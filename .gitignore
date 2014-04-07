@@ -41,3 +41,13 @@ Thumbs.db
 # SASS #
 ##########
 .sass-cache
+
+# Local dev environments #
+##########################
+
+# Ignore local multisite
+sites/*.localhost
+*_local
+
+# remove IDE files
+.idea
