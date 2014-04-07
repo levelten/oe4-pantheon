@@ -117,8 +117,6 @@ function enterprise_style_image_default_styles() {
     }
   }
 
-  dsm($styles);
-
   return $styles;
 }
 
