@@ -1,0 +1,320 @@
+<?php
+/**
+ * @file
+ * Code for the test feature.
+ */
+
+define('GRIDMAGIC_LAYOUT_PRESET_DEFAULT', 'auto_1-4');
+define('GRIDMAGIC_ROW_PRESET_DEFAULT', 'auto_1-4');
+
+/**
+ *
+ * See entity_get_info() for code pattern
+ *
+ * @param null $preset_name
+ *
+ */
+function gridmagic_get_row_preset_info($preset_name = NULL) {
+  $row_preset_info = &drupal_static(__FUNCTION__, array());
+
+  if (empty($row_preset_info)) {
+    if ($cache = cache_get("gridmagic_row_preset_info")) {
+      $row_preset_info = $cache->data;
+    }
+    else {
+      // load info from modules that implement hook_row_preset_info
+      $row_preset_info = module_invoke_all('gridmagic_row_preset_info');
+
+      // Let other modules alter the entity info.
+      drupal_alter('gridmagic_row_preset_info', $row_preset_info);
+      cache_set("gridmagic_row_preset_info", $row_preset_info);
+    }
+  }
+
+  if (empty($preset_name)) {
+    return $row_preset_info;
+  }
+  else if (isset($row_preset_info[$preset_name])) {
+    return $row_preset_info[$preset_name];
+  }
+  return FALSE;
+}
+
+function gridmagic_gridmagic_row_preset_info() {
+  $preset = array();
+  $preset['auto_1-4'] = array(
+    'title' => t('Autospan default (1 to 4 equal columns)'),
+    'limit' => 4,
+    'cols' => array(
+      '1e' => array(
+        'class' => array(
+          'col-md-12',
+        ),
+      ),
+      '2e' => array(
+        'class' => array(
+          'col-md-6',
+        ),
+      ),
+      '3e' => array(
+        'class' => array(
+          'col-md-4',
+          'col-sm-6',
+        ),
+      ),
+      '4e' => array(
+        'class' => array(
+          'col-md-3',
+          'col-sm-6',
+        ),
+      ),
+    ),
+  );
+
+  $preset['33_33_33'] = array(
+    'title' => t('Three column 33/33/33'),
+    'limit' => 3,
+    'cols' => array(
+      'c1' => array(
+        'class' => array(
+          'col-md-4',
+          'col-sm-6',
+        ),
+      ),
+    ),
+  );
+
+  $preset['25_25_25_25'] = array(
+    'title' => t('Four column 25/25/25/25'),
+    'limit' => 4,
+    'cols' => array(
+      'c1' => array(
+        'class' => array(
+          'col-md-3',
+          'col-sm-6',
+        ),
+      ),
+    ),
+  );
+  return $preset;
+}
+
+/*
+ *
+ *
+ */
+function gridmagic_get_layout_preset_info($preset_name = NULL) {
+  $layout_preset_info = &drupal_static(__FUNCTION__, array());
+
+  if (empty($layout_preset_info)) {
+    if ($cache = cache_get("xgridmagic_layout_preset_info")) {
+      $layout_preset_info = $cache->data;
+    }
+    else {
+      // load info from modules that implement hook_row_preset_info
+      $layout_preset_info = module_invoke_all('gridmagic_layout_preset_info');
+
+      foreach ($layout_preset_info AS $name => $info) {
+        // replace row data with preset if set
+        foreach ($layout_preset_info[$name]['rows'] AS $key => $row) {
+          if (!empty($row['row_preset'])) {
+            $preset = gridmagic_get_row_preset_info($row['row_preset']);
+            if (!empty($preset)) {
+              $layout_preset_info[$name]['rows'][$key] = drupal_array_merge_deep($layout_preset_info[$name]['rows'][$key], $preset);
+            }
+
+          }
+        }
+      }
+
+      // Let other modules alter the entity info.
+      drupal_alter('layout_preset_info', $layout_preset_info);
+      cache_set("layout_preset_info", $layout_preset_info);
+    }
+  }
+
+  if (empty($preset_name)) {
+    return $layoutpreset_info;
+  }
+  else if (isset($layout_preset_info[$preset_name])) {
+    return $layout_preset_info[$preset_name];
+  }
+  return FALSE;
+}
+
+function gridmagic_gridmagic_layout_preset_info() {
+  $preset = array();
+  $preset['auto_1-4'] = array(
+    'title' => t('Autospan default (1 to 4 equal columns)'),
+    'rows' => array(
+      'r1' => array(
+        'row_preset' => GRIDMAGIC_ROW_PRESET_DEFAULT,
+      ),
+    ),
+  );
+  return $preset;
+}
+
+function gridmagic_autospan_region_implements_all() {
+  $preset = array(
+    '_' => array(
+      'footer' => GRIDMAGIC_ROW_PRESET_DEFAULT,
+    ),
+  );
+  return $preset;
+}
+
+function gridmagic_autospan_region_implements($theme) {
+  $implements = &drupal_static(__FUNCTION__, array());
+  if (isset($implements[$theme])) {
+    return $implements[$theme];
+  }
+  $all= gridmagic_autospan_region_implements_all();
+  $implements[$theme] = array();
+  if (isset($all[$theme])) {
+    $implements[$theme] = $all[$theme];
+  }
+  if (isset($all['_'])) {
+    $implements[$theme] += $all['_'];
+  }
+
+  return $implements[$theme];
+}
+
+function gridmagic_page_alter(&$page) {
+  global $theme;
+  if (!is_array($page)) {
+    return;
+  }
+  $implements = gridmagic_autospan_region_implements($theme);
+  $regions = element_children($page);
+//dsm($regions);
+  foreach ($regions AS $region_name) {
+    if (!empty($implements[$region_name])) {
+      $region = &$page[$region_name];
+      if (!is_array($region)) {
+        continue;
+      }
+      $layout_preset = gridmagic_get_layout_preset_info($implements[$region_name]);
+      $blocks = element_children($region);
+
+      // calculate element counts
+      $block_row_element_count = array();
+      $prev_block_name = '';
+      $row = 0;
+      foreach ($blocks AS $block_name) {
+        $element = &$page[$region_name][$block_name];
+        $add_count = 1;
+        // if a block_row, set block index
+        if (isset($element['#theme']) && ($element['#theme'] == 'block_row_wrapper')) {
+          // if block is ment to be stacked,
+          if (in_array('stacked', $element['#css_classes'])) {
+            if (substr($prev_block_name, 0, 3) == 'row') {
+              $page[$region_name][$prev_block_name]['#content'][$block_name] = $region[$block_name];
+              unset($page[$region_name][$block_name]);
+            }
+          }
+          else {
+            $row = (int)substr($block_name, 3);
+            $add_count = count(element_children($element['#content']));
+          }
+        }
+        if (!isset($block_row_element_count[$row])) {
+          $block_row_element_count[$row] = 0;
+        }
+        $block_row_element_count[$row] += $add_count;
+        $prev_block_name = $block_name;
+      }
+      $element = &$page[$region_name];
+      gridmagic_process_block_element($element, $region_name, $layout_preset, 0, $block_row_element_count);
+    }
+  }
+  //dsm($page);
+}
+
+function gridmagic_process_block_element(&$element, $name, $layout_preset, $index, $block_row_element_count) {
+  $row = (substr($name, 0, 3) == 'row') ? (int)substr($name, 3) : 0;
+  foreach (element_children($element) AS $element_name) {
+    $sub_element = &$element[$element_name];
+
+    if (isset($sub_element['#theme']) && ($sub_element['#theme'] == 'block_row_wrapper')) {
+      // check if inner row
+      if (in_array('stacked', $sub_element['#css_classes'])) {
+        $attributes = gridmagic_get_element_attributes($layout_preset, $index, $block_row_element_count[$row]);
+        $sub_element['#css_classes'] = array_unique(array_merge($sub_element['#css_classes'], $attributes['class']));
+      }
+      // standard row
+      else {
+        $row = (int)substr($element_name, 3);
+        gridmagic_process_block_element($sub_element['#content'], $element_name, $layout_preset, $index, $block_row_element_count);
+      }
+    }
+    else if (isset($sub_element['#block'])) {
+      gridmagic_add_block_attributes($sub_element['#block'], $layout_preset, $index, $block_row_element_count[$row]);
+      $index++;
+    }
+  }
+}
+
+function gridmagic_add_block_attributes(&$block, $layout_preset, $index, $count) {
+  if (!empty($block->gridmagic['autospan_disable'])) {
+    return;
+  }
+  $attributes = gridmagic_get_element_attributes($layout_preset, $index, $count);
+
+  if (!isset($block->gridmagic)) {
+    $block->gridmagic = array();
+  }
+  if (!isset($block->gridmagic['attributes'])) {
+    $block->gridmagic['attributes'] = array();
+  }
+  if (!isset($block->gridmagic['attributes']['class'])) {
+    $block->gridmagic['attributes']['class'] = array();
+  }
+  $block->gridmagic['attributes']['class'] = array_unique(array_merge($block->gridmagic['attributes']['class'], $attributes['class']));
+}
+
+/**
+ * @param $preset: can be layout preset or row preset
+ * @param $index
+ * @param $count
+ * @param int $row
+ * @return array
+ */
+function gridmagic_get_element_attributes($preset, $index, $count, $row = 1) {
+  $attributes = array();
+
+  // check if preset is row or layout preset type
+  if (isset($preset['cols'])) {
+    $row_settings = $preset;
+  }
+  else if (isset($preset['rows'])) {
+    for ($i = $row; $i > 0; $i--) {
+      if (isset($preset['rows']["r$row"]) && is_array($preset['rows']["r$row"])) {
+        $row_settings = $preset['rows']["r$row"];
+        break;
+      }
+    }
+  }
+
+  for ($i = $count; $i > 0; $i--) {
+    if (isset($row_settings['cols'][$i . 'e']) && is_array($row_settings['cols'][$i . 'e'])) {
+      $attributes += $row_settings['cols'][$i . 'e'];
+      break;
+    }
+  }
+
+  return $attributes;
+}
+
+/**
+ * Implements theme_preprocess_block().
+ *
+ * Extend block's classes with any user defined classes.
+ */
+function gridmagic_preprocess_block(&$vars) {
+  $block = $vars['block'];
+  if (isset($block->gridmagic['attributes']['class'])) {
+    $vars['classes_array'] = array_merge($vars['classes_array'], $block->gridmagic['attributes']['class']);
+  }
+}

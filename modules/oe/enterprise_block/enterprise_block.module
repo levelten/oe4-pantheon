@@ -1,0 +1,64 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Block feature.
+ */
+
+include_once 'enterprise_block.features.inc';
+
+/**
+ * Implements hook_form_alter
+ *
+ * Disable bean revisioning
+ * @param $form
+ * @param $form_state
+ */
+function enterprise_block_form_bean_form_alter(&$form, &$form_state) {
+  drupal_add_css(drupal_get_path('module', 'enterprise_base') . '/css/enterprise_base.edit_form.css');
+
+  // Hide the revision checkbox.
+  $form['revision']['is_new_revision']['#type'] = 'hidden';
+
+  // Make "Create new revision" off by default
+  $form['revision']['is_new_revision']['#default_value'] = 0;
+
+  // Hide the revision log field.
+  $form['revision']['log']['#type'] = 'hidden';
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function enterprise_block_theme() {
+  $items = array();
+
+
+  // Add two column layout to bean edit form
+  $items['bean_form'] = array(
+    'render element' => 'form',
+    'path' => drupal_get_path('theme', 'rubik') .'/templates',
+    'template' => 'form-default',
+    'preprocess functions' => array(
+      'enterprise_block_preprocess_bean_form',
+      'rubik_preprocess_form_buttons',
+    ),
+  );
+  //$items = array();
+  return $items;
+}
+
+function enterprise_block_preprocess_bean_form(&$vars) {
+  // TODO: hacks to prevent undefined index notices
+  if (!isset($vars['attributes_array'])) {
+    $vars['attributes_array'] = array();
+  }
+  if (!isset($vars['classes_array'])) {
+    $vars['classes_array'] = array();
+  }
+  if (!isset($vars['title_attributes_array'])) {
+    $vars['title_attributes_array'] = array();
+  }
+  if (!isset($vars['content_attributes_array'])) {
+    $vars['content_attributes_array'] = array();
+  }
+}

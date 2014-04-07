@@ -1,0 +1,6 @@
+name = Fontello
+description = Integrates the <a href="http://fontello.com" target="_blank">Fontello</a> service as an icon provider for the Icon API.
+core = 7.x
+configure = admin/config/media/icons
+package = Icon Provider
+dependencies[] = icon

@@ -1,0 +1,7 @@
+name = Intelligence Contact
+description = "Enables fieldable contact entities with integrated intelligence"
+package = Intelligence
+core = 7.x
+php = 5.3
+
+dependencies[] = entity

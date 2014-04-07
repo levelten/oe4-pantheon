@@ -1,0 +1,6 @@
+name = Intelligence session manager
+core = "7.x"
+description = "Provides session codes and other session management tools EXPERIMENTAL"
+package = Intelligence
+
+dependencies[] = intel

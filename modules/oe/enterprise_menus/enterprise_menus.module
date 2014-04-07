@@ -1,0 +1,638 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function enterprise_menus_menu() {
+  // Config form.
+  $items['admin/config/system/enterprise_menu'] = array(
+    'title' => 'Enterprise Menu Config',
+    'description' => 'Edit settings for the enterprise menu',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('enterprise_menus_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'enterprise_menus.admin.inc',
+  );
+//  $links['flush-cache'] = array(
+//    '#title' => t('Flush all caches'),
+//    '#weight' => 20,
+//    '#access' => user_access('flush caches'),
+//    '#href' => 'admin_menu/flush-cache',
+//    '#options' => array(
+//      'query' => $destination + array('token' => drupal_get_token('admin_menu/flush-cache')),
+//    ),
+//  );
+  
+  // Content
+  $items['admin/manage-content'] = array(
+    'title' => 'Content',
+    'description' => 'All content.',
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('admin/content'),
+    'access arguments' => array('access administration pages'),
+    'weight' => -10,
+    'parent' => 'admin',
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+      'toolbar_css' => 'col4',
+    ),
+  );
+  // Content > Settings
+  $items['admin/manage-content/files'] = array(
+    'title' => 'Files',
+    'description' => 'Files settings.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer content types'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 30,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // Content > Actions
+  $items['admin/manage-content/comments'] = array(
+    'title' => 'Comments',
+    'description' => 'Comments.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 20,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // Build out sections content types.
+  $node_types = _node_types_build()->names;
+  foreach ($node_types as $node_type => $node_type_label) {
+    if (variable_get('enterprise_menus_' . $node_type, FALSE)) {
+      $items['admin/manage-' . $node_type] = array(
+        'title' => t(_enterprise_menus_pluralize($node_type, $node_type_label)),
+        'description' => 'Administer ' . $node_type . ' content.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array('access administration pages'),
+        'file path' => drupal_get_path('module', 'system'),
+        'file' => 'system.admin.inc',
+        'weight' => variable_get('enterprise_menus_weight_' . $node_type, 0),
+        'options' => array(
+          'toolbar_expanded' => TRUE,
+          'toolbar_break' => TRUE,
+          'toolbar_css' => 'col2',
+        ),
+      );
+      // Actions
+      $items['admin/manage-' . $node_type . '/actions'] = array(
+        'title' => 'Actions',
+        'description' => $node_type_label . ' actions.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array('access administration pages'),
+        'file path' => drupal_get_path('module', 'system'),
+        'file' => 'system.admin.inc',
+        'weight' => 0,
+        'options' => array(
+          'toolbar_expanded' => TRUE,
+          'toolbar_break' => TRUE,
+        ),
+      );
+      // Settings
+      $items['admin/manage-' . $node_type . '/settings'] = array(
+        'title' => 'Settings',
+        'description' => $node_type_label . ' settings.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array('administer content types'),
+        'file path' => drupal_get_path('module', 'system'),
+        'file' => 'system.admin.inc',
+        'weight' => 1,
+        'options' => array(
+          'toolbar_expanded' => TRUE,
+          'toolbar_break' => TRUE,
+        ),
+      );
+    }
+    else {
+      $items['admin/manage-content/' . $node_type] = array(
+        'title' => t(_enterprise_menus_pluralize($node_type, $node_type_label)),
+        'description' => 'Administer ' . $node_type . ' content.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array('access administration pages'),
+        'file path' => drupal_get_path('module', 'system'),
+        'file' => 'system.admin.inc',
+        'weight' => variable_get('enterprise_menus_weight_' . $node_type, 0),
+        'options' => array(
+          'toolbar_expanded' => TRUE,
+          'toolbar_break' => TRUE,
+          'toolbar_css' => 'col2',
+        ),
+      );
+    }
+  }
+  // People
+  $items['admin/manage-people'] = array(
+    'title' => 'People',
+    'description' => 'Administer the site users.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer users'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 30,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+      'toolbar_css' => 'col2',
+    ),
+  );
+  // People > Actions
+  $items['admin/manage-people/actions'] = array(
+    'title' => 'Actions',
+    'description' => $node_type_label . ' actions.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer users'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 0,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // People > Settings
+  $items['admin/manage-people/settings'] = array(
+    'title' => 'Settings',
+    'description' => $node_type_label . ' settings.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer users'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 1,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // Site settings
+  $items['admin/site-config'] = array(
+    'title' => 'Site settings',
+    'description' => 'Administer the site configuration.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 40,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+      'toolbar_css' => 'col3',
+    ),
+  );
+  // Site settings > Visual & Layout
+  $items['admin/site-config/layout'] = array(
+    'title' => 'Visual & Layout',
+    'description' => 'Administer the appearance and layout of your store.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access callback' => 'enterprise_menus_visual_layout_access',
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 0,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // Site settings > Advanced settings
+  $items['admin/site-config/advanced'] = array(
+    'title' => 'Advanced settings',
+    'description' => 'Administer the site configuration.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 1,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  // Site settings > Development
+  $items['admin/site-config/development'] = array(
+    'title' => 'Development',
+    'description' => 'Common development links.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access callback' => 'enterprise_menus_devel_settings_access',
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => 3,
+    'options' => array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+    ),
+  );
+  $items['admin/site-config/development/clear-cache'] = array(
+    'title' => 'Clear Caches',
+    'description' => 'Clear all Drupal caches.',
+    'page callback' => 'enterprise_menus_flush_cache',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'options' => array('attributes' => array('class' => array('menu-destination'))),
+  );
+  $items['admin/site-config/development/cron'] = array(
+    'title' => 'Run Cron',
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('admin/reports/status/run-cron'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['admin/site-config/development/update'] = array(
+    'title' => 'Run Updates',
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('update.php'),
+    'access arguments' => array('administer software updates'),
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for the Development settings menu item.
+ */
+function enterprise_menus_devel_settings_access() {
+  return user_access('administer site configuration') || user_access('administer software updates');
+}
+
+/**
+ * Access callback for the Visual & Layout menu item.
+ */
+function enterprise_menus_visual_layout_access() {
+  return user_access('administer themes') || user_access('administer blocks') || user_access('administer views');
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function enterprise_menus_menu_alter(&$items) {
+  // Move the pages under the "Getting Started" entry.
+  foreach (array('admin/help/getting-started', 'admin/help/first-steps', 'admin/demo') as $path) {
+    if (isset($items[$path])) {
+      $items[$path]['parent'] = 'admin/help';
+      $items[$path]['context'] = MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE;
+      if ($path == 'admin/demo') {
+        $items[$path]['title'] = 'Reset your Demo Site';
+      }
+    }
+  }
+
+  $node_types = _node_types_build()->names;
+  foreach ($node_types as $node_type => $node_type_label) {
+    if (variable_get('enterprise_menus_' . $node_type, FALSE)) {
+      $action_base = 'admin/manage-' . $node_type . '/actions';
+      $setting_base = 'admin/manage-' . $node_type . '/settings';
+    }
+    else {
+      $action_base = 'admin/manage-content/' . $node_type;
+      $setting_base = 'admin/manage-content/' . $node_type;
+    }
+    // Content > All content
+    if (isset($items['admin/content/' . $node_type])) {
+      $items['admin/content/' . $node_type]['parent'] = $action_base;
+      $items['admin/content/' . $node_type]['title'] = 'All ' . _enterprise_menus_pluralize($node_type, $node_type_label);
+      $items['admin/content/' . $node_type]['weight'] = -15;
+      $items['admin/content/' . $node_type]['type'] = MENU_NORMAL_ITEM;
+    }
+    else {
+      $items['admin/manage-content/' . $node_type . '-manage'] = array(
+        'title' => 'All ' . _enterprise_menus_pluralize($node_type, $node_type_label),
+        'page callback' => 'drupal_goto',
+        'page arguments' => array('admin/content/node/' . $node_type),
+        'access arguments' => array('access administration pages'),
+        'weight' => -15,
+        'parent' => $action_base,
+      );
+    }
+    // Content > Add content
+    if (isset($items['node/add/' . $node_type])) {
+      $items['node/add/' . $node_type]['parent'] = $action_base;
+      $article = (in_array(strtolower(substr($node_type_label, 0, 1)), array('a', 'e', 'i', 'o', 'u')) ?'an':'a');
+      $items['node/add/' . $node_type]['title'] = 'Add ' . $article . ' ' . $node_type_label;
+      $items['node/add/' . $node_type]['type'] = MENU_NORMAL_ITEM;
+    }
+    // Content > Edit structure
+    $items['admin/manage-content/' . $node_type . '-structure'] = array(
+      'title' => 'Edit structure',
+      'page callback' => 'drupal_goto',
+      'page arguments' => array('admin/structure/types/manage/' . $node_type),
+      'access arguments' => array('access administration pages'),
+      'parent' => $setting_base,
+    );
+  }
+
+  // Content > All content
+  if (isset($items['admin/content'])) {
+    $items['admin/content']['parent'] = 'admin/site-config/advanced';
+    $items['admin/content']['title'] = 'All content';
+    $items['admin/content']['weight'] = -15;
+    $items['admin/content']['type'] = MENU_LOCAL_TASK;
+  }
+  // Content > All comments
+  if (isset($items['admin/content/comment'])) {
+    $items['admin/content/comment']['parent'] = 'admin/manage-content/comments';
+    $items['admin/content/comment']['title'] = 'All comments';
+    $items['admin/content/comment']['weight'] = -14;
+    $items['admin/content/comment']['type'] = MENU_NORMAL_ITEM;
+  }
+  if (isset($items['admin/content/comment/approval'])) {
+    $items['admin/content/comment/approval']['parent'] = 'admin/manage-content/comments';
+    $items['admin/content/comment/approval']['title'] = 'Approve comments';
+    $items['admin/content/comment/approval']['weight'] = -14;
+    $items['admin/content/comment/approval']['type'] = MENU_NORMAL_ITEM;
+  }
+  // Content > Files > All
+  if (isset($items['admin/content/file'])) {
+    $items['admin/content/file']['parent'] = 'admin/manage-content/files';
+    $items['admin/content/file']['title'] = 'All files';
+    $items['admin/content/file']['weight'] = 0;
+    $items['admin/content/file']['type'] = MENU_NORMAL_ITEM;
+  }
+  // Content > Files > Add
+  if (isset($items['file/add'])) {
+    $items['file/add']['parent'] = 'admin/manage-content/files';
+    $items['file/add']['title'] = 'Add a file';
+    $items['file/add']['weight'] = 1;
+    $items['file/add']['type'] = MENU_NORMAL_ITEM;
+  }
+  // Content > Files > Configure
+  if (isset($items['admin/structure/file-types'])) {
+    $items['admin/structure/file-types']['parent'] = 'admin/manage-content/files';
+    $items['admin/structure/file-types']['title'] = 'Configure files';
+    $items['admin/structure/file-types']['weight'] = 2;
+    $items['admin/structure/file-types']['type'] = MENU_NORMAL_ITEM;
+  }
+//  // Content > Add content
+//  if (isset($items['node/add/add-content'])) {
+//    $items['node/add/add-content']['parent'] = 'admin/manage-content/actions';
+//    $items['node/add/add-content']['title'] = 'Add content';
+//    $items['node/add/add-content']['type'] = MENU_NORMAL_ITEM;
+//  }
+
+  if (isset($items['admin/help'])) {
+    $items['admin/help']['weight'] = 50;
+    $items['admin/help']['options'] = array(
+      'toolbar_expanded' => TRUE,
+      'toolbar_break' => TRUE,
+      'toolbar_css' => 'help',
+    );
+  }
+
+  $exempt = array(
+    'admin/people/create',
+    'admin/people/permissions',
+    'admin/people/permissions/roles',
+  );
+  foreach ($items AS $path => $item) {
+    if ((substr($path, 0, 13) == 'admin/people/') && !in_array($path, $exempt)) {
+      $items[$path]['parent'] = 'admin/manage-people/actions';
+    }
+  }
+  // Set up people menu.
+  if (isset($items['admin/people'])) {
+    $items['admin/people']['parent'] = 'admin/manage-people/actions';
+    $items['admin/people']['title'] = 'All Users';
+    $items['admin/people']['type'] = MENU_NORMAL_ITEM;
+  }
+  if (isset($items['admin/people/create'])) {
+    $items['admin/people/create']['parent'] = 'admin/manage-people/actions';
+    $items['admin/people/create']['title'] = 'Add a User';
+    $items['admin/people/create']['type'] = MENU_NORMAL_ITEM;
+  }
+  if (isset($items['admin/people/permissions'])) {
+    $items['admin/people/permissions']['parent'] = 'admin/manage-people/settings';
+    $items['admin/people/permissions']['title'] = 'Manage Permissions';
+    $items['admin/people/permissions']['type'] = MENU_NORMAL_ITEM;
+  }
+  if (isset($items['admin/people/permissions/roles'])) {
+    $items['admin/people/permissions/roles']['parent'] = 'admin/manage-people/settings';
+    $items['admin/people/permissions/roles']['title'] = 'Manage Roles';
+    $items['admin/people/permissions/roles']['type'] = MENU_NORMAL_ITEM;
+  }
+  if (isset($items['admin/config/people'])) {
+    $items['admin/config/people']['parent'] = 'admin/manage-people/settings';
+    $items['admin/config/people']['title'] = 'Configure Accounts';
+    $items['admin/config/people']['type'] = MENU_NORMAL_ITEM;
+  }
+  // Move the appearance and layout entries under admin/site-config/layout.
+  foreach (array('admin/appearance', 'admin/structure/block', 'admin/structure/views') as $path) {
+    if (isset($items[$path])) {
+      $items[$path]['parent'] = 'admin/site-config/layout';
+    }
+  }
+  // Move structure out to it's own item.
+  $items['admin/structure']['parent'] = 'admin/site-config';
+  $items['admin/structure']['weight'] = 2;
+  $items['admin/structure']['options'] = array(
+    'toolbar_expanded' => TRUE,
+    'toolbar_break' => TRUE,
+  );
+  // Move the main Drupal entry points below admin/site-config/advanced.
+  foreach (array('admin/modules', 'admin/config', 'admin/reports', 'admin/advanced_help') as $path) {
+    if (isset($items[$path])) {
+      $items[$path]['parent'] = 'admin/site-config/advanced';
+    }
+    $items['admin/reports']['title'] = 'Site reports';
+  }
+}
+
+/**
+ * Implements hook_menu_link_alter().
+ *
+ * Apply some link configuration stored in the router during the menu
+ * rebuild process.
+ */
+function enterprise_menus_menu_link_alter(&$link) {
+  // Check if the item belongs to a shortcut menu.
+  if (module_exists('shortcut') && shortcut_set_load($link['menu_name'])) {
+    // Don't change the plid of shortcut menu items.
+    return;
+  }
+
+  // Don't change the plid for customized menu items.
+  if (!empty($link['customized'])) {
+    return;
+  }
+
+  $item = _enterprise_menu_find_router($link['link_path']);
+  if ($item && isset($item['options'])) {
+    if (!isset($link['options'])) {
+      $link['options'] = array();
+    }
+    $link['options'] += $item['options'];
+  }
+  if ($item && isset($item['parent'])) {
+    $plid = db_query('SELECT mlid FROM {menu_links} WHERE link_path = :path', array(':path' => $item['parent']))->fetchField();
+    if ($plid) {
+      $link['plid'] = $plid;
+    }
+  }
+}
+
+function _enterprise_menu_find_router($link_path) {
+  $router = menu_get_router();
+  $parts = explode('/', $link_path, MENU_MAX_PARTS);
+
+  $ancestors = menu_get_ancestors($parts);
+  // Add an empty router path as a fallback.
+  $ancestors[] = '';
+  foreach ($ancestors as $key => $router_path) {
+    if (isset($router[$router_path])) {
+      // Exit the loop leaving $router_path as the first match.
+      break;
+    }
+  }
+
+  return isset($router[$router_path]) ? $router[$router_path] : NULL;
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function enterprise_menus_module_implements_alter(&$implementations, $hook) {
+  if (in_array($hook, array('menu_alter'))) {
+    // Move our hook implementation to the bottom.
+    $group = $implementations['enterprise_menus'];
+    unset($implementations['enterprise_menus']);
+    $implementations['enterprise_menus'] = $group;
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function enterprise_menus_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'enterprise_menus') . '/views',
+  );
+}
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ */
+function enterprise_menus_menu_breadcrumb_alter(&$active_trail, $item) {
+  // Home > Administration > Content > Settings > Content types
+  if (drupal_match_path($item['path'], "admin/structure/types") || drupal_match_path($item['path'], "admin/structure/types/*")) {
+    if (drupal_match_path($item['path'], "admin/structure/types/add")) {
+      return;
+    }
+    $active_trail_end = array_slice($active_trail, 6);
+    $active_trail = array_slice($active_trail, 0, 1);
+    $active_trail[] = _enterprise_menus_get_item('admin');
+    $active_trail[] = _enterprise_menus_get_item('admin/manage-content');
+    $active_trail[] = _enterprise_menus_get_item('admin/manage-content/settings');
+    $active_trail[] = _enterprise_menus_get_item('admin/manage-content/settings/content-types');
+    $active_trail = array_merge($active_trail, $active_trail_end);
+  }
+  // Set the breadcrumb for the "Add content" tab of node/add.
+  else if (drupal_match_path($item['path'], 'node/add')) {
+    $active_trail = array_slice($active_trail, 0, 1);
+    $active_trail[] = _enterprise_menus_get_item('admin');
+    $active_trail[] = _enterprise_menus_get_item('admin/manage-content');
+    $active_trail[] = _enterprise_menus_get_item('admin/manage-content/actions');
+    $active_trail[] = _enterprise_menus_get_item('node/add/add-content');
+  }
+}
+
+/**
+ * Returns a menu router item.
+ *
+ * If the Crumbs module is enabled, uses the Crumbs-provided function and
+ * sets additional keys later expected by that module.
+ *
+ * @param $path
+ *   The path, for example node/5.
+ *
+ * @return
+ *   The loaded router item, with additional keys set if the Crumbs module is
+ *   present.
+ */
+function _enterprise_menus_get_item($path) {
+  if (module_exists('crumbs')) {
+    static $loaded = FALSE;
+    if (!$loaded) {
+      module_load_include('inc', 'crumbs', 'crumbs.trail');
+      $loaded = TRUE;
+    }
+
+    $item = crumbs_get_router_item($path);
+    $item['link_title'] = $item['title'];
+    $item['link_options'] = array();
+
+    return $item;
+  }
+  else {
+    return menu_get_item($path);
+  }
+}
+
+/**
+ * Pluralize the content type
+ */
+function _enterprise_menus_pluralize($type, $label) {
+  if (substr($label, -1) != 's') {
+    return $label . 's';
+  }
+  return $label;
+}
+
+/**
+ * Flush all caches or a specific one.
+ */
+function enterprise_menus_flush_cache() {
+  // We really need this but don't know how to add it right now.
+//  if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], current_path())) {
+//    return MENU_ACCESS_DENIED;
+//  }
+  drupal_flush_all_caches();
+
+  drupal_set_message(t('!title cache cleared.', array('!title' => 'Every')));
+
+  // The JavaScript injects a destination request parameter pointing to the
+  // originating page, so the user is redirected back to that page. Without
+  // destination parameter, the redirect ends on the front page.
+  drupal_goto();
+}
+
+/**
+ * Implements hook_page_build().
+ */
+function enterprise_menus_page_build(&$page) {
+  if (!user_access('access toolbar')) {
+    return;
+  }
+  // Performance: Skip this entirely for AJAX requests.
+  if (strpos($_GET['q'], 'js/') === 0) {
+    return;
+  }
+  // The function path_is_admin() is not available on update.php pages.
+  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE === 'update') {
+    return;
+  }
+  $path = drupal_get_path('module', 'enterprise_menus');
+
+  $page['page_bottom']['toolbar'] = array(
+    '#attached' => array(),
+  );
+  $attached = &$page['page_bottom']['#attached'];
+
+  // Destination query strings are applied via JS.
+  $settings['destination'] = drupal_http_build_query(drupal_get_destination());
+  // Settings for Back to site link.
+  $settings['currentPath'] = current_path();
+  $settings['currentPathIsAdmin'] = path_is_admin($settings['currentPath']);
+
+  $attached['js'][] = array(
+    'data' => array('enterprise_menus' => $settings),
+    'type' => 'setting',
+  );
+  $attached['js'][$path . '/enterprise_menus.js'] = array('every_page' => TRUE);
+}

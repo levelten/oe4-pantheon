@@ -1,0 +1,85 @@
+// Dynamic (Logged-in, can rate)
+.fivestar-oe_stars div.fivestar-widget {
+  .star {
+    font-size: 20px;
+    font-size: 2rem;
+    text-indent: 0;
+    &, a {
+      background: transparent;
+      height: auto;
+      position: relative;
+      width: auto;
+    }
+    a {
+      bottom: 0;
+      display: block;
+      left: 0;
+      overflow: hidden;
+      position: absolute;
+      right: 0;
+      text-indent: -9999px;
+      top: 0;
+    }
+    &:before {
+      content: '\e02f';
+      font-family: "enterprise_base";
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+      display: inline-block;
+      text-decoration: inherit;
+      width: 1em;
+      margin-right: .2em;
+      text-align: center;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1em;
+      margin-left: .2em;
+    }
+    &.on, &.hover {
+      &:before {
+        content: '\e031';
+      }
+    }
+  }
+}
+// Static (logged-out, cannot rate)
+.fivestar-oe_stars .fivestar-widget-static {
+  .star {
+    background: transparent;
+    height: auto;
+    width: auto;
+    position: relative;
+    text-indent: 0;
+    span {
+      &.off, &.on {
+        background: transparent;
+        font-size: 20px;
+        font-size: 2rem;
+        height: 1em;
+        position: relative;
+        text-indent: 0;
+        width: 1.4em;
+      }
+    }
+    span:before {
+      content: '\e02f';
+      font-family: "enterprise_base";
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+      display: inline-block;
+      text-decoration: inherit;
+      width: 1em;
+      margin-right: .2em;
+      text-align: center;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1em;
+      margin-left: .2em;
+    }
+    span.on:before {
+      content: '\e031';
+    }
+  }
+}

@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the node_data module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function entity_data_schema() {
+  $schema = array();
+  $schema['entity_data'] = array(
+    'description' => 'Named variable/value pairs associated with entities.',
+    'fields' => array(
+      'entity_type' => array(
+        'description' => 'The type of the entity data is attached to.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The entity id this data is attached to',
+      ),
+      'language' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The language of the tag.',
+      ),
+      'name' => array(
+        'description' => 'The name of the variable.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the variable.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'translatable' => TRUE,
+      ),
+    ),
+    'primary key' => array(
+      'entity_type',
+      'entity_id',
+      'language',
+      'name',
+    ),
+  );
+
+  return $schema;
+}

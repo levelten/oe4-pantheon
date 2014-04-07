@@ -1,0 +1,349 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Demo feature.
+ */
+
+include_once 'enterprise_demo.features.inc';
+
+function enterprise_demo_menu() {
+  $items = array();
+  $items['enterprise_demo/init'] = array(
+    'title' => 'Enterprise demo init',
+    'page callback' => 'enterprise_demo_init_app',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['enterprise_demo/util'] = array(
+    'title' => 'Enterprise demo util',
+    'page callback' => 'enterprise_demo_util',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function enterprise_demo_util() {
+
+  features_revert(array('enterprise_demo' => array('field_instance')));
+
+  return '';
+
+  enterprise_apps_config_app('enterprise_webform_content');
+
+  return '';
+}
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_demo_enterprise_apps_app_enabled() {
+  // get batch processing for init_app
+  $batch = enterprise_demo_enterprise_apps_app_enabled_batch() ;
+  batch_set($batch);
+  batch_process('<front>');
+}
+
+
+function enterprise_demo_enterprise_apps_app_enabled_batch() {
+  global $base_path;
+
+  $operations = array();
+  $required_apps = array(
+    'enterprise_social',
+    'enterprise_social_content',
+    'enterprise_user',
+    'enterprise_user_content',
+    'enterprise_comments',
+    'enterprise_blog',
+    'enterprise_blog_content',
+    'enterprise_webform',
+    'enterprise_webform_content',
+    'enterprise_landingpages',
+    'enterprise_landingpages_content',
+  );
+  if (enterprise_apps_module_files_exist('enterprise_faq_content')) {
+    $required_apps[] = 'enterprise_faq';
+    $required_apps[] = 'enterprise_faq_content';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_press_content')) {
+    $required_apps[] = 'enterprise_press';
+    $required_apps[] = 'enterprise_press_content';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_news_content')) {
+    //$required_apps[] = 'enterprise_news';
+    //$required_apps[] = 'enterprise_news_content';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_intel')) {
+    $required_apps[] = 'enterprise_intel';
+  }
+  if (enterprise_apps_module_files_exist('oedemo')) {
+    $required_apps[] = 'oedemo';
+  }
+
+  foreach ($required_apps AS $i => $app) {
+    if (!module_exists($app)) {
+      $operations[] = enterprise_apps_get_batch_operation_enable_module($app);
+      unset($required_apps[$i]);
+    }
+  }
+
+  $required_apps[] = 'enterprise_demo';
+
+  foreach ($required_apps AS $app) {
+    $operations[] = enterprise_apps_get_batch_operation_config_app($app);
+  }
+
+  $batch = array(
+    'operations' => $operations,
+    'title' => st('Installing Open Enterprise demo'),
+    'init_message' => t('Preparing to install'),
+    'error_message' => st('The installation has encountered an error.'),
+    'finished' => '_enterprise_demo_config_app_batch_finished',
+  );
+
+  return $batch;
+}
+
+function _enterprise_demo_config_app_batch_finished($success, $results, $operations) {
+  // CKEditor sets some settings that override the enterprise_editor. Make sure the
+  // feature is fully reverted at this time.
+  //features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
+
+  // must rebuild field instances after all fields are installed.
+  features_revert(array('enterprise_demo' => array('field_instance')));
+
+  // remove any redirects created on content import
+  $query = db_delete('redirect')
+    ->condition('access', 0);
+  $query->execute();
+
+  // bulk update pathauto paths
+  module_load_include('inc', 'pathauto', 'pathauto.pathauto');
+  $context = array();
+  node_pathauto_bulk_update_batch_process($context);
+
+  drupal_flush_all_caches();
+
+  // clear status messages
+  drupal_get_messages('status', TRUE);
+
+  if ($success) {
+    drupal_set_message(t('Congratulations! You have successfully installed Open Enterprise.'));
+  }
+  else {
+    $error_operation = reset($operations);
+    drupal_set_message(
+      t('An error occurred during installation processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      ), 'error'
+    );
+  }
+}
+
+// run when module first enabled
+function enterprise_demo_post_features_revert($component) {
+  dsm('enterprise_demo_post_features_revert');
+  dsm($component);
+  //return;
+  if ($component != 'uuid_entities') {
+    return;
+  }
+  //enterprise_demo_app_init();
+}
+
+function enterprise_demo_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_demo' => array(
+      'menus' => array(),
+    ),
+  );
+
+  $menu = array();
+  $menu['node:da99084c-c5ee-4e6e-9e02-d11c71602daf'] = array(
+    'link_title' => t('Home'),
+    'weight' => -10,
+  );
+  $menu['node:43a64850-4c5f-4c33-8625-f058b8165e51'] = array(
+    'link_title' => t('Services'),
+    'weight' => -8,
+    'expanded' => 1,
+  );
+  $menu['node:366d1ca9-c66a-45da-bf74-d2eb65287f2e'] = array(
+    'link_title' => t('Close Sales'),
+    'weight' => -5,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:9431960d-168f-4fe0-a4f7-1194c76d506b'] = array(
+    'link_title' => t('Attract Visitors'),
+    'weight' => 0,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:987015b6-0f3c-48fd-bc39-dfbf4262b416'] = array(
+    'link_title' => t('Convert Leads'),
+    'weight' => 1,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:366d1ca9-c66a-45da-bf74-d2eb65287f2e'] = array(
+    'link_title' => t('Close Sales'),
+    'weight' => 2,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+
+  $menu['node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7'] = array(
+    'link_title' => t('About us'),
+    'weight' => 5,
+    'expanded' => 1,
+  );
+
+  /*
+  $menu_def['view:enterprise_news:page'] = array(
+    //'link_title' => t('About us'),
+    'weight' => 1,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  */
+
+  $menu['view:enterprise_users:page'] = array(
+    'weight' => 1,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_press'] = array(
+    'weight' => 2,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_news'] = array(
+    'weight' => 3,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_faq'] = array(
+    'weight' => 4,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+
+  $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
+    'link_title' => t('Contact'),
+    'weight' => 7,
+  );
+
+
+  $settings['enterprise_demo']['menus']['main-menu'] = $menu;
+  $weight = 0;
+  $settings['enterprise_demo']['blocks'] = array(
+    'search:form' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'title' => t('Search OE Pro'),
+      'weight' => $weight++,
+    ),
+    'widgets:s_twitter-user-timeline-widget' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'weight' => $weight++,
+    ),
+    'widgets:s_facebook-like-box' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'weight' => $weight++,
+    ),
+    'widgets:s_enterprise_social-follow' => array(
+      'title' => t('Follow us'),
+      'regions' => array(
+        'footer',
+      ),
+      'block_row' => array(
+        'row' => 'row2',
+        'row_class' => 'stacked',
+      ),
+      'weight' => $weight++,
+    ),
+    'bean:custom-footer-contact-us' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'block_row' => array(
+        'row' => 'row2',
+        'row_class' => 'stacked',
+      ),
+      'weight' => $weight++,
+    ),
+
+    'views:enterprise_blog_blocks-tags' => array(
+      'weight' => 2,
+    ),
+    'views:enterprise_blog_blocks-recent' => array(
+      'weight' => 4,
+    ),
+    'views:enterprise_blog_blocks-popular' => array(
+      'weight' => 6,
+    ),
+    // disable blog archive block
+    'views:enterprise_blog_blocks-archives' => array(
+      'regions' => -1,
+    ),
+    // add cta footer to blog content type
+    'cta:sel_cta_sidebar' => array(
+      'path' => array(
+        'pages' => array(
+          '<front>',
+          'admin/*',
+          'user',
+          'user/*',
+          'users/*',
+          'offer/*',
+          'thank-you/*',
+          'services',
+          'services/*',
+          'about',
+          'about/*',
+          'team',
+        ),
+      ),
+    ),
+    // add cta footer to blog content type
+    'cta:sel_cta_footer' => array(
+      'node_type' => array(
+        'types' => array(
+          'enterprise_blog',
+        ),
+      ),
+    ),
+  );
+
+
+  $nodes['cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
+    'webform' => array(
+      'redirect_url' => 'thank-you/contact',
+    ),
+  );
+
+  $settings['enterprise_demo']['nodes'] = $nodes;
+
+  return $settings;
+}
+
+function enterprise_demo_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_demo'] = array(
+    'title' => t('Demo'),
+  );
+
+  return $config;
+}
+
+function enterprise_demo_enterprise_apps_config_info_alter(&$config_info) {
+  //dsm($config_info);
+}
+
+function enterprise_demo_enterprise_apps_config_settings_alter(&$config_settings, &$config_info, $context) {
+  //dsm($config_settings);
+  return '';
+}

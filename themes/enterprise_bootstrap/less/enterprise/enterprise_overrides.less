@@ -1,0 +1,283 @@
+// Structural overrides specifically for Enterprise Bootstrap
+
+.nopadding 			  { padding:0 !important;}
+.nopadding-left   { padding-left:0 !important;}
+.nopadding-right 	{ padding-right:0 !important;}
+.nopadding-top 		{ padding-top:0 !important;}
+.nopadding-bottom	{ padding-bottom:0 !important;}
+.nomargin 			  { margin:0 !important;}
+.nomargin-left 		{ margin-left:0 !important;}
+.nomargin-right 	{ margin-right:0 !important;}
+.nomargin-top		  {margin-top:0 !important;}
+.nomargin-bottom	{ margin-bottom:0 !important;}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* additional colors */
+
+.text-secondary {
+  color: @brand-secondary;
+  &:hover {
+    color: darken(@brand-primary, 10%);
+  }
+}
+
+.text-accent {
+  color: @brand-accent;
+  &:hover {
+    color: darken(@brand-accent, 10%);
+  }
+}
+
+.btn-secondary {
+  background: @brand-secondary;
+  border-color: darken(@brand-secondary, 10%);
+  color: white;
+  &:hover {
+    background: darken(@brand-secondary, 10%);
+    .transition;
+  }
+}
+
+.btn-accent {
+  background: @brand-accent;
+  border-color: darken(@brand-accent, 10%);
+  color: white;
+  &:hover {
+    background: darken(@brand-accent, 10%);
+    .transition;
+  }
+}
+
+/* TODO: for some reason these styles are missing from enterprise_bootstrap */
+.bg-primary {background-color: @brand-primary;}
+.bg-secondary {background-color: @brand-secondary;}
+.bg-accent {background-color: @brand-accent;}
+.bg-success {background-color: @brand-success;}
+.bg-warning {background-color: @brand-warning;}
+.bg-danger {background-color: @brand-danger;}
+.bg-info {background-color: @brand-info;}
+
+
+
+/* hack to get Facebook like box to display responsive */
+#fb-root {
+  display: none;
+}
+
+.fb_iframe_widget, .fb_iframe_widget span, .fb_iframe_widget span iframe[style] {
+  max-width: 100% !important;
+}
+
+/* styling for enterprise base style links */
+ul.action-links {
+    margin: 12px 0;
+    padding: 0;
+    li {
+        display: inline;
+        margin: 0;
+        padding: 0 6px 0 0;
+    }
+}
+
+.block-title i {
+    font-size: .7em;
+    margin-right: .3em;
+}
+
+.ds-sticky {
+  background: #fff;
+  display: inline-block;
+  padding: 10px 0;
+}
+
+.btn-social-share {
+  color: #FFFFFF;
+  background-color: #888888;
+  margin-right: .4em;
+}
+
+.addthis_button .addthis_counter.addthis_bubble_style {
+  background: none!important;
+  display:inline-block!important;
+  *display:inline!important;
+  *zoom:1!important;
+  float:none!important;
+  width:auto!important;
+}
+
+.addthis_counter.addthis_bubble_style a.addthis_button_expanded {
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif!important;
+  font-size:1.6rem;
+  color: #FFFFFF;
+  line-height:1em;
+  position:relative;
+  width: .7em;
+  z-index:1;
+}
+
+ul.tags {
+    li {
+        display: inline-block;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    a {
+        font-size: 13px;
+        padding: 2px 7px;
+        background: #f7f7f7;
+        margin: 0 3px 6px 0;
+        display: inline-block;
+    }
+    i {
+      margin-right: .3em;
+  }
+}
+
+fieldset.panel-default {
+    legend.panel-heading {
+        border: 0;
+        float: left;
+        line-height: 1em;
+        margin-bottom: 0;
+    }
+    .panel-body {
+        border-top: 1px solid @gray-light;
+        overflow: auto;
+        padding-top: 20px;
+    }
+}
+
+#socialmedia-admin-profiles-form {
+    padding-top: 1em;
+}
+
+.cta {
+  padding: 10px 10px;
+  color: white;
+  background: @brand-primary;
+  border: 0;
+  overflow: hidden;
+  .transition;
+  &:hover {
+    background: darken(@brand-primary, 10%);
+    .transition;
+  }
+  &:last-child {
+    margin-right: 0;
+  }
+  .icon {
+    color: white;
+  }
+  h3, h4, h5, h6 {
+    color: white;
+    margin: 0 0 10px 0;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  .btn-cta {
+    background: @brand-accent;
+    color: white;
+  }
+}
+
+.cta-secondary {
+  background: @brand-secondary;
+  .transition;
+  &:hover {
+    background: darken(@brand-secondary, 10%);
+    .transition;
+  }
+  .btn-cta {
+    background: @brand-accent;
+    color: white;
+  }
+}
+
+.cta-accent {
+  background: @brand-accent;
+  .transition;
+  &:hover {
+    background: darken(@brand-accent, 10%);
+    .transition;
+  }
+  .btn-cta {
+    background: @brand-primary;
+    color: white;
+  }
+}
+
+.cta-rectangle {
+  max-width: 300px;
+  .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
+  .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
+  .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
+  .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
+  .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
+  .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
+  .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
+  .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
+  .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
+  .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
+  .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
+  .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.cta-btn {
+  h3, h4, h5, h6 {
+    color: white;
+    margin: 0 0 0 0;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
+  .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
+  .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
+  .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
+  .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
+  .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
+  .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
+  .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
+  .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
+  .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
+  .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
+  .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .icon-right {
+    span {
+      display:inline-block;
+      vertical-align:middle;
+      width:80%;
+    }
+    i {
+      display:inline-block;
+      vertical-align:middle;
+      padding-left:5px;
+      width:20%;
+    }
+  }
+  .icon-bottom {
+    span {
+      display:block;
+      width:100%;
+    }
+    i {
+      display:block;
+      text-align: center;
+      width:100%;
+      margin-top: 5px;
+    }
+  }
+
+}
+

@@ -1,0 +1,8 @@
+; $Id: contentanalysisexample.info,v 1.5 2010/05/08 16:12:13 tomdude48 Exp $
+name = "Content Analysis API Example"
+description = "Example Content Analyzer module"
+package = Content analysis
+dependencies[] = contentanalysis
+files[] = contentanalysisexample.module
+scripts[] = contentanalysisexample.js
+core = 7.x

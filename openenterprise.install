@@ -1,0 +1,365 @@
+<?php
+
+/**
+ * implements hook_install_configure_form_alter()
+ */
+function openenterprise_form_install_configure_form_alter(&$form, &$form_state) {
+  // When using Drush, let it set the default password.
+  if (drupal_is_cli()) {
+    return;
+  }
+
+  // Many modules set messages during installation that are very annoying.
+  // We don't want to confuse people during the install with random messages.
+  // (I'm looking at you date and menu_block)
+  drupal_get_messages('status');
+  drupal_get_messages('warning');
+
+  $form['site_information']['site_name']['#default_value'] = 'Open Enterprise';
+  $form['site_information']['site_mail']['#default_value'] = 'admin@'. $_SERVER['HTTP_HOST'];
+  $form['admin_account']['account']['name']['#default_value'] = 'admin';
+  $form['admin_account']['account']['mail']['#default_value'] = 'admin@'. $_SERVER['HTTP_HOST'];
+  
+  // Set a default country so we can benefit from it on Address Fields.
+  $form['server_settings']['site_default_country']['#default_value'] = 'US';
+
+  // Hide Update Notifications.
+  $form['update_notifications']['#access'] = FALSE;
+  // Hide site email address. We'll fill it in with the account email.
+  $form['site_information']['site_mail']['#access'] = FALSE;
+  
+  // Add a custom validation that needs to be trigger before the original one,
+  // where we can copy the admin account's mail as the site's mail.
+  array_unshift($form['#validate'], 'openenterprise_custom_setting'); 
+}
+
+/**
+ * Custom callback for setting the site email address.
+ */
+function openenterprise_custom_setting(&$form, &$form_state) {
+  $form_state['values']['site_mail'] = $form_state['values']['account']['mail'];
+}
+
+/**
+ * Force-set a theme at any point during the execution of the request.
+ *
+ * Drupal doesn't give us the option to set the theme during the installation
+ * process and forces enable the maintenance theme too early in the request
+ * for us to modify it in a clean way.
+ */
+function openenterprise_install_set_theme($target_theme) {
+  if ($GLOBALS['theme'] != $target_theme) {
+    unset($GLOBALS['theme']);
+    drupal_static_reset();
+    $GLOBALS['conf']['maintenance_theme'] = $target_theme;
+    _drupal_maintenance_theme();
+  }
+}
+
+/**
+ * Change the final task to our task
+ */
+function openenterprise_install_tasks_alter(&$tasks, $install_state) {
+  $tasks['install_finished']['function'] = "openenterprise_install_finished";
+  $tasks['install_select_profile']['display'] = FALSE;
+  $tasks['install_select_locale']['display'] = FALSE;
+  $tasks['install_profile_modules']['display_name'] = 'Install site';
+  
+    // The "Welcome" screen needs to come after the first two steps
+  // (profile and language selection), despite the fact that they are disabled.
+  $new_task['install_welcome'] = array(
+    'display' => TRUE,
+    'display_name' => st('Welcome'),
+    'type' => 'form',
+    'run' => isset($install_state['parameters']['welcome']) ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_REACHED,
+  );
+  $old_tasks = $tasks;
+  $tasks = array_slice($old_tasks, 0, 2) + $new_task + array_slice($old_tasks, 2);
+}
+
+/**
+ * Callback for install welcome form
+ */
+function install_welcome($form, &$form_state, &$install_state) {
+  drupal_set_title(st('Welcome'));
+  $message = '<p>' . st('Thank you for choosing Open Enterprise, a product offered by LevelTen Interactive.') . '</p>';
+  $form = array();
+  $form['welcome_message'] = array(
+    '#markup' => $message,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array( 
+    '#type' => 'submit',
+    '#value' => st("Let's Get Started!"),
+    '#weight' => 10,
+  );
+  return $form;
+}
+
+function install_welcome_submit($form, &$form_state) {
+  global $install_state;
+
+  $install_state['parameters']['welcome'] = 'done';  
+}
+
+/**
+ * Installation task; perform final steps and display a 'finished' page.
+ *
+ * @param $install_state
+ *   An array of information about the current installation state.
+ *
+ * @return
+ *   A message informing the user that the installation is complete.
+ */
+function openenterprise_install_finished(&$install_state) {
+  // CKEditor sets some settings that override the openenterprise_editor. Make sure the 
+  // feature is fully reverted at this time.
+  features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
+  
+  // Flush all caches to ensure that any full bootstraps during the installer
+  // do not leave stale cached data, and that any content types or other items
+  // registered by the install profile are registered correctly.
+  drupal_flush_all_caches();
+
+  // Remember the profile which was used.
+  variable_set('install_profile', drupal_get_profile());
+
+  // Install profiles are always loaded last
+  db_update('system')
+    ->fields(array('weight' => 1000))
+    ->condition('type', 'module')
+    ->condition('name', drupal_get_profile())
+    ->execute();
+
+  // Cache a fully-built schema.
+  drupal_get_schema(NULL, TRUE);
+
+  // Run cron to populate update status tables (if available) so that users
+  // will be warned if they've installed an out of date Drupal version.
+  // Will also trigger indexing of profile-supplied content or feeds.
+  drupal_cron_run();
+  
+  drupal_goto(); // Now go to the home page.
+}
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ */
+function openenterprise_install() {
+  openenterprise_install_theme_settings();
+  openenterprise_install_admin_roll();
+  openenterprise_install_blocks();
+  openenterprise_install_permissions();
+  openenterprise_install_variables();
+  openenterprise_install_custom_modules();
+}
+
+/**
+ * Install default theme settings.
+ */
+function openenterprise_install_theme_settings() {
+  // Set default theme.
+  $theme_default = 'enterprise_bootstrap';
+  $themes = list_themes(TRUE); //Get all the available themes
+  if(isset($themes['unify'])) {
+    $theme_default = 'unify';
+  }
+  variable_set('theme_default', $theme_default);
+
+  theme_enable(array($theme_default));
+  $settings = variable_get('theme_spacelab_settings', array());
+  $settings['bootstrap_navbar_position'] = 'static-top';
+  // turn off non block primary nav element, main-menu implemented as block
+  $settings['toggle_main_menu'] = 0;
+
+  variable_set('theme_spacelab_settings', $settings);
+  theme_disable(array('bartik'));
+
+  variable_set('admin_theme', 'rubik');
+  variable_set('node_admin_theme', '1');
+}
+
+/*
+ * Install user rolls.
+ */
+function openenterprise_install_admin_roll() {
+  // Create a default role for site administrators, with all available permissions assigned.
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->weight = 2;
+  user_role_save($admin_role);
+  user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
+  // Set this as the administrator role.
+  variable_set('user_admin_role', $admin_role->rid);
+  // Assign user 1 the "administrator" role.
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+    ->execute();
+  // Enable default permissions for system roles.
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval'));  
+}
+
+/**
+ * Install default block placements.
+ */
+function openenterprise_install_blocks() {
+  // Enable some standard blocks.
+  $default_theme = variable_get('theme_default', 'enterprise_bootstrap');
+  $admin_theme = 'rubik';
+  $values = array(
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'openenterprise',
+      'delta' => 'powered-by',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'footer_bottom',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main-menu',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'navigation',
+      'pages' => '',
+      'title' => '<none>',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'help',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'help',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'login',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'new',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'search',
+      'delta' => 'form',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => -10,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+  );
+  $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'title', 'cache'));
+  foreach ($values as $record) {
+    $query->values($record);
+  }
+  $query->execute();
+}
+
+/**
+ * Install default permissions.
+ */
+function openenterprise_install_permissions() {
+  // Enable default permissions for system roles.
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'access comments'));
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval'));
+}
+
+
+
+/**
+ * Install default variables.
+ */
+function openenterprise_install_variables() {
+  $variables = array(
+    // Bootstrap needs a minimum of jQuery 1.7. Set jQuery Update variables.
+    'jquery_update_compression_type' => 'min',
+    'jquery_update_jquery_cdn' => 'google',
+    'jquery_update_jquery_version' => '1.7',
+    // Pathauto sets this to something else. We actually want it blank
+    // so we can turn it off for some vocabularies.
+    'pathauto_taxonomy_term_pattern' => '',
+    // Pathauto variables since they don't get set early enough for content.
+    //'pathauto_node_pattern' => '[node:content-type:machine-name]/[node:title]',
+    'pathauto_node_pattern' => '',
+    'pathauto_punctuation_underscore' => '1',
+    // Set up date defaults so it doesn't yell at us anymore
+    'date_first_day' => 0,
+    'date_format_long' => 'l, F j, Y - H:i',
+    'date_format_medium' => 'D, Y-m-d H:i',
+    'date_format_short' => 'Y-m-d H:i',
+    // Enable user pictures and set the default to a square thumbnail option.
+    'user_pictures' => '1',
+    'user_picture_dimensions' => '1024x1024',
+    'user_picture_file_size' => '800',
+    'user_picture_style' => 'thumbnail',
+    // Allow visitor account creation with administrative approval.
+    'user_register' => USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL,
+    // Setup file paths
+    //'file_public_path' => 'sites/default/files',
+    //'file_temporary_path' => 'sites/default/files/tmp',
+  );
+  foreach ($variables as $name => $value) {
+    variable_set($name, $value);
+  }
+}
+
+/**
+ * This can be used by a sub distribution to add additional modules.
+ */
+function openenterprise_install_custom_modules() {
+  if($extras = variable_get('enterprise_extras', FALSE)) {
+    module_enable($extras, TRUE);
+  }
+}

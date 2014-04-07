@@ -1,0 +1,15 @@
+name = Deployment UI
+description = Provides a UI for the Deploy module
+package = Deployment
+core = 7.x
+dependencies[] = deploy
+dependencies[] = ctools
+configure = admin/structure/deploy
+
+
+; Information added by drush on 2013-12-13
+version = "7.x-2.0-alpha2+1-dev"
+core = "7.x"
+project = "deploy"
+datestamp = "1386959684"
+

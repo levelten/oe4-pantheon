@@ -1,0 +1,12 @@
+name = Enterprise Landing Pages Test Workflow
+core = 7.x
+package = Features
+dependencies[] = bean_uuid
+dependencies[] = ctools
+dependencies[] = deploy
+dependencies[] = intel_webform
+dependencies[] = webform
+features[ctools][] = deploy:deploy_plans:1
+features[deploy_plans][] = enterprise_landingpages_test
+features[features_api][] = api:2
+features[uuid_entities][] = enterprise_landingpages_test

@@ -1,0 +1,22 @@
+name = Enterprise Menus
+description = Provides a more content editor friendly admin menu.
+core = 7.x
+package = Open Enterprise
+dependencies[] = toolbar_megamenu
+
+stylesheets[all][] = enterprise_menus.css
+
+; Information added by  packaging script on 2013-12-03
+version = "7.x-2.10"
+core = "7.x"
+project = "enterprise"
+datestamp = "1386081910"
+
+
+
+; Information added by drush on 2013-12-30
+version = "7.x-3.x-dev"
+core = "7.x"
+project = "openenterprise"
+datestamp = "1388434114"
+

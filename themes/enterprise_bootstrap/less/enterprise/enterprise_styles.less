@@ -1,0 +1,102 @@
+.style-date-stacked {
+    margin-right: 10px;
+    position: relative;
+    width: 55px;
+    .day, .month {
+        color: #fff;
+        display: block;
+        text-align: center;
+    }
+    .day {
+        background: #666;
+        font-size: 30px;
+        font-size: 3rem;
+        font-weight: 600;
+        padding: 5px 0;
+        line-height: 30px;
+        line-height: 3rem;
+    }
+    .month {
+        background: #AAAAAA;
+        font-size: 15px;
+        font-size: 1.5rem;
+        line-height: 15px;
+        line-height: 1.5rem;
+        padding: 2px 0 4px;
+        text-transform: uppercase;
+    }
+    .arrow {
+        border-bottom: 13px solid #AAAAAA;
+        border-right: 12px solid transparent;
+        bottom: 0;
+        position: absolute;
+        right: -10px;
+    }
+}
+
+.style-social-media {
+    .btn-social-profile {
+        background: @brand-secondary;
+        border: 0;
+        margin-right: 0.5em;
+        padding: 6px 8px;
+        .transition;
+        &:hover {
+            background: darken(@brand-secondary, 10%);
+            .transition;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
+        .icon {
+            color: white;
+        }
+    }
+}
+
+.style-blog-full {
+    .ds-middle {
+        .field-name-field-image {
+            padding-bottom: 1em;
+        }
+    }
+}
+
+.style-about-author {
+    .field-name-field-description {
+        padding-bottom: 1em;
+    }
+}
+
+i.i-thumbnail {
+    background: #ddd;
+    margin: 5px;
+    .border-radius(100%);
+    color: #888888;
+    display: inline-block;
+    .font-size(7);
+    padding: .25em;
+    text-align: center;
+    vertical-align: middle;
+    .transition(0.2s, ease, 0s);
+}
+
+i.i-circle {
+    display: inline-block;
+    background: #ddd;
+    margin: 5px;
+    .rounded(50%) !important;
+    color: #888888;
+    .font-size(7);
+    line-height: 1em;
+    padding: 0.25em 0 0;
+    text-align: center;
+    .transition(0.2s, ease, 0s);
+    top: 0px;
+    width: 1.5em !important;
+    height: 1.5em;
+    &:before, &:after {
+        display: block;
+        top: 50%;
+    }
+}

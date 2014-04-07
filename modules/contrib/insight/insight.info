@@ -1,0 +1,9 @@
+name = Insight
+description = Provides marketing insight integration
+package = Insight
+core = 7.x
+php = 5.1
+dependencies[] = contentanalysis
+configure = admin/config/insight
+files[] = insight.module
+files[] = insight.admin.inc

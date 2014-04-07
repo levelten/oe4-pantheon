@@ -1,0 +1,12 @@
+name = Enterprise Extras
+description = Provides miscellaneous enhancements
+core = 7.x
+package = Open Enterprise
+project = enterprise_extras
+
+dependencies[] = libraries
+dependencies[] = icon
+dependencies[] = icon_filter
+libraries[] = jquery.fitvids
+
+

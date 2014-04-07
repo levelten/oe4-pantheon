@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ * This file serves as a stub file for the many Examples modules in the
+ * @link http://drupal.org/project/examples Examples for Developers Project @endlink
+ * which you can download and experiment with.
+ *
+ * One might say that examples.module is an example of documentation. However,
+ * note that the example submodules define many doxygen groups, which may or
+ * may not be a good strategy for other modules.
+ */
+
+function entity_data_entity_insert($entity, $type) {
+  entity_data_entity_save($entity, $type);
+}
+
+function entity_data_entity_update($entity, $type) {
+  entity_data_entity_save($entity, $type);
+}
+
+function entity_data_entity_save($entity, $type) {
+  // check if entity_data is set
+  if (!isset($entity->entity_data) || !is_array($entity->entity_data)) {
+    return;
+  }
+  $entity_info = entity_get_info($type);
+  if (!isset($entity->entity_data)
+    || !is_array($entity->entity_data)
+    || !isset($entity_info['entity keys']['id'])) {
+    return;
+  }
+  foreach ($entity->entity_data AS $name => $value) {
+    entity_data_set($type, $entity->{$entity_info['entity keys']['id']}, $name, $value, $entity->language);
+  }
+}
+
+function entity_data_entity_delete($entity_type, $id) {
+  entity_data_del_all($entity_type, $id);
+}
+
+/**
+ * Implements hook_entity_load
+ * @param $entity_type
+ * @param $id
+ */
+function entity_data_entity_load(&$entities, $types) {
+  foreach ($entities AS $i => $entity) {
+    $entity_info = entity_get_info($entity->entity_type);
+    if (!isset($entity_info['entity keys']['id'])) {
+      return;
+    }
+    $vars = entity_data_get_all($entity->entity_type, $entity->{$entity_info['entity keys']['id']}, array());
+
+    if (count($vars)) {
+      $entities[$i]->entity_data = $vars;
+    }
+  }
+
+}
+
+function entity_data_set($entity_type, $entity_id, $name, $value, $language = LANGUAGE_NONE) {
+  // serialize if not string
+  if (!is_string($value)) {
+    $value = serialize($value);
+  }
+  $key = array(
+    'entity_type' => $entity_type,
+    'entity_id' => $entity_id,
+    'language' => $language,
+    'name' => $name,
+  );
+  $fields = array(
+    'value' => $value,
+  );
+  $query = db_merge('entity_data')
+    ->key($key)
+    ->fields($fields);
+  $query->execute();
+}
+
+function entity_data_get($entity_type, $entity_id, $name, $default = null, $language = LANGUAGE_NONE) {
+  $query = db_select('entity_data', 'v')
+    ->fields('v', array('value'))
+    ->condition('entity_type', $entity_type)
+    ->condition('entity_id', $entity_id)
+    ->condition('name', $name);
+  $values = $query->execute()->fetchCol();
+
+  if (count($values)) {
+    return unserialize($values[0]);
+  }
+
+  return $default;
+}
+
+function entity_data_del($entity_type, $entity_id, $name) {
+  $query = db_delete('entity_data')
+    ->condition('entity_type', $entity_type)
+    ->condition('entity_id', $entity_id)
+    ->condition('name', $name);
+  $query->execute();
+}
+
+function entity_data_del_all($entity_type, $entity_id) {
+  $query = db_delete('entity_data')
+    ->condition('entity_type', $entity_type)
+    ->condition('entity_id', $entity_id);
+  $query->execute();
+}
+
+function entity_data_get_all($entity_type, $entity_id, $language = LANGUAGE_NONE) {
+  $vars = &drupal_static(__FUNCTION__, array());
+  if (isset($vars[$entity_type][$entity_id])) {
+    return $vars[$entity_type][$entity_id];
+  }
+  $query = db_select('entity_data', 'v')
+    ->fields('v')
+    ->condition('entity_type', $entity_type)
+    ->condition('entity_id', $entity_id);
+  if (!isset($vars[$entity_type])) {
+    $vars[$entity_type] = array();
+  }
+
+  $result = $query->execute();
+
+  $vars[$entity_type][$entity_id] = array();
+  while ($row = $result->fetchObject()) {
+    $vars[$entity_type][$entity_id][$row->name] = unserialize($row->value);
+  }
+
+  return $vars[$entity_type][$entity_id];
+}
+
+function entity_data_uuid_entities_features_export_entity_alter(&$entity, $entity_type) {
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['entity keys']['uuid'])) {
+    $uuid = $entity->{$entity_info['entity keys']['uuid']};
+    $ids = entity_get_id_by_uuid($entity_type, array($uuid));
+    $id = $ids[$entity->uuid];
+  }
+  else {
+    $id = $entity->{$entity_info['entity keys']['id']};
+  }
+
+  $vars = entity_data_get_all($entity_type, $id);
+  if (count($vars)) {
+    $entity->entity_data = $vars;
+  }
+}

@@ -1,0 +1,22 @@
+diff --git a/disqus.js b/disqus.js
+index 74d971d..3b9efd1 100644
+--- a/disqus.js
++++ b/disqus.js
+@@ -46,6 +46,17 @@ Drupal.behaviors.disqus = {
+           if (settings.disqus.sso || false) {
+             this.sso = settings.disqus.sso;
+           }
++          if (settings.disqus.callback_onnewcomment || false) {
++            this.callbacks.onNewComment = [function(comment) { 
++              var namespaces = settings.disqus.callback_onnewcomment.split(".");
++              var func = namespaces.pop();
++              var context = window;
++              for(var i = 0; i < namespaces.length; i++) {
++                context = context[namespaces[i]];
++              }
++              context[func](comment);
++           }];
++          }          
+         };
+ 
+         // Make the AJAX call to get the Disqus comments.

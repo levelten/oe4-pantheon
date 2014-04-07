@@ -1,0 +1,456 @@
+<?php
+/**
+ * @file
+ */
+
+require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterprise_style.ds_api.inc";
+require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterprise_style.image.inc";
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function enterprise_style_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "breakpoints" && $api == "default_breakpoint_group") {
+    return array("version" => "1");
+  }
+  if ($module == "breakpoints" && $api == "default_breakpoints") {
+    return array("version" => "1");
+  }
+  if ($module == "picture" && $api == "default_picture_mapping") {
+    return array("version" => "1");
+  }
+}
+
+/**
+ * Adding js and css for core features
+ * TODO is there a better way of doing this? Can a libraries file called from
+ * .info?
+*/
+function enterprise_style_init() {
+  // add js library for auto sizing of videos
+  drupal_add_js(libraries_get_path('jquery.fitvids') . '/jquery.fitvids.js');
+  // js for custom OE JS features
+  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/main.js');
+  // core styling for custom features (should be overriden in theme)
+  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/main.css');
+}
+
+function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
+  //dsm($entity_type);
+  //dsm($fields);
+}
+
+function enterprise_style_page_alter(&$page) {
+  //dsm($page);
+}
+
+/**
+* Implements hook_theme().
+*/
+function enterprise_style_theme() {
+  $themes = array();
+
+  $themes['user_thumbnail'] = array(
+    //'template' => 'templates/date-stacked',
+    //'file' => 'enterprise_style.pages.inc',
+    'variables' => array(
+      'entity' => NULL,
+      'user' => NULL,
+      'uid' => NULL,
+      'photo' => NULL,
+    ),
+  );
+
+  $themes['bootstrap_jumbotron'] = array(
+    'template' => 'templates/bootstrap-jumbotron',
+    'file' => 'enterprise_style.pages.inc',
+    'variables' => array(
+      'title' => NULL,
+      'body' => NULL,
+      'link' => array(),
+    ),
+  );
+
+  $themes['bootstrap_featurette'] = array(
+    'template' => 'templates/bootstrap-featurette',
+    'file' => 'enterprise_style.pages.inc',
+    'variables' => array(
+      'header' => NULL,
+      'body' => NULL,
+      'image' => array(),
+      'link' => array(),
+    ),
+  );
+
+  $themes['bootstrap_featurette_stacked'] = array(
+    'template' => 'templates/bootstrap-featurette-stacked',
+    'file' => 'enterprise_style.pages.inc',
+    'variables' => array(
+      'header' => NULL,
+      'body' => NULL,
+      'image' => array(),
+      'link' => array(),
+    ),
+  );
+
+  $themes['date_stacked'] = array(
+    'template' => 'templates/date-stacked',
+    'file' => 'enterprise_style.pages.inc',
+    'variables' => array(
+      'entity' => NULL,
+      'time' => NULL,
+    ),
+  );
+
+/*
+  // views override
+  $themes['views_view_summary'] = array(
+    'arguments' => array(
+      'view' => NULL,
+      'options' => NULL,
+      'rows' => NULL,
+      'title' => NULL,
+      'context' => NULL,
+    ),
+    'template' => 'enterprise-style-views-view-summary',
+    'original hook' => 'views_view_summary',
+    'path' => drupal_get_path('module', 'enterprise_style') . '/templates/list',
+    'preprocess functions' => array(
+      'template_preprocess',
+      'template_preprocess_views_view_summary',
+      'enterprise_style_preprocess_views_view_summary',
+    ),
+  );
+/*
+  $themes['views_view_list'] = array(
+    'arguments' => array('view' => NULL, 'field' => NULL, 'row' => NULL),
+    'template' => 'views-view-list',
+    'original hook' => 'views_view_list',
+    'path' => drupal_get_path('module', 'views') . '/theme',
+    'preprocess functions' => array( // This is the global preprocess function used by all templates.
+      'template_preprocess',
+      'enterprise_style_preprocess_views_view_list',
+      'template_preprocess_views_view_list',
+     ),
+  );
+*/
+  return $themes;
+}
+
+function enterprise_style_theme_registry_alter(&$theme_registry) {
+  $theme = &$theme_registry['views_view_summary'];
+  $theme['path'] = drupal_get_path('module', 'enterprise_style') . '/templates/list';
+  $theme['template'] = 'enterprise-style-views-view-summary';
+//dsm($theme_registry);
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+/*
+function enterprise_style_views_api() {
+  return array(
+    'api' => 3,
+    //'path' => drupal_get_path('module', 'enterprise_style') . '/theme',
+  );
+}
+*/
+
+function enterprise_style_views_plugins_alter(&$plugins) {
+  //dsm($plugins);
+  //$plugins['style']['list']['handler'] = 'EnterpriseStyleListPluginStyle';
+}
+
+function enterprise_style_preprocess_views_view(&$vars) {
+  //dsm($vars);
+}
+
+function enterprise_style_preprocess_views_view_summary(&$vars) {
+  //template_preprocess_views_view_summary($vars);
+
+  $vars['list_classes'] = '';
+  $vars['row_list_item_classes'] = array();
+  $vars['row_badge_classes'] = array();
+  $row_classes_default = '';
+  $row_list_item_classes_default = '';
+  $row_badge_classes_default = 'pull-right';
+
+
+  //$vars['boostrap_component_type'] = 'nav-stacked';
+  //$vars['boostrap_component_type'] = 'list-group';
+  //$vars['boostrap_component_type'] = 'tag-cloud';
+  //$vars['boostrap_component_type'] = 'list-inline';
+  //$vars['boostrap_component_type'] = 'tag-cloud';
+  $vars['boostrap_component_type'] = 'list-unstyled';
+
+  if (isset($vars['view']->current_display)) {
+    if ($vars['view']->current_display == 'tags') {
+      $vars['boostrap_component_type'] = 'tag-cloud';
+    }
+  }
+
+  if (isset($vars['boostrap_component_type'])) {
+    if ($vars['boostrap_component_type'] == 'list-group') {
+      $vars['list_classes'] = 'list-group';
+      $row_list_item_classes_default = 'list-group-item';
+    }
+    else if ($vars['boostrap_component_type'] == 'nav-stacked') {
+      $vars['list_classes'] = 'nav nav-stacked';
+    }
+    else if ($vars['boostrap_component_type'] == 'nav-list') {
+      $vars['list_classes'] = 'nav nav-list';
+    }
+    else if ($vars['boostrap_component_type'] == 'list-unstyled') {
+      $vars['list_classes'] = 'list-unstyled';
+    }
+    else if ($vars['boostrap_component_type'] == 'list-inline') {
+      $vars['list_classes'] = 'list-inline';
+      //$row_classes_default = ' btn btn-default';
+    }
+    else if ($vars['boostrap_component_type'] == 'tag-cloud') {
+      $vars['options']['count'] = FALSE;
+      $vars['list_classes'] = 'list-unstyled tags';
+    }
+  }
+
+  foreach ($vars['rows'] as $id => $row) {
+    if ($vars['boostrap_component_type'] == 'tag-cloud') {
+      $vars['rows'][$id]->link = theme('icon', array('bundle' => 'bootstrap', 'icon' => 'glyphicon-tag')) . $vars['rows'][$id]->link;
+    }
+
+    $vars['row_classes'][$id] .= $row_classes_default;
+    $vars['row_list_item_classes'][$id] = $row_list_item_classes_default;
+    $vars['row_badge_classes'][$id] = $row_badge_classes_default;
+    // add active class to active items
+    if ($vars['row_classes'][$id] == 'active') {
+      $vars['row_list_item_classes'][$id] .= (!empty($vars['row_list_item_classes'][$id]) ? ' ' : '') . 'active';
+    }
+  }
+}
+
+/*
+function enterprise_style_preprocess_views_view_list(&$vars) {
+  //dsm('enterprise_style_preprocess_views_view_list');
+  //dsm($vars);
+
+  //watchdog('enterprise_style_preprocess_views_view_list', '');
+}
+*/
+
+/*
+function enterprise_style_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes'] += array(
+    'bootstrap_jumbotron' => array(
+      'label' => t('Jumbotron'),
+      'custom settings' => TRUE,
+    ),
+  );
+}
+
+function enterprise_style_preprocess_node(&$vars) {
+  if($vars['view_mode'] == "bootstrap_jumbotron") {
+    $variables['title'] = '';
+	$bs_vars = array(
+	  'title' => $variables['title'],
+	  'body' => 'this is a test',
+	);
+	$variables['content'] = theme('bootstrap_jumbotron', $bs_vars);
+  }
+}
+*/
+
+/**
+ * Implements hook_styler().
+ *
+ * Tell styler module what styles this module provides.
+ */
+function enterprise_style_styler_style() {
+  $styles = array();
+
+  global $user;
+
+  // Image shapes
+  $styles['icons']['example'] = array(
+    '#title' => t('Example'),
+    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<div style="font-size: 2em; line-height: .75em;">
+<i class="icon glyphicon glyphicon-ok"></i>
+<i class="icon glyphicon glyphicon-download"></i>
+<i class="icon glyphicon glyphicon-thumbs-up"></i>
+</div>
+      ',
+      '#value_highlight' => '
+<i class="icon glyphicon glyphicon-ok"></i>
+<i class="icon glyphicon glyphicon-download"></i>
+<i class="icon glyphicon glyphicon-thumbs-up"></i>
+      ',
+    ),
+  );
+
+  $styles['icons']['shapes'] = array(
+    '#title' => t('Background shapes'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '
+<i class="icon glyphicon glyphicon-download i-rounded"></i>
+<i class="icon glyphicon glyphicon-download i-circle"></i>
+<i class="icon glyphicon glyphicon-download i-thumbnail"></i>
+      ',
+      '#value_highlight' => '
+<i class="icon ... ... i-rounded"></i>
+<i class="icon ... ... i-circle"></i>
+<i class="icon ... ... i-thumbnail"></i>
+      ',
+    ),
+  );
+
+  // Jumbotron
+  $vars = array(
+    'title' => t('Hello, world!'),
+    'body' => t('This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.'),
+    'link' => array(
+      'text' => t('Learn more'),
+      'path' => '',
+      'options' => array(
+        'fragment' => '',
+        'external' => TRUE,
+      ),
+    ),
+  );
+  $styles['featured']['jumbotron'] = array(
+    '#title' => t('Jumbotron'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => theme('bootstrap_jumbotron', $vars),
+    ),
+  );
+
+  // Featurette
+  $vars = array(
+    'header' => t('First featurette headling. <span class="text-muted">It\'ll blow your mind.</span>'),
+    'body' => t('Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.'),
+    'image' => array(
+      'path' => 'http://placehold.it/500x500',
+    ),
+    'link' => array(
+      'text' => t('Learn more'),
+      'path' => '',
+      'options' => array(
+        'fragment' => '',
+        'external' => TRUE,
+      ),
+    ),
+  );
+  $styles['featured']['featurette'] = array(
+    '#title' => t('Featurette'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => theme('bootstrap_featurette', $vars),
+      '#value_highlight' => '<div class="row featurette">
+  <img class="featurette-image col-md-5 pull-left" src="http://placehold.it/500x500" />
+  <div class="message col-md-7">
+    <h2 class="featurette-heading">First featurette heading. <span class="text-muted">It\'ll blow your mind.</span></h2>
+    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+    <p><a href="#" class="btn btn-primary btn-lg" role="button">Learn more</a></p>
+  </div>
+</div>
+',
+    ),
+  );
+
+  // Featurette stacked
+  $vars = array(
+    'header' => t('Heading'),
+    'body' => t('Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac.'),
+    'image' => array(
+      'path' => 'http://placehold.it/140x140',
+    ),
+    'link' => array(
+      'text' => t('Learn more'),
+      'path' => '',
+      'options' => array(
+        'fragment' => '',
+        'external' => TRUE,
+      ),
+    ),
+  );
+  $styles['featured']['featurette-stacked'] = array(
+    '#title' => t('Featurette stacked'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => theme('bootstrap_featurette_stacked', $vars),
+      '#value_highlightx' => '<div class="row featurette">
+  <img class="featurette-image col-md-5 pull-left" src="http://placehold.it/500x500" />
+  <div class="message col-md-7">
+    <h2 class="featurette-heading">First featurette heading. <span class="text-muted">It\'ll blow your mind.</span></h2>
+    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+    <p><a href="#" class="btn btn-primary btn-lg" role="button">Learn more</a></p>
+  </div>
+</div>
+',
+    ),
+  );
+
+  /*
+  $vars = array(
+    //'account' => $user,
+    'uid' => 2,
+  );
+  $styles['images']['user-thumbnail'] = array(
+    '#title' => t('user thumbnail'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => theme('user_thumbnail', $vars),
+    ),
+  );
+  */
+
+  // Date stacked
+  $vars = array();
+  $styles['time']['date-stacked'] = array(
+    '#title' => t('Date stacked'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => theme('date_stacked', $vars),
+    ),
+  );
+
+  return $styles;
+}
+
+/**
+ * Implements hook_icon_bundles().
+ */
+function enterprise_style_icon_bundles() {
+  $bundles['enterprise_style'] = array(
+    'name' => 'enterprise_style',
+    'render' => 'sprite',
+    'title' => t('General'),
+    'provider' => 'fontello',
+    'path' => drupal_get_path('module', 'enterprise_style') . '/icons',
+    'settings' => array(
+      'method' => 'embedded',
+      'tag' => 'i',
+    ),
+  );
+  fontello_icon_fontello_import_process($bundles['enterprise_style']);
+  return $bundles;
+}
+
+function enterprise_style_fivestar_widgets() {
+  $widgets = array(
+    drupal_get_path('module', 'enterprise_style') . '/css/oe_stars.css' => 'oe_stars',
+  );
+  return $widgets;
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function enterprise_style_preprocess_page(&$variables) {
+  $variables['menu_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-menu'));
+  $variables['search_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-search'));
+  $variables['user_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-users'));
+}

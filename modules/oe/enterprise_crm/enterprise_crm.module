@@ -1,0 +1,18 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise CRM feature.
+ */
+
+include_once 'enterprise_crm.features.inc';
+
+/**
+ * Implements hook_admin_paths()
+ */
+function enterprise_crm_admin_paths() {
+  $paths = array(
+    'crm-core' => 1,
+    'crm-core/*' => 1,
+  );
+  return $paths;
+}
