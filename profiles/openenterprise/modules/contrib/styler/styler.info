@@ -1,0 +1,4 @@
+name = Style Guide
+description = Provides a guide of styles supported by the theme.
+package = Theme
+core = 7.x

@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * Demonstrate basic module block_views.
+ */
+
+define('BLOCK_GATE_OPERATOR_CT_VIEWS', 'OR');
+
+/**
+ * Implements hook_block_list_alter().
+ *
+ *
+ */
+function block_gate_block_list_alter(&$blocks) {
+  global $theme_key;
+
+  if (BLOCK_GATE_OPERATOR_CT_VIEWS != 'OR') {
+    return;
+  }
+
+  // Build an array of views for each block.
+  $block_views = array();
+  $result = db_query('SELECT * FROM {block_views}');
+  foreach ($result as $record) {
+    $block_views[$record->module][$record->delta][$record->view][$record->display] = TRUE;
+  }
+
+  // Build an array of node types for each block.
+  $block_node_types = array();
+  $result = db_query('SELECT module, delta, type FROM {block_node_type}');
+  foreach ($result as $record) {
+    $block_node_types[$record->module][$record->delta][$record->type] = TRUE;
+  }
+
+
+  $blocks_by_ct = $blocks;
+  node_block_list_alter($blocks_by_ct);
+
+  $blocks_by_views = $blocks;
+  block_views_block_list_alter($blocks_by_views);
+
+
+  $menu = menu_get_item();
+  $view = '';
+  $page_type = '';
+  if ($menu['page_callback'] == 'views_page') {
+    $page_type = 'view';
+    $view = $menu['page_arguments'][0];
+    $display = $menu['page_arguments'][1];
+  }
+  if ($menu['page_callback'] == 'node_page_view') {
+    $page_type = 'node';
+    $node = menu_get_object();
+  }
+
+  foreach ($blocks as $key => $block) {
+    if (!isset($block->theme) || !isset($block->status) || $block->theme != $theme_key || $block->status != 1) {
+      // This block was added by a contrib module, leave it in the list.
+      continue;
+    }
+    $removed = FALSE;
+    $disabled_by = array();
+    $enabled_by = array();
+    // determine if block is explicitly enabled or disabled by content type
+    if (!isset($blocks_by_ct[$key])) {
+      $disabled_by['content_type'] = 1;
+    }
+    if (($page_type == 'node') && isset($block_node_types[$block->module][$block->delta][$node->type])) {
+      $enabled_by['content_type'] = 1;
+    }
+
+    // determine if block is explicitly enabled or disabled by view
+    if (!isset($blocks_by_views[$key])) {
+      $disabled_by['views'] = 1;
+    }
+    if (($page_type == 'view') && isset($block_views[$block->module][$block->delta][$view][$display]))  {
+      $enabled_by['views'] = 1;
+    }
+
+    if ($page_type == 'view') {
+      // if block is disabled by block_views, remove
+      if (isset($disabled_by['views'])) {  // some views are selected
+        unset($blocks[$key]);
+      }
+      // if node has disabled by node and not enabled by block_views, remove
+      else {
+        if (isset($disabled_by['content_type'])
+          && !isset($enabled_by['views'])
+        ) {
+          unset($blocks[$key]);
+        }
+      }
+    }
+    else if ($page_type == 'node') {
+      // if block is disabled by node, remove
+      if (isset($disabled_by['content_type'])) {  // some views are selected
+        unset($blocks[$key]);
+      }
+      // if node has disabled by node and not enabled by block_views, remove
+      else {
+        if (isset($disabled_by['views'])
+          && !isset($enabled_by['content_type'])
+        ) {
+          unset($blocks[$key]);
+        }
+      }
+    }
+    // on any other page types obey default visibility logic
+    else {
+      if (count($disabled_by)) {
+        unset($blocks[$key]);
+      }
+    }
+
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter()
+ *
+ * Look for modules implementing block filters
+ * @param $implementations
+ * @param $hook
+ */
+function block_gate_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'block_list_alter') {
+    if (BLOCK_GATE_OPERATOR_CT_VIEWS == 'OR') {
+      unset($implementations['node']);
+      if (isset($implementations['block_views'])) {
+        unset($implementations['block_views']);
+      }
+    }
+  }
+}

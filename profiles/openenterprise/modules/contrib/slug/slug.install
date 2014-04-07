@@ -1,0 +1,89 @@
+<?php
+
+/**
+ * Implements hook_schema()
+ * 
+ * @return string
+ */
+function slug_schema() {
+  $schema = array();
+  
+  $schema['slug'] = array(
+    'description' => 'A list of slugs for drupal entities.',
+    'fields' => array(
+      'entity_type' => array(
+        'description' => 'The entity type of the slug.',
+        'type'        => 'varchar',
+        'length'      => 128,
+        'not null'    => TRUE,
+      ),
+      'entity_id' => array(
+        'description' => 'The Entity ID of the slug.',
+        'type'        => 'int',
+        'unsigned' => TRUE,
+        'not null'    => TRUE
+      ),
+      'slug' => array(
+        'description' => 'The alias for this path; e.g. title-of-the-story.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'language' => array(
+        'description' => "The language this alias is for; if 'und', the alias will be used for unknown languages. Each Drupal path can have an alias for each supported language.",
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'type_id_language' => array('entity_type', 'entity_id', 'language'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function slug_install() {
+  // Set the weight to 2 (After pathauto)
+  db_update('system')
+    ->fields(array('weight' => 2))
+    ->condition('type', 'module')
+    ->condition('name', 'slug')
+    ->execute();
+}
+
+/**
+ * Switch schema to be compatible with generic entities.
+ */
+function slug_update_7000() {
+//  db_drop_index('slug', 'nid_vid_language');
+  db_drop_field('slug', 'vid');
+  db_change_field('slug', 'nid', 'entity_id', 
+    array(
+      'description' => 'The Entity ID of the slug.',
+      'type'        => 'int',
+      'unsigned' => TRUE,
+      'not null'    => TRUE
+    )
+  );
+  db_add_field('slug', 'entity_type',
+    array(
+        'description' => 'The entity type of the slug.',
+        'type'        => 'varchar',
+        'length'      => 128,
+        'not null'    => TRUE,
+        'default'     => 'node',
+    ),
+    array(
+      'indexes' => array(
+        'type_id_language' => array('entity_type', 'entity_id', 'language'),
+      ),
+    )
+  );
+}

@@ -1,0 +1,315 @@
+<?php
+
+/* 
+ * Parent settings for slugs.
+ */
+
+/**
+ * Implements hook_form_node_type_form_alter()
+ */
+function slug_parent_form_node_type_form_alter(&$form, &$form_state) {
+  $type = $form['#node_type'];
+  
+  $form['menu']['slug_menu'] = array(
+    '#type' => 'select',
+    '#title' => 'Slug Parent Menu',
+    '#description' => 'Select the menu to use for managing the hierarchy of the content type.',
+    '#options' => array(0 => "Don't use") + menu_get_menus(),
+    '#default_value' => variable_get('slug_menu_' . $type->type, FALSE),
+  ); 
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter()
+ */
+function slug_parent_form_node_form_alter(&$form, &$form_state, $form_id) {
+  $node = $form['#node'];
+  if (variable_get('slug_menu_' . $node->type, FALSE) && user_access('use slugs')) {
+    $link = $node->parent;
+    $type = $node->type;
+    $options = menu_parent_options(array(variable_get('slug_menu_' . $type, FALSE) => 'Root'), $link['mlid'], $type);
+    // Remove current item and children so there are no circular links.
+    if ($link['mlid']) {
+      $query = db_select('menu_links', 'm');
+      $query->addField('m', 'mlid');
+      $query->condition('menu_name', $link['menu_name']);
+      $query->orderBy('depth', 'DESC');
+
+      $or = db_or();
+      $i = 1;
+      $p = 'p1';
+      while ($i <= MENU_MAX_DEPTH) {
+        $or->condition($p, $link['mlid']);
+        $p = 'p' . ++$i;
+      }
+      $query->condition($or);
+      $children = $query->execute()->fetchAll();
+      foreach($children as $child) {
+        unset($options[$link['menu_name'] . ':' . $child->mlid]);
+      }
+    }
+
+    $form['parent'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Slug'),
+      '#access' => user_access('use slugs'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#weight' => 2,
+      '#attributes' => array('class' => array('parent-link-form', 'display_sidebar')),
+    );
+    // Move slug under parent.
+    $form['parent']['slug'] = $form['slug'];
+    unset($form['slug']);
+    // Force slug to show in sidebar.
+    $form['parent']['slug']['#machine_name']['standalone'] = TRUE;
+    $form['parent']['slug']['#tree'] = FALSE; // We don't actually want this one in the tree but for display purposes it helps.
+    $form['#attached']['js'][] = drupal_get_path('module', 'slug_parent') . '/js/slug_parent.js';
+    $form['#attached']['js'][] = array(
+      'type' => 'setting',
+      'data' => array(
+        'slugPaths' => slug_parent_build_menu_paths(variable_get('slug_menu_' . $type, FALSE)),
+      ),
+    );
+    $form['parent']['path_preview'] = array(
+      '#weight' => 5,
+      '#markup' => '<div id="path-preview">' . 
+      '<span class="label">' . t('Path Preview') . ': </span>' .
+      '<span class="path">' . '</span>' .
+      '</div>',
+    );
+    $form['parent']['link'] = array(
+      '#type' => 'container',
+      '#parents' => array('parent'),
+    );
+    // Populate the element with the link data.
+    foreach (array('mlid', 'module', 'has_children', 'customized', 'options', 'expanded', 'hidden', 'parent_depth_limit') as $key) {
+      $form['parent']['link'][$key] = array('#type' => 'value', '#value' => $link[$key]);
+    }
+
+    $default = ($link['mlid'] ? $link['menu_name'] . ':' . $link['plid'] : variable_get('menu_parent_' . $type, 'main-menu:0'));
+    if (!isset($options[$default])) {
+      $array = array_keys($options);
+      $default = reset($array);
+    }
+    $form['parent']['link']['parent'] = array(
+      '#type' => 'select',
+      '#title' => t('Parent item'),
+      '#weight' => 1,
+      '#default_value' => $default,
+      '#options' => $options,
+      '#attributes' => array('class' => array('menu-parent-select')),
+    );
+    $form['parent']['link']['hidden'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hidden in menu'),
+      '#weight' => 2,
+      '#default_value' => $link['hidden'],
+      '#description' => t('Hide this page from the menu.'),
+    );
+    $form['parent']['link']['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#weight' => 3,
+      '#delta' => 50,
+      '#default_value' => $link['weight'],
+      '#description' => t('Links with smaller weights are displayed before links with larger weights.'),
+    );
+    
+    // Since we are replacing the menu functionality, remove it from the settings.
+    $form['menu']['#access'] = FALSE;
+    // Since we are replacing the path functionality, remove it from the settings.
+    $form['path']['#access'] = FALSE;
+    $form['path']['pathauto']['#default_value'] = TRUE; // Force pathauto regeneration.
+  }
+}
+
+/**
+ * Implements hook_node_submit().
+ *
+ * @see slug_form_node_form_alter()
+ */
+function slug_parent_node_submit($node, $form, $form_state) {
+  // Decompose the selected menu parent option into 'menu_name' and 'plid', if
+  // the form used the default parent selection widget.
+  if (!empty($form_state['values']['parent']['parent'])) {
+    list($node->parent['menu_name'], $node->parent['plid']) = explode(':', $form_state['values']['parent']['parent']);
+  }
+}
+
+/**
+ * Implements hook_node_prepare()
+ */
+function slug_parent_node_prepare($node) {
+  if (variable_get('slug_menu_' . $node->type, FALSE)) {
+    // Load in the parent menu item.
+    if (empty($node->parent)) {
+      // Prepare the node for the edit form so that $node->menu always exists.
+      $menu_name = variable_get('slug_menu_' . $node->type, FALSE);
+      $item = array();
+      if (isset($node->nid)) {
+        $mlid = FALSE;
+        $mlid = db_query_range("SELECT mlid FROM {menu_links} WHERE link_path = :path AND menu_name = :menu_name AND module = 'menu' ORDER BY mlid ASC", 0, 1, array(
+          ':path' => 'node/' . $node->nid,
+          ':menu_name' => $menu_name,
+        ))->fetchField();
+        if ($mlid) {
+          $item = menu_link_load($mlid);
+        }
+      }
+      // Set default values.
+      $node->parent = $item + array(
+        'link_title' => '',
+        'mlid' => 0,
+        'plid' => 0,
+        'menu_name' => $menu_name,
+        'weight' => 0,
+        'options' => array(),
+        'module' => 'menu',
+        'expanded' => 1,
+        'hidden' => 0,
+        'has_children' => 0,
+        'customized' => 0,
+      );    
+    }
+    // Find the depth limit for the parent select.
+    if (!isset($node->parent['parent_depth_limit'])) {
+      $node->parent['parent_depth_limit'] = _menu_parent_depth_limit($node->parent);
+    }    
+  }
+  return $node;
+}
+
+/**
+ * Implements hook_pathauto_alias_alter().
+ * 
+ * @param type $alias
+ * @param array $context
+ */
+function slug_parent_pathauto_alias_alter(&$alias, array &$context) {
+  if ($context['module'] == 'node' && variable_get('slug_menu_' . $context['type'], FALSE)) {
+    $node = $context['data']['node'];
+    $base = '';
+    if (isset($node->parent) && $node->parent['plid']) {
+      $parent_link = menu_link_load($node->parent['plid']);
+      $base = drupal_get_path_alias($parent_link['link_path'], $parent_link['language']) . '/';
+    }
+    $alias = $base . $node->slug;
+    
+    if (module_exists('redirect')) {
+      // Ensure there is no existing redirect or it won't let us save.
+      $redirect = redirect_load_by_source($alias);
+      if ($redirect) {
+        redirect_delete($redirect->rid);
+      }
+    }
+  }
+}
+
+/**
+ * Build out path aliases for menu items.
+ */
+function slug_parent_build_menu_paths($menu) {
+  $return = array();
+  $links = menu_load_links($menu);
+  foreach($links as $link) {
+    $return[$menu . ':' . $link['mlid']] = drupal_get_path_alias($link['link_path']);
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_menu_link_update()
+ * 
+ * When a menu link in the slugs menu is updated, we need to update the url aliases and any children as well.
+ */
+function slug_parent_menu_link_update($item) {
+//  if ($item['menu_name'] == variable_get('slug_menu_', 'main-menu')) {
+    slug_parent_update_path($item);
+//  }
+}
+
+/**
+ * Function to update paths for a menu item and recurse to it's children.
+ */
+function slug_parent_update_path($item) {
+  if (is_object($item)) {
+    $item = (array) $item;
+  }
+  $nid = arg(1, $item['link_path']);
+  if (arg(0, $item['link_path']) == 'node' && is_numeric($nid)) {
+    $node = node_load($nid);
+    // Not entirely sure why this is necessary but it hasn't been prepared.
+    node_object_prepare($node);
+    // If nodes exist without existing slugs, fill in with node title.
+    if (!isset($node->slug) || $node->slug == '') {
+      module_load_include('inc', 'pathauto');
+      $node->slug = pathauto_cleanstring($node->title);
+    }
+    if ($node) {
+      pathauto_node_update_alias($node, 'update');
+    }
+
+    if ($item['has_children']) {
+      $query = db_select('menu_links', 'm');
+      $query->fields('m');
+      $query->condition('menu_name', $item['menu_name']);
+      $query->condition('plid', $item['mlid']);
+
+      $children = $query->execute()->fetchAll();
+      foreach($children as $child) {
+        slug_parent_update_path($child);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter()
+ */
+function slug_parent_form_pathauto_patterns_form_alter(&$form, &$form_state, $form_id) {
+  $node_types = _node_types_build()->names;
+  foreach ($node_types as $node_type => $node_type_label) {
+    if (variable_get('slug_menu_' . $node_type, FALSE)) {
+      $form['node']['pathauto_node_' . $node_type . '_pattern']['#disabled'] = TRUE;
+      $form['node']['pathauto_node_' . $node_type . '_pattern']['#suffix'] = '<div>' . t('URL Aliases are being managed by Slugs for !label. Change this <a href="/admin/config/content/slug">here</a>', array('!label' => $node_type_label)) . '</div>';
+    }
+  }
+}
+
+/**
+ * Implements hook_token_info().
+ * 
+ * @return type
+ */
+function slug_parent_token_info() {
+  $info = array();
+  $info['tokens']['node']['slug_parent'] = array(
+    'name' => t('Slug Parent'),
+    'description' => t('The path to the parent node. (With appended "/")'),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_tokens($type, $tokens, array $data = array(), array $options = array())
+ */
+function slug_parent_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'entity') {
+    $entity = $data['entity'];
+    foreach($tokens as $name => $original) {
+      if ($name == 'slug_parent') {
+        if (isset($entity->parent) && $entity->parent['plid']) {
+          $parent_link = menu_link_load($entity->parent['plid']);
+          $replacements[$original] = drupal_get_path_alias($parent_link['link_path']) . '/';
+        }
+        else {
+          $replacements[$original] = '';
+        }
+      }
+    }
+  }
+  return $replacements;
+}

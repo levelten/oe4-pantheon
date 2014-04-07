@@ -1,0 +1,12 @@
+name = Luxe
+description = "Improve the user experience of the login and signup page."
+package = "User interface"
+stylesheets[all][] = "css/luxe.css"
+core = 7.x
+
+; Information added by drupal.org packaging script on 2012-10-29
+version = "7.x-1.2"
+core = "7.x"
+project = "luxe"
+datestamp = "1351473418"
+

@@ -1,0 +1,64 @@
+name = Unity for OpenEnterprise
+description = A Bootstrap Sub-theme for open enterprise.
+core = 7.x
+base theme = enterprise_bootstrap
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Regions
+;;;;;;;;;;;;;;;;;;;;;
+
+regions[navigation]     = 'Navigation'
+regions[header]         = 'Top Bar'
+regions[highlighted]    = 'Highlighted'
+regions[help]           = 'Help'
+regions[content]        = 'Content'
+regions[sidebar_first]  = 'Primary'
+regions[sidebar_second] = 'Secondary'
+regions[footer]         = 'Footer'
+regions[footer_bottom]  = 'Footer bottom'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Stylesheets
+;;;;;;;;;;;;;;;;;;;;;
+
+;; css from unify template
+stylesheets[all][] = assets/plugins/bootstrap/css/bootstrap.css
+stylesheets[all][] = assets/css/style.css
+stylesheets[all][] = assets/css/headers/header1.css
+stylesheets[all][] = assets/css/responsive.css
+stylesheets[all][] = assets/plugins/font-awesome/css/font-awesome.css
+stylesheets[all][] = assets/css/pages/blog.css
+stylesheets[all][] = assets/css/pages/page_magazine.css
+stylesheets[all][] = assets/css/themes/default.css
+stylesheets[all][] = assets/css/themes/headers/default.css
+
+;; custom overrides
+stylesheets[all][] = css/styles.css
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Scripts
+;;;;;;;;;;;;;;;;;;;;;
+
+scripts[] = 'assets/plugins/bootstrap/js/bootstrap.min.js'
+scripts[] = 'assets/plugins/hover-dropdown.min.js'
+
+;scripts[] = 'bootstrap/js/affix.js'
+;scripts[] = 'bootstrap/js/alert.js'
+;scripts[] = 'bootstrap/js/button.js'
+;scripts[] = 'bootstrap/js/carousel.js'
+;scripts[] = 'bootstrap/js/collapse.js'
+scripts[] = 'bootstrap/js/dropdown.js'
+;scripts[] = 'bootstrap/js/modal.js'
+;scripts[] = 'bootstrap/js/tooltip.js'
+;scripts[] = 'bootstrap/js/popover.js'
+;scripts[] = 'bootstrap/js/scrollspy.js'
+;scripts[] = 'bootstrap/js/tab.js'
+;scripts[] = 'bootstrap/js/transition.js'
+
+; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
+settings[bootstrap_cdn] = ''

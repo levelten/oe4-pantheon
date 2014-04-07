@@ -1,0 +1,6 @@
+name = Alchemy Content Analyzer
+package = Content analysis
+description = Provides an Alchemy based content analyzer. 
+dependencies[] = alchemy
+dependencies[] = contentanalysis
+core = 7.x

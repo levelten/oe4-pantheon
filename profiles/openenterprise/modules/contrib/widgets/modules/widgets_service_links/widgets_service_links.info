@@ -1,0 +1,6 @@
+name = Widgets Service links
+description = Enables links from Service links module to be used as widget elements
+package = Widgets
+dependencies[] = widgets
+dependencies[] = service_links
+core = 7.x

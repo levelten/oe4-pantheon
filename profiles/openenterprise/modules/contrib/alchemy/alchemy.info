@@ -1,0 +1,6 @@
+name = "Alchemy"
+description = "Provides an interface to the Alchemy API service. AlchemyAPI provides content owners and web developers with a rich suite of content analysis and meta-data annotation tools."
+package = Content analysis
+core = 7.x
+
+configure = admin/config/services/alchemy

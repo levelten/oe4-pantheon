@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ *
+ */
+
+
+/**
+ *  Implementation of hook_schema
+ */
+function config_schema() {
+  $schema['config_wizard'] = array(
+    'description' => 'Stores config wizards',
+    'fields' => array(
+      'name' => array(
+        'description' => 'machine name for wizard',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'language for the wizard',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'saved data',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  
+  $schema['config_form'] = array(
+    'description' => 'Stores config wizards',
+    'fields' => array(
+      'name' => array(
+        'description' => 'machine name for wizard',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'language for the wizard',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'saved data',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  
+  $schema['config_progress'] = array(
+    'description' => 'Stores wizard progress data',
+    'fields' => array(
+      'name' => array(
+        'description' => 'machine name for wizard',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'the user id of the person running the wizard',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'started' => array(
+        'description' => 'unix timestamp of when the wizard was started',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'finished' => array(
+        'description' => 'unix timestamp of when the wizard was completed',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'saved data',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+  );
+  
+  return $schema;
+}

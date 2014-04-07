@@ -1,0 +1,6 @@
+name = Widgets
+description = Enables easy management of code snipets like Twitter, Facebook and Google+ buttons.
+package = Widgets
+core = 7.x
+; files[] = widgets.test
+configure = admin/structure/widgets-sets

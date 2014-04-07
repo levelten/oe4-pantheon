@@ -1,0 +1,118 @@
+@CHARSET "ISO-8859-1";
+
+#sidebar {
+  width: 23%;
+  float: left;
+}
+
+#form {
+  float: right;
+  width: 75%;
+  padding-left: 2%;
+  clear: none;	
+}
+
+
+#config-wizard #form ul {
+  list-style: disc outside none;
+  padding-left: 40px;
+}
+
+#config-wizard #form ol {
+  list-style: decimal outside none;
+  padding-left: 40px;
+}
+
+ol.task-list {
+  margin-left: 0;
+  list-style-type: none;
+  list-style-image: none;
+}
+
+ol.task-list li {
+  padding: 0.5em 1em 0.5em 20px;
+  color: #adadad;
+}
+
+ol.task-list li.active {
+  background: transparent url(/themes/seven/images/task-item.png) no-repeat 3px 50%;
+  padding: 0.5em 1em 0.5em 20px;
+  color: #000;
+  font-weight: bold;
+}
+
+ol.task-list li.done {
+  background: transparent url(/themes/seven/images/task-check.png) no-repeat 0 50%;
+  color: green;
+}
+
+ol.task-list li.active-group {
+    background: transparent url(/themes/seven/images/arrow-asc.png) no-repeat 3px 50%;
+    padding: 0.5em 1em 0.5em 20px;
+    color: #000;
+    font-weight: bold;
+}
+
+ol.subtask-list {
+    margin-left: 16px;
+}
+
+#qtip-config-modal.tooltip-modal {
+  width: 90%;
+  max-width: 90%;
+  min-height: 200px;
+}
+
+#qtip-config-modal .qtip-title {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+#modalContent {
+  border-radius: 5px 5px 0px 0px;
+  -moz-border-radius: 5px 5px 0px 0px;
+  -webkit-border-radius: 5px 5px 0px 0px;
+}
+
+#modalBackdrop {
+  /* background: url(images/bleeds.png) 0px -30px repeat-x; */
+  background-color: #000;
+}
+
+#modalContent .ctools-modal-content {
+	padding: 0px 0px 10px 0px;
+	min-height: 400px;
+	border-radius: 6px 6px 5px 5px;
+	box-shadow: #111 0px 0px 10px;
+	-moz-border-radius: 6px 6px 5px 5px;
+	-moz-box-shadow: #111 0px 0px 10px;
+	-webkit-border-radius: 6px 6px 5px 5px;
+	-webkit-box-shadow: #111 0px 0px 10px;
+}
+
+#modalContent .modal-header {
+  /* background: url(images/bleeds.png) 0px -30px repeat-x; */
+  background-color: #666;
+  color: #ccc;
+  font-size: 1.1em;
+  height: 25px;
+  overflow: hidden;
+  padding-top: 4px;
+  border-radius: 6px 6px 0px 0px;
+  -moz-border-radius: 6px 6px 0px 0px;
+  -webkit-border-radius: 6px 6px 0px 0px;
+}
+
+#modalContent .modal-header .modal-title {
+	display: block;
+	padding-top: 2px;
+}
+
+#modalContent .modal-header .close {
+  padding-right: 2px;
+}
+
+/* patch to display vertical tabs propertly */
+div.ctools-modal-content fieldset.vertical-tabs-pane {
+  clear: none;
+}

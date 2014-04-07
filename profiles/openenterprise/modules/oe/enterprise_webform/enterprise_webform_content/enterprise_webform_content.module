@@ -1,0 +1,99 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Webform Content feature.
+ */
+
+include_once 'enterprise_webform_content.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_on_enable()
+ */
+function enterprise_webform_content_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_webform_content');
+}
+
+/**
+ * Implements hook_enterprise_apps_config_settings()
+ * @return array
+ */
+function enterprise_webform_content_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_webform_content' => array(
+      'menus' => array(),
+    ),
+  );
+
+  $menu = array();
+  $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
+    'link_title' => t('Contact us'),
+    'weight' => 10,
+  );
+
+  $settings['enterprise_webform_content']['menus']['main-menu'] = $menu;
+
+  $settings['enterprise_webform_content']['blocks'] = array(
+    'bean:contact-info-and-map' => array(
+      'regions' => array(
+        'sidebar_second',
+      ),
+      'path' => array(
+        'pages' => array(
+          'contact',
+        ),
+        'visibility' => 1,
+      ),
+      'weight' => -5,
+    ),
+  );
+
+  return $settings;
+}
+
+/**
+ * Implements hook_enterprise_apps_config_info()
+ * @return array
+ */
+function enterprise_webform_content_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_webform_content'] = array(
+    'title' => t('Webform content'),
+  );
+
+  // blocks config
+  $visibility = array(
+    'enterprise_webform_path_contact_us' => array(
+      'title' => t('Show on contact us page'),
+      'path' => array(
+        'pages' => array(
+          'contact',
+        ),
+        'visibility' => 1,
+      ),
+    ),
+  );
+  $view = views_get_view('enterprise_blog_blocks');
+  $display_desc = array();
+  if (!empty($view)) {
+    foreach ($view->display AS $name => $display) {
+      $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+    }
+  }
+
+  $weight = 0;
+  $config['enterprise_webform_content']['blocks'] = array(
+    // Blog categories block
+    'bean:contact-info-and-map' => array(
+      'description' => t('Contact info and map'),
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_webform_path_contact_us'),
+        'weight' => -5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+  );
+  return $config;
+}
+
+

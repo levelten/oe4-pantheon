@@ -1,0 +1,69 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function enterprise_editor_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "strongarm" && $api == "strongarm") {
+    return array("version" => "1");
+  }
+}
+/**
+ * Implements hook_ckeditor_settings_alter().
+ */
+function enterprise_editor_ckeditor_settings_alter(&$settings) {
+  static $base_path;
+  static $module_path;
+  static $query;
+  if (!isset($base_path)) {
+    $base_path = base_path();
+  }
+  if (!isset($module_path)) {
+    $module_path = drupal_get_path('module', 'enterprise_editor');
+    $query = variable_get('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
+    $js_settings = array(
+      'enterprise_editor' => array(
+        'path' => $base_path . $module_path,
+        'query' => $query,
+      ),
+    );
+    drupal_add_js($js_settings, 'setting');
+    $theme_path = drupal_get_path('theme', variable_get('theme_default', 'bartik'));
+    foreach (file_scan_directory($theme_path, '/ckeditor.admin.js$/i') as $file) {
+      drupal_add_js($file->uri);
+    }
+  }
+  // Change the ckeditor config path.
+  $settings['customConfig'] = $base_path . $module_path . '/ckeditor/config.js?' . $query;
+  // Add additional styling for Bootstrap based themes.
+  $settings['contentsCss'][] = $base_path . $module_path . '/ckeditor/ckeditor.css?' . $query;
+  if (!empty($settings['stylesCombo_stylesSet'])) {
+    unset($settings['stylesCombo_stylesSet']);
+  }
+}
+
+// Organize media uploads under files/media directory
+// TODO: need to add support for mediaBrowser popup used in editor
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function enterprise_editor_form_media_add_upload_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'][] = 'enterprise_editor_add_upload_validate';
+}
+
+/**
+ * Validate file_directory parameter on the media upload form.
+ */
+function enterprise_editor_add_upload_validate($form, &$form_state) {
+  $params = &$form_state['build_info']['args'][0];
+  $file = !empty($form_state['values']['upload']) ? $form_state['values']['upload'] : NULL;
+  // If the upload directory has not already been set and we can determine the
+  // file type, then use the configured default directory for that type.
+  if (empty($params['file_directory'])) {
+    $params['file_directory'] = 'media/' . ((!empty($file->type)) ? $file->type : 'other' );
+  }
+}
+

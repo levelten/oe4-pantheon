@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Code for the Blog App feature.
+ */
+
+include_once('enterprise_user.features.inc');
+
+/**
+ * Implements hook_ds_classes_alter().
+ * Provide the necessary classes for blog types.
+ */
+function enterprise_user_ds_classes_alter(&$classes, $name) {
+  if ('ds_classes_regions' === $name) {
+    $classes['style-about-author'] = t('User: About Author');
+  }
+}

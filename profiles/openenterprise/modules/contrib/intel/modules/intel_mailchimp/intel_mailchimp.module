@@ -1,0 +1,511 @@
+<?php
+
+function intel_mailchimp_menu() {
+  $items = array();
+  
+  $items['admin/config/services/intel/modules/mailchimp'] = array(
+    'title' => 'MailChimp',
+    'description' => 'Add on module configuration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('intel_mailchimp_admin_config'),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_mailchimp.admin.inc',
+  ); 
+
+  $items['visitor/%intel_visitor/mailchimp'] = array(
+    'title' => 'MailChimp',
+    'description' => 'MailChimp contact information.',
+    'page callback' => 'intel_mailchimp_contact',
+    'page arguments' => array(1),
+    //'access callback' => 'user_access',
+    //'access arguments' => array('view all intel reports'),
+    'access callback' => 'intel_mailchimp_show_visitor_menu_tab',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_mailchimp.admin.inc', 
+  );
+  /*
+  $items['visitor/%intel_visitor/mailchimp/view'] = array(
+    'title' => 'View',
+    'weight' => -1,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  */
+  $items['visitor/%intel_visitor/mailchimp/launch'] = array(
+    'title' => 'View in MailChimp',
+    'description' => 'MailChimp contact information.',
+    'page callback' => 'intel_mailchimp_contact',
+    'page arguments' => array(1, 'launch'),
+    'access callback' => 'intel_mailchimp_show_visitor_menu_tab',
+    'access arguments' => array(1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'intel_mailchimp.admin.inc',  
+    'options' => array('attributes' => array('target' => 'mailchimp')),
+  );
+  $items['visitor/%intel_visitor/mailchimp/resync'] = array(
+    'title' => 'Resync',
+    'description' => 'MailChimp contact information.',
+    'page callback' => 'intel_mailchimp_contact',
+    'page arguments' => array(1, 'resync'),
+    'access callback' => 'intel_mailchimp_show_visitor_menu_tab',
+    'access arguments' => array(1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'intel_mailchimp.admin.inc', 
+  );
+
+  $items['intel_mailchimp/email_click_js'] = array(
+    'title' => 'L10Insight MailChimp Util',
+    'description' => 'Analyze and optimize node content.',
+    'page callback' => 'intel_mailchimp_email_click_js',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['intel_mailchimp/util/fetch_contact'] = array(
+    'title' => 'SEO Tools Util',
+    'description' => 'Analyze and optimize node content.',
+    'page callback' => 'intel_mailchimp_util_fetch_contact',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+function intel_mailchimp_show_visitor_menu_tab($visitor) {
+  //return user_access('view all intel reports');
+  return user_access('view all intel reports') && intel_mailchimp_visitor_is_linked($visitor);
+}
+
+function intel_mailchimp_visitor_is_linked($visitor) {
+  $vp = $visitor->getProperties();
+  $linked = !empty($vp->ext_data['mailchimp']['leid']) ? 1 : 0;
+  return $linked;
+}
+
+function intel_mailchimp_util_fetch_contact() {
+  $lists = mailchimp_get_lists();
+dpm($lists);//
+  $list_id = '8ffda48948';
+  $email = 'susan@topshelfmodules.com';
+  //$list_id = variable_get('intel_mailchimp_default_list_id', '');
+  //$email = 'tom@getlevelten.com';
+  $memberinfo = mailchimp_get_memberinfo($list_id, $email);
+dpm($memberinfo);//
+  return 'OK';
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function intel_mailchimp_libraries_info() {
+  $libraries['mailchimp-api'] = array(
+    'name' => 'MailChimp API 2.0 by Drew McLellan',
+    'vendor url' => 'http://apidocs.mailchimp.com/api/2.0',
+    'download url' => 'https://bitbucket.org/mailchimp/mailchimp-api-php/downloads',
+    // note version number not included in file
+    'version arguments' => array(
+      'file' => 'MailChimp.php',
+      // Version 2.0
+      'pattern' => '/@version\s+([0-9a-zA-Z\.-]+)/',
+    ),
+    'files' => array(
+      'php' => array('MailChimp.php'),
+    ),
+  );
+
+  return $libraries;
+}
+
+function intel_mailchimp_get_api_object() {
+  $library = libraries_load('mailchimp-api');
+
+  if (!$library['installed']) {
+    $msg = 'Failed to load MailChimp PHP library. Please refer to the installation requirements.';
+    watchdog('intel_mailchimp', $msg, WATCHDOG_ERROR);
+    drupal_set_message(t($msg), 'error');
+    return NULL;
+  }
+
+  $api_key = variable_get('mailchimp_api_key', '');
+
+  // We allow the class name to be overridden, following the example of core's
+  // mailsystem, in order to use alternate MailChimp classes. The bundled tests
+  // use this approach to extend the MailChimp class with a test server.
+  $classname = variable_get('mailchimp_api_classname', 'MailChimp');
+  $q = new \Drewm\MailChimp($api_key);
+
+  // Set the timeout to something that won't take down the Drupal site:
+  //$q->setTimeout(60);
+
+  // Specify if a secure connection should be used with the API:
+  //$q->useSecure(variable_get('mailchimp_use_secure', TRUE));
+
+  //if ($q->errorCode) {
+  //  watchdog('mailchimp', 'MCAPI Error: %errmsg', array('%errmsg' => $q->errorMessage), WATCHDOG_ERROR);
+  //  return NULL;
+  //}
+
+  return $q;
+}
+
+function intel_mailchimp_api_list_member_info_by_leid($list_id, $leid) {
+  $q = intel_mailchimp_get_api_object();
+  $params = array();
+  $params['id'] = $list_id;
+  $params['emails'] = array();
+  $params['emails'][] = array(
+    'leid' => $leid,
+  );
+  $result = $q->call('lists/member-info', $params);
+  if (!empty($result['success_count'])) {
+    return $result['data'][0];
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_intel_intel_script
+ */
+function intel_mailchimp_intel_intel_script() {
+  $scripts['mailchimp'] = array(
+    'title' => t('MailChimp'),
+    'description' => t('Use on any pages that MailChip emails might link.'),
+    'path' => libraries_get_path('LevelTen') . '/Intel/js/l10intel_mailchimp.js',
+    'enabled' => 1,
+    'selectable' => 0,
+  );
+  $scripts['disqus_email_click'] = array(
+    'title' => t('MailChimp  (email click)'),
+    'description' => t('Enables email click events.'),
+    'path' => drupal_get_path('module', 'intel_mailchimp') . '/intel_mailchimp.js',
+    'enabled' => 1,
+  );
+
+  return $scripts;
+}
+
+function intel_mailchimp_email_click_js() {
+  watchdog('intel_mailchimp_email_click_js', print_r($_GET, 1));
+  if (empty($_GET['vtk']) || empty($_GET['userid'])) {
+    $response = array(
+      'status' => INTEL_STATUS_BAD_REQUEST,
+      'message' => t('Invalid input.'),
+    );
+    intel_json_output($response);
+    return;
+  }
+
+  $vtk = $_GET['vtk'];
+  $userid = $_GET['userid'];
+  $listid = $_GET['listid'];
+  $campaignid = $_GET['campaignid'];
+  $location = $_GET['location'];
+  $system_path = $_GET['system_path'];
+
+  $default_list_id = variable_get('intel_mailchimp_default_list_id', '');
+
+  $visitor = intel_visitor_load_or_create('user');
+  $ext_data = $visitor->ext_data;
+
+  if (!isset($ext_data['mailchimp'])) {
+    $mc_data = array(
+      'leid' => '',
+      'list_id' => '',
+    );
+  }
+  else {
+    $mc_data = $visitor->getVar('ext', 'mailchimp');
+  }
+
+  if ($mc_data['leid'] == $default_list_id) {
+    $mc_data['leid'] = $userid;
+    $mc_data['list_id'] = $listid;
+  }
+
+  if (!isset($mc_data['ids'])) {
+    $mc_data['ids'] = array();
+  }
+
+  if (!isset($mc_data['ids'][$userid])) {
+    $mc_data['ids'][$userid] = array(
+      'leid' => $userid,
+      'list_id' => $listid,
+    );
+  }
+
+  $visitor->setVar('ext', 'mailchimp', $mc_data);
+
+  $visitor->setLastActivity(REQUEST_TIME);
+
+  $visitor->save();
+
+  $loc_comps = intel_parse_url($location);
+
+  // check if emailclick already exists
+  $vars = array(
+    'vid' => $visitor->vid,
+    'type' => 'mailchimp',
+    'eid' => $campaignid,
+    'response_page_host' => $loc_comps['host'],
+    'response_page_path' => $loc_comps['path'],
+  );
+  $emailclick = intel_emailclick_load_by_vars($vars);
+
+  // if emailclick already exists
+  if (!empty($emailclick->clicked)) {
+    $emailclick->last = REQUEST_TIME;
+  }
+  // if not create new one
+  else {
+    $emailclick = (array)intel_emailclick_construct();
+    $emailclick += $vars;
+    $emailclick['response_page_id'] = !empty($loc_comps['nid']) ? $loc_comps['nid'] : 0;
+    $emailclick = (object) $emailclick;
+  }
+  intel_emailclick_save($emailclick);
+
+  // queue to sync visitor data
+  //intel_add_visitor_sync_request($visitor->vtk);
+
+  $response = array(
+    'status' => INTEL_STATUS_OK,
+  );
+  intel_json_output($response);
+}
+
+function intel_mailchimp_intel_sync_visitordata(&$visitor) {
+  global $base_url, $base_path;
+
+  $default_list_id = variable_get('intel_mailchimp_default_list_id', '');
+  $sync_ids = array();
+  // check for linked ids that already exists
+  $mc_data = $visitor->getVar('ext', 'mailchimp');
+  if (isset($mc_data['ids'])) {
+    // key ids by list id
+    foreach ($mc_data['ids'] AS $id) {
+      $sync_ids[$id['list_id']] = $id;
+    }
+  }
+
+  dsm($sync_ids);
+
+  if (empty($sync_ids) && (!$default_list_id || !$visitor->email)) {
+    return TRUE;
+  }
+
+  $crud_options = variable_get('intel_mailchimp_sync_crud', 'update');
+  $crud_options = explode(',', $crud_options);
+
+  // if default list not linked, try to get mc member by email
+  if (!isset($sync_ids[$default_list_id]['leid'])) {
+    $email = $visitor->getVar('ext', 'mailchimp', 'email');
+    if (!$email) {
+      $email = $visitor->email;
+    }
+    if ($email) {
+      $sync_ids[$default_list_id] = array(
+        'list_id' => $default_list_id,
+        'email' => $email,
+      );
+    }
+  }
+
+  $save_local = 0;
+  $save_api = 0;
+  $api_merges = array();
+  $members = array();
+  // get data from all lists
+  foreach ($sync_ids AS $list_id => $id) {
+    if (isset($id['leid'])) {
+      // contrib mailchimp module does not support memberinfo by leid
+      // use custom function
+      $member = intel_mailchimp_api_list_member_info_by_leid($list_id, $id['leid']);
+      $id['email'] = $member['email'];
+    }
+    else if (isset($id['email'])) {
+      $member = mailchimp_get_memberinfo($list_id, $id['email']);
+      // if member not found and create option set, create member in mc
+      if (empty($member['leid']) && in_array('create', $crud_options)) {
+        $mc_list = (object)array('mc_list_id' => $list_id);
+        $ret = mailchimp_subscribe_user($mc_list, $id['email'], array());
+        $member = mailchimp_get_memberinfo($list_id, $id['email']);
+      }
+      $id['leid'] = $member['leid'];
+    }
+
+    // if member not found, skip
+    if (empty($member['leid'])) {
+      continue;
+    }
+
+    // if email not set on visitor, add email from MC.
+    if (empty($visitor->email)) {
+      $visitor->setIdentifier('email', $member['email']);
+      $save_local = 1;
+    }
+
+    // if email not set on id, save it
+    if (empty($mc_data['ids'][$id['leid']]['email'])) {
+      $mc_data['ids'][$id['leid']]['email'] = $member['email'];
+      $save_local = 1;
+    }
+    if (empty($mc_data['ids'][$id['leid']]['leid'])) {
+      $mc_data['ids'][$id['leid']]['leid'] = $member['leid'];
+      $save_local = 1;
+    }
+    if (empty($mc_data['ids'][$id['leid']]['list_id'])) {
+      $mc_data['ids'][$id['leid']]['list_id'] = $list_id;
+      $save_local = 1;
+    }
+
+    if (empty($mc_data['euid']) && !empty($member['euid'])) {
+      $mc_data['euid'] = $member['euid'];
+      $save_local = 1;
+    }
+
+    if ($list_id == $default_list_id) {
+      $mc_data['leid'] = $member['leid'];
+      $mc_data['list_id'] = $default_list_id;
+      $mc_data['email'] = $member['email'];
+    }
+
+
+
+    // if name not set locally, get from mc
+    if (empty($visitor->name) && (!empty($member['merges']['FNAME']))) {
+      $name = $member['merges']['FNAME'];
+      if (!empty($member['merges']['LNAME'])) {
+        $name .= ' ' . $member['merges']['LNAME'];
+      }
+      $visitor->setName($name);
+      $save_local = 1;
+    }
+
+    $api_merges[$list_id] = array();
+    if (isset($member['merges']['L10I_VTK'])) {
+      $api_merges[$list_id]['L10I_VTK'] = $visitor->vtk;
+    }
+    if (isset($member['merges']['L10I_VID'])) {
+      $api_merges[$list_id]['L10I_VID'] = $visitor->vid;
+    }
+    if (isset($member['merges']['L10I_VURL'])) {
+      $api_merges[$list_id]['L10I_VURL'] = $base_url . $base_path . $visitor->uri();
+    }
+    if (isset($member['merges']['L10I_VSYNC'])) {
+      $api_merges[$list_id]['L10I_VSYNC'] = $base_url . $base_path . $visitor->uri() . '/resync' . '?destination=' . urlencode($profile_url) ;
+    }
+    if (isset($member['merges']['L10I_SCORE'])) {
+      $score = $visitor->getVar('api_visitor', 'analytics', 's');
+      if (!$score) {
+        $score = $visitor->getVar('data', 'analytics', 's');
+      }
+      $api_merges[$list_id]['L10I_SCORE'] = $score ? $score : 0;
+    }
+    if (empty($member['geo']['latitude'])) {
+      $loc = $visitor->getVar('data', 'location', '');
+      if (!empty($loc['latitude'])) {
+        $api_merges[$list_id]['mc_location'] = array();
+        $api_merges[$list_id]['mc_location']['latitude'] = $loc['latitude'];
+        $api_merges[$list_id]['mc_location']['longitude'] = $loc['longitude'];
+      }
+    }
+    $members[$list_id] = $member;
+  }
+
+  /*
+  // admin set merge fields
+  $prop_options = array(
+    'source' => 'mailchimp',
+  );
+  $mvars = $member['merges'];
+  //$prop_info = intel_intel_visitor_property_info();
+  //$options = intel_visitor_property_select_options();
+  $system_vars = intel_mailchimp_system_mergevars();
+  foreach ($mvars AS $tag => $mvar) {
+    // skip system variables
+    if (in_array($tag, $system_vars)) {
+      continue;
+    }
+    $key = 'intel_mailchimp_property_map_' . $list_id . '_' . $mvar['tag'];
+    $map = variable_get($key, '');
+    if (!$map) {
+      continue;
+    }
+    if (trim($mvar)) { 
+      $a = explode(':', $map);
+      $sn = $a[0];
+      $prop = array(
+        $a[1] = $mvar,
+      );
+      intel_visitor_property_set($visitor, 'data.foursquare', $prop, $prop_options);
+    } 
+    else {
+      
+    }     
+    
+  }
+  */
+
+  $visitor->setVar('ext', 'mailchimp', $mc_data);
+
+  // hook to enable other modules to process data
+  $vars = array();
+
+  foreach (module_implements('intel_mailchimp_sync_visitordata') AS $module) {
+    $function = $module . '_intel_mailchimp_sync_visitordata';
+    $statuses[$module] = $function($visitor, $members, $api_merges, $vars);
+    $save_local = 1;
+    $save_api = 1;
+  }
+
+  if ($save_local) {
+    $visitor->merge();
+  }
+  foreach ($api_merges AS $list_id => $api_merge) {
+    if (count($api_merge)) {
+      $api_merge['EMAIL'] = $sync_ids[$list_id]['email'];
+      $list = (object)array(
+        'mc_list_id' => $list_id,
+        'label' => '', //TODO, label is needed for mailchimp_update_user messages
+      );
+      mailchimp_update_user($list, $email, $api_merge);
+      //mailchimp_update_user($list, array('leid' => $member['leid']), $member['merges']);
+    }
+  }
+
+if (!empty($_GET['debug'])) {
+  dpm('mailchimp:visitor');dpm($visitor);//
+  dpm('mailchimp:members');dpm($members);//
+  dpm('mailchimp:api_merges');dpm($api_merges);//
+}
+  return TRUE;
+}
+
+function intel_mailchimp_mailchimp_process_webhook($type, $data) {
+  watchdog('intel_mailchimp', 'Webhook type @type has been processed. @data',
+    array(
+      '@type' => $type,
+      '@data' => print_r($data, 1),
+    ), 
+    WATCHDOG_INFO
+  );
+}
+
+function intel_mailchimp_system_mergevars() {
+  return array(
+    'L10I_VURL',
+    'L10I_VSYNC',
+    'L10I_VID',
+    'L10I_VTK',
+    'L10I_SCORE',
+    'EMAIL',
+    'FNAME',
+    'LNAME',  
+  );
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Press Content feature.
+ */
+
+include_once 'enterprise_press_content.features.inc';

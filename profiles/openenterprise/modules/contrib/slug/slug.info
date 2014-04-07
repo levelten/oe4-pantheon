@@ -1,0 +1,6 @@
+name = Slug
+description = Adds slugs to entities.
+core = 7.x
+
+dependencies[] = menu
+dependencies[] = pathauto

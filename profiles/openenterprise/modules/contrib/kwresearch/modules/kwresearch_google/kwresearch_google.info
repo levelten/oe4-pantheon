@@ -1,0 +1,5 @@
+name = "Keyword Research Google"
+description = "Provides integration of Google AdWords Keyword Tool data for Keyword Research."
+package = SEO
+dependencies[] = kwresearch
+core = 7.x

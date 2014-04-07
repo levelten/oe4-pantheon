@@ -1,0 +1,5 @@
+name = Slug Parent
+description = Parent functionality for nodes. Adds the ability to enforce hierarchy of content types.
+core = 7.x
+
+dependencies[] = slug

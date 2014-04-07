@@ -1,0 +1,34 @@
+name = Enterprise Fields
+description = Provides basic field information for entities.
+core = 7.x
+package = Open Enterprise
+version = 7.x-2.0
+project = enterprise_fields
+dependencies[] = enterprise_base
+dependencies[] = features
+dependencies[] = file
+dependencies[] = icon_field
+dependencies[] = image
+dependencies[] = link
+dependencies[] = radioactivity
+dependencies[] = text
+features[features_api][] = api:2
+features[field_base][] = body
+features[field_base][] = field_body
+features[field_base][] = field_description
+features[field_base][] = field_energy_level
+features[field_base][] = field_file
+features[field_base][] = field_firstname
+features[field_base][] = field_icon
+features[field_base][] = field_image
+features[field_base][] = field_lastname
+features[field_base][] = field_picture
+features[field_base][] = field_resource_link
+
+
+; Information added by drush on 2013-12-30
+version = "7.x-3.x-dev"
+core = "7.x"
+project = "enterprise_base"
+datestamp = "1388434236"
+

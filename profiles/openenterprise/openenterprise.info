@@ -1,0 +1,130 @@
+name = OpenEnterprise
+description = OpenEnterprise Distribution by LevelTen Interactive
+distribution_name = OpenEnterprise
+version = "7.x-3.x"
+
+; Core
+dependencies[] = block
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = field
+dependencies[] = file
+
+; Contrib
+
+;; Fields
+dependencies[] = date
+dependencies[] = date_popup
+dependencies[] = date_views
+dependencies[] = entityreference
+dependencies[] = ffc
+dependencies[] = field_delimiter
+dependencies[] = field_formatter_class
+dependencies[] = field_formatter_settings
+dependencies[] = field_group
+dependencies[] = field_word_boundary
+dependencies[] = filefield_sources
+dependencies[] = link
+dependencies[] = linked_field
+dependencies[] = options_element
+
+;; Path
+dependencies[] = globalredirect
+dependencies[] = pathauto
+dependencies[] = redirect
+dependencies[] = slug
+dependencies[] = transliteration
+
+;; Text Editor
+dependencies[] = video_filter
+dependencies[] = ckeditor
+dependencies[] = ckeditor_media
+dependencies[] = ckeditor_blocks
+dependencies[] = ckeditor_bootstrap
+dependencies[] = file_entity
+dependencies[] = insert_block
+dependencies[] = media
+dependencies[] = pathologic
+dependencies[] = picture
+dependencies[] = token_filter
+
+;; UX Enhancements
+dependencies[] = admin_menu
+dependencies[] = admin_menu_toolbar
+dependencies[] = better_formats
+dependencies[] = jquery_update
+dependencies[] = luxe
+dependencies[] = module_filter
+dependencies[] = navigation404
+dependencies[] = search404
+dependencies[] = simplified_menu_admin
+; dependencies[] = toolbar_megamenu
+
+;; Block Tools
+dependencies[] = block_class
+dependencies[] = block_gate
+dependencies[] = block_row
+dependencies[] = block_views
+dependencies[] = block_visibility
+dependencies[] = bean
+dependencies[] = bean_admin_ui
+dependencies[] = blocker
+dependencies[] = blocker_ui
+
+;; Sitebuilding Tools
+dependencies[] = breakpoints
+dependencies[] = ctools
+dependencies[] = ds
+dependencies[] = ds_extras
+dependencies[] = ds_format
+dependencies[] = ds_forms
+dependencies[] = ds_bootstrap_layouts
+dependencies[] = email_registration
+dependencies[] = entity
+dependencies[] = entitycache
+dependencies[] = exclude_node_title
+dependencies[] = gridmagic
+dependencies[] = image_url_formatter
+dependencies[] = features
+dependencies[] = libraries
+dependencies[] = menu_block
+dependencies[] = picture
+dependencies[] = strongarm
+dependencies[] = token
+dependencies[] = views
+dependencies[] = views_content
+dependencies[] = views_ui
+dependencies[] = views_bulk_operations
+dependencies[] = views_litepager
+dependencies[] = views_responsive_grid
+
+;; Enterprise Modules
+dependencies[] = enterprise_apps
+dependencies[] = enterprise_base
+dependencies[] = enterprise_block
+dependencies[] = enterprise_editor
+; dependencies[] = enterprise_menus
+dependencies[] = enterprise_page
+dependencies[] = enterprise_style
+
+files[] = openenterprise.profile
+
+;; Testing
+dependencies[] = config
+dependencies[] = enterprise_config
+
+
+; Information added by drush on 2013-12-30
+version = "7.x-3.x-dev"
+core = "7.x"
+project = "openenterprise"
+datestamp = "1388434114"
+

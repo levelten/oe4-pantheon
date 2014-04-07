@@ -1,0 +1,15 @@
+name = Enterprise Config
+description = Configuration wizards for Open Enterprise
+core = 7.x
+package = Open Enterprise
+dependencies[] = config
+dependencies[] = features
+features[config_wizard][] = analytics_setup
+features[config_wizard][] = conversion_workflow
+features[config_wizard][] = install
+features[config_wizard][] = mailchimp_setup
+features[config_wizard][] = web_services_setup
+features[config_wizard][] = webform
+features[features_api][] = api:2
+features_exclude[dependencies][enterprise_config] = enterprise_config
+

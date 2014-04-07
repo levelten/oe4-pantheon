@@ -1,0 +1,34 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Comments feature.
+ */
+
+include_once 'enterprise_comments.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_comments_enterprise_apps_app_enabled() {
+  // get batch processing for init_app
+  enterprise_apps_config_app('enterprise_comments');
+}
+
+function enterprise_comments_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_comments' => array(
+      'blocks' => array(),
+    ),
+  );
+
+  $settings['enterprise_comments']['blocks'] = array(
+    'disqus:disqus_comments' => array(
+      'regions' => array(
+        'content',
+      ),
+      'weight' => 20,
+    ),
+  );
+
+  return $settings;
+}

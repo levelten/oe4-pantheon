@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise User Content feature.
+ */
+
+include_once 'enterprise_user_content.features.inc';

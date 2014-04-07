@@ -1,0 +1,5 @@
+name = Config
+description = Helps automate configuration settings
+core = 7.x
+configure = admin/config/system/config
+dependencies[] = ctools

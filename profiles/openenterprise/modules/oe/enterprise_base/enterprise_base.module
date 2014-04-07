@@ -1,0 +1,427 @@
+<?php
+/**
+ * @file
+ */
+
+// Drupal needs this blank file.
+
+include_once('enterprise_base.features.inc');
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * @param $items
+ */
+function enterprise_base_menu_alter(&$items) {
+  // Force the default node page to be hidden.
+//  $items['node']['page callback'] = 'drupal_not_found';
+  // Because we override the admin/people page with a view, admin/people/create
+  // inherits the page callback of views_view. Set the page callback manually
+  // instead.
+  $items['admin/people/create']['page callback'] = 'user_admin';
+  $items['admin/people/create']['file'] = 'user.admin.inc';
+}
+
+/**
+ * Implements hook_admin_paths()
+ */
+function enterprise_base_admin_paths() {
+  $paths = array(
+    'user/*/scheduler' => 1,
+  );
+  return $paths;
+}
+
+/**
+ * Implements hook_update_projects_alter().
+ */
+function enterprise_base_update_projects_alter(&$projects) {
+  // We wish to remove our custom modules from any drupal.org updates.
+//  $client = variable_get('enterprise_client', FALSE);
+//  foreach($projects as $key => $project) {
+//    // Remove all enterprise projects
+//    if (preg_match('/^enterprise_.*$/', $key)) {
+//      unset($projects[$key]);
+//    }
+//    // Remove client specific projects
+//    elseif ($client && preg_match('/^' . $client . '_.*$/', $key)) {
+//      unset($projects[$key]);
+//    }
+//    // Remove any specified projects as well.
+//    elseif (in_array($key, variable_get('enterprise_projects_exclude', array()))) {
+//      unset($projects[$key]);
+//    }
+//  }
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ * 
+ * Here we will capture the taxonomy_term uri callback and make it so we can 
+ * parse out the callback to various submodules.
+ * 
+ * @param array $entity_info
+ */
+function enterprise_base_entity_info_alter(&$entity_info) {
+  $entity_info['taxonomy_term']['uri callback'] = 'enterprise_base_taxonomy_term_uri';
+}
+
+/**
+ * Rewrite taxonomy term uris. Allow other modules to modify specific vocabularies.
+ * 
+ * @param type $term
+ * @return type
+ */
+function enterprise_base_taxonomy_term_uri($term) {
+  $url = array(
+    'path' => 'taxonomy/term/' . $term->tid,
+  );
+  
+  // Allow other modules to set the path.
+  drupal_alter($term->vocabulary_machine_name . '_uri', $url, $term);
+  return $url;
+}
+
+/**
+ * Convert a string to lowercase with underscores and safe for machine names
+ */
+function enterprise_base_create_machine_name($string, $replacement = '_') {
+  return preg_replace('/[^a-z0-9]+/', $replacement, strtolower($string));
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function enterprise_base_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  global $user;
+
+  // assign active_type if view has a content type filter
+  $active_type = FALSE;
+  if((arg(0) != 'admin') && isset($router_item['page_callback']) &&  ($router_item['page_callback'] == 'views_page')) {
+    //$view = views_page($router_item['page_arguments'][0], $router_item['page_arguments'][0]);
+    $view = views_get_view($router_item['page_arguments'][0]);
+    $tfilter = FALSE; 
+    if (isset($view->display['default']->display_options['filters']['type'])) {
+      $tfilter = $view->display['default']->display_options['filters']['type'];
+    }
+    $display = $router_item['page_arguments'][1];
+    if (is_array($display)) {
+      $display = array_shift($display);
+    }
+    if (isset($view->display[$display]->display_options['filters']['type'])) {
+      $tfilter = $view->display[$display]->display_options['filters']['type'];
+    }
+    if ($tfilter) {
+      if (($tfilter['table'] == 'node')) {
+        if (!isset($tfilter['operator']) || ($tfilter['operator'] == 'in')) {
+          $active_type = array_shift($tfilter['value']);
+        }
+      }
+    }
+  }
+  
+  // set active_type if enterprise_base view
+  if (($root_path == 'nodes' || $root_path == 'node')) {
+    $active_type = arg(1);
+  }
+  // set active_type if enterprise_base view
+  if (($user->uid > 0) && ($root_path == 'node/%')) {
+  	$node = node_load(arg(1));
+    $active_type = $node->type;
+  }
+
+  
+  if ($active_type) {
+    $type = node_type_load($active_type);
+    if (!isset($type->name)) {
+      return;
+    }
+    $content_name = strtolower($type->name);
+    $item = menu_get_item('node/add/' . str_replace('_', '-', $active_type));
+
+    if ($item['access']) {
+      $item['title'] = t('Add @type_name', array('@type_name' => strtolower($content_name)));
+      $item['localized_options'] = array(
+        'html' => TRUE,
+        'attributes' => array(
+          'class' => array('btn', 'btn-small'),
+        ),
+      );
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+    $href = 'admin/content/node/' . $active_type;
+    $item = menu_get_item($href);
+    if ($item['access']) {
+      $item['href'] = $href;
+      $item['title'] = t('Manage @type_name', array('@type_name' => $content_name . 's'));
+      $item['localized_options'] = array(
+        'html' => TRUE,
+        'attributes' => array(
+          'class' => array('btn', 'btn-small'),
+        ),
+      );
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+  
+  if ($root_path == 'admin/content' || (strpos($root_path, 'admin/content/node') === 0)) {
+  	drupal_add_css(drupal_get_path('module', 'enterprise_base') . '/enterprise_base.content_admin.css');
+  	$custom_view = ($root_path != 'admin/content') ? TRUE : FALSE;
+    $active_type = arg(3);
+    // if active type, clear + add content action
+    if (isset($active_type)) {
+    	unset($data['actions']['output'][0]);
+    }
+    $types = node_type_get_names();
+    // add contextual add content type link
+    if (isset($active_type) && $active_type) {
+      $type_name = strtolower($types[$active_type]);
+      $item = menu_get_item('node/add/' . str_replace('_', '-', $active_type));
+      $item['title'] = t('Add @type_name', array('@type_name' => $type_name));
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+    // add all sub-tab if on content to trigger display of subtabs on some themes (e.g. Rubik)
+    $href = 'admin/content/node';
+    $item = menu_get_item($href);    
+    if ($item['access']) {
+      $item['href'] = $href;
+      $item['title'] = ' ' . t('All');
+      $output = array(
+        '#theme' => 'menu_local_task',
+        '#link' => $item,
+      );
+      if (!isset($active_type)) {
+        $output['#active'] = TRUE;
+      }
+      $data['tabs'][1]['output'][] = $output; 
+    }  
+    // add sub-tabs for content types
+    $count = count($types) + 1;
+    $data['tabs'][1]['count'] = $count;
+    $i = 0;
+    foreach ($types AS $type => $name) {
+      $href = 'admin/content/node/' . $type;
+      $item = menu_get_item($href);
+      // if custom admin view exists for content type, skip adding sub-tab
+      if ($item['path'] != 'admin/content/node') {
+        continue;
+      }
+      if ($item['access']) {
+        $item['href'] = $href;
+        $item['title'] = $name;
+        $output = array(
+            '#theme' => 'menu_local_task',
+            '#link' => $item,
+        );
+        if ($type == $active_type) {
+          $output['#active'] = TRUE;
+        }
+        $data['tabs'][1]['output'][] = $output;
+      }
+      $i++;
+    } 
+    usort($data['tabs'][1]['output'], '_enterprise_base_content_sort_tabs'); 
+  } 
+}
+
+function _enterprise_base_content_sort_tabs($a, $b) {
+  return strnatcmp($a['#link']['title'], $b['#link']['title']);
+}
+
+/**
+ * Implement hook_form_alter
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function enterprise_base_form_alter(&$form, &$form_state, $form_id) {
+	if ($form_id == 'field_ui_field_edit_form') {
+	  $options = array(
+	    '' => t('Standard'),
+	    'sidebar' => t('Sidebar'),
+	    //'verticaltabs' => t('Vertical tabs'),
+	  );
+	  $field_name = $form['#field']['field_name'];
+	  $default = '';
+	  if (isset($form_state['build_info']['args'][0]['enterprise_edit_form_display'])) {
+	  	$default = $form_state['build_info']['args'][0]['enterprise_edit_form_display'];
+	  }
+	  $form['instance']['enterprise_edit_form_display'] = array(
+	    '#type' => 'radios',
+	    '#title' => t('Edit form display location'),
+	    '#description' => t('Select where you want this field to display on the edit form. Sidebar is recommended for meta data.'),
+	    '#default_value' => $default,
+	    '#options' => $options,
+	  );
+	}
+	// use JavaScript to move 
+	elseif (isset($form['#node_edit_form'])) {
+    // if admin theme is Rubik, enhance node admin
+		$theme = variable_get('admin_theme', 'bartik');
+		$node_admin = variable_get('node_admin_theme', 'bartik');
+		if (($theme != 'rubik') || (!$node_admin)) {
+			return;
+		}
+		drupal_add_js(drupal_get_path('module', 'enterprise_base') . '/js/enterprise_base.edit_form.js');
+		drupal_add_css(drupal_get_path('module', 'enterprise_base') . '/css/enterprise_base.edit_form.css');
+		if (isset($form_state['field']) && is_array($form_state['field'])) {
+		  foreach ($form_state['field'] AS $name => $field) {
+		    if (!isset($field[LANGUAGE_NONE]['instance'])) {
+		      continue;
+		    }
+		  	$field[LANGUAGE_NONE]['instance'] += array(
+		  	  'enterprise_edit_form_display' => '',
+		  	);
+		  	$display = $field[LANGUAGE_NONE]['instance']['enterprise_edit_form_display'];
+		  	if ($display == 'sidebar') {
+          $form[$name]['#attributes']['class'][] = 'display_sidebar';
+          // set field to scrollable if checkboxes or radios
+          if (isset($form[$name][LANGUAGE_NONE]['#type']) && in_array($form[$name][LANGUAGE_NONE]['#type'], array('checkboxes', 'radios'))) {
+          	$form[$name][LANGUAGE_NONE]['#attributes']['class'][] = 'scrollable';
+          }
+		  	}
+		  	// if closed vocabular, add + add term link to field
+		  	$fdata = $form_state['field'][$name][LANGUAGE_NONE];
+		  	if (($fdata['field']['type'] == 'taxonomy_term_reference')  && ($fdata['instance']['widget']['type'] == 'options_buttons')) {
+		  		$vocab_name = $fdata['field']['settings']['allowed_values'][0]['vocabulary'];
+
+		  	  $item = menu_get_item("admin/structure/taxonomy/$vocab_name/add");
+			    if ($item['access']) {
+			    	$form[$name][LANGUAGE_NONE]['#attributes']['class'][] = 'with-action-links';
+			    	// TODO work out styling
+			      $form[$name][LANGUAGE_NONE]['#field_suffix'] = '<ul class="action-linksx"><li>' . l('+ ' . t('Add term'), "admin/structure/taxonomy/$vocab_name/add", array('html' => TRUE, 'attributes' => array('target' => "_blank", 'class' => array('add-term-link')))) . '</li></ul>';
+			      
+			    }
+		  	}
+		  }
+		}
+		// move schedual
+		if (isset($form['scheduler_settings'])) {
+			unset($form['scheduler_settings']['#group']);
+			unset($form['scheduler_settings']['#attached']);
+			$form['scheduler_settings']['#title'] = $form['scheduler_settings']['publish_on']['#title'];
+			unset($form['scheduler_settings']['publish_on']['#title']);
+			$form['scheduler_settings']['#attributes']['class'][] = 'display_sidebar';	
+			$form['scheduler_settings']['#weight'] = -10;
+		}
+		if (isset($form['metatags'])) {
+			$form['metatags']['#weight'] = -20;
+			
+		}
+	}
+}
+
+/**
+ * Implements hook_views_default_views_alter()
+ * @param $views
+ */
+function enterprise_base_views_default_views_alter(&$views) {
+  // if enterprise_user app not enabled, remove first_name & last_name filtering
+  if (isset($views['enterprise_user_admin'])) {
+    if (!module_exists('enterprise_user')) {
+      foreach ($views['enterprise_user_admin']->display AS $display_name => $display) {
+        if (isset($display->display_options['filters']['field_firstname_value'])) {
+          unset($views['enterprise_user_admin']->display[$display_name]->display_options['filters']['field_firstname_value']);
+        }
+        if (isset($display->display_options['filters']['field_lastname_value'])) {
+          unset($views['enterprise_user_admin']->display[$display_name]->display_options['filters']['field_lastname_value']);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ * TODO: hack to get breadcrumbs working, develop a better api for this
+ */
+function enterprise_base_preprocess_page(&$variables) {
+  $trail = drupal_get_breadcrumb();
+  if (!empty($trail) && (strip_tags($trail[0]) == t('Home'))) {
+    $path_pattern = '';
+    $replacements = array();
+    // Replace the leading Home crumb.
+    if (isset($variables['node'])) {
+      $entity = $variables['node'];
+      $path_pattern = pathauto_pattern_load_by_entity('node', $entity->type);
+    }
+    else {
+      $router_item = menu_get_item();
+      // views page
+      if((arg(0) != 'admin') && isset($router_item['page_callback']) && ($router_item['page_callback'] == 'views_page') && (isset($router_item['page_arguments'][1]))) {
+        $view = views_get_view($router_item['page_arguments'][0]);
+        $display = $router_item['page_arguments'][1];
+        if (is_array($display)) {
+          $display = array_shift($display);
+        }
+        //$view->display[$display]->display_options['filters']['field_firstname_value'];
+      }
+    }
+
+    if ($path_pattern) {
+      $ppa = explode('/', $path_pattern);
+      foreach ($ppa  AS $i => $e) {
+        if ($e == '[node:author]') {
+          $author = user_load($entity->uid);
+          $replacements[$i+1] = $name = isset($author->realname) ? $author->realname :  $author->name;
+        }
+      }
+    }
+
+    foreach ($replacements AS $i => $replacement) {
+      if (isset($trail[$i])) {
+        $trail[$i] = preg_replace('/\>(.*)<\/a>/', ">$replacement</a>", $trail[$i]);
+      }
+    }
+
+    drupal_set_breadcrumb($trail);
+    $variables['breadcrumb'] = theme('breadcrumb', array('breadcrumb' => drupal_get_breadcrumb()));
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter()
+ * @param $implementations
+ * @param $hook
+ */
+function enterprise_base_module_implements_alter(&$implementations, $hook) {
+  // disable jquery_update on rules pages (rules needs jquery 1.4.4)
+  if ($hook == 'library_alter') {
+    $uri = request_uri();
+    if (strpos($uri,'admin/config/workflow/rules')>0){
+      unset($implementations['jquery_update']);
+    }
+  }
+}
+
+
+/*
+function jquery_update_jquery_path() {
+  // Check whether we are to retrieve the minified version.
+  $jquery_file = array(
+    'none' => 'jquery.js',
+    'min' => 'jquery.min.js',
+  );
+  $type = variable_get('jquery_update_compression_type', 'min');
+  $curr_uri = request_uri();
+  if (strpos($curr_uri,'admin')>0 || strpos($curr_uri,'edit')>0 || strpos($curr_uri,'add')>0){
+    $path2 = drupal_get_path('module', 'jquery_update') .'/replace/jquery/1.3';
+    return $path2 .'/'. $jquery_file[$type];
+  }
+  else {
+    // Find the jQuery version to use.
+    $version = variable_get('jquery_update_jquery_version', '1.3');
+    $path = drupal_get_path('module', 'jquery_update') .'/replace/jquery/'. $version .'/';
+    return $path . $jquery_file[$type];
+  }
+}
+*/

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise blog content feature.
+ */
+
+include_once 'enterprise_blog_content.features.inc';

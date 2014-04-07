@@ -1,0 +1,340 @@
+<?php
+/**
+ * @file
+ * Code for the Curated App feature.
+ */
+
+
+
+include_once('enterprise_curated.features.inc');
+
+function enterprise_curated_app_settings() {
+  $settings = array(
+    'section_path' => 'industry-news',
+    'section_path_node' => 'industry-news',
+    'multi_author' => FALSE,  // FALSE or number for path slug order
+    //'multi_class' => FALSE, // FALSE or number for path slug order
+    'taxonomy_categories' => 'blog_categories',
+    'taxonomy_categories_base_path' => 'blog/categories',
+    'taxonomy_tags' => 'blog_tags',
+    'taxonomy_tags_base_path' => 'blog/tags',
+  );
+  return $settings;
+}
+
+function enterprise_curated_enterprise_config_apps_structures() {
+  $structures = array();
+  $structures['enterprise_curated'] = array(
+    'title' => t('Curated'),
+  );
+  $visibility = array(
+    'enterprise_curated_view' => array(
+      'title' => t('Show on curated post listing pages'),
+      'views' => array(
+        'views' => array('enterprise_curated:page'),
+      ),
+    ),
+    'enterprise_curated_content_type' => array(
+      'title' => t('Show on curated post pages'),
+      'node_type' => array(
+        'types' => array('enterprise_curated'),
+      )
+    ),
+  );
+  $view = views_get_view('enterprise_curated_blocks');
+  $display_desc = array();
+  foreach ($view->display AS $name => $display) {
+    $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+  }
+
+  $weight = 0;
+  $structures['enterprise_curated']['blocks'] = array(
+    // Curated categories block
+    'views:enterprise_curated_blocks-categories' => array(
+      'description' => $display_desc['categories'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_curated_view', 'enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => $weight++,
+    ),
+    'views:enterprise_curated_blocks-archives' => array(
+      'description' => $display_desc['archives'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_curated_view', 'enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => $weight++,
+    ),
+    'views:enterprise_curated_blocks-tags' => array(
+      'description' => $display_desc['tags'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_curated_view', 'enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => $weight++,
+    ),
+    'views:enterprise_curated_blocks-recent' => array(
+      'description' => $display_desc['recent'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_curated_view', 'enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => $weight++,
+    ),
+    'views:enterprise_curated_blocks-popular' => array(
+      'description' => $display_desc['popular'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_curated_view', 'enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => $weight++,
+    ),
+    'views:enterprise_curated_blocks-related' => array(
+      'description' => $display_desc['related'],
+      'defaults' => array(
+        'regions' => array('content'),
+        'visibility' => array('enterprise_curated_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => 10,
+    ),
+    /**/
+  );
+  return $structures;
+}
+
+/**
+ * Implements hook_views_data_alter()
+ */
+function enterprise_curated_views_data_alter(&$data) {
+  // Add an additional option for published field
+  $data['node']['status']['field']['output formats']['draft'] = array('', 'Draft');
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function enterprise_curated_preprocess_field(&$variables) {
+  if ($variables['element']['#field_name'] === 'field_curated_tags') {
+    $variables['label'] = '<i class="icon-tags"></i>';
+    $variables['classes_array'][] = 'tags';
+  }
+}
+
+/**
+ * Implements hook_ds_classes_alter().
+ * Provide the necessary classes for curated types.
+ */
+function enterprise_curated_ds_classes_alter(&$classes, $name) {
+  if ('ds_classes_regions' === $name) {
+    $classes['style-curated-full'] = t('Curated: Full');
+    //$classes['style-curated-featured'] = t('Curated: Featured');
+    $classes['style-curated-teaser'] = t('Curated: Teaser');
+    //$classes['style-curated-mini'] = t('Curated: Mini');
+    //$classes['style-curated-related'] = t('Curated: Related');
+  }
+}
+
+/**
+ * Implements hook_ds_fields_info().
+ */
+function enterprise_curated_ds_fields_info($entity_type) {
+  $node = array();
+  $user = array();
+  $node['curated_sticky_metainfo'] = array(
+    'title' => t('Meta Information (Sticky)'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'ui_limit' => array('enterprise_curated|*'),
+    'function' => 'enterprise_base_curated_meta_info',
+    'properties' => array(),
+  );
+  return array('node' => $node, 'user' => $user);
+}
+
+/**
+ * Implements hook_VOCABULARY_NAME_uri() which is provided by enterprise_base.
+ *
+ * @return array
+ */
+function enterprise_curated_curated_categories_uri_alter(&$url, $term) {
+  $settings = enterprise_curated_app_settings();
+  $url['path'] = $settings['section_path'] . '/category/' . enterprise_base_create_machine_name($term->name);
+}
+
+/**
+ * Implements hook_VOCABULARY_NAME_uri() which is provided by enterprise_base.
+ *
+ * @return array
+ */
+function enterprise_curated_curated_tags_uri_alter(&$url, $term) {
+  $settings = enterprise_curated_app_settings();
+  $url['path'] = $settings['section_path'] . '/tag/' . enterprise_base_create_machine_name($term->name);
+}
+
+function enterprise_curated_field_default_field_bases_alter(&$fields) {
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if (($settings['taxonomy_categories'] === FALSE) || ($settings['taxonomy_categories'] != 'curated_categories')) {
+        unset($fields['field_curated_categories']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if (($settings['taxonomy_tags'] === FALSE) || ($settings['taxonomy_tags'] != 'curated_tags')) {
+        unset($fields['field_curated_tags']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+}
+
+function enterprise_curated_field_default_field_instances_alter(&$fields) {
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['node-enterprise_curated-field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if ($settings['taxonomy_categories'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_categories']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_categories']['field_name'] = 'field_' . $settings['taxonomy_categories'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['node-enterprise_curated-field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if ($settings['taxonomy_tags'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_tags']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_tags']['field_name'] = 'field_' . $settings['taxonomy_tags'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+}
+
+//field_default_field_instances
+
+function enterprise_curated_views_default_views_alter(&$views) {
+  $settings = enterprise_curated_app_settings();
+  $new_settings = array(
+    'taxonomies' => array(),
+  );
+  if (!empty($settings['section_path'])) {
+    $new_settings['section_path'] = array(
+      'cur' => 'curated',
+      'new' => $settings['section_path'],
+    );
+  }
+  if (!empty($settings['taxonomy_categories'])) {
+    $new_settings['taxonomies']['field_curated_categories_tid'] = array(
+      'rel_id' => 'field_' . $settings['taxonomy_categories'] . '_tid',
+      'rel_table' => 'field_data_field_' . $settings['taxonomy_categories'],
+      'base_path' => $settings['taxonomy_categories_base_path'],
+    );
+  }
+  if (!empty($settings['taxonomy_tags'])) {
+    $new_settings['taxonomies']['field_curated_tags_tid'] = array(
+      'rel_id' => 'field_' . $settings['taxonomy_tags'] . '_tid',
+      'rel_table' => 'field_data_field_' . $settings['taxonomy_tags'],
+      'base_path' => $settings['taxonomy_tags_base_path'],
+    );
+  }
+
+  foreach ($views AS $view_name => $view) {
+    if ($view_name == 'enterprise_curated') {
+      //dsm('enterprise_curated_views_default_views_alter(enterprise_curated)0');
+      //dsm($views[$view_name]);
+
+      $views[$view_name] = enterprise_config_alter_default_app_view($views[$view_name], $new_settings);
+
+      //dsm('enterprise_curated_views_default_views_alter(enterprise_curated)1');
+      //dsm($views[$view_name]);
+    }
+    if ($view_name == 'enterprise_curated_blocks') {
+      //dsm('enterprise_curated_views_default_views_alter(enterprise_curated_blocks)0');
+      //dsm($views[$view_name]);
+
+      $views[$view_name] = enterprise_config_alter_default_app_view($views[$view_name], $new_settings);
+
+      //dsm('enterprise_curated_views_default_views_alter(enterprise_curated_blocks)1');
+      //dsm($views[$view_name]);
+    }
+  }
+}
+
+function enterprise_config_alter_default_app_view($view, $new_settings) {
+  // loop through view displays
+  foreach ($view->display AS $display_name => $display) {
+
+    // alter section path
+    if (isset($new_settings['section_path'])) {
+      if (!empty($display->display_options['path'])) {
+        $view->display[$display_name]->display_options['path'] = preg_replace('/' . $new_settings['section_path']['cur'] .'/', $new_settings['section_path']['new'], $display->display_options['path'], 1);
+      }
+    }
+
+    // for alt taxonomies, relationships and arguments must be changed
+    if (isset($new_settings['taxonomies']) && is_array($new_settings['taxonomies'])) {
+      foreach ($new_settings['taxonomies'] AS $rel_id_0 => $new_tax_settings) {
+        // check if display has taxonomy relationship, if so alter
+        if (isset($view->display[$display_name]->display_options['relationships'][$rel_id_0])) {
+          $rel_id_1 = $new_tax_settings['rel_id'];
+          $rel = $view->display[$display_name]->display_options['relationships'][$rel_id_0];
+          unset($view->display[$display_name]->display_options['relationships'][$rel_id_0]);
+          $rel['id'] = $rel_id_1;
+          $rel['table'] = $new_tax_settings['rel_table'];
+          $rel['field'] = $rel_id_1;
+          $view->display[$display_name]->display_options['relationships'][$rel_id_1] = $rel;
+          // alter arguments
+          foreach ($view->display[$display_name]->display_options['arguments'] AS $arg_id => $argument) {
+            if (isset($argument['relationship']) && ($argument['relationship'] == $rel_id_0) ) {
+              $view->display[$display_name]->display_options['arguments'][$arg_id]['relationship'] = $rel_id_1;
+              $view->display[$display_name]->display_options['arguments'][$arg_id]['summary_options']['base_path'] = $new_tax_settings['base_path'];
+            }
+          }
+        }
+      }
+    }
+  }
+  return $view;
+}
+
+function enterprise_curated_taxonomy_default_vocabularies_alter(&$vocabularies) {
+  $settings = enterprise_curated_app_settings();
+  if (isset($vocabularies['curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      //unset($vocabularies['curated_categories']);
+    }
+  }
+}
+
+function enterprise_curated_strongarm_import_value_alter(&$value, $name) {
+//dsm($name);
+  $settings = enterprise_curated_app_settings();
+  // alter path auto settings for content type
+  if ($name == 'pathauto_node_enterprise_curated_pattern') {
+    // if alt section_path_node
+    if (!empty($settings['section_path_node'])) {
+      dsm($value);
+      $value = preg_replace('/curated/', $settings['section_path_node'], $value, 1);
+    }
+    if (isset($settings['multi_author']) && ($settings['multi_author'] === FALSE)) {
+      $value = str_replace('[node:author]/', '', $value);
+    }
+  }
+}

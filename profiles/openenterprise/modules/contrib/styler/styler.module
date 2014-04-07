@@ -1,0 +1,548 @@
+<?php
+
+define('STYLER_THEME', variable_get('theme_default', 'bartik'));
+
+/**
+ * @file
+ * Provides a guide of styles supported by the theme.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function styler_menu() {
+  $items = array();
+  $items['admin/appearance/style-guide'] = array(
+    'title' => 'Style Guide',
+    'description' => 'View a theme supported style guide.',
+    'page callback' => 'styler_style_view',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'theme callback' => 'styler_theme_callback',
+  );
+  return $items;
+}
+
+/**
+* No overlay for the style guide.
+*
+* Implements hook_admin_paths()
+*/
+function styler_admin_paths() {
+  $paths = array(
+    'admin/appearance/style-guide' => FALSE,
+  );
+  return $paths;
+}
+
+function styler_theme_styles(&$styles = array()) {
+  $theme_path = drupal_get_path('theme', STYLER_THEME);
+  if (file_exists($theme_path . '/styler.inc')) {
+    include $theme_path . '/styler.inc';
+  }
+}
+
+/*
+function styler_access() {
+  $styles = array();
+  styler_theme_styles($styles);
+  return !empty($styles);
+}
+*/
+
+function styler_theme_callback() {
+  return STYLER_THEME;
+}
+
+function styler_styles() {
+  $styles = array();
+  $styles = styler_default_styles();
+  styler_theme_styles($styles);
+  $module_styles = module_invoke_all('styler_style');
+  $styles = drupal_array_merge_deep($styles, $module_styles);
+  return $styles;
+}
+
+function styler_style_view() {
+  drupal_add_css(drupal_get_path('module', 'styler') . '/styler_bootstrap.css');
+  drupal_add_css(drupal_get_path('module', 'styler') . '/styler.css');
+  drupal_add_js(drupal_get_path('module', 'styler') . '/styler_bootstrap.js');
+  drupal_add_js(drupal_get_path('module', 'styler') . '/styler.js');
+
+
+  $prettify_path = libraries_get_path('prettify');
+  if ($prettify_path ) {
+    drupal_add_css($prettify_path  . '/prettify.css');
+    drupal_add_js($prettify_path  . '/prettify.js');
+  }
+
+  $build = array(
+    'styles' => array(
+      'pre' => array(
+        '#markup' => '<div class="col-md-9">',
+      ),
+    ),
+    'nav' => array(
+      'pre' => array(
+        '#markup' => '<div class="col-md-3">',
+      ),
+    ),
+  );
+  $nav_items = array();
+  $styles = styler_styles();
+  $required = array('title', 'element');
+//dsm($styles);
+  foreach ($styles as $comp_name => $component) {
+    $block = new stdClass();
+    $block->module = 'styler';
+    $block->delta = $comp_name;
+    $block->region = 'content';
+    $block->subject = $component['#title'];
+    $variables = array();
+    $variables['elements']['#title'] = 'titlex';
+    $variables['elements']['#children'] = '';
+    $variables['title_attributes_array']['id'] = $comp_name;
+
+    $variables['elements']['#children'] .= '<div class="bs-docs-section">';
+
+    $variables['elements']['#children'] .= '<h1 id="' . $comp_name . '" class="page-header">' . $component['#title'] . '</h1>';
+
+    $nav_items[$comp_name] = array(
+      '#text' => $component['#title'],
+    );
+
+    foreach(element_children($component) as $l2_name) {
+      $vars = $component[$l2_name];
+      $vars['#name'] = $comp_name . '-' . $l2_name;
+      $vars['#level'] = 2;
+      if (isset($vars['#title'])) {
+        $nav_items[$comp_name][$vars['#name']] = $vars['#title'];
+      }
+      $variables['elements']['#children'] .= theme_styler_element($vars);
+      foreach(element_children($component[$l2_name]) as $l3_name) {
+        $vars = $component[$l2_name][$l3_name];
+        $vars['#name'] = $comp_name . '-' . $l2_name . '-' . $l3_name;
+        $vars['#level'] = 3;
+        $variables['elements']['#children'] .= theme_styler_element($vars);
+      }
+    }
+
+    $variables['elements']['#children'] .= '</div>';
+
+    //$build['styles'][$comp_name]['#markup'] = theme('block', $variables);
+    $build['styles'][$comp_name]['#markup'] = render($variables);
+
+    //drupal_add_region_content('sidebar_first', 'testing');
+
+  }
+  $build['styles']['post']['#markup'] = '</div>';
+
+  $build['nav']['nav']['#markup'] = theme_bootstrap_nav_docs($nav_items);
+  $build['nav']['post']['#markup'] = '</div>';
+  return $build;
+}
+
+function theme_bootstrap_nav_docs($nav_items, $level = 0) {
+  $output = '<ul class="nav' . (($level == 0) ? ' bs-docs-sidebar' : '') . '">';
+  foreach ($nav_items AS $key => $value) {
+    $text = '';
+    $url = '';
+    $options = array();
+    $add = '';
+
+    if (is_array($value)) {
+      $text = $value['#text'];
+      $level++;
+      $add = theme_bootstrap_nav_docs($value, $level);
+    }
+    else {
+      if (substr($key, 0, 1) == '#') {
+        continue;
+      }
+      $text = $value;
+    }
+    $options = array(
+      'fragment' => $key,
+      'external' => TRUE,
+    );
+    $output .= '<li>';
+    $output .= l($text, '', $options);
+    if ($add) {
+      $output .= $add;
+    }
+    $output .= '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+function theme_styler_element($vars) {
+  $output = '';
+  $name = $vars['#name'];
+  $level = $vars['#level'];
+
+  if (isset($vars['#title'])) {
+    $output .= '<h' . $level . ' id="' . $name . '">' . $vars['#title'] . '</h' . $level . '>';
+  }
+  if (isset($vars['#description'])) {
+    $output .= '<p>' . $vars['#description'] . '</p>';
+  }
+  if (isset($vars['#value'])) {
+    $code = $vars['#value'];
+    if ($vars['#tag'] != 'markup') {
+      $code = theme('html_tag', array('element' => $vars));
+    }
+    $highlight = isset($vars['#value_highlight']) ? $vars['#value_highlight'] : $code;
+    $highlight = htmlentities($highlight);
+    $output .= '
+          <div class="bs-example bs-example-' . $name . '">
+            <div class="row col-md-12">
+            ' . $code .'
+            </div>
+          </div>
+          <div class="highlight">
+            <pre class="prettyprint"><code class="html">' . $highlight . '</code></pre>
+          </div>
+        ';
+  }
+  return $output;
+}
+
+function styler_default_styles() {
+  // Typography
+  $styles['type'] = array(
+    '#title' => t('Typography'),
+    'headings' => array(
+      '#title' => t('Headings'),
+      '#description' => t('All HTML headings, <code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code>, are available. <code>.h1</code> through <code>.h6</code> classes are also available, for when you want to match the font styling of a heading but still want your text to be displayed inline.'),
+    ),
+  );
+  $styles['type']['headings']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<h1>h1. heading</h1>
+<h2>h2. heading</h2>
+<h3>h3. heading</h3>
+<h4>h4. heading</h4>
+<h5>h5. heading</h5>
+<h6>h6. heading</h6>
+'
+  );
+  $styles['type']['headings']['with_sub'] = array(
+    '#tag' => 'markup',
+    '#value' => '<h1>h1. heading <small>Secondary text</small></h1>
+<h2>h2. heading <small>Secondary text</small></h2>
+<h3>h3. heading <small>Secondary text</small></h3>
+<h4>h4. heading <small>Secondary text</small></h4>
+<h5>h5. heading <small>Secondary text</small></h5>
+<h6>h6. heading <small>Secondary text</small></h6>
+'
+  );
+  $styles['type']['headings']['block_titles'] = array(
+    '#title' => t('Block titles'),
+    '#tag' => 'markup',
+    '#value' => '
+<div class="block"><h2 class="block-title">Block Title</h2></div>
+
+<aside><div class="block"><h2 class="block-title">Sidebar Block Title</h2></div></aside>
+<p><strong>Paragraph of text</strong> - Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam id dolor id nibh ultricies vehicula ut id elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nulla vitae elit libero, a pharetra augue.</p>
+'
+  );
+
+
+  // body copy
+  $styles['type']['body-copy'] = array(
+    '#title' => t('Body copy'),
+    //'#description' => '',
+  );
+  $styles['type']['body-copy']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<p>Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula.
+
+Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec ullamcorper nulla non metus auctor fringilla. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla.
+</p>
+',
+    '#value_highlight' => '<p>...</p>',
+  );
+
+  $styles['type']['body-copy']['lead'] = array(
+    '#title' => t('Lead body copy'),
+    '#tag' => 'markup',
+    '#value' => '<p class="lead">Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus.</p>',
+    '#value_highlight' => '<p class="lead">...</p>',
+  );
+
+  // Emphasis
+  $styles['type']['emphasis'] = array(
+    '#title' => t('Emphasis'),
+    '#description' => t('Make use of HTML\'s default emphasis tags with lightweight styles.'),
+  );
+  $styles['type']['emphasis']['small-text'] = array(
+    '#title' => t('Small text'),
+    '#description' => t('For de-emphasizing inline or blocks of text, use the <code>&lt;small&gt;</code> tag to set text at 85% the size of the parent. Heading elements receive their own <code>font-size</code> for nested <code>&lt;small&gt;</code> elements.'),
+    '#tag' => 'markup',
+    '#value' => 'This line of text is meant to be <small>treated as fine print</small>.',
+  );
+  $styles['type']['emphasis']['bold'] = array(
+    '#title' => t('Bold'),
+    '#description' => t('For emphasizing a snippet of text with a heavier font-weight.'),
+    '#tag' => 'markup',
+    '#value' => 'The following snippet of text is <strong>rendered as bold text</strong>.',
+  );
+  $styles['type']['emphasis']['italics'] = array(
+    '#title' => t('Italics'),
+    '#description' => t('For emphasizing a snippet of text with italics.'),
+    '#tag' => 'markup',
+    '#value' => 'The following snippet of text is <em>rendered as italicized text</em>.',
+  );
+
+  // Contextual colors
+  $styles['type']['colors'] = array(
+    '#title' => t('Contextual colors'),
+    '#description' => t('Convey meaning through color with a handful of emphasis utility classes. These may also be applied to links and will darken on hover just like our default link styles.'),
+  );
+  $styles['type']['colors']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<p class="text-muted">Fusce dapibus, tellus ac cursus commodo, tortor mauris nibh.</p>
+<p class="text-primary">Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+<p class="text-secondary">Etiam porta sem malesuada magna mollis euismod.</p>
+<p class="text-accent">Donec ullamcorper nulla non metus auctor fringilla.</p>
+<p class="text-success">Duis mollis, est non commodo luctus, nisi erat porttitor ligula.</p>
+<p class="text-info">Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+<p class="text-warning">Etiam porta sem malesuada magna mollis euismod.</p>
+<p class="text-danger">Donec ullamcorper nulla non metus auctor fringilla.</p>
+',
+    '#value_highlight' => '<p class="text-muted">...</p>
+<p class="text-primary">...</p>
+<p class="text-secondary">...</p>
+<p class="text-accent">...</p>
+<p class="text-success">...</p>
+<p class="text-info">...</p>
+<p class="text-warning">...</p>
+<p class="text-danger">...</p>',
+  );
+
+  $styles['type']['colors']['background'] = array(
+    '#title' => t('Contextual backgrounds'),
+    '#description' => t('Similar to the contextual text color classes, easily set the background of an element to any contextual class. Anchor components will darken on hover, just like the text classes.'),
+    '#tag' => 'markup',
+    '#value' => '<div class="bs-example-bg-classes">
+<p class="bg-primary">Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+<p class="bg-secondary">Etiam porta sem malesuada magna mollis euismod..</p>
+<p class="bg-accent">Donec ullamcorper nulla non metus auctor fringilla.</p>
+<p class="bg-success">Duis mollis, est non commodo luctus, nisi erat porttitor ligula.</p>
+<p class="bg-info">Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+<p class="bg-warning">Etiam porta sem malesuada magna mollis euismod.</p>
+<p class="bg-danger">Donec ullamcorper nulla non metus auctor fringilla.</p>
+</div>
+',
+    '#value_highlight' => '<p class="bg-primary">...</p>
+<p class="bg-secondary">...</p>
+<p class="bg-accent">...</p>
+<p class="bg-success">...</p>
+<p class="bg-info">...</p>
+<p class="bg-warning">...</p>
+<p class="bg-danger">...</p>',
+  );
+
+  // Buttons
+  $styles['buttons'] = array(
+    '#title' => t('Buttons'),
+  );
+  $styles['buttons']['options'] = array(
+    '#title' => t('Options'),
+    '#description' => t('Use any of the available button classes to quickly create a styled button.'),
+  );
+  $styles['buttons']['options']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '
+    <button type="button" class="btn btn-default">Default</button>
+    <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-success">Success</button>
+    <button type="button" class="btn btn-info">Info</button>
+    <button type="button" class="btn btn-warning">Warning</button>
+    <button type="button" class="btn btn-danger">Danger</button>
+    <button type="button" class="btn btn-link">Link</button>
+',
+    '#value_highlight' => '<!-- Standard button -->
+<button type="button" class="btn btn-default">Default</button>
+
+<!-- Provides extra visual weight and identifies the primary action in a set of buttons -->
+<button type="button" class="btn btn-primary">Primary</button>
+
+<!-- Indicates a successful or positive action -->
+<button type="button" class="btn btn-success">Success</button>
+
+<!-- Contextual button for informational alert messages -->
+<button type="button" class="btn btn-info">Info</button>
+
+<!-- Indicates caution should be taken with this action -->
+<button type="button" class="btn btn-warning">Warning</button>
+
+<!-- Indicates a dangerous or potentially negative action -->
+<button type="button" class="btn btn-danger">Danger</button>
+
+<!-- Deemphasize a button by making it look like a link while maintaining button behavior -->
+<button type="button" class="btn btn-link">Link</button>
+',
+  );
+
+  $styles['buttons']['sizes'] = array(
+    '#title' => t('Sizes'),
+    '#description' => t('Fancy larger or smaller buttons? Add <code>.btn-lg</code>, <code>.btn-sm</code>, or <code>.btn-xs</code> for additional sizes.'),
+  );
+  $styles['buttons']['sizes']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '
+    <p>
+      <button type="button" class="btn btn-primary btn-lg">Large button</button>
+      <button type="button" class="btn btn-default btn-lg">Large button</button>
+    </p>
+    <p>
+      <button type="button" class="btn btn-primary">Default button</button>
+      <button type="button" class="btn btn-default">Default button</button>
+    </p>
+    <p>
+      <button type="button" class="btn btn-primary btn-sm">Small button</button>
+      <button type="button" class="btn btn-default btn-sm">Small button</button>
+    </p>
+    <p>
+      <button type="button" class="btn btn-primary btn-xs">Extra small button</button>
+      <button type="button" class="btn btn-default btn-xs">Extra small button</button>
+    </p>
+',
+    '#value_highlight' => '<p>
+  <button type="button" class="btn btn-primary btn-lg">Large button</button>
+  <button type="button" class="btn btn-default btn-lg">Large button</button>
+</p>
+<p>
+  <button type="button" class="btn btn-primary">Default button</button>
+  <button type="button" class="btn btn-default">Default button</button>
+</p>
+<p>
+  <button type="button" class="btn btn-primary btn-sm">Small button</button>
+  <button type="button" class="btn btn-default btn-sm">Small button</button>
+</p>
+<p>
+  <button type="button" class="btn btn-primary btn-xs">Extra small button</button>
+  <button type="button" class="btn btn-default btn-xs">Extra small button</button>
+</p>
+',
+  );
+
+
+
+
+  // Images
+  $desc = t('Add classes to an <img> element to easily style images in any project.');
+  $styles['images'] = array(
+    '#title' => t('Images'),
+    'shapes' => array(
+      '#title' => t('Image shapes'),
+      '#description' => $desc,
+    ),
+  );
+  $styles['images']['shapes']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<img alt="140x140" class="img-rounded" src="http://placehold.it/140x140" style="height: 140px; width: 140px;">
+<img alt="140x140" class="img-circle" src="http://placehold.it/140x140" style="height: 140px; width: 140px;">
+<img alt="140x140" class="img-thumbnail" src="http://placehold.it/140x140" style="height: 140px; width: 140px;">
+',
+    '#value_highlight' => '<img src="..." alt="..." class="img-rounded">
+<img src="..." alt="..." class="img-circle">
+<img src="..." alt="..." class="img-thumbnail">
+',
+  );
+  $styles['type']['headings']['with_sub'] = array(
+    '#tag' => 'markup',
+    '#value' => '<h1>h1. heading <small>Secondary text</small></h1>
+<h2>h2. heading <small>Secondary text</small></h2>
+<h3>h3. heading <small>Secondary text</small></h3>
+<h4>h4. heading <small>Secondary text</small></h4>
+<h5>h5. heading <small>Secondary text</small></h5>
+<h6>h6. heading <small>Secondary text</small></h6>
+'
+  );
+
+  // Icons (placeholder for other hooks to implement)
+  $styles['icons'] = array(
+    '#title' => t('Icons'),
+    '#description' => t('Styling for icons.'),
+  );
+
+  // Time (placeholder for other hooks to implement)
+  $styles['time'] = array(
+    '#title' => t('Time & date'),
+    '#description' => t('Styling of time and date elements.'),
+  );
+
+  // Featured content (placeholder for other hooks to implement)
+  $styles['featured'] = array(
+    '#title' => t('Featured content'),
+    '#description' => t('Components used to highlight special content.'),
+  );
+
+
+  return $styles;
+
+
+  $items = array('List Item', 'List Item', 'List Item');
+  $styles['ul'] = array(
+    'title' => 'Unordered List',
+    'element' => array(
+      '#tag' => 'ul',
+      '#value' => '
+  <li>List Item</li>
+  <li>List Item</li>
+  <li>List Item</li>
+'
+    ),
+  );
+  $styles['ol'] = array(
+    'title' => 'Ordered List',
+    'element' => array(
+      '#tag' => 'ol',
+      '#value' => '
+  <li>List Item</li>
+  <li>List Item</li>
+  <li>List Item</li>
+'
+    ),
+  );
+  $tree = menu_tree('main-menu');
+  $styles['menu_tree'] = array(
+    'title' => 'Menu Tree',
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => render($tree),
+    ),
+  );
+  $styles['blockquote'] = array(
+    'title' => 'Block Quote',
+    'description' => t('NOTE: To have the byline appended in small print and indented, you must use the %footer tag.', array('%footer' => '<footer>')),
+    'element' => array(
+      '#tag' => 'blockquote',
+      '#value' => '
+  Etiam porta sem malesuada magna mollis euismod. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+  <footer>John Doe, President<cite>ACME Inc.</cite></footer>
+'
+    ),
+  );
+  $styles['pullquote'] = array(
+    'title' => 'Pull Quote',
+    'description' => t('This offers a different type of quote, generally used for pulling site generated content instead of an individual\'s quote.'),
+    'element' => array(
+      '#tag' => 'blockquote',
+      '#attributes' => array(
+        'class' => 'pullquote',
+      ),
+      '#value' => '
+  Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+'
+    ),
+  );
+
+
+
+
+  return $styles;
+}

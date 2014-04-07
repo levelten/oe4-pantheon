@@ -1,0 +1,183 @@
+<?php
+
+/**
+ * Implements hook_permission().
+ */ 
+function slug_permission() {
+  return array(
+    'use slugs' => array(
+      'title' => t('Assign slugs to entities')
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_load()
+ */
+function slug_entity_load($entities, $type) {
+  // We should optimize this query to work for multiple loads at the same time.
+  foreach($entities as $entity) {
+    $slug = slug_load($entity, $type);
+    $entity->slug = is_object($slug) ? $slug->slug : '';
+  }
+}
+
+/**
+ * Implements hook_entity_update()
+ */
+function slug_entity_update($entity, $type) {
+  slug_entity_save($entity, $type);
+}
+
+/**
+ * Implements hook_entity_insert()
+ */
+function slug_entity_insert($entity, $type) {
+  slug_entity_save($entity, $type);
+}
+
+/**
+ * Helper for hook_entity_insert() and hook_entity_update().
+ */
+function slug_entity_save($entity, $type) {
+  $slug = slug_load($entity, $type);
+  if (isset($entity->slug) && !$slug) { // New slug
+    slug_save($entity, $type);
+  }
+  elseif (isset($entity->slug) && $slug && $entity->slug != $slug->slug) { // Updated slug
+    slug_save($entity, $type, TRUE);
+    // Need to trigger all children to update as well.
+    $entity->parent['updated'] = TRUE; // This fools the menu link update hook into running.
+  }
+  elseif (isset($entity->slug) && $entity->slug == '' && $slug) { // Deleted slug
+    slug_delete($entity, $type);
+  }
+  if (isset($entity->parent)) {
+    $link = &$entity->parent;
+    $link['link_title'] = trim(entity_label($type, $entity));
+    $uri = entity_uri($type, $entity);
+    $link['link_path'] = $uri['path'];
+    $link['language'] = entity_language($type, $entity);
+    if (!menu_link_save($link)) {
+      drupal_set_message(t('There was an error saving the menu link.'), 'error');
+    }
+  }
+}
+
+/**
+ * Attach slug field to entity forms. This would work better as a 
+ * hook_entity_form_alter but it doesn't exist yet.
+ * 
+ * Implements hook_field_attach_form()
+ */
+function slug_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  $entity_info = entity_get_info($entity_type);
+  // Only set the slug if there is a label (Users don't have labels)
+  if (isset($entity_info['entity keys']['label'])) {
+    $form['slug'] = array(
+      '#type' => 'machine_name',
+      '#machine_name' => array(
+        'exists' => 'slug_exists',
+        'label' => t('Slug'),
+        'source' => array($entity_info['entity keys']['label']),
+        'replace_pattern' => '[^a-z0-9_\-]+'
+      ),
+      '#title' => t('Slug'),
+      '#description' => t('The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.'),
+      '#required' => TRUE,
+      '#default_value' => (isset($entity->slug)?$entity->slug:''),
+      '#weight' => 0,
+    );
+  }
+}
+
+/**
+ * Implements hook_entity_delete()
+ */
+function slug_entity_delete($entity, $type) {
+  slug_delete($entity, $type);
+}
+
+/**
+ * Callback for checking if a machine name is unique.
+ * 
+ * We don't actually care since we can have duplicate slugs. Pathauto will handle
+ * generating unique urls.
+ *  
+ * @param type $node
+ * @return type
+ */
+function slug_exists($text) {
+  return FALSE;
+}
+
+/**
+ * Save a slug
+ */
+function slug_save($entity, $type, $update = FALSE) {
+  $keys = array();
+  if ($update) {
+    $keys = array('entity_type', 'entity_id');
+  }
+  $slug = new stdClass();
+  $slug->entity_type = $type;
+  $slug->entity_id = entity_id($type, $entity);
+  $slug->slug = $entity->slug;
+  $slug->language = entity_language($type, $entity);
+  drupal_write_record('slug', $slug, $keys);
+}
+
+/**
+ * Load a slug
+ */
+function slug_load($entity, $type) {
+  return db_select('slug', 's')
+    ->fields('s')
+    ->condition('entity_type', $type)
+    ->condition('entity_id', entity_id($type, $entity))
+    ->execute()
+    ->fetchObject();
+}
+
+/**
+ * Delete a slug
+ */
+function slug_delete($entity, $type) {
+  db_delete('slug')
+    ->condition('entity_type', $type)
+    ->condition('entity_id', entity_id($type, $entity))
+    ->execute();
+}
+
+/**
+ * Implements hook_token_info_alter(&$data).
+ * 
+ * @return type
+ */
+function slug_token_info_alter(&$info) {
+  $entities = entity_get_info();
+  foreach($entities as $name => $entity_info) {
+    if (isset($info['tokens'][$name])) {
+      $info['tokens'][$name]['slug'] = array(
+        'name' => t('Slug'),
+        'description' => t('The “slug” is the URL-friendly version of the name.'),
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_tokens($type, $tokens, array $data = array(), array $options = array())
+ */
+function slug_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'entity') {
+    $entity = $data['entity'];
+    foreach($tokens as $name => $original) {
+      if ($name == 'slug') {
+        $replacements[$original] = $entity->slug;
+      }
+    }
+  }
+  return $replacements;
+}
