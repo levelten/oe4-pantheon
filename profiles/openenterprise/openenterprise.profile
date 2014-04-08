@@ -20,6 +20,7 @@ if (!function_exists('system_form_install_select_profile_form_alter')) {
         switch ($profile) {
           case 'Standard':
           case 'Minimal':
+          case 'Pantheon':
           case 'OpenEnterprise':
             unset($profiles[$key]);
             break;
