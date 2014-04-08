@@ -1043,7 +1043,7 @@ Let LevelTen Interactive help you build, manage and improve your web marketing p
 <div class="col-md-6">
 <h3>Workflow Automation</h3>
 
-<p><img alt="" data-picture-group="full-4x3" src="/sites/default/files/conversion-workflow.png" /></p>
+<p><img alt="" data-picture-group="full-0" src="/sites/default/files/conversion-workflow.png" /></p>
 </div>
 
 <div class="col-md-6">

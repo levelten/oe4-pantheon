@@ -1,0 +1,107 @@
+diff --git modules/filter/filter.api.php modules/filter/filter.api.php
+index 399d564..d6524d4 100644
+--- modules/filter/filter.api.php
++++ modules/filter/filter.api.php
+@@ -185,6 +185,56 @@ function hook_filter_info() {
+ }
+ 
+ /**
++ * Perform alterations on text formats definitions.
++ *
++ * @param $formats
++ *   Array of of all existent text formats.
++ * @param $only_enabled_formats
++ *   Boolean. If TRUE, $formats will contain only enabled formats,
++ *   otherwise both, disabled and enabled formats, will be available in
++ *   $formats parameter.
++ *
++ * @see filter_formats()
++ */
++function hook_filter_formats_alter(&$formats, $only_enabled_formats) {
++  $filters['custom_format'] = array(
++    'title' => t('Custom text format'),
++    'description' => t('Allows you to restrict the HTML tags the user can use.'),
++    'process callback' => '_custom_callback',
++    'settings callback' => '_custom_settings_callback',
++    'default settings' => array(
++      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd>',
++      'filter_html_help' => 1,
++      'filter_html_nofollow' => 0,
++    ),
++    'tips callback' => '_custom_text_format_tips',
++  );
++}
++
++/**
++ * Perform alterations on text formats definitions.
++ *
++ * @param $formats
++ *   Array of of all existent text formats.
++ *
++ * @see filter_list_format()
++ */
++function hook_filter_list_format_alter(&$formats) {
++  $custom_filter = new StdClass;
++  $custom_filter->format = 'custom_format';
++  $custom_filter->module = 'custom_module';
++  $custom_filter->name = 'custom_filter';
++  $custom_filter->weight = 0;
++  $custom_filter->status = 1;
++  $settings = array(
++    'allowed_html' => '<a> <em> <strong>',
++  );
++  $custom_filter->settings = serialize($settings);
++
++  $formats['custom_format']['custom_filter'] = $custom_filter;
++}
++
++/**
+  * Perform alterations on filter definitions.
+  *
+  * @param $info
+diff --git modules/filter/filter.module modules/filter/filter.module
+index 8834bea..cc8ba92 100644
+--- modules/filter/filter.module
++++ modules/filter/filter.module
+@@ -306,7 +306,17 @@ function filter_format_disable($format) {
+  * @see filter_format_load()
+  */
+ function filter_format_exists($format_id) {
+-  return (bool) db_query_range('SELECT 1 FROM {filter_format} WHERE format = :format', 0, 1, array(':format' => $format_id))->fetchField();
++  $formats = db_select('filter_format', 'ff')
++    ->fields('ff')
++    ->execute()
++    ->fetchAllAssoc('format');
++
++  // Allow modules to alter the list of formats; e.g., to load formats
++  // exported into code.
++  $only_enabled_formats = FALSE;
++  drupal_alter('filter_formats', $formats, $only_enabled_formats);
++
++  return isset($formats[$format_id]);
+ }
+ 
+ /**
+@@ -406,6 +416,11 @@ function filter_formats($account = NULL) {
+         ->execute()
+         ->fetchAllAssoc('format');
+ 
++      // Allow modules to alter the list of formats; e.g., to load formats
++      // exported into code.
++      $only_enabled_formats = TRUE;
++      drupal_alter('filter_formats', $formats['all'], $only_enabled_formats);
++
+       cache_set("filter_formats:{$language->language}", $formats['all']);
+     }
+   }
+@@ -664,6 +679,10 @@ function filter_list_format($format_id) {
+       foreach ($result as $record) {
+         $filters['all'][$record->format][$record->name] = $record;
+       }
++      // Allow modules to alter the filters of all formats; e.g., to complete
++      // formats exported into code.
++      drupal_alter('filter_list_format', $filters['all']);
++
+       cache_set('filter_list_format', $filters['all']);
+     }
+   }

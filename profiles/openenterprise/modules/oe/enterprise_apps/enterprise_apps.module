@@ -50,6 +50,25 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $query = db_select('system', 's')
+    ->fields('s')
+    ->condition('type', 'theme')
+    ->condition('status', 1);
+  $themes = $query->execute()->fetchAllAssoc('name');
+  dsm($themes);
+  return '';
+
+  $themes = array();
+  $theme_list = list_themes();
+  dsm($theme_list);
+  foreach ($theme_list AS $name => $theme) {
+    if ($theme->status) {
+      $regions = system_region_list($name);
+      $themes[$name] = $regions;
+    }
+  }
+  dsm($themes);
+
   return '';
 }
 
@@ -594,188 +613,214 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
   if (!isset($config_settings['blocks'])) {
     return;
   }
-  $theme = (isset($config_settings['blocks']['theme'])) ? $config_settings['blocks']['theme'] : variable_get('theme_default', NULL);
-  $block_regions = system_region_list($theme);
+  //$theme = (isset($config_settings['blocks']['themes'])) ? $config_settings['blocks']['themes'] : variable_get('theme_default', NULL);
+  //$block_regions = system_region_list($theme);
+
+  // build array of enabled themes and their regions
+  $themes = array();
+  //$theme_list = list_themes(TRUE);
+  // for some reason list_themes does not show themes enabled during install,
+  // so using custom query
+  $query = db_select('system', 's')
+    ->fields('s')
+    ->condition('type', 'theme')
+    ->condition('status', 1);
+  $theme_list = $query->execute()->fetchAllAssoc('name');
+
+  foreach ($theme_list AS $name => $theme) {
+    if ($theme->status) {
+      $regions = system_region_list($name);
+      $themes[$name] = $regions;
+    }
+  }
 
   foreach ($config_settings['blocks'] AS $name => $settings) {
     $ci_block = isset($config_info['blocks'][$name]) ? $config_info['blocks'][$name] : array();
 
-    // get current block if it exists
-    $block0 = block_load($settings['module'], $settings['delta']);
-    $region = isset($block0->region) ? $block0->region : -1;
-    // iterative through possible regions to find one in the theme
-    if (isset($settings['regions']) && is_array($settings['regions'])) {
-      foreach ($settings['regions'] AS $region) {
-        if (isset($block_regions[$region])) {
-          $region = $region;
-          break;
+    foreach ($themes AS $theme => $block_regions) {
+      // get current block if it exists
+      //$block0 = block_load($settings['module'], $settings['delta']);
+      $query = db_select('block', 'b')
+        ->fields('b')
+        ->condition('module', $settings['module'])
+        ->condition('delta', $settings['delta'])
+        ->condition('theme', $theme);
+      $block0 = $query->execute()->fetchObject();
+      $region = isset($block0->region) ? $block0->region : -1;
+      // iterative through possible regions to find one in the theme
+      if (isset($settings['regions']) && is_array($settings['regions'])) {
+        foreach ($settings['regions'] AS $region_name) {
+          if (isset($block_regions[$region_name])) {
+            $region = $region_name;
+            break;
+          }
         }
       }
-    }
-    else if (isset($settings['regions']) && ($settings['regions'] == -1)) {
-      $region = -1;
-    }
+      else if (isset($settings['regions']) && ($settings['regions'] == -1)) {
+        $region = -1;
+      }
 
-    $weight = 0;
-    $visibility = 0;
-    $pages = array();
-    $types = array();
-    $views = array();
-    $block_row = array();
+      $weight = 0;
+      $visibility = 0;
+      $pages = array();
+      $types = array();
+      $views = array();
+      $block_row = array();
 
-    // add any existing block settings
-    if (isset($block0->visibility)) {
-      $weight = $block0->weight;
-      $visibility = $block0->visibility;
-      $pages = drupal_map_assoc(explode(PHP_EOL, $block0->pages));
-      $types = drupal_map_assoc(enterprise_apps_block_node_types($settings['module'], $settings['delta']));
-      $views = drupal_map_assoc(enterprise_apps_block_views($settings['module'], $settings['delta']));
-      $blk = (object) $settings;
-      $block_row = (array)block_row($blk);
-    }
-//dsm($types);
+      // add any existing block settings
+      if (isset($block0->visibility)) {
+        $weight = $block0->weight;
+        $visibility = $block0->visibility;
+        $pages = drupal_map_assoc(explode(PHP_EOL, $block0->pages));
+        $types = drupal_map_assoc(enterprise_apps_block_node_types($settings['module'], $settings['delta']));
+        $views = drupal_map_assoc(enterprise_apps_block_views($settings['module'], $settings['delta']));
+        $blk = (object) $settings;
+        $block_row = (array)block_row($blk);
+      }
+  //dsm($types);
 
-    // process direct settings
-    $weight = isset($settings['weight']) ? $settings['weight'] : $weight;
-    $visibility = isset($settings['path']['visibility']) ? $settings['path']['visibility'] : $visibility;
-    if (isset($settings['path']['pages'])) {
-      $pages = drupal_map_assoc($settings['path']['pages']) + $pages;
-    }
-    if (isset($settings['node_type']['types'])) {
-      $types = drupal_map_assoc($settings['node_type']['types'] + $types);
-    }
-    if (isset($settings['views']['views'])) {
-      $views = drupal_map_assoc($settings['views']['views'] + $views);
-    }
-    if (isset($settings['block_row'])) {
-      $block_row += $settings['block_row'];
-    }
+      // process direct settings
+      $weight = isset($settings['weight']) ? $settings['weight'] : $weight;
+      $visibility = isset($settings['path']['visibility']) ? $settings['path']['visibility'] : $visibility;
+      if (isset($settings['path']['pages'])) {
+        $pages = drupal_map_assoc($settings['path']['pages']) + $pages;
+      }
+      if (isset($settings['node_type']['types'])) {
+        $types = drupal_map_assoc($settings['node_type']['types'] + $types);
+      }
+      if (isset($settings['views']['views'])) {
+        $views = drupal_map_assoc($settings['views']['views'] + $views);
+      }
+      if (isset($settings['block_row'])) {
+        $block_row += $settings['block_row'];
+      }
 
-    // process any preset settings
-    if (isset($settings['visibility_presets']) && is_array($settings['visibility_presets'])) {
-      foreach ($settings['visibility_presets'] AS $preset_name) {
-        if (isset($ci_block['visibility_presets'][$preset_name])) {
-          $preset = $ci_block['visibility_presets'][$preset_name];
-        }
-        else {
-          $preset = array();
-        }
-//dsm($preset_name);
-//dsm($preset);
+      // process any preset settings
+      if (isset($settings['visibility_presets']) && is_array($settings['visibility_presets'])) {
+        foreach ($settings['visibility_presets'] AS $preset_name) {
+          if (isset($ci_block['visibility_presets'][$preset_name])) {
+            $preset = $ci_block['visibility_presets'][$preset_name];
+          }
+          else {
+            $preset = array();
+          }
+  //dsm($preset_name);
+  //dsm($preset);
 
-        $preset += array(
-          'path' => array(
-            'pages' => array(),
-            'visibility' => 0,
-          ),
-          'node_type' => array(
-            'types' => array(),
-          ),
-          'views' => array(
-            'views' => array(),
-          ),
-        );
-        $visibility = $preset['path']['visibility'];
-        foreach ($preset['path']['pages'] AS $page) {
-          $pages[$page] = $page;
-        }
-        foreach ($preset['node_type']['types'] AS $type) {
-          $types[$type] = $type;
-        }
-        foreach ($preset['views']['views'] AS $view) {
-          $views[$view] = $view;
+          $preset += array(
+            'path' => array(
+              'pages' => array(),
+              'visibility' => 0,
+            ),
+            'node_type' => array(
+              'types' => array(),
+            ),
+            'views' => array(
+              'views' => array(),
+            ),
+          );
+          $visibility = $preset['path']['visibility'];
+          foreach ($preset['path']['pages'] AS $page) {
+            $pages[$page] = $page;
+          }
+          foreach ($preset['node_type']['types'] AS $type) {
+            $types[$type] = $type;
+          }
+          foreach ($preset['views']['views'] AS $view) {
+            $views[$view] = $view;
+          }
         }
       }
-    }
 
-//dsm($ci_block);
-//dsm($settings);
-//dsm($pages);
-//dsm($types);
-//dsm($views);
+  //dsm($ci_block);
+  //dsm($settings);
+  //dsm($pages);
+  //dsm($types);
+  //dsm($views);
 
-    $title = isset($block0->title) ? $block0->title : '';
-    if (isset($settings['title'])) {
-      $title = $settings['title'];
-    }
-    $custom = isset($block0->custom) ? $block0->custom : 0;
-    if (isset($settings['custom'])) {
-      $custom = $settings['custom'];
-    }
-    $fields = array(
-      'title' => $title,
-      'region' => ($region) ? $region : -1,
-      'status' => ($region) ? 1 : 0,
-      'visibility' => (int) $visibility,
-      'pages' => implode(PHP_EOL, $pages),
-      'custom' => $custom,
-      'weight' => $weight,
-    );
-
-    if (module_exists('css_class')) {
-      if (isset($settings['css_class'])) {
-        $fields['css_class'] = $settings['css_class'];
+      $title = isset($block0->title) ? $block0->title : '';
+      if (isset($settings['title'])) {
+        $title = $settings['title'];
       }
-    }
-
-    $key = array(
-      'module' => $settings['module'],
-      'delta' => $settings['delta'],
-      'theme' => $theme,
-    );
-    $query = db_merge('block')
-      ->key($key)
-      ->fields($fields);
-//dsm(" " . $query);
-    $query->execute();
-
-    db_delete('block_node_type')
-      ->condition('module', $settings['module'])
-      ->condition('delta', $settings['delta'])
-      ->execute();
-    foreach ($types AS $i => $type) {
+      $custom = isset($block0->custom) ? $block0->custom : 0;
+      if (isset($settings['custom'])) {
+        $custom = $settings['custom'];
+      }
       $fields = array(
+        'title' => $title,
+        'region' => ($region) ? $region : -1,
+        'status' => ($region) ? 1 : 0,
+        'visibility' => (int) $visibility,
+        'pages' => implode(PHP_EOL, $pages),
+        'custom' => $custom,
+        'weight' => $weight,
+      );
+
+      if (module_exists('css_class')) {
+        if (isset($settings['css_class'])) {
+          $fields['css_class'] = $settings['css_class'];
+        }
+      }
+
+      $key = array(
         'module' => $settings['module'],
         'delta' => $settings['delta'],
-        'type' => $type,
+        'theme' => $theme,
       );
-      db_insert('block_node_type')
-        ->fields($fields)
-        ->execute();
-    }
+      $query = db_merge('block')
+        ->key($key)
+        ->fields($fields);
+  //dsm(" " . $query);
+      $query->execute();
 
-    db_delete('block_views')
-      ->condition('module', $settings['module'])
-      ->condition('delta', $settings['delta'])
-      ->execute();
-    foreach ($views AS $i => $viewdis) {
-      list($view, $display) = explode(':', $viewdis);
-      $fields = array(
-        'module' => $settings['module'],
-        'delta' => $settings['delta'],
-        'view' => $view,
-        'display' => $display,
-      );
-      db_insert('block_views')
-        ->fields($fields)
-        ->execute();
-    }
-
-    if (module_exists('block_row')) {
-      db_delete('block_row')
+      db_delete('block_node_type')
         ->condition('module', $settings['module'])
         ->condition('delta', $settings['delta'])
         ->execute();
-      if (!empty($block_row['row']) || !empty($block_row['row_class'])) {
+      foreach ($types AS $i => $type) {
         $fields = array(
           'module' => $settings['module'],
           'delta' => $settings['delta'],
-          'row' => isset($block_row['row']) ? $block_row['row'] : '',
-          'row_class' => isset($block_row['row_class']) ? $block_row['row_class'] : '',
+          'type' => $type,
         );
-        db_insert('block_row')
+        db_insert('block_node_type')
           ->fields($fields)
           ->execute();
+      }
+
+      db_delete('block_views')
+        ->condition('module', $settings['module'])
+        ->condition('delta', $settings['delta'])
+        ->execute();
+      foreach ($views AS $i => $viewdis) {
+        list($view, $display) = explode(':', $viewdis);
+        $fields = array(
+          'module' => $settings['module'],
+          'delta' => $settings['delta'],
+          'view' => $view,
+          'display' => $display,
+        );
+        db_insert('block_views')
+          ->fields($fields)
+          ->execute();
+      }
+
+      if (module_exists('block_row')) {
+        db_delete('block_row')
+          ->condition('module', $settings['module'])
+          ->condition('delta', $settings['delta'])
+          ->execute();
+        if (!empty($block_row['row']) || !empty($block_row['row_class'])) {
+          $fields = array(
+            'module' => $settings['module'],
+            'delta' => $settings['delta'],
+            'row' => isset($block_row['row']) ? $block_row['row'] : '',
+            'row_class' => isset($block_row['row_class']) ? $block_row['row_class'] : '',
+          );
+          db_insert('block_row')
+            ->fields($fields)
+            ->execute();
+        }
       }
     }
   }

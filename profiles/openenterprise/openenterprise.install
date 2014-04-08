@@ -163,14 +163,11 @@ function openenterprise_install() {
  */
 function openenterprise_install_theme_settings() {
   // Set default theme.
-  $theme_default = 'enterprise_bootstrap';
-  $themes = list_themes(TRUE); //Get all the available themes
-  if(isset($themes['unify'])) {
-    $theme_default = 'unify';
-  }
+  $themes_enable = openenterprise_themes_enable_list();
+  $theme_default = $themes_enable[count($themes_enable) - 1];
   variable_set('theme_default', $theme_default);
 
-  theme_enable(array($theme_default));
+  theme_enable($themes_enable);
   $settings = variable_get('theme_spacelab_settings', array());
   $settings['bootstrap_navbar_position'] = 'static-top';
   // turn off non block primary nav element, main-menu implemented as block
@@ -181,6 +178,17 @@ function openenterprise_install_theme_settings() {
 
   variable_set('admin_theme', 'rubik');
   variable_set('node_admin_theme', '1');
+}
+
+function openenterprise_themes_enable_list() {
+  $themes_enable = array(
+    'enterprise_bootstrap',
+  );
+  $themes = list_themes(TRUE); //Get all the available themes
+  if(isset($themes['unify'])) {
+    $themes_enable[] = 'unify';
+  }
+  return $themes_enable;
 }
 
 /*
@@ -208,31 +216,9 @@ function openenterprise_install_admin_roll() {
  */
 function openenterprise_install_blocks() {
   // Enable some standard blocks.
-  $default_theme = variable_get('theme_default', 'enterprise_bootstrap');
+  //$default_theme = variable_get('theme_default', 'enterprise_bootstrap');
   $admin_theme = 'rubik';
   $values = array(
-    array(
-      'module' => 'system',
-      'delta' => 'main',
-      'theme' => $default_theme,
-      'status' => 1,
-      'weight' => 0,
-      'region' => 'content',
-      'pages' => '',
-      'title' => '',
-      'cache' => -1,
-    ),
-    array(
-      'module' => 'openenterprise',
-      'delta' => 'powered-by',
-      'theme' => $default_theme,
-      'status' => 1,
-      'weight' => 10,
-      'region' => 'footer_bottom',
-      'pages' => '',
-      'title' => '',
-      'cache' => -1,
-    ),
     array(
       'module' => 'system',
       'delta' => 'main',
@@ -242,17 +228,6 @@ function openenterprise_install_blocks() {
       'region' => 'content',
       'pages' => '',
       'title' => '',
-      'cache' => -1,
-    ),
-    array(
-      'module' => 'system',
-      'delta' => 'main-menu',
-      'theme' => $default_theme,
-      'status' => 1,
-      'weight' => 0,
-      'region' => 'navigation',
-      'pages' => '',
-      'title' => '<none>',
       'cache' => -1,
     ),
     array(
@@ -300,6 +275,44 @@ function openenterprise_install_blocks() {
       'cache' => -1,
     ),
   );
+  $themes = openenterprise_themes_enable_list();
+  foreach ($themes AS $theme_name) {
+    $regions = system_region_list($theme_name);
+    $values[] = array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => $theme_name,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    );
+    $values[] = array(
+      'module' => 'system',
+      'delta' => 'main-menu',
+      'theme' => $theme_name,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'navigation',
+      'pages' => '',
+      'title' => '<none>',
+      'cache' => -1,
+    );
+    $values[] = array(
+      'module' => 'openenterprise',
+      'delta' => 'powered-by',
+      'theme' => $theme_name,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'footer_bottom',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    );
+  }
+
   $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'title', 'cache'));
   foreach ($values as $record) {
     $query->values($record);
