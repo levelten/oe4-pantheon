@@ -126,6 +126,19 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_sync_visitordata_fullcontact', INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT),
     '#description' => t('Check to enable syncing data via FullContact API. Only available for pro accounts.'),
   );
+
+  if($lib_path = intel_get_library_path()) {
+    $file_path = $lib_path . "/realtime/index.php";
+    if (file_exists($file_path)) {
+      $form['l10iapi']['advanced']['intel_track_realtime'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Realtime tracking'),
+        '#default_value' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
+        //'#description' => t('Check to enable syncing data via FullContact API. Only available for pro accounts.'),
+      );
+    }
+  }
+
   $form['l10iapi']['advanced']['intel_l10iapi_js_ver'] = array(
     '#type' => 'textfield',
     '#title' => t('Custom l10i.js version'),

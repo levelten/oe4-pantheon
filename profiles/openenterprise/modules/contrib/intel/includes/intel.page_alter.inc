@@ -106,6 +106,18 @@ function intel_page_alter(&$page) {
 
     // track page taxonomy terms
     $l10i_var_action['value'] = '';
+    if (isset($page_entity_settings['track_term_fields']) && is_array($page_entity_settings['track_term_fields'])) {
+      foreach ($page_entity_settings['track_term_fields'] AS $key => $flag) {
+        if ($flag && isset($entity->{$key}[$lang])) {
+          foreach ($entity->{$key}[$lang] AS $t) {
+            $page_attrs['t'] = array(
+              $t['tid'] => '',
+            );
+          }
+        }
+      }
+    }
+    /*
     foreach ($fields_info AS $key => $field) {
       if (isset($entity->{$key}[$lang][0]['tid'])) {
         $field_info = field_info_field($key);
@@ -119,6 +131,7 @@ function intel_page_alter(&$page) {
         }
       }
     }
+    */
     
     // set custom page attributes if page_attribute_col field exists
     if (!empty($entity->field_page_attribute_col[$lang]) && is_array($entity->field_page_attribute_col[$lang])) {
@@ -274,11 +287,13 @@ function intel_page_alter(&$page) {
       'cms_hostpath' => $parsed_url['hostpath'],
       'module_path' => drupal_get_path('module', 'intel'),
       'system_path' => $_GET['q'],
+      'lib_path' => intel_get_library_path(),
       'page_title' => $page_title,
       'track_analytics' => 0, // TODO ? does this do anything?
       'track_adhoc_ctas' => 'track-cta',
       'track_adhoc_events' => 'track-event',
       'track_forms' => $track_forms,
+      'track_realtime' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
       'is_landingpage' => $is_landingpage,
       'pushes' => $pushes,
       'scorings' => intel_get_scorings('js_setting'),

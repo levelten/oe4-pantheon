@@ -11,6 +11,7 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'node_type_form') {
     $entity_type = 'node';
     $bundle = isset($form['#node_type']->type) ? $form['#node_type']->type : '';
+
   }
   elseif ($form_id == 'taxonomy_form_vocabulary') {
     $entity_type = 'taxonomy';
@@ -58,6 +59,23 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
       '#default_value' => !empty($entity_settings['track_page_uid']) ? $entity_settings['track_page_uid'] : 'a',
       '#description' => t('If enabled, node author will be tracked in analytics for this content type.'),
     );
+
+    $options = array();
+    $fields_info = field_info_instances($entity_type, $bundle);
+    foreach ($fields_info AS $key => $field) {
+      $field_info = field_info_field($key);
+      if (isset($field_info['settings']['allowed_values'][0]['vocabulary'])) {
+        $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
+        $options[$key] = $field['label'];
+      }
+    }
+    $form['intel']['intel_track_term_fields'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Track vocabularies'),
+      '#options' => $options,
+      '#default_value' => !empty($entity_settings['track_term_fields']) ? $entity_settings['track_term_fields'] : array(),
+      '#description' => t('If checked, any terms in the vocabulary will be added to page attributes.'),
+    );
   }
   elseif ($form_id == 'taxonomy_form_vocabulary') {
     $form['intel']['intel_track_page_terms'] = array(
@@ -88,6 +106,9 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
 
   if (isset($values['intel_track_page_uid'])) {
     $entity_settings['track_page_uid'] = $values['intel_track_page_uid'];
+  }
+  if (isset($values['intel_track_term_fields'])) {
+    $entity_settings['track_term_fields'] = $values['intel_track_term_fields'];
   }
 
   if (isset($values['intel_track_page_terms'])) {

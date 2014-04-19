@@ -151,7 +151,7 @@ function openenterprise_install_finished(&$install_state) {
  */
 function openenterprise_install() {
   openenterprise_install_theme_settings();
-  openenterprise_install_admin_roll();
+  openenterprise_install_admin_role();
   openenterprise_install_blocks();
   openenterprise_install_permissions();
   openenterprise_install_variables();
@@ -194,7 +194,7 @@ function openenterprise_themes_enable_list() {
 /*
  * Install user rolls.
  */
-function openenterprise_install_admin_roll() {
+function openenterprise_install_admin_role() {
   // Create a default role for site administrators, with all available permissions assigned.
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
