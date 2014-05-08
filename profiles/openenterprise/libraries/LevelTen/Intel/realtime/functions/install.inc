@@ -17,7 +17,9 @@ function schema() {
   $schema = array();
   $schema['realtime'] = "
 CREATE TABLE IF NOT EXISTS `{$db_tableprefix}realtime` (
-  `time` int(11) NOT NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `time` int(11) unsigned NOT NULL,
+  `ord` tinyint(4) NOT NULL,
   `vtk` varchar(32) NOT NULL,
   `sid` int(11) NOT NULL,
   `type` varchar(32) NOT NULL, 
@@ -28,17 +30,28 @@ CREATE TABLE IF NOT EXISTS `{$db_tableprefix}realtime` (
   `value` float NOT NULL,
   `label` varchar(255) NOT NULL,
   `data` text NOT NULL,
+  PRIMARY KEY (`id`),
   KEY `time` (`time`),
-  KEY `vtk` (`vtk`)
+  KEY `vtk` (`vtk`(16))
+);
+";
+
+$schema['realtime_session'] = "
+CREATE TABLE IF NOT EXISTS `{$db_tableprefix}realtime_session` (
+  `vtk` varchar(32) NOT NULL,
+  `sid` int(11) NOT NULL,
+  `start` int(11) unsigned NOT NULL,
+  `last` int(11) unsigned NOT NULL,
+  `data` text NOT NULL,
+  PRIMARY KEY `vtk` (`vtk`(16),`sid`)
 );
 ";
 
 $schema['realtime_visitor'] = "
 CREATE TABLE IF NOT EXISTS `{$db_tableprefix}realtime_visitor` (
   `vtk` varchar(32) NOT NULL,
-  `sid` int(11) NOT NULL,
   `data` text NOT NULL,
-  KEY `vtk` (`vtk`)
+  PRIMARY KEY `vtk` (`vtk`(16))
 );
 ";
 
@@ -55,6 +68,7 @@ function install() {
 
   $tables = array(
     'realtime',
+    'realtime_session',
     'realtime_visitor',
   );
   foreach ($tables AS $table) {

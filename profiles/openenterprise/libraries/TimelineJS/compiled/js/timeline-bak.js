@@ -5647,12 +5647,6 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			goToSlide(n, ease, duration);
 		================================================== */
 		function goToSlide(n, ease, duration, fast, firstrun) {
-//console.log(this);
-//console.log($slider);
-//console.log($slider_container);
-//console.log(config);
-//console.log($(this).attr('id') + ' : ' + $(this).attr('class'));
-//console.log($(layout).attr('id') + ' : ' + $(layout).attr('class'));
 			var _ease		= config.ease,
 				_duration	= config.duration,
 				is_last		= false,
@@ -7130,7 +7124,6 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			
 			config.nav.width			= config.width;
 			config.nav.height			= 200;
-            //config.nav.height           = 150; // ALT
 			config.feature.width		= config.width;
 			config.feature.height		= config.height - config.nav.height;
 			config.nav.zoom.adjust		= parseInt(config.start_zoom_adjust, 10);
@@ -7960,7 +7953,6 @@ if(typeof VMM.Timeline != 'undefined' && typeof VMM.Timeline.TimeNav == 'undefin
 		};
 		
 		function goToMarker(n, ease, duration, fast, firstrun) {
-console.log(config);
 			trace("GO TO MARKER");
 			var _ease		= config.ease,
 				_duration	= config.duration,

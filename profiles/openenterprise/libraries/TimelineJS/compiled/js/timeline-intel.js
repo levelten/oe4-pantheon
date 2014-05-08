@@ -5235,7 +5235,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			config.slider.content.width = current_width - (config.slider.content.padding *2);
 			
 			VMM.Lib.width($slides_items, (slides.length * config.slider.content.width));
-			
+
 			if (_from_start) {
 				VMM.Lib.css($slider_container, "left", slides[current_slide].leftpos());
 			}
@@ -5653,6 +5653,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 //console.log(config);
 //console.log($(this).attr('id') + ' : ' + $(this).attr('class'));
 //console.log($(layout).attr('id') + ' : ' + $(layout).attr('class'));
+
 			var _ease		= config.ease,
 				_duration	= config.duration,
 				is_last		= false,
@@ -5663,8 +5664,9 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			/* STOP ANY VIDEO PLAYERS ACTIVE
 			================================================== */
 			VMM.ExternalAPI.youtube.stopPlayers();
-			
-			// Set current slide
+//console.log(slides);
+//console.log(current_slide);
+            // Set current slide
 			current_slide	= n;
 			_pos			= slides[current_slide].leftpos();
 			
@@ -7130,7 +7132,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			
 			config.nav.width			= config.width;
 			config.nav.height			= 200;
-            //config.nav.height           = 150; // ALT
+            config.nav.height           = 150; // ALT
 			config.feature.width		= config.width;
 			config.feature.height		= config.height - config.nav.height;
 			config.nav.zoom.adjust		= parseInt(config.start_zoom_adjust, 10);
@@ -7415,14 +7417,23 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		================================================== */
 		function build() {
 
-			// START AT SLIDE
-			if (parseInt(config.start_at_slide) > 0 && config.current_slide == 0) {
-				config.current_slide = parseInt(config.start_at_slide); 
-			}
-			// START AT END
-			if (config.start_at_end && config.current_slide == 0) {
-				config.current_slide = _dates.length - 1;
-			}
+            console.log(config);
+            console.log(_dates);
+
+            // TODO: HACK/PATCH
+
+
+            if (config.customUpdate != true) {
+                // START AT SLIDE
+                if (parseInt(config.start_at_slide) > 0 && config.current_slide == 0) {
+                    config.current_slide = parseInt(config.start_at_slide);
+                }
+                // START AT END
+                if (config.start_at_end && config.current_slide == 0) {
+                    config.current_slide = _dates.length - 1;
+                }
+            }
+
 			
 			
 			// IE7
@@ -7433,7 +7444,20 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				
 				detachMessege();
 				reSize();
-				
+
+                if (config.customUpdate == true) {
+                    if (config.customRefresh == true) {
+                        config.current_slide = 0;
+                        slider.setSlide(0);
+                    }
+                    //slider.init(_dates);
+                    //timenav.init(_dates, data.era);
+
+                    //slider.setSlide(_dates.length - 1);
+                    //timenav.setMarker(_dates.length - 1, config.ease, config.duration);
+                    //return;
+                }
+
 				// EVENT LISTENERS
 				VMM.bindEvent($slider, onSliderLoaded, "LOADED");
 				VMM.bindEvent($navigation, onTimeNavLoaded, "LOADED");
@@ -7446,8 +7470,12 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			
 				// RESIZE EVENT LISTENERS
 				VMM.bindEvent(global, reSize, config.events.resize);
-				
-				
+
+                if (config.customUpdate == true) {
+                    slider.setSlide(_dates.length - 1);
+                    timenav.setMarker(_dates.length - 1, config.ease, config.duration);
+                    //return;
+                }
 				
 			}
 			
@@ -7644,7 +7672,7 @@ if(typeof VMM.Timeline != 'undefined' && typeof VMM.Timeline.TimeNav == 'undefin
 	
 	VMM.Timeline.TimeNav = function(parent, content_width, content_height) {
 		trace("VMM.Timeline.TimeNav");
-		
+//console.log(parent);
 		var $timenav, $content, $time, $timeintervalminor, $timeinterval, $timeintervalmajor, $timebackground, 
 			$timeintervalbackground, $timenavline, $timenavindicator, $timeintervalminor_minor, $toolbar, $zoomin, $zoomout, $dragslide,
 			config					= VMM.Timeline.Config,
@@ -7960,7 +7988,6 @@ if(typeof VMM.Timeline != 'undefined' && typeof VMM.Timeline.TimeNav == 'undefin
 		};
 		
 		function goToMarker(n, ease, duration, fast, firstrun) {
-console.log(config);
 			trace("GO TO MARKER");
 			var _ease		= config.ease,
 				_duration	= config.duration,
@@ -7968,11 +7995,11 @@ console.log(config);
 				is_first	= false;
 			
 			current_marker = 	n;
-			
+
 			timenav_pos.left			= (config.width/2) - markers[current_marker].pos_left
 			timenav_pos.visible.left	= Math.abs(timenav_pos.left) - 100;
 			timenav_pos.visible.right	= Math.abs(timenav_pos.left) + config.width + 100;
-			
+
 			if (current_marker == 0) {
 				is_first = true;
 			}
@@ -8071,6 +8098,19 @@ console.log(config);
 			// NEED TO REWRITE ALL OF THIS
 			var _first								= getDateFractions(data[0].startdate),
 				_last								= getDateFractions(data[data.length - 1].enddate);
+
+            // TODO: HACK/PATCH
+            // assure at least a 30 min timespan
+//console.log(data);
+//console.log(config);
+            if (config.customMode == 'rtd') {
+                //var startdate = data[data.length - 1].enddate - (1800 * 1000);
+                //var _first = getDateFractions(startdate);
+                //var _first = getDateFractions(startdate);
+            }
+//console.log(_first);
+//console.log(_last);
+            // END TODO: HACK/PATCH
 			
 			// EON
 			interval_calc.eon.type					=	"eon";
@@ -8543,7 +8583,10 @@ console.log(config);
 		}
 		
 		function positionInterval(the_main_element, the_intervals, is_animated, is_minor) {
-			
+//console.log(the_main_element);
+//console.log(the_intervals);
+//console.log(the_intervals);
+
 			var last_position		= 0,
 				last_position_major	= 0,
 				//in_view_margin		= (config.nav.minor_width/config.nav.multiplier.current)/2,
@@ -8982,7 +9025,20 @@ console.log(config);
 			var i	= 0,
 				j	= 0;
 			// CALCULATE INTERVAL
-			timespan = getDateFractions((data[data.length - 1].enddate) - (data[0].startdate), true);
+
+            timespan = getDateFractions((data[data.length - 1].enddate) - (data[0].startdate), true);
+
+            // TODO: HACK/PATCH
+            // assure at least a 30 min timespan
+console.log(timespan);
+//console.log(data);
+//console.log(config);
+            if (config.customMode == 'rtd') {
+                //timespan = getDateFractions(1800 * 1000, true);
+            }
+console.log(timespan);
+            // END TODO: HACK/PATCH
+
 			trace(timespan);
 			calculateInterval();
 
@@ -9079,7 +9135,7 @@ console.log(config);
 				
 			markers			= [];
 			era_markers		= [];
-			
+console.log(data);
 			for(i = 0; i < data.length; i++) {
 				
 				var _marker,
@@ -9091,9 +9147,16 @@ console.log(config);
 					_marker_obj,
 					_marker_title		= "",
 					has_title			= false;
-				
-				
-				_marker					= VMM.appendAndGetElement($content, "<div>", "marker");
+
+                // TODO HACK/PATCH start
+                // add custom classes to markers
+				var classes = "marker";
+                if (data[i].classname != undefined) {
+                    classes += ' ' + data[i].classname
+                }
+
+				_marker					= VMM.appendAndGetElement($content, "<div>", classes);
+                // END TODO HACK/PATCH
 				_marker_flag			= VMM.appendAndGetElement(_marker, "<div>", "flag");
 				_marker_content			= VMM.appendAndGetElement(_marker_flag, "<div>", "flag-content");
 				_marker_dot				= VMM.appendAndGetElement(_marker, "<div>", "dot");

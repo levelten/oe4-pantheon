@@ -1011,9 +1011,9 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
         );
         $custom_str .= "$key|{$value['title']}";
         if (!empty($value['description'])) {
-          $custom_st .= "|" . $value['description'];
+          $custom_str .= "|" . $value['description'];
         }
-        $custom_st .= "\n";
+        $custom_str .= "\n";
       }
     }
     $form['options']['options'] = array(
@@ -1074,7 +1074,7 @@ function intel_admin_attribute_form_validate(&$form, &$form_state) {
   
   // process custom options
   $a = explode("\n", $values['custom_options']);
-  $static_options = $attribute['static_options'];
+  $static_options = !empty($attribute['static_options']) ? $attribute['static_options'] : array();
   $custom_options = array();
   foreach ($a AS $b) {
     if (!trim($b)) {
@@ -1112,7 +1112,7 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   $add = empty($form_state['attribute']['key']) ? 1 : 0;
   $scope = $form_state['scope'];
 
-  $attribute = array();
+  $attribute = !empty($form_state['attribute']) ? $form_state['attribute'] : array();
   if ($add) { 
     $key = $values['key'];   
   }

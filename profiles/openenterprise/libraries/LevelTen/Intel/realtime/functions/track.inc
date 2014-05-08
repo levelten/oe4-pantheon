@@ -28,6 +28,7 @@ function track_pageview() {
   }
   $response = array(
     'message' => "OK",
+    'instance' => $instance,
   );
   return $response;
 }
@@ -57,8 +58,8 @@ function track_session_construct() {
   $session = (object) array();
   $session->vtk = $GET['vtk'];
   $session->sid = $GET['sid'];
-  $session->start = (int)$GET['t'];
-  $session->last = (int)$GET['t'];
+  $session->start = REQUEST_TIME;
+  $session->last = REQUEST_TIME;
   $session->data = array();
   $session->data['ts'] = $GET['ts'];
   $session->data['vtk'] = $GET['vtk'];
@@ -70,22 +71,40 @@ function track_instance_construct() {
   global $GET;
 
   $instance = (object) array();
+
+  $instance->data = $GET;
+  unset($instance->data['q']);
+  unset($instance->data['callback']);
+
   $instance->vtk = $GET['vtk'];
   $instance->sid = $GET['sid'];
   $instance->time = (int)$GET['t'];
   $instance->path = $GET['p'];
   $instance->host = $GET['h'];
   $instance->isEntrance = (int)$GET['ie'];
+  // ordinal is used to make sure page views are returned before events so
+  // session data can be constructed properly
+  $instance->ord = 0;
+
+  // typecast for types other than str
+  $instance->data['t'] = (int)$instance->data['t'];
+  $instance->data['ie'] = (int)$instance->data['ie'];
+  $instance->data['iu'] = (int)$instance->data['iu'];
+
   if (isset($GET['ec'])) {
     $instance->category = $GET['ec'];
     $instance->action = $GET['ea'];
     $instance->label = $GET['el'];
-    $instance->value = (int)$GET['ev'];
+    $instance->value = (float)$GET['ev'];
     $instance->noninteraction = $GET['ei'];
+    $instance->ord = 1;
+
+    // typecast for types other than str
+    $instance->data['ev'] = (float)$instance->data['ev'];
+    $instance->data['ei'] = (int)$instance->data['ei'];
   }
-  $instance->data = $GET;
-  unset($instance->data['q']);
-  unset($instance->data['callback']);
+
+
   return $instance;
 }
 
@@ -99,6 +118,7 @@ function track_instance_dbsave($instance, $db_mode = 1) {
 
   $vars = array(
     ':time' => !empty($instance->time) ? $instance->time : 0,
+    ':ord' => isset($instance->ord) ? $instance->ord : 10,
     ':vtk' => !empty($instance->vtk) ? $instance->vtk : '',
     ':sid' => !empty($instance->sid) ? $instance->sid : 1,
     ':type' => !empty($instance->type) ? $instance->type : '',
@@ -210,7 +230,7 @@ function track_log_prune() {
 
   $query_str = "DELETE FROM {$db_tableprefix}realtime WHERE time < :time";
   $vars = array(
-    ':time' => REQUEST_TIME - 1800,
+    ':time' => REQUEST_TIME - 86400,
   );
   $query = $db->prepare($query_str);
   $query->execute($vars);
@@ -228,6 +248,7 @@ function track_log_prune() {
 function track_log() {
   global $GET, $POST;
 
+  /*
   $time_end = isset($GET['t']) ? $GET['t'] : REQUEST_TIME;
   $time_start = isset($GET['st']) ? $GET['st'] : ($time_end - 1800);
   $filters = array(
@@ -243,17 +264,35 @@ function track_log() {
     $time_end,
     '<=',
   );
+  */
+  $last_id = isset($GET['last_id']) ? $GET['last_id'] : 0;
+  $filters['conditions'][] = array(
+    'id',
+    $last_id,
+    '>',
+  );
+  /*
+  $filters['conditions'][] = array(
+    'time',
+    REQUEST_TIME - 86400,
+    '>',
+  );
+  */
 
   $instances = track_instance_dbload_by_filter($filters);
 
   // TODO: create a more effienct than decodeing json to encode json
   $data = array();
+  $ids = array();
   foreach ($instances AS $instance) {
     $data[] = json_decode($instance['data']);
+    $ids[] = $instance['id'];
   }
 
   $response = array(
     'instances' => $data,
+    'last_id' => $instances[count($instances) - 1]['id'],
+    'ids' => $ids,
   );
   return $response;
 }
@@ -264,7 +303,7 @@ function track_instance_dbload_by_filter($filters, $decode_types = array(), $dec
   $conditions = isset($filters['conditions']) ? $filters['conditions'] : array();
   $vars = array();
   //$query_str = "SELECT * FROM {$db_tableprefix}realtime";
-  $query_str = "SELECT data FROM {$db_tableprefix}realtime";
+  $query_str = "SELECT id, data FROM {$db_tableprefix}realtime";
   if (!empty($conditions)) {
     $query_str .= ' WHERE ';
     $count = 0;
@@ -281,6 +320,8 @@ function track_instance_dbload_by_filter($filters, $decode_types = array(), $dec
       $query_str .= $cond[0];
       $query_str .= isset($cond[2]) ? $cond[2] : '=';
       $query_str .= $hash;
+      $query_str .= ' ORDER BY time ASC, vtk ASC, ord ASC';
+      $query_str .= ' LIMIT 100';
       $count++;
     }
   }

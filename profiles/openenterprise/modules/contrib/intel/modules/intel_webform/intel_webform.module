@@ -50,6 +50,14 @@ function intel_webform_page_alter(&$page) {
 }
 
 /**
+ * Implements hook_intel_page_settings_js_alter()
+ * @param $settings
+ */
+function intel_webform_intel_page_settings_js_alter(&$settings) {
+  $settings['track_forms'][] = 'form.webform-client-form';
+}
+
+/**
  * Modify a Webform submission, prior to saving it in the database.
  *
  * @param $node

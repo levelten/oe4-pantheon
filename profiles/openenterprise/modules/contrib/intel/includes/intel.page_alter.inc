@@ -254,14 +254,14 @@ function intel_page_alter(&$page) {
   
   // check form processing
   // this is a hack to exclude webform's submission redirect page
-  $track_forms = 1;
+  $track_forms = array();
   if (isset($node->type) && ($node->type == 'webform')) {
     // check if page is a webform submit validation
     if (!empty($_POST['form_id']) && (substr($_POST['form_id'], 0, 20) == 'webform_client_form_')) {
       $track_forms = 0;
     }
   }
-  
+
   //if (isset($node->type) && ($node->type == 'enterprise_landingpage')) {
   //  $is_landingpage = 1;
   //}

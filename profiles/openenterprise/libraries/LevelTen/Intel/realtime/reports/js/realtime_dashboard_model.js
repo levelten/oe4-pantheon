@@ -1,19 +1,30 @@
 
-Array.prototype.remove = function(from, to) {
-    var rest = this.slice((to || from) + 1 || this.length);
-    this.length = from < 0 ? this.length + from : from;
-    return this.push.apply(this, rest);
-};
+
 
 function rtDashboardModel (name) {
     this.name = name;
     this.log = {};
     this.logNew = {};
     this.logDel = {};
+    this.logLastId = 0;
+    this.logExpire = 86400;
+    //this.logIds = {};
     this.sessions = {};
+    this.visitors = {};
     this.realtimeApiUrl = '../';
     this.timeDelta = 0;
     this.lastFetchTime = 0;
+    this.stats = {
+        pages: {},
+        pageAttrs: {},
+        ts: {},
+        tsDetails: {},
+        events: {},
+        ctas: {},
+        lps: {},
+        visitors: {}
+    };
+    this.statsDelta = {},
     this.authors = {
         1: 'User 1',
         3: 'Tom McCracken',
@@ -39,6 +50,18 @@ function rtDashboardModel (name) {
         'thankyou': 'Thank you pages',
         'press_release': 'Press releases'
     };
+    this.scorings = {
+        entrance: .05,
+        stick: .1,
+        additional_pages: .02
+    };
+
+    this.init = function () {
+        // if this window is the main report, then initiate polling
+        if ((rtdSetup.role == 'all') || rtdSetup.role == 'master') {
+            this.pole();
+        }
+    }
 
     this.pole = function pole() {
         // limit fetch starttime to 30 minutes ago
@@ -60,6 +83,7 @@ function rtDashboardModel (name) {
         var func = 'track/log';
         var time = this.getTime();
         var params = {
+            last_id: this.logLastId,
             st: this.lastFetchTime,
             t: time - 1
         };
@@ -71,7 +95,7 @@ function rtDashboardModel (name) {
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
 //console.log(json);
-                rtdModel.addToLog(json.instances);
+                rtdModel.addToLog(json.instances, json.ids, json.last_id);
                 //rtdModel.buildTimeline();
             }
         };
@@ -79,15 +103,30 @@ function rtDashboardModel (name) {
         jQuery.ajax(vars);
     };
 
-    this.addToLog = function addToLog(data) {
-        //console.log('addToLog data:'); console.log(data);
+    this.addToLog = function addToLog(data, ids, lastId) {
         var time;
+
         for (var i in data) {
+            if (ids[i] < this.logLastId) {
+              continue; // we got duplicate data for some reason
+            }
             var e = data[i];
             if (e.t == undefined) {
                 continue;
             }
             time = e.t;
+            // unserialise page attributes
+            if (data[i].pa != undefined) {
+                data[i].pa = this._unserializeCustomVar(data[i].pa);
+            }
+            // unserialise traffic source
+            if (data[i].ts != undefined) {
+                data[i].ts = this._unserializeCustomVar(data[i].ts);
+            }
+            // remove url encodeing from doc title
+            data[i].dt = decodeURI(data[i].dt);
+            data[i].f = decodeURI(data[i].f);
+
             // initialize element if does not exist
             if (this.log[time] == undefined) {
                 this.log[time] = [];
@@ -97,11 +136,13 @@ function rtDashboardModel (name) {
             if (this.logNew[time] == undefined) {
                 this.logNew[time] = [];
             }
+            // store the index of the instance in the main log element
+            data[i].logEI = this.log[time].length - 1;
             this.logNew[time].push(data[i]);
         }
 
         // remove any data older than 30 minutes
-        var time0 = this.getTime() - 1800;
+        var time0 = this.getTime() - this.logExpire;
         for (var t in this.log) {
             var time = parseInt(t);
             if (time >= time0) {
@@ -109,6 +150,12 @@ function rtDashboardModel (name) {
             }
             this.logDel[time] = this.log.t;
             delete this.log.t;
+        }
+        this.logLastId = lastId;
+        if (data.length > 0) {
+            console.log('New Data (addToLog):');
+            console.log(data);
+            console.log(this.logNew);
         }
         //console.log(this.log);
     }
@@ -169,64 +216,7 @@ function rtDashboardModel (name) {
         return str.join("&");
     };
 
-    this.buildTimeline = function buildTimeline() {
-        console.log(this.instances);
 
-        var curTime = this.getTime();
-        var timelineData = {
-            headline: "Test Headline",
-            type: "default",
-            text: "Intro body text goes here",
-            startDate: this.formatTimelineDate(curTime - 1800),
-            endDate: this.formatTimelineDate(curTime),
-            date: []
-        };
-        console.log(this.instances);
-        for (var i in this.instances) {
-            var inst = this.instances[i];
-            var time = this.formatTimelineDate(inst.time);
-            timelineData.date.push({
-                startDate: time,
-                endDate: time,
-                headline: inst.path,
-                text: "test text",
-                tag: "pageview",
-                asset: {
-                    media: "http://" + inst.host + inst.path
-                }
-            });
-        }
-        console.log(timelineData);
-        var data = {
-            type:       'timeline',
-            width:      $('#timeline-report .pane').width() + 2,
-            height:     $('#timeline-report .pane').height() + 16,
-            source:     {timeline: timelineData},
-            embed_id:   'timeline',
-            //debug: true,
-            //start_zoom_adjust:  '2',
-            start_at_end: true
-        };
-        createStoryJS(data);
-        //console.log(data);
-        //dsm(VMM);
-        //var timeline = new VMM.Timeline();
-        //console.log(timeline);
-        //timeline.init({timeline: timelineData});
-    };
-
-    this.formatTimelineDate = function formatTimelineDate(time) {
-        var d = new Date(1000 * parseInt(time));
-        //var time = d.getFullYear() + ',' + (d.getMonth()+1) + ',' + d.getDate() + ' ';
-        var time =  (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear()  + ' ';
-        var t = d.getHours();
-        time += ((''+t).length<2 ? '0' : '') + t;
-        t = d.getMinutes();
-        time += ':' + ((''+t).length<2 ? '0' : '') + t;
-        t = d.getSeconds();
-        time += ':' + ((''+t).length<2 ? '0' : '') + t;
-        return time;
-    };
 
     this._unserializeCustomVar = function (str) {
         str = decodeURIComponent(str);
@@ -269,35 +259,39 @@ function rtDashboardView (name) {
     this.charts = {};
     this.chartData = {};
     this.chartDivs = {
-        pages: 'chart-realtime-pageviews-table',
-        pageAttrs: 'chart-realtime-page-attrs-table',
-        events: 'chart-realtime-events-table',
-        eventDetails: 'chart-realtime-events-details-table',
-        ctas: 'chart-realtime-ctas-table',
-        lps: 'chart-realtime-landingpages-table'
+        pages: 'pages-table',
+        pageAttrs: 'page-attrs-table',
+        events: 'events-table',
+        eventDetails: 'events-details-table',
+        ctas: 'ctas-table',
+        lps: 'landingpages-table',
+        ts: 'ts-table',
+        tsDetails: 'ts-details-table',
+        visitors: 'active-visitors-table',
+        visitorTimeline: 'visitor-timeline',
+        visitorDetails: 'visitor-details'
     }
+    this.chartsEnabled = {};
     this.chartIndex = {
-        pvTable: {},
+        pages: {},
         pageAttrs: {},
         eTable: {},
         edTable: {},
         ctaTable: {},
-        lpTable: {}
+        lpTable: {},
+        ts: {},
+        tsDetails: {},
+        visitors: {}
     };
-    this.stats = {
-        pages: {},
-        pageAttrs: {},
-        events: {},
-        ctas: {},
-        lps: {}
-    };
-    this.statsDelta = {},
     this.chartBumps = {
         pages: {},
         pageAttrs: {},
+        ts: {},
+        tsDetails: {},
         events: {},
         ctas: {},
-        lps: {}
+        lps: {},
+        visitors: {}
     };
     this.chartRotation = {
         pageAttrs: [
@@ -305,10 +299,17 @@ function rtDashboardView (name) {
             ['ct', 'blog'],
             ['t'],
             ['a']
+        ],
+        tsDetails: [
+            ['source'],
+            ['medium'],
+            ['campaign'],
+            ['term']
         ]
     };
     this.chartRotationI = {
         pageAttrs: 0,
+        tsDetails: 0,
         eventDetail: 0
     };
     this.pageAttrsChartLabels = {
@@ -317,6 +318,13 @@ function rtDashboardView (name) {
         ctd: '%key pages'
     };
     this.pageAttrsActive = [];
+    this.tsDetailsChartLabels = {
+        source: 'Sources',
+        medium: 'Mediums',
+        term: 'Terms',
+        campaign: 'Campaigns'
+    };
+    this.tsDetailsActive = [];
     this.eventDetailCharts = [
       'Social share',
       'Comment'
@@ -331,17 +339,29 @@ function rtDashboardView (name) {
         '#E89B0C'
     ];
 
-    this.initStatsDelta = function initStatsDelta() {
-        this.statsDelta = {
-            pages: {},
-            pageAttrs: {},
-            events: {},
-            ctas: {},
-            lps: {}
-        };
-    };
-
     this.rotationCount = 0;
+
+    this.init = function (chartWindows) {
+      for (var key in this.chartDivs) {
+        if ($('#' + this.chartDivs[key]).lenght > 0) {
+            this.chartsEnabled[key] = true;
+        }
+      }
+
+      if (rtdSetup.role == 'child') {
+          this.model = window.opener.rtdModel;
+      }
+      else {
+          this.model = window.rtdModel;
+      }
+
+      // if this window is the main report, then initiate polling
+      if ((rtdSetup.role == 'all') || rtdSetup.role == 'master') {
+          this.pole();
+      }
+
+    }
+
     this.pole = function pole() {
 //return;
         rtdView.buildAll();
@@ -349,9 +369,21 @@ function rtDashboardView (name) {
         window.setInterval(function () {
             rtdView.buildAll();
 
-        }, 2000);
+        }, 1000);
     };
 
+    this.initStatsDelta = function initStatsDelta() {
+        this.statsDelta = {
+            pages: {},
+            pageAttrs: {},
+            events: {},
+            ctas: {},
+            lps: {},
+            ts: {},
+            tsDetails: {},
+            visitors: {}
+        };
+    };
 
     this.buildAll = function buildAll() {
         if ((typeof(sp) == 'undefined')) {
@@ -367,16 +399,16 @@ function rtDashboardView (name) {
     };
 
     this.buildCharts = function buildCharts() {
-        var log = rtdModel.log;
-        var logNew = rtdModel.logNew;
-        rtdModel.logNew = {};
+        var log = this.model.log;
+        var logNew = this.model.logNew;
+        this.model.logNew = {};
         // clear previous statsDelta values
         this.initStatsDelta();
 
-        var curTime = rtdModel.getTime();
+        var curTime = this.model.getTime();
         var maxValue = 0;
-        //console.log(log);
-        //console.log(curTime);
+//console.log('log'); console.log(log);
+console.log('logNew'); console.log(logNew);
 
         var secTime0 = curTime - 60;
         var minTime0 = curTime - 1800;
@@ -392,12 +424,13 @@ function rtDashboardView (name) {
 
         var col1Style = 'stroke-color: ' + this.chartColors[0] + '; stroke-width: 2; fill-opacity: 0.4';
         var col2Style = 'stroke-color: ' + this.chartColors[1] + '; stroke-width: 2; fill-opacity: 0.4';
+        var col3Style = 'stroke-color: ' + this.chartColors[2] + '; stroke-width: 2; fill-opacity: 0.4';
         if (this.chartData.pvMin == undefined) {
             this.chartData.pvMin = new google.visualization.DataTable();
             this.chartData.pvMin.addColumn('number', 'Time');
-            this.chartData.pvMin.addColumn('number', 'Entrances');
-            this.chartData.pvMin.addColumn({type: 'string', role: 'style'});
             this.chartData.pvMin.addColumn('number', 'Pageviews');
+            this.chartData.pvMin.addColumn({type: 'string', role: 'style'});
+            this.chartData.pvMin.addColumn('number', 'Entrances');
             this.chartData.pvMin.addColumn({type: 'string', role: 'style'});
             for (var i = 0; i < 30; i++) {
                 this.chartData.pvMin.addRow([i*60, 0, col1Style, 0, col2Style]);
@@ -406,18 +439,20 @@ function rtDashboardView (name) {
         if (this.chartData.pvSec == undefined) {
             this.chartData.pvSec = new google.visualization.DataTable();
             this.chartData.pvSec.addColumn('number', 'Time');
-            this.chartData.pvSec.addColumn('number', 'Entrances');
             this.chartData.pvSec.addColumn('number', 'Pageviews');
+            this.chartData.pvSec.addColumn('number', 'Entrances');
         }
         if (this.chartData.eMin == undefined) {
             this.chartData.eMin = new google.visualization.DataTable();
             this.chartData.eMin.addColumn('number', 'Time');
-            this.chartData.eMin.addColumn('number', 'Valued events');
-            this.chartData.eMin.addColumn({type: 'string', role: 'style'});
             this.chartData.eMin.addColumn('number', 'Events');
             this.chartData.eMin.addColumn({type: 'string', role: 'style'});
+            this.chartData.eMin.addColumn('number', 'Value events');
+            this.chartData.eMin.addColumn({type: 'string', role: 'style'});
+            this.chartData.eMin.addColumn('number', 'Goals');
+            this.chartData.eMin.addColumn({type: 'string', role: 'style'});
             for (var i = 0; i < 30; i++) {
-                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col2Style]);
+                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col2Style, 0, col3Style]);
             }
         }
         if (this.chartData.eSec == undefined) {
@@ -425,15 +460,10 @@ function rtDashboardView (name) {
             this.chartData.eSec.addColumn('number', 'Time');
             this.chartData.eSec.addColumn('number', 'Valued events');
             this.chartData.eSec.addColumn('number', 'Events');
+            this.chartData.eSec.addColumn('number', 'Goals');
         }
 
-        if (this.chartData.pvTable == undefined) {
-            this.chartData.pvTable = new google.visualization.DataTable();
-            this.chartData.pvTable.addColumn('string', 'Pages');
-            this.chartData.pvTable.addColumn('number', 'Ent');
-            this.chartData.pvTable.addColumn('number', 'Pvs');
-            this.chartData.pvTable.addColumn('number', 'Val');
-        }
+
 
         if (this.chartData.eTable == undefined) {
             this.chartData.eTable = new google.visualization.DataTable();
@@ -453,8 +483,6 @@ function rtDashboardView (name) {
             this.chartData.ctaTable.addColumn('number', 'Imps');
             this.chartData.ctaTable.addColumn('number', 'Clks');
             this.chartData.ctaTable.addColumn('number', 'Clk%');
-            var formatter = new google.visualization.NumberFormat({suffix: '%', fractionDigits: 1});
-            formatter.format(this.chartData.ctaTable, 3); // Apply formatter to second column
         }
         if (this.chartData.lpTable == undefined) {
             this.chartData.lpTable = new google.visualization.DataTable();
@@ -540,9 +568,8 @@ function rtDashboardView (name) {
 
         var minData = [];
         var count = 0;
-        var theLog = (this.lastBuild == 0) ? log : logNew;
-        for (var i in theLog) {
-            var logElement = theLog[i];
+        for (var i in logNew) {
+            var logElement = logNew[i];
             var index = 0;
             var t = parseInt(i);
             // skip if t is greaterthan the browsers current time
@@ -556,16 +583,18 @@ function rtDashboardView (name) {
                 row = 29 - Math.floor((t - minTime0) / 60);
 //console.log(row);
                 if (counts.siteAdd.pageviews > 0) {
-                    count = this.chartData.pvMin.getValue(row, 3);
-                    this.chartData.pvMin.setValue(row, 3, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
                     count = this.chartData.pvMin.getValue(row, 1);
-                    this.chartData.pvMin.setValue(row, 1, counts.siteAdd.entrances + count);
+                    this.chartData.pvMin.setValue(row, 1, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
+                    count = this.chartData.pvMin.getValue(row, 3);
+                    this.chartData.pvMin.setValue(row, 3, counts.siteAdd.entrances + count);
                 }
                 if (counts.siteAdd.events > 0) {
-                    count = this.chartData.eMin.getValue(row, 3);
-                    this.chartData.eMin.setValue(row, 3, (counts.siteAdd.events - counts.siteAdd.valuedEvents) + count);
                     count = this.chartData.eMin.getValue(row, 1);
-                    this.chartData.eMin.setValue(row, 1, counts.siteAdd.valuedEvents + count);
+                    this.chartData.eMin.setValue(row, 1, (counts.siteAdd.events - counts.siteAdd.valuedEvents - counts.siteAdd.goals) + count);
+                    count = this.chartData.eMin.getValue(row, 3);
+                    this.chartData.eMin.setValue(row, 3, counts.siteAdd.valuedEvents + count);
+                    count = this.chartData.eMin.getValue(row, 5);
+                    this.chartData.eMin.setValue(row, 5, counts.siteAdd.goals + count);
                 }
             }
             if (t >= secTime0) {
@@ -574,56 +603,51 @@ function rtDashboardView (name) {
                 // update
                 if (counts.siteAdd.pageviews > 0) {
                     if (pvSecIndexes[time] == undefined) {
-                        this.chartData.pvSec.addRow([time, counts.siteAdd.entrances, (counts.siteAdd.pageviews - counts.siteAdd.entrances)]);
+                        this.chartData.pvSec.addRow([time, (counts.siteAdd.pageviews - counts.siteAdd.entrances), counts.siteAdd.entrances]);
                     }
                     else {
                         var row = pvSecIndexes[time];
-                        count = this.chartData.pvSec.getValue(row, 2);
-                        this.chartData.pvSec.setValue(row, 2, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
                         count = this.chartData.pvSec.getValue(row, 1);
-                        this.chartData.pvSec.setValue(row, 1, counts.siteAdd.entrances + count);
+                        this.chartData.pvSec.setValue(row, 1, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
+                        count = this.chartData.pvSec.getValue(row, 2);
+                        this.chartData.pvSec.setValue(row, 2, counts.siteAdd.entrances + count);
                     }
                 }
                 if (counts.siteAdd.events > 0) {
                     if (eSecIndexes[time] == undefined) {
-                        this.chartData.eSec.addRow([time, counts.siteAdd.valuedEvents, (counts.siteAdd.events - counts.siteAdd.valuedEvents)]);
+                        this.chartData.eSec.addRow([time, (counts.siteAdd.events - counts.siteAdd.valuedEvents - counts.siteAdd.goals), counts.siteAdd.valuedEvents, counts.siteAdd.goals]);
                     }
                     else {
                         var row = eSecIndexes[time];
-                        count = this.chartData.eSec.getValue(row, 2);
-                        this.chartData.eSec.setValue(row, 2, (counts.siteAdd.events - counts.siteAdd.valuedEvents) + count);
                         count = this.chartData.eSec.getValue(row, 1);
-                        this.chartData.eSec.setValue(row, 1, counts.siteAdd.valuedEvents + count);
+                        this.chartData.eSec.setValue(row, 1, (counts.siteAdd.events - counts.siteAdd.valuedEvents - counts.siteAdd.goals) + count);
+                        count = this.chartData.eSec.getValue(row, 2);
+                        this.chartData.eSec.setValue(row, 2, counts.siteAdd.valuedEvents + count);
+                        count = this.chartData.eSec.getValue(row, 3);
+                        this.chartData.eSec.setValue(row, 3, counts.siteAdd.goals + count);
                     }
                 }
 
             }
         }
         //console.log(this.chartData.pvMin.toJSON());
-console.log(this.statsDelta);
-        // page table build
-        for (var key in this.statsDelta.pages) {
-            var c = this.statsDelta.pages[key];
-            if (this.chartIndex.pvTable[key] == undefined) {
-                this.chartIndex.pvTable[key] = this.chartData.pvTable.getNumberOfRows();
-                this.chartData.pvTable.addRow([key, 0, 0, 0]);
-            }
-            row = this.chartIndex.pvTable[key];
-            count = this.chartData.pvTable.getValue(row, 1);
-            this.chartData.pvTable.setValue(row, 1, c.entrances + count);
-            count = this.chartData.pvTable.getValue(row, 2);
-            this.chartData.pvTable.setValue(row, 2, c.pageviews + count);
-            this.chartBumps.pages[row] = c.pageviews;
-        }
-
+//console.log(this.statsDelta);
         var statsData = this.statsDelta;
         if ((this.lastBuild == 0)) {
            statsData = this.stats;
         }
 
+        this.buildPagesReport(statsData);
+
         this.buildPageAttrsReport(statsData);
 
+        this.buildTsReport(statsData);
 
+        this.buildTsDetailsReport(statsData);
+
+        this.buildVisitorsReport(statsData);
+
+/*
         // event table build
         for (var key in this.statsDelta.events) {
             var c = this.statsDelta.events[key];
@@ -668,7 +692,8 @@ console.log(this.statsDelta);
             this.chartData.ctaTable.setValue(row, 1, countA);
             var countB = this.chartData.ctaTable.getValue(row, 2)  + c.clicks;
             this.chartData.ctaTable.setValue(row, 2, countB);
-            this.chartData.ctaTable.setValue(row, 3, Math.round(100 * countB/countA, 1));
+            var per = (countA != 0) ? 100 * countB/countA : 0;
+            this.chartData.ctaTable.setValue(row, 3, per);
             this.chartBumps.ctas[row] = c.clicks;
         }
 
@@ -684,9 +709,11 @@ console.log(this.statsDelta);
             this.chartData.lpTable.setValue(row, 1, countA);
             var countB = this.chartData.lpTable.getValue(row, 2)  + c.conversions;
             this.chartData.lpTable.setValue(row, 2, countB);
-            this.chartData.lpTable.setValue(row, 3, Math.round(100 * countB/countA, 1));
+            var per = (countA != 0) ? 100 * countB/countA : 0;
+            this.chartData.lpTable.setValue(row, 3, per);
             this.chartBumps.lps[row] = c.conversions;
         }
+        */
 
         var minDivWidth = jQuery('#chart-realtime-pageviews-min').width();
         var backgroundColor = jQuery('.pane').css('background-color');
@@ -757,12 +784,12 @@ console.log(this.statsDelta);
         };
 
         if (this.charts.pvMin == undefined) {
-            this.charts.pvMin = new google.visualization.ColumnChart(document.getElementById('chart-realtime-pageviews-min'));
+            this.charts.pvMin = new google.visualization.ColumnChart(document.getElementById('active-pageviews-timeline-min'));
         }
         this.charts.pvMin.draw(this.chartData.pvMin, options);
 
         if (this.charts.eMin == undefined) {
-            this.charts.eMin = new google.visualization.ColumnChart(document.getElementById('chart-realtime-events-min'));
+            this.charts.eMin = new google.visualization.ColumnChart(document.getElementById('active-events-timeline-min'));
         }
         this.charts.eMin.draw(this.chartData.eMin, options);
 
@@ -782,15 +809,16 @@ console.log(this.statsDelta);
         };
 
         if (this.charts.pvSec == undefined) {
-           this.charts.pvSec = new google.visualization.ColumnChart(document.getElementById('chart-realtime-pageviews-sec'));
+           this.charts.pvSec = new google.visualization.ColumnChart(document.getElementById('active-pageviews-timeline-sec'));
         }
         this.charts.pvSec.draw(this.chartData.pvSec, options);
 
         if (this.charts.eSec == undefined) {
-            this.charts.eSec = new google.visualization.ColumnChart(document.getElementById('chart-realtime-events-sec'));
+            this.charts.eSec = new google.visualization.ColumnChart(document.getElementById('active-events-timeline-sec'));
         }
         this.charts.eSec.draw(this.chartData.eSec, options);
 
+        /*
         options = {
             showRowNumber: true,
             allowHtml: true,
@@ -802,32 +830,34 @@ console.log(this.statsDelta);
               headerCell: 'table-header-cell'
             }
         };
-        if (this.charts.pvTable == undefined) {
-            this.charts.pvTable = new google.visualization.Table(document.getElementById('chart-realtime-pageviews-table'));
-        }
-        this.charts.pvTable.draw(this.chartData.pvTable, options);
 
 
+        var valueFormatter = this.valueFormatter();
+        var percentFormatter = this.percentFormatter();
 
         if (this.charts.eTable == undefined) {
-            this.charts.eTable = new google.visualization.Table(document.getElementById('chart-realtime-events-table'));
+            this.charts.eTable = new google.visualization.Table(document.getElementById('events-table'));
         }
         this.charts.eTable.draw(this.chartData.eTable, options);
 
         if (this.charts.edTable == undefined) {
-            this.charts.edTable = new google.visualization.Table(document.getElementById('chart-realtime-events-detail-table'));
+            this.charts.edTable = new google.visualization.Table(document.getElementById('event-details-table'));
         }
         this.charts.edTable.draw(this.chartData.edTable, options);
 
         if (this.charts.ctaTable == undefined) {
-            this.charts.ctaTable = new google.visualization.Table(document.getElementById('chart-realtime-ctas-table'));
+            this.charts.ctaTable = new google.visualization.Table(document.getElementById('ctas-table'));
         }
+        percentFormatter.format(this.chartData.ctaTable, 3);
         this.charts.ctaTable.draw(this.chartData.ctaTable, options);
 
         if (this.charts.lpTable == undefined) {
-            this.charts.lpTable = new google.visualization.Table(document.getElementById('chart-realtime-landingpages-table'));
+            this.charts.lpTable = new google.visualization.Table(document.getElementById('landingpages-table'));
         }
+        percentFormatter.format(this.chartData.lpTable, 3);
         this.charts.lpTable.draw(this.chartData.lpTable, options);
+
+        */
 
         this.doChartBumps();
 
@@ -850,9 +880,88 @@ console.log(this.statsDelta);
         return options;
     };
 
+    this.valueFormatter = function() {
+       return new google.visualization.NumberFormat({
+            fractionDigits: 2
+        });
+    };
+
+    this.percentFormatter = function() {
+        return new google.visualization.NumberFormat({
+            fractionDigits: 1,
+            suffix: '%'
+        });
+    };
+
+    this.timeMSFormatter = function() {
+        return new google.visualization.DateFormat({
+            pattern: "m:ss"
+        });
+    };
+
     this.chartRedraw = {};
+
+    this.buildPagesReport = function(statsData, refresh) {
+        var chartKey = 'pages';
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+        if (this.chartData.pages == undefined) {
+            this.chartData.pages = new google.visualization.DataTable();
+            this.chartData.pages.addColumn('string', 'Pages');
+            this.chartData.pages.addColumn('number', 'Ent');
+            this.chartData.pages.addColumn('number', 'Pvs');
+            this.chartData.pages.addColumn('number', 'Val');
+        }
+        var draw = false;
+        for (var key in statsData.pages) {
+            var c = statsData.pages[key];
+            draw = true;
+            if (this.chartIndex.pages[key] == undefined) {
+                this.chartIndex.pages[key] = this.chartData.pages.getNumberOfRows();
+                this.chartData.pages.addRow([key, 0, 0, 0]);
+            }
+            var row = this.chartIndex.pages[key];
+
+            count = this.chartData.pages.getValue(row, 1);
+            this.chartData.pages.setValue(row, 1, c.entrances + count);
+
+            count = this.chartData.pages.getValue(row, 2);
+            this.chartData.pages.setValue(row, 2, c.pageviews + count);
+
+            count = this.chartData.pages.getValue(row, 3);
+            this.chartData.pages.setValue(row, 3, c.value + count);
+
+            if (refresh != true) {
+                if (c.pageviews > 0) {
+                    this.chartBumps.pages[row] = 0;
+                }
+                if (c.value > 1) {
+                    this.chartBumps.pages[row] = 1;
+                }
+            }
+            //console.log(this.chartBumps.pages);
+
+        }
+
+        if (this.charts.pages == undefined) {
+            this.charts.pages = new google.visualization.Table(document.getElementById(this.chartDivs['pages']));
+            google.visualization.events.addListener(this.charts.pages, 'ready', function () {rtdView.doChartBumps('pages');});
+        }
+        if (draw) {
+            var valueFormatter = this.valueFormatter();
+            valueFormatter.format(this.chartData.pages, 3);
+            this.charts.pages.draw(this.chartData.pages, this.drawTableOptions());
+        }
+
+    };
+
     this.buildPageAttrsReport = function(statsData, type, refresh) {
-console.log(statsData);
+//console.log(statsData);
+        var chartKey = 'pageAttrs';
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
         if (type == undefined) {
           type = (this.pageAttrsActive.length > 0) ? this.pageAttrsActive : this.chartRotation.pageAttrs[this.chartRotationI.pageAttrs];
         }
@@ -866,7 +975,7 @@ console.log(statsData);
           delete this.chartRedraw.pageAttrs;
         }
 
-console.log(statsData);
+//console.log(statsData);
         if (this.chartData.pageAttrs == undefined) {
             this.chartData.pageAttrs = new google.visualization.DataTable();
             this.chartData.pageAttrs.addColumn('string', 'Content types');
@@ -877,24 +986,29 @@ console.log(statsData);
         var labels = {};
         var data = {};
         if (statsData.pageAttrs[type[0]] != undefined
-            && ()) {
+        //    && ()
+        ) {
             data = statsData.pageAttrs[type[0]];
             if ((type.length == 2)) {
-              if
-              data = data[type[1]]._pages;
+              if (data[type[1]] == undefined) {
+                data = {};
+              }
+              else {
+                  data = data[type[1]]._pages;
+              }
             }
             if (type[0] == 'a') {
                 this.chartData.pageAttrs.setColumnLabel(0, 'Authors');
-                labels = rtdModel.authors;
+                labels = this.model.authors;
             }
             if (type[0] == 't') {
                 this.chartData.pageAttrs.setColumnLabel(0, 'Terms');
-                labels = rtdModel.terms;
+                labels = this.model.terms;
             }
             if (type[0] == 'ct') {
-                labels = rtdModel.contentTypes;
+                labels = this.model.contentTypes;
                 if ((type.length == 2)) {
-                    var label = (rtdModel.contentTypes[type[1]] != undefined) ? rtdModel.contentTypes[type[1]] : type[1];
+                    var label = (this.model.contentTypes[type[1]] != undefined) ? this.model.contentTypes[type[1]] : type[1];
                     this.chartData.pageAttrs.setColumnLabel(0, label);
                 }
             }
@@ -910,64 +1024,513 @@ console.log(statsData);
             row = this.chartIndex.pageAttrs[key];
             count = this.chartData.pageAttrs.getValue(row, 1);
             this.chartData.pageAttrs.setValue(row, 1, c.entrances + count);
+
             count = this.chartData.pageAttrs.getValue(row, 2);
             this.chartData.pageAttrs.setValue(row, 2, c.pageviews + count);
+
+            count = this.chartData.pageAttrs.getValue(row, 3);
+            this.chartData.pageAttrs.setValue(row, 3, c.value + count);
+
             if (refresh != true) {
-                this.chartBumps.pageAttrs[row] = c.pageviews;
-                // make sure to clear the bump styles
-                this.chartRedraw.pageAttrs = true;
+                if (c.pageviews > 0) {
+                    this.chartBumps.pageAttrs[row] = 0;
+                }
+                if (c.value > 1) {
+                    this.chartBumps.pageAttrs[row] = 1;
+                }
             }
-
-
         }
 
         if (this.charts.pageAttrs == undefined) {
             this.charts.pageAttrs = new google.visualization.Table(document.getElementById(this.chartDivs['pageAttrs']));
+            google.visualization.events.addListener(this.charts.pageAttrs, 'ready', function () {rtdView.doChartBumps('pageAttrs');});
         }
         if (draw) {
+          var valueFormatter = this.valueFormatter();
+          valueFormatter.format(this.chartData.pageAttrs, 3);
           this.charts.pageAttrs.draw(this.chartData.pageAttrs, this.drawTableOptions());
         }
     };
 
 
 
-    this.rotateReports = function() {
-console.log('rotateReports');
-      this.chartRotationI.pageAttrs++;
-      if (this.chartRotation.pageAttrs[this.chartRotationI.pageAttrs] == undefined) {
-          this.chartRotationI.pageAttrs = 0;
-      }
-      var type = this.chartRotation.pageAttrs[this.chartRotationI.pageAttrs];
-      var $pane = jQuery('#' + this.chartDivs['pageAttrs']).parent();
-      var width = jQuery('#' + this.chartDivs['pageAttrs']).parent().width() + 'px';
-console.log(type);
-console.log(width);
-        //rtdView.buildPageAttrsReport(rtdView.stats, type, true);
+    this.buildTsReport = function(statsData, refresh) {
+        var chartKey = 'ts';
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
 
-        jQuery('#' + this.chartDivs['pageAttrs']).parent().animate({opacity: '0.1'}, 500, function() {
-            rtdView.buildPageAttrsReport(rtdView.stats, type, true);
-            $(this).animate({opacity: '1'}, 500);
-        });
+        if (this.chartData[chartKey] == undefined) {
+            this.chartData[chartKey] = new google.visualization.DataTable();
+            this.chartData[chartKey].addColumn('string', 'Traffic source');
+            this.chartData[chartKey].addColumn('number', 'Ent');
+            this.chartData[chartKey].addColumn('number', 'Pvs');
+            this.chartData[chartKey].addColumn('number', 'Val');
+        }
+        var draw = false;
 
+        for (var key in statsData.ts.main) {
+            var c = statsData.ts.main[key];
+
+            draw = true;
+            if (this.chartIndex[chartKey][key] == undefined) {
+                this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
+                this.chartData[chartKey].addRow([key, 0, 0, 0]);
+            }
+            var row = this.chartIndex.ts[key];
+
+            count = this.chartData[chartKey].getValue(row, 1);
+            this.chartData[chartKey].setValue(row, 1, c.entrances + count);
+
+            count = this.chartData[chartKey].getValue(row, 2);
+            this.chartData[chartKey].setValue(row, 2, c.pageviews + count);
+
+            count = this.chartData[chartKey].getValue(row, 3);
+            this.chartData[chartKey].setValue(row, 3, c.value + count);
+            if (!refresh == true) {
+                if (c.entrances > 0) {
+                    this.chartBumps.ts[row] = 0;
+                }
+                if (c.value > 1) {
+                    this.chartBumps.ts[row] = 1;
+                }
+            }
+        }
+
+        if (this.charts[chartKey] == undefined) {
+            this.charts[chartKey] = new google.visualization.Table(document.getElementById(this.chartDivs[chartKey]));
+            google.visualization.events.addListener(this.charts[chartKey], 'ready', function () {rtdView.doChartBumps(chartKey);});
+        }
+        if (draw) {
+            var valueFormatter = this.valueFormatter();
+            valueFormatter.format(this.chartData[chartKey], 3);
+
+            this.charts[chartKey].draw(this.chartData[chartKey], this.drawTableOptions());
+        }
+    };
+
+    this.buildTsDetailsReport = function(statsData, type, refresh) {
+        var chartKey = 'tsDetails';
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+//console.log(statsData);
+        if (type == undefined) {
+            type = (this.tsDetailsActive.length > 0) ? this.tsDetailsActive : this.chartRotation.tsDetails[this.chartRotationI.tsDetails];
+        }
+        if (refresh == true) {
+            this.chartData[chartKey] = null;
+            this.chartIndex[chartKey] = {};
+        }
+        var draw = false;
+        if (this.chartRedraw[chartKey] != undefined) {
+            draw = true;
+            delete this.chartRedraw[chartKey];
+        }
+
+//console.log(statsData);
+        if (this.chartData[chartKey] == undefined) {
+            this.chartData[chartKey] = new google.visualization.DataTable();
+            this.chartData[chartKey].addColumn('string', 'Traffic source');
+            this.chartData[chartKey].addColumn('number', 'Ent');
+            this.chartData[chartKey].addColumn('number', 'Pvs');
+            this.chartData[chartKey].addColumn('number', 'Val');
+        }
+        var labels = {};
+        var data = {};
+        if (statsData.ts[type[0]] != undefined
+        //    && ()
+            ) {
+            data = statsData.ts[type[0]];
+            var lkey = type[0];
+            if ((type.length == 2)) {
+                data = data[type[1]]._pages;
+                lkey += '-' + type[1];
+            }
+            var lkey = type[0];
+            if (this.tsDetailsChartLabels[lkey] != undefined) {
+                this.chartData[chartKey].setColumnLabel(0, this.tsDetailsChartLabels[lkey]);
+            }
+        }
+
+        var draw = false;
+
+        for (var key in data) {
+            var c = data[key];
+
+            draw = true;
+            if (this.chartIndex[chartKey][key] == undefined) {
+                this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
+                this.chartData[chartKey].addRow([key, 0, 0, 0]);
+            }
+            row = this.chartIndex[chartKey][key];
+
+            count = this.chartData[chartKey].getValue(row, 1);
+            this.chartData[chartKey].setValue(row, 1, c.entrances + count);
+
+            count = this.chartData[chartKey].getValue(row, 2);
+            this.chartData[chartKey].setValue(row, 2, c.pageviews + count);
+
+            count = this.chartData[chartKey].getValue(row, 3);
+            this.chartData[chartKey].setValue(row, 3, c.value + count);
+
+            if (!refresh == true) {
+                if (c.entrances > 0) {
+                    this.chartBumps.tsDetails[row] = 0;
+                }
+                if (c.value > 1) {
+                    this.chartBumps.tsDetails[row] = 1;
+                }
+            }
+
+        }
+
+        if (this.charts[chartKey] == undefined) {
+            this.charts[chartKey] = new google.visualization.Table(document.getElementById(this.chartDivs[chartKey]));
+            google.visualization.events.addListener(this.charts[chartKey], 'ready', function () {rtdView.doChartBumps(chartKey);});
+        }
+        if (draw) {
+            var valueFormatter = this.valueFormatter();
+            valueFormatter.format(this.chartData[chartKey], 3);
+            this.charts[chartKey].draw(this.chartData[chartKey], this.drawTableOptions());
+        }
+    };
+
+    this.activeVisitor = '';
+
+    this.buildVisitorsReport = function(statsData, refresh) {
+        var chartKey = 'visitors';
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+        
+        var indexes = {
+            lastHit: 7,
+            pageviews:4,
+            eventsgoals: 5,
+            sessions: 3,
+            value: 6,
+            page: 2
+        }
+        var labels = {
+            lastHit: 'Last',
+            pageviews: 'Pgs',
+            eventsgoals: 'Gls',
+            sessions: 'Ses',
+            value: 'Value',
+            page: ''
+        }
+        if (this.chartData[chartKey] == undefined) {
+            this.chartData[chartKey] = new google.visualization.DataTable();
+            this.chartData[chartKey].addColumn('string', '');
+            this.chartData[chartKey].addColumn('string', 'Visitors');
+            this.chartData[chartKey].addColumn('number', '');
+            this.chartData[chartKey].addColumn('number', '');
+            this.chartData[chartKey].addColumn('number', '');
+            this.chartData[chartKey].addColumn('number', '');
+            this.chartData[chartKey].insertColumn(indexes['page'], 'string', '');
+            this.chartData[chartKey].insertColumn(indexes['lastHit'], 'date', '');
+
+            for (var j in indexes) {
+                this.chartData[chartKey].setColumnLabel(indexes[j], labels[j]);
+            }
+
+//console.log(this.chartData[chartKey].toJSON());
+
+            //this.chartData[chartKey].addColumn('string', 'stats');
+        }
+
+        var draw = true;
+        var newActiveVisitorData = false;
+//console.log(this.model.visitors);
+//console.log(this.model.sessions);
+//console.log(statsData.visitors);
+        var count;
+        // update stats changes, e.g. pageviews and value.
+        // time based updates done in loop below this one
+        for (var key in statsData.visitors) {
+
+            var c = statsData.visitors[key];
+            var visitor = this.model.visitors[key];
+            var sid = visitor.activeSession;
+            var session = this.model.sessions[key + '.' + sid];
+            var lastPage = session.hits[session.last];
+            lastPage = this.model.log[session.last][lastPage.pageLEI];
+
+            // TODO make this more elegant
+            if (this.activeVisitor == '') {
+                this.activeVisitor = key;
+            }
+
+            // if this visitor is the activeVisitor, set new...Data flag
+            if (key == this.activeVisitor) {
+                newActiveVisitorData = true;
+            }
+
+            console.log(session);
+            //console.log(lastPage);
+
+            draw = true;
+            if (this.chartIndex[chartKey][key] == undefined) {
+                this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
+                var imageSrc = '../../icons/default_user.png';
+                var img = '<img src="' + imageSrc + '">';
+                var stats = "ts: test<br/>ent: test2<br/>pg: /blog";
+                var newRow = [img, visitor.name, 0, 0, 0, 0, 0, 0];
+                newRow[indexes['lastHit']] = new Date();
+                newRow[indexes['page']] = '';
+                this.chartData[chartKey].addRow(newRow);
+            }
+            var row = this.chartIndex[chartKey][key];
+
+            //this.chartData[chartKey].setValue(row, indexes['lastHit'], dateTimeFromLastHit);
+
+            //count = this.chartData[chartKey].getValue(row, indexes['pageviews']);
+            this.chartData[chartKey].setValue(row, indexes['pageviews'], session.pageviews);
+
+            this.chartData[chartKey].setValue(row, indexes['eventsgoals'], (session.valuedEvents + session.goals));
+
+            //count = this.chartData[chartKey].getValue(row, indexes['sessions']);
+            this.chartData[chartKey].setValue(row, indexes['sessions'], sid);
+
+            count = this.chartData[chartKey].getValue(row, indexes['value']);
+            this.chartData[chartKey].setValue(row, indexes['value'], c.value + count);
+
+            this.chartData[chartKey].setValue(row, indexes['page'], lastPage.p);
+
+            if (!refresh == true) {
+                if (c.pageviews > 0) {
+                    this.chartBumps.visitors[row] = 0;
+                }
+                if (c.value > 1) {
+                    this.chartBumps.visitors[row] = 1;
+                }
+            }
+
+        }
+
+        // update time since last hit
+        var rows = this.chartData[chartKey].getNumberOfRows();
+        var rowAdjust = 0;
+        for (var key in this.chartIndex[chartKey]) {
+            if (rowAdjust != 0) {
+                this.chartIndex[chartKey][key] += rowAdjust;
+            }
+            var row = this.chartIndex[chartKey][key];
+            var visitor = this.model.visitors[key];
+            var sid = visitor.activeSession;
+            var session = this.model.sessions[key + '.' + sid];
+            var timeFromLastHit = (this.model.getTime() - session.last);
+
+            // remove visitors without a hit in last 30 mins
+            if (timeFromLastHit > 1800) {
+                this.chartData[chartKey].removeRow(row);
+                delete this.chartIndex[chartKey][key];
+                rowAdjust--;
+            }
+            else {
+                this.chartData[chartKey].setValue(row, indexes['lastHit'], new Date(1000 * timeFromLastHit));
+            }
+        }
+
+        if (this.charts[chartKey] == undefined) {
+            this.charts[chartKey] = new google.visualization.Table(document.getElementById(this.chartDivs[chartKey]));
+            google.visualization.events.addListener(this.charts[chartKey], 'ready', function () {rtdView.doChartBumps(chartKey);});
+        }
+        if (draw) {
+            var valueFormatter = this.valueFormatter();
+            valueFormatter.format(this.chartData[chartKey], indexes['value']);
+
+            var timeFormatter = this.timeMSFormatter();
+            timeFormatter.format(this.chartData[chartKey], indexes['lastHit']);
+
+            var options = this.drawTableOptions();
+            options.showRowNumber = false;
+            this.charts[chartKey].draw(this.chartData[chartKey], options);
+        }
+
+        if (newActiveVisitorData) {
+            this.buildTimeline();
+        }
 
     };
 
-    this.doChartBumps = function() {
-        for (var key in this.chartDivs) {
-            var $tableRows = jQuery('#' + this.chartDivs[key] + ' .table-row');
-            for (var row in this.chartBumps[key]) {
-              var dir =  this.chartBumps[key][row];
-                if (dir > 0) {
-                    $tableRows.eq(row).addClass('table-row-bump-up');
-                    //$tableRows.eq(row).animate({backgroundColor: '#566C39'}, 200);
-                    //this.chartBumps[key][row]--;
-                }
-                else if (dir < 0) {
-                    $tableRows.eq(row).addClass('table-row-bump-down');
-                    //this.chartBumps[key][row]++;
-                }
-                delete this.chartBumps[key][row];
+    this.timelineInitialized = false;
+    this.buildTimeline = function buildTimeline() {
+        var curTime = this.model.getTime();
+        var vtk = this.activeVisitor;
+        if (vtk == '') {
+            return;
+        }
+        var visitor = this.model.visitors[vtk];
+        var sid = visitor.activeSession;
+        var session = this.model.sessions[vtk + '.' + sid];
+        console.log(visitor);
+        console.log(sid);
+        console.log(session);
+
+        var timelineData = {
+            headline: visitor.name + " Clickstream",
+            type: "default",
+            text: "Intro body text goes here",
+            //startDate: this.formatTimelineDate(curTime - 1800),
+            //endDate: this.formatTimelineDate(curTime),
+            date: []
+        };
+        for (var ht in session.hits) {
+            var hits = session.hits[ht];
+            var time = this.formatTimelineDate(ht);
+            var tag = 'event';
+            if (hits.pageLEI != undefined) {
+                tag = 'pageview';
+                page = this.model.log[ht][hits.pageLEI];
             }
+            timelineData.date.push({
+                startDate: time,
+                endDate: time,
+                headline: page.dt,
+                text: "test text",
+                tag: tag,
+                asset: {
+                    media: "http://" + page.h + page.p
+                }
+            });
+        }
+
+        if (this.timelineInitialized) {
+            VMM.Timeline.Config.source.timeline = timelineData;
+
+            // see if this stops rebuild animation
+            //VMM.Timeline.Config.duration = 0;
+            //VMM.Timeline.Config.ease = "linear";  // "easeInOutExpo"
+            //VMM.Timeline.Config.current_slide = timelineData.date.length;
+            VMM.Timeline.Config.start_at_slide = timelineData.date.length;
+            //VMM.Timeline.Config.current_slide = timelineData.date.length;
+            VMM.fireEvent(global, VMM.Timeline.Config.events.data_ready, VMM.Timeline.Config.source);
+
+
+            //VMM.Slider.setSlide(0);
+            //createStimenav.setMarker(0, config.ease,config.duration);
+
+            //VMM.Timeline.Config.duration = 1000;
+            //VMM.Timeline.Config.ease = "easeInOutExpo";  // "easeInOutExpo"
+
+            //VMM.Timeline.Config.current_slide = timelineData.date.length - 1;
+
+
+            //VMM.fireEvent(global, VMM.Timeline.Config.events.slide_change, timelineData.date.length);
+
+            //VMM.Timeline.Config.duration = 0;
+
+            //VMM.Timeline.Config.current_slide = timelineData.date.length;
+            //VMM.Timeline.Config.nav.height = 100;
+
+            //VMM.Timeline.Config.nav.rows.current = [1, 1, 1];
+
+            //VMM.fireEvent(global, VMM.Timeline.Config.events.data_ready, VMM.Timeline.Config.source );
+            //VMM.fireEvent(global, VMM.Timeline.Config.events.slide_change, timelineData.date.length);
+
+            return;
+        }
+
+        var data = {
+            type:       'timeline',
+            width:      $('#visitor-timeline').width()+2,
+            height:     $('#visitor-timeline').height()+16,
+            //height:     $('#timeline-report').height()+16+100,
+            source:     {timeline: timelineData},
+            embed_id:   'visitor-timeline',
+            //hash_bookmark: true,
+            start_at_slide: timelineData.date.length,
+            start_zoom_adjust:  '0',
+            //start_at_end: true,
+            debug: true
+        };
+        timeline = createStoryJS(data);
+        //var timeline = new VMM.Timeline('timeline-report');
+        //timeline.init(data);
+        //VMM.bindEvent(buildTimeline2);
+        VMM.bindEvent(global, rtdView.timelineOnDataReady, "DATAREADY");
+        this.timelineInitialized = true;
+    };
+
+    this.timelineOnDataReady = function timelineOnDataReady() {
+        console.log(this);
+    }
+
+    this.formatTimelineDate = function formatTimelineDate(time) {
+        var d = new Date(1000 * parseInt(time));
+        //var time = d.getFullYear() + ',' + (d.getMonth()+1) + ',' + d.getDate() + ' ';
+        var time =  (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear()  + ' ';
+        var t = d.getHours();
+        time += ((''+t).length<2 ? '0' : '') + t;
+        t = d.getMinutes();
+        time += ':' + ((''+t).length<2 ? '0' : '') + t;
+        t = d.getSeconds();
+        time += ':' + ((''+t).length<2 ? '0' : '') + t;
+        return time;
+    };
+
+
+
+    this.rotateReports = function() {
+//console.log('rotateReports');
+      var charts = [
+        'pageAttrs',
+        'tsDetails'
+      ];
+
+      var types = {
+          pageAttrs: [],
+          tsDetails: []
+      };
+      for (var key in types) {
+          this.chartRotationI[key]++;
+//console.log(key);
+//console.log(this.chartRotation);
+//console.log(this.chartRotationI);
+
+          if (this.chartRotation[key][this.chartRotationI[key]] == undefined) {
+              this.chartRotationI[key] = 0;
+          }
+          types[key] = this.chartRotation[key][this.chartRotationI[key]];
+
+          var $pane = jQuery('#' + this.chartDivs[key]).parent();
+          var width = jQuery('#' + this.chartDivs[key]).parent().width() + 'px';
+
+          jQuery('#' + this.chartDivs[key]).parent().animate({opacity: '0.1'}, 500, function () {
+              var key = $('.chart', this).attr('data-chart-key');
+              var func = 'build' + key.charAt(0).toUpperCase() + key.slice(1) + 'Report';
+//console.log(key);
+//console.log(types[key]);
+//console.log(func);
+
+              rtdView[func](rtdView.stats, types[key], true);
+              $(this).animate({opacity: '1'}, 500);
+          });
+      }
+
+    };
+
+    this.doChartBumps = function(chartKey) {
+//console.log(this.chartBumps);
+//console.log(this.chartBumps[chartKey]);
+        var colors = {
+            0: '#325662',
+            1: '#566C39',
+            '-1': '#880000'
+        };
+        var $tableRows = jQuery('#' + this.chartDivs[chartKey] + ' .table-row');
+//console.log($tableRows);
+        for (var row in this.chartBumps[chartKey]) {
+            var $tableRow = $tableRows.eq(row);
+            var color0 = $tableRow.css('background-color');
+            var color1 =  colors[this.chartBumps[chartKey][row]];
+            //$tableRows.eq(row).addClass('table-row-bump-up');
+            //$tableRows.eq(row).css("background-color","yellow");
+
+            $tableRows.eq(row).animate({backgroundColor: color1}, 250).animate({backgroundColor: color1}, 1000).animate({backgroundColor: color0}, 250);
+            delete this.chartBumps[chartKey][row];
         }
     };
 
@@ -976,7 +1539,7 @@ console.log(width);
     };
 
     this.getLogElementTypeCount = function getLogElementTypeCount(element) {
-        //console.log(element);
+console.log(element);
         var counts = {
           site: {
             pageviews: 0,
@@ -995,98 +1558,126 @@ console.log(width);
             value: 0
           }
         };
-
+        // stores values that need propogated throughout sessions.
+        var addValues = {};
         for (var i in element) {
+            if (!element.hasOwnProperty(i) || (element[i].type == undefined)) {
+                continue;
+            }
             var e = element[i];
+
+            var pageKey = e.p;
             var sesKey = e.vtk + '.' + e.sid;
+            var visitorKey = e.vtk;
+            var t = parseInt(e.t);
+            var value = 0;
+
+
+            // construct visitor if does not exist
+            if (this.model.visitors[visitorKey] == undefined) {
+                this.model.visitors[visitorKey] = {
+                    name: 'anon (' + e.vtk.substr(0,10) + ')',
+                    sessions: {}
+                }
+            }
+            if (this.model.visitors[visitorKey].sessions[e.sid] == undefined) {
+                this.model.visitors[visitorKey].sessions[e.sid] = t;
+                this.model.visitors[visitorKey].activeSession = e.sid;
+            }
+
+            // construct session if does not exist
+            if (this.model.sessions[sesKey] == undefined) {
+                this.model.sessions[sesKey] = {
+                    vtk: e.vtk,
+                    start: t,
+                    last: t,
+                    pageviews: 0,
+                    events: 0,
+                    valuedEvents: 0,
+                    goals: 0,
+                    ts: {},
+                    hits: {}
+                }
+            }
+            else {
+                this.model.sessions[sesKey].last = t;
+            }
+
+            // add page to session struc if does not exist
+            if (this.model.sessions[sesKey].hits[t] == undefined) {
+                // update session pages array
+                this.model.sessions[sesKey].hits[t] = {
+                    events: []
+                };
+            }
+
+            // if e contains traffic source, use it, otherwise get from session
+            if (e.ts != undefined) {
+                this.model.sessions[sesKey].ts = e.ts;
+            }
+            else if (this.model.sessions[sesKey] != undefined) {
+                e.ts = this.model.sessions[sesKey].ts;
+            }
+
+            // initialize stats data if page page stats does not exist
+            if (this.stats.pages[pageKey] == undefined) {
+                this.stats.pages[pageKey] = this.getCountsArrayInit();
+            }
+            if (this.statsDelta.pages[pageKey] == undefined) {
+                this.statsDelta.pages[pageKey] = this.getCountsArrayInit();
+            }
+            if (this.stats.visitors[visitorKey] == undefined) {
+                this.stats.visitors[visitorKey] = this.getCountsArrayInit();
+            }
+            if (this.statsDelta.visitors[visitorKey] == undefined) {
+                this.statsDelta.visitors[visitorKey] = this.getCountsArrayInit();
+            }
+
+
+
             if (e.type == 'pageview') {
-                var key = e.p;
-                if (this.statsDelta.pages[e.p] == undefined) {
-                    this.statsDelta.pages[e.p] = this.getCountsArrayInit();
-                }
-                var pa = [];
-                if (e.pa != undefined) {
-                  var pa = rtdModel._unserializeCustomVar(e.pa);
-                }
-console.log(pa);
                 counts.site.pageviews++;
                 counts.siteAdd.pageviews++;
-                this.statsDelta.pages[e.p].pageviews++;
-                if (e.ie == '1') {
+                this.stats.pages[pageKey].pageviews++;
+                this.statsDelta.pages[pageKey].pageviews++;
+                this.stats.visitors[visitorKey].pageviews++;
+                this.statsDelta.visitors[visitorKey].pageviews++;
+
+                if (e.ie == 1) {
                     counts.site.entrances++;
                     counts.siteAdd.entrances++;
-                    this.statsDelta.pages[e.p].entrances++;
-                    rtdModel.sessions[sesKey] = {
-                      ts: rtdModel._unserializeCustomVar(e.ts),
-                      pages: []
-                    }
+                    this.stats.pages[pageKey].entrances++;
+                    this.statsDelta.pages[pageKey].entrances++;
+                    this.stats.visitors[visitorKey].entrances++;
+                    this.statsDelta.visitors[visitorKey].entrances++;
                 }
 
-                rtdModel.sessions[sesKey].pages.push({
-                  key: key,
-                  t: e.t,
-                  pa: pa
-                });
+                this.model.sessions[sesKey].pageviews++;
+                this.model.sessions[sesKey].hits[t].pageLEI = e.logEI;
+console.log(this.model.sessions);
 
-                // translate page attrs ga structure
-                for (var pai in pa) {
-
-                    var pav = pa[pai];
-                    var pavs = [];
-                    if (typeof pav === 'object') {
-                      for (var pi in pav) {
-                        pavs.push(pi);
-                      }
-                    }
-                    else {
-                        pavs = [pav];
-                    }
-console.log(pavs);
-                    for (var pi in pavs) {
-                        if (!pavs.hasOwnProperty(pi)) {
-                          continue;
-                        }
-                        pav = pavs[pi];
-
-                        if (this.statsDelta.pageAttrs[pai] == undefined) {
-                            this.statsDelta.pageAttrs[pai] = {};
-                        }
-                        if (this.statsDelta.pageAttrs[pai][pav] == undefined) {
-                            this.statsDelta.pageAttrs[pai][pav] = this.getCountsArrayInit();
-                            this.statsDelta.pageAttrs[pai][pav]._pages = {};
-                        }
-                        if (this.statsDelta.pageAttrs[pai][pav]._pages[key] == undefined) {
-                            this.statsDelta.pageAttrs[pai][pav]._pages[key] = this.getCountsArrayInit();
-                        }
-                        if (this.stats.pageAttrs[pai] == undefined) {
-                            this.stats.pageAttrs[pai] = {};
-                        }
-                        if (this.stats.pageAttrs[pai][pav] == undefined) {
-                            this.stats.pageAttrs[pai][pav] = this.getCountsArrayInit();
-                            this.stats.pageAttrs[pai][pav]._pages = {};
-                        }
-                        if (this.stats.pageAttrs[pai][pav]._pages[key] == undefined) {
-                            this.stats.pageAttrs[pai][pav]._pages[key] = this.getCountsArrayInit();
-                        }
-                        this.statsDelta.pageAttrs[pai][pav].pageviews++;
-                        this.statsDelta.pageAttrs[pai][pav]._pages[key].pageviews++;
-                        this.stats.pageAttrs[pai][pav].pageviews++;
-                        this.stats.pageAttrs[pai][pav]._pages[key].pageviews++;
-                        if (e.ie == '1') {
-                            this.statsDelta.pageAttrs[pai][pav].entrances++;
-                            this.statsDelta.pageAttrs[pai][pav]._pages[key].entrances++;
-                            this.stats.pageAttrs[pai][pav].entrances++;
-                            this.stats.pageAttrs[pai][pav]._pages[key].entrances++;
-                        }
-                    }
-
-
-
+                // determine value of page view
+                if (this.model.sessions[sesKey].pageviews == 1) {
+                    value += this.model.scorings['entrance'];
                 }
+                else if (this.model.sessions[sesKey].pageviews == 2) {
+                    value += this.model.scorings['stick'];
+                }
+                else {
+                    value += this.model.scorings['additional_pages'];
+                }
+
+                // update page attributes entrances and page views
+                this.updatePageAttrsStats(e.pa, pageKey, e.ie, 1, 0);
+
+                this.updateTsStats(e.ts, pageKey, e.ie, 1, 0);
             }
             else if (e.type == 'event') {
                 var key = e.ec;
                 if (e.ec.substr(-1) == '!') {
+                    key = key.substring(0, key.length - 1);
+                }
+                else if (e.ec.substr(-1) == '+') {
                     key = key.substring(0, key.length - 1);
                 }
                 var subkey = e.ea;
@@ -1101,15 +1692,36 @@ console.log(pavs);
                 counts.siteAdd.events++;
                 this.statsDelta.events[key].events++;
                 this.statsDelta.events[key].details[subkey].events++;
+                this.model.sessions[sesKey].events++;
                 // if valued event
                 if (e.ec.substr(-1) == '!') {
+                    var ev = parseFloat(e.ev);
+                    value += ev;
                     counts.site.valuedEvents++;
                     counts.siteAdd.valuedEvents++;
                     this.statsDelta.events[key].valuedEvents++;
                     this.statsDelta.events[key].details[subkey].valuedEvents++;
-                    this.statsDelta.events[key].value += parseFloat(e.ev);
-                    this.statsDelta.events[key].details[subkey].value += parseFloat(e.ev);
+                    this.statsDelta.events[key].value += ev;
+                    this.statsDelta.events[key].details[subkey].value += ev;
+                    this.model.sessions[sesKey].valuedEvents++;
                 }
+                else if (e.ec.substr(-1) == '+') {
+                    var ev = parseFloat(e.ev);
+                    value += ev;
+                    counts.site.goals++;
+                    counts.siteAdd.goals++;
+                    this.statsDelta.events[key].goals++;
+                    this.statsDelta.events[key].details[subkey].goals++;
+                    this.statsDelta.events[key].value += ev;
+                    this.statsDelta.events[key].details[subkey].value += ev;
+                    this.model.sessions[sesKey].goals++;
+                }
+
+                // add event info to session
+                this.model.sessions[sesKey].hits[t].events.push({
+                    LEI: e.logEI
+                })
+
                 if (e.ec.substr(0, 3) == 'CTA') {
                     var key = e.ea;
                     if (this.statsDelta.ctas[key] == undefined) {
@@ -1137,11 +1749,183 @@ console.log(pavs);
                         this.statsDelta.lps[key].conversions++;
                     }
                 }
+
+
             }
 
+            // add value of hits to addValue struc
+            if (addValues[sesKey] == undefined) {
+                addValues[sesKey] = 0;
+            }
+            addValues[sesKey] += value;
         }
+
+
+console.log(addValues);
+console.log(this.model.sessions);
+console.log(this.model.log);
+        // propagate value, note entrance page gets 80% of value, others 20%
+        var session = {};
+        var pageInstance = {};
+        var entPgInstance = {};
+        var value = 0;
+        for (var sesKey in addValues) {
+            value = addValues[sesKey];
+            session = this.model.sessions[sesKey];
+            var entPgInstance = null;
+            for (var ht in session.hits) {
+                if (!session.hits.hasOwnProperty(ht)) {
+                    continue;
+                }
+                var hit = session.hits[ht];
+console.log(hit);
+                // if hit is page view, adjust page's stats
+                if (hit.pageLEI != undefined) {
+                    pageInstance = this.model.log[ht][hit.pageLEI];
+                    // weight pageValue based on entrance page or not
+                    var pageValue = .2 * value;
+                    // if entPgInstance not set, then this is the entrance page
+                    if (entPgInstance == undefined) {
+                      pageValue = .8 * value;
+                      entPgInstance = pageInstance;
+                    }
+
+                    if (this.statsDelta.pages[pageInstance.p] == undefined) {
+                        this.statsDelta.pages[pageInstance.p] = this.getCountsArrayInit();
+                    }
+                    this.stats.pages[pageInstance.p].value += pageValue;
+                    this.statsDelta.pages[pageInstance.p].value += pageValue;
+                    this.updatePageAttrsStats(pageInstance.pa, pageInstance.p, 0, 0, pageValue);
+                }
+            };
+
+            // update traffic source stats. Determine the entrance page path
+            // for the session to update page values under traffic sources
+console.log(entPgInstance);
+            this.updateTsStats(session.ts, entPgInstance.p, 0, 0, value);
+
+            // update visitor stats
+            this.stats.visitors[visitorKey].value += value;
+            this.statsDelta.visitors[visitorKey].value += value;
+        }
+
+
+console.log(this.statsDelta);
         return counts;
     };
+
+    this.updatePageAttrsStats = function  updatePageAttrsStats(pa, pageKey, entrances, pageviews, value) {
+        for (var pai in pa) {
+            var pav = pa[pai];
+            var pavs = [];
+            if (typeof pav === 'object') {
+                for (var pi in pav) {
+                    pavs.push(pi);
+                }
+            }
+            else {
+                pavs = [pav];
+            }
+console.log(pavs);
+            for (var pi in pavs) {
+                if (!pavs.hasOwnProperty(pi)) {
+                    continue;
+                }
+                pav = pavs[pi];
+
+                if (this.statsDelta.pageAttrs[pai] == undefined) {
+                    this.statsDelta.pageAttrs[pai] = {};
+                }
+                if (this.statsDelta.pageAttrs[pai][pav] == undefined) {
+                    this.statsDelta.pageAttrs[pai][pav] = this.getCountsArrayInit();
+                    this.statsDelta.pageAttrs[pai][pav]._pages = {};
+                }
+                if (this.statsDelta.pageAttrs[pai][pav]._pages[pageKey] == undefined) {
+                    this.statsDelta.pageAttrs[pai][pav]._pages[pageKey] = this.getCountsArrayInit();
+                }
+                if (this.stats.pageAttrs[pai] == undefined) {
+                    this.stats.pageAttrs[pai] = {};
+                }
+                if (this.stats.pageAttrs[pai][pav] == undefined) {
+                    this.stats.pageAttrs[pai][pav] = this.getCountsArrayInit();
+                    this.stats.pageAttrs[pai][pav]._pages = {};
+                }
+                if (this.stats.pageAttrs[pai][pav]._pages[pageKey] == undefined) {
+                    this.stats.pageAttrs[pai][pav]._pages[pageKey] = this.getCountsArrayInit();
+                }
+                this.statsDelta.pageAttrs[pai][pav].pageviews += pageviews;
+                this.statsDelta.pageAttrs[pai][pav]._pages[pageKey].pageviews += pageviews;
+                this.stats.pageAttrs[pai][pav].pageviews += pageviews;
+                this.stats.pageAttrs[pai][pav]._pages[pageKey].pageviews += pageviews;
+
+                this.statsDelta.pageAttrs[pai][pav].entrances += entrances;
+                this.statsDelta.pageAttrs[pai][pav]._pages[pageKey] += entrances;
+                this.stats.pageAttrs[pai][pav].entrances += entrances;
+                this.stats.pageAttrs[pai][pav]._pages[pageKey].entrances += entrances;
+
+                this.statsDelta.pageAttrs[pai][pav].value += value;
+                this.statsDelta.pageAttrs[pai][pav]._pages[pageKey] += value;
+                this.stats.pageAttrs[pai][pav].value += value;
+                this.stats.pageAttrs[pai][pav]._pages[pageKey].value += value;
+            }
+        }
+    };
+
+    this.updateTsStats = function  updateTsStats(ts, pageKey, entrances, pageviews, value) {
+        // build main key
+        ts.main = '';
+        if (ts.source != undefined) {
+            ts.main += ts.source;
+        }
+        if (ts.medium != undefined) {
+            ts.main += '/' + ts.medium;
+        }
+        if (ts.main == '') {
+            ts.main = '(not provided)';
+        }
+
+        for (var i in ts) {
+            if (!ts.hasOwnProperty(i)) {
+                continue;
+            }
+            tsv = ts[i];
+            if (this.stats.ts[i] == undefined) {
+                this.stats.ts[i] = {};
+            }
+            if (this.statsDelta.ts[i] == undefined) {
+                this.statsDelta.ts[i] = {};//this.getCountsArrayInit();
+            }
+            if (this.stats.ts[i][tsv] == undefined) {
+                this.stats.ts[i][tsv] = this.getCountsArrayInit();
+                this.stats.ts[i][tsv]._pages = {};
+            }
+            if (this.statsDelta.ts[i][tsv] == undefined) {
+                this.statsDelta.ts[i][tsv] = this.getCountsArrayInit();
+                this.statsDelta.ts[i][tsv]._pages = {};
+            }
+            if (this.stats.ts[i][tsv]._pages[pageKey] == undefined) {
+                this.stats.ts[i][tsv]._pages[pageKey] = this.getCountsArrayInit();
+            }
+            if (this.statsDelta.ts[i][tsv]._pages[pageKey] == undefined) {
+                this.statsDelta.ts[i][tsv]._pages[pageKey] = this.getCountsArrayInit();
+            }
+
+            this.statsDelta.ts[i][tsv].pageviews += pageviews;
+            this.statsDelta.ts[i][tsv]._pages[pageKey].pageviews += pageviews;
+            this.stats.ts[i][tsv].pageviews += pageviews;
+            this.stats.ts[i][tsv]._pages[pageKey].pageviews += pageviews;
+
+            this.statsDelta.ts[i][tsv].entrances += entrances;
+            this.statsDelta.ts[i][tsv]._pages[pageKey] += entrances;
+            this.stats.ts[i][tsv].entrances += entrances;
+            this.stats.ts[i][tsv]._pages[pageKey].entrances += entrances;
+
+            this.statsDelta.ts[i][tsv].value += value;
+            this.statsDelta.ts[i][tsv]._pages[pageKey] += value;
+            this.stats.ts[i][tsv].value += value;
+            this.stats.ts[i][tsv]._pages[pageKey].value += value;
+        }
+    }
 
     this.getCountsArrayInit = function getCountsArrayInit() {
         return {
@@ -1153,8 +1937,9 @@ console.log(pavs);
 
     this.getCountsEventArrayInit = function getCountsEventArrayInit() {
         return {
-            valuedEvents: 0,
             events: 0,
+            valuedEvents: 0,
+            goals: 0,
             value: 0
         }
     };
@@ -1173,6 +1958,8 @@ console.log(pavs);
         }
     };
 }
+
+
 
 
 
