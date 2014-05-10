@@ -44,7 +44,7 @@ $default_settings = array(
 );
 
 $env_settings[HOST] = array(
-  'adminkey' => '1234',
+  'adminkey' => '2538',
 );
 $env_settings['oepro.getlevelten.com']['db'] = array(
   'dsn' => 'mysql:host=localhost;dbname=oepro.getlevelten.com',

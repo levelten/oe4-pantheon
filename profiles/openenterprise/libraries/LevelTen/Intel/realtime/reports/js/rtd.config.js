@@ -376,13 +376,14 @@ function rtDashboardConfig (name) {
         });
 
         //var paneHeight = jQuery('#pages-table-container .pane').height();
-        if (this.screen == 'master') {
+        if (this.screen == 'default') {
             chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 4;
         }
         else {
             chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 2;
         }
-console.log(chartHeight);
+//console.log(chartHeight);
+//console.log(this.screen);
         var rowHeight = (chartHeight - 3) / 11;
         var fontSize = rowHeight/28 * 100;
         var keyMetricFontSize = fontSize * 3;
