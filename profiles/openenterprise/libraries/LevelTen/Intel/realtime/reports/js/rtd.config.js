@@ -45,20 +45,36 @@ function rtDashboardConfig (name) {
 
         this.doLayout();
         this.doResize();
-        jQuery(window).resize(rtdConfig.doResize);
+        jQuery(window).resize(function () { rtdConfig.doResize(); });
 
         if (this.role == 'master') {
             var winWidth = $('#dashboard').width();
             var winHeight = $('#dashboard').height();
             var options = '';
             options += 'width=' + Math.round(winWidth/4) + ',height=' + Math.round(winHeight/4);
-            options += ',menubar=yes,toolbar=yes';
+            //options += ',menubar=yes,toolbar=yes';
+            // add traffic source pages reports
             var winName = 'pagesTsScreen';
             var win = window.open('?r=child&s=pagesTs', winName, options, winName);
             this.chartWindows['pages'] = win;
             this.chartWindows['pageAttrs'] = win;
             this.chartWindows['ts'] = win;
             this.chartWindows['tsDetails'] = win;
+
+            // visitor reports
+            var winName = 'visitorsScreen';
+            var win = window.open('?r=child&s=visitors', winName, options, winName);
+            this.chartWindows['visitors'] = win;
+            this.chartWindows['visitorTimeline'] = win;
+            this.chartWindows['visitorDetails'] = win;
+
+            // add events reports
+            var winName = 'eventsScreen';
+            var win = window.open('?r=child&s=events', winName, options, winName);
+            this.chartWindows['events'] = win;
+            this.chartWindows['eventsDetails'] = win;
+            this.chartWindows['ctas'] = win;
+            this.chartWindows['lps'] = win;
         }
 
         // get colors from CSS
@@ -327,8 +343,10 @@ function rtDashboardConfig (name) {
 
     this.doResize = function () {
         console.log();
+        var winHeight = $(window).height();
+        var winWidth = $(window).width();
         // set main div to height of window
-        $('#dashboard').height($(window).height());
+        $('#dashboard').height(winHeight);
 
         jQuery('[class*="row-md-"]').each(function(index) {
             var classes = $(this).attr('class');
@@ -358,8 +376,13 @@ function rtDashboardConfig (name) {
         });
 
         //var paneHeight = jQuery('#pages-table-container .pane').height();
-        var $chart = jQuery('#pages-table-container .chart');
-        var chartHeight = $chart.height();
+        if (this.screen == 'master') {
+            chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 4;
+        }
+        else {
+            chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 2;
+        }
+console.log(chartHeight);
         var rowHeight = (chartHeight - 3) / 11;
         var fontSize = rowHeight/28 * 100;
         var keyMetricFontSize = fontSize * 3;

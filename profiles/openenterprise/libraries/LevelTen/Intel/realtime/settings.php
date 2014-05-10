@@ -35,7 +35,7 @@ elseif ($exec_mode == 'connector_local') {
   //$host = 'lvlt_api.localhost:8082';
 }
 else {
-  $host = !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'api.getlevelten.com';
+  $host = !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'oepro.getlevelten.com';
 }
 define('HOST', $host);
 
@@ -46,9 +46,16 @@ $default_settings = array(
 $env_settings[HOST] = array(
   'adminkey' => '1234',
 );
-$env_settings[HOST]['db'] = array(
+$env_settings['oepro.getlevelten.com']['db'] = array(
+  'dsn' => 'mysql:host=localhost;dbname=oepro.getlevelten.com',
+  'username' => 'root',
+  'password' => 'ET1144sy8He825c',
+  'tableprefix' => 'intel_',
+);
+
+$env_settings['oepro3p.localhost:8082']['db'] = array(
   'dsn' => 'mysql:host=127.0.0.1;dbname=oepro3p;port=33066',
-  'username' => 'drupaluser', 
+  'username' => 'drupaluser',
   'password' => '',
   'tableprefix' => 'intel_',
 );

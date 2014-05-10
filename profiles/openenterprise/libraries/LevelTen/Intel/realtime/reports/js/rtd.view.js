@@ -1334,9 +1334,16 @@ function rtDashboardView (name) {
 
     this.buildVisitorsReport = function(statsData, refresh) {
         var chartKey = 'visitors';
+
+        // check if this report in in another window
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.buildVisitorsReport(statsData, refresh);
+            return;
+        }
         if (!this.chartsEnabled[chartKey]) {
             return;
         }
+
         
         var indexes = {
             lastHit: 7,
@@ -1588,7 +1595,17 @@ function rtDashboardView (name) {
     this.timelineData = {}
 
     this.buildTimeline = function buildTimeline(refresh) {
-console.log();
+        var chartKey = 'visitorTimeline';
+
+        // check if this report in in another window
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.buildTimeline(statsData, refresh);
+            return;
+        }
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+
         var curTime = this.model.getTime();
         var vtk = this.activeVisitor;
         if (vtk == '') {
@@ -1899,6 +1916,18 @@ console.log(session);
     };
 
     this.buildVisitorDetailsReport = function buildVisitorDetailsReport(refresh) {
+        var chartKey = 'visitorDetails';
+
+        // check if this report in in another window
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.buildVisitorDetailsReport(statsData, refresh);
+            return;
+        }
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+
+
         var curTime = this.model.getTime();
         var vtk = this.activeVisitor;
         if (vtk == '') {
@@ -2431,7 +2460,7 @@ console.log(visitor);
     };
 
     this.updateVisitorAttrsStats = function  updateVisitorAttrsStats(element, visitorKey, sesKey, pageKey) {
-console.log(element.va);
+//console.log(element.va);
         if (element.va == undefined) {
             return;
         }
@@ -2442,8 +2471,8 @@ console.log(element.va);
             visitor.va = {};
         }
         var va0 = visitor.va;
-console.log(va0);
-console.log(va);
+//console.log(va0);
+//console.log(va);
 
         if (element.ie == 1 && (element.va0 != undefined)) {
             this.model.sessions[sesKey].va0 = element.va0;
@@ -2482,7 +2511,7 @@ console.log(va);
                     pageVa[vaKey] = vaValue;
                 }
                 else {
-console.log(vaValue);
+//console.log(vaValue);
                     for (var key in vaValue) {
                         if (va0[vaKey][key] == undefined) {
                             if (pageVa[vaKey] == undefined) {
@@ -2507,7 +2536,7 @@ console.log(vaValue);
             }
 
         }
-        console.log(pageVa);
+//console.log(pageVa);
         this.model.log[element.t][element.logEI].va = pageVa;
         this.model.visitors[visitorKey].va = va;
     };
