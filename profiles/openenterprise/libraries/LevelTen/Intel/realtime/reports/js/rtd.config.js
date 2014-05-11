@@ -24,6 +24,7 @@ function rtDashboardConfig (name) {
         'series-1': 'chart-series-1',
         'series-2': 'chart-series-2',
         'series-3': 'chart-series-3',
+        'series-4': 'chart-series-4',
         'event-hit': 'event-hit',
         'event-valued': 'event-valued',
         'event-goal': 'event-goal',
@@ -176,11 +177,14 @@ function rtDashboardConfig (name) {
         $container.addClass('key-metric-container');
 
         var $pane = $('<div />').appendTo($container);
-        $pane.addClass('key-metric-pane');
+        $pane.addClass('key-metric-pane google-visualization-table-table');
 
         var $label = $('<div />').appendTo($pane);
-        $label.addClass('key-metric-label');
-        $label.text(label);
+        $label.addClass('key-metric-label table-header-row');
+
+        var $labeltd = $('<div />').appendTo($label);
+        $labeltd.addClass('td');
+        $labeltd.text(label);
 
         var $valuec = $('<div />').appendTo($pane);
         $valuec.addClass('key-metric-value-container');
@@ -219,12 +223,12 @@ function rtDashboardConfig (name) {
         $container.addClass('branding-container');
         $container.text('logo');
 
-        this.addSiteStatsReportKeyMetric($report, 'entrances', '0', 'visits');
-        this.addSiteStatsReportKeyMetric($report, 'pageviews', '0', 'pageviews');
+        this.addSiteStatsReportKeyMetric($report, 'entrances', '0', 'Visits');
+        this.addSiteStatsReportKeyMetric($report, 'pageviews', '0', 'Pageviews');
         //this.addSiteStatsReportKeyMetric($report, 'events', '0', 'events');
-        this.addSiteStatsReportKeyMetric($report, 'valued-events', '0', 'val. events');
-        this.addSiteStatsReportKeyMetric($report, 'goals', '0', 'goals');
-        this.addSiteStatsReportKeyMetric($report, 'value', '0', 'value');
+        this.addSiteStatsReportKeyMetric($report, 'valued-events', '0', 'Valued events');
+        this.addSiteStatsReportKeyMetric($report, 'goals', '0', 'Goals');
+        this.addSiteStatsReportKeyMetric($report, 'value', '0', 'Value');
 
         // add active pages timeline
         var name = 'active-pageviews-timeline';
@@ -309,11 +313,14 @@ function rtDashboardConfig (name) {
         $container.addClass('visitor-details-container col-md-' + rows);
 
         var $pane = $('<div />').appendTo($container);
-        $pane.addClass('visitor-details-pane');
+        $pane.addClass('visitor-details-pane google-visualization-table-table');
 
         var $label = $('<div />').appendTo($pane);
-        $label.addClass('visitor-details-label');
-        $label.text(label);
+        $label.addClass('visitor-details-label table-header-row');
+
+        var $labeltd = $('<div />').appendTo($label);
+        $labeltd.addClass('td');
+        $labeltd.text(label);
 
         var $valuec = $('<div />').appendTo($pane);
         $valuec.addClass('visitor-details-value-container');
@@ -377,27 +384,29 @@ function rtDashboardConfig (name) {
 
         //var paneHeight = jQuery('#pages-table-container .pane').height();
         if (this.screen == 'default') {
-            chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 4;
+            chartHeight = (winHeight / 4) - 2 * parseInt(jQuery('.pane').css('margin'));
         }
         else {
-            chartHeight = (winHeight - 2 * parseInt(jQuery('.pane').css('margin'))) / 2;
+            chartHeight = (winHeight / 2) - 2 * parseInt(jQuery('.pane').css('margin'));
         }
 //console.log(chartHeight);
 //console.log(this.screen);
-        var rowHeight = (chartHeight - 3) / 11;
-        var fontSize = rowHeight/28 * 100;
+        // calculate row heights based on screen size. Make table rows even and
+        // have the header row be the difference
+        var rowHeight = Math.round((chartHeight - 8) / 11) + 1;
+        var headerRowHeight = chartHeight - (rowHeight * 10) - 3; // the 3 is for the border bottom
+console.log("winHeight=" + winHeight + ",chartHeight=" + chartHeight + ",rowHeight=" + rowHeight + ",headerRowHeight=" + headerRowHeight);
+        var fontSize = rowHeight/32 * 100;
         var keyMetricFontSize = fontSize * 3;
 
 //console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
 
         var css = document.createElement('style')
-        var html = ".google-visualization-table-table tr {height: " + rowHeight + "px; font-size: " + fontSize + "%;}";
+        var html = ".google-visualization-table-table .table-header-row td, .google-visualization-table-table .table-header-row .td  {height: " + headerRowHeight  + "px; font-size: " + fontSize + "%;}";
+        html += ".google-visualization-table-table .table-row td {height: " + rowHeight + "px; font-size: " + fontSize + "%;}";
         // active visitor table uses floated tds, this corrects for border alignment issues
-        html += "#active-visitors-table .google-visualization-table-table tr.table-header-row td {height: " + (0.75 * rowHeight) + "px;}";
         html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
-        html += "#site-stats-table .key-metric-label { height: " + (0.85 * rowHeight) + "px !important; }"
-        html += "#visitor-details-report .visitor-details-value {font-size: " + fontSize + "%; }";
-        html += "#visitor-details-report .visitor-details-label {height: " + rowHeight + "px; font-size: " + fontSize + "%;}"
+        html += "#active-visitors-table .table-header-row td {height: " + (headerRowHeight - 3) + "px; !important; }";
         css.innerHTML = html;
         document.body.appendChild(css);
 

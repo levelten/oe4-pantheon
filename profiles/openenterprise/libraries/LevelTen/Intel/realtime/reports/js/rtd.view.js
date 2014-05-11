@@ -1,6 +1,7 @@
 function rtDashboardView (name) {
     this.model;
     this.config;
+    //this.view;
     this.charts = {};
     this.chartData = {};
     this.chartDivs = {
@@ -140,10 +141,12 @@ function rtDashboardView (name) {
       if (rtdConfig.role == 'child') {
           this.model = window.opener.rtdModel;
           this.config = window.opener.rtdConfig;
+          //this.view = window.opener.rtdView;
       }
       else {
           this.model = window.rtdModel;
           this.config = window.rtdConfig;
+          //this.view = window.rtdView;
       }
 
       // if this window is the main report, then initiate polling
@@ -283,6 +286,7 @@ function rtDashboardView (name) {
         var col1Style = 'stroke-color: ' + this.config.colors['series-1'] + '; stroke-width: 2; fill-opacity: 0.4';
         var col2Style = 'stroke-color: ' + this.config.colors['series-2'] + '; stroke-width: 2; fill-opacity: 0.4';
         var col3Style = 'stroke-color: ' + this.config.colors['series-3'] + '; stroke-width: 2; fill-opacity: 0.4';
+        var col4Style = 'stroke-color: ' + this.config.colors['series-4'] + '; stroke-width: 2; fill-opacity: 0.4';
         if (this.chartData.pvMin == undefined) {
             this.chartData.pvMin = new google.visualization.DataTable();
             this.chartData.pvMin.addColumn('number', 'Time');
@@ -305,12 +309,12 @@ function rtDashboardView (name) {
             this.chartData.eMin.addColumn('number', 'Time');
             this.chartData.eMin.addColumn('number', 'Events');
             this.chartData.eMin.addColumn({type: 'string', role: 'style'});
-            this.chartData.eMin.addColumn('number', 'Value events');
+            this.chartData.eMin.addColumn('number', 'Valued events');
             this.chartData.eMin.addColumn({type: 'string', role: 'style'});
             this.chartData.eMin.addColumn('number', 'Goals');
             this.chartData.eMin.addColumn({type: 'string', role: 'style'});
             for (var i = 0; i < 30; i++) {
-                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col2Style, 0, col3Style]);
+                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col2Style, 0, col4Style]);
             }
         }
         if (this.chartData.eSec == undefined) {
@@ -528,7 +532,7 @@ function rtDashboardView (name) {
             },
             hAxis: {
                 direction: -1,
-                gridlines: {count: 6, color: '#333'},
+                gridlines: {count: 6, color: backgroundColor},
                 ticks: [
                     {v: 300, f:'-5 min'},
                     {v: 600, f:'-10 min'},
@@ -547,16 +551,29 @@ function rtDashboardView (name) {
             }
         };
 
+        options.colors = [
+            this.config.colors['series-1'],
+            this.config.colors['series-2']
+        ];
         if (this.charts.pvMin == undefined) {
             this.charts.pvMin = new google.visualization.ColumnChart(document.getElementById('active-pageviews-timeline-min'));
         }
         this.charts.pvMin.draw(this.chartData.pvMin, options);
 
+        options.colors = [
+            this.config.colors['series-1'],
+            this.config.colors['series-2'],
+            this.config.colors['series-4']
+        ];
         if (this.charts.eMin == undefined) {
             this.charts.eMin = new google.visualization.ColumnChart(document.getElementById('active-events-timeline-min'));
         }
         this.charts.eMin.draw(this.chartData.eMin, options);
 
+        options.colors = [
+            this.config.colors['series-1'],
+            this.config.colors['series-2']
+        ];
         options.bar.groupWidth = 5;
         options.legend.position = 'none';
         options.hAxis.ticks = [
@@ -577,6 +594,11 @@ function rtDashboardView (name) {
         }
         this.charts.pvSec.draw(this.chartData.pvSec, options);
 
+        options.colors = [
+            this.config.colors['series-1'],
+            this.config.colors['series-2'],
+            this.config.colors['series-4']
+        ];
         if (this.charts.eSec == undefined) {
             this.charts.eSec = new google.visualization.ColumnChart(document.getElementById('active-events-timeline-sec'));
         }
@@ -700,7 +722,7 @@ function rtDashboardView (name) {
             draw = true;
             if (this.chartIndex[chartKey][key] == undefined) {
                 this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
-                var label = key + this.getCMSLink('link-ext', key);
+                var label = this.capstr(key) + this.getCMSLink('link-ext', key);
                 this.chartData[chartKey].addRow([label, 0, 0, 0]);
             }
             var row = this.chartIndex[chartKey][key];
@@ -1445,7 +1467,7 @@ function rtDashboardView (name) {
             this.chartData[chartKey].setValue(row, indexes['value'], c.value + count);
 
             if ((lastPage != undefined) && (lastPage.p != undefined)) {
-                var label = '<span class="pageWrapper">' + lastPage.p +  '</span>';
+                var label = '<span class="pageWrapper">' + this.capstr(lastPage.p, 36) +  '</span>';
                 this.chartData[chartKey].setValue(row, indexes['page'], label);
             }
 
@@ -1542,6 +1564,10 @@ function rtDashboardView (name) {
         options = this.setSortOptions(chartKey, options);
 
         options.showRowNumber = false;
+        // this table has custom styling so change table row classes
+        options.cssClassNames.tableRow = 'table-row-av table-row-even';
+        options.cssClassNames.oddTableRow = 'table-row-av table-row-odd';
+        options.cssClassNames.selectedTableRow = 'table-row-av table-row-selected';
         this.charts[chartKey].draw(this.chartData[chartKey], options);
 
         // determine if activeVisitor needs to be changed and if timeline needs
@@ -1689,14 +1715,24 @@ console.log(session);
             }
             else if ((events[0].ec.substr(-1) == '!') || (events[0].ec.substr(-1) == '+')) {
                 headline = events[0].ec;
-                text = 'value: +' + hits.value.toFixed(2) + '<br /><br />';
-                text += 'source: ' +  events[0].ea + '<br />';
+                text = '<span class="hit-value">value: +' + hits.value.toFixed(2) + '</span><br />';
+                var items = [];
+                text += '<h3>Resource:</h3>';
+                text += '<p>' + events[0].ea + '</p>';
+
+                text += '<h3>Resource id:</h3>';
+                text += '<p>' + '<a href="/' + events[0].el + '" target="cms">' + events[0].el + '</a>' + '</p>';
+
+                media = "http://" + events[0].h + events[0].p;
                 classname = 'event';
-                if (('/' + events[0].el) != events[0].p) {
-                    text += 'source id: ' +  events[0].el + '<br />';
+                if (events[0].ec.substr(-1) == '!') {
+                    classname = 'valuedevent';
                 }
-                text += 'page: ' +  events[0].p + '<br />';
-                media = "http://" + events[0].h + events[0].p
+                else if (events[0].ec.substr(-1) == '+') {
+                    classname = 'goal';
+                }
+                media = "http://" + events[0].h + events[0].p;
+                caption = events[0].p;
             }
             else {
                 continue;
@@ -2019,7 +2055,7 @@ console.log(visitor);
           this.chartRotationNext = 0;
       }
       var types = {};
-      types[chartKeys[this.chartRotationNext ]] = [];
+      types[chartKeys[this.chartRotationNext]] = [];
 
       for (var key in types) {
           this.chartRotationI[key]++;
@@ -2032,6 +2068,8 @@ console.log(visitor);
           }
           types[key] = this.chartRotation[key][this.chartRotationI[key]];
 
+          this.rotateReport(key, types[key], this.chartRotationI[key]);
+          /*
           var $pane = jQuery('#' + this.chartDivs[key]).parent();
           var width = jQuery('#' + this.chartDivs[key]).parent().width() + 'px';
 
@@ -2045,8 +2083,36 @@ console.log(visitor);
               rtdView[func](rtdView.model.stats, types[chartKey], true);
               $(this).animate({opacity: '1'}, 500);
           });
+          */
       }
 
+    };
+
+    this.rotateReport = function (chartKey, chartType, chartRotationI) {
+        // check if the report is in this screen
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.rotateReport(chartKey, chartType, chartRotationI) ;
+            return;
+        }
+        if (!this.chartsEnabled[chartKey]) {
+            return;
+        }
+        // this is used to set the chartRotationIndex locally if in multi screen mode
+        this.chartRotationI[chartKey] = chartRotationI;
+
+        var $pane = jQuery('#' + this.chartDivs[chartKey]).parent();
+        var width = jQuery('#' + this.chartDivs[chartKey]).parent().width() + 'px';
+
+        jQuery('#' + this.chartDivs[chartKey]).parent().animate({opacity: '0.1'}, 500, function () {
+            var chartKey = $('.chart', this).attr('data-chart-key');
+            var func = 'build' + String(chartKey).ucfirst() + 'Report';
+//console.log(key);
+//console.log(types[key]);
+//console.log(func);
+
+            rtdView[func](rtdView.model.stats, chartType, true);
+            $(this).animate({opacity: '1'}, 500);
+        });
     };
 
     this.doChartBumps = function(chartKey) {
@@ -2642,10 +2708,17 @@ console.log(rtdView.chartIndex['visitors'][key]);
         if (rtdView.chartIndex['visitors'][key] == undefined) {
             return;
         }
-        var row = rtdView.chartIndex['visitors'][key];
+        var chartKey = 'visitors';
+        // check if report is in this screen
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.updateVisitorData(key) ;
+            return;
+        }
+
+        var row = rtdView.chartIndex[chartKey][key];
         var label = rtdView.model.visitors[key].name + rtdView.getCMSLink('link-ext', rtdView.config.settings.cmsPath + 'visitor/' + key);
         //rtdView.chartData['visitors'].setValue(row, 1, rtdView.model.visitors[key].name);
-        rtdView.chartData['visitors'].setValue(row, 1, label);
+        rtdView.chartData[chartKey].setValue(row, 1, label);
         //rtdView.drawVisitorsReport({key: row});
         rtdView.drawVisitorsReport({});
     };
@@ -2655,6 +2728,12 @@ console.log(rtdView.chartIndex['visitors'][key]);
             return;
         }
         var chartKey = 'pageAttrs';
+        // check if report is in this screen
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.updateAuthorData(key) ;
+            return;
+        }
+
         // only update if current pageAttrs report is authors
         var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
         if ((type[0] != 'a') || (type[1] != undefined)) {
@@ -2671,6 +2750,12 @@ console.log(rtdView.chartIndex['visitors'][key]);
             return;
         }
         var chartKey = 'pageAttrs';
+        // check if report is in this screen
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.updateContentTypeData(key) ;
+            return;
+        }
+
         // only update if current pageAttrs report is content types
         var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
         if ((type[0] != 'ct') || (type[1] != undefined)) {
@@ -2687,7 +2772,13 @@ console.log(rtdView.chartIndex['visitors'][key]);
             return;
         }
         var chartKey = 'pageAttrs';
+        // check if report is in this screen
+        if (rtdConfig.chartWindows[chartKey] != undefined) {
+            rtdConfig.chartWindows[chartKey].rtdView.updateTermData(key) ;
+            return;
+        }
         // only update if current pageAttrs report is content types
+//console.log(rtdView.chartRotationI[chartKey]);
         var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
         if ((type[0] != 't') || (type[1] != undefined)) {
             return;
@@ -2728,6 +2819,16 @@ console.log(rtdView.chartIndex['visitors'][key]);
         }
         link += '>' + text + '</a>';
         return link;
+    };
+
+    this.capstr = function (str, maxLength) {
+        if (maxLength == undefined) {
+            maxLength = 60;
+        }
+        if (str.length > maxLength) {
+            str = str.substr(0, (maxLength - 3)) + '...';
+        }
+        return str;
     };
 }
 
