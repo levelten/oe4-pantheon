@@ -148,7 +148,7 @@ function rtDashboardModel (name) {
             data: {},
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
-console.log(json);
+//console.log(json);
                 rtdModel.addToLog(json.instances, json.ids, json.last_id);
                 //rtdModel.buildTimeline();
             }
@@ -212,6 +212,7 @@ console.log(json);
             this.logDel[time] = this.log.t;
             delete this.log.t;
         }
+        // set
         this.logLastId = lastId;
         if (data.length > 0) {
             //console.log('New Data (addToLog):');

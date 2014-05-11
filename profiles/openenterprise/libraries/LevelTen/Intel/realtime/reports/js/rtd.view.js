@@ -15,7 +15,7 @@ function rtDashboardView (name) {
         tsDetails: 'ts-details-table',
         visitors: 'active-visitors-table',
         visitorTimeline: 'visitor-timeline',
-        visitorDetails: 'visitor-details'
+        visitorDetails: 'visitor-details-report'
     }
     this.chartsEnabled = {};
     this.chartIndex = {
@@ -182,36 +182,39 @@ function rtDashboardView (name) {
       });
       */
 
-      // init timeline
-      var timelineData = {
-            //headline: " Clickstream",
-            type: "default",
-            //text: "Intro body text goes here",
-            //startDate: this.formatTimelineDate(curTime - 1800),
-            //endDate: this.formatTimelineDate(curTime),
-            date: [{
-              "startDate": this.formatTimelineDate(this.model.getTime()),
-              "endDate": this.formatTimelineDate(this.model.getTime()),
-              headline: 'Clickstream'
-            }]
-      };
-      var data = {
-            type:       'timeline',
-            width:      $('#visitor-timeline').width()+2,
-            height:     $('#visitor-timeline').height()+16,
-            //height:     $('#timeline-report').height()+16+100,
-            source:     {timeline: timelineData},
-            embed_id:   'visitor-timeline',
-            //hash_bookmark: true,
-            start_at_slide: 0,
-            customMode: 'rtd',
-            start_zoom_adjust:  '-1',
-            //start_at_end: true,
-            debug: false
+      if ((rtdConfig.screen == 'default') || (rtdConfig.screen == 'visitors')) {
+          // init timeline
+          var timelineData = {
+              //headline: " Clickstream",
+              type: "default",
+              //text: "Intro body text goes here",
+              //startDate: this.formatTimelineDate(curTime - 1800),
+              //endDate: this.formatTimelineDate(curTime),
+              date: [{
+                  "startDate": this.formatTimelineDate(this.model.getTime()),
+                  "endDate": this.formatTimelineDate(this.model.getTime()),
+                  headline: 'Clickstream'
+              }]
+          };
+          var data = {
+              type:       'timeline',
+              width:      $('#visitor-timeline').width()+2,
+              height:     $('#visitor-timeline').height()+16,
+              //height:     $('#timeline-report').height()+16+100,
+              source:     {timeline: timelineData},
+              embed_id:   'visitor-timeline',
+              //hash_bookmark: true,
+              start_at_slide: 0,
+              customMode: 'rtd',
+              start_zoom_adjust:  '-1',
+              //start_at_end: true,
+              debug: false
 
-        };
-        console.log(data);
-        this.timeline = createStoryJS(data);
+          };
+          console.log(data);
+          this.timeline = createStoryJS(data);
+      }
+
 
     };
 
@@ -1207,6 +1210,7 @@ function rtDashboardView (name) {
     };
 
     this.buildEventDetailsReport = function(statsData, type, refresh) {
+//console.log('buildEventDetailsReport');
         var chartKey = 'eventDetails';
         var draw = false;
         // check if this report in in another window
@@ -1894,11 +1898,14 @@ console.log(session);
                         }
                         item += vaInfo.options[i].title;
                     }
-                    vaItems.push(item);
+
                     c++;
                 }
+                vaItems.push(item);
             }
         }
+console.log(va);
+console.log(vaItems);
         return vaItems;
     }
 

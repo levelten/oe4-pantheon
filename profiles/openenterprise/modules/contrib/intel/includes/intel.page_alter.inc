@@ -289,7 +289,7 @@ function intel_page_alter(&$page) {
       'system_path' => $_GET['q'],
       'lib_path' => intel_get_library_path(),
       'page_title' => $page_title,
-      'track_analytics' => 0, // TODO ? does this do anything?
+      'track_analytics' => 0, // this is set in intel_js_alter if ga script exists
       'track_adhoc_ctas' => 'track-cta',
       'track_adhoc_events' => 'track-event',
       'track_forms' => $track_forms,
@@ -631,6 +631,8 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
 function intel_js_alter(&$javascript) {
   $debug = intel_debug_mode();
   $options = array();
+
+  // get intel options various modules have added to for intel
   if (!empty($javascript['settings']['data']) && is_array($javascript['settings']['data'])) {
     foreach ($javascript['settings']['data'] AS $i => $v) {
       if (!empty($v['intel'])) {
@@ -638,23 +640,43 @@ function intel_js_alter(&$javascript) {
       }
     }
   }
+
+  // search through javascript settings for main intel and google analytics settings
   $i = 0;
+  $intel_i = -1;
+  $ga_i = -1;
   while (isset($javascript[$i])) {
     if (substr($javascript[$i]['data'], 0, 10) == 'var _l10iq') {
-      $options = drupal_array_merge_deep_array($options);
-      $json = drupal_json_encode($options);
-      $javascript[$i]['data'] = str_replace("_l10iq.push(['_setOptions', {}]);", "_l10iq.push(['_setOptions', $json]);", $javascript[$i]['data']);
-      //$javascript[$i]['data'] .= "_l10iq.push(['_setOptions', $json]);";
+      $intel_i = $i;
     }
-    if ($debug && (substr($javascript[$i]['data'], 0, 8) == 'var _gaq')) {
-      if (variable_get('intel_debug_ga_debug', 0)) {
-        $javascript[$i]['data'] = str_replace('/ga.js', '/u/ga_debug.js', $javascript[$i]['data']);
-      }
-      $script = " if ((typeof _l10im == 'object') && (typeof _l10im.markTime == 'function')) { _gaq.push(function() { _l10im.markTime('ga._trackPageview'); }); }";
-      $javascript[$i]['data'] .= $script;      
-    }    
+    if (substr($javascript[$i]['data'], 0, 8) == 'var _gaq') {
+      $ga_i = $i;
+    }
+    // if we have found both intel & ga js, exit loop
+    if (($intel_i >= 0) && ($ga_i >= 0)) {
+      break;
+    }
     $i++;
   }
+
+  if ($intel_i >= 0) {
+    $options = drupal_array_merge_deep_array($options);
+    // if google_analtyics script is added, turn on track_analtyics flag
+    if ($ga_i >= 0) {
+      $options['track_analytics'] = 1;
+    }
+    $json = drupal_json_encode($options);
+    $javascript[$intel_i]['data'] = str_replace("_l10iq.push(['_setOptions', {}]);", "_l10iq.push(['_setOptions', $json]);", $javascript[$intel_i]['data']);
+  }
+
+  if ($debug && ($ga_i >= 0)) {
+    if (variable_get('intel_debug_ga_debug', 0)) {
+      $javascript[$ga_i]['data'] = str_replace('/ga.js', '/u/ga_debug.js', $javascript[$ga_i]['data']);
+    }
+    $script = " if ((typeof _l10im == 'object') && (typeof _l10im.markTime == 'function')) { _gaq.push(function() { _l10im.markTime('ga._trackPageview'); }); }";
+    $javascript[$ga_i]['data'] .= $script;
+  }
+
 }
 
 function intel_check_form_submission($page) {

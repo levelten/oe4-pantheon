@@ -193,11 +193,17 @@ function intel_get_visitor_attributes_default() {
   // remove anonymous user
   unset($user_roles[1]);
 
+  $options = array();
+  foreach ($user_roles AS $rid => $role) {
+    $options[$rid] = (object)array(
+      'title' => $role,
+    );
+  }
   $attributes['r'] = array(
     'title' => t('User roles'), 
     'description' => t('Set to Drupal user roles for authenticated visitors.'),   
     'type' => 'list',
-    'coded_options' => $user_roles,
+    'static_options' => $options,
   );
   $attributes['k'] = array(
     'title' => t('Known'), 

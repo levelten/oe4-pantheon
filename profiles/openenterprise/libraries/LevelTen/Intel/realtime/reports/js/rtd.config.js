@@ -72,7 +72,7 @@ function rtDashboardConfig (name) {
             var winName = 'eventsScreen';
             var win = window.open('?r=child&s=events', winName, options, winName);
             this.chartWindows['events'] = win;
-            this.chartWindows['eventsDetails'] = win;
+            this.chartWindows['eventDetails'] = win;
             this.chartWindows['ctas'] = win;
             this.chartWindows['lps'] = win;
         }
@@ -397,7 +397,7 @@ function rtDashboardConfig (name) {
         html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
         html += "#site-stats-table .key-metric-label { height: " + (0.85 * rowHeight) + "px !important; }"
         html += "#visitor-details-report .visitor-details-value {font-size: " + fontSize + "%; }";
-        html += "#visitor-details-report .visitor-details-label { height: " + (0.85 * rowHeight) + "px; }"
+        html += "#visitor-details-report .visitor-details-label {height: " + rowHeight + "px; font-size: " + fontSize + "%;}"
         css.innerHTML = html;
         document.body.appendChild(css);
 

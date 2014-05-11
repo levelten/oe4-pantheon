@@ -265,7 +265,7 @@ function track_log() {
     '<=',
   );
   */
-  $last_id = isset($GET['last_id']) ? $GET['last_id'] : 0;
+  $last_id = (int)isset($GET['last_id']) ? $GET['last_id'] : 0;
   $filters['conditions'][] = array(
     'id',
     $last_id,
@@ -286,12 +286,15 @@ function track_log() {
   $ids = array();
   foreach ($instances AS $instance) {
     $data[] = json_decode($instance['data']);
-    $ids[] = $instance['id'];
+    $ids[] = (int)$instance['id'];
+    if ($instance['id'] > $last_id) {
+      $last_id = $instance['id'];
+    }
   }
 
   $response = array(
     'instances' => $data,
-    'last_id' => $instances[count($instances) - 1]['id'],
+    'last_id' => (int)$last_id,
     'ids' => $ids,
   );
   return $response;

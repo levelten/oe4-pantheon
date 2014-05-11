@@ -43,9 +43,87 @@ function intel_realtime_menu() {
       'weight' => 1,
       //'file' => 'reports/intel.report_scorecard.inc',
   );
+  $items['admin/reports/intel_realtime/log'] = array(
+    'title' => 'Realtime log',
+    'page callback' => 'intel_realtime_log_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('view all intel reports'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 1,
+    'file' => 'intel_realtime.admin.inc',
+  );
+
+  $items['admin/reports/intel_realtime/log/%intel_realtime_log'] = array(
+    'title' => 'Realtime log hit',
+    'page callback' => 'intel_realtime_log_hit_page',
+    'page arguments' => array(4),
+    'access callback' => 'user_access',
+    'access arguments' => array('view all intel reports'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'intel_realtime.admin.inc',
+  );
+
+  $items['admin/reports/intel_realtime/log/clear'] = array(
+    'title' => 'Realtime log clear',
+    'page callback' => 'intel_realtime_log_clear_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('view all intel reports'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 1,
+    'file' => 'intel_realtime.admin.inc',
+  );
+
   return $items;
 }
 
+function intel_realtime_log_load($id) {
+  $query = db_select('intel_realtime', 'l')
+    ->fields('l')
+    ->condition('id', $id);
+  //$v = $query->leftJoin('intel_visitor', 'v', '%alias.vid = s.vid');
+  $hit = $query->execute()->fetchObject();
+  return $hit;
+}
+
+function intel_realtime_log_load_filtered($filter = array(), $options = array(), $header = array(), $limit = 100, $offset = NULL) {
+  $query = db_select('intel_realtime', 'l')
+    ->fields('l')
+    ->extend('PagerDefault')
+    ->orderBy('time', 'DESC')
+    ->orderBy('ord', 'ASC')
+    ->limit($limit);
+
+  if (!empty($header)) {
+    $query->extend('TableSort')->orderByHeader($header);
+  }
+
+  //TODO get filters working
+  if (!empty($filter['where'])) {
+    //$sql .= " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') . $filter['where'];
+    //$count_sql .=  " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') .  $filter['where'];
+  }
+  if (!empty($filter['conditions'])) {
+    foreach ($filter['conditions'] AS $condition) {
+      if (count($condition) == 3) {
+        $query->condition($condition[0], $condition[1], $condition[2]);
+      }
+      else {
+        $query->condition($condition[0], $condition[1]);
+      }
+    }
+  }
+
+  $result = $query->execute();
+
+  return $result;
+}
+
+function intel_realtime_log_clear($time = 0) {
+  $query = db_delete('intel_realtime')
+    ->condition('time', (REQUEST_TIME - $time), '<=');
+  $query->execute();
+}
 
 
 function intel_realtime_author_load_js() {
