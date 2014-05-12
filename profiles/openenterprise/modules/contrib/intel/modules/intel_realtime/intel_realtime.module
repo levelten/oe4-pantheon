@@ -6,6 +6,13 @@
  */
 function intel_realtime_menu() {
   $items = array();
+  $items['intel/painfo_option_js'] = array(
+    'title' => '',
+    'page callback' => 'intel_realtime_painfo_option_load_js',
+    'access callback' => 'user_access',
+    'access arguments' => array('view all intel reports'),
+    'type' => MENU_CALLBACK,
+  );
   $items['intel/author_load_js'] = array(
     'title' => '',
     'page callback' => 'intel_realtime_author_load_js',
@@ -125,6 +132,45 @@ function intel_realtime_log_clear($time = 0) {
   $query->execute();
 }
 
+function intel_realtime_painfo_option_load_js($pa_key = '', $option_id = '') {
+  $response = array();
+  if (empty($pa_key) || empty($option_id)) {
+    intel_json_output_error(INTEL_STATUS_BAD_REQUEST);
+  }
+
+  $response['option'] = array(
+    'type' => $pa_key,
+    'id' => $option_id,
+  );
+  if ($pa_key == 'a') {
+    $account = user_load($option_id);
+    if (!empty($account)) {
+      $response['option']['title'] = format_username($account);
+    }
+  }
+  else if ($pa_key == 'ct') {
+    $types = node_type_get_types();
+    //print_r($types);
+    if (isset($types[$option_id])) {
+      $response['option']['title'] = $types[$option_id]->name;
+    }
+    else if (isset($types['enterprise_' . $option_id])) {
+      $response['option']['title'] = $types['enterprise_' . $option_id]->name;
+    }
+  }
+  else if ($pa_key == 't') {
+    $term = taxonomy_term_load($option_id);
+    if (!empty($term)) {
+      $response['option']['title'] = $term->name;
+    }
+  }
+
+  if (empty($response['option']['title'])) {
+    intel_json_output_error(INTEL_STATUS_NOT_FOUND);
+  }
+
+  intel_json_output($response);
+}
 
 function intel_realtime_author_load_js() {
   $response = array();

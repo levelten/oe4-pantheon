@@ -126,39 +126,65 @@ i.ext-link {
     border: none;
 	.vco-storyjs {
 	   font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
-
+       font-size: inherit;
       .vco-toolbar {
         display: none;
       }
       .vco-timeline {
       }
       .vco-feature {
-          font-size: 80%;
-          h1, h2, h3, h4, h5, h6 {
-            font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-weight: bold;
+          .text {
+              font-size: 80%;
+              h1, h2, h3, h4, h5, h6 {
+                font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-weight: bold;
+              }
+              h1 {
+                  font-size: 140%;
+              }
+              h2 {
+                font-size: 115%;
+                &.date {
+                  font-size: 100%;
+                  font-weight: normal;
+                }
+              }
+              h3 {
+                font-size: 100%;
+                line-height: 1.1em;
+                margin-bottom: 0;
+              }
+              p {
+                font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+                font-size: inherit;
+
+              }
+              .slide-tag {
+                background-color: #666;
+              }
           }
-          h1 {
-              font-size: 1.4em;
-          }
-          h2 {
-            font-size: 1.15em;
-            &.date {
-              font-size: 0.8em;
-              font-weight: normal;
-            }
-          }
-          h3 {
-            font-size: 1em;
-            line-height: 1.1em;
-            margin-bottom: 0;
-          }
-        p {
-          font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-          font-size: 0.8em;
-        }
+
 
       }
+      .vco-slider {
+        .nav-previous, .nav-next {
+          font-size: 80%;
+          .date {
+            font-size: 100%;
+          }
+          .title {
+            font-size: 100%;
+          }
+        }
+        .slider-item .content .content-container .media .media-wrapper .media-container .caption {
+          font-size: 80%;
+        }
+      }
+      /*
+      .vco-slider .slider-item .content .content-container .media {
+        min-width: 33%;
+      }
+      */
       .vco-navigation {
           height: 150px;
           .timenav {

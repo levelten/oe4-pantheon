@@ -5486,7 +5486,10 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			VMM.Lib.height(".slider-item", config.slider.height);
 			
 			
-			
+			// BEGIN HACK
+            // force non skinny mode
+            is_skinny = false;
+            // END HACK
 			if (is_skinny) {
 				
 				mediasize.text_media.width = 	config.slider.content.width - (config.slider.content.padding*2);
@@ -5513,8 +5516,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				
 				
 			} else {
-				
-				VMM.Lib.css(".slider-item .layout-text-media .text", "width", "40%" );
+
+
+                // BEGIN HACK
+                // make text area bigger
+                //VMM.Lib.css(".slider-item .layout-text-media .text", "width", "40%" ); original
+                VMM.Lib.css(".slider-item .layout-text-media .text", "width", "60%" );
+                // END HACK
 				VMM.Lib.css(".slider-item .layout-text-media .text", "display", "table-cell" );
 				VMM.Lib.css(".slider-item .layout-text-media .text .container", "display", "table-cell" );
 				VMM.Lib.css(".slider-item .layout-text-media .text .container", "width", "auto" );

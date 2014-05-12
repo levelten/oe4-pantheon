@@ -810,14 +810,14 @@ function rtDashboardView (name) {
             }
             if (type[0] == 'a') {
                 this.chartData[chartKey].setColumnLabel(0, 'Authors');
-                labels = this.model.authors;
+                labels = this.model.paInfo[type[0]].options;
             }
             if (type[0] == 't') {
                 this.chartData[chartKey].setColumnLabel(0, 'Terms');
-                labels = this.model.terms;
+                labels = this.model.paInfo[type[0]].options;
             }
             if (type[0] == 'ct') {
-                labels = this.model.contentTypes;
+                labels = this.model.paInfo[type[0]].options;
                 if ((type.length == 2)) {
                     var label = (this.model.contentTypes[type[1]] != undefined) ? this.model.contentTypes[type[1]] : type[1];
                     this.chartData.pageAttrs.setColumnLabel(0, label);
@@ -832,17 +832,20 @@ function rtDashboardView (name) {
                 this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
                 var label = key;
                 if (labels[key] != undefined) {
-                   label = labels[key];
+                   label = labels[key].title;
                 }
                 else {
                     if ((type[0] == 'a') && (type[1] == undefined)) {
-                        this.model.fetchAuthor(key, rtdView.updateAuthorData);
+                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
                     }
                     else if ((type[0] == 'ct') && (type[1] == undefined)) {
-                        this.model.fetchContentType(key, rtdView.updateContentTypeData);
+                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
                     }
                     else if ((type[0] == 't') && (type[1] == undefined)) {
-                        this.model.fetchTerm(key, rtdView.updateTermData);
+                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
                     }
 
                 }
@@ -1318,7 +1321,7 @@ function rtDashboardView (name) {
 
         }
 
-        // create table header lable
+        // create table header label
         if (draw) {
             var lkeys = [];
             var headerLabel = 'Events';
@@ -1684,23 +1687,37 @@ console.log(session);
                 if (page.ie == 1) {
                     classname = 'entrance';
                 }
+console.log(page.pa);
                 for (var i in page.pa) {
-                   if (this.model.paLabels[i] != undefined) {
+
+                   if (this.model.paInfo[i] != undefined) {
                        var value = '';
-                       if (i == 'ct') {
-                           value = (this.model.contentTypes[page.pa[i]] != undefined)? this.model.contentTypes[page.pa[i]] : page.pa[i];
+                       if (this.model.paInfo[i].type == 'list') {
+                           for (var j in page.pa[i]) {
+                               value += (value.length > 0 ? ', ' : '');
+                               if (this.model.paInfo[i].options[j] == undefined) {
+                                   value += '<span class="placeholder-pa-' + i + '-' + j + '">' + j + '</span>';
+                                   this.model.fetchPaInfoOption(i, j, rtdView.updatePaInfoOption, 500);
+
+                                   //this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
+                               }
+                               else {
+                                    value += this.model.paInfo[i].options[j].title;
+                               }
+                           }
                        }
-                       else if (i == 'a') {
-                           value = (this.model.authors[page.pa[i]] != undefined) ? this.model.authors[page.pa[i]] : page.pa[i];
-                       }
-                       else if (i == 't') {
-                           for (var t in page.pa[i]) {
-                               value += (value.length > 0 ? ', ' : '') + ((this.model.terms[t] != undefined) ? this.model.terms[t] : t);
+                       else {
+                           if (this.model.paInfo[i].options[page.pa[i]] == undefined) {
+                               value += '<span class="placeholder-pa-' + i + '-' + page.pa[i] + '">' + page.pa[i] + '</span>';
+                               this.model.fetchPaInfoOption(i, page.pa[i], rtdView.updatePaInfoOption);
+                           }
+                           else {
+                               value += this.model.paInfo[i].options[page.pa[i]].title;
                            }
                        }
 
                        if (value.length > 0) {
-                           paItems.push(this.model.paLabels[i] + ': ' + value);
+                           paItems.push(this.model.paInfo[i].title + ': ' + value);
                        }
                    }
                 }
@@ -2714,14 +2731,40 @@ console.log(rtdView.chartIndex['visitors'][key]);
             rtdConfig.chartWindows[chartKey].rtdView.updateVisitorData(key) ;
             return;
         }
+        jQuery('.placeholder-v-' + key).replaceWith(rtdView.chartIndex['visitors'][key]);
 
+        /*
         var row = rtdView.chartIndex[chartKey][key];
         var label = rtdView.model.visitors[key].name + rtdView.getCMSLink('link-ext', rtdView.config.settings.cmsPath + 'visitor/' + key);
         //rtdView.chartData['visitors'].setValue(row, 1, rtdView.model.visitors[key].name);
         rtdView.chartData[chartKey].setValue(row, 1, label);
         //rtdView.drawVisitorsReport({key: row});
         rtdView.drawVisitorsReport({});
+        */
     };
+
+    this.updatePaInfoOption = function(paKey, key, option) {
+console.log(paKey);
+console.log(key);
+console.log(rtdView.model.paInfo);
+        if (rtdView.model.paInfo[paKey].options[key] == undefined) {
+            return;
+        }
+        // check if report is in this screen
+        if (rtdConfig.chartWindows['pageAttrs'] != undefined) {
+            rtdConfig.chartWindows['pageAttrs'].rtdView.updatePaInfoOption(paKey, key, option);
+        }
+        if (rtdConfig.chartWindows['visitor'] != undefined) {
+            rtdConfig.chartWindows['visitor'].rtdView.updatePaInfoOption(paKey, key, option);
+        }
+        var selector = '.placeholder-pa-' + paKey + '-' + key;
+        var $temp = jQuery(selector);
+        console.log(selector);
+        console.log($temp);
+        //jQuery(selector).replaceWith(rtdView.model.paInfo[paKey].options[key].title);
+        $temp.replaceWith(option.title);
+        var a = 10 / $temp.length;
+    }
 
     this.updateAuthorData = function (key) {
         if (rtdView.model.authors[key] == undefined) {
@@ -2733,16 +2776,7 @@ console.log(rtdView.chartIndex['visitors'][key]);
             rtdConfig.chartWindows[chartKey].rtdView.updateAuthorData(key) ;
             return;
         }
-
-        // only update if current pageAttrs report is authors
-        var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
-        if ((type[0] != 'a') || (type[1] != undefined)) {
-            return;
-        }
-
-        var row = rtdView.chartIndex[chartKey][key];
-        rtdView.chartData[chartKey].setValue(row, 0, rtdView.model.authors[key]);
-        rtdView.drawPageAttrsReport();
+        jQuery('.placeholder-pa-a-' + key).replaceWith(rtdView.model.authors[key]);
     };
 
     this.updateContentTypeData = function (key) {
@@ -2755,19 +2789,11 @@ console.log(rtdView.chartIndex['visitors'][key]);
             rtdConfig.chartWindows[chartKey].rtdView.updateContentTypeData(key) ;
             return;
         }
-
-        // only update if current pageAttrs report is content types
-        var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
-        if ((type[0] != 'ct') || (type[1] != undefined)) {
-            return;
-        }
-
-        var row = rtdView.chartIndex[chartKey][key];
-        rtdView.chartData[chartKey].setValue(row, 0, rtdView.model.contentTypes[key]);
-        rtdView.drawPageAttrsReport();
+        jQuery('.placeholder-pa-ct-' + key).replaceWith(rtdView.model.contentTypes[key]);
     };
 
     this.updateTermData = function (key) {
+console.log(key);
         if (rtdView.model.terms[key] == undefined) {
             return;
         }
@@ -2777,16 +2803,7 @@ console.log(rtdView.chartIndex['visitors'][key]);
             rtdConfig.chartWindows[chartKey].rtdView.updateTermData(key) ;
             return;
         }
-        // only update if current pageAttrs report is content types
-//console.log(rtdView.chartRotationI[chartKey]);
-        var type = (rtdView.chartActive[chartKey].length > 0) ? rtdView.chartActive[chartKey] : rtdView.chartRotation[chartKey][rtdView.chartRotationI[chartKey]];
-        if ((type[0] != 't') || (type[1] != undefined)) {
-            return;
-        }
-
-        var row = rtdView.chartIndex[chartKey][key];
-        rtdView.chartData[chartKey].setValue(row, 0, rtdView.model.terms[key]);
-        rtdView.drawPageAttrsReport();
+        jQuery('.placeholder-pa-t-' + key).replaceWith(rtdView.model.terms[key]);
     };
 
     this.getCMSLink = function(icon, path) {

@@ -78,6 +78,29 @@ function rtDashboardModel (name) {
         stick: .1,
         additional_pages: .02
     };
+    this.paInfo = {
+        a: {
+            title: 'Author',
+            type: 'scalar',
+            options: {}
+        },
+        ct: {
+            title: 'Content type',
+            type: 'scalar',
+            options: {}
+        },
+        t: {
+            title: 'Terms',
+            type: 'list',
+            options: {}
+        },
+        i: {
+            title: 'Page intent',
+            type: 'list',
+            options: {}
+        }
+    }
+    this.paInfoRequested = {};
     this.vaInfo = {
         g: {
             title: 'Groups',
@@ -249,6 +272,45 @@ function rtDashboardModel (name) {
         jQuery.ajax(vars);
     };
 
+    this.fetchPaInfoOption = function (paKey, optionId, callback, timeout) {
+        // check if this data has already been requested
+        var time = rtdModel.getTime();
+        if (this.paInfoRequested[paKey] == undefined) {
+            this.paInfoRequested[paKey] = {};
+        }
+        if (this.paInfoRequested[paKey][optionId] != undefined) {
+            return;
+        }
+        this.paInfoRequested[paKey][optionId] = time;
+        //var func = 'painfo_option/' + paKey + '/' + optionId;
+        //var params = {};
+        var vars = {
+            dataType: 'json',
+            //url: this._getRealtimeDataUrl(func, params),
+            url: this.realtimeDataUrl + 'painfo_option_js/' + paKey + '/' + optionId,
+            data: {},
+            success: function (json){
+console.log(json);
+                if (json.status != 200) {
+                    return;
+                }
+                rtdModel.paInfo[paKey].options[optionId] = {
+                    title: json.option.title
+                }
+                if (callback != undefined) {
+                    if (timeout == undefined) {
+                        timeout = 0;
+                    }
+                    setTimeout(function () {callback(json.option.type, json.option.id, json.option);}, timeout);
+                    //callback(json.option.type, json.option.id, json.option);
+                    //callback(json.option.type, json.option.id, json.option);
+                }
+            }
+        };
+console.log(vars.url);
+        jQuery.ajax(vars);
+    }
+
     this.fetchAuthor = function (uid, callback) {
         var func = 'author_load';
         var params = {
@@ -262,7 +324,10 @@ function rtDashboardModel (name) {
                 if (json.author == undefined) {
                     return;
                 }
-                rtdModel.authors[uid] = json.author.name;
+                //rtdModel.authors[uid] = json.author.name;
+                rtdModel.paInfo.a.options[uid] = {
+                    title: json.author.name
+                }
                 if (callback != undefined) {
                     callback(uid, json.author);
                 }
