@@ -267,7 +267,7 @@ function rtDashboardConfig (name) {
 
         var $h = $('<h3 />').appendTo($pane);
         $h.addClass('row-md-2 col-md-12');
-        $h.text('events');
+        $h.text('Events');
 
         var $div = $('<div />').appendTo($pane);
         $div.addClass('row-md-10 col-md-12');
@@ -399,14 +399,16 @@ console.log("winHeight=" + winHeight + ",chartHeight=" + chartHeight + ",rowHeig
         var fontSize = rowHeight/32 * 100;
         var keyMetricFontSize = fontSize * 3;
 
-//console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
+console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
 
         var css = document.createElement('style')
-        var html = ".google-visualization-table-table .table-header-row td, .google-visualization-table-table .table-header-row .td  {height: " + headerRowHeight  + "px; font-size: " + fontSize + "%;}";
-        html += ".google-visualization-table-table .table-row td {height: " + rowHeight + "px; font-size: " + fontSize + "%;}";
+        var html = ".google-visualization-table-table .table-header-row td, .google-visualization-table-table .table-header-row .td  {height: " + headerRowHeight  + "px;}";
+        html += ".google-visualization-table-table .table-row td {height: " + rowHeight + "px;}";
+        html += "body {font-size: " + fontSize + "%;}";
         // active visitor table uses floated tds, this corrects for border alignment issues
-        html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
+       // html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
         html += "#active-visitors-table .table-header-row td {height: " + (headerRowHeight - 3) + "px; !important; }";
+        html
         css.innerHTML = html;
         document.body.appendChild(css);
 
