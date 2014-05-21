@@ -23,3 +23,25 @@ body.cke_editable .row-fluid > *:last-child,
 body.cke_editable [class*=col-] > *:last-child {
   margin-bottom: 0;
 }
+
+body.cke_editable {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 20px;
+}
+body.cke_editable ol {
+  padding-left: 40px !important;
+}
+body.cke_editable ol,
+.cke_editable ol li {
+  list-style: decimal;
+}
+body.cke_editable ul {
+  padding-left: 40px !important;
+}
+body.cke_editable ul,
+.cke_editable ul li {
+  list-style: disc;
+}
