@@ -50,3 +50,5 @@ sites/*.localhost
 
 # remove IDE files
 .idea
+
+/sites/default/local.settings.php
