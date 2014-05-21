@@ -2744,9 +2744,10 @@ console.log(rtdView.chartIndex['visitors'][key]);
     };
 
     this.updatePaInfoOption = function(paKey, key, option) {
-console.log(paKey);
-console.log(key);
-console.log(rtdView.model.paInfo);
+//console.log(paKey);
+//console.log(key);
+//console.log(option);
+//console.log(rtdView.model.paInfo);
         if (rtdView.model.paInfo[paKey].options[key] == undefined) {
             return;
         }
@@ -2765,7 +2766,7 @@ console.log(rtdView.model.paInfo);
         $temp.replaceWith(option.title);
         var a = 10 / $temp.length;
     }
-
+/*
     this.updateAuthorData = function (key) {
         if (rtdView.model.authors[key] == undefined) {
             return;
@@ -2805,6 +2806,7 @@ console.log(key);
         }
         jQuery('.placeholder-pa-t-' + key).replaceWith(rtdView.model.terms[key]);
     };
+    */
 
     this.getCMSLink = function(icon, path) {
         //var text = '<img src="' + rtdConfig.settings.imgPath + '/url_icon.gif' + '" class="url-link">';

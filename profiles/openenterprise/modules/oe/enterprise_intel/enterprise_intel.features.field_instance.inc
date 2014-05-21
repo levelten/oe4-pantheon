@@ -205,6 +205,42 @@ function enterprise_intel_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-page-field_visitor_attribute_col'
+  $field_instances['node-page-field_intel_event_col'] = array(
+    'bundle' => 'page',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_intel_event_col',
+    'label' => 'Intel events',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'field_collection',
+      'settings' => array(),
+      'type' => 'field_collection_embed',
+      'weight' => 41,
+    ),
+  );
+
   // Exported field_instance: 'node-page-field_page_attribute_col'
   $field_instances['node-page-field_page_attribute_col'] = array(
     'bundle' => 'page',

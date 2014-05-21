@@ -54,7 +54,9 @@ function intel_webform_page_alter(&$page) {
  * @param $settings
  */
 function intel_webform_intel_page_settings_js_alter(&$settings) {
-  $settings['track_forms'][] = 'form.webform-client-form';
+  if (is_array($settings['intel']['track_forms'])) {
+    $settings['intel']['track_forms'][] = 'form.webform-client-form';
+  }
 }
 
 /**
@@ -72,9 +74,9 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   $visitor = intel_visitor_load_or_create('user');
 
   $wf_settings = variable_get('intel_webform_settings_node_' . $node->nid, array());
-dsm($wf_settings);
-dsm($submission);
-dsm($node->webform['components']);
+//dsm($wf_settings);
+//dsm($submission);
+//dsm($node->webform['components']);
   $merge_data = array();
   $update_name_prop = 0;
   $name_prop = $visitor->getProp('data.name');

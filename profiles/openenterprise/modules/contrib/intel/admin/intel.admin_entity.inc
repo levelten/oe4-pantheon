@@ -78,11 +78,86 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
     );
   }
   elseif ($form_id == 'taxonomy_form_vocabulary') {
+    // alter page intent description
+    $form['intel']['intel_page_intent']['#description'] = t('Set the page intent for this vocabulary\'s listing page.');
+
+    // alter collapsed settings
+    $form['intel']['#collapsed'] = (empty($entity_settings['track_page_terms']) && empty($entity_settings['page_attribute']['key']));
+
     $form['intel']['intel_track_page_terms'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Add terms to page attributes'),
+      '#title' => t('Add selected terms to page attributes on all content types.'),
       '#default_value' => !empty($entity_settings['track_page_terms']) ? $entity_settings['track_page_terms'] : INTEL_TRACK_PAGE_TERMS_DEFAULT,
-      '#description' => t('If enabled terms in this vocabulary will be added to page attributes.'),
+      '#description' => t('Check to enable term in this vocabulary to be automatically tracked in analytics on all content types. In left unchecked, you can configure tracking settings on per content type via the content type edit form.'),
+    );
+
+    $form['intel']['page_attribute'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Custom page attribute'),
+      '#description' => t('By default vocabularies are tracked as standard Taxomony terms. Use the below fields create a custom page attribute to track this vocabulary.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($entity_settings['page_attribute']['key']),
+    );
+    $form['intel']['page_attribute']['intel_page_attribute_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Key'),
+      '#default_value' => !empty($entity_settings['page_attribute']['key']) ? $entity_settings['page_attribute']['key'] : '',
+      '#description' => t('A short unique identifier for the attribute. Keep this a short as possible.'),
+      '#size' => 12,
+    );
+
+    $form['intel']['page_attribute']['intel_page_attribute_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title override'),
+      '#default_value' => !empty($entity_settings['page_attribute']['title']) ? $entity_settings['page_attribute']['title'] : '',
+      '#description' => t('Human friendly attribute title to displayed to site administrators. Leave blank to use vocabulary\'s name.'),
+      '#size' => 32,
+    );
+
+    $form['intel']['page_attribute']['intel_page_attribute_description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description override'),
+      '#default_value' => !empty($entity_settings['page_attribute']['description']) ? $entity_settings['page_attribute']['description'] : '',
+      '#description' => t('Description of the attribute. Leave blank to use vocabulary\'s description.'),
+      '#rows' => 2,
+    );
+
+    $form['intel']['intel_track_page_terms_visitor'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Track selected terms in visitor attributes on all content types.'),
+      '#default_value' => !empty($entity_settings['track_page_terms_visitor']) ? $entity_settings['track_page_terms_visitor'] : INTEL_TRACK_PAGE_TERMS_VISITOR_DEFAULT,
+      '#description' => t('Check to enable term in this vocabulary to be automatically tracked in analytics on all content types. In left unchecked, you can configure tracking settings on per content type via the content type edit form.'),
+    );
+
+    $form['intel']['visitor_attribute'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Custom visitor attribute'),
+      '#description' => t('By default vocabularies the settings for the page attributes will be used to track in visitor attributes. Use the field below, if you would like to track this vocabulary\'s terms as a different visitor attribute.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($entity_settings['visitor_attribute']['key']),
+    );
+    $form['intel']['visitor_attribute']['intel_visitor_attribute_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Key'),
+      '#default_value' => !empty($entity_settings['visitor_attribute']['key']) ? $entity_settings['visitor_attribute']['key'] : '',
+      '#description' => t('A short unique identifier for the attribute. Keep this a short as possible.'),
+      '#size' => 12,
+    );
+
+    $form['intel']['visitor_attribute']['intel_visitor_attribute_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title override'),
+      '#default_value' => !empty($entity_settings['visitor_attribute']['title']) ? $entity_settings['visitor_attribute']['title'] : '',
+      '#description' => t('Human friendly attribute title to displayed to site administrators. Leave blank to use vocabulary\'s name.'),
+      '#size' => 32,
+    );
+
+    $form['intel']['visitor_attribute']['intel_visitor_attribute_description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description override'),
+      '#default_value' => !empty($entity_settings['visitor_attribute']['description']) ? $entity_settings['visitor_attribute']['description'] : '',
+      '#description' => t('Description of the attribute. Leave blank to use vocabulary\'s description.'),
+      '#rows' => 2,
     );
   }
 }
@@ -91,11 +166,13 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
   if (!isset($form_state['intel'])) {
     return;
   }
+  dsm($form);
+  dsm($form_state);
   $values = $form_state['values'];
   $entity_type = $form_state['intel']['entity_type'];
   $bundle = $form_state['intel']['bundle'];
-  if (!$bundle && !empty($values['name'])) {
-    $bundle = $values['name'];
+  if (!$bundle && !empty($values['machine_name'])) {
+    $bundle = $values['machine_name'];
   }
 
   $entity_settings = array();
@@ -115,8 +192,46 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
     $entity_settings['track_page_terms'] = $values['intel_track_page_terms'];
   }
 
+  if (isset($values['intel_track_page_terms'])) {
+    $entity_settings['track_page_terms'] = $values['intel_track_page_terms'];
+  }
+
+  if (!empty($values['intel_page_attribute_key'])) {
+    if (!isset($entity_settings['page_attribute'])) {
+      $entity_settings['page_attribute'] = array();
+    }
+    $entity_settings['page_attribute']['key'] = $values['intel_page_attribute_key'];
+    if (!empty($values['intel_page_attribute_title'])) {
+      $entity_settings['page_attribute']['title'] = $values['intel_page_attribute_title'];
+    }
+    if (!empty($values['intel_page_attribute_description'])) {
+      $entity_settings['page_attribute']['description'] = $values['intel_page_attribute_description'];
+    }
+  }
+
+  if (isset($values['intel_track_page_terms_visitor'])) {
+    $entity_settings['track_page_terms_visitor'] = $values['intel_track_page_terms_visitor'];
+  }
+  if (!empty($values['intel_visitor_attribute_key'])
+    || !empty($values['intel_visitor_attribute_title'])
+    || !empty($values['intel_visitor_attribute_description'])
+  ) {
+    if (!isset($entity_settings['visitor_attribute'])) {
+      $entity_settings['visitor_attribute'] = array();
+    }
+    $entity_settings['visitor_attribute']['key'] = $values['intel_visitor_attribute_key'];
+    if (!empty($values['intel_visitor_attribute_title'])) {
+      $entity_settings['visitor_attribute']['title'] = $values['intel_visitor_attribute_title'];
+    }
+    if (!empty($values['intel_visitor_attribute_description'])) {
+      $entity_settings['visitor_attribute']['description'] = $values['intel_visitor_attribute_description'];
+    }
+  }
+
   variable_set('intel_entity_settings_' . $entity_type . '__' . $bundle, $entity_settings);
 }
+
+
 
 function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '') {
   drupal_add_css(drupal_get_path('module', 'intel') . "/css/intel.entity_edit.css");

@@ -97,6 +97,103 @@ function oedemo_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'intel_visitor_attributes_custom_i';
+  $strongarm->value = array(
+    'title' => 'Interests',
+    'description' => 'Used to value a visitors interest in various items.',
+    'type' => 'vector',
+    'custom_options' => array(
+      'ux' => array(
+        'title' => 'UX
+',
+        'description' => '',
+      ),
+      'm' => array(
+        'title' => 'Mobile
+',
+        'description' => '',
+      ),
+      'dr' => array(
+        'title' => 'Drupal
+',
+        'description' => '',
+      ),
+      'c' => array(
+        'title' => 'Content
+',
+        'description' => '',
+      ),
+      'sm' => array(
+        'title' => 'Social media
+',
+        'description' => '',
+      ),
+      't' => array(
+        'title' => 'Traffic
+',
+        'description' => '',
+      ),
+      'l' => array(
+        'title' => 'Leads
+',
+        'description' => '',
+      ),
+      'a' => array(
+        'title' => 'Analytics
+',
+        'description' => '',
+      ),
+    ),
+    'selectable' => 1,
+    'module' => 'intel',
+    'options' => array(
+      'ux' => array(
+        'title' => 'UX
+',
+        'description' => '',
+      ),
+      'm' => array(
+        'title' => 'Mobile
+',
+        'description' => '',
+      ),
+      'dr' => array(
+        'title' => 'Drupal
+',
+        'description' => '',
+      ),
+      'c' => array(
+        'title' => 'Content
+',
+        'description' => '',
+      ),
+      'sm' => array(
+        'title' => 'Social media
+',
+        'description' => '',
+      ),
+      't' => array(
+        'title' => 'Traffic
+',
+        'description' => '',
+      ),
+      'l' => array(
+        'title' => 'Leads
+',
+        'description' => '',
+      ),
+      'a' => array(
+        'title' => 'Analytics',
+        'description' => '',
+      ),
+    ),
+    'key' => 'i',
+  );
+  $export['intel_visitor_attributes_custom_i'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'mailchimp_api_key';
   $strongarm->value = 'f55c733a7e69720740dfce566df455a8-us3';
   $export['mailchimp_api_key'] = $strongarm;

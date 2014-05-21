@@ -14,6 +14,7 @@ define('INTEL_L10IAPI_VER_MIN', '0.1.31');
 define('INTEL_PAGE_INTENT_DEFAULT', 'i');
 define('INTEL_TRACK_PAGE_UID_DEFAULT', 'a');
 define('INTEL_TRACK_PAGE_TERMS_DEFAULT', 0);
+define('INTEL_TRACK_PAGE_TERMS_VISITOR_DEFAULT', 0);
 define('INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT', 1);
 define('INTEL_TRACK_PHONECALLS_DEFAULT', 0);
 define('INTEL_TRACK_REALTIME_DEFAULT', 0);
@@ -33,18 +34,28 @@ function intel_menu() {
   $reports = intel_reports();
 
   // admin config callbacks
-
-  $items['admin/config/services/intel'] = array(
-    'title' => 'LevelTen Intelligence',
-    'description' => 'Analyze and optimize node content.',
+  $items['admin/config/intel'] = array(
+    'title' => 'Intelligence',
+    'description' => 'Administer Intelligence configuration and associated modules.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer group'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/intel/settings'] = array(
+    'title' => 'Settings',
+    'description' => 'API, global options, events, page attribute and visitor attribute settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('intel_admin_settings'),
     'access callback' => 'user_access',
     'access arguments' => array('admin intel'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_config.inc',
+    'weight' => -10,
   );
-  $items['admin/config/services/intel/general'] = array(
+  $items['admin/config/intel/settings/general'] = array(
     'title' => 'General',
     'description' => 'Analyze and optimize node content.',
     'page callback' => 'drupal_get_form',
@@ -56,7 +67,7 @@ function intel_menu() {
     'file' => 'admin/intel.admin_config.inc',
   );
   $w = 0;
-  $items['admin/config/services/intel/scoring'] = array(
+  $items['admin/config/intel/settings/scoring'] = array(
     'title' => 'Scoring',
     'description' => 'Analyze and optimize node content.',
     'page callback' => 'drupal_get_form',
@@ -67,7 +78,7 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/intel_event'] = array(
+  $items['admin/config/intel/settings/intel_event'] = array(
     'title' => 'Events',
     'description' => 'Intel events configuration.',
     'page callback' => 'intel_admin_intel_event_list_page',
@@ -77,7 +88,7 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/visitor_attribute'] = array(
+  $items['admin/config/intel/settings/visitor_attribute'] = array(
     'title' => 'Visitor attributes',
     'description' => 'Visitor attribute configuration.',
     'page callback' => 'intel_admin_visitor_attribute_list_page',
@@ -87,7 +98,7 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/page_attribute'] = array(
+  $items['admin/config/intel/settings/page_attribute'] = array(
     'title' => 'Page attributes',
     'description' => 'Page attribute configuration.',
     'page callback' => 'intel_admin_page_attribute_list_page',
@@ -97,7 +108,7 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/external_tracking'] = array(
+  $items['admin/config/intel/settings/external_tracking'] = array(
     'title' => 'External tracking',
     'description' => 'Analyze and optimize node content.',
     'page callback' => 'drupal_get_form',
@@ -108,18 +119,8 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/modules'] = array(
-    'title' => 'Modules',
-    'description' => 'Add on module configuration',
-    'page callback' => 'intel_admin_modules_page',
-    //'page arguments' => array('intel_admin_external_tracking'),
-    'access callback' => '_intel_user_access_extended',
-    'access arguments' => array('admin intel'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => $w++,
-    'file' => 'admin/intel.admin_config.inc',
-  );
-  $items['admin/config/services/intel/intel_event/add'] = array(
+
+  $items['admin/config/intel/settings/intel_event/add'] = array(
     'title' => 'Add event',
     'page callback' => 'intel_admin_intel_event_add_page',
     'access callback' => 'user_access',
@@ -127,7 +128,7 @@ function intel_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/intel_event/%intel_intel_event/edit'] = array(
+  $items['admin/config/intel/settings/intel_event/%intel_intel_event/edit'] = array(
     'title' => 'Edit event',
     'page callback' => 'intel_admin_intel_event_edit_page',
     'page arguments' => array(5),
@@ -136,7 +137,7 @@ function intel_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/intel_event/%intel_intel_event/delete'] = array(
+  $items['admin/config/intel/settings/intel_event/%intel_intel_event/delete'] = array(
     'title' => 'Delete event',
     'page callback' => 'intel_admin_intel_event_delete_page',
     'page arguments' => array(5),
@@ -145,7 +146,7 @@ function intel_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/visitor_attribute/add'] = array(
+  $items['admin/config/intel/settings/visitor_attribute/add'] = array(
     'title' => 'Add attribute',
     'page callback' => 'intel_admin_visitor_attribute_add_page',
     'access callback' => 'user_access',
@@ -153,7 +154,7 @@ function intel_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/visitor_attribute/%intel_visitor_attribute/edit'] = array(
+  $items['admin/config/intel/settings/visitor_attribute/%intel_visitor_attribute/edit'] = array(
     'title' => 'Visitor attribute',
     'page callback' => 'intel_admin_visitor_attribute_edit_page',
     'page arguments' => array(5),
@@ -162,7 +163,7 @@ function intel_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/page_attribute/add'] = array(
+  $items['admin/config/intel/settings/page_attribute/add'] = array(
     'title' => 'Add attribute',
     'page callback' => 'intel_admin_page_attribute_add_page',
     'access callback' => 'user_access',
@@ -170,7 +171,7 @@ function intel_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'admin/intel.admin_config.inc',
   );
-  $items['admin/config/services/intel/page_attribute/%intel_page_attribute/edit'] = array(
+  $items['admin/config/intel/settings/page_attribute/%intel_page_attribute/edit'] = array(
     'title' => 'Page attribute',
     'page callback' => 'intel_admin_page_attribute_edit_page',
     'page arguments' => array(5),
@@ -181,7 +182,7 @@ function intel_menu() {
   );
 
   if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
-    $items['admin/config/services/intel/phonenumber'] = array(
+    $items['admin/config/intel/settings/phonenumber'] = array(
       'title' => 'Phone numbers',
       'description' => 'Intel phone number configuration.',
       'page callback' => 'intel_admin_phonenumber_list_page',
@@ -191,7 +192,7 @@ function intel_menu() {
       'weight' => $w++,
       'file' => 'admin/intel.admin_config.inc',
     );
-    $items['admin/config/services/intel/phonenumber/add'] = array(
+    $items['admin/config/intel/settings/phonenumber/add'] = array(
       'title' => 'Add phone number',
       'page callback' => 'intel_admin_phonenumber_add_page',
       'access callback' => 'user_access',
@@ -199,7 +200,7 @@ function intel_menu() {
       'type' => MENU_LOCAL_ACTION,
       'file' => 'admin/intel.admin_config.inc',
     );
-    $items['admin/config/services/intel/phonenumber/%intel_phonenumber/edit'] = array(
+    $items['admin/config/intel/settings/phonenumber/%intel_phonenumber/edit'] = array(
       'title' => 'Edit phone number',
       'page callback' => 'intel_admin_phonenumber_edit_page',
       'page arguments' => array(5),
@@ -208,7 +209,7 @@ function intel_menu() {
       'type' => MENU_NORMAL_ITEM,
       'file' => 'admin/intel.admin_config.inc',
     );
-    $items['admin/config/services/intel/phonenumber/%intel_phonenumber/delete'] = array(
+    $items['admin/config/intel/settings/phonenumber/%intel_phonenumber/delete'] = array(
       'title' => 'Delete phone number',
       'page callback' => 'intel_admin_phonenumber_delete_page',
       'page arguments' => array(5),
@@ -847,8 +848,11 @@ function intel_admin_paths() {
  */
 function intel_util() {
 
-  $a = array();
-  dsm(serialize($a));
+  $attributes = variable_get('intel_page_attributes_custom', array());
+dsm($attributes);
+  $attributes = variable_get('intel_visitor_attributes_custom', array());
+dsm($attributes);
+
   return '';
 
   $q = intel_mailchimp_get_api_object();
@@ -1583,7 +1587,7 @@ function intel_submission_load_by_vars($vars) {
   return $submission;
 }
 
-function intel_load_filtered_submission_result($filter = array(), $options = array(), $header = array(), $limit = 100, $offset = NULL) {
+function intel_submission_load_filtered($filter = array(), $options = array(), $header = array(), $limit = 100, $offset = NULL) {
   $query = db_select('intel_submission', 's')
     ->extend('PagerDefault')
     ->limit($limit);
@@ -1594,6 +1598,7 @@ function intel_load_filtered_submission_result($filter = array(), $options = arr
   //$query->addField($v, 'vtkid', 'vtkid');
   $query->addField($v, 'data', 'visitor_data');
   $query->addField($v, 'ext_data', 'visitor_ext_data');
+  $query->addTag('intel_submission_load_filtered');
 
   if (!empty($header)) {
     $query->extend('TableSort')->orderByHeader($header);

@@ -523,7 +523,7 @@ function intel_requirements($phase) {
       return $requirements;
     }
     if (!$account_level = intel_verify_apikey($message, $tid, $apikey)) {
-      $message .= ' ' . $t('The Intelligence module has not been configured yet. Please configure settings from the <a href="@url">Intelligence settings page</a>.', array('@url' => url('admin/config/services/intel')));
+      $message .= ' ' . $t('The Intelligence module has not been configured yet. Please configure settings from the <a href="@url">Intelligence settings page</a>.', array('@url' => url('admin/config/intel/settings')));
       $requirements['intel'] += array(
         'description' => $message,
         'severity' => REQUIREMENT_WARNING,

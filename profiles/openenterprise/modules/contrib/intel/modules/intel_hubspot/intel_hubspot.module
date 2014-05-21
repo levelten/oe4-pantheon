@@ -3,7 +3,7 @@
 function intel_hubspot_menu() {
   $items = array();
   
-  $items['admin/config/services/intel/modules/hubspot'] = array(
+  $items['admin/config/intel/hubspot'] = array(
     'title' => 'HubSpot',
     'description' => 'Add on module configuration',
     'page callback' => 'intel_hubspot_admin_config_page',
@@ -11,7 +11,7 @@ function intel_hubspot_menu() {
     //'page arguments' => array('intel_hubspot_admin_config'),
     'access callback' => 'user_access',
     'access arguments' => array('admin intel'),
-    'type' => MENU_LOCAL_TASK,
+    //'type' => MENU_LOCAL_TASK,
     'file' => 'intel_hubspot.admin.inc',
   );  
   

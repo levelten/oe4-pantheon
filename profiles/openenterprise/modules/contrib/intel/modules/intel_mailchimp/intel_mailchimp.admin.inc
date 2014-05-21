@@ -34,6 +34,7 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
   else {
     drupal_set_message(t('Could not get valid Mailchimp API object'), 'error');
   }
+  dsm($lists);
   $list_id = variable_get('intel_mailchimp_default_list_id', '');
   $form['intel_mailchimp_default_list_id'] = array(
     '#type' => 'select',
@@ -78,6 +79,55 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
         '#default_value' => variable_get($key, ''),
         '#description' => t('Select an intel property to map to MailChimp merge vars.'),
       );       
+    }
+
+    // process interest groups
+    $visitor_attrs = intel_get_visitor_attributes();
+    dsm($visitor_attrs);
+    // filter compatible visitor_attrs
+    $options = array(
+      '' => t('- None'),
+    );
+    foreach ($visitor_attrs AS $key => $attr) {
+      if (($attr['type'] == 'list') || ($attr['type'] == 'vector')) {
+        $options[$key] = $attr['title'];
+      }
+    }
+    $intgroups = $list['intgroups'];
+    $form['group-map'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Group map'),
+      '#collapsible' => FALSE,
+    );
+    foreach ($intgroups AS $intgroup) {
+      $key = 'intel_mailchimp_group_map_' . $list_id . '_' . $intgroup['id'];
+      $default_value = variable_get($key, '');
+      $form['group-map'][$key] = array(
+        '#type' => 'select',
+        '#title' => $intgroup['name'],
+        '#options' => $options,
+        '#default_value' => $default_value,
+        '#description' => t('Select an intel property to map to MailChimp interest group.'),
+      );
+
+      if (isset($visitor_attrs[$default_value]) && ($visitor_attrs[$default_value]['type'] == 'vector')) {
+        $key2 = $key . '_threshold_count';
+        $form['group-map'][$key2] = array(
+          '#type' => 'textfield',
+          '#title' => $intgroup['name'] . ' ' . t('threshold count'),
+          '#default_value' => variable_get($key2, 5),
+          '#description' => t('Select an intel property to map to MailChimp interest group.'),
+          '#size' => 5,
+        );
+        $key2 = $key . '_threshold_percent';
+        $form['group-map'][$key2] = array(
+          '#type' => 'textfield',
+          '#title' => $intgroup['name'] . ' ' . t('threshold percent'),
+          '#default_value' => variable_get($key2, 10),
+          '#description' => t('Select an intel property to map to MailChimp interest group.'),
+          '#size' => 5,
+        );
+      }
     }
   }
   return $form;

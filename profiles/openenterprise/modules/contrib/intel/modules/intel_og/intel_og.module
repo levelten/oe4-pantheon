@@ -1,0 +1,201 @@
+<?php
+
+/**
+ *  Implements of hook_menu()
+ */
+function intel_og_menu() {
+  $items = array();
+  $items['admin/config/intel/og'] = array(
+    'title' => 'Organic Groups',
+    'description' => 'Setup ',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('intel_og_admin_config_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    //'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_og.admin.inc',
+  );
+  $items['group/%/%/admin/intel'] = array(
+    'title callback' => 'Intel',
+    //'title arguments' => array('People in group @group', 1, 2),
+    //'description' => 'Find and manage group members.',
+    'page callback' => 'intel_og_admin_page',
+    'page arguments' => array(1, 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('manage members', 1, 2),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'intel_og.admin.inc',
+  );
+  $items['group/%/%/admin/intel/contacts'] = array(
+    'title' => 'Contacts',
+    'description' => 'Information about visitors.',
+    'page callback' => 'intel_og_admin_people_contacts',
+    'page arguments' => array(1, 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('manage members', 1, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_og.admin.inc',
+  );
+  $items['group/%/%/admin/intel/submissions'] = array(
+    'title' => 'Submissions',
+    'description' => 'Information about visitors.',
+    'page callback' => 'intel_og_admin_people_submissions',
+    'page arguments' => array(1, 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('manage members', 1, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_og.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_intel_page_intel_pushes
+ *
+ */
+function intel_og_intel_page_intel_pushes() {
+  $og_context = og_context();
+
+  if (empty($og_context['gid'])) {
+    return;
+  }
+
+  $l10i_var_action = array(
+    'method' => '_setIntelVar',
+    'scope' => 'page',
+    'namespace' => 'analytics',
+    'keys' => 'og',
+    'value' => $og_context['gid'],
+  );
+  intel_add_page_intel_push($l10i_var_action);
+  drupal_add_js(drupal_get_path('module', 'intel_og') . '/intel_og.page.js');
+  $time = REQUEST_TIME;
+  $params = session_get_cookie_params();
+  setcookie('l10i_og', $og_context['gid'], 0, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+}
+
+function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
+  $entity_type = variable_get('intel_og_default_group_type', 'node');
+  $og_context = og_context($entity_type);
+ dsm($og_context);
+  if (empty($og_context['gid'])) {
+    return;
+  }
+
+  // TODO this is hard coded, need to change
+  $entity = entity_load($og_context['group_type'], array($og_context['gid']));
+  $entity = $entity[$og_context['gid']];
+
+  if (isset($entity->field_ga_code)) {
+    $wrapper = entity_metadata_wrapper('dwyr_franchise', $entity);
+    $ga_code = $wrapper->field_ga_code->value();
+    if (!empty($ga_code)) {
+      array_unshift($l10iq_pushes, array('_setAccount', $ga_code, 'l10i_og'));
+    }
+  }
+}
+
+/*
+function intel_og_intel_page_settings_js_alter(&$js, &$page) {
+
+}
+*/
+
+function intel_og_artifact_save($artifact_type, $aid, $group_type, $gid) {
+  $key = array(
+    'artifact_type' => $artifact_type,
+    'aid' => $aid,
+    'group_type' => $group_type,
+    'gid' => $gid,
+  );
+  $query = db_merge('intel_og_artifact')
+    ->key($key);
+  $query->execute();
+}
+
+function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $context) {
+//  $args = func_get_args();
+//  dsm($args);
+
+  $gid = null;
+  if (isset($context['submit_context']['og'])) {
+    $gid = $context['submit_context']['og'];
+  }
+  else
+  // if og is set on submit context, add it to the submission object. Data will
+  // be saved after submission and sid is created
+  if (isset($context['submit_context']['og'])) {
+    $submission->og = $context['submit_context']['og'];
+
+    // check if visitor og_ref already contains gid target. If not, add it.
+    $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
+    $i = 0;
+    foreach ($wrapper->og_group_ref->getIterator() as $delta => $og_ref) {
+      if ($og_ref->getIdentifier() == $context['submit_context']['og']) {
+        return;
+      }
+      $i++;
+    }
+    $wrapper->og_group_ref[$i]->set($context['submit_context']['og']);
+  }
+}
+
+function intel_og_intel_visitor_insert($visitor) {
+  intel_og_intel_visitor_save($visitor);
+}
+
+function intel_og_intel_visitor_update($visitor) {
+  intel_og_intel_visitor_save($visitor);
+}
+
+function intel_og_intel_visitor_save($visitor) {
+//dsm($visitor);
+  //intel_og_artifact_save('visitor', $visitor->sid, 'node', $visitor->og);
+}
+
+function intel_og_intel_submission_insert($submission) {
+//dsm($submission);
+  intel_og_artifact_save('submission', $submission->sid, 'node', $submission->og);
+}
+
+function intel_og_query_alter($query) {
+
+  // check if in group admin context
+  if ((arg(0) == 'group') && arg(1) && is_numeric(arg(2)) && (arg(3) == 'admin') && (arg(4) == 'intel')) {
+$menu_item = menu_get_item();
+dsm($menu_item);
+    $group_type = arg(1);
+    $gid = arg(2);
+    if (arg(5) == 'contacts') {
+      // query for filtered visitor contacts list
+      if ($query->hasTag('intel_visitor_load_multiple')) {
+        // need to filter by og ownership by using inner join
+        $join_on =  '%alias.etid = base.vid
+            AND %alias.entity_type = :og_entity_type
+            AND %alias.gid = :gid';
+        $join_vars = array(
+          ':og_entity_type' => 'intel_visitor',
+          ':gid' => $gid,
+        );
+        $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
+        //$query->addField($i, "gid");
+        //$query->isNotNull("$i.gid");
+        //$query->condition("$i.gid", 'NULL', 'IS NOT');
+        //$query->condition("$i.entity_type", $group_type);
+        //$query->condition("$i.gid", $gid);
+//dsm($query);
+//dsm(" " . $query);
+      }
+    }
+    else if (arg(5) == 'submissions') {
+      if ($query->hasTag('intel_submission_load_filtered')) {
+        $i = $query->innerJoin('intel_og_artifact', 'a',
+          '%alias.artifact_type == "submission" AND %alias.aid = s.sid'
+        );
+        $query->condition("$i.gid", $gid);
+//dsm($query);
+//dsm(" " . $query);
+      }
+    }
+  }
+}

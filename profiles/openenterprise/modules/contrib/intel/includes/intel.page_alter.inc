@@ -9,12 +9,20 @@
 function intel_page_alter(&$page) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   global $user;
+//print_r($user);
+  /*
+  if ($user->uid != 1) {
+  //dsm($user);
+  print_r($_SESSION);
+  watchdog('intel: ' . $_GET['q'], print_r($_SESSION, 1));
 
 // testing how session work. Looking at login/logout transition
 // TODO remove (form testing only)
-//$_SESSION['intel'] = isset($_SESSION['intel']) ? $_SESSION['intel'] + 1 : 0;
-//$vtk = IntelVisitor::extractVtk();
-//watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
+$_SESSION['intel'] = isset($_SESSION['intel']) ? $_SESSION['intel'] + 1 : 0;
+$vtk = IntelVisitor::extractVtk();
+watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
+  }
+  */
   
   $path_is_admin = path_is_admin(current_path());
   
@@ -67,7 +75,7 @@ function intel_page_alter(&$page) {
 
     }
   }
-  // TODO support for taxomony terms
+  // TODO support for taxomony terms listing page
 
   // do field operations
   if ($entity) {
@@ -104,35 +112,34 @@ function intel_page_alter(&$page) {
       }     
     }
 
-    // track page taxonomy terms
-    $l10i_var_action['value'] = '';
-    if (isset($page_entity_settings['track_term_fields']) && is_array($page_entity_settings['track_term_fields'])) {
-      foreach ($page_entity_settings['track_term_fields'] AS $key => $flag) {
-        if ($flag && isset($entity->{$key}[$lang])) {
-          foreach ($entity->{$key}[$lang] AS $t) {
-            $page_attrs['t'] = array(
-              $t['tid'] => '',
-            );
-          }
-        }
-      }
-    }
-    /*
+    $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
+
+    // process vocabularies with global tracking enabled
     foreach ($fields_info AS $key => $field) {
       if (isset($entity->{$key}[$lang][0]['tid'])) {
+        // get field_info to get associated vocabulary
         $field_info = field_info_field($key);
         $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
-        if (!empty($entity_settings['taxonomy'][$vocab_name]['track_page_terms'])) {
+        // check if tracking is enabled at the content type level or on globally on the vocabulary
+        if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
+          $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
           foreach ($entity->{$key}[$lang] AS $t) {
-            $page_attrs['t'] = array(
-              $t['tid'] => '',
-            );
+            if (!isset($page_attrs[$page_attr_key])) {
+              $page_attrs[$page_attr_key] = array();
+            }
+            $page_attrs[$page_attr_key][$t['tid']] = '';
+            if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
+              $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
+              if (!isset($visitor_attrs[$visitor_attr_key])) {
+                $visitor_attrs[$visitor_attr_key] = array();
+              }
+              $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
+            }
           }
         }
       }
     }
-    */
-    
+
     // set custom page attributes if page_attribute_col field exists
     if (!empty($entity->field_page_attribute_col[$lang]) && is_array($entity->field_page_attribute_col[$lang])) {
       foreach ($entity->field_page_attribute_col[$lang] AS $i => $e) {
@@ -249,7 +256,9 @@ function intel_page_alter(&$page) {
     $l10i_event_action = intel_filter_event_for_push($l10i_event_action);
     intel_add_page_intel_push($l10i_event_action);
   }
-  
+
+  //intel_check_user_login($page);
+
   intel_check_form_submission($page);
   
   // check form processing
@@ -265,6 +274,10 @@ function intel_page_alter(&$page) {
   //if (isset($node->type) && ($node->type == 'enterprise_landingpage')) {
   //  $is_landingpage = 1;
   //}
+
+  // call hook for modules to add page pushes
+  module_invoke_all('intel_page_intel_pushes');
+
 
   $pushes = intel_get_flush_page_intel_pushes();
 
@@ -384,6 +397,7 @@ function intel_get_flush_page_intel_pushes() {
 }
 
 function intel_page_intel_pushes($action = 'get', $push = array(), $index = '') {
+
   if (!isset($_SESSION['intel_page_pushes'])) {
     $_SESSION['intel_page_pushes'] = array();
   }
@@ -396,6 +410,7 @@ function intel_page_intel_pushes($action = 'get', $push = array(), $index = '') 
   $ret = $_SESSION['intel_page_pushes'];
   if ($action == 'get_flush') {
     unset($_SESSION['intel_page_pushes']);
+    //$_SESSION['intel_page_pushes'] = array();
   }
   return $ret;
 }
@@ -584,7 +599,25 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     $sv = (variable_get('intel_debug_mode', 0)) ? '' : '.min';
     //$script .= "// LevelTen Intelligence" . $terminator;
     $script .= "var _l10iq = _l10iq || [];" . $terminator;
-    //$script .= "var _intel = _intel || [];" . $terminator;    
+    //$script .= "var _intel = _intel || [];" . $terminator;
+    $l10iq_pushes = array();
+    //$l10iq_pushes[] = array('_setTrackerPrefix', $l10i_ga_tracker_prefix);
+    $l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
+    if ($l10i_domain_name) {
+      $l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
+    }
+    $l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
+    $l10iq_pushes[] = array('_setDataMode', $data_mode);
+    $l10iq_pushes[] = array('_setOptions', (object) array());
+
+    // trigger alter to enable other modules to add pushes
+    drupal_alter('intel_l10iq_pushes', $l10iq_pushes);
+
+    foreach ($l10iq_pushes AS $p) {
+      $script .= "_l10iq.push(" . json_encode($p) . ");" . $terminator;
+    }
+
+/*
     $script .= "_l10iq.push(['_setTrackerPrefix', '$l10i_ga_tracker_prefix']);" . $terminator;  
     $script .= "_l10iq.push(['_setAccount', '$l10i_ga_account']);" . $terminator; 
     if ($l10i_domain_name) {
@@ -592,7 +625,8 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     }
     $script .= "_l10iq.push(['_setApiUrl', '$api_hostpath/']);" . $terminator; 
     $script .= "_l10iq.push(['_setDataMode', $data_mode]);" . $terminator;  
-    $script .= "_l10iq.push(['_setOptions', {}]);" . $terminator;  
+    $script .= "_l10iq.push(['_setOptions', {}]);" . $terminator;
+*/
     
     if ($version == 'latest') {
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
@@ -666,7 +700,7 @@ function intel_js_alter(&$javascript) {
       $options['track_analytics'] = 1;
     }
     $json = drupal_json_encode($options);
-    $javascript[$intel_i]['data'] = str_replace("_l10iq.push(['_setOptions', {}]);", "_l10iq.push(['_setOptions', $json]);", $javascript[$intel_i]['data']);
+    $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["_setOptions",{}]);', '_l10iq.push(["_setOptions",' . $json . ']);', $javascript[$intel_i]['data']);
   }
 
   if ($debug && ($ga_i >= 0)) {
@@ -1031,6 +1065,7 @@ function intel_execute_response_redirect_if_set($lp_node, $link_query = array())
 }
 
 function intel_visitor_sync_user($account) {
+return; // TODO: disabled
   global $user;
 
 
@@ -1091,9 +1126,14 @@ function intel_visitor_sync_user($account) {
  * @param $edit
  * @param $account
  */
-function intel_user_login(&$edit, $account) {
+// TODO: This causes problems with user session management.
+// for some odd reason the intel_add_page_intel_push causes the user to be logged out
+function intel_user_login(&$edit, &$account) {
+  return;
+
 
   $visitor = intel_visitor_load($account->uid, FALSE, 'uid');
+
   if (!$visitor) {
     intel_visitor_sync_user($account);
   }
@@ -1102,20 +1142,22 @@ function intel_user_login(&$edit, $account) {
     $visitor->save();
   }
 
+
   $call = array(
     'method' => '_addIntelEvent',
     'event' => 'pageshow',
     'selector' => 'body',
     'category' => 'User login',
     'action' => 'User login form',
-    'label' => 'user',
+    'label' => 'user/' . $account->uid,
     'value' => 0,
     'noninteraction' => FALSE,
     'location' => 'user',
   );
   intel_add_page_intel_push($call);
-  $pushes = intel_get_page_intel_pushes();
-  //watchdog('intel_user_login', print_r($pushes, 1));
+
+//$pushes = intel_get_page_intel_pushes();
+//watchdog('intel_user_login', print_r($pushes, 1));
 }
 
 /**

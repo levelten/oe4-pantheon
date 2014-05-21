@@ -146,7 +146,7 @@ function intel_admin_people_submissions($filter = array()) {
     );
   }
   $options = array();
-  $result = intel_load_filtered_submission_result($filter, $options, $header, 50);
+  $result = intel_submission_load_filtered($filter, $options, $header, 50);
 
   $hs_portal_id = variable_get('hubspot_portalid', '');
   

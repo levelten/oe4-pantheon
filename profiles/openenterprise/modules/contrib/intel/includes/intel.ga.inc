@@ -310,9 +310,50 @@ function intel_get_attributes($mode = 'visitor') {
       $attrs[$k]['options'] = $v['static_options'];
     }
     $attrs[$k]['module']  = 'intel';
-  } 
+  }
 
-  $custom = variable_get('intel_' . $mode . '_attributes_custom', array());
+  // process vocabularies set as custom attributes
+  $entity_settings = intel_get_entity_settings_multi('taxonomy');
+  foreach ($entity_settings AS $k => $v) {
+
+    // check if attribute key is set or if intel_track_page_terms_visitor
+    if ((isset($v[$mode . '_attribute']) && !empty($v[$mode . '_attribute']['key']))
+      || (($mode == 'visitor') && !empty($v['track_page_terms_visitor']))
+    ) {
+      // if mode == visitor,
+      if (($mode == 'visitor') && (empty($v[$mode . '_attribute']['key']))) {
+        $key = !empty($v['page_attribute']['key']) ? $v['page_attribute']['key'] : 't';
+        if (!isset($v['visitor_attribute'])) {
+          $v['visitor_attribute'] = array();
+        }
+        $v['visitor_attribute'] += $v['page_attribute'];
+      }
+      else {
+        $key = $v[$mode . '_attribute']['key'];
+      }
+
+      $vocab_info = taxonomy_vocabulary_machine_name_load($k);
+      $attrs[$key] = $v[$mode . '_attribute'];
+      if (empty($attrs[$key]['title'])) {
+        $attrs[$key]['title'] = $vocab_info->name;
+      }
+      if (empty($attrs[$key]['description'])) {
+        $attrs[$key]['description'] = $vocab_info->description;
+      }
+      $attrs[$key]['options_description'] = t('Generated from taxonomy vocabulary !link.',
+        array(
+          '!link' => l($vocab_info->name, 'admin/structure/taxonomy/' . $k . '/edit'),
+        )
+      );
+      $attrs[$key]['type'] = ($mode == 'visitor') ? 'vector' : 'list';
+      $attrs[$key]['module']  = 'intel';
+      $attrs[$key]['source_type']  = 'taxonomy';
+      $attrs[$key]['source_bundle']  = $k;
+    }
+  }
+
+  // load custom attributes and overrides
+  $custom = intel_get_page_attributes_custom_multi($mode);
   foreach ($custom AS $k => $v) {
     // check if custom attribute
     if (isset($attrs[$k])) {
@@ -351,10 +392,12 @@ function intel_get_attributes($mode = 'visitor') {
   drupal_alter('intel_' . $mode . '_attributes', $attrs);
   
   uasort($attrs, '_intel_sort_by_title');
-  
+
   $attributes[$mode] = $attrs;  
   return $attributes[$mode];  
 }
+
+
 
 function intel_page_attribute_load($key) {
   $attributes = intel_get_page_attributes();
@@ -493,6 +536,40 @@ function intel_phonenumber_save($phonenumber, $key = '') {
   $phonenumbers[$key] = $phonenumber;
   $phonenumbers = variable_set('intel_phonenumbers', $phonenumbers);
   return $phonenumber;
+}
+
+function intel_get_page_attributes_custom_multi($mode = 'visitor') {
+  $query = db_select('variable', 'v')
+    ->fields('v')
+    ->condition('name', 'intel_' . $mode . '_attribute_custom_%', 'LIKE');
+  $result = $query->execute();
+
+  $data = array();
+  while ($row = $result->fetchObject()) {
+    $a = explode('_', $row->name);
+    $data[$a[4]] = unserialize($row->value);
+  }
+  return $data;
+}
+
+function intel_get_entity_settings_multi($entity_type, $bundle = '') {
+  $query = db_select('variable', 'v')
+    ->fields('v');
+
+  if ($bundle == '') {
+    $query->condition('name', 'intel_entity_settings_' . $entity_type . '__%', 'LIKE');
+  }
+  else {
+    $query->condition('name', 'intel_entity_settings_' . $entity_type . '__' . $bundle);
+  }
+  $result = $query->execute();
+
+  $data = array();
+  while ($row = $result->fetchObject()) {
+    $a = explode('_', $row->name, 6);
+    $data[$a[5]] = unserialize($row->value);
+  }
+  return $data;
 }
 
 function _intel_sort_by_title($a, $b) {

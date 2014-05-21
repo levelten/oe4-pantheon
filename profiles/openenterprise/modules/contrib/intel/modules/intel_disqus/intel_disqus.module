@@ -6,7 +6,7 @@ define('ACCESS_TOKEN', '');
 function intel_disqus_menu() {
   $items = array();
   
-  $items['admin/config/services/intel/modules/disqus'] = array(
+  $items['admin/config/intel/settings/modules/disqus'] = array(
     'title' => 'Disqus',
     'description' => 'Add on module configuration',
     'page callback' => 'drupal_get_form',

@@ -30,6 +30,7 @@ features[variable][] = intel_extended_mode
 features[variable][] = intel_ga_account
 features[variable][] = intel_mailchimp_default_list_id
 features[variable][] = intel_track_phonecalls
+features[variable][] = intel_visitor_attributes_custom_i
 features[variable][] = mailchimp_api_key
 features[variable][] = twilio_account
 features[variable][] = twilio_number

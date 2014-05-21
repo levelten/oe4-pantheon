@@ -671,6 +671,7 @@ class IntelVisitorController extends EntityAPIControllerExportable {
 
     // Invoke hook_entity_presave().
     module_invoke_all('entity_presave', $entity, 'intel_visitor');
+    module_invoke_all('intel_visitor_presave', $entity);
     // The 'primary_keys' argument determines whether this will be an insert
     // or an update. So if the entity already has an ID, we'll specify
     // eid as the key.
@@ -683,7 +684,7 @@ class IntelVisitorController extends EntityAPIControllerExportable {
     // We're going to invoke either hook_entity_update() or
     // hook_entity_insert(), depending on whether or not this is a
     // new entity.
-    $invocation = 'entity_insert';
+    $invocation = '_insert';
     // Now we need to either insert or update the fields which are
     // attached to this entity. We use the same primary_keys logic
     // to determine whether to update or insert, and which hook we
@@ -693,10 +694,11 @@ class IntelVisitorController extends EntityAPIControllerExportable {
     }
     else {
       field_attach_update('intel_visitor', $entity);
-      $invocation = 'entity_update';
+      $invocation = '_update';
     }
     // Invoke either hook_entity_update() or hook_entity_insert().
-    module_invoke_all($invocation, $entity, 'intel_visitor');
+    module_invoke_all('entity' . $invocation, $entity, 'intel_visitor');
+    module_invoke_all('intel_visitor' . $invocation, $entity);
     return $entity;
   }
   
@@ -985,7 +987,7 @@ function intel_visitor_build_profile_content_elements($entity) {
       array('s.vid', $entity->identifiers['vid'], 'IN'),
     ),
   );
-  $result = intel_load_filtered_submission_result($filter);
+  $result = intel_submission_load_filtered($filter);
   $rows = array();
   $wf_nodes = array();
   $items = array();

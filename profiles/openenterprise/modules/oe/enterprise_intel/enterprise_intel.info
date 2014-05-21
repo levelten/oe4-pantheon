@@ -28,6 +28,7 @@ features[field_instance][] = field_collection_item-field_page_attribute_col-fiel
 features[field_instance][] = field_collection_item-field_page_attribute_col-field_page_attribute_value
 features[field_instance][] = field_collection_item-field_visitor_attribute_col-field_visitor_attribute
 features[field_instance][] = field_collection_item-field_visitor_attribute_col-field_visitor_attribute_value
+features[field_instance][] = node-page-field_intel_event_col
 features[field_instance][] = node-page-field_page_attribute_col
 features[field_instance][] = node-page-field_visitor_attribute_col
 features[variable][] = googleanalytics_pages

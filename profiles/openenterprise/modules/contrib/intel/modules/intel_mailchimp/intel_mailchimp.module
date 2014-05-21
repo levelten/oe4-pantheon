@@ -3,14 +3,14 @@
 function intel_mailchimp_menu() {
   $items = array();
   
-  $items['admin/config/services/intel/modules/mailchimp'] = array(
+  $items['admin/config/intel/mailchimp'] = array(
     'title' => 'MailChimp',
-    'description' => 'Add on module configuration',
+    'description' => 'Configuration for MailChimp Intelligence integration',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('intel_mailchimp_admin_config'),
     'access callback' => 'user_access',
     'access arguments' => array('admin intel'),
-    'type' => MENU_LOCAL_TASK,
+    //'type' => MENU_LOCAL_TASK,
     'file' => 'intel_mailchimp.admin.inc',
   ); 
 

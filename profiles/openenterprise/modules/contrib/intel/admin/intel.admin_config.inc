@@ -515,8 +515,8 @@ function intel_admin_intel_event_list_page() {
   foreach ($events AS $key => $event) {
     $ops = array();
     if (!empty($event['custom'])) {
-      $ops[] = l(t('edit'), 'admin/config/services/intel/intel_event/' . $key . '/edit', $link_options);
-      $ops[] = l(t('delete'), 'admin/config/services/intel/intel_event/' . $key . '/delete', $link_options);
+      $ops[] = l(t('edit'), 'admin/config/intel/settings/intel_event/' . $key . '/edit', $link_options);
+      $ops[] = l(t('delete'), 'admin/config/intel/settings/intel_event/' . $key . '/delete', $link_options);
     }
     else {
       $ops[] = t('NA');
@@ -801,7 +801,7 @@ function intel_admin_intel_event_form_submit(&$form, &$form_state) {
     ));    
   }
   drupal_set_message($msg);
-  drupal_goto('admin/config/services/intel/intel_event');
+  drupal_goto('admin/config/intel/settings/intel_event');
 }
 
 function intel_admin_intel_event_delete_page($event) {
@@ -834,7 +834,7 @@ function intel_admin_intel_event_delete_form_submit($form, &$form_state) {
     '%title' => $event['title'],
   ));    
   drupal_set_message($msg);
-  drupal_goto('admin/config/services/intel/intel_event');
+  drupal_goto('admin/config/intel/settings/intel_event');
 }
 
 
@@ -874,7 +874,7 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
   $link_options = array();
   foreach ($attributes AS $key => $attr) {
     $ops = array();
-    $ops[] = l(t('edit'), 'admin/config/services/intel/' . $scope . '_attribute/' . $key . '/edit', $link_options);
+    $ops[] = l(t('edit'), 'admin/config/intel/settings/' . $scope . '_attribute/' . $key . '/edit', $link_options);
     $rows[] = array(
       $key,
       $attr['title'],
@@ -908,7 +908,7 @@ function intel_admin_visitor_attribute_edit_page($attribute) {
 }
 
 function intel_admin_page_attribute_add_page() {
-  drupal_set_title(t('Add vpage attribute'));
+  drupal_set_title(t('Add page attribute'));
   $form = drupal_get_form('intel_admin_attribute_form', array(), 'page');
   return drupal_render($form);
 }
@@ -961,6 +961,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
     'flag' => t('Flag'),
     'scalar' => t('Scalar'),
     'list' => t('List'),
+    'list_t' => t('List (taxonomy)'),
     'vector' => t('Vector'),
   );
   $form['type'] = array(
@@ -972,14 +973,14 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
     '#required' => 1,
   );
   $form['type']['#markup'] = $form['type']['#default_value'];
-  
+
   $desc = !empty($attribute['options_description']) ? $attribute['options_description'] : '';
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#description' => check_plain($desc),
+    '#description' => check_markup($desc, 'full_html'),
   );
   
   if (empty($attribute['type']) || isset($attribute['static_options']) || isset($attribute['custom_options'])) {
@@ -1016,12 +1017,12 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
         $custom_str .= "\n";
       }
     }
+
     $form['options']['options'] = array(
       '#type' => 'item',
       '#title' => t('Existing options'),
       '#markup' => theme('table', array('header' => $header, 'rows' => $rows)),
-    ); 
-    
+    );
     if (empty($attribute['type']) || (isset($attribute['custom_options']) && is_array($attribute['custom_options']))) {
       $form['options']['custom_options'] = array(
         '#type' => 'textarea',
@@ -1029,7 +1030,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
         '#default_value' => $custom_str,
         '#description' => t('Enter one option per line as key|label|description (e.g. <em>p|Profile|User profiles</em>).'),
       ); 
-    } 
+    }
   }
   
   $form['selectable'] = array(
@@ -1069,6 +1070,14 @@ function intel_admin_attribute_form_validate(&$form, &$form_state) {
         '%key' => $values['key'],
       ));
       form_set_error('key', $msg);   
+    }
+  }
+
+  if ($values['type'] == 'list_t') {
+    if (trim($values['custom_options'])) {
+      $values['custom_options'] = '';
+      $msg = t('Custom options cannot be used with type list (taxomony). Custom options have been ignored.');
+      drupal_set_message($msg, 'warning');
     }
   }
   
@@ -1138,14 +1147,12 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   
   
   if ($scope == 'page') {
-    $attributes = variable_get('intel_page_attributes_custom', array());
-    $attributes[$key] = $attribute;
-    variable_set('intel_page_attributes_custom', $attributes); 
+    $attributes = variable_get('intel_page_attribute_custom_' . $key, array());
+    variable_set('intel_page_attributes_custom_' . $key, $attribute);
   }
   else {
-    $attributes = variable_get('intel_visitor_attributes_custom', array());
-    $attributes[$key] = $attribute;
-    variable_set('intel_visitor_attributes_custom', $attributes); 
+    $attributes = variable_get('intel_visitor_attribute_custom_' . $key, array());
+    variable_set('intel_visitor_attributes_custom_' . $key, $attribute);
   }
   
   if ($add) {
@@ -1184,8 +1191,8 @@ function intel_admin_phonenumber_list_page() {
   foreach ($phonenumbers AS $key => $phonenumber) {
     $ops = array();
     if (!empty($phonenumber['custom'])) {
-      $ops[] = l(t('edit'), 'admin/config/services/intel/phonenumber/' . $key . '/edit', $link_options);
-      $ops[] = l(t('delete'), 'admin/config/services/intel/phonenumber/' . $key . '/delete', $link_options);
+      $ops[] = l(t('edit'), 'admin/config/intel/settings/phonenumber/' . $key . '/edit', $link_options);
+      $ops[] = l(t('delete'), 'admin/config/intel/settings/phonenumber/' . $key . '/delete', $link_options);
     }
     else {
       $ops[] = t('NA');
@@ -1205,7 +1212,7 @@ function intel_admin_phonenumber_list_page() {
     'rows' => $rows,
     'empty' => t('No phone numbers were found. !link.',
       array(
-        '!link' => l(t('Add a phone number'), 'admin/config/services/intel/phonenumber/add'),
+        '!link' => l(t('Add a phone number'), 'admin/config/intel/settings/phonenumber/add'),
       )
     ),
   );
@@ -1441,7 +1448,7 @@ function intel_admin_phonenumber_form_submit(&$form, &$form_state) {
     ));
   }
   drupal_set_message($msg);
-  drupal_goto('admin/config/services/intel/phonenumber');
+  drupal_goto('admin/config/intel/settings/phonenumber');
 }
 
 

@@ -5,3 +5,57 @@
  */
 
 include_once 'enterprise_intel.features.inc';
+
+function enterprise_intel_menu() {
+  $items = array();
+  $items['admin/config/intel/config'] = array(
+    'title' => 'Enterprise config',
+    'description' => 'Config helper for setting up Intelligence structures',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('enterprise_intel_admin_config_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    //'type' => MENU_LOCAL_TASK,
+    'file' => 'enterprise_intel.admin.inc',
+  );
+  return $items;
+}
+
+function enterprise_intel_revert_intel_controls() {
+  $content_types = node_type_get_types();
+  foreach ($content_types AS $bundle => $type) {
+    $settings = variable_get('enterprise_intel_entity_settings_node__' . $bundle, FALSE);
+    if ($settings) {
+      enterprise_intel_config_intel_controls('node', $bundle, $settings);
+    }
+  }
+}
+
+function enterprise_intel_config_intel_controls($entity_type, $bundle, $settings) {
+  $fields_info = field_info_fields();
+//dsm($fields_info);
+  foreach ($settings AS $key => $value) {
+    $field_instance0 = field_info_instance($entity_type, $key, $bundle);
+//dsm($field_instance0);
+    if (strpos($key, 'field_') == 0) {
+      // if settings value is true and content type does not already have field,
+      // add instance
+      if ($value && !isset($field_instance0['id'])) {
+        $field_info = $fields_info[$key];
+        if (!empty($field_info['bundles']['node'])) {
+          $source_bundle = $field_info['bundles']['node'][0];
+        }
+        $field_instance = field_info_instance($entity_type, $key, $source_bundle);
+        //dsm($field_instance_info);
+        $field_instance['bundle'] = $bundle;
+        // remove field instance id
+        unset($field_instance['id']);
+        field_create_instance($field_instance);
+      }
+    }
+    // if field not set and exist on content type, remove it
+    else if (!$value && isset($field_instance0['id'])) {
+      field_delete_instance($field_instance0, FALSE);
+    }
+  }
+}
