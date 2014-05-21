@@ -6802,6 +6802,69 @@ i.i-circle:after {
   margin: 0;
   width: auto;
 }
+section.section-style-left header {
+  overflow: auto;
+}
+section.section-style-left header h2,
+section.section-style-left header h3 {
+  margin: 0 0 0.5em;
+}
+section.section-style-left figure {
+  float: left;
+  padding-right: 10px;
+}
+section.section-style-left figure figcaption {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0.5em 0;
+  text-align: left;
+}
+section.section-style-right header {
+  overflow: auto;
+}
+section.section-style-right header h2,
+section.section-style-right header h3 {
+  margin: 0 0 0.5em;
+}
+section.section-style-right figure {
+  float: right;
+  padding-left: 10px;
+}
+section.section-style-right figure figcaption {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0.5em 0;
+  text-align: right;
+}
+section.section-style {
+  width: 100%;
+}
+section.section-style > div {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 50%;
+}
+section.section-style .no-wrap-left {
+  float: left;
+  padding-right: 0.5em;
+}
+section.section-style .no-wrap-right {
+  float: right;
+  padding-left: 0.5em;
+}
+section.section-style header {
+  overflow: auto;
+}
+section.section-style header h2,
+section.section-style header h3 {
+  margin: 0 0 0.5em;
+}
 .nopadding {
   padding: 0 !important;
 }

@@ -132,3 +132,62 @@ i.i-circle {
         width: auto;
     }
 }
+
+// CKEditor templates
+section {
+    &.section-style-left {
+        header {
+            overflow: auto;
+            h2, h3 {
+                margin: 0 0 0.5em;
+            }
+        }
+        figure {
+          float: left;
+          padding-right: 10px;
+          figcaption {
+                .box-sizing;
+                padding: 0.5em 0;
+                text-align: left;
+            }
+        }
+    }
+    &.section-style-right {
+        header {
+            overflow: auto;
+            h2, h3 {
+                margin: 0 0 0.5em;
+            }
+        }
+        figure {
+            float: right;
+            padding-left: 10px;
+            figcaption {
+                .box-sizing;
+                padding: 0.5em 0;
+                text-align: right;
+            }
+        }
+    }
+    &.section-style {
+        width: 100%;
+        > div {
+            .box-sizing;
+            width: 50%;
+        }
+        .no-wrap-left {
+            float: left;
+            padding-right: 0.5em;
+        }
+        .no-wrap-right {
+            float: right;
+            padding-left: 0.5em;
+        }
+        header {
+            overflow: auto;
+            h2, h3 {
+                margin: 0 0 0.5em;
+            }
+        }
+    }
+}
