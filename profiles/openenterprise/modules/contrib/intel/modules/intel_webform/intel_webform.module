@@ -215,7 +215,8 @@ function intel_webform_form_webform_component_edit_form_alter(&$form, $form_stat
   $cid = $form['cid']['#value'];
   $type = $form['type']['#value'];
   $node = node_load($nid);
-  $component = $node->webform['components'][$cid];
+  // get existing component, empty array if new component
+  $component = (isset($node->webform['components'][$cid])) ? $node->webform['components'][$cid] : array();
 
   $options = array(
     '' => t(' - None - '),

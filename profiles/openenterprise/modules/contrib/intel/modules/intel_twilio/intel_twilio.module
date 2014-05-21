@@ -249,11 +249,17 @@ function intel_twilio_intel_form_submission_data(&$visitor, &$submission, &$trac
     global $base_url, $base_path;
     $a = explode('//', $base_url);
     $base_url = $a[1];
+
     if (!is_array($context['form_settings']['send_sms'])) {
       $context['form_settings']['send_sms'] = array($context['form_settings']['send_sms']);
     }
+
     foreach ($context['form_settings']['send_sms'] AS $number => $sms) {
-      $to_num = $number;
+      $to_num = intel_twillio_validate_phone_number($number);
+      // if invalid number, skip
+      if (!$to_num) {
+        continue;
+      }
       $form_url = substr(url('node/' . $submission->fid) ,1);
       $msg = $visitor->name . ' submitted form ' . $base_url . $base_path . $form_url . '.';
       $msg .= ' submission: ' . $base_url . $base_path . $submission->details_url;
@@ -261,6 +267,14 @@ function intel_twilio_intel_form_submission_data(&$visitor, &$submission, &$trac
       intel_twilio_send_sms($to_num, $msg);
     }
   }
+}
+
+function intel_twillio_validate_phone_number($number) {
+  $pattern = '/^\+?\d{10,14}$/';  // e.164 pattern
+  if (preg_match($pattern, $number)) {
+    return $number;
+  }
+  return FALSE;
 }
 
 /**
