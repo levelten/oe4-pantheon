@@ -31,8 +31,9 @@ function cke_tpl_img(url, classes) {
   var classes = classes || 'image-style';
   return '<figure><img class="' + classes + '" src="' + url + '" /><figcaption>Image Caption</figcaption></figure>';
 }
-function cke_tpl_section(content) {
-  return '<section class="row margin-top margin-bottom">' + content + '</section>';
+function cke_tpl_section(content, classes) {
+  var classes = classes || 'section-style';
+  return '<section class="row margin-top margin-bottom ' + classes + '">' + content + '</section>';
 }
 function cke_tpl_span(content, span) {
   var content = content || '<p>Insert content here</p>';
@@ -123,25 +124,25 @@ CKEDITOR.addTemplates('default', {
       title: 'Section - Left Image',
       image: 'section-left.png?' + Drupal.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the left of the content. Content wraps around the image.',
-      html: cke_tpl_section( cke_tpl_img(null, 'image-left-style') + cke_tpl_header() + cke_tpl_text(3) )
+      html: cke_tpl_section( cke_tpl_img(null, 'image-left-style') + cke_tpl_header() + cke_tpl_text(3), 'section-style-left' )
     },
     {
       title: 'Section - Right Image',
       image: 'section-right.png?' + Drupal.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the right of the content. Content wraps around the image.',
-      html: cke_tpl_section( cke_tpl_img(null, 'image-right-style') + cke_tpl_header() + cke_tpl_text(3) )
+      html: cke_tpl_section( cke_tpl_img(null, 'image-right-style') + cke_tpl_header() + cke_tpl_text(3), 'section-style-right' )
     },
     {
       title: 'Section - Left Image (no wrap)',
       image: 'section-left-no-wrap.png?' + Drupal.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the left of the content. Content does not wrap around the image.',
-      html: cke_tpl_section( cke_tpl_img(null, 'image-left-style') + '<div class="no-wrap">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
+      html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_img(null, 'image-left-style') + '</div><div class="no-wrap-right">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
     },
     {
       title: 'Section - Right Image (no wrap)',
       image: 'section-right-no-wrap.png?' + Drupal.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the right of the content. Content does not wrap around the image.',
-      html: cke_tpl_section( cke_tpl_img(null, 'image-right-style') + '<div class="no-wrap">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
+      html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_header() + cke_tpl_text(3) + '</div><div class="no-wrap-right">' + cke_tpl_img(null, 'image-right-style') + '</div>' )
     },
     {
       title: 'Row',
