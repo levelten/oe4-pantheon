@@ -53,7 +53,7 @@ function blocker_ui_edit_form($form, $form_state, $blocker) {
   );
   
   $blocks = blocker_blocks();
-  $enabled_blocks = array_filter(variable_get('blocker_blocks', FALSE));
+  $enabled_blocks = array_filter(variable_get('blocker_blocks', array()));
   
   if ($enabled_blocks && !empty($enabled_blocks)) {
     foreach($blocks as $key => $block) {
@@ -152,8 +152,12 @@ function blocker_ui_edit_form_submit($form, $form_state) {
  */
 function blocker_ui_block_delete($form, &$form_state, $blocker) {
   $form['brid'] = array('#type' => 'hidden', '#value' => $blocker->brid);
-
-  return confirm_form($form, t('Are you sure you want to remove the block %name from this entity?', array('%name' => $blocker->title)), '<front>', '', t('Remove'), t('Cancel'));
+  $entity = array_values(entity_load($blocker->entity_type, array($blocker->entity_id)));
+  $question = t('Are you sure you want to remove the block %name from this entity?', array('%name' => $blocker->title));
+  $path = '<front>';
+  $desc_options = array('@block' => $blocker->module.':'.$blocker->delta, '@region' => $blocker->region, '@title' => $entity[0]->title);
+  $description = t('This will remove the <em>@block</em> block in <em>@region</em> from <em>@title</em>.', $desc_options);
+  return confirm_form($form, $question, $path, $description, t('Remove'), t('Cancel'));
 }
 
 /**
