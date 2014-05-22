@@ -2000,7 +2000,8 @@ fieldset[disabled] .btn-default.active {
   color: #e7e7e7;
   background-color: #fff;
 }
-.btn-primary {
+.btn-primary,
+.page-node-blocks .btn.place-block {
   color: #ffffff;
   background-color: #008cba;
   border-color: #0079a1;
@@ -2009,14 +2010,22 @@ fieldset[disabled] .btn-default.active {
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary.active,
-.open .dropdown-toggle.btn-primary {
+.open .dropdown-toggle.btn-primary,
+.page-node-blocks .btn.place-block:hover,
+.page-node-blocks .btn.place-block:focus,
+.page-node-blocks .btn.place-block:active,
+.page-node-blocks .btn.place-block.active,
+.open .dropdown-toggle.page-node-blocks .btn.place-block {
   color: #ffffff;
   background-color: #006d91;
   border-color: #004b63;
 }
 .btn-primary:active,
 .btn-primary.active,
-.open .dropdown-toggle.btn-primary {
+.open .dropdown-toggle.btn-primary,
+.page-node-blocks .btn.place-block:active,
+.page-node-blocks .btn.place-block.active,
+.open .dropdown-toggle.page-node-blocks .btn.place-block {
   background-image: none;
 }
 .btn-primary.disabled,
@@ -2033,11 +2042,27 @@ fieldset[disabled] .btn-primary:focus,
 fieldset[disabled] .btn-primary:active,
 .btn-primary.disabled.active,
 .btn-primary[disabled].active,
-fieldset[disabled] .btn-primary.active {
+fieldset[disabled] .btn-primary.active,
+.page-node-blocks .btn.place-block.disabled,
+.page-node-blocks .btn.place-block[disabled],
+fieldset[disabled] .page-node-blocks .btn.place-block,
+.page-node-blocks .btn.place-block.disabled:hover,
+.page-node-blocks .btn.place-block[disabled]:hover,
+fieldset[disabled] .page-node-blocks .btn.place-block:hover,
+.page-node-blocks .btn.place-block.disabled:focus,
+.page-node-blocks .btn.place-block[disabled]:focus,
+fieldset[disabled] .page-node-blocks .btn.place-block:focus,
+.page-node-blocks .btn.place-block.disabled:active,
+.page-node-blocks .btn.place-block[disabled]:active,
+fieldset[disabled] .page-node-blocks .btn.place-block:active,
+.page-node-blocks .btn.place-block.disabled.active,
+.page-node-blocks .btn.place-block[disabled].active,
+fieldset[disabled] .page-node-blocks .btn.place-block.active {
   background-color: #008cba;
   border-color: #0079a1;
 }
-.btn-primary .badge {
+.btn-primary .badge,
+.page-node-blocks .btn.place-block .badge {
   color: #008cba;
   background-color: #fff;
 }
