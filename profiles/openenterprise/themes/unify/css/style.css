@@ -6684,6 +6684,9 @@ img {
   box-sizing: border-box;
   padding-left: 1em;
 }
+.krumo-root {
+  color: black;
+}
 .style-date-stacked {
   margin-right: 10px;
   position: relative;
