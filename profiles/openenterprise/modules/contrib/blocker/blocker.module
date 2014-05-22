@@ -131,6 +131,11 @@ function blocker_page_build(&$page) {
                 $block['#weight'] = $block['#block']->weight;
                 $blocks_sorted = FALSE;
               }
+              // Without setting this, region becomes -1.
+              // Actual region names are useful for themers.
+              if (isset($block['#block']->region)) {
+                $block['#block']->region = $region;
+              }
             }
           }
           else {
