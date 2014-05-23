@@ -929,7 +929,7 @@ function intel_check_form_submission($page) {
     $loc_comps = intel_parse_url($_COOKIE['l10i_l']);
     if (!empty($loc_comps['system_path'])) {
       $a = explode('/', $loc_comps['system_path']);
-      if (($a[0] == 'node') && is_numberic($a[1])) {
+      if (($a[0] == 'node') && is_numeric($a[1])) {
         $lp_node = node_load($a[1]);
         intel_execute_response_redirect_if_set($lp_node, $link_query);
       }
