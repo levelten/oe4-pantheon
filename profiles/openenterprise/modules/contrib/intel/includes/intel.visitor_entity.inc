@@ -617,7 +617,7 @@ class IntelVisitorController extends EntityAPIControllerExportable {
    */
   public function create(array $values = array()) {
     global $user;
-    
+
     $schema = drupal_get_schema('intel_visitor');
     foreach ($schema['fields'] AS $key => $field) {
       $values[$key] = isset($field['default']) ? $field['default'] : '';
@@ -641,8 +641,10 @@ class IntelVisitorController extends EntityAPIControllerExportable {
         $values['identifiers']['uid'][] = $user->uid;
       }
     }
+
     $entity = parent::create($values);
     $entity->created = REQUEST_TIME;
+
     return $entity;
   }
   

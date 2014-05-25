@@ -248,7 +248,7 @@ function intel_twilio_intel_form_submission_data(&$visitor, &$submission, &$trac
   if (isset($context['form_settings']) && !empty($context['form_settings']['send_sms'])) {
     global $base_url, $base_path;
     $a = explode('//', $base_url);
-    $base_url = $a[1];
+    $hostpath = $a[1];
 
     if (!is_array($context['form_settings']['send_sms'])) {
       $context['form_settings']['send_sms'] = array($context['form_settings']['send_sms']);
@@ -261,9 +261,9 @@ function intel_twilio_intel_form_submission_data(&$visitor, &$submission, &$trac
         continue;
       }
       $form_url = substr(url('node/' . $submission->fid) ,1);
-      $msg = $visitor->name . ' submitted form ' . $base_url . $base_path . $form_url . '.';
-      $msg .= ' submission: ' . $base_url . $base_path . $submission->details_url;
-      $msg .= ' visitor: ' . $base_url . $base_path . $visitor->uri();
+      $msg = $visitor->name . ' submitted form ' . $hostpath . $base_path . $form_url . '.';
+      $msg .= ' submission: ' . $hostpath . $base_path . $submission->details_url;
+      $msg .= ' visitor: ' . $hostpath . $base_path . $visitor->uri();
       intel_twilio_send_sms($to_num, $msg);
     }
   }

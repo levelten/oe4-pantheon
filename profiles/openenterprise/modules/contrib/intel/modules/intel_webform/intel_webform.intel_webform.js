@@ -4,6 +4,7 @@ function l10iWebformTracker() {
   this.init = function init() {
     _l10iq.push(['_log', "l10iWebformTracker.init()"]);
     _l10iq.registerCallback('saveFormSubmitAlter', this.saveFormSubmitAlterCallback, this);
+    //$('input[name="submitted[intel_vtk]"]').val(_l10iq.vtk);
   }
   
   this.saveFormSubmitAlterCallback = function saveFormSubmitCallback(json_params, json_data, $obj, event) {

@@ -72,6 +72,7 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   $idents = array();
   $vtk = IntelVisitor::extractVtk();
   $visitor = intel_visitor_load_or_create('user');
+  $api_level = variable_get('intel_api_level', '');
 
   $wf_settings = variable_get('intel_webform_settings_node_' . $node->nid, array());
 //dsm($wf_settings);
@@ -104,6 +105,11 @@ function intel_webform_webform_submission_presave($node, &$submission) {
     }
   }
 
+  // if api_level != pro, vtk data will not be available to link visitors
+  if ($api_level != 'pro') {
+    return;
+  }
+
   $prop_options = array(
     'source' => 'form',
   );
@@ -111,7 +117,41 @@ function intel_webform_webform_submission_presave($node, &$submission) {
     $visitor->setProp($prop_name, $values, $prop_options);
   }
 
+  $visitor->setLastActivity(REQUEST_TIME);
+
+  if (isset($visitor->is_new) || count($merge_data)) {
+    $visitor->updated = REQUEST_TIME;
+  }
+
   $visitor->merge();
+  // set intel_vid on submission to pass it to intel_webform_webform_submission_insert
+  // so the vid can be saved after sid is created
+  if (($api_level == 'pro') && empty($visitor->vtk)) {
+    $submission->intel_vid = $visitor->vid;
+  }
+}
+
+function intel_webform_webform_submission_insert($node, $submission) {
+  // OK this is a bit of a hack, but not sure of a better way given issues with
+  // sessions data for anonomous users. It is not a good idea to use the variables
+  // table to store this info.
+  //
+  // The problem is if a form is submitted without a vtk set. This shouldn't happen,
+  // but if it does, you get two visitors created, one by intel_webform_webform_submission_presave
+  // and one in intel_do_submission check.
+  //
+  // The variable should be deleted in intel_webform_intel_form_submission_check
+
+  // check if intel_vid is set, which happens in webform_submission_presave only
+  // if api is set to pro and vtk is not passed
+  if (isset($submission->intel_vid)) {
+    $data = variable_get('intel_webform_temp_submission_data', array());
+    $data[$node->nid . '_' . $submission->sid] = array(
+      'time' => REQUEST_TIME,
+      'vid' => $submission->intel_vid
+    );
+    variable_set('intel_webform_temp_submission_data', $data);
+  }
 }
 
 /**
@@ -184,8 +224,9 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$form
   
   require_once './' . drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
   $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
-  $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent    
+  $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
   if (isset($wfsubmission->submitted)) {
+
     $link_query = array('sid' => $_GET['sid']);
     $wf_node = node_load($wfsubmission->nid);
     if (isset($wf_node->field_track_submission[$wf_node->language][0]['value'])) {
@@ -194,10 +235,21 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$form
     if (isset($wf_node->field_track_submission_value[$wf_node->language][0]['value'])) {
       $track['category_id'] = $wf_node->field_track_submission_value[$wf_node->language][0]['value'];
     }
+
+    $submission_data = variable_get('intel_webform_temp_submission_data', array());
+    $key = $wfsubmission->nid . '_' . $wfsubmission->sid;
+    if ($submission_data[$key]) {
+      $submission->vid = $submission_data[$key]['vid'];
+      // delete entry in variable
+      unset($submission_data[$key]);
+      variable_set('intel_webform_temp_submission_data', $submission_data);
+    }
+
     $submission->type = 'webform';
     $submission->fid = $wfsubmission->nid;
     $submission->fsid = $wfsubmission->sid;
     $submission->details_url = "node/{$wfsubmission->nid}/submission/{$wfsubmission->sid}";
+
     $track['form_title'] = $wf_node->title;
     $track['submission_path'] = $submission->details_url;
     $wf_node = node_load($wfsubmission->nid);
@@ -485,4 +537,28 @@ function intel_webform_setup_webform_config(&$node) {
     }
   }
 
+}
+
+/**
+ * Implements hook_cron
+ *
+ * Used to clear out expired data in intel_webform_temp_submission_data
+ */
+function intel_webform_cron() {
+  $data = variable_get('intel_webform_temp_submission_data', array());
+
+  foreach ($data AS $key => $value) {
+    // if data more than 60 seconds old, remove it
+    if ($value['time'] < (REQUEST_TIME - 60)) {
+      unset($data[$key]);
+    }
+  }
+
+  // save purged data or delete variable if any values still exist
+  if (count($data)) {
+    variable_get('intel_webform_temp_submission_data', $data);
+  }
+  else {
+    variable_del('intel_webform_temp_submission_data');
+  }
 }

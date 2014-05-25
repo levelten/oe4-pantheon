@@ -6,9 +6,9 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_submission_page($sid) {
+function intel_submission_page($submission) {
   
-  $submission = intel_submission_load($sid);
+  //$submission = intel_submission_load($sid);
   $visitor = intel_visitor_load((int)$submission->vid);
   //if (!empty($submission->visitorid)) {
     //$visitor = intel_visitor_load_by_visitorid($submission->visitorid);

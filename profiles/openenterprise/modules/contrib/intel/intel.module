@@ -290,7 +290,9 @@ function intel_menu() {
     'title' => 'Visitor',
     'page callback' => 'intel_visitor_view',
     'page arguments' => array(1),
-    'access arguments' => array('view intel visitor data'),
+    //'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('view', 1),
   );
   $items['visitor/%intel_visitor/view'] = array(
     'title' => 'View',
@@ -300,14 +302,16 @@ function intel_menu() {
   $items['visitor/add'] = array(
     'title' => 'Add an visitor',
     'page callback' => 'intel_visitor_add',
-    'access arguments' => array('edit intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('create', 1),
     'file' => 'admin/intel.admin_visitor.inc',
   );
   $items['visitor/%intel_visitor/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('intel_visitor_edit_form', 1),
-    'access arguments' => array('edit intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('update', 1),
     'type' => MENU_LOCAL_TASK,
     'file' => 'admin/intel.admin_visitor.inc',
     'weight' => -19,
@@ -316,7 +320,8 @@ function intel_menu() {
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('intel_visitor_delete_confirm_form', 1),
-    'access arguments' => array('edit intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('delete', 1),
     'type' => MENU_CALLBACK,
     'file' => 'admin/intel.admin_visitor.inc',
   );
@@ -326,7 +331,8 @@ function intel_menu() {
     'page callback' => 'intel_sync_visitordata_page',
     'page arguments' => array(1),
     'access callback' => 'user_access',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array(1, 'view'),
     'type' => MENU_LOCAL_ACTION,
     //'file' => 'people/intel.people.inc',
   );
@@ -335,7 +341,8 @@ function intel_menu() {
     'page callback' => 'intel_sync_fullcontact_page',
     'page arguments' => array(1),
     'access callback' => 'user_access',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array(1, 'view'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/intel.visitor_sync.inc',
   );
@@ -344,8 +351,8 @@ function intel_menu() {
     'description' => 'LevelTen insight.',
     'page callback' => 'intel_visitor_tab_clickstream',
     'page arguments' => array(1),
-    'access callback' => '_intel_permission_access_content_report',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('view', 1),
     'weight' => -9,
     'type' => MENU_LOCAL_TASK,
     'file' => 'admin/intel.admin_visitor.inc',
@@ -408,7 +415,8 @@ function intel_menu() {
     'description' => 'View full user profile and categories.',
     'page callback' => 'intel_goto_user',
     'page arguments' => array(1),
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('view', 1),
     'type' => MENU_LOCAL_ACTION,
     //'file' => 'people/intel.people.inc',
   );
@@ -418,17 +426,18 @@ function intel_menu() {
     'description' => 'View full visitor Intelligence profile.',
     'page callback' => 'intel_goto_visitor',
     'page arguments' => array(1),
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('view', 1),
     'type' => MENU_LOCAL_ACTION,
   );
 
-  $items['submission/%'] = array(
+  $items['submission/%intel_submission'] = array(
     'title' => 'Submission',
     'description' => 'Information about visitors.',
     'page callback' => 'intel_submission_page',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_submission_access',
+    'access arguments' => array('view', 1),
     //'type' => MENU_LOCAL_TASK,
     'file' => 'admin/intel.admin_submission.inc',
   );
@@ -438,8 +447,8 @@ function intel_menu() {
     'description' => 'Information about visitors.',
     'page callback' => 'intel_admin_people_contacts',
     //'page arguments' => array(4),
-    'access callback' => 'user_access',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_visitor_access',
+    'access arguments' => array('view', 1),
     'position' => 'left',
     'weight' => -4,
     //'type' => MENU_NORMAL_ITEM,
@@ -460,8 +469,8 @@ function intel_menu() {
     'description' => 'Information about visitors.',
     'page callback' => 'intel_admin_people_submissions',
     //'page arguments' => array(4),
-    'access callback' => 'user_access',
-    'access arguments' => array('view intel visitor data'),
+    'access callback' => 'intel_submissions_access',
+    'access arguments' => array('view', 1),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_submission.inc',
   );
@@ -660,7 +669,7 @@ function intel_menu() {
     'page callback' => 'intel_util',
     'access callback' => 'user_access',
     'access callback' => TRUE,
-    'access arguments' => array('admin intel'),
+    //'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
 
@@ -836,8 +845,8 @@ function intel_admin_paths() {
   $paths = array(
     'node/*/analytics' => 1,
     'node/*/analytics/*' => 1,
-    'person/*' => 1,
     'visitor/*' => 1,
+    'submission/*' => 1,
   );
   return $paths;
 }
@@ -847,6 +856,14 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util() {
+dsm($_COOKIE);
+return '';
+  $values = array(
+    'id' => $id,
+  );
+  $entity = entity_get_controller('intel_visitor')->create($values);
+
+  print_r($entity);
 
   $attributes = variable_get('intel_page_attributes_custom', array());
 dsm($attributes);
@@ -953,26 +970,72 @@ function _intel_temp_reset_db() {
 function intel_permission() {
   $permissions = array();
   $permissions['admin intel'] = array(
-    'title' => t('Administer LevelTen Insight'),
+    'title' => t('Administer Intelligence'),
     'description' => t('Enables user to configure module settings.'),
   );
   $permissions['view all intel reports'] = array(
-    'title' => t('View all LevelTen Insight reports'),
+    'title' => t('View all Intelligence reports'),
     'description' => t('Grants access to all reports.'),
   );
   $permissions['view own intel reports'] = array(
-    'title' => t('View own LevelTen Insight reports'),
+    'title' => t('View own Intelligence reports'),
     'description' => t('Grants access to content reports on nodes that a user has authored.'),
   );
-  $permissions['view intel visitor data'] = array(
-    'title' => t('View visitor data'),
+  $permissions['view all intel visitors'] = array(
+    'title' => t('View all visitors'),
     'description' => t('Grants access to visitor information and reports.'),
   );
-  $permissions['edit intel visitor data'] = array(
-    'title' => t('Edit visitor data'),
-    'description' => t('Grants edit visitor information.'),
+  $permissions['update all intel visitors'] = array(
+    'title' => t('Edit any visitor'),
+    'description' => t('Grants access to edit visitor information.'),
+  );
+  $permissions['delete all intel visitors'] = array(
+    'title' => t('Delete any visitor'),
+    'description' => t('Grants access to delete visitors.'),
+  );
+
+  $permissions['view all intel submissions'] = array(
+    'title' => t('View submissions'),
+    'description' => t('Grants access to view submissions.'),
   );
   return $permissions;
+}
+
+function intel_visitor_access($op, $visitor, $account = NULL) {
+  global $user;
+  $account = isset($account) ? $account : $user;
+
+  $general_access = user_access('view all intel visitors', $account);
+
+  $module_access = count(array_filter(module_invoke_all('intel_visitor_access', $visitor, $op, $account))) > 0;
+
+  switch ($op) {
+    case 'view':
+      return $module_access || $general_access;
+    case 'create':
+    case 'update':
+      return $module_access || ($general_access && user_access('update all intel visitors', $account));
+    case 'delete':
+      return $module_access || ($general_access && user_access('delete all intel visitors', $account));
+    case 'list':
+      return $module_access || $general_access;
+  }
+}
+
+function intel_submission_access($op, $submission, $account = NULL) {
+  global $user;
+  $account = isset($account) ? $account : $user;
+
+  $general_access = user_access('view all intel submissions', $account);
+
+  $module_access = count(array_filter(module_invoke_all('intel_submission_access', $submission, $op, $account))) > 0;
+
+  switch ($op) {
+    case 'view':
+      return $module_access || $general_access;
+    case 'list':
+      return $module_access || $general_access;
+  }
 }
 
 /**
@@ -1289,8 +1352,6 @@ function intel_get_ApiClientProps() {
   return $apiClientProps;
 }
 
-
-
 function intel_visitor_load($id = NULL, $reset = FALSE, $id_type = 'vid') {
   $ids = (isset($id) ? array($id) : array());
   $visitors = intel_visitor_load_multiple($ids, array(), $reset, $id_type);
@@ -1517,6 +1578,9 @@ function intel_submission_save($submission) {
     $function = $module . '_intel_submission_presave';
     $function($submission);
   }
+  $key = array(
+    'sid' => (!empty($submission->sid)) ? $submission->sid : 0,
+  );
   $fields = array(
     'vid' => (!empty($submission->vid)) ? $submission->vid : 0,
     'submitted' => (!empty($submission->submitted)) ? $submission->submitted : time(),
@@ -1539,12 +1603,25 @@ function intel_submission_save($submission) {
   if (!is_string($fields['data'])) {
     $fields['data'] = serialize($fields['data']);
   }
-  $query = db_insert('intel_submission')
-    ->fields($fields);
-  $sid = $query->execute();
-  $submission->sid = $sid;
 
-  module_invoke_all('intel_submission_insert', $submission);
+  if (!$key['sid']) {
+    // merge key into fields
+    $query = db_insert('intel_submission')
+      ->fields($fields);
+    $sid = $query->execute();
+    $submission->sid = $sid;
+    $hook = 'intel_submission_insert';
+  }
+  else {
+    $query = db_merge('intel_submission')
+      ->key($key)
+      ->fields($fields);
+    $query->execute();
+    $sid = $key['sid'];
+    $hook = 'intel_submission_update';
+  }
+
+  module_invoke_all($hook, $submission);
 
   return $sid;
 }

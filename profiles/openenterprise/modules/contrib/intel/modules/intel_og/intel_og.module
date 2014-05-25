@@ -22,7 +22,7 @@ function intel_og_menu() {
     'page callback' => 'intel_og_admin_page',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('manage members', 1, 2),
+    'access arguments' => array('view intel visitor data', 1, 2),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'intel_og.admin.inc',
   );
@@ -32,7 +32,7 @@ function intel_og_menu() {
     'page callback' => 'intel_og_admin_people_contacts',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('manage members', 1, 2),
+    'access arguments' => array('view intel visitor data', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'intel_og.admin.inc',
   );
@@ -42,11 +42,190 @@ function intel_og_menu() {
     'page callback' => 'intel_og_admin_people_submissions',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('manage members', 1, 2),
+    'access arguments' => array('view intel visitor data', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'intel_og.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Implements hook_og_permission().
+ */
+function intel_og_og_permission() {
+  $items = array();
+
+  $items['view referenced intel visitors'] = array(
+    'title' => t('View referenced visitor intel'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['update referenced intel visitors'] = array(
+    'title' => t('Edit referenced visitor intel'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['delete referenced intel visitors'] = array(
+    'title' => t('Delete referenced visitors'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['view referenced intel submissions'] = array(
+    'title' => t('View referenced submission metadata'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['view referenced webform submissions'] = array(
+    'title' => t('View referenced webform submissions'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['update referenced webform submissions'] = array(
+    'title' => t('Edit referenced webform submissions'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['delete referenced webform submissions'] = array(
+    'title' => t('Delete referenced webform submissions'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
+
+  return $items;
+}
+
+function intel_og_intel_visitor_access($visitor, $op = 'view', $account = NULL) {
+  //$args = func_get_args();
+  //dsm($args);
+  global $user;
+  $account = isset($account) ? $account : $user;
+  //dsm($account);
+
+  if (empty($visitor->vid)) {
+    return FALSE;
+  }
+  $vars = array(
+    'artifact_type' => 'visitor',
+    'aid' => $visitor->vid,
+  );
+  $intel_og_artifact = intel_og_artifact_load_by_vars($vars);
+  if (empty($intel_og_artifact->gid)) {
+    return FALSE;
+  }
+  //dsm($intel_og_artifact);
+
+  $group_type = variable_get('intel_og_default_group_type', 'node');
+  //dsm($group_type);
+
+  switch ($op) {
+    case 'view':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'view referenced intel visitors', $account);
+    case 'update':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'update referenced intel visitors', $account);
+    case 'delete':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'delete referenced intel visitors', $account);
+  }
+  return FALSE;
+}
+
+function intel_og_intel_submission_access($submission, $op = 'view', $account = NULL) {
+  //$args = func_get_args();
+  //dsm($args);
+  global $user;
+  $account = isset($account) ? $account : $user;
+  //dsm($account);
+
+  if (empty($submission->sid)) {
+    return FALSE;
+  }
+  $vars = array(
+    'artifact_type' => 'submission',
+    'aid' => $submission->sid,
+  );
+  $intel_og_artifact = intel_og_artifact_load_by_vars($vars);
+//dsm($intel_og_artifact);
+  if (empty($intel_og_artifact->gid)) {
+    return FALSE;
+  }
+  //dsm($intel_og_artifact);
+
+  $group_type = variable_get('intel_og_default_group_type', 'node');
+  //dsm($group_type);
+
+  switch ($op) {
+    case 'view':
+    case 'list':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'view referenced intel submissions', $account);
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_webform_submission_access().
+ *
+ * @see webform_submission_access()
+ */
+function intel_og_webform_submission_access($node, $submission, $op = 'view', $account = NULL) {
+  //$args = func_get_args();
+ // dsm($args);
+  global $user;
+  $account = isset($account) ? $account : $user;
+  //dsm($account);
+
+  if (empty($submission->sid)) {
+    return FALSE;
+  }
+
+  $vars = array(
+    'type' => 'webform',
+    'fid' => $submission->nid,
+    'fsid' => $submission->sid,
+  );
+  $intel_submission = intel_submission_load_by_vars($vars);
+  if (empty($intel_submission->sid)) {
+    return FALSE;
+  }
+  //dsm($intel_submission);
+
+  $vars = array(
+    'artifact_type' => 'submission',
+    'aid' => $intel_submission->sid,
+  );
+  $intel_og_artifact = intel_og_artifact_load_by_vars($vars);
+  if (empty($intel_og_artifact->gid)) {
+    return FALSE;
+  }
+  //dsm($intel_og_artifact);
+
+  $group_type = variable_get('intel_og_default_group_type', 'node');
+  //dsm($group_type);
+
+  switch ($op) {
+    case 'view':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'view referenced webform submissions', $account);
+    case 'edit':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'edit referenced webform submissions', $account);
+    case 'delete':
+      return og_user_access($group_type, $intel_og_artifact->gid, 'delete referenced webform submissions', $account);
+  }
+  return FALSE;
+}
+
+function intel_og_artifact_load($artifact_type, $aid) {
+  $vars = array(
+    'artifact_type' => $artifact_type,
+    'aid' => $aid,
+  );
+  return intel_og_artifact_load_by_vars($vars);
+}
+
+function intel_og_artifact_load_by_vars($vars) {
+  $query = db_select('intel_og_artifact', 'a')
+    ->fields('a');
+  foreach ($vars AS $key => $value) {
+    $query->condition($key, $value);
+  }
+  $artifact = $query->execute()->fetchObject();
+  return $artifact;
 }
 
 /**
@@ -77,7 +256,7 @@ function intel_og_intel_page_intel_pushes() {
 function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
   $entity_type = variable_get('intel_og_default_group_type', 'node');
   $og_context = og_context($entity_type);
- dsm($og_context);
+
   if (empty($og_context['gid'])) {
     return;
   }
@@ -113,30 +292,78 @@ function intel_og_artifact_save($artifact_type, $aid, $group_type, $gid) {
   $query->execute();
 }
 
-function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $context) {
-//  $args = func_get_args();
-//  dsm($args);
+/**
+ * Implements hook_form_alter().
+ */
+function intel_og_form_alter(&$form, &$form_state, $form_id) {
+  // Webform is being presented to visitor.
+  if (isset($form['#node']->webform) && in_array('webform_client_form_submit', $form['#submit'])) {
+    $values = array(
+      'id' => 'user',
+    );
+    $entity = entity_get_controller('intel_visitor')->create($values);
 
+    // check if og_group_ref field exists and has no default_value
+    if (isset($form['submitted']['og_group_ref']) && empty($form['submitted']['og_group_ref']['#default_value'])) {
+      $og_context = og_context();
+      if (!empty($og_context['gid'])) {
+        $form['submitted']['og_group_ref']['#default_value'] = $og_context['gid'];
+      }
+    }
+  }
+}
+
+function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $context) {
+//$args = func_get_args();
+//dsm($args);
   $gid = null;
   if (isset($context['submit_context']['og'])) {
     $gid = $context['submit_context']['og'];
   }
-  else
-  // if og is set on submit context, add it to the submission object. Data will
-  // be saved after submission and sid is created
-  if (isset($context['submit_context']['og'])) {
-    $submission->og = $context['submit_context']['og'];
+  else {
+    if ($submission->type == 'webform') {
+      $wf_node = node_load($submission->fid);
+      if (isset($wf_node->webform['components'])) {
 
-    // check if visitor og_ref already contains gid target. If not, add it.
-    $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
-    $i = 0;
-    foreach ($wrapper->og_group_ref->getIterator() as $delta => $og_ref) {
-      if ($og_ref->getIdentifier() == $context['submit_context']['og']) {
-        return;
       }
-      $i++;
+      foreach ($wf_node->webform['components'] AS $id => $comp) {
+        if ($comp['form_key'] == 'og_group_ref') {
+          $wf_submission = webform_get_submission($submission->fid, $submission->fsid);
+          if (isset($wf_submission->data[$id]))
+            $gid = $wf_submission->data[$id]['value'][0];
+        }
+      }
     }
-    $wrapper->og_group_ref[$i]->set($context['submit_context']['og']);
+  }
+
+  if ($gid) {
+    // if og is set on submit context, add it to the submission object. Data will
+    // be saved after submission and sid is created
+    $submission->og_gid = $gid;
+    $visitor->og_gid = $gid;
+dsm($visitor);
+    print_r($visitor->vid);
+    // check if intel_visitor has an og_group_ref field
+    if (!isset($visitor->og_group_ref)) {
+      return;
+    }
+    return;
+    // create entity wrapper to make it easer to work with field data
+    $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
+
+    // load new reference by GID
+    $group_type = variable_get('intel_og_default_group_type', 'node');
+    $new_ref = entity_load($group_type, array($gid));
+    $new_ref = $new_ref[$gid];
+
+    $refs = $wrapper->og_group_ref->value();
+    if (!$refs) {
+      $refs = array();
+    }
+    $refs[] = $new_ref;
+dsm($refs);
+    $wrapper->og_group_ref->set($refs);
+    //$wrapper->save();
   }
 }
 
@@ -150,52 +377,85 @@ function intel_og_intel_visitor_update($visitor) {
 
 function intel_og_intel_visitor_save($visitor) {
 //dsm($visitor);
-  //intel_og_artifact_save('visitor', $visitor->sid, 'node', $visitor->og);
+  if (!empty($visitor->og_gid)) {
+    $group_type = variable_get('intel_og_default_group_type', 'node');
+    intel_og_artifact_save('visitor', $visitor->vid, $group_type, $visitor->og_gid);
+  }
 }
 
 function intel_og_intel_submission_insert($submission) {
 //dsm($submission);
-  intel_og_artifact_save('submission', $submission->sid, 'node', $submission->og);
+  if (!empty($submission->og_gid)) {
+    $group_type = variable_get('intel_og_default_group_type', 'node');
+    intel_og_artifact_save('submission', $submission->sid, $group_type, $submission->og_gid);
+  }
+
 }
 
 function intel_og_query_alter($query) {
+  // alter intel visitor queries
+  if (
+    !$query->hasTag('intel_admin_people_contacts')
+    && !$query->hasTag('intel_admin_people_visitors')
+    && !$query->hasTag('intel_submission_load_filtered')
+  ) {
+    return;
+  }
+
+  $menu_item = menu_get_item();
+
+  $callbacks = array(
+    'intel_og_admin_people_contacts',
+    'intel_og_admin_people_visitors',
+    'intel_og_admin_people_submissions'
+  );
+
+  // if menu page callback is not one we want to filter or page arguments don't match
+  // exit
+  if (
+    !in_array($menu_item['page_callback'], $callbacks)
+    || empty($menu_item['page_arguments'])
+    || !is_array($menu_item['page_arguments'])
+    || (count($menu_item['page_arguments']) < 2)
+  ) {
+    return;
+  }
+
+  $group_type = $menu_item['page_arguments'][0];
+  $gid = $menu_item['page_arguments'][1];
 
   // check if in group admin context
-  if ((arg(0) == 'group') && arg(1) && is_numeric(arg(2)) && (arg(3) == 'admin') && (arg(4) == 'intel')) {
-$menu_item = menu_get_item();
-dsm($menu_item);
-    $group_type = arg(1);
-    $gid = arg(2);
-    if (arg(5) == 'contacts') {
-      // query for filtered visitor contacts list
-      if ($query->hasTag('intel_visitor_load_multiple')) {
-        // need to filter by og ownership by using inner join
-        $join_on =  '%alias.etid = base.vid
-            AND %alias.entity_type = :og_entity_type
-            AND %alias.gid = :gid';
-        $join_vars = array(
-          ':og_entity_type' => 'intel_visitor',
-          ':gid' => $gid,
-        );
-        $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
-        //$query->addField($i, "gid");
-        //$query->isNotNull("$i.gid");
-        //$query->condition("$i.gid", 'NULL', 'IS NOT');
-        //$query->condition("$i.entity_type", $group_type);
-        //$query->condition("$i.gid", $gid);
+  if (
+    $query->hasTag('intel_admin_people_contacts')
+    || $query->hasTag('intel_admin_people_visitors')
+  ) {
+    // need to filter by og ownership by using inner join
+    $join_on = '%alias.etid = intel_visitor.vid
+        AND %alias.entity_type = :og_entity_type
+        AND %alias.gid = :gid';
+    $join_vars = array(
+      ':og_entity_type' => 'intel_visitor',
+      ':gid' => $gid,
+    );
+    $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
+//print_r($query);
+//dsm(" " . $query);
+  }
+  else if (
+    $query->hasTag('intel_submission_load_filtered')
+    && ($menu_item['page_callback'] == 'intel_og_admin_people_submissions')
+  ) {
+    $join_on =  "%alias.artifact_type = 'submission'
+        AND %alias.aid = s.sid
+        AND %alias.gid = :gid";
+    $join_vars = array(
+      ':gid' => $gid,
+    );
+    $i = $query->innerJoin('intel_og_artifact', 'a', $join_on, $join_vars);
+
+    //$query->condition("$i.gid", $gid);
 //dsm($query);
 //dsm(" " . $query);
-      }
-    }
-    else if (arg(5) == 'submissions') {
-      if ($query->hasTag('intel_submission_load_filtered')) {
-        $i = $query->innerJoin('intel_og_artifact', 'a',
-          '%alias.artifact_type == "submission" AND %alias.aid = s.sid'
-        );
-        $query->condition("$i.gid", $gid);
-//dsm($query);
-//dsm(" " . $query);
-      }
-    }
   }
 }
+

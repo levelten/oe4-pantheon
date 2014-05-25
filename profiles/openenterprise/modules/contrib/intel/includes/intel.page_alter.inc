@@ -714,6 +714,9 @@ function intel_js_alter(&$javascript) {
 }
 
 function intel_check_form_submission($page) {
+  // if api_level!=pro, vtk will not exist to process submission data correctly
+  $api_level = variable_get('intel_api_level', '');
+
   // check for webform submission
   $track = array(
     'category_id' => '',
@@ -729,6 +732,7 @@ function intel_check_form_submission($page) {
   // an array of fields to pass to intel's autofill form feature
   $autofill= array();
   $submission_data = array();
+  $visitor = null;
 
   // fire hook for modules to report if a form has been submitted by setting $submission->type
   foreach (module_implements('intel_form_submission_check') AS $module) {
@@ -764,7 +768,18 @@ function intel_check_form_submission($page) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   
   // load current user
-  $visitor = intel_visitor_load_or_create('user');
+  // check if vid is set on submission to load a specific visitor
+  if (!empty($submission->vid)) {
+    $visitor = intel_visitor_load_or_create((int)$submission->vid);
+  }
+  else {
+    $visitor = intel_visitor_load_or_create('user');
+  }
+
+  if (empty($visitor->vtk) && !empty($_SESSION['intel_vid'])) {
+    $visitor = intel_visitor_load_or_create($_SESSION['intel_vid']);
+  }
+
 
   // load data from api to get submission context
   if (!empty($visitor->vtk)) {
@@ -929,7 +944,7 @@ function intel_check_form_submission($page) {
     $loc_comps = intel_parse_url($_COOKIE['l10i_l']);
     if (!empty($loc_comps['system_path'])) {
       $a = explode('/', $loc_comps['system_path']);
-      if (($a[0] == 'node') && is_numberic($a[1])) {
+      if (($a[0] == 'node') && is_numeric($a[1])) {
         $lp_node = node_load($a[1]);
         intel_execute_response_redirect_if_set($lp_node, $link_query);
       }
@@ -987,6 +1002,7 @@ if (!empty($_GET['debug'])) {
   // save visitor
   if (!empty($visitor->vid)) {
     intel_visitor_save($visitor);
+    watchdog('intel.page_alter 992', print_r($visitor, 1));
   }
 
   // queue to sync visitor data

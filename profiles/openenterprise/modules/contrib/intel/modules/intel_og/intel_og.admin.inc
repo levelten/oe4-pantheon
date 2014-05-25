@@ -7,7 +7,7 @@ function intel_og_admin_config_form($form, $form_state) {
   foreach ($entity_info AS $key => $value) {
     $options[$key] = $value['label'];
   }
-  $form['intel_og_group_entity_type'] = array(
+  $form['intel_og_default_group_type'] = array(
     '#type' => 'select',
     '#title' => t('Default group entity type'),
     '#options' => $options,
@@ -34,14 +34,16 @@ function intel_og_admin_page($group_type, $gid) {
   return $output;
 }
 
-
-
 function intel_og_admin_people_contacts($group_type, $gid) {
   include_once drupal_get_path('module', 'intel') . '/admin/intel.admin_visitor.inc';
+  // call the standard intel_admin_listing, contacts are filtered by group using
+  // hook_query_alter
   return intel_admin_people_contacts();
 }
 
 function intel_og_admin_people_submissions($group_type, $gid) {
   include_once drupal_get_path('module', 'intel') . '/admin/intel.admin_submission.inc';
+  // call the standard intel_admin_listing, contacts are filtered by group using
+  // hook_query_alter
   return intel_admin_people_submissions();
 }

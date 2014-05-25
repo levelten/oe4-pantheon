@@ -43,6 +43,28 @@ function intel_visitor_add() {
  *   for fields attached to the entity.
  */
 function intel_visitor_edit_form($form, &$form_state, $entity) {
+  dsm($entity);
+  /*
+
+  $wrapper = entity_metadata_wrapper('intel_visitor', $entity);
+dsm($wrapper);
+  $gid = 1;
+  $new_ref = entity_load('dwyr_franchise', array($gid));
+  $new_ref = $new_ref[$gid];
+dsm($new_ref);
+  $refs = $wrapper->og_group_ref->value();
+dsm($refs);
+  if (!$refs) {
+    $refs = array();
+  }
+  $refs[] = $new_ref;
+dsm($refs);
+  $wrapper->og_group_ref->set($refs);
+  $wrapper->save();
+  */
+
+
+
   $form['entity'] = array(
     '#type' => 'value',
     '#value' => $entity,
@@ -332,6 +354,9 @@ function intel_admin_people_contacts() {
   $query->propertyCondition('contact_created', 0, '>');
   $query->pager(50);
   $query->tableSort($header);
+  $query->addTag('intel_admin_people_contacts');
+
+  drupal_alter('intel_admin_people_contacts_query', $query);
 
   $result = $query->execute();
 
@@ -407,10 +432,16 @@ function intel_admin_people_visitors() {
   $query->entityCondition('entity_type', 'intel_visitor');
   $query->pager(50);
   $query->tableSort($header);
+  $query->addTag('intel_admin_people_visitors');
+
+  drupal_alter('intel_admin_people_visitors_query', $query);
 
   $result = $query->execute();
 
-  $visitors = intel_visitor_load_multiple(array_keys($result['intel_visitor']));
+  $visitors = array();
+  if (isset($result['intel_visitor'])) {
+    $visitors = intel_visitor_load_multiple(array_keys($result['intel_visitor']));
+  }
 
   $rows = array();
   foreach ($visitors AS $visitor) {
