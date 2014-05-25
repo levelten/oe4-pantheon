@@ -31,7 +31,7 @@ function enterprise_starterkit_process_page(&$variables) {
 /**
  * Bootstrap theme wrapper function for the primary menu links.
  */
-function enterprise_starterkit_menu_tree__primary(&$variables) {
+function enterprise_starterkit_menu_tree__main_menu(&$variables) {
   return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
 }
 

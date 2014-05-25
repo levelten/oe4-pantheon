@@ -199,7 +199,7 @@ function blocker_ui_page_build(&$page) {
         $page[$region][$block_id] = $block;
       }
       $page[$region]['add'] = array(
-        '#markup' => l(t('Place a block'), 'admin/config/user-interface/blocker/add/' . $blocker_info['entity_type'] . '/' . $blocker_info['entity_id'] . '/' . $region, array('query' => drupal_get_destination())),
+        '#markup' => l(t('Place a block'), 'admin/config/user-interface/blocker/add/' . $blocker_info['entity_type'] . '/' . $blocker_info['entity_id'] . '/' . $region, array('query' => drupal_get_destination(), 'attributes' => array('class' => array('btn', 'place-block')))),
         '#weight' => 100,
       );
       $page[$region]['#sorted'] = FALSE;
