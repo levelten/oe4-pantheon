@@ -1446,6 +1446,7 @@ function cta_node_update($node) {
  *
  */
 function cta_node_save($node) {
+
   if (!isset($node->cta)) {
     return;
   }
