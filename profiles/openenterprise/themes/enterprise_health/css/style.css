@@ -7458,10 +7458,11 @@ footer .footer-top .block .block-inner-title .block-title {
   font-size: 24px;
   font-size: 2.4rem;
   letter-spacing: -0.25px;
+  margin: 0.25em 0 1em;
 }
 footer .footer-top .block .block-inner-title .icon {
-  font-size: 50px;
-  font-size: 5rem;
+  font-size: 30px;
+  font-size: 3rem;
   line-height: 0em;
 }
 footer .footer-bottom {
@@ -7469,8 +7470,10 @@ footer .footer-bottom {
   padding: 1em 0;
 }
 footer #block-widgets-s-facebook-like-box {
-  background-color: white;
   padding: 0;
+}
+footer #block-widgets-s-facebook-like-box .block-inner-content {
+  background-color: white;
 }
 footer #block-widgets-s-enterprise-social-follow .btn-social {
   background-color: white;
