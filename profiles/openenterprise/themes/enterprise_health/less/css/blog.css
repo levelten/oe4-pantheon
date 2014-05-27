@@ -1,0 +1,12 @@
+.view-enterprise-blog-blocks.view-display-id-front_blogs .views-responsive-grid .views-column.well {
+  background-color: transparent;
+}
+.view-enterprise-blog-blocks.view-display-id-front_blogs .views-responsive-grid .views-column.views-column-first {
+  padding-left: 0;
+}
+.view-enterprise-blog-blocks.view-display-id-front_blogs .views-responsive-grid .views-column.views-column-last {
+  padding-right: 0;
+}
+.view-enterprise-blog-blocks.view-display-id-front_blogs .views-responsive-grid .views-column .node-enterprise-blog {
+  background-color: white;
+}

@@ -1,0 +1,50 @@
+name = Enterprise Health for OpenEnterprise
+description = A Bootstrap Sub-theme for Open Enterprise.
+core = 7.x
+base theme = enterprise_bootstrap
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Regions
+;;;;;;;;;;;;;;;;;;;;;
+
+regions[navigation]     = 'Navigation'
+regions[header]         = 'Top Bar'
+regions[highlighted]    = 'Highlighted'
+regions[help]           = 'Help'
+regions[content]        = 'Content'
+regions[sidebar_first]  = 'Primary'
+regions[sidebar_second] = 'Secondary'
+regions[footer]         = 'Footer'
+regions[footer_bottom]  = 'Footer Bottom'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Stylesheets
+;;;;;;;;;;;;;;;;;;;;;
+
+stylesheets[all][] = css/style.css
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Scripts
+;;;;;;;;;;;;;;;;;;;;;
+
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/affix.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/alert.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/button.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/carousel.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/collapse.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/dropdown.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/modal.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/tooltip.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/popover.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/scrollspy.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/tab.js'
+;scripts[] = '../enterprise_bootstrap/bootstrap/js/transition.js'
+
+; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
+settings[bootstrap_cdn] = ''
+settings[bootstrap_navbar_position] = 'static-top'
+settings[toggle_name] = 0
