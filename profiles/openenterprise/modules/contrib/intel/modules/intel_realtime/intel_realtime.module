@@ -313,6 +313,7 @@ function intel_realtime_dashboard_report_page() {
       'link-ext-alt' => 'icon-link-ext-alt',
     ),
     'attrInfo' => $attrInfo,
+    'queryParams' => (object) array(),
   );
 
   $css = array();

@@ -206,6 +206,11 @@ console.log(data);
                 continue;
             }
 
+            // filter query params
+            var p = data[i].p.split('?');
+            data[i].p = p[0];
+            // TODO add query inclusions via settings.queryParamsFilter
+
             // unserialise page attributes
             if (data[i].pa != undefined) {
                 data[i].pa = this._unserializeCustomVar(data[i].pa);
