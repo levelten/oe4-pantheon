@@ -53,7 +53,7 @@ function l10iAddthisTracker() {
         }        
         var last_set = _l10iq.push(['_getFlag', 'session', 'addthis']);
         var timestamp = _l10iq.push(['_getTime']);
-        if ((count > 0) && ((last_set == undefined) || ((timestamp - last_set) > (60*60*24)))) { 
+        if ((count > 0) && ((last_set == undefined) || ((timestamp - last_set) > (60*60*24)))) {
           _l10iq.push(['_saveVar', 'visitor', 'addthis']);
           _l10iq.push(['_setFlag', 'session', 'addthis', timestamp, true]);
         }

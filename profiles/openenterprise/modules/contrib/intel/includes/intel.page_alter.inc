@@ -508,12 +508,12 @@ function intel_init() {
   if (intel_debug_mode() && !module_exists('devel')) {
     if (!function_exists('dpm')) {
       function dpm($input) {
-        print_r($input);
+        print_r($input);//
       }
     }
     if (!function_exists('dsm')) {
       function dsm($input) {
-        print_r($input);
+        print_r($input);//
       }
     }
   }

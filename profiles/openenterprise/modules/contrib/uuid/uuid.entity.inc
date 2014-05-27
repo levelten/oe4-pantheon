@@ -289,6 +289,12 @@ function entity_make_entity_local($entity_type, $entity) {
     }
   }
   else {
+    watchdog('entity_type', print_r($entity_type, 1));
+    watchdog('entity', print_r($entity, 1));
+    watchdog('entity_info', print_r($info, 1));
+    dsm($entity_type);
+    dsm($entity);
+    dsm($info);
     throw new UuidEntityException(t('Trying to operate on a @type entity, which doesn\'t support UUIDs.', array('@type' => $info['label'])));
   }
 }

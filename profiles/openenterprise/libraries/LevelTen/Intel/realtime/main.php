@@ -96,6 +96,14 @@ function routers_load() {
     ),
     //'access' => 'level',
   );
+  $routers['track/var'] = array(
+    'function' => 'track_var',
+    'file' => 'track',
+    'includes' => array(
+      'includes/db.inc',
+    ),
+    //'access' => 'level',
+  );
   $routers['track/session'] = array(
     'function' => 'track_session',
     'file' => 'track',

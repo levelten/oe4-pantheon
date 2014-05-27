@@ -2,9 +2,6 @@
 
 function enterprise_intel_admin_config_form($form, $form_state) {
   $content_types = node_type_get_types();
-  $content_types = array(
-    'enterprise_blog' => $content_types['enterprise_blog'],
-  );
 //dsm($content_types);
 
   $options = array(
@@ -93,13 +90,13 @@ function enterprise_intel_admin_config_form($form, $form_state) {
     //dsm($fields);
 
     $default_value = variable_get('enterprise_intel_entity_settings_node__' . $bundle, array());
-dsm($default_value);
+//dsm($default_value);
     foreach ($fields AS $field_name => $field) {
       if (isset($options[$field_name])) {
         $default_value[$field_name] = $field_name;
       }
     }
-dsm($default_value);
+//dsm($default_value);
     $form['content_type']['content_type_' . $bundle] = array(
       '#type' => 'checkboxes',
       '#title' => $content_type->name . ' ' . t('config'),
@@ -118,8 +115,8 @@ dsm($default_value);
 }
 
 function enterprise_intel_admin_config_form_submit($form, $form_state) {
-  dsm($form);
-  dsm($form_state);
+  //dsm($form);
+  //dsm($form_state);
   $values = $form_state['values'];
 
   // build mapping of vocabularies to base field
@@ -131,8 +128,8 @@ function enterprise_intel_admin_config_form_submit($form, $form_state) {
         $vocab_map[$vocab_name] = $value;
       }
     }
-  }
-dsm($vocab_map);
+  }dsm($vocab_map);
+
   variable_set('enterprise_intel_vocab_field_map', $vocab_map);
 
   // build settings for each content type
@@ -152,12 +149,12 @@ dsm($vocab_map);
           }
         }
       }
-      dsm($settings[$type_name]);
+      //dsm($settings[$type_name]);
       variable_set('enterprise_intel_entity_settings_node__' . $type_name, $settings[$type_name]);
     }
   }
 
-  dsm($settings);
+  //dsm($settings);
 
   enterprise_intel_revert_intel_controls();
   //enterprise_intel_revert_intel_controls('node', 'enterprise_blog', $values['content_type_enterprise_blog']);

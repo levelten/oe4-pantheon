@@ -11,7 +11,6 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'node_type_form') {
     $entity_type = 'node';
     $bundle = isset($form['#node_type']->type) ? $form['#node_type']->type : '';
-
   }
   elseif ($form_id == 'taxonomy_form_vocabulary') {
     $entity_type = 'taxonomy';
@@ -20,6 +19,8 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
   else {
     return;
   }
+  dsm($entity_type);
+  dsm( $bundle );
   $form['intel'] = array(
     '#type' => 'fieldset',
     '#title' => t('LevelTen Intelligence'),
@@ -166,8 +167,7 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
   if (!isset($form_state['intel'])) {
     return;
   }
-  dsm($form);
-  dsm($form_state);
+
   $values = $form_state['values'];
   $entity_type = $form_state['intel']['entity_type'];
   $bundle = $form_state['intel']['bundle'];

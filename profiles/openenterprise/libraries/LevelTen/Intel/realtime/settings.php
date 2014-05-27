@@ -60,4 +60,11 @@ $env_settings['oepro3p.localhost:8082']['db'] = array(
   'tableprefix' => 'intel_',
 );
 
+$env_settings['oepro3p_test.localhost:8082']['db'] = array(
+  'dsn' => 'mysql:host=127.0.0.1;dbname=oepro3p_test;port=33066',
+  'username' => 'drupaluser',
+  'password' => '',
+  'tableprefix' => 'intel_',
+);
+
 $settings = $env_settings[HOST];

@@ -863,8 +863,6 @@ return '';
   );
   $entity = entity_get_controller('intel_visitor')->create($values);
 
-  print_r($entity);
-
   $attributes = variable_get('intel_page_attributes_custom', array());
 dsm($attributes);
   $attributes = variable_get('intel_visitor_attributes_custom', array());
@@ -2163,6 +2161,24 @@ function intel_add_visitor_sync_request($vtk, $delay = 0) {
     $items[$vtk] = $item;
     variable_set('intel_sync_visitor_requests', $items);
   }
+}
+
+/**
+ * Implements hook_node_type_delete()
+ * @param $info
+ */
+function intel_node_type_delete($info) {
+  variable_del('intel_entity_settings_node__' . $info->type);
+}
+
+/**
+ * Implements hook_ttaxonomy_vocabulary_delete
+ *
+ * Delete entity settings variable
+ */
+function intel_taxonomy_vocabulary_delete($vocabulary) {
+  dsm($vocabulary);
+  variable_del('intel_entity_settings_taxonomy__' . $vocabulary->machine_name);
 }
 
 function intel_sync_visitordata_page($person_intel) {

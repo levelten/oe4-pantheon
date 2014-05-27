@@ -145,7 +145,8 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['arguments']['name']['title_enable'] = TRUE;
   $handler->display->display_options['arguments']['name']['title'] = 'Blog Posts in %1';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
+  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['name']['specify_validation'] = TRUE;
@@ -181,7 +182,8 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['arguments']['name']['title_enable'] = TRUE;
   $handler->display->display_options['arguments']['name']['title'] = 'Blogs tagged with %1';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
+  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['name']['specify_validation'] = TRUE;
@@ -881,6 +883,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_categories_tid';
   $handler->display->display_options['arguments']['name']['default_action'] = 'summary';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
   $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'blog/category';
@@ -909,7 +912,8 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_tags_tid';
   $handler->display->display_options['arguments']['name']['default_action'] = 'summary';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
+  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'blog/tag';
   $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';

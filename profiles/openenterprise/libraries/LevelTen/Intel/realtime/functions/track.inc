@@ -45,6 +45,27 @@ function track_event() {
   return $response;
 }
 
+function track_var() {
+  global $GET, $REQUEST;
+  $instance = track_instance_construct();
+  $instance->type = 'var';
+  $instance->ord = 2;
+  $instance->data['type'] = 'var';
+  $instance->data['scope'] = $GET['type'];
+  if (isset($GET['namespace'])) {
+    $instance->data['namespace'] = $GET['namespace'];
+  }
+  if (isset($GET['keys'])) {
+    $instance->data['keys'] = $GET['keys'];
+  }
+  $instance->data['value'] = $REQUEST['value'];
+  track_instance_dbsave($instance);
+  $response = array(
+    'message' => "OK",
+  );
+  return $response;
+}
+
 function track_session() {
   global $GET;
 
@@ -81,15 +102,21 @@ function track_instance_construct() {
   $instance->time = (int)$GET['t'];
   $instance->path = $GET['p'];
   $instance->host = $GET['h'];
-  $instance->isEntrance = (int)$GET['ie'];
+
   // ordinal is used to make sure page views are returned before events so
   // session data can be constructed properly
   $instance->ord = 0;
 
   // typecast for types other than str
   $instance->data['t'] = (int)$instance->data['t'];
-  $instance->data['ie'] = (int)$instance->data['ie'];
-  $instance->data['iu'] = (int)$instance->data['iu'];
+  if (isset($instance->data['ie'])) {
+    $instance->isEntrance = (int)$instance->data['ie'];
+    $instance->data['ie'] = (int)$instance->data['ie'];
+  }
+
+  if (isset($instance->data['iu'])) {
+    $instance->data['iu'] = (int)$instance->data['iu'];
+  }
 
   if (isset($GET['ec'])) {
     $instance->category = $GET['ec'];
@@ -103,7 +130,6 @@ function track_instance_construct() {
     $instance->data['ev'] = (float)$instance->data['ev'];
     $instance->data['ei'] = (int)$instance->data['ei'];
   }
-
 
   return $instance;
 }

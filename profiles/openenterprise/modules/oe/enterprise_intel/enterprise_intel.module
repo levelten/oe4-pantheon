@@ -21,6 +21,12 @@ function enterprise_intel_menu() {
   return $items;
 }
 
+function enterprise_intel_post_features_revert($component) {
+  if ($component == 'field_instance') {
+    enterprise_intel_revert_intel_controls();
+  }
+}
+
 function enterprise_intel_revert_intel_controls() {
   $content_types = node_type_get_types();
   foreach ($content_types AS $bundle => $type) {

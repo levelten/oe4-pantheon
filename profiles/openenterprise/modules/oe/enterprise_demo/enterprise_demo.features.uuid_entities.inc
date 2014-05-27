@@ -2599,6 +2599,6 @@ and your business. <strong><a href="/contact-us">Get in touch!</a></strong></p>
     'uuid' => 'eb1751f9-2176-4bd7-8787-ef2b7280dfc7',
     'view_mode' => 'default',
   );
-
+  
   return $entities;
 }

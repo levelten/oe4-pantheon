@@ -246,7 +246,8 @@ function intel_get_page_attributes_default() {
     'title' => t('Author'), 
     'description' => t('The uid of a node author.'),   
     'type' => 'scalar',
-    'options_description' => t('Auto generated from entity uid.'),  
+    'options_description' => t('Auto generated from entity uid.'),
+    'options info callback' => 'intel_page_attribute_author_option_info',
   );
   $attributes['ct'] = array(
     'title' => t('Content type'),  
@@ -254,6 +255,7 @@ function intel_get_page_attributes_default() {
     'type' => 'scalar',
     'options_description' => t('Auto generated from entity type/bundle.'),    
     'type' => 'value',
+    'options info callback' => 'intel_page_attribute_content_type_option_info',
   );
   $attributes['et'] = array(
     'title' => t('Entity type'), 
@@ -285,7 +287,8 @@ function intel_get_page_attributes_default() {
     'title' => t('Taxomony term'), 
     'description' => t('List of taxomonies term ids.'),   
     'type' => 'list',
-    'options_description' => t('Auto generated from terms in selected taxonomy fields.'),  
+    'options_description' => t('Auto generated from terms in selected taxonomy fields.'),
+    'options info callback' => 'intel_page_attribute_taxomony_term_option_info',
   );
   return $attributes;
 }
@@ -320,6 +323,10 @@ function intel_get_attributes($mode = 'visitor') {
     if ((isset($v[$mode . '_attribute']) && !empty($v[$mode . '_attribute']['key']))
       || (($mode == 'visitor') && !empty($v['track_page_terms_visitor']))
     ) {
+      $vocab_info = taxonomy_vocabulary_machine_name_load($k);
+      if (empty($vocab_info->vid)) {
+        continue;
+      }
       // if mode == visitor,
       if (($mode == 'visitor') && (empty($v[$mode . '_attribute']['key']))) {
         $key = !empty($v['page_attribute']['key']) ? $v['page_attribute']['key'] : 't';
@@ -332,7 +339,6 @@ function intel_get_attributes($mode = 'visitor') {
         $key = $v[$mode . '_attribute']['key'];
       }
 
-      $vocab_info = taxonomy_vocabulary_machine_name_load($k);
       $attrs[$key] = $v[$mode . '_attribute'];
       if (empty($attrs[$key]['title'])) {
         $attrs[$key]['title'] = $vocab_info->name;
@@ -349,6 +355,7 @@ function intel_get_attributes($mode = 'visitor') {
       $attrs[$key]['module']  = 'intel';
       $attrs[$key]['source_type']  = 'taxonomy';
       $attrs[$key]['source_bundle']  = $k;
+      $attrs[$key]['options'] = array();
     }
   }
 
@@ -404,6 +411,76 @@ function intel_page_attribute_load($key) {
   $attribute = $attributes[$key];
   $attribute['key'] = $key;
   return $attribute; 
+}
+
+function intel_get_attribute_option($mode, $attr_key, $option_id) {
+  $info = intel_get_visitor_attributes();
+  //dsm($info);
+  if ($mode == 'page') {
+    $attrInfo = intel_page_attribute_load($attr_key);
+  }
+  else {
+    $attrInfo = intel_visitor_attribute_load($attr_key);
+  }
+  if (!empty($attrInfo)) {
+
+  }
+
+  $data = array(
+    'title' => '',
+  );
+
+  if (!empty($attrInfo['options info callback'])) {
+    $data = $attrInfo['options info callback']($option_id);
+  }
+  else if (($attrInfo['module'] == 'intel') && isset($attrInfo['source_type']) && ($attrInfo['source_type'] == 'taxonomy')) {
+    $term = taxonomy_term_load($option_id);
+    if (!empty($term)) {
+      $data['title'] = $term->name;
+    }
+  }
+  else if (isset($attrInfo['options'][$option_id])) {
+    $data = $attrInfo['options'][$option_id];
+  }
+
+  return $data;
+}
+
+function intel_page_attribute_author_option_info($option_id) {
+  $data = array(
+    'title' => '',
+  );
+  $account = user_load($option_id);
+  if (!empty($account)) {
+    $data['title'] = format_username($account);
+  }
+  return $data;
+}
+
+function intel_page_attribute_content_type_option_info($option_id) {
+  $data = array(
+    'title' => '',
+  );
+  $types = node_type_get_types();
+  //print_r($types);
+  if (isset($types[$option_id])) {
+    $data['title'] = $types[$option_id]->name;
+  }
+  else if (isset($types['enterprise_' . $option_id])) {
+    $data['title'] = $types['enterprise_' . $option_id]->name;
+  }
+  return $data;
+}
+
+function intel_page_attribute_taxomony_term_option_info($option_id) {
+  $data = array(
+    'title' => '',
+  );
+  $term = taxonomy_term_load($option_id);
+  if (!empty($term)) {
+    $data['title'] = $term->name;
+  }
+  return $data;
 }
 
 function intel_get_page_intents_default($filter = 'report') {

@@ -856,11 +856,52 @@ function enterprise_apps_config_nodes($config_settings, $config_info) {
     return;
   }
 
+  $entity_infos = entity_get_info();
+//dsm($entity_infos);
+
   foreach ($config_settings['nodes'] AS $uuid => $settings) {
     $ci_node = isset($config_info['nodes'][$uuid]) ? $config_info['nodes'][$uuid] : array();
 
     $node = enterprise_apps_node_load_by_uuid($uuid);
 //dsm($node);
+    $node_wrapper = entity_metadata_wrapper('node', $node);
+    $lang = $node->language;
+
+    // translate uuids in fields
+    $instance_infos = field_info_instances('node', $node->type);
+
+    // fields must be handled differently
+    foreach ($settings AS $setting_name => $setting_value) {
+      // check if setting is a field
+      if (!isset($instance_infos[$setting_name])) {
+        continue;
+      }
+//dsm($instance_infos[$setting_name]);
+      $field_info = field_info_field($setting_name);
+//dsm($field_info);
+      if ($field_info['type'] == 'taxonomy_term_reference') {
+
+        foreach ($setting_value[$lang] AS $i => $value) {
+          $id = entity_get_id_by_uuid('taxonomy_term', array($value['tid']));
+          $setting_value[$lang][$i]['tid'] = $id[$value['tid']];
+        }
+        if ($field_info['cardinality'] == 1) {
+          $node->{$setting_name}[$lang][0] = $setting_value[$lang][0];
+        }
+        // TODO this is setup as an override, not sure if merge is better
+        else {
+          $node->{$setting_name}[$lang] = $setting_value[$lang];
+        }
+        // remove setting so it is not processed by the final merge
+        unset($settings[$setting_name]);
+//dsm($setting_value);
+
+      }
+      // TODO
+      else if ($field_info['type'] == 'entity_reference') {
+
+      }
+    }
 
     // special processing for webform content type
     if (isset($settings['webform'])) {
@@ -1273,5 +1314,3 @@ function enterprise_apps_entity_dependencies($entity, $entity_type) {
     return $dependencies;
   }
 }
-
-

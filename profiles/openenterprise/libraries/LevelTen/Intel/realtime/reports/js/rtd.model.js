@@ -78,7 +78,16 @@ function rtDashboardModel (name) {
         stick: .1,
         additional_pages: .02
     };
-    this.paInfo = {
+
+    this.attrOptionInfoRequested = {
+        page: {},
+        visitor: {}
+    }
+    this.attrInfo = {
+        page: {},
+        visitor: {}
+    }
+    this.attrInfo.page = {
         a: {
             title: 'Author',
             type: 'scalar',
@@ -100,8 +109,7 @@ function rtDashboardModel (name) {
             options: {}
         }
     }
-    this.paInfoRequested = {};
-    this.vaInfo = {
+    this.attrInfo.visitor = {
         g: {
             title: 'Groups',
             type: 'list'
@@ -137,7 +145,7 @@ function rtDashboardModel (name) {
             this.pole();
         }
 
-        this.vaInfo = rtdConfig.settings.vaInfo;
+        this.attrInfo = rtdConfig.settings.attrInfo;
     }
 
     this.pole = function pole() {
@@ -182,7 +190,7 @@ function rtDashboardModel (name) {
 
     this.addToLog = function addToLog(data, ids, lastId) {
         var time;
-//console.log(data);
+console.log(data);
         for (var i in data) {
             if (ids[i] < this.logLastId) {
               continue; // we got duplicate data for some reason
@@ -192,6 +200,12 @@ function rtDashboardModel (name) {
                 continue;
             }
             time = e.t;
+
+            if (e.type == 'var') {
+                this.addVar(e);
+                continue;
+            }
+
             // unserialise page attributes
             if (data[i].pa != undefined) {
                 data[i].pa = this._unserializeCustomVar(data[i].pa);
@@ -243,6 +257,51 @@ function rtDashboardModel (name) {
             //console.log(this.logNew);
         }
         //console.log(this.log);
+    };
+
+    this.addVar = function (e) {
+        if (e.scope == 'visitor') {
+            if (this.visitors[e.vtk] == undefined) {
+                this.visitors[e.vtk] = {
+                    name: 'anon (' + e.vtk.substr(0,10) + ')',
+                    sessions: {}
+                };
+            }
+            if (e.namespace != undefined) {
+                if (e.namespace == 'addthis') {
+                    if ((e.value.geo != undefined)
+                      && (e.value.geo.lat != undefined)
+                      && (e.value.geo.lon != undefined)
+                        ) {
+                        this.visitors[e.vtk]['location'] = {
+                          lat: e.value.geo.lat,
+                          lon: e.value.geo.lon
+                        };
+                    }
+                    if (e.value.services != undefined) {
+                        this.visitors[e.vtk]['sharing'] = e.value.services;
+                    }
+                }
+            }
+        }
+        /*
+        if (e.scope == 'visitor') {
+            if (this.visitors[e.vtk]['data'] == undefined) {
+                this.visitors[e.vtk]['data'] = {};
+            }
+            var keys = '';
+            if (e.namespace != undefined) {
+                keys += e.namespace;
+            }
+            if (e.keys != undefined) {
+                keys += ((keys.length > 0) ? '.' : '') + e.keys
+            }
+            var keysArr = keys.split('.');
+            for (var j = 0; j < keysArr.length; j++) {
+
+            }
+        }
+        */
     }
 
     this.fetchVisitor = function (vtk, callback) {
@@ -272,116 +331,45 @@ function rtDashboardModel (name) {
         jQuery.ajax(vars);
     };
 
-    this.fetchPaInfoOption = function (paKey, optionId, callback, timeout) {
+    this.fetchAttributeOptionInfo = function (mode, attrKey, optionId, callback, timeout) {
         // check if this data has already been requested
         var time = rtdModel.getTime();
-        if (this.paInfoRequested[paKey] == undefined) {
-            this.paInfoRequested[paKey] = {};
+        if (this.attrOptionInfoRequested[mode] == undefined) {
+            this.attrOptionInfoRequested[mode] = {};
         }
-        if (this.paInfoRequested[paKey][optionId] != undefined) {
+        if (this.attrOptionInfoRequested[mode][attrKey] == undefined) {
+            this.attrOptionInfoRequested[mode][attrKey] = {};
+        }
+        if (this.attrOptionInfoRequested[mode][attrKey][optionId] != undefined) {
             return;
         }
-        this.paInfoRequested[paKey][optionId] = time;
-        //var func = 'painfo_option/' + paKey + '/' + optionId;
-        //var params = {};
+        this.attrOptionInfoRequested[mode][attrKey][optionId] = time;
+        var func = 'attribute_option_info_js/' + mode + '/' + attrKey + '/' + optionId;
         var vars = {
             dataType: 'json',
-            //url: this._getRealtimeDataUrl(func, params),
-            url: this.realtimeDataUrl + 'painfo_option_js/' + paKey + '/' + optionId,
+            url: this.realtimeDataUrl + func,
             data: {},
             success: function (json){
-console.log(json);
+                //console.log(json);
                 if (json.status != 200) {
                     return;
                 }
-                rtdModel.paInfo[paKey].options[optionId] = {
+                rtdModel.attrInfo[mode][attrKey].options[optionId] = {
                     title: json.option.title
                 }
                 if (callback != undefined) {
                     if (timeout == undefined) {
                         timeout = 0;
                     }
-                    setTimeout(function () {callback(json.option.type, json.option.id, json.option);}, timeout);
+                    setTimeout(function () {callback(json.option.mode, json.option.type, json.option.id, json.option);}, timeout);
                     //callback(json.option.type, json.option.id, json.option);
                     //callback(json.option.type, json.option.id, json.option);
                 }
             }
         };
-console.log(vars.url);
+//console.log(vars.url);
         jQuery.ajax(vars);
     }
-
-    this.fetchAuthor = function (uid, callback) {
-        var func = 'author_load';
-        var params = {
-            uid: uid
-        };
-        var vars = {
-            dataType: 'json',
-            url: this._getRealtimeDataUrl(func, params),
-            data: {},
-            success: function (json){
-                if (json.author == undefined) {
-                    return;
-                }
-                //rtdModel.authors[uid] = json.author.name;
-                rtdModel.paInfo.a.options[uid] = {
-                    title: json.author.name
-                }
-                if (callback != undefined) {
-                    callback(uid, json.author);
-                }
-            }
-        };
-        //console.log(vars);
-        jQuery.ajax(vars);
-    };
-
-    this.fetchContentType = function (ct, callback) {
-        var func = 'content_type_load';
-        var params = {
-            'type': ct
-        };
-        var vars = {
-            dataType: 'json',
-            url: this._getRealtimeDataUrl(func, params),
-            data: {},
-            success: function (json){
-                if (json.content_type == undefined) {
-                    return;
-                }
-                rtdModel.contentTypes[ct] = json.content_type.name;
-                if (callback != undefined) {
-                    callback(ct, json.content_type);
-                }
-            }
-        };
-        //console.log(vars);
-        jQuery.ajax(vars);
-    };
-
-    this.fetchTerm = function (tid, callback) {
-        var func = 'term_load';
-        var params = {
-            'tid': tid
-        };
-        var vars = {
-            dataType: 'json',
-            url: this._getRealtimeDataUrl(func, params),
-            data: {},
-            success: function (json){
-                if (json.term == undefined) {
-                    return;
-                }
-                rtdModel.terms[tid] = json.term.name;
-                if (callback != undefined) {
-                    callback(tid, json.term);
-                }
-            }
-        };
-        //console.log(vars);
-        jQuery.ajax(vars);
-    };
 
     this.fetchLogReturn = function fetchLogReturn(data) {
         console.log(data);

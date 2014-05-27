@@ -268,8 +268,16 @@ function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
   if (isset($entity->field_ga_code)) {
     $wrapper = entity_metadata_wrapper('dwyr_franchise', $entity);
     $ga_code = $wrapper->field_ga_code->value();
+
     if (!empty($ga_code)) {
-      array_unshift($l10iq_pushes, array('_setAccount', $ga_code, 'l10i_og'));
+      // insert the second tracking code after the first so that the main tracking
+      // code remains the default
+      foreach ($l10iq_pushes AS $i => $push) {
+        if ($push[0] == '_setAccount') {
+          array_splice($l10iq_pushes, $i+1, 0, array(array('_setAccount', $ga_code, 'l10i_og')));
+          return;
+        }
+      }
     }
   }
 }
@@ -341,8 +349,7 @@ function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $
     // be saved after submission and sid is created
     $submission->og_gid = $gid;
     $visitor->og_gid = $gid;
-dsm($visitor);
-    print_r($visitor->vid);
+
     // check if intel_visitor has an og_group_ref field
     if (!isset($visitor->og_group_ref)) {
       return;
@@ -361,7 +368,6 @@ dsm($visitor);
       $refs = array();
     }
     $refs[] = $new_ref;
-dsm($refs);
     $wrapper->og_group_ref->set($refs);
     //$wrapper->save();
   }

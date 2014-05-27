@@ -114,6 +114,7 @@ function _enterprise_demo_config_app_batch_finished($success, $results, $operati
 
   // must rebuild field instances after all fields are installed.
   features_revert(array('enterprise_demo' => array('field_instance')));
+  features_revert(array('enterprise_intel' => array('field_instance')));
 
   // remove any redirects created on content import
   $query = db_delete('redirect')
@@ -148,8 +149,8 @@ function _enterprise_demo_config_app_batch_finished($success, $results, $operati
 
 // run when module first enabled
 function enterprise_demo_post_features_revert($component) {
-  dsm('enterprise_demo_post_features_revert');
-  dsm($component);
+  //dsm('enterprise_demo_post_features_revert');
+  //dsm($component);
   //return;
   if ($component != 'uuid_entities') {
     return;
@@ -318,10 +319,92 @@ function enterprise_demo_enterprise_apps_config_settings() {
     ),
   );
 
-
+  // Webform: Contact us
   $nodes['cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
     'webform' => array(
       'redirect_url' => 'thank-you/contact',
+    ),
+  );
+
+  // Blog post: 5 Tips to Increase Your Conversion Rates
+  $nodes['b7a86778-4129-4756-84d1-5e4780436c0e'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: 11 Beautiful Flat Site Designs
+  $nodes['ada72cc8-57d8-42b8-82ce-dd7188e6dde4'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: How To Optimize Your Website for Search Engines
+  $nodes['3136cbf9-9438-4c87-8c3e-3716cd45184c'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Responsive Design Simplified with Bootstrap
+  $nodes['4a734df2-20a7-44e2-be7c-7ab0497e4945'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Brand Like a Publisher with Style Guides
+  $nodes['3fc7411a-4a40-4c6c-9bc8-a7697cbc8be3'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Social Media ROI & How to Improve It
+  $nodes['7f7991ee-8cf4-4a80-b379-fc2dc9241227'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: 6 Key Metrics for Better Content
+  $nodes['7d7aea4c-1b3c-4377-9613-f37ea43d04d4'] = array(
+
+  );
+
+  // Blog post: 7 Modules To Make Your Drupal Site More Usable
+  $nodes['8caf3e4b-71ed-4fbe-b2a6-f0ddaf733c10'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
     ),
   );
 

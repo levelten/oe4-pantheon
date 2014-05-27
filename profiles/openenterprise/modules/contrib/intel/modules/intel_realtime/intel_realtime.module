@@ -6,9 +6,10 @@
  */
 function intel_realtime_menu() {
   $items = array();
-  $items['intel/painfo_option_js'] = array(
+
+  $items['intel/attribute_option_info_js'] = array(
     'title' => '',
-    'page callback' => 'intel_realtime_painfo_option_load_js',
+    'page callback' => 'intel_realtime_attribute_option_info_js',
     'access callback' => 'user_access',
     'access arguments' => array('view all intel reports'),
     'type' => MENU_CALLBACK,
@@ -132,44 +133,29 @@ function intel_realtime_log_clear($time = 0) {
   $query->execute();
 }
 
-function intel_realtime_painfo_option_load_js($pa_key = '', $option_id = '') {
+function intel_realtime_attribute_option_info_js($mode = 'visitor', $pa_key = '', $option_id = '') {
   $response = array();
   if (empty($pa_key) || empty($option_id)) {
     intel_json_output_error(INTEL_STATUS_BAD_REQUEST);
   }
 
-  $response['option'] = array(
-    'type' => $pa_key,
-    'id' => $option_id,
-  );
-  if ($pa_key == 'a') {
-    $account = user_load($option_id);
-    if (!empty($account)) {
-      $response['option']['title'] = format_username($account);
-    }
-  }
-  else if ($pa_key == 'ct') {
-    $types = node_type_get_types();
-    //print_r($types);
-    if (isset($types[$option_id])) {
-      $response['option']['title'] = $types[$option_id]->name;
-    }
-    else if (isset($types['enterprise_' . $option_id])) {
-      $response['option']['title'] = $types['enterprise_' . $option_id]->name;
-    }
-  }
-  else if ($pa_key == 't') {
-    $term = taxonomy_term_load($option_id);
-    if (!empty($term)) {
-      $response['option']['title'] = $term->name;
-    }
-  }
+  $data = intel_get_attribute_option($mode, $pa_key, $option_id);
 
-  if (empty($response['option']['title'])) {
+  if (empty($data['title'])) {
     intel_json_output_error(INTEL_STATUS_NOT_FOUND);
   }
 
+  $response['option'] = array(
+    'mode' => $mode,
+    'type' => $pa_key,
+    'id' => $option_id,
+  );
+
+  $response['option']['title'] = $data['title'];
+
   intel_json_output($response);
+
+  //return print_r($response, 1);
 }
 
 function intel_realtime_author_load_js() {
@@ -273,6 +259,7 @@ function intel_realtime_dashboard_report_page() {
 
   // add google jsapi
   $js[] = 'https://www.google.com/jsapi';
+  $js[] = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false';
 
   // add timeline libs
   $js[] = $timeline_path . '/compiled/js/storyjs-embed.js';
@@ -293,7 +280,27 @@ function intel_realtime_dashboard_report_page() {
   }
 
   require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
-  $vaInfo = intel_get_visitor_attributes();
+  $attrInfo = array(
+    'page' => intel_get_page_attributes(),
+    'visitor' => intel_get_visitor_attributes(),
+  );
+
+  // removing select attributes to simplify demo
+  unset($attrInfo['page']['pt']);
+  unset($attrInfo['page']['et']);
+
+  // initialize options arrays that are not set just to save some checks in js
+  foreach ($attrInfo['page'] AS $key => $value) {
+    if (!isset($value['options'])) {
+      $attrInfo['page'][$key]['options'] = array();
+    }
+  }
+
+  foreach ($attrInfo['visitor'] AS $key => $value) {
+    if (!isset($value['options'])) {
+      $attrInfo['visitor'][$key]['options'] = array();
+    }
+  }
 
   $settings = array(
     'cmsPath' => $base_path,
@@ -305,7 +312,7 @@ function intel_realtime_dashboard_report_page() {
       'link-ext' => 'icon-link-ext',
       'link-ext-alt' => 'icon-link-ext-alt',
     ),
-    'vaInfo' => $vaInfo,
+    'attrInfo' => $attrInfo,
   );
 
   $css = array();

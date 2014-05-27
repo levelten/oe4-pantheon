@@ -163,17 +163,18 @@ function rtDashboardView (name) {
 
 
       $('#visitor-timeline').on('LOADED', function(e) {
-          //console.log('on.LOADED');
+          console.log('on.LOADED');
           //console.log(e);
           rtdView.onTimelineLoaded(this, e);
       });
 
         $('#visitor-timeline').on('UPDATE', function(e) {
-            //console.log('on.UPDATE');
-            //console.log(e);
+            console.log('on.UPDATE');
+            console.log(e);
         });
 
         $('#visitor-timeline').on("DOMSubtreeModified", '.vco-navigation', function() {
+            //console.log('on.DOMSubtreeModified');
             //rtdView.onTimelineUpdate(event);
         });
 
@@ -810,16 +811,16 @@ function rtDashboardView (name) {
             }
             if (type[0] == 'a') {
                 this.chartData[chartKey].setColumnLabel(0, 'Authors');
-                labels = this.model.paInfo[type[0]].options;
+                labels = this.model.attrInfo['page'][type[0]].options;
             }
             if (type[0] == 't') {
                 this.chartData[chartKey].setColumnLabel(0, 'Terms');
-                labels = this.model.paInfo[type[0]].options;
+                labels = this.model.attrInfo['page'][type[0]].options;
             }
             if (type[0] == 'ct') {
-                labels = this.model.paInfo[type[0]].options;
+                labels = this.model.attrInfo['page'][type[0]].options;
                 if ((type.length == 2)) {
-                    var label = (this.model.contentTypes[type[1]] != undefined) ? this.model.contentTypes[type[1]] : type[1];
+                    var label = (this.model.attrInfo['page'][type[0]].options[type[1]] != undefined) ? this.model.attrInfo['page'][type[0]].options[type[1]].title : type[1];
                     this.chartData.pageAttrs.setColumnLabel(0, label);
                 }
             }
@@ -836,16 +837,16 @@ function rtDashboardView (name) {
                 }
                 else {
                     if ((type[0] == 'a') && (type[1] == undefined)) {
-                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
-                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
+                        label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
                     }
                     else if ((type[0] == 'ct') && (type[1] == undefined)) {
-                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
-                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
+                        label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
                     }
                     else if ((type[0] == 't') && (type[1] == undefined)) {
-                        label = '<span class="placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
-                        this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
+                        label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
                     }
 
                 }
@@ -1647,6 +1648,7 @@ function rtDashboardView (name) {
         var visitor = this.model.visitors[vtk];
         var sid = visitor.activeSession;
         var session = this.model.sessions[vtk + '.' + sid];
+        var placeholders = 0;
 //console.log(visitor);
 //console.log(sid);
 console.log(session);
@@ -1683,41 +1685,43 @@ console.log(session);
             var paItems = [];
             if (tag == 'pages') {
                 headline = page.dt;
-                text = 'value: +' + hits.value.toFixed(2) + '<br />';
+                text = 'value: +' + hits.value.toFixed(2);
+                text += '<div class="body">';
                 if (page.ie == 1) {
                     classname = 'entrance';
                 }
-console.log(page.pa);
+//console.log(page.pa);
                 for (var i in page.pa) {
 
-                   if (this.model.paInfo[i] != undefined) {
+                   if (this.model.attrInfo['page'][i] != undefined) {
                        var value = '';
-                       if (this.model.paInfo[i].type == 'list') {
+                       if (this.model.attrInfo['page'][i].type == 'list') {
                            for (var j in page.pa[i]) {
                                value += (value.length > 0 ? ', ' : '');
-                               if (this.model.paInfo[i].options[j] == undefined) {
-                                   value += '<span class="placeholder-pa-' + i + '-' + j + '">' + j + '</span>';
-                                   this.model.fetchPaInfoOption(i, j, rtdView.updatePaInfoOption, 500);
-
-                                   //this.model.fetchPaInfoOption(type[0], key, rtdView.updatePaInfoOption);
+                               if (this.model.attrInfo['page'][i].options[j] == undefined) {
+                                   value += '<span class="placeholder-attr-option placeholder-pa-' + i + '-' + j + '">' + j + '</span>';
+                                   placeholders++;
+                                   this.model.fetchAttributeOptionInfo('page', i, j, rtdView.updateAttributeOptionInfo);
+                                   //this.model.fetchPaInfoOption(i, j, rtdView.updatePaInfoOption, 500);
                                }
                                else {
-                                    value += this.model.paInfo[i].options[j].title;
+                                    value += this.model.attrInfo['page'][i].options[j].title;
                                }
                            }
                        }
                        else {
-                           if (this.model.paInfo[i].options[page.pa[i]] == undefined) {
-                               value += '<span class="placeholder-pa-' + i + '-' + page.pa[i] + '">' + page.pa[i] + '</span>';
-                               this.model.fetchPaInfoOption(i, page.pa[i], rtdView.updatePaInfoOption);
+                           if (this.model.attrInfo['page'][i].options[page.pa[i]] == undefined) {
+                               value += '<span class="placeholder-attr-option placeholder-pa-' + i + '-' + page.pa[i] + '">' + page.pa[i] + '</span>';
+                               placeholders++;
+                               this.model.fetchAttributeOptionInfo('page', i, page.pa[i], rtdView.updateAttributeOptionInfo);
                            }
                            else {
-                               value += this.model.paInfo[i].options[page.pa[i]].title;
+                               value += this.model.attrInfo['page'][i].options[page.pa[i]].title;
                            }
                        }
 
                        if (value.length > 0) {
-                           paItems.push(this.model.paInfo[i].title + ': ' + value);
+                           paItems.push(this.model.attrInfo['page'][i].title + ': ' + value);
                        }
                    }
                 }
@@ -1725,7 +1729,7 @@ console.log(page.pa);
                     title: 'Page attributes:',
                     listClass: 'pa'
                 }
-                text += '<p>' + this.themeItemList(paItems, options) + '</p>';
+                text += this.themeItemList(paItems, options);
 
                 media = "http://" + page.h + page.p;
                 caption = page.p;
@@ -1755,13 +1759,18 @@ console.log(page.pa);
                 continue;
             }
             if (page.va != undefined) {
-                var vaItems = this.getVAItems(page.va, {s: true}, {delta: true});
+                var options = {
+                    exclude: {s: true },
+                    delta: true
+                };
+                var vaItems = this.getVAItems(page.va, options);
                 var options = {
                     title: 'Visitor attributes:',
                     listClass: 'va'
                 }
                 text += '<p>' + this.themeItemList(vaItems, options) + '</p>';
             }
+            text += '</div>';
 
 
             this.timelineData.date.push({
@@ -1807,6 +1816,7 @@ console.log(page.pa);
             //}
             VMM.Timeline.Config.source.timeline = this.timelineData;
 
+            VMM.Timeline.Config.placeholders = placeholders;
             VMM.Timeline.Config.customUpdate = true;
             VMM.Timeline.Config.customRefresh = refresh;
 
@@ -1872,7 +1882,7 @@ console.log(page.pa);
     };
 
     this.onTimelineDataReady = function (that, e, d) {
-//console.log('this.onTimelineDataReady');
+console.log('this.onTimelineDataReady');
 //console.log(that);
 //console.log(this);
 //console.log(e);
@@ -1883,6 +1893,16 @@ console.log(page.pa);
 //console.log('this.onTimelineLoaded');
 //console.log(that);
 //console.log(e);
+console.log(VMM.Timeline.Config);
+        if ((VMM.Timeline.Config.placeholders != undefined) && (VMM.Timeline.Config.placeholders > 0)) {
+            $objs = $('#visitor-timeline .placeholder-attr-option');
+            console.log($objs);
+            $('#visitor-timeline .placeholder-attr-option').each(function( index, value ) {
+            //jQuery.each($('#visitor-timeline .placeholder-attr-option'), function( index, value ) {
+                console.log( index + ": " + value );
+            });
+        }
+
         return;
         if (this.timelineNeedsIndexing) {
             console.log('this.onTimelineUpdate');
@@ -1900,26 +1920,32 @@ console.log(page.pa);
 
     };
 
-    this.getVAItems = function (va, exclude, options) {
-        if (exclude == undefined) {
-            exclude = {};
-        }
+    this.getVAItems = function (va, options) {
         if (options == undefined) {
             options = {};
         }
 
         var vaItems = [];
         for (var vaKey in va) {
-            // if vaInfo not avaialble, skip item
-            if (this.model.vaInfo[vaKey] == undefined) {
+console.log(va);
+console.log(options);
+console.log(this.model.attrInfo['visitor']);
+            // if attrInfo['visitor'] not avaialble, skip item
+            if (this.model.attrInfo['visitor'][vaKey] == undefined) {
               continue;
             }
-            var vaInfo = this.model.vaInfo[vaKey];
-            var vaValue = va[vaKey];
-            // skip any excluded items
-            if (exclude[vaKey] == true) {
+            // if include is set, skip any not included
+            if ((options.include != undefined) && ((options.include[vaKey] == undefined) || (options.include[vaKey] == false))) {
                 continue;
             }
+            // skip any excluded items
+            if ((options.exclude != undefined) && (options.exclude[vaKey] == true)) {
+                continue;
+            }
+            var vaInfo = this.model.attrInfo['visitor'][vaKey];
+//console.log(vaInfo);
+            var vaValue = va[vaKey];
+
             if (vaInfo.type == 'flag') {
                 var item = ((options.delta == true) ? '+' : '') + vaInfo.title;
                 vaItems.push(item);
@@ -1934,15 +1960,41 @@ console.log(page.pa);
             }
             if ((vaInfo.type == 'list') || (vaInfo.type == 'vector')) {
                 var item = vaInfo.title + ': ';
+                if ((options['isSingular'] == true)) {
+                    item = '';
+                }
                 var c = 0;
+                if (vaInfo.type == 'vector') {
+                    vaValue = sortObject(vaValue, -1);
+                    console.log(vaValue);
+                }
                 for (var i in vaValue) {
                     if (vaInfo.type == 'vector') {
-                        item += ((c>0) ? ', ' : '');
-                        item += vaInfo.options[i].title + ': ';
-                        if (options.delta == true) {
-                            item += ((vaValue[i] >= 0) ? '+' : '');
+                        // vaValue was transformed into array via search function
+                        if (!vaValue.hasOwnProperty(i)) {
+                            continue;
                         }
-                        item += vaValue[i];
+                        var ov = vaValue[i].value;
+                        var ok = vaValue[i].key;
+
+                        item += ((c>0) ? ', ' : '');
+                        if (vaInfo.options[ok] == undefined) {
+                            item += '<span class="placeholder-attr-option placeholder-va-' + vaKey + '-' + ok + '">' + ok + '</span>: ';
+                            this.model.fetchAttributeOptionInfo('visitor', vaKey, ok, rtdView.updateAttributeOptionInfo);
+                        }
+                        else {
+                            item += vaInfo.options[ok].title + ': ';
+                        }
+
+                        if (options.delta == true) {
+                            item += ((ov >= 0) ? '+' : '');
+                        }
+                        item += ov;
+                        if ((options['isSingular'] == true)) {
+                            vaItems.push(item);
+                            item = '';
+                            c = -1;
+                        }
                     }
                     else {
                         item += ((c>0) ? ', ' : '');
@@ -1950,15 +2002,18 @@ console.log(page.pa);
                             item += '+';
                         }
                         item += vaInfo.options[i].title;
+
                     }
 
                     c++;
                 }
-                vaItems.push(item);
+                if ((options['isSingular'] != true)) {
+                  vaItems.push(item);
+                }
             }
         }
-console.log(va);
-console.log(vaItems);
+//console.log(va);
+//console.log(vaItems);
         return vaItems;
     }
 
@@ -1997,8 +2052,13 @@ console.log(vaItems);
         var sid = visitor.activeSession;
         var session = this.model.sessions[vtk + '.' + sid];
 
-
-        var vaItems = this.getVAItems(visitor.va, {i: true});
+        var options = {
+            exclude: {
+                i: true,
+                j: true
+            }
+        };
+        var vaItems = this.getVAItems(visitor.va, options);
 console.log(visitor);
 //console.log(vaItems);
         var options = {
@@ -2009,18 +2069,115 @@ console.log(visitor);
 
         $('#visitor-details-value-attrs').html(text);
 
+
+
+        var options = {
+            include: {
+                j: true
+            },
+            isSingular: true
+        };
+        var vaItems = this.getVAItems(visitor.va, options);
+        var options = {
+            listClass: 'va-interests'
+        }
+        text = this.themeItemList(vaItems, options);
+        $('#visitor-details-value-interests').html(text);
+
+        /*
+
         text = '';
-        if (visitor.va.i != undefined) {
+        var attrKey = 'j'
+        if (visitor.va[attrKey] != undefined) {
             var items = [];
-            for (var key in visitor.va.i) {
-                items.push(this.model.vaInfo.i.options[key].title + ': ' + visitor.va.i[key]);;
+            for (var key in visitor.va[attrKey]) {
+                var item = '';
+                if (this.model.attrInfo['visitor'][attrKey].options[key] == undefined) {
+                    item += '<span class="placeholder-attr-option placeholder-va-' + attrKey + '-' + key + '">' + key + '</span>';
+                    this.model.fetchAttributeOptionInfo('visitor', attrKey, key, rtdView.updateAttributeOptionInfo);
+                }
+                else {
+                    item += this.model.attrInfo['visitor'][attrKey].options[key].title;
+                }
+                item += ': ' + visitor.va[attrKey][key];
+                items.push(item);
+                //items.push(this.model.attrInfo['visitor'].j.options[key].title + ': ' + visitor.va.j[key]);
             }
             options.listClass = 'va-interests';
             text = this.themeItemList(items, options);
         }
         $('#visitor-details-value-interests').html(text);
+*/
+
+
+        if (visitor.sharing != undefined) {
+            var items = [];
+            for (var key in visitor.sharing) {
+                var item = '';
+                if (this.sharingLabels[key] == undefined) {
+                    continue;
+                }
+                item += this.sharingLabels[key] + ': ' + visitor.sharing[key];
+                items.push(item);
+                //items.push(this.model.attrInfo['visitor'].j.options[key].title + ': ' + visitor.va.j[key]);
+            }
+            options.listClass = 'visitor-sharing';
+            text = this.themeItemList(items, options);
+        }
+        else {
+            text = '(not provided)';
+        }
+        $('#visitor-details-value-sharing').html(text);
+
+        if (visitor.location != undefined
+            && visitor.location.lat != undefined
+            ) {
+            if (this.activeMap != visitor.vtk) {
+                this.activeMap = visitor.vtk;
+                this.buildVisitorLocation(visitor.location);
+            }
+        }
+        else {
+            this.activeMap = '';
+            $('#visitor-details-value-location').html('(not provided)');
+        }
 
     };
+
+    this.sharingLabels = {
+        facebook: 'Facebook',
+        google_plusone_share: 'Google+',
+        linkedin: 'LinkedIn',
+        twitter: 'Twitter',
+    }
+
+    this.activeMap = '';
+    this.buildVisitorLocation = function (location) {
+console.log(location);
+        location.lat = parseFloat(location.lat);
+        location.lon = parseFloat(location.lon);
+
+        var mapOptions = {
+            zoom: 4,
+            center: new google.maps.LatLng(location.lat, location.lon),
+	        disableDefaultUI: true,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+	    };
+
+        var map = new google.maps.Map(document.getElementById('visitor-details-value-location'), mapOptions);
+
+        var circleOptions = {
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 1,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            map: map,
+            center: new google.maps.LatLng(location.lat, location.lon),
+            radius: 50000
+        }
+        locCircle = new google.maps.Circle(circleOptions);
+    }
 
     this.themeItemList = function (items, options) {
         var text = '';
@@ -2575,10 +2732,10 @@ console.log(visitor);
 //console.log(element.va);
         var pageVa = {};
         for (var vaKey in va) {
-            if (this.model.vaInfo[vaKey] == undefined) {
+            if (this.model.attrInfo['visitor'][vaKey] == undefined) {
                 continue;
             }
-            var vaInfo = this.model.vaInfo[vaKey];
+            var vaInfo = this.model.attrInfo['visitor'][vaKey];
             var vaValue = va[vaKey];
 
             if (vaInfo.type == 'flag') {
@@ -2731,7 +2888,7 @@ console.log(rtdView.chartIndex['visitors'][key]);
             rtdConfig.chartWindows[chartKey].rtdView.updateVisitorData(key) ;
             return;
         }
-        jQuery('.placeholder-v-' + key).replaceWith(rtdView.chartIndex['visitors'][key]);
+        jQuery('.placeholder-va-' + key).replaceWith(rtdView.chartIndex['visitors'][key]);
 
         /*
         var row = rtdView.chartIndex[chartKey][key];
@@ -2743,70 +2900,26 @@ console.log(rtdView.chartIndex['visitors'][key]);
         */
     };
 
-    this.updatePaInfoOption = function(paKey, key, option) {
-//console.log(paKey);
-//console.log(key);
-//console.log(option);
-//console.log(rtdView.model.paInfo);
-        if (rtdView.model.paInfo[paKey].options[key] == undefined) {
+    this.updateAttributeOptionInfo = function(mode, attrKey, optionId, option) {
+        if (rtdView.model.attrInfo[mode][attrKey].options[optionId] == undefined) {
             return;
         }
         // check if report is in this screen
         if (rtdConfig.chartWindows['pageAttrs'] != undefined) {
-            rtdConfig.chartWindows['pageAttrs'].rtdView.updatePaInfoOption(paKey, key, option);
+            rtdConfig.chartWindows['pageAttrs'].rtdView.updateAttributeOptionInfo(mode, attrKey, optionId, option);
         }
         if (rtdConfig.chartWindows['visitor'] != undefined) {
-            rtdConfig.chartWindows['visitor'].rtdView.updatePaInfoOption(paKey, key, option);
+            rtdConfig.chartWindows['visitor'].rtdView.updateAttributeOptionInfo(mode, attrKey, optionId, option);
         }
-        var selector = '.placeholder-pa-' + paKey + '-' + key;
+        var selector = '.placeholder-';
+        selector += (mode == 'visitor') ? 'va-' : 'pa-';
+        selector += attrKey + '-' + optionId;
         var $temp = jQuery(selector);
-        console.log(selector);
-        console.log($temp);
-        //jQuery(selector).replaceWith(rtdView.model.paInfo[paKey].options[key].title);
+//console.log(selector);
+//console.log($temp);
+        //jQuery(selector).replaceWith(rtdView.model.attrInfo['page'][paKey].options[key].title);
         $temp.replaceWith(option.title);
-        var a = 10 / $temp.length;
-    }
-/*
-    this.updateAuthorData = function (key) {
-        if (rtdView.model.authors[key] == undefined) {
-            return;
-        }
-        var chartKey = 'pageAttrs';
-        // check if report is in this screen
-        if (rtdConfig.chartWindows[chartKey] != undefined) {
-            rtdConfig.chartWindows[chartKey].rtdView.updateAuthorData(key) ;
-            return;
-        }
-        jQuery('.placeholder-pa-a-' + key).replaceWith(rtdView.model.authors[key]);
     };
-
-    this.updateContentTypeData = function (key) {
-        if (rtdView.model.contentTypes[key] == undefined) {
-            return;
-        }
-        var chartKey = 'pageAttrs';
-        // check if report is in this screen
-        if (rtdConfig.chartWindows[chartKey] != undefined) {
-            rtdConfig.chartWindows[chartKey].rtdView.updateContentTypeData(key) ;
-            return;
-        }
-        jQuery('.placeholder-pa-ct-' + key).replaceWith(rtdView.model.contentTypes[key]);
-    };
-
-    this.updateTermData = function (key) {
-console.log(key);
-        if (rtdView.model.terms[key] == undefined) {
-            return;
-        }
-        var chartKey = 'pageAttrs';
-        // check if report is in this screen
-        if (rtdConfig.chartWindows[chartKey] != undefined) {
-            rtdConfig.chartWindows[chartKey].rtdView.updateTermData(key) ;
-            return;
-        }
-        jQuery('.placeholder-pa-t-' + key).replaceWith(rtdView.model.terms[key]);
-    };
-    */
 
     this.getCMSLink = function(icon, path) {
         //var text = '<img src="' + rtdConfig.settings.imgPath + '/url_icon.gif' + '" class="url-link">';

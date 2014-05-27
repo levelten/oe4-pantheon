@@ -238,7 +238,7 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$form
 
     $submission_data = variable_get('intel_webform_temp_submission_data', array());
     $key = $wfsubmission->nid . '_' . $wfsubmission->sid;
-    if ($submission_data[$key]) {
+    if (isset($submission_data[$key])) {
       $submission->vid = $submission_data[$key]['vid'];
       // delete entry in variable
       unset($submission_data[$key]);
