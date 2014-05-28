@@ -64,10 +64,24 @@ i.ext-link {
   width: 25%;
 }
 
-#branding {
-	float: left;
-	width: 20%;
+#branding-container {
+  float: left;
+  width: 20%;
+  display: table;
+  height: 100%;
+  #branding {
+    display: table-cell;
+    vertical-align: middle;
+    img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 94%;
+      height: auto;
+    }
+  }
 }
+
 #site-stats-table {
 	.key-metric-container {
 		width: 15.4%;
@@ -102,7 +116,7 @@ i.ext-link {
 		   margin-top: -10%;
 		}
 		.key-metric-value-active {		    
-			font-size: 3.2em;
+			font-size: 3.5em;
 			font-weight: bold;
 			text-align: right;
 		}
@@ -140,19 +154,20 @@ i.ext-link {
                 font-weight: bold;
               }
               h1 {
-                  font-size: 140%;
+                  font-size: 150%;
               }
               h2 {
-                font-size: 115%;
+                font-size: 130%;
                 &.date {
                   font-size: 100%;
                   font-weight: normal;
                 }
               }
               h3 {
-                font-size: 100%;
+                font-size: 115%;
                 line-height: 1.1em;
                 margin-bottom: 0;
+
               }
               p {
                 font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
@@ -167,7 +182,19 @@ i.ext-link {
                 text-align: left !important;
                 h3 {
                   text-align: left !important;
+                  margin-bottom: .1em;
+                  /*
+                  text-decoration: underline;
+                  text-decoration-color: #888;
+                  -moz-text-decoration-color: #888;
+                  */
                 }
+              }
+              li {
+                color: #BBB;
+              }
+              label {
+                color: #FFF;
               }
           }
 

@@ -219,9 +219,13 @@ function rtDashboardConfig (name) {
 
         // build site stats
         var $container = $('<div />').appendTo($report);
-        $container.attr('id', 'branding');
+        $container.attr('id', 'branding-container');
         $container.addClass('branding-container');
-        $container.text('logo');
+
+        var $div = $('<div />').appendTo($container);
+        $div.attr('id', 'branding');
+        $div.addClass('branding');
+        $div.html('<img src="' + this.settings.imgPath + '/logo_light.png">');
 
         this.addSiteStatsReportKeyMetric($report, 'entrances', '0', 'Visits');
         this.addSiteStatsReportKeyMetric($report, 'pageviews', '0', 'Pageviews');

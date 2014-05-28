@@ -325,35 +325,41 @@ function rtDashboardView (name) {
             this.chartData.eSec.addColumn('number', 'Events');
             this.chartData.eSec.addColumn('number', 'Goals');
         }
-
+console.log(this.chartData.eMin.toJSON());
         var rowPvMinInit = [0, 0, col1Style, 0, col2Style];
+        var rowEMinInit = [0, 0, col1Style, 0, col2Style, 0, col4Style];
         if (curSeconds < lastBuildSeconds) {
             for (var i = 29; i > 0; i--) {
-                for (var j = 0; j < 4; j++) {
-                  var value = this.chartData.pvMin.getValue(i-1, j);
-                  this.chartData.pvMin.setValue(i, j, value);
+                for (var j = 0; j < 6; j++) {
+                    if (j < 4) {
+                        var value = this.chartData.pvMin.getValue(i-1, j);
+                        this.chartData.pvMin.setValue(i, j, value);
+                    }
+
                   var value = this.chartData.eMin.getValue(i-1, j);
                   this.chartData.eMin.setValue(i, j, value);
                 }
             }
-            for (var j = 0; j < 4; j++) {
-                this.chartData.pvMin.setValue(0, j, rowPvMinInit[j]);
-                this.chartData.eMin.setValue(0, j, rowPvMinInit[j]);
+            for (var j = 0; j < 6; j++) {
+                if (j < 4) {
+                  this.chartData.pvMin.setValue(0, j, rowPvMinInit[j]);
+                }
+                this.chartData.eMin.setValue(0, j, rowEMinInit[j]);
             }
         }
         else {
-        for (var i = 0; i < 30; i++) {
-            var time = this.chartData.pvMin.getValue(i, 0);
-            //min = Math.floor(min);
-            if (this.lastBuild > 0) {
-                time = time + (curSeconds - lastBuildSeconds);
+            for (var i = 0; i < 30; i++) {
+                var time = this.chartData.pvMin.getValue(i, 0);
+                //min = Math.floor(min);
+                if (this.lastBuild > 0) {
+                    time = time + (curSeconds - lastBuildSeconds);
+                }
+                else {
+                    time = time + curSeconds;
+                }
+                this.chartData.pvMin.setValue(i, 0, time);
+                this.chartData.eMin.setValue(i, 0, time);
             }
-            else {
-                time = time + curSeconds;
-            }
-            this.chartData.pvMin.setValue(i, 0, time);
-            this.chartData.eMin.setValue(i, 0, time);
-        }
         }
 
         // decrement time of existing rows
@@ -414,7 +420,7 @@ function rtDashboardView (name) {
             if (t >= minTime0) {
 //console.log(counts);
                 row = 29 - Math.floor((t - minTime0 - 1) / 60);
-//console.log(row);
+console.log(row);
                 if (counts.siteAdd.pageviews > 0) {
                     count = this.chartData.pvMin.getValue(row, 1);
                     this.chartData.pvMin.setValue(row, 1, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
@@ -745,8 +751,6 @@ function rtDashboardView (name) {
                     this.chartBumps[chartKey][row] = 1;
                 }
             }
-            //console.log(this.chartBumps.pages);
-
         }
 
         if (this.charts[chartKey] == undefined) {
@@ -762,7 +766,6 @@ function rtDashboardView (name) {
     };
 
     this.buildPageAttrsReport = function(statsData, type, refresh) {
-//console.log(statsData);
         var chartKey = 'pageAttrs';
         var draw = false;
         // check if this report in in another window
@@ -786,7 +789,6 @@ function rtDashboardView (name) {
           delete this.chartRedraw.pageAttrs;
         }
 
-//console.log(statsData);
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
             this.chartData[chartKey].addColumn('string', 'Content types');
@@ -963,7 +965,7 @@ function rtDashboardView (name) {
         if (!this.chartsEnabled[chartKey]) {
             return;
         }
-//console.log(statsData);
+
         if (type == undefined) {
             type = (this.chartActive[chartKey].length > 0) ? this.chartActive[chartKey] : this.chartRotation[chartKey][this.chartRotationI[chartKey]];
         }
@@ -977,7 +979,6 @@ function rtDashboardView (name) {
             delete this.chartRedraw[chartKey];
         }
 
-//console.log(statsData);
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
             this.chartData[chartKey].addColumn('string', 'Traffic source');
@@ -1236,7 +1237,6 @@ function rtDashboardView (name) {
     };
 
     this.buildEventDetailsReport = function(statsData, type, refresh) {
-//console.log('buildEventDetailsReport');
         var chartKey = 'eventDetails';
         var draw = false;
         // check if this report in in another window
@@ -1248,7 +1248,6 @@ function rtDashboardView (name) {
             return;
         }
 
-//console.log(statsData);
         if (type == undefined) {
             type = (this.chartActive[chartKey].length > 0) ? this.chartActive[chartKey] : this.chartRotation[chartKey][this.chartRotationI[chartKey]];
         }
@@ -1257,10 +1256,6 @@ function rtDashboardView (name) {
             this.chartIndex[chartKey] = {};
             draw = true;
         }
-
-//console.log(statsData);
-//console.log(type);
-//console.log(refresh);
 
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
@@ -1346,7 +1341,6 @@ function rtDashboardView (name) {
                 headerLabel = headerLabel.replace("%subtype", type[1]);
             }
 
-//console.log(lkey);
             this.chartData[chartKey].setColumnLabel(0, headerLabel);
 
         }
@@ -1405,17 +1399,10 @@ function rtDashboardView (name) {
             for (var j in indexes) {
                 this.chartData[chartKey].setColumnLabel(indexes[j], labels[j]);
             }
-
-//console.log(this.chartData[chartKey].toJSON());
-
-            //this.chartData[chartKey].addColumn('string', 'stats');
         }
 
         var draw = true;
         var newVisitorData = {};
-//console.log(this.model.visitors);
-//console.log(this.model.sessions);
-//console.log(statsData.visitors);
         var count;
         // update stats changes, e.g. pageviews and value.
         // time based updates done in loop below this one
@@ -1434,9 +1421,6 @@ function rtDashboardView (name) {
             if (key == this.activeVisitor) {
                 newActiveVisitorData = true;
             }
-
-            //console.log(session);
-            //console.log(lastPage);
 
             draw = true;
             if (this.chartIndex[chartKey][key] == undefined) {
@@ -1519,15 +1503,9 @@ function rtDashboardView (name) {
         if (draw) {
             this.drawVisitorsReport(newVisitorData);
         }
-
-        //if (newActiveVisitorData) {
-        //    this.buildTimeline();
-        //}
-
     };
 
     this.onChartSelect = function (chartKey) {
-//console.log(chartKey);
         var selection = this.charts[chartKey].getSelection();
         if (selection.length == 0) {
             this.chartSelections[chartKey] = null;
@@ -1537,17 +1515,14 @@ function rtDashboardView (name) {
         }
         else {
             this.chartSelections[chartKey] = selection;
-//console.log(this.chartSelections);
             if (chartKey == 'visitors') {
                 this.selectedVisitor = arraySearch(selection[0].row, this.chartIndex[chartKey]);
-//console.log(this.selectedVisitor);
                 if ((this.selectedVisitor != false) && (this.activeVisitor != this.selectedVisitor)) {
                     this.activeVisitor = this.selectedVisitor;
                     this.buildTimeline(true);
                 }
             }
         }
-//console.log(selection);
     }
 
     this.drawVisitorsReport = function (newVisitorData) {
@@ -1649,9 +1624,6 @@ function rtDashboardView (name) {
         var sid = visitor.activeSession;
         var session = this.model.sessions[vtk + '.' + sid];
         var placeholders = 0;
-//console.log(visitor);
-//console.log(sid);
-console.log(session);
 
         this.timelineData = {
             //headline: visitor.name + " Clickstream",
@@ -1676,7 +1648,6 @@ console.log(session);
             if (hits.pageLEI != undefined) {
                 tag = 'pages';
                 page = this.model.log[ht][hits.pageLEI];
-//console.log(page);
             }
             for (var i = 0; i < hits.events.length; i++) {
                 var event = this.model.log[ht][hits.events[i].LEI];
@@ -1685,12 +1656,12 @@ console.log(session);
             var paItems = [];
             if (tag == 'pages') {
                 headline = page.dt;
-                text = 'value: +' + hits.value.toFixed(2);
+                //text = 'value: +' + hits.value.toFixed(2);
+                text = '<span class="hit-value">value: +' + hits.value.toFixed(2) + '</span>';
                 text += '<div class="body">';
                 if (page.ie == 1) {
                     classname = 'entrance';
                 }
-//console.log(page.pa);
                 for (var i in page.pa) {
 
                    if (this.model.attrInfo['page'][i] != undefined) {
@@ -1721,7 +1692,7 @@ console.log(session);
                        }
 
                        if (value.length > 0) {
-                           paItems.push(this.model.attrInfo['page'][i].title + ': ' + value);
+                           paItems.push('<label class="timeline page-attr">' + this.model.attrInfo['page'][i].title + '</label>: ' + value);
                        }
                    }
                 }
@@ -1733,58 +1704,98 @@ console.log(session);
 
                 media = "http://" + page.h + page.p;
                 caption = page.p;
-            }
-            else if ((events[0].ec.substr(-1) == '!') || (events[0].ec.substr(-1) == '+')) {
-                headline = events[0].ec;
-                text = '<span class="hit-value">value: +' + hits.value.toFixed(2) + '</span><br />';
+
+                if (page.va != undefined) {
+                    var options = {
+                        exclude: {s: true },
+                        delta: true,
+                        labelClass: 'timeline visitor-attr'
+                    };
+                    var vaItems = this.getVAItems(page.va, options);
+                    var options = {
+                        title: 'Visitor attributes:',
+                        listClass: 'va',
+
+                    }
+                    text += '<p>' + this.themeItemList(vaItems, options) + '</p>';
+                }
+
                 var items = [];
-                text += '<h3>Resource:</h3>';
-                text += '<p>' + events[0].ea + '</p>';
-
-                text += '<h3>Resource id:</h3>';
-                text += '<p>' + '<a href="/' + events[0].el + '" target="cms">' + events[0].el + '</a>' + '</p>';
-
-                media = "http://" + events[0].h + events[0].p;
-                classname = 'event';
-                if (events[0].ec.substr(-1) == '!') {
-                    classname = 'valuedevent';
+                for(var j = 0; j < events.length; j++) {
+                    var event = events[j];
+                    if ((event.ec.substr(-1) != '!') && (event.ec.substr(-1) != '+')) {
+                        items.push('<label class="timeline event">' + event.ec + '</label>: ' + event.ea);
+                    }
                 }
-                else if (events[0].ec.substr(-1) == '+') {
-                    classname = 'goal';
+
+                if (items.length > 0) {
+                    var options = {
+                        title: 'Events:',
+                        listClass: 'events'
+                    }
+                    text += '<p>' + this.themeItemList(items, options) + '</p>';
                 }
-                media = "http://" + events[0].h + events[0].p;
-                caption = events[0].p;
+
+                text += '</div>';
+
+
+                this.timelineData.date.push({
+                    startDate: time,
+                    endDate: time,
+                    headline: headline,
+                    text: text,
+                    tag: 'page',
+                    classname: classname,
+                    asset: {
+                        media: media,
+                        caption: caption
+                    }
+                });
             }
-            else {
-                continue;
-            }
-            if (page.va != undefined) {
-                var options = {
-                    exclude: {s: true },
-                    delta: true
-                };
-                var vaItems = this.getVAItems(page.va, options);
-                var options = {
-                    title: 'Visitor attributes:',
-                    listClass: 'va'
+            for(var j = 0; j < events.length; j++) {
+                var event = events[j];
+                if ((events[j].ec.substr(-1) == '!') || (events[j].ec.substr(-1) == '+')) {
+                    headline = events[j].ec;
+                    text = '<span class="hit-value">value: +' + event.ev.toFixed(2) + '</span>';
+                    text += '<div class="body">';
+                    var items = [];
+                    text += '<h3>Resource:</h3>';
+                    text += '<p>' + events[j].ea + '</p>';
+
+                    text += '<h3>Resource id:</h3>';
+                    text += '<p>' + '<a href="/' + events[j].el + '" target="cms">' + events[j].el + '</a>' + '</p>';
+                    text += '</div>';
+                    media = "http://" + events[j].h + events[j].p;
+                    classname = 'event';
+                    if (events[j].ec.substr(-1) == '!') {
+                        classname = 'valuedevent';
+                    }
+                    else if (events[j].ec.substr(-1) == '+') {
+                        classname = 'goal';
+                    }
+                    media = "http://" + events[j].h + events[j].p;
+                    caption = events[j].p;
+
+                    this.timelineData.date.push({
+                        startDate: time,
+                        endDate: time,
+                        headline: headline,
+                        text: text,
+                        tag: 'event',
+                        classname: classname,
+                        asset: {
+                            media: media,
+                            caption: caption
+                        }
+                    });
                 }
-                text += '<p>' + this.themeItemList(vaItems, options) + '</p>';
+                else {
+                    continue;
+                }
             }
-            text += '</div>';
 
 
-            this.timelineData.date.push({
-                startDate: time,
-                endDate: time,
-                headline: headline,
-                text: text,
-                tag: tag,
-                classname: classname,
-                asset: {
-                    media: media,
-                    caption: caption
-                }
-            });
+
             lastHit = ht;
         }
 
@@ -1806,9 +1817,6 @@ console.log(session);
         */
 
 
-
-//console.log('timeline:');
-//console.log(this.timelineData);
 
         //if (this.timelineInitialized) {
             //VMM.Timeline.build = function () {
@@ -1882,7 +1890,7 @@ console.log(session);
     };
 
     this.onTimelineDataReady = function (that, e, d) {
-console.log('this.onTimelineDataReady');
+//console.log('this.onTimelineDataReady');
 //console.log(that);
 //console.log(this);
 //console.log(e);
@@ -1893,7 +1901,7 @@ console.log('this.onTimelineDataReady');
 //console.log('this.onTimelineLoaded');
 //console.log(that);
 //console.log(e);
-console.log(VMM.Timeline.Config);
+//console.log(VMM.Timeline.Config);
         if ((VMM.Timeline.Config.placeholders != undefined) && (VMM.Timeline.Config.placeholders > 0)) {
             $objs = $('#visitor-timeline .placeholder-attr-option');
             console.log($objs);
@@ -1925,11 +1933,13 @@ console.log(VMM.Timeline.Config);
             options = {};
         }
 
+        var labelClass = (options.labelClass != undefined) ? ' class="' + options.labelClass + '"' : '';
+
         var vaItems = [];
         for (var vaKey in va) {
-console.log(va);
-console.log(options);
-console.log(this.model.attrInfo['visitor']);
+//console.log(va);
+//console.log(options);
+//console.log(this.model.attrInfo['visitor']);
             // if attrInfo['visitor'] not avaialble, skip item
             if (this.model.attrInfo['visitor'][vaKey] == undefined) {
               continue;
@@ -1951,7 +1961,7 @@ console.log(this.model.attrInfo['visitor']);
                 vaItems.push(item);
             }
             else if (vaInfo.type == 'scalar') {
-                var item = vaInfo.title + ': ';
+                var item = '<label' + labelClass + '>' + vaInfo.title + '</label>: ';
                 if (options.delta == true) {
                     item += ((vaValue >= 0) ? '+' : '');
                 }
@@ -1959,7 +1969,7 @@ console.log(this.model.attrInfo['visitor']);
                 vaItems.push(item);
             }
             if ((vaInfo.type == 'list') || (vaInfo.type == 'vector')) {
-                var item = vaInfo.title + ': ';
+                var item = '<label' + labelClass + '>' + vaInfo.title + '</label>: ';
                 if ((options['isSingular'] == true)) {
                     item = '';
                 }
@@ -1983,7 +1993,12 @@ console.log(this.model.attrInfo['visitor']);
                             this.model.fetchAttributeOptionInfo('visitor', vaKey, ok, rtdView.updateAttributeOptionInfo);
                         }
                         else {
-                            item += vaInfo.options[ok].title + ': ';
+                            if ((options['isSingular'] == true)) {
+                                item += '<label' + labelClass + '>' + vaInfo.options[ok].title + '</label>: ';
+                            }
+                            else {
+                                item += vaInfo.options[ok].title + ': ';
+                            }
                         }
 
                         if (options.delta == true) {

@@ -190,7 +190,7 @@ function rtDashboardModel (name) {
 
     this.addToLog = function addToLog(data, ids, lastId) {
         var time;
-console.log(data);
+
         for (var i in data) {
             if (ids[i] < this.logLastId) {
               continue; // we got duplicate data for some reason
