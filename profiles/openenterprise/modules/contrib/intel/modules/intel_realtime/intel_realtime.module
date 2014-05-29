@@ -146,7 +146,7 @@ function intel_realtime_visitor_load_js() {
   if (empty($visitor)) {
     intel_json_output_error(INTEL_STATUS_NOT_FOUND);
   }
-
+  $response['vtk'] = $_GET['vtk'];
   $response['visitor'] = $visitor->data;
   $response['visitor']['name'] = $visitor->name;
   $response['visitor']['vid'] = (int)$visitor->vid;

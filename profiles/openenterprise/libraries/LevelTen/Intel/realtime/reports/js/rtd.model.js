@@ -326,6 +326,7 @@ console.log(e);
                 if (json.visitor == undefined) {
                     return;
                 }
+                var vtk = json.vtk;
                 rtdModel.visitors[vtk].data = json.visitor;
                 if (json.visitor.name == undefined) {
                     return;

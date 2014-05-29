@@ -399,11 +399,11 @@ function rtDashboardConfig (name) {
         // have the header row be the difference
         var rowHeight = Math.round((chartHeight - 8) / 11) + 1;
         var headerRowHeight = chartHeight - (rowHeight * 10) - 3; // the 3 is for the border bottom
-console.log("winHeight=" + winHeight + ",chartHeight=" + chartHeight + ",rowHeight=" + rowHeight + ",headerRowHeight=" + headerRowHeight);
+//console.log("winHeight=" + winHeight + ",chartHeight=" + chartHeight + ",rowHeight=" + rowHeight + ",headerRowHeight=" + headerRowHeight);
         var fontSize = rowHeight/36 * 100;
         //var keyMetricFontSize = fontSize * 3;
 
-console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
+//console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
 
         var css = document.createElement('style');
         var html = ".google-visualization-table-table .table-header-row td, .google-visualization-table-table .table-header-row .td  {height: " + headerRowHeight  + "px;}";

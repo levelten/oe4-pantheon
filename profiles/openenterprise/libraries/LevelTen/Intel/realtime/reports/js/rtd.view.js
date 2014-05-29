@@ -1434,7 +1434,7 @@ function rtDashboardView (name) {
                 }
                 else {
                     //img = '<img src="' + visitor.image + '">';
-                    img += '<img src="' + this.config.settings.imgPath + '/trans.gif" class="visitor-image-' + visitor.vtk + '">';
+                    img += '<img src="' + this.config.settings.imgPath + '/trans.gif" class="visitor-image-' + key + '">';
 
 
                     //img = visitor.image;
@@ -2823,7 +2823,6 @@ console.log(va0)
                     pageVa[vaKey] = vaValue;
                 }
                 else {
-//console.log(vaValue);
                     for (var key in vaValue) {
                         if (va0[vaKey][key] == undefined) {
                             if (pageVa[vaKey] == undefined) {
@@ -2848,7 +2847,6 @@ console.log(va0)
             }
 
         }
-//console.log(pageVa);
         this.model.log[element.t][element.logEI].va = pageVa;
         this.model.visitors[visitorKey].va = va;
     };
@@ -2945,8 +2943,6 @@ console.log(va0)
             rtdConfig.chartWindows['visitors'].rtdView.updateVisitorVar(vtk, varKey);
             return;
         }
-console.log(vtk);
-console.log(rtdView.activeVisitor);
         if (rtdView.activeVisitor == vtk) {
             rtdView.buildVisitorDetailsReport();
         }
