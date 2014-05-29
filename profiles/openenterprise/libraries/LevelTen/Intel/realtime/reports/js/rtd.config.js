@@ -405,14 +405,14 @@ console.log("winHeight=" + winHeight + ",chartHeight=" + chartHeight + ",rowHeig
 
 console.log("pchartHeight=" + chartHeight + ", rowHeight=" + rowHeight + ", fontSize=" + fontSize);
 
-        var css = document.createElement('style')
+        var css = document.createElement('style');
         var html = ".google-visualization-table-table .table-header-row td, .google-visualization-table-table .table-header-row .td  {height: " + headerRowHeight  + "px;}";
         html += ".google-visualization-table-table .table-row td {height: " + rowHeight + "px;}";
         html += "body {font-size: " + fontSize + "%;}";
         // active visitor table uses floated tds, this corrects for border alignment issues
        // html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
         html += "#active-visitors-table .table-header-row td {height: " + (headerRowHeight - 3) + "px; !important; }";
-        html
+        html += '.visitor-image-default { background-image:url("' + this.settings.defaultVisitorImg + '"); background-size: contain; }';
         css.innerHTML = html;
         document.body.appendChild(css);
 

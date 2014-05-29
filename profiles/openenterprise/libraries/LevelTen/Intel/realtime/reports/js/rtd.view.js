@@ -1417,8 +1417,6 @@ function rtDashboardView (name) {
             var lastPage = session.hits[session.last];
             lastPage = this.model.log[session.last][lastPage.pageLEI];
 
-
-
             // if this visitor is the activeVisitor, set new...Data flag
             if (key == this.activeVisitor) {
                 newActiveVisitorData = true;
@@ -1427,12 +1425,23 @@ function rtDashboardView (name) {
             draw = true;
             if (this.chartIndex[chartKey][key] == undefined) {
                 this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
-                var imageSrc = this.config.settings.defaultVisitorImg;
-                var img = '<img src="' + imageSrc + '">';
+                var img = '';
+                if (visitor.image == undefined) {
+                    img += '<span class="placeholder-visitor placeholder-visitor-' + key + '-image">';
+                    //img += '<img src="' + this.config.settings.defaultVisitorImg + '">';
+                    img += '<img src="' + this.config.settings.imgPath + '/trans.gif" class="visitor-image-default">';
+                    img += '</span>';
+                }
+                else {
+                    //img = '<img src="' + visitor.image + '">';
+                    img += '<img src="' + this.config.settings.imgPath + '/trans.gif" class="visitor-image-' + visitor.vtk + '">';
+
+
+                    //img = visitor.image;
+                }
                 var label =  visitor.name
 
                 if (visitor.name.substr(0, 5) == 'anon ') {
-console.log(visitor);
                     label = '<span class="placeholder-visitor placeholder-visitor-' + key + '-name">' + label + '</span>';
                 }
                 label += this.getCMSLink('link-ext', this.config.settings.cmsPath + 'visitor/' + key);
@@ -2203,7 +2212,6 @@ console.log(visitor);
 
     this.activeMap = '';
     this.buildVisitorLocation = function (location) {
-console.log(location);
         location.lat = parseFloat(location.lat);
         location.lon = parseFloat(location.lon);
 
@@ -2780,12 +2788,12 @@ console.log(location);
         // delta caused by the hit, then update the visitor va.
 
 //console.log(element.va);
-//console.log(va);
+console.log(va);
+console.log(va0)
         var pageVa = {};
         for (var vaKey in va) {
-            console.log(vaKey);
             // if visitor is known, fetch their data
-            if (vaKey == 'k') {
+            if (vaKey == 'k' && (va0.k == undefined)) {
                 this.model.fetchVisitor(visitorKey, rtdView.updateVisitor);
             }
 
@@ -2946,7 +2954,6 @@ console.log(rtdView.activeVisitor);
 
     // TODO not sure if this function is still used
     this.updateVisitor = function (vtk) {
-console.log(rtdView.chartIndex['visitors'][vtk]);
         if (rtdView.chartIndex['visitors'][vtk] == undefined) {
             return;
         }
@@ -2975,7 +2982,17 @@ console.log(rtdView.chartIndex['visitors'][vtk]);
                         if (rtdView.chartIndex[chartKey][vtk] != undefined) {
                             var row = rtdView.chartIndex[chartKey][vtk];
                             rtdView.chartData[chartKey].setValue(row, 1, label);
-                            rtdView.drawVisitorsReport({});
+                            //rtdView.drawVisitorsReport({});
+                        }
+                    }
+                    if (d[3] == 'image' && (visitor.image != undefined)) {
+                        //var img = '<img src="' + visitor.image + '">';
+                        var img = '<img src="' + rtdView.config.settings.imgPath + '/trans.gif" class="visitor-image-' + vtk + '">';
+                        $element.replaceWith(img);
+                        if (rtdView.chartIndex[chartKey][vtk] != undefined) {
+                            var row = rtdView.chartIndex[chartKey][vtk];
+                            rtdView.chartData[chartKey].setValue(row, 0, img);
+                            //rtdView.drawVisitorsReport({});
                         }
                     }
                 }

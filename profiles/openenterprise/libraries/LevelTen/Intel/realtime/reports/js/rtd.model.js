@@ -331,6 +331,16 @@ console.log(e);
                     return;
                 }
                 rtdModel.visitors[vtk].name = json.visitor.name;
+                if ((json.visitor.image != undefined) && (json.visitor.image.url != undefined)) {
+                    rtdModel.visitors[vtk].image = json.visitor.image.url;
+
+                    var css = document.createElement('style');
+                    css.innerHTML = '.visitor-image-' + vtk + ' { background-image:url("' + json.visitor.image.url + '"); background-size: contain; }';
+                    document.body.appendChild(css);
+
+                    //rtdModel.visitors[vtk].image = new Image();
+                    //rtdModel.visitors[vtk].image.src = json.visitor.image.url;
+                }
                 if (callback != undefined) {
                     callback(vtk, json.visitor);
                 }
