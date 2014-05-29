@@ -1429,7 +1429,13 @@ function rtDashboardView (name) {
                 this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
                 var imageSrc = this.config.settings.defaultVisitorImg;
                 var img = '<img src="' + imageSrc + '">';
-                var label =  visitor.name + this.getCMSLink('link-ext', this.config.settings.cmsPath + 'visitor/' + key);
+                var label =  visitor.name
+
+                if (visitor.name.substr(0, 5) == 'anon ') {
+console.log(visitor);
+                    label = '<span class="placeholder-visitor placeholder-visitor-' + key + '-name">' + label + '</span>';
+                }
+                label += this.getCMSLink('link-ext', this.config.settings.cmsPath + 'visitor/' + key);
                 var newRow = [img, label, 0, 0, 0, 0, 0, 0];
                 newRow[indexes['lastHit']] = new Date();
                 newRow[indexes['page']] = '';
@@ -2410,7 +2416,7 @@ console.log(location);
                     name: 'anon (' + e.vtk.substr(0,10) + ')',
                     sessions: {}
                 }
-                this.model.fetchVisitor(e.vtk, rtdView.updateVisitorData);
+                this.model.fetchVisitor(e.vtk, rtdView.updateVisitor);
             }
             if (this.model.visitors[visitorKey].sessions[e.sid] == undefined) {
                 this.model.visitors[visitorKey].sessions[e.sid] = t;
@@ -2777,6 +2783,12 @@ console.log(location);
 //console.log(va);
         var pageVa = {};
         for (var vaKey in va) {
+            console.log(vaKey);
+            // if visitor is known, fetch their data
+            if (vaKey == 'k') {
+                this.model.fetchVisitor(visitorKey, rtdView.updateVisitor);
+            }
+
             if (this.model.attrInfo['visitor'][vaKey] == undefined) {
                 continue;
             }
@@ -2933,27 +2945,42 @@ console.log(rtdView.activeVisitor);
     };
 
     // TODO not sure if this function is still used
-    this.updateVisitorData = function (key) {
-console.log(rtdView.chartIndex['visitors'][key]);
-        if (rtdView.chartIndex['visitors'][key] == undefined) {
+    this.updateVisitor = function (vtk) {
+console.log(rtdView.chartIndex['visitors'][vtk]);
+        if (rtdView.chartIndex['visitors'][vtk] == undefined) {
             return;
         }
         var chartKey = 'visitors';
         // check if report is in this screen
         if (rtdConfig.chartWindows[chartKey] != undefined) {
-            rtdConfig.chartWindows[chartKey].rtdView.updateVisitorData(key) ;
+            rtdConfig.chartWindows[chartKey].rtdView.updateVisitorData(vtk) ;
             return;
         }
-        jQuery('.placeholder-va-' + key).replaceWith(rtdView.chartIndex['visitors'][key]);
 
-        /*
-        var row = rtdView.chartIndex[chartKey][key];
-        var label = rtdView.model.visitors[key].name + rtdView.getCMSLink('link-ext', rtdView.config.settings.cmsPath + 'visitor/' + key);
-        //rtdView.chartData['visitors'].setValue(row, 1, rtdView.model.visitors[key].name);
-        rtdView.chartData[chartKey].setValue(row, 1, label);
-        //rtdView.drawVisitorsReport({key: row});
-        rtdView.drawVisitorsReport({});
-        */
+        var visitor = rtdView.model.visitors[vtk];
+
+        $objs = $('#active-visitors-table .placeholder-visitor');
+        $objs.each( function( index, element ) {
+            var $element = $(element);
+            var c = $element.attr('class');
+            c = c.split(' ');
+            var theClass = '';
+            for (var i = 0; i < c.length; i++) {
+                var d = c[i].split('-');
+                // look for class in correct format
+                if ((d.length == 4) && (d[0] == 'placeholder') && (d[1] == 'visitor') && (d[2] == vtk)) {
+                    if (d[3] == 'name') {
+                        var label = visitor.name + rtdView.getCMSLink('link-ext', rtdView.config.settings.cmsPath + 'visitor/' + vtk);
+                        $element.replaceWith(label);
+                        if (rtdView.chartIndex[chartKey][vtk] != undefined) {
+                            var row = rtdView.chartIndex[chartKey][vtk];
+                            rtdView.chartData[chartKey].setValue(row, 1, label);
+                            rtdView.drawVisitorsReport({});
+                        }
+                    }
+                }
+            }
+        });
     };
 
     this.updateAttributeOptionInfo = function(mode, attrKey, optionId, option) {

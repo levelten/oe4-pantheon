@@ -332,9 +332,8 @@ function intel_menu() {
     'page arguments' => array(1),
     'access callback' => 'user_access',
     'access callback' => 'intel_visitor_access',
-    'access arguments' => array(1, 'view'),
+    'access arguments' => array('update', 1),
     'type' => MENU_LOCAL_ACTION,
-    //'file' => 'people/intel.people.inc',
   );
   $items['visitor/%intel_visitor/fullcontact/resync'] = array(
     'title' => 'Resync data',
@@ -342,7 +341,7 @@ function intel_menu() {
     'page arguments' => array(1),
     'access callback' => 'user_access',
     'access callback' => 'intel_visitor_access',
-    'access arguments' => array(1, 'view'),
+    'access arguments' => array('update', 1),
     'type' => MENU_CALLBACK,
     'file' => 'includes/intel.visitor_sync.inc',
   );

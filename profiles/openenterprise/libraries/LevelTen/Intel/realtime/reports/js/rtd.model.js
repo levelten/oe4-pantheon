@@ -311,19 +311,22 @@ console.log(e);
     }
 
     this.fetchVisitor = function (vtk, callback) {
-        var func = 'visitor_load';
+        var func = 'visitor_load_js/' + vtk;
+        var time = rtdModel.getTime();
         var params = {
-            vtk: vtk
+            vtk: vtk,
+            t: time
         };
         var vars = {
             dataType: 'json',
             url: this._getRealtimeDataUrl(func, params),
             data: {},
             success: function (json){
+                console.log(json);
                 if (json.visitor == undefined) {
                     return;
                 }
-                rtdModel.visitors[vtk].attrs = json.visitor;
+                rtdModel.visitors[vtk].data = json.visitor;
                 if (json.visitor.name == undefined) {
                     return;
                 }

@@ -14,27 +14,6 @@ function intel_realtime_menu() {
     'access arguments' => array('view all intel reports'),
     'type' => MENU_CALLBACK,
   );
-  $items['intel/author_load_js'] = array(
-    'title' => '',
-    'page callback' => 'intel_realtime_author_load_js',
-    'access callback' => 'user_access',
-    'access arguments' => array('view all intel reports'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['intel/content_type_load_js'] = array(
-    'title' => '',
-    'page callback' => 'intel_realtime_content_type_load_js',
-    'access callback' => 'user_access',
-    'access arguments' => array('view all intel reports'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['intel/term_load_js'] = array(
-    'title' => '',
-    'page callback' => 'intel_realtime_term_load_js',
-    'access callback' => 'user_access',
-    'access arguments' => array('view all intel reports'),
-    'type' => MENU_CALLBACK,
-  );
   $items['intel/visitor_load_js'] = array(
     'title' => '',
     'page callback' => 'intel_realtime_visitor_load_js',
@@ -156,59 +135,6 @@ function intel_realtime_attribute_option_info_js($mode = 'visitor', $pa_key = ''
   intel_json_output($response);
 
   //return print_r($response, 1);
-}
-
-function intel_realtime_author_load_js() {
-  $response = array();
-  if (empty($_GET['uid'])) {
-    intel_json_output_error(INTEL_STATUS_BAD_REQUEST);
-  }
-  $account = user_load($_GET['uid']);
-  if (empty($account)) {
-    intel_json_output_error(INTEL_STATUS_NOT_FOUND);
-  }
-  $response['author'] = array();
-  $response['author']['name'] = format_username($account);
-  //$response['author']['account'] = $account;
-  intel_json_output($response);
-}
-
-function intel_realtime_content_type_load_js() {
-  $response = array();
-  if (empty($_GET['type'])) {
-    intel_json_output_error(INTEL_STATUS_BAD_REQUEST);
-  }
-  $types = node_type_get_types();
-  $type = '';
-  if (isset($types[$_GET['type']])) {
-    $type = $types[$_GET['type']];
-  }
-  else if (isset($types['enterprise_' . $_GET['type']])) {
-    $type = $types['enterprise_' . $_GET['type']];
-  }
-
-  if (!$type) {
-    intel_json_output_error(INTEL_STATUS_NOT_FOUND);
-  }
-  $response['content_type'] = array();
-  $response['content_type']['name'] = $type->name;
-  //$response['author']['account'] = $account;
-  intel_json_output($response);
-}
-
-function intel_realtime_term_load_js() {
-  $response = array();
-  if (empty($_GET['tid'])) {
-    intel_json_output_error(INTEL_STATUS_BAD_REQUEST);
-  }
-  $term = taxonomy_term_load($_GET['tid']);
-  if (empty($term)) {
-    intel_json_output_error(INTEL_STATUS_NOT_FOUND);
-  }
-  $response['term'] = array();
-  $response['term']['name'] = $term->name;
-  //$response['author']['account'] = $account;
-  intel_json_output($response);
 }
 
 function intel_realtime_visitor_load_js() {

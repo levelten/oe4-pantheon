@@ -2,7 +2,7 @@ var _l10iq = _l10iq || [];
 
 // load YouTube javascript API
 var tag = document.createElement('script');
-tag.src = "//www.youtube.com/iframe_api";
+tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
@@ -41,11 +41,29 @@ function l10iYouTubeTracker() {
           video.before('<a name="video-' + matches[1] + '"></a>');
           video.attr('id', matches[1]);
           l10iYouTube.players[matches[1]] = new YT.Player(matches[1], {
-            events: {
-              //'onReady': onPlayerReady,
-              'onStateChange': l10iYouTube.onPlayerStateChange
-            }
+              events: {
+                  'onReady': l10iYouTube.onPlayerReady,
+                  'onStateChange': l10iYouTube.onPlayerStateChange
+                  //'onReady': vidTestReady,
+                  //'onStateChange': vidTestReady
+              }
           });
+
+            /*
+          video.before('<div id="player-' + matches[1] + '"></div>');
+          l10iYouTube.players[matches[1]] = new YT.Player('player-' + matches[1], {
+              'videoId': matches[1],
+              height: '390',
+              width: '640',
+              events: {
+                    'onReady': l10iYouTube.onPlayerReady,
+                    'onStateChange': l10iYouTube.onPlayerStateChange
+                    //'onReady': vidTestReady,
+                    //'onStateChange': vidTestReady
+              }
+          });
+          */
+
           l10iYouTube.playerState[matches[1]] = {
             state: -1,
             paused: true
@@ -55,8 +73,11 @@ function l10iYouTubeTracker() {
     });
   };
 
+  this.onPlayerReady = function (event) {
+
+  };
+
   this.onPlayerStateChange = function (event) {
-console.log(event);
     var id = event.target.a.id;
     var player = l10iYouTube.players[id];
     var ga_event = {
@@ -92,6 +113,7 @@ console.log(event);
 }
 
 var l10iYouTube = new l10iYouTubeTracker();
+
 jQuery(document).ready(function() {
 	_l10iq.push(['_onReady', l10iYouTube.init, l10iYouTube]);
 });

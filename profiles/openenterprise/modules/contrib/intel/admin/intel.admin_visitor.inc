@@ -43,7 +43,6 @@ function intel_visitor_add() {
  *   for fields attached to the entity.
  */
 function intel_visitor_edit_form($form, &$form_state, $entity) {
-  dsm($entity);
   /*
 
   $wrapper = entity_metadata_wrapper('intel_visitor', $entity);
