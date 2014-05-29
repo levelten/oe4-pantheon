@@ -285,9 +285,14 @@ function intel_realtime_dashboard_report_page() {
     'visitor' => intel_get_visitor_attributes(),
   );
 
+  //dsm($attrInfo['page']);
+  //return '';
+
   // removing select attributes to simplify demo
   unset($attrInfo['page']['pt']);
   unset($attrInfo['page']['et']);
+
+  $attrInfo['page']['t']['title'] = t('Terms');
 
   // initialize options arrays that are not set just to save some checks in js
   foreach ($attrInfo['page'] AS $key => $value) {

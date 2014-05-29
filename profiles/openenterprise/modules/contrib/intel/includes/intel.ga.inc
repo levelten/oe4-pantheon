@@ -871,7 +871,7 @@ function intel_get_scorings($filter = '') {
   $base = intel_get_base_scorings();
   foreach ($base AS $i => $m) {
     if (($filter == 'js_setting') && (empty($m['js_setting']))) {
-      continue;
+      //continue;
     }
     $scorings[$filter][$i] = isset($custom[$i]) ? $custom[$i] : $m['value'];
   }

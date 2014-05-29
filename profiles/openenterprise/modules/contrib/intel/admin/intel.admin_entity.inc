@@ -19,8 +19,6 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
   else {
     return;
   }
-  dsm($entity_type);
-  dsm( $bundle );
   $form['intel'] = array(
     '#type' => 'fieldset',
     '#title' => t('LevelTen Intelligence'),

@@ -49,7 +49,7 @@ function track_var() {
   global $GET, $REQUEST;
   $instance = track_instance_construct();
   $instance->type = 'var';
-  $instance->ord = 2;
+  $instance->ord = 3;
   $instance->data['type'] = 'var';
   $instance->data['scope'] = $GET['type'];
   if (isset($GET['namespace'])) {
@@ -124,8 +124,12 @@ function track_instance_construct() {
     $instance->label = $GET['el'];
     $instance->value = (float)$GET['ev'];
     $instance->noninteraction = $GET['ei'];
-    $instance->ord = 1;
-
+    if (substr($instance->category, -1) == '+') {
+      $instance->ord = 2;
+    }
+    else {
+      $instance->ord = 1;
+    }
     // typecast for types other than str
     $instance->data['ev'] = (float)$instance->data['ev'];
     $instance->data['ei'] = (int)$instance->data['ei'];

@@ -179,7 +179,6 @@ function rtDashboardModel (name) {
             data: {},
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
-//console.log(json);
                 rtdModel.addToLog(json.instances, json.ids, json.last_id);
                 //rtdModel.buildTimeline();
             }
@@ -266,6 +265,7 @@ function rtDashboardModel (name) {
 
     this.addVar = function (e) {
         if (e.scope == 'visitor') {
+console.log(e);
             if (this.visitors[e.vtk] == undefined) {
                 this.visitors[e.vtk] = {
                     name: 'anon (' + e.vtk.substr(0,10) + ')',
@@ -287,6 +287,7 @@ function rtDashboardModel (name) {
                         this.visitors[e.vtk]['sharing'] = e.value.services;
                     }
                 }
+                rtdView.updateVisitorVar(e.vtk, 'addthis');
             }
         }
         /*

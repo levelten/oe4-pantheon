@@ -163,14 +163,16 @@ function rtDashboardView (name) {
 
 
       $('#visitor-timeline').on('LOADED', function(e) {
-          console.log('on.LOADED');
+          //console.log('on.LOADED');
           //console.log(e);
           rtdView.onTimelineLoaded(this, e);
       });
 
         $('#visitor-timeline').on('UPDATE', function(e) {
-            console.log('on.UPDATE');
-            console.log(e);
+            //console.log('on.UPDATE');
+            //console.log(e);
+
+            rtdView.onTimelineUpdate(this, e);
         });
 
         $('#visitor-timeline').on("DOMSubtreeModified", '.vco-navigation', function() {
@@ -315,7 +317,7 @@ function rtDashboardView (name) {
             this.chartData.eMin.addColumn('number', 'Goals');
             this.chartData.eMin.addColumn({type: 'string', role: 'style'});
             for (var i = 0; i < 30; i++) {
-                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col2Style, 0, col4Style]);
+                this.chartData.eMin.addRow([i*60, 0, col1Style, 0, col3Style, 0, col4Style]);
             }
         }
         if (this.chartData.eSec == undefined) {
@@ -325,9 +327,9 @@ function rtDashboardView (name) {
             this.chartData.eSec.addColumn('number', 'Events');
             this.chartData.eSec.addColumn('number', 'Goals');
         }
-console.log(this.chartData.eMin.toJSON());
+//console.log(this.chartData.eMin.toJSON());
         var rowPvMinInit = [0, 0, col1Style, 0, col2Style];
-        var rowEMinInit = [0, 0, col1Style, 0, col2Style, 0, col4Style];
+        var rowEMinInit = [0, 0, col1Style, 0, col3Style, 0, col4Style];
         if (curSeconds < lastBuildSeconds) {
             for (var i = 29; i > 0; i--) {
                 for (var j = 0; j < 6; j++) {
@@ -420,7 +422,7 @@ console.log(this.chartData.eMin.toJSON());
             if (t >= minTime0) {
 //console.log(counts);
                 row = 29 - Math.floor((t - minTime0 - 1) / 60);
-console.log(row);
+//console.log(row);
                 if (counts.siteAdd.pageviews > 0) {
                     count = this.chartData.pvMin.getValue(row, 1);
                     this.chartData.pvMin.setValue(row, 1, (counts.siteAdd.pageviews - counts.siteAdd.entrances) + count);
@@ -569,7 +571,7 @@ console.log(row);
 
         options.colors = [
             this.config.colors['series-1'],
-            this.config.colors['series-2'],
+            this.config.colors['series-3'],
             this.config.colors['series-4']
         ];
         if (this.charts.eMin == undefined) {
@@ -603,7 +605,7 @@ console.log(row);
 
         options.colors = [
             this.config.colors['series-1'],
-            this.config.colors['series-2'],
+            this.config.colors['series-3'],
             this.config.colors['series-4']
         ];
         if (this.charts.eSec == undefined) {
@@ -1902,18 +1904,19 @@ console.log(row);
 //console.log(that);
 //console.log(e);
 //console.log(VMM.Timeline.Config);
+
+        // pause to wait for slides to render
         if ((VMM.Timeline.Config.placeholders != undefined) && (VMM.Timeline.Config.placeholders > 0)) {
-            $objs = $('#visitor-timeline .placeholder-attr-option');
-            console.log($objs);
-            $('#visitor-timeline .placeholder-attr-option').each(function( index, value ) {
-            //jQuery.each($('#visitor-timeline .placeholder-attr-option'), function( index, value ) {
-                console.log( index + ": " + value );
-            });
+            setTimeout(function(){
+                rtdView.updateTimelinePlacehoders();
+                VMM.Timeline.Config.placeholders = 0;
+            }, 2000);
         }
+        //this.updateTimelinePlacehoders();
 
         return;
         if (this.timelineNeedsIndexing) {
-            console.log('this.onTimelineUpdate');
+            //console.log('this.onTimelineUpdate');
             VMM.Timeline.Config.duration = 500;
             VMM.Timeline.Config.ease = "linear";  // "easeInOutExpo"
             var count = this.timelineData.date.length-1 - VMM.Timeline.Config.current_slide
@@ -1925,7 +1928,33 @@ console.log(row);
     };
 
     this.onTimelineUpdate = function (that, e) {
+        rtdView.updateTimelinePlacehoders();
+    };
 
+    this.updateTimelinePlacehoders = function () {
+        $objs = $('#visitor-timeline .placeholder-attr-option');
+        $objs.each( function( index, element ) {
+            var $element = $(element);
+            var c = $element.attr('class');
+            c = c.split(' ');
+            var theClass = '';
+            for (var i = 0; i < c.length; i++) {
+                var d = c[i].split('-');
+                // look for class in correct format
+                if (d[0] == 'placeholder' && ((d[1] == 'va') || (d[1] == 'pa'))) {
+                    var mode = (d[1] == 'va') ? 'visitor' : 'page';
+                    var attrKey = d[2];
+                    var optionId = d[3];
+                    if (rtdView.model.attrInfo[mode] != undefined
+                       && rtdView.model.attrInfo[mode][attrKey] != undefined
+                       && rtdView.model.attrInfo[mode][attrKey].options[optionId] != undefined
+                       && rtdView.model.attrInfo[mode][attrKey].options[optionId].title != undefined
+                    ) {
+                       $element.replaceWith(rtdView.model.attrInfo[mode][attrKey].options[optionId].title);
+                    }
+                }
+            }
+        });
     };
 
     this.getVAItems = function (va, options) {
@@ -2745,6 +2774,7 @@ console.log(location);
         // delta caused by the hit, then update the visitor va.
 
 //console.log(element.va);
+//console.log(va);
         var pageVa = {};
         for (var vaKey in va) {
             if (this.model.attrInfo['visitor'][vaKey] == undefined) {
@@ -2764,7 +2794,7 @@ console.log(location);
                     pageVa[vaKey] = vaValue;
                 }
                 else if (va0[vaKey] != vaValue) {
-                    pageVa[vaKey] = (vaValue - visitor.va[vaKey]);
+                    pageVa[vaKey] = (vaValue - va0[vaKey]);
                 }
             }
 
@@ -2785,7 +2815,7 @@ console.log(location);
                             if (pageVa[vaKey] == undefined) {
                                 pageVa[vaKey] = {};
                             }
-                            if (vaInfo.type == 'vector') {
+                            if (vaInfo.type == 'vector' && (va0[vaKey][key] != undefined)) {
                                 pageVa[vaKey][key] = (vaValue[key] - va0[vaKey][key]);
                             }
                             else {
@@ -2890,8 +2920,19 @@ console.log(location);
         }
     };
 
+    this.updateVisitorVar = function (vtk, varKey) {
+        if (rtdConfig.chartWindows['visitors'] != undefined) {
+            rtdConfig.chartWindows['visitors'].rtdView.updateVisitorVar(vtk, varKey);
+            return;
+        }
+console.log(vtk);
+console.log(rtdView.activeVisitor);
+        if (rtdView.activeVisitor == vtk) {
+            rtdView.buildVisitorDetailsReport();
+        }
+    };
 
-
+    // TODO not sure if this function is still used
     this.updateVisitorData = function (key) {
 console.log(rtdView.chartIndex['visitors'][key]);
         if (rtdView.chartIndex['visitors'][key] == undefined) {
@@ -2923,8 +2964,8 @@ console.log(rtdView.chartIndex['visitors'][key]);
         if (rtdConfig.chartWindows['pageAttrs'] != undefined) {
             rtdConfig.chartWindows['pageAttrs'].rtdView.updateAttributeOptionInfo(mode, attrKey, optionId, option);
         }
-        if (rtdConfig.chartWindows['visitor'] != undefined) {
-            rtdConfig.chartWindows['visitor'].rtdView.updateAttributeOptionInfo(mode, attrKey, optionId, option);
+        if (rtdConfig.chartWindows['visitors'] != undefined) {
+            rtdConfig.chartWindows['visitors'].rtdView.updateAttributeOptionInfo(mode, attrKey, optionId, option);
         }
         var selector = '.placeholder-';
         selector += (mode == 'visitor') ? 'va-' : 'pa-';
