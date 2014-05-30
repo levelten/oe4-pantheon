@@ -16,6 +16,7 @@ ini_set("log_errors", 1);
 ini_set("error_log", "logs/error.log");
 
 define('STATUS_OK', 200);
+define('STATUS_OK_NO_CONTENT', 204);
 define('STATUS_BAD_REQUEST', 400);
 define('STATUS_UNAUTHORIZED', 401);
 define('STATUS_FORBIDDEN', 403);

@@ -179,6 +179,10 @@ function rtDashboardModel (name) {
             data: {},
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
+                if (json.status == 200) {
+                    console.log('Log data recieved:');
+                    console.log(json);
+                }
                 rtdModel.addToLog(json.instances, json.ids, json.last_id);
                 //rtdModel.buildTimeline();
             }
@@ -189,7 +193,6 @@ function rtDashboardModel (name) {
 
     this.addToLog = function addToLog(data, ids, lastId) {
         var time;
-
         for (var i in data) {
             if (ids[i] < this.logLastId) {
               continue; // we got duplicate data for some reason
@@ -265,7 +268,7 @@ function rtDashboardModel (name) {
 
     this.addVar = function (e) {
         if (e.scope == 'visitor') {
-console.log(e);
+//console.log(e);
             if (this.visitors[e.vtk] == undefined) {
                 this.visitors[e.vtk] = {
                     name: 'anon (' + e.vtk.substr(0,10) + ')',

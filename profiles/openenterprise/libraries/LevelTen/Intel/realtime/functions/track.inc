@@ -323,6 +323,7 @@ function track_log() {
   }
 
   $response = array(
+    'status' => (count($data)) ? STATUS_OK : STATUS_OK_NO_CONTENT,
     'instances' => $data,
     'last_id' => (int)$last_id,
     'ids' => $ids,

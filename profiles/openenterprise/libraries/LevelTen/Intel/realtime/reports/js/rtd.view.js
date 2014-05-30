@@ -221,7 +221,7 @@ function rtDashboardView (name) {
               debug: false
 
           };
-          console.log(data);
+
           this.timeline = createStoryJS(data);
       }
 
@@ -2047,7 +2047,6 @@ function rtDashboardView (name) {
                 var c = 0;
                 if (vaInfo.type == 'vector') {
                     vaValue = sortObject(vaValue, -1);
-                    console.log(vaValue);
                 }
                 for (var i in vaValue) {
                     if (vaInfo.type == 'vector') {
@@ -2145,8 +2144,7 @@ function rtDashboardView (name) {
             }
         };
         var vaItems = this.getVAItems(visitor.va, options);
-console.log(visitor);
-//console.log(vaItems);
+
         var options = {
             //title: 'Visitor attributes:',
             listClass: 'va'
@@ -2812,8 +2810,6 @@ console.log(visitor);
         // delta caused by the hit, then update the visitor va.
 
 //console.log(element.va);
-console.log(va);
-console.log(va0)
         var pageVa = {};
         for (var vaKey in va) {
             // if visitor is known, fetch their data

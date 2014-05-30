@@ -7425,9 +7425,6 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		================================================== */
 		function build() {
 
-            console.log(config);
-            console.log(_dates);
-
             // TODO: HACK/PATCH
 
 
@@ -9038,13 +9035,13 @@ if(typeof VMM.Timeline != 'undefined' && typeof VMM.Timeline.TimeNav == 'undefin
 
             // TODO: HACK/PATCH
             // assure at least a 30 min timespan
-console.log(timespan);
+//console.log(timespan);
 //console.log(data);
 //console.log(config);
             if (config.customMode == 'rtd') {
                 //timespan = getDateFractions(1800 * 1000, true);
             }
-console.log(timespan);
+//console.log(timespan);
             // END TODO: HACK/PATCH
 
 			trace(timespan);
@@ -9143,7 +9140,7 @@ console.log(timespan);
 				
 			markers			= [];
 			era_markers		= [];
-console.log(data);
+
 			for(i = 0; i < data.length; i++) {
 				
 				var _marker,
