@@ -2414,7 +2414,7 @@ console.log(newVisitorData);
     };
 
     this.getLogElementTypeCount = function getLogElementTypeCount(element) {
-//console.log(element);
+console.log(element);
         var counts = {
           site: {
             pageviews: 0,
@@ -2440,13 +2440,13 @@ console.log(newVisitorData);
                 continue;
             }
             var e = element[i];
-
+console.log(e);
             var pageKey = e.p;
             var sesKey = e.vtk + '.' + e.sid;
             var visitorKey = e.vtk;
             var t = parseInt(e.t);
             var value = 0;
-
+console.log('vtk=' + visitorKey);
 
             // construct visitor if does not exist
             if (this.model.visitors[visitorKey] == undefined) {
