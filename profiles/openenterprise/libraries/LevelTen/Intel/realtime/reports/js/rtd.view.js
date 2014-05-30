@@ -1404,9 +1404,6 @@ console.log('logNew:'); console.log(logNew);
             return;
         }
 
-        console.log('buildVisitorsReport');
-
-        
         var indexes = {
             lastHit: 7,
             pageviews:4,
@@ -1580,6 +1577,7 @@ console.log('logNew:'); console.log(logNew);
     }
 
     this.drawVisitorsReport = function (newVisitorData) {
+console.log(newVisitorData);
         var chartKey = 'visitors';
         var valueFormatter = this.valueFormatter();
         valueFormatter.format(this.chartData[chartKey], 6);
