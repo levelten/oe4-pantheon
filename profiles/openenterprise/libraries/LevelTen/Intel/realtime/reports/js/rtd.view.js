@@ -276,7 +276,11 @@ function rtDashboardView (name) {
         var curTime = this.model.getTime();
         var maxValue = 0;
 //console.log('log'); console.log(log);
-//console.log('logNew'); console.log(logNew);
+        this.haveNewData = false;
+        if (!jQuery.isEmptyObject(logNew)) {
+            this.haveNewData = true;
+console.log('logNew:'); console.log(logNew);
+        }
 
         var secTime0 = curTime - 60;
         var minTime0 = curTime - 1800;
@@ -480,6 +484,10 @@ function rtDashboardView (name) {
         var statsData = this.model.statsDelta;
         if ((this.lastBuild == 0)) {
            statsData = this.model.stats;
+        }
+
+        if (this.haveNewData) {
+            console.log('statsData:');console.log(statsData);
         }
 
         this.updateSiteStatsReport(statsData);
@@ -1395,6 +1403,8 @@ function rtDashboardView (name) {
         if (!this.chartsEnabled[chartKey]) {
             return;
         }
+
+        console.log('buildVisitorsReport');
 
         
         var indexes = {

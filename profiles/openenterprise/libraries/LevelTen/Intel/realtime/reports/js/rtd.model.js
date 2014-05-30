@@ -325,7 +325,10 @@ function rtDashboardModel (name) {
             url: this._getRealtimeDataUrl(func, params),
             data: {},
             success: function (json){
-                console.log(json);
+                if (true) {
+                    console.log('Visitor data recieved:');
+                    console.log(json);
+                }
                 if (json.visitor == undefined) {
                     return;
                 }
