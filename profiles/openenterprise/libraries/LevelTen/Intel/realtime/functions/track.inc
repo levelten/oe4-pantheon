@@ -327,6 +327,7 @@ function track_log() {
     'instances' => $data,
     'last_id' => (int)$last_id,
     'ids' => $ids,
+    'server_time' => REQUEST_TIME,
   );
   return $response;
 }
