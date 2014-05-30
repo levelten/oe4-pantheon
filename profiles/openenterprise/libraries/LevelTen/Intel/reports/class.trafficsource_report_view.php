@@ -160,9 +160,9 @@ class TrafficsourceReportView extends ReportView {
       $table->addRowItem(implode(' ', $d['links']));
       $table->addRow();
       
-        $entrs_pie_chart->addRow(array($itemLabel, $entrances));
+      $entrs_pie_chart->addRow(array($itemLabel, $entrances));
         
-        $value_pie_chart->addRow(array($itemLabel, $value));
+      $value_pie_chart->addRow(array($itemLabel, $value));
       
       if (($indexBy != 'searchKeyword') ||  ($itemLabel != '(not provided)')) {
         $vpe = ($entrances) ? $value/$entrances : 0;

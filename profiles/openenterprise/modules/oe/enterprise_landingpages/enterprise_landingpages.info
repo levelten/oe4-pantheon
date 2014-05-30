@@ -70,7 +70,6 @@ features[variable][] = field_bundle_settings_node__enterprise_landingpage
 features[variable][] = field_bundle_settings_node__enterprise_thankyou
 features[variable][] = intel_entity_settings_node__enterprise_landingpage
 features[variable][] = intel_entity_settings_node__enterprise_thankyou
-features[variable][] = intel_entity_settings_node__webform
 features[variable][] = menu_options_enterprise_landingpage
 features[variable][] = menu_options_enterprise_thankyou
 features[variable][] = menu_parent_enterprise_landingpage

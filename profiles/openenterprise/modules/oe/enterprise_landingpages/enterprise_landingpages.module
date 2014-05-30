@@ -128,10 +128,8 @@ function enterprise_landingpages_permission() {
  * @param $page
  */
 function enterprise_landingpages_page_alter(&$page) {
-//dsm($page);
   $entity = menu_get_object();
   if (!empty($entity) && ($entity->type == 'enterprise_landingpage')) {
-//dsm($entity);
     if (!empty($entity->entity_data['landingpages']['page_remove_blocks'])) {
       $ignore = enterprise_landingpages_block_remove_ignore();
       if (isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'])
@@ -312,6 +310,12 @@ function enterprise_landingpages_form_bean_form_alter(&$form, $form_state) {
     }
   }
 }
+
+/**
+ * Implements hook_form_FORMID_alter()
+ * @param $form
+ * @param $form_state
+ */
 
 function enterprise_landingpages_form_node_form_alter(&$form, $form_state) {
   if (isset($form['#node']) && ($form['#node']->type == 'enterprise_landingpage')) {
@@ -513,7 +517,7 @@ function enterprise_landingpages_landingpage_node_form_alter(&$form, &$form_stat
   $form['page_customization']['page_remove_blocks'] = array(
     '#type' => 'checkbox',
     '#title' => t('Remove blocks'),
-    '#default_value' => isset($lp_options['page_remove_blocks']) ? $lp_options['page_remove_blocks'] : 1,
+    '#default_value' => isset($lp_options['page_remove_blocks']) ? $lp_options['page_remove_blocks'] : 0,
     //'#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
   );
 
@@ -577,7 +581,15 @@ function enterprise_landingpages_landingpage_node_form_validate(&$form, &$form_s
     $form_state['node']->cta['selections']['cta_forms'] = $selection;
   }
 
-  $form['#node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
+  if (!isset($form_state['node']->entity_data)) {
+    $form_state['node']->entity_data = array();
+  }
+  if (!isset($form_state['node']->entity_data['landingpages'])) {
+    $form_state['node']->entity_data['landingpages'] = array();
+  }
+  $form_state['node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
+
+  //$form['#node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
 
   //$form['#node']->cta['selections']['cta_forms'] = $form_state['values']['cta_form'];
 }

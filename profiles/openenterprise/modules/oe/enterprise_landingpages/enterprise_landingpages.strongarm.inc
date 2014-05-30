@@ -235,16 +235,6 @@ function enterprise_landingpages_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
-  $strongarm->name = 'intel_entity_settings_node__webform';
-  $strongarm->value = array(
-    'page_intent' => 'l',
-    'track_page_uid' => 0,
-  );
-  $export['intel_entity_settings_node__webform'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
   $strongarm->name = 'menu_options_enterprise_landingpage';
   $strongarm->value = array(
     0 => 'main-menu',

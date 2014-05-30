@@ -79,6 +79,8 @@ function rtDashboardView (name) {
         pageAttrs: [
             ['ct'],
             ['ct', 'blog'],
+            ['j'],
+            ['j', 1],
             ['t'],
             ['a']
         ],
@@ -99,8 +101,10 @@ function rtDashboardView (name) {
       pageAttrs: {
         a: 'Authors',
         ct: 'Content types',
-        'ct.ANY': '%key pages',
-        t: 'Taxonomy terms'
+        'ct.DEFAULT': '%subtype pages',
+        j: 'Subjects',
+        'j.DEFAULT': '%subtype pages',
+        t: 'Terms'
       },
       tsDetails: {
             source: 'Source',
@@ -813,21 +817,34 @@ function rtDashboardView (name) {
                   data = data[type[1]]._pages;
               }
             }
-            if (type[0] == 'a') {
-                this.chartData[chartKey].setColumnLabel(0, 'Authors');
-                labels = this.model.attrInfo['page'][type[0]].options;
+
+            lkeys = [];
+            var headerLabel = 'Page attributes';
+            if (type.length == 1) {
+                lkeys.push(type[0]);
             }
-            if (type[0] == 't') {
-                this.chartData[chartKey].setColumnLabel(0, 'Terms');
-                labels = this.model.attrInfo['page'][type[0]].options;
+            else if (type.length == 2) {
+                lkeys.push(type[0] + '.' + type[1]);
+                lkeys.push(type[0] + '.DEFAULT');
             }
-            if (type[0] == 'ct') {
-                labels = this.model.attrInfo['page'][type[0]].options;
-                if ((type.length == 2)) {
-                    var label = (this.model.attrInfo['page'][type[0]].options[type[1]] != undefined) ? this.model.attrInfo['page'][type[0]].options[type[1]].title : type[1];
-                    this.chartData.pageAttrs.setColumnLabel(0, label);
+            for (var i = 0; i < lkeys.length; i++) {
+                if (this.chartRotationLabels[chartKey][lkeys[i]] != undefined) {
+                    headerLabel = this.chartRotationLabels[chartKey][lkeys[i]];
+                    break;
                 }
             }
+            if (type.length > 0) {
+                var rep = (this.model.attrInfo.page[type[0]].title != undefined) ? this.model.attrInfo.page[type[0]].title : type[0];
+                headerLabel = headerLabel.replace("%type", rep);
+            }
+            if (type.length == 2) {
+                var rep = (this.model.attrInfo.page[type[0]].options[type[1]] != undefined) ? this.model.attrInfo.page[type[0]].options[type[1]].title : type[1];
+                headerLabel = headerLabel.replace("%subtype", rep);
+            }
+
+            this.chartData.pageAttrs.setColumnLabel(0, headerLabel);
+
+            labels = this.model.attrInfo['page'][type[0]].options;
         }
 
         for (var key in data) {
@@ -840,9 +857,13 @@ function rtDashboardView (name) {
                    label = labels[key].title;
                 }
                 else {
-                    if ((type[0] == 'a') && (type[1] == undefined)) {
+                    if ((type[1] == undefined)) {
                         label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
                         this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
+                    }
+                    /*
+                    if ((type[0] == 'a') && (type[1] == undefined)) {
+
                     }
                     else if ((type[0] == 'ct') && (type[1] == undefined)) {
                         label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
@@ -852,6 +873,11 @@ function rtDashboardView (name) {
                         label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
                         this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
                     }
+                    else if ((type[0] == 's') && (type[1] == undefined)) {
+                        label = '<span class="placeholder-attr-option placeholder-pa-' + type[0] + '-' + key + '">' + key + '</span>';
+                        this.model.fetchAttributeOptionInfo('page', type[0], key, rtdView.updateAttributeOptionInfo);
+                    }
+                    */
 
                 }
                 this.chartData[chartKey].addRow([label, 0, 0, 0]);
@@ -1537,6 +1563,7 @@ function rtDashboardView (name) {
                 if ((this.selectedVisitor != false) && (this.activeVisitor != this.selectedVisitor)) {
                     this.activeVisitor = this.selectedVisitor;
                     this.buildTimeline(true);
+                    this.buildVisitorDetailsReport(true);
                 }
             }
         }
@@ -2291,9 +2318,6 @@ console.log(visitor);
 
       for (var key in types) {
           this.chartRotationI[key]++;
-//console.log(key);
-//console.log(this.chartRotation);
-//console.log(this.chartRotationI);
 
           if (this.chartRotation[key][this.chartRotationI[key]] == undefined) {
               this.chartRotationI[key] = 0;

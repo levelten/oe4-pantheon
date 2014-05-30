@@ -67,7 +67,14 @@ class PieChart extends Chart {
     if (empty($this->settings['cols']) || (count($this->settings['cols']) != 2)) {
       array_unshift($data, array('Items', 'Value')); 
     }
-    
+
+    // check if rounding errors have created a negative value
+    foreach ($data AS $i => $values) {
+      if ($values[1] < 0) {
+        $data[$i][1] = 0;
+      }
+    }
+
     $datajson = drupal_json_encode($data);
     $optionsjson = drupal_json_encode($this->options);
     $settingsjson = drupal_json_encode($this->settings);
