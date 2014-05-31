@@ -147,7 +147,8 @@ function track_instance_dbsave($instance, $db_mode = 1) {
   }
 
   $vars = array(
-    ':time' => !empty($instance->time) ? $instance->time : 0,
+    //':time' => !empty($instance->time) ? $instance->time : 0,
+    ':time' => REQUEST_TIME,
     ':ord' => isset($instance->ord) ? $instance->ord : 10,
     ':vtk' => !empty($instance->vtk) ? $instance->vtk : '',
     ':sid' => !empty($instance->sid) ? $instance->sid : 1,
