@@ -14,6 +14,7 @@ function rtDashboardModel (name) {
     this.realtimeApiUrl = '';
     this.realtimeDataUrl = '';
     this.timeDelta = 0;
+    this.timeDeltaCorection = 0;
     this.lastFetchTime = 0;
     this.stats = {
         site: {},
@@ -155,7 +156,7 @@ function rtDashboardModel (name) {
 
         window.setInterval(function () {
             rtdModel.fetchAll();
-        }, 5000);
+        }, 4000);
     };
 
     this.fetchAll = function fetchAll() {
@@ -179,10 +180,12 @@ function rtDashboardModel (name) {
             data: {},
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
-                if (json.server_time != undefined) {
-
+                // sync with server time if timeDelta not yet set
+                if (rtdModel.timeDeltaCorection == 0) {
+                    rtdModel.timeDeltaCorection = parseInt(json.server_time);
                     var time = new Date().getTime();
                     rtdModel.timeDelta = parseInt(json.server_time) - Math.round(time/1000);
+
                     console.log('browser time: ' + Math.round(time/1000) + ', server time: ' + json.server_time);
                 }
                 if (json.status == 200) {

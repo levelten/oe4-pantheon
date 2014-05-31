@@ -279,7 +279,7 @@ function rtDashboardView (name) {
         this.haveNewData = false;
         if (!jQuery.isEmptyObject(logNew)) {
             this.haveNewData = true;
-console.log('logNew:'); console.log(logNew);
+//console.log('logNew:'); console.log(logNew);
         }
 
         var secTime0 = curTime - 60;
@@ -487,7 +487,7 @@ console.log('logNew:'); console.log(logNew);
         }
 
         if (this.haveNewData) {
-            console.log('statsData:');console.log(statsData);
+            //console.log('statsData:');console.log(statsData);
         }
 
         this.updateSiteStatsReport(statsData);
@@ -1577,7 +1577,7 @@ console.log('logNew:'); console.log(logNew);
     }
 
     this.drawVisitorsReport = function (newVisitorData) {
-console.log(newVisitorData);
+//console.log(newVisitorData);
         var chartKey = 'visitors';
         var valueFormatter = this.valueFormatter();
         valueFormatter.format(this.chartData[chartKey], 6);
@@ -2414,8 +2414,8 @@ console.log(newVisitorData);
     };
 
     this.getLogElementTypeCount = function getLogElementTypeCount(element) {
-console.log('getLogElementTypeCount element:');
-console.log(element);
+//console.log('getLogElementTypeCount element:');
+//console.log(element);
         var counts = {
           site: {
             pageviews: 0,
@@ -2441,13 +2441,13 @@ console.log(element);
                 continue;
             }
             var e = element[i];
-console.log(e);
+//console.log(e);
             var pageKey = e.p;
             var sesKey = e.vtk + '.' + e.sid;
             var visitorKey = e.vtk;
             var t = parseInt(e.t);
             var value = 0;
-console.log('vtk=' + visitorKey);
+//console.log('vtk=' + visitorKey);
 
             // construct visitor if does not exist
             if (this.model.visitors[visitorKey] == undefined) {
