@@ -180,8 +180,10 @@ function rtDashboardModel (name) {
             //jsonpCallback: this.name + '.fetchLogReturn',
             success: function (json){
                 if (json.server_time != undefined) {
+
                     var time = new Date().getTime();
-                    this.timeDelta = parseInt(json.server_time) - Math.round(time/1000);
+                    rtdModel.timeDelta = parseInt(json.server_time) - Math.round(time/1000);
+                    console.log('browser time: ' + Math.round(time/1000) + ', server time: ' + json.server_time);
                 }
                 if (json.status == 200) {
                     console.log('Log data recieved:');
