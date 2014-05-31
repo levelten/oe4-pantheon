@@ -423,7 +423,7 @@ console.log('logNew:'); console.log(logNew);
             var t = parseInt(i);
             // skip if t is greaterthan the browsers current time
             if (t > curTime) {
-              //continue;
+              continue;
             }
             var counts = this.getLogElementTypeCount(logElement);
             var d = new Date(1000 * t);
