@@ -6,7 +6,7 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_author_list_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_page_attribute_list_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
   $output = '';
   $filters = array();
   $context = 'site';
@@ -21,7 +21,7 @@ function intel_author_list_report_page($sub_index = '-', $filter_type = '', $fil
   if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
     intel_add_report_headers();
 
-    drupal_set_title(t('Author report', array('@title' => $reports['team'][$sub_index]['title'])), PASS_THROUGH);
+    drupal_set_title(t('@title report', array('@title' => $reports['content'][$sub_index]['title'])), PASS_THROUGH);
     $filters += $_GET;
     $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
     $output .= drupal_render($filter_form);  
@@ -31,11 +31,11 @@ function intel_author_list_report_page($sub_index = '-', $filter_type = '', $fil
     $output .= intel_get_report_ajax_container();
   }
   elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_author_list_report($filters, $context, $sub_index);
+    $output .= intel_page_attribute_list_report($filters, $context, $sub_index);
   }
   elseif ($_GET['return_type'] == 'json') {
     $data = array(
-      'report' => intel_author_list_report($filters, $context, $sub_index),
+      'report' => intel_page_attribute_list_report($filters, $context, $sub_index),
     );
     drupal_json_output($data);
     return;    
@@ -44,13 +44,21 @@ function intel_author_list_report_page($sub_index = '-', $filter_type = '', $fil
   return $output;
 }
 
-function intel_author_list_report($filters = array(), $context = 'site', $sub_index = '-', $mode = '') {
+function intel_page_attribute_list_report($filters = array(), $context = 'site', $sub_index = '-', $mode = '') {
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
   $reports = intel_reports();
-  $report_mode = $reports['team'][$sub_index]['key'];
+  $report_mode = $reports['content'][$sub_index]['key'];
   $report_modes = explode('.', $report_mode);
+
+  $a = explode(':', $report_modes[0]);
+  $attrKey = $a[1];
+
+  $attrInfo = intel_page_attribute_load($attrKey);
+
+  //dsm($attrInfo);
+  //dsm($report_modes);
 
   $cache_options = array();
   $row_count = 100;
@@ -64,28 +72,38 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->buildFilters($filters, $context);
-  $ga_data->addGAFilter('ga:customVarValue1!@&a=1&');
+
+  //$ga_data->addGAFilter('ga:customVarValue1!@&a=1&');
 
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
-  //$ga_data->setDebug(1);
-  $ga_data->setRequestSetting('indexBy', 'author');
+  $ga_data->setDebug(1);
+  //$ga_data->setRequestSetting('indexBy', 'author');
+  $ga_data->setPageAttributeInfo($attrInfo);
+  $ga_data->setRequestSetting('indexBy', 'pageAttribute:' . $attrKey);
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews');
-  
+
   $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
   $ga_data->loadFeedData('entrances');
+
+
   
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews_valuedevents');
 
+  dsm($ga_data->data);
+  return '';
+
   $ga_data->loadFeedData('entrances_valuedevents');
   
   $d = $ga_data->data;
- 
+
+
+  return '';
   foreach ($d['author'] AS $index => $de) {
     $score_components = array();
     $d['author'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);      

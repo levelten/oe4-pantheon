@@ -350,7 +350,7 @@ $ga_data->setDebug(0);
   $ga_data->setRequestDefaultParam('max_results', 40 * $count); 
   $request = $ga_data->loadFeedData('pageviews_valuedevents', 'content');  
 //dsm($ga_data->data['content']);   
-  $d['content'] = $ga_data->data['content'];
+  $d['content'] = !empty($ga_data->data['content']) ? $ga_data->data['content'] : array();
 $ga_data->setDebug(0); 
 
   // testing

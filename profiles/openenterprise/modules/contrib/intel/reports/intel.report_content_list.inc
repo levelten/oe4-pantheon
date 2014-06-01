@@ -11,6 +11,12 @@ function intel_content_list_report_page($report_mode = '-', $filter_type = '', $
   $filters = array();
   $context = 'site';
   $reports = intel_reports();
+  if (isset($reports['content'][$report_mode]['page callback'])) {
+    if (isset($reports['content'][$report_mode]['file'])) {
+      include_once drupal_get_path('module', 'intel') . '/' . $reports['content'][$report_mode]['file'];
+    }
+    return $reports['content'][$report_mode]['page callback']($report_mode, $filter_type, $filter_element);
+  }
   if ($filter_type) {
     if ($filter_type == 'visitorid') {
       $filter_type = 'visitor';

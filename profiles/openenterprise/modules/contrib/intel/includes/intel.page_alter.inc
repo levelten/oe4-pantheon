@@ -492,6 +492,10 @@ function intel_trigger_intel_event_by_name($event_name, $values = array()) {
   return intel_trigger_intel_event($values);
 }
 
+function intel_print_var($var) {
+  dsm($var);
+}
+
 function intel_init() {
   // Need to use drupal_add_html_head() instead of drupal_add_js() to load monitor script above all js.
   if ($script = variable_get('intel_js_monitor_script', '')) {

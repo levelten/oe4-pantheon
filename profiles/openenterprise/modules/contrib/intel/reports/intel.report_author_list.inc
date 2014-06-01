@@ -70,11 +70,13 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
-  //$ga_data->setDebug(1);
+  $ga_data->setDebug(1);
   $ga_data->setRequestSetting('indexBy', 'author');
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews');
+
+  return '';
   
   $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
   $ga_data->loadFeedData('entrances');

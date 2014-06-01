@@ -4,10 +4,10 @@
  * @author  Tom McCracken <tomm@levelten.net>
  * @version 1.0
  * @copyright 2013 LevelTen Ventures
- * 
+ *
  * @section LICENSE
  * All rights reserved. Do not use without permission.
- * 
+ *
  */
 namespace LevelTen\Intel;
 if (!empty($_GET['debug'])) {
@@ -28,20 +28,21 @@ class GAModel {
   public  $settings;
   public  $pathQueryFilters = array();
   private $pageAttributeFilter = array();
+  private $pageAttributeInfo = array();
   private $requestCallback = '';
   private $requestCallbackOptions = array();
   private $dataIndexCallbacks = array();
   private $debug = 0;
   private $reportModes = array();
   private $requestDefault = array(
-      'dimensions' => array(),
-      'metrics' => array(),
-      'sort' => '',
-      'start_date' => 0,
-      'end_date' => 0,
-      'filters' => '',
-      'segment' => '',
-      'max_results' => 50,  
+    'dimensions' => array(),
+    'metrics' => array(),
+    'sort' => '',
+    'start_date' => 0,
+    'end_date' => 0,
+    'filters' => '',
+    'segment' => '',
+    'max_results' => 50,
   );
   private $requestSettings = array(
     'type' => 'pageviews',
@@ -52,49 +53,49 @@ class GAModel {
     'sortType' => '',
     'excludeGoalFields' => 0,
   );
-  
+
   function __contruct() {
-    
+
   }
-  
+
   function setDateRange($start_date, $end_date) {
     $this->start_date = $start_date;
     $this->end_date = $end_date;
     $this->requestDefault['start_date'] = $start_date;
     $this->requestDefault['end_date'] = $end_date;
   }
-  
+
   function setRequestSetting($param, $value) {
     $this->requestSettings[$param] = $value;
   }
-  
+
   function setRequestDefaultParam($param, $value) {
     $this->requestDefault[$param] = $value;
   }
-  
+
   function setRequestCallback ($callback, $options = array()) {
     $this->requestCallback = $callback;
-    $this->requestCallbackOptions = $options;    
+    $this->requestCallbackOptions = $options;
   }
-  
+
   function setDataIndexCallback($index, $callback) {
     $this->dataIndexCallbacks[$index] = $callback;
   }
-  
+
   function setReportModes($modes) {
     if (is_string($modes)) {
       $modes = explode('.', $modes);
     }
     $this->reportModes = $modes;
   }
-  
+
   function setDebug($debug) {
     $this->debug = $debug;
-    if ($this->debug && !method_exists('Debug::printVar')) {
+    if ($this->debug && !function_exists('Debug::printVar')) {
       require_once __DIR__ . '/../libs/class.debug.php';
     }
   }
-  
+
   function buildFilters($filters, $context = 'site') {
     $gasegments = array();
     $gafilters = array();
@@ -105,11 +106,11 @@ class GAModel {
 
     if (!empty($filters['page'])) {
       $a = explode(":", $filters['page']);
-      $path = $a[1]; 
+      $path = $a[1];
       // TODO remove this dependency
       $pathfilter = $this->formatPathFilter($path);
       $landingpagefilter = str_replace('pagePath', 'landingPagePath', $pathfilter);
-      
+
       if ($context == 'page') {
         $gapaths['pagePath'] = $pathfilter;
         $gapaths['landingPagePath'] = str_replace('pagePath', 'landingPagePath', $landingpagefilter);
@@ -123,16 +124,16 @@ class GAModel {
         }
       }
     }
-    
+
     if (!empty($filters['event'])) {
       $gasegments['event'] = "ga:eventCategory=~^" . $filters['event'];
     }
-    
+
     if (!empty($filters['trafficsource'])) {
       $a = explode(":", $filters['trafficsource']);
       $gafilters['trafficsource'] = "ga:{$a[0]}=={$a[1]}";
     }
-    
+
     if (!empty($filters['location'])) {
       $a = explode(":", $filters['location']);
       $gafilters['location'] = "ga:{$a[0]}=={$a[1]}";
@@ -140,19 +141,19 @@ class GAModel {
         $this->settings['location_dimension_level'] = 'region';
       }
     }
-      
+
     if (!empty($filters['visitor'])) {
       $a = explode(":", $filters['visitor']);
-      $vtk = $a[1]; 
+      $vtk = $a[1];
       //$gasegments['visitor'] = "ga:customVarValue5==" . $vtk;
       $gafilters['visitor'] = "ga:customVarValue5==" . $vtk;
     }
-  
+
     if (!empty($filters['visitor-attr'])) {
       $a = str_replace(':', '=', $filters['visitor-attr']);
       $query = l10insight_build_ga_filter_from_serialized_customvar($a);
       //$ga_segments['visitor-attr'] = "dynamic::ga:customVarValue3=" . $query;
-    } 
+    }
     $this->gaFilters = array(
       'filters' => $gafilters,
       'segments' => $gasegments,
@@ -162,7 +163,7 @@ class GAModel {
     );
   }
   /**
-   * 
+   *
    * @param $item
    * @param $type: valid values = 'filter' or 'segement'
    */
@@ -176,11 +177,16 @@ class GAModel {
       //$this->gaFilters['filter'] =  implode(";", $this->gaFilters['filters']);      
     }
   }
-  
+
   function setPageAttributeFilter($filter) {
     $this->pageAttributeFilter = $filter;
   }
-  
+
+  function setPageAttributeInfo($info) {
+    $this->pageAttributeInfo = $info;
+  }
+
+
   function applyFiltersToRequest($request) {
     if (!empty($this->gaFilters['filter'])) {
       $request['filters'] .= (($request['filters']) ? ';' : '') . $this->gaFilters['filter'];
@@ -190,31 +196,31 @@ class GAModel {
     }
     return $request;
   }
-  
+
   function setCustomFilter($string, $type = 'filter') {
     $this->customFilters[$type] = $string;
   }
-  
+
   //function loadFeedData($type, $indexBy = '', $details = 0, $max_results = 100, $results_index = 0) {
   function loadFeedData($type = '', $indexBy = '', $details = 0) {
     // format the ga request array
     $request = $this->getRequestArray($type, $indexBy, $details);
     if ($this->debug) { Debug::printVar($request); }
-    
+
     // call dyanmic function to fetch data from ga
     if ($this->requestCallback) {
       $func = $this->requestCallback;
       $feed = $func($request, $this->requestCallbackOptions);
     }
     if ($this->debug) { Debug::printVar($feed); }
-    
+
     // parse data into $this->data
     $this->addFeedData($feed, $type, $indexBy, $details);
     if ($this->debug) { Debug::printVar($this->data); }
 
     return $this->data;
   }
-  
+
   //function getRequestArray($type, $sub_type = 'value_desc', $indexBy = '', $details = 0, $max_results = 100, $results_index = 0) {
   function getRequestArray($type = '', $indexBy = '', $details = 0) {
     $request = $this->requestDefault;
@@ -226,7 +232,7 @@ class GAModel {
     $subIndexBy = $settings['subIndexBy'];
     $details = ($details) ? $details : $settings['details'];
     $reportModes = $this->reportModes;
-    
+
     $filters = $this->gaFilters['filters'];
     $segments = $this->gaFilters['segments'];
 //Debug::printVar($filters);
@@ -253,7 +259,7 @@ class GAModel {
       else {
         $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerVisit', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
         $request['sort'] = '-ga:goalValueAll,-ga:entrances';
-      }    
+      }
     }
     else if ($type == 'pageviews_valuedevents') {
       $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
@@ -296,27 +302,27 @@ class GAModel {
       $request['sort'] = '-ga:totalEvents';
     }
     else if ($type == 'visit_info') {
-       $request['dimensions'][] = 'ga:country';
-       $request['dimensions'][] = 'ga:medium';
-       $request['dimensions'][] = 'ga:socialNetwork';
-       $request['metrics'] = array('ga:entrances', 'ga:goalValueAll'); 
-       if ($reportModes[0] == 'visit') {  // visit.recent report
-         $request['dimensions'][] = 'ga:visitCount';
-         $request['dimensions'][] = 'ga:customVarValue4';
-       }
-       $request['sort'] = '-ga:goalValueAll,-ga:entrances';
-       if ($this->gaFilters['paths']['pagePath']) {
-         $segments[] = $this->gaFilters['paths']['pagePath'];
-       }
+      $request['dimensions'][] = 'ga:country';
+      $request['dimensions'][] = 'ga:medium';
+      $request['dimensions'][] = 'ga:socialNetwork';
+      $request['metrics'] = array('ga:entrances', 'ga:goalValueAll');
+      if ($reportModes[0] == 'visit') {  // visit.recent report
+        $request['dimensions'][] = 'ga:visitCount';
+        $request['dimensions'][] = 'ga:customVarValue4';
+      }
+      $request['sort'] = '-ga:goalValueAll,-ga:entrances';
+      if ($this->gaFilters['paths']['pagePath']) {
+        $segments[] = $this->gaFilters['paths']['pagePath'];
+      }
     }
-    
+
     if (($types[0] == 'entrances') && ($this->gaFilters['paths']['landingPagePath'])) {
       $filters[] = $this->gaFilters['paths']['landingPagePath'];
     }
     if (($types[0] == 'pageviews') && ($this->gaFilters['paths']['pagePath'])) {
       $filters[] = $this->gaFilters['paths']['pagePath'];
-    }    
-    
+    }
+
     $request = $this->applyFiltersToRequest($request);
     if ($indexBy == 'date') {
       $request['dimensions'][] = 'ga:date';
@@ -332,7 +338,7 @@ class GAModel {
         $request['dimensions'][] = 'ga:pagePath';
       }
       //$request['max_results'] = 4 * $items;  
-    } 
+    }
     else if ($indexBy == 'pagePath') {
       if ($types[0] == 'entrances') {
         $request['dimensions'][] = 'ga:landingPagePath';
@@ -350,10 +356,10 @@ class GAModel {
       $request['dimensions'][] = 'ga:visitCount';
       if ($reportModes[1] == 'recent') {
         $request['dimensions'][] = 'ga:customVarValue4';
-        $request['sort'] = '-ga:customVarValue4';  
+        $request['sort'] = '-ga:customVarValue4';
         if ($type == 'entrances') {
           $filter[] = 'ga:entrances>0';
-        }      
+        }
       }
       //$request['segment'] = (!empty($request['segment']) ? ';' . $this->gaFilters['paths']['pagePath'] : ''); 
     }
@@ -363,7 +369,7 @@ class GAModel {
       $request['dimensions'][] = 'ga:referralPath';
       $request['dimensions'][] = 'ga:keyword';
       $request['dimensions'][] = 'ga:socialNetwork';
-      $request['dimensions'][] = 'ga:campaign';     
+      $request['dimensions'][] = 'ga:campaign';
     }
     else if ($indexBy == 'trafficcategory') {
       $request['dimensions'][] = 'ga:medium';
@@ -389,39 +395,47 @@ class GAModel {
       $request['dimensions'][] = 'ga:customVarValue1';
       $filters[] = 'ga:customVarValue1=@&a=';
       $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
-    }    
+    } else if (strpos($indexBy, 'pageAttribute:') === 0) {
+      $indexBys = explode(':', $indexBy);
+      $request['dimensions'][] = 'ga:customVarValue1';
+      // TODO add other attribute types
+      if ($this->pageAttributeInfo['type'] == 'list') {
+        $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '.';
+      }
+      $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
+    }
     else if (!empty($indexBy)) {
       $request['dimensions'][] = 'ga:' . $indexBy;
     }
-    
+
     if ($subIndexBy) {
       if ($subIndexBy == 'trafficcategory') {
         $request['dimensions'][] = 'ga:medium';
         $request['dimensions'][] = 'ga:socialNetwork';
-      } 
+      }
       else if ($subIndexBy == 'socialNetwork') {
-        $filters[] = 'ga:socialNetwork!=(not set)';  
-        $request['sort'] = '-ga:goalValueAll,-ga:entrances'; 
+        $filters[] = 'ga:socialNetwork!=(not set)';
+        $request['sort'] = '-ga:goalValueAll,-ga:entrances';
         $request['dimensions'][] = 'ga:socialNetwork';
-      } 
+      }
       else if ($subIndexBy == 'organicSearch') {
         $request['dimensions'][] = 'ga:medium';
         $request['metrics'][] = 'ga:organicSearches';
         $filters[] = 'ga:medium==organic';
-        $request['sort'] = '-ga:organicSearches'; 
-      }     
+        $request['sort'] = '-ga:organicSearches';
+      }
       else if ($subIndexBy == 'searchKeyword') {
         $request['dimensions'][] = 'ga:medium';
         $request['dimensions'][] = 'ga:keyword';
         $request['metrics'][] = 'ga:organicSearches';
         $filters[] = 'ga:medium==organic';
-        $filters[] = 'ga:keyword!@(not '; 
-        $request['sort'] = '-ga:organicSearches'; 
+        $filters[] = 'ga:keyword!@(not ';
+        $request['sort'] = '-ga:organicSearches';
       }
       else {
         $request['dimensions'][] = 'ga:' . $subIndexBy;
       }
-      
+
     }
 
     if ($details) {
@@ -432,21 +446,25 @@ class GAModel {
         $request['dimensions'][] = 'ga:eventCategory';
       }
       if (($type == 'entrances_goals') || ($type == 'pageviews_goals')) {
-        
-      }      
-    } 
+
+      }
+    }
     $request['filters'] = $this->customFilters['filter'] . (($this->customFilters['filter'] && count($filters)) ? ';' : '') . implode(';', $filters);
     if (count($segments) || !empty($this->customFilters['segment'])) {
       $request['segment'] = 'dynamic::' . $this->customFilters['segment'] . (($this->customFilters['segment'] && count($segments)) ? ';' : '') . implode(';', $segments);
     }
     return $request;
   }
-  
+
   function addFeedData($feed, $type = '', $indexBy = '', $details = 0) {
+    $args = func_get_args();
+    dsm($args);
     if (empty($feed->results) || !is_array($feed->results)) {
       return;
     }
     $settings = $this->requestSettings;
+
+    dsm($settings);
     $type = ($type) ? $type : $settings['type'];
     $subType = $settings['subType'];
     $indexBy = ($indexBy) ?  $indexBy : $settings['indexBy'];
@@ -462,7 +480,7 @@ class GAModel {
     else {
       $sub_indexes = array('-');
     }
-    
+
     if (!$prime_index) {
       $prime_index = 'site';
     }
@@ -514,41 +532,49 @@ class GAModel {
       }
       else {
         $this->data[$prime_index] = $d;
-      }      
-    }  
+      }
+    }
   }
-  
+
   function addPageviewFeedData($d, $feed, $indexBy, $subIndexBy) {
     if (!isset($d['_all']['pageview'])) {
       $d['_all']['pageview'] = $this->initPageviewDataStruc();
-      $d['_totals']['pageview'] = $this->initPageviewDataStruc();      
+      $d['_totals']['pageview'] = $this->initPageviewDataStruc();
     }
     $this->_addPageviewFeedDataRow($d['_totals']['pageview'], $feed->totals);
     foreach($feed->results AS $row) {
-      if (!$index = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
         continue;
       }
-      if (!isset($d[$index]['pageview'])) {
-        $d[$index]['pageview'] = $this->initPageviewDataStruc();
+      if (!is_array($indexes)) {
+        $indexes = array($indexes);
       }
-      $keys = array('_all', $index);
+      foreach ($indexes AS $index) {
+        if (!isset($d[$index]['pageview'])) {
+          $d[$index]['pageview'] = $this->initPageviewDataStruc();
+        }
+      }
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+      //$keys = array('_all', $indexes);
       foreach ($keys AS $k) {
         $this->_addPageviewFeedDataRow($d[$k]['pageview'], $row);
       }
+
     }
-    return $d;     
+    return $d;
   }
-  
+
   function _addPageviewFeedDataRow(&$data, $row) {
-    $data['pageviews'] += $row['pageviews']; 
+    $data['pageviews'] += $row['pageviews'];
     $data['pageviewsPerVisit'] += ($row['pageviews'] * $row['pageviewsPerVisit']);
     $data['timeOnPage'] += $row['timeOnPage'];
-    $data['sticks'] += ($row['pageviews'] - $row['exits']);           
+    $data['sticks'] += ($row['pageviews'] - $row['exits']);
     $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
     $data['goalCompletionsAll'] += !empty($row['goalCompletionsAll']) ? $row['goalCompletionsAll'] : 0;
-    return $data;    
+    return $data;
   }
-  
+
   function addEntranceFeedData($d, $feed, $indexBy, $subIndexBy = '') {
     if (!isset($d['_all']['entrance'])) {
       $d['_all']['entrance'] = $this->initEntranceDataStruc();
@@ -559,68 +585,99 @@ class GAModel {
     }
     $this->_addEntranceFeedDataRow($d['_totals']['entrance'], $feed->totals);
     foreach($feed->results AS $row) {
-      if (!$index = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
         continue;
       }
       $subIndex = $this->initFeedIndex($row, $subIndexBy);
-      if (!isset($d[$index]['entrance'])) {
-        $d[$index]['entrance'] = $this->initEntranceDataStruc();
+      if (!is_array($indexes)) {
+        $indexes = array($indexes);
       }
-      if ($subIndexBy) {
-        if (!isset($d[$index][$subIndexBy])) {
-          $d[$index][$subIndexBy] = array('_all' => array());
-          $d[$index][$subIndexBy]['_all']['entrance'] = $this->initEntranceDataStruc();
+      foreach ($indexes AS $index) {
+        if (!isset($d[$index]['entrance'])) {
+          $d[$index]['entrance'] = $this->initEntranceDataStruc();
         }
-        if ($subIndex && !isset($d[$index][$subIndexBy][$subIndex])) {
-          $d[$index][$subIndexBy][$subIndex] = array('entrance' => $this->initEntranceDataStruc());
-          $d[$index][$subIndexBy][$subIndex]['i'] = $subIndex;         
+        if ($subIndexBy) {
+          if (!isset($d[$index][$subIndexBy])) {
+            $d[$index][$subIndexBy] = array('_all' => array());
+            $d[$index][$subIndexBy]['_all']['entrance'] = $this->initEntranceDataStruc();
+          }
+          if ($subIndex && !isset($d[$index][$subIndexBy][$subIndex])) {
+            $d[$index][$subIndexBy][$subIndex] = array('entrance' => $this->initEntranceDataStruc());
+            $d[$index][$subIndexBy][$subIndex]['i'] = $subIndex;
+          }
         }
       }
-      
-      if ($subIndexBy) {
-        if ($subIndex) {
-          $this->_addEntranceFeedDataRow($d[$index][$subIndexBy][$subIndex]['entrance'], $row);
+
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+
+      $subkeys = array('_all');
+      if ($subIndex) {
+        $subkeys[] = $subIndex;
+      }
+
+      foreach ($keys AS $k) {
+        if ($subIndexBy) {
+          // only counts for _all once
+          if ($k == '_all') {
+            $this->_addEntranceFeedDataRow($d['_all'][$subIndexBy], $row);
+          }
+          else {
+            foreach ($subkeys AS $sk) {
+              $this->_addEntranceFeedDataRow($d[$k][$subIndexBy][$sk]['entrance'], $row);
+            }
+          }
+
         }
-        $this->_addEntranceFeedDataRow($d[$index][$subIndexBy]['_all']['entrance'], $row);
-        $this->_addEntranceFeedDataRow($d['_all'][$subIndexBy], $row);
+        else {
+          $this->_addEntranceFeedDataRow($d[$k]['entrance'], $row);
+        }
       }
-      else {
-        $this->_addEntranceFeedDataRow($d[$index]['entrance'], $row);
-        $this->_addEntranceFeedDataRow($d['_all']['entrance'], $row);
-      }
+
+
     }
-    return $d;     
+    return $d;
   }
-  
+
   function _addEntranceFeedDataRow(&$data, $row) {
     $data['entrances'] += $row['entrances'];
     $data['newVisits'] += $row['newVisits'];
-    $data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : ($row['entrances'] * $row['pageviewsPerVisit']); 
+    $data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : ($row['entrances'] * $row['pageviewsPerVisit']);
     $data['pageviewsPerVisit'] += ($row['entrances'] * $row['pageviewsPerVisit']);
     $data['timeOnSite'] += $row['timeOnSite'];
-    $data['sticks'] += ($row['entrances'] - $row['bounces']);           
+    $data['sticks'] += ($row['entrances'] - $row['bounces']);
     $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
     $data['goalCompletionsAll'] += !empty($row['goalCompletionsAll']) ? $row['goalCompletionsAll'] : 0;
     if (!empty($row['customVarValue4'])) {
       $data['timestamp'] = $row['customVarValue4'];
     }
-    return $data;   
+    return $data;
   }
-  
+
   function addValuedeventsFeedData($d, $feed, $indexBy, $mode = 'entrance') {
     if (!isset($d['_all'][$mode])) {
       $d['_all'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
-      $d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}();      
+      $d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
     }
     $d['_totals'][$mode]['events']['_all'] = $this->_addValuedeventsFeedDataRow($d['_totals'][$mode]['events']['_all'], $feed->totals);
     foreach($feed->results AS $row) {
-      if (!$index = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
         continue;
       }
-      if (!isset($d[$index][$mode])) {
-        $d[$index][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+
+      if (!is_array($indexes)) {
+        $indexes = array($indexes);
       }
-      $keys = array('_all', $index);
+
+      foreach ($indexes AS $index) {
+        if (!isset($d[$index][$mode])) {
+          $d[$index][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+        }
+      }
+
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+
       foreach ($keys AS $k) {
         if (isset($row['eventCategory'])) {
           $eventCateogry = $row['eventCategory'];
@@ -633,20 +690,20 @@ class GAModel {
         $d[$k][$mode]['events']['_all'] = $this->_addValuedeventsFeedDataRow($d[$k][$mode]['events']['_all'], $row);
       }
     }
-    return $d;      
+    return $d;
   }
-  
+
   function _addValuedeventsFeedDataRow($data, $row) {
     $data['value'] += $row['eventValue'];
     $data['totalValuedEvents'] += $row['totalEvents'];
     $data['uniqueValuedEvents'] += $row['uniqueEvents'];
-    return $data;   
+    return $data;
   }
-  
+
   function addGoalsFeedData($d, $feed, $indexBy, $mode = 'entrance', $details) {
     if (!isset($d['_all'][$mode])) {
       $d['_all'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
-      $d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}(); 
+      $d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
     }
     foreach ($details AS $id) {
       $d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, $id);
@@ -670,19 +727,19 @@ class GAModel {
         }
       }
     }
-    return $d;      
+    return $d;
   }
-  
+
   function _addGoalsFeedDataRow($data, $row, $id) {
     $data["completions"] += $row["goal{$id}Completions"];
     $data["value"] += $row["goal{$id}Value"];
-    return $data;   
+    return $data;
   }
-  
+
   function addVisitInfoFeedData($d, $feed, $indexBy, $mode = 'entrance', $details) {
     $keyOps = array(
-      'entrances' => 0, 
-      'goalValueAll' => 0, 
+      'entrances' => 0,
+      'goalValueAll' => 0,
       'customVarValue5' => 0,
     );
     foreach($feed->results AS $row) {
@@ -697,16 +754,16 @@ class GAModel {
       }
       if (isset($row['medium'])) {
         $d[$index]['visitinfo']['trafficcategory'] = $this->initFeedIndex($row, 'trafficcategory');
-      } 
-      $d[$index]['visitinfo']['location'] = $this->initFeedIndex($row, 'location');     
+      }
+      $d[$index]['visitinfo']['location'] = $this->initFeedIndex($row, 'location');
     }
     return $d;
   }
-  
+
   function addEventsourceEventFeedData($d, $feed, $indexBy) {
     if (!isset($d['_all'])) {
       $d['_all'] = $this->initPageviewDataStruc();
-      $d['_totals'] = $this->initPageviewDataStruc();      
+      $d['_totals'] = $this->initPageviewDataStruc();
     }
     $d['_totals']['events']['_all'] = $this->_addEventsourceEventFeedDataRow($d['_totals'][$mode]['events']['_all'], $feed->totals);
 
@@ -715,7 +772,7 @@ class GAModel {
         continue;
       }
       if (!isset($d[$index])) {
-        $d[$index] = $this->initPageviewDataStruc();        
+        $d[$index] = $this->initPageviewDataStruc();
       }
       if (!isset($d[$index]['title'])) {
         $d[$index]['title'] = $row['eventAction'];
@@ -734,10 +791,10 @@ class GAModel {
         $d[$k]['events']['_all'] = $this->_addEventsourceEventFeedDataRow($d[$k]['events']['_all'], $row);
       }
     }
-    return $d;      
+    return $d;
   }
-  
-  function _addEventsourceEventFeedDataRow($data, $row) {    
+
+  function _addEventsourceEventFeedDataRow($data, $row) {
     $data['totalEvents'] += $row['totalEvents'];
     $data['uniqueEvents'] += $row['uniqueEvents'];
     if (substr($row['eventCategory'], -1) == '!') {
@@ -745,9 +802,9 @@ class GAModel {
       $data['totalValuedEvents'] += $row['totalEvents'];
       $data['uniqueValuedEvents'] += $row['uniqueEvents'];
     }
-    return $data;   
+    return $data;
   }
-  
+
   function initFeedIndex(&$row, $indexBy, &$d = array(), &$pagePath = '') {
     if (!$indexBy) {
       return '';
@@ -758,7 +815,7 @@ class GAModel {
     if (!empty($this->dataIndexCallbacks[$indexBy])) {
       $func = $this->dataIndexCallbacks[$indexBy];
       $index = $func($row);
-    } 
+    }
     else if ($indexBy == 'content') {
       $index = $row['hostname'] . $path;
     }
@@ -827,35 +884,61 @@ class GAModel {
       $row['customVarValue1'] = $decoded;
       $index = $data['a'];
     }
+    else if (strpos($indexBy, 'pageAttribute:') === 0) {
+      $decoded = '';
+      $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
+      $row['customVarValue1'] = $decoded;
+      $indexBys = explode(':', $indexBy);
+
+      if ($this->pageAttributeInfo['type'] == 'list') {
+        $index = array();
+        foreach ($data AS $key => $value) {
+          if (strpos($key, $indexBys[1]) === 0) {
+            $a = explode('.', $key);
+            $index[] = $key;
+          }
+        }
+      }
+      else {
+        $index = $data[$indexBys[1]];
+      }
+    }
     else if ($indexBy == 'site') {
       return 'site';
     }
     else {
       $index = $row[$indexBy];
     }
-    if ($index && !isset($d[$index])) {
-      $d[$index] = array();
-      $d[$index]['i'] = $index;
+    if ($index) {
+      $indexes = is_array($index) ? $index : array($index);
+      foreach ($indexes as $ind) {
+        if (!isset($d[$ind])) {
+          $d[$ind] = array();
+          $d[$ind]['i'] = $ind;
+        }
+      }
     }
+
+
     return $index;
   }
-  
+
   function determineTrafficCategoryIndex($row) {
     if (!empty($row['socialNetwork']) && ($row['socialNetwork'] != '(not set)')) {
       return 'social network';
-    }  
+    }
     if (!empty($row['hasSocialSourceReferral']) && ($row['hasSocialSourceReferral'] != 'Yes')) {
       return 'social network';
-    } 
+    }
     if ($row['medium'] == 'facebook') {
       return 'social network';
-    } 
+    }
     if ($row['medium'] == 'twitter') {
       return 'social network';
-    } 
+    }
     if ($row['medium'] == 'linkedin') {
       return 'social network';
-    } 
+    }
     if ($row['medium'] == '(none)') {
       return 'direct';
     }
@@ -870,23 +953,23 @@ class GAModel {
     }
     if ($row['medium'] == 'feed') {
       return 'feed';
-    }  
+    }
     return 'other';
   }
-  
+
   function getTrafficsourcesSubIndexes() {
     $s = array(
-      'medium', 
-      'source', 
-      'referralHostpath', 
-      'searchKeyword', 
-      'socialNetwork', 
-      'campaign', 
+      'medium',
+      'source',
+      'referralHostpath',
+      'searchKeyword',
+      'socialNetwork',
+      'campaign',
       'trafficcategory'
     );
     return $s;
   }
-  
+
   function initIndexDataStruc() {
     $a = array(
       '_all' => array(),
@@ -894,7 +977,7 @@ class GAModel {
     );
     return $a;
   }
-  
+
   function initEntranceDataStruc() {
     $a = array(
       'events' => $this->initEventsDataArrayStruc(),
@@ -910,7 +993,7 @@ class GAModel {
     );
     return $a;
   }
-  
+
   function initPageviewDataStruc() {
     $a = array(
       'events' => $this->initEventsDataArrayStruc(),
@@ -922,15 +1005,15 @@ class GAModel {
       'goalValueAll' => 0,
       'goalCompletionsAll' => 0,
     );
-    return $a; 
+    return $a;
   }
-  
+
   function initEventsDataArrayStruc() {
     $a = array();
     $a['_all'] = $this->initEventsDataStruc();
     return $a;
   }
-  
+
   function initEventsDataStruc() {
     $a = array(
       'value' => 0,
@@ -941,13 +1024,13 @@ class GAModel {
     );
     return $a;
   }
-  
+
   function initGoalsDataArrayStruc() {
     $a = array();
     $a['_all'] = $this->initGoalsDataStruc();
     return $a;
   }
-  
+
   function initGoalsDataStruc() {
     $a = array(
       'value' => 0,
@@ -955,7 +1038,7 @@ class GAModel {
     );
     return $a;
   }
-  
+
   function formatPathFilter($path, $type = '', $bestMatch = FALSE) {
     $f = (($type == 'landingpage') || ($type == 'landingPagePath')) ? 'landingPagePath' : 'pagePath';
     $path = urldecode($path);
@@ -971,7 +1054,7 @@ class GAModel {
     }
     return $filter;
   }
-  
+
   function unserializeCustomVar($str, $decoded_str = '') {
     $decoded_str = html_entity_decode($str);
     $a = explode("&", $decoded_str);
@@ -979,7 +1062,7 @@ class GAModel {
     foreach ($a AS $i => $e) {
       $kv = explode("=", $e);
       if (empty($kv[0])) {
-          continue;
+        continue;
       }
       if (count($kv) == 2) {
         $data[$kv[0]] = $kv[1];
@@ -990,7 +1073,7 @@ class GAModel {
     }
     return $data;
   }
-  
+
   function filterPagePath($path) {
     $path = html_entity_decode($path);
     $filter_queries = array(
@@ -1000,7 +1083,7 @@ class GAModel {
       '_hsenc',  // HubSpot code
       '_hsmi', // HubSpot code
       '__hstc',
-      '__hssc',    
+      '__hssc',
     );
     $a = explode('?', $path);
     $query = '';
@@ -1010,25 +1093,25 @@ class GAModel {
         $d = explode('=', $c);
         if (!in_array($d[0], $filter_queries)) {
           $query .= (($query) ? '&' : '') . $c;
-        }   
+        }
       }
     }
     if ($query) {
-      $path = $a[0] . "?$query"; 
+      $path = $a[0] . "?$query";
     }
     else {
       $path = $a[0];
     }
     return $path;
   }
-  
+
   static function formatGtRegexFilter($param, $number, $key = '') {
     $k = ($key) ? "&$key=" : "^";
     $end = ($key) ? '&' : "$";
     $nstr = (string)$number;
     $num_arr = str_split($nstr);
     $digits = count($num_arr);
-    $regex = $param . '=~' . $k . '\d{' . ($digits+1) . '\,}' . $end;  
+    $regex = $param . '=~' . $k . '\d{' . ($digits+1) . '\,}' . $end;
     $p = '';
     foreach ($num_arr AS $i => $digit) {
       $digit = (int)$digit;
@@ -1037,7 +1120,7 @@ class GAModel {
         if ((1 + $digit) == 9) {
           $regex .= '9';
         }
-        else { 
+        else {
           $regex .= '[' . (1 + $digit) . '-9]';
         }
         if ($i < ($digits - 1)) {
@@ -1047,16 +1130,16 @@ class GAModel {
           $regex .= $end;
         }
       }
-      $p .= (string)$digit; 
+      $p .= (string)$digit;
     }
-    return $regex;  
+    return $regex;
   }
-  
+
   static function formatNltRegexFilter($param, $number) {
     $nstr = (string)$number;
     $num_arr = str_split($nstr);
     $digits = count($num_arr);
-    $regex = $param . '!~^\d{0\,' . ($digits-1) . '}$';  
+    $regex = $param . '!~^\d{0\,' . ($digits-1) . '}$';
     $p = '';
     foreach ($num_arr AS $i => $digit) {
       $digit = (int)$digit;
@@ -1065,7 +1148,7 @@ class GAModel {
         if (($digit - 1) == 0) {
           $regex .= '0';
         }
-        else { 
+        else {
           $regex .= '[0-' . ($digit - 1) . ']';
         }
         if ($i < ($digits - 1)) {
@@ -1075,9 +1158,9 @@ class GAModel {
           $regex .= '$';
         }
       }
-      $p .= (string)$digit; 
+      $p .= (string)$digit;
     }
-    return $regex;  
-  }  
-  
+    return $regex;
+  }
+
 }
