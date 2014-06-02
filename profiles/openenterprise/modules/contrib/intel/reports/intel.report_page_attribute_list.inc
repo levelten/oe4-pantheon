@@ -53,11 +53,12 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
   $report_modes = explode('.', $report_mode);
 
   $a = explode(':', $report_modes[0]);
-  $attrKey = $a[1];
+  $attr_key = $a[1];
 
-  $attrInfo = intel_page_attribute_load($attrKey);
+  $attr_info = intel_page_attribute_load($attr_key);
+  $indexBy = 'pageAttribute:' . $attr_key;
 
-  //dsm($attrInfo);
+  //dsm($attr_info);
   //dsm($report_modes);
 
   $cache_options = array();
@@ -71,6 +72,7 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
   
   $ga_data = new LevelTen\Intel\GAModel();
+  $ga_data->setPageAttributeInfo($attr_info);
   $ga_data->buildFilters($filters, $context);
 
   //$ga_data->addGAFilter('ga:customVarValue1!@&a=1&');
@@ -79,52 +81,52 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
-  $ga_data->setDebug(1);
-  //$ga_data->setRequestSetting('indexBy', 'author');
-  $ga_data->setPageAttributeInfo($attrInfo);
-  $ga_data->setRequestSetting('indexBy', 'pageAttribute:' . $attrKey);
+  //$ga_data->setDebug(1);
+
+  $ga_data->setRequestSetting('indexBy', $indexBy);
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews');
 
   $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
   $ga_data->loadFeedData('entrances');
-
-
   
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews_valuedevents');
-
-  dsm($ga_data->data);
-  return '';
 
   $ga_data->loadFeedData('entrances_valuedevents');
   
   $d = $ga_data->data;
 
+//dsm($d);
 
-  return '';
-  foreach ($d['author'] AS $index => $de) {
+  foreach ($d[$indexBy] AS $index => $de) {
     $score_components = array();
-    $d['author'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);      
-    $d['author'][$index]['score_components'] = $score_components;  
+    $d[$indexBy][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);
+    $d[$indexBy][$index]['score_components'] = $score_components;
   }   
 
-  $uids = array();
-  foreach ($d['author'] AS $index => $de) {
+  $data_options = array(
+    'page_count' => 1,
+  );
+  foreach ($d[$indexBy] AS $index => $de) {
     if (empty($de['i']) || (substr($de['i'], 0 , 1) == '_')) { 
       continue; 
-    }   
-    $uids[] = (int)$de['i'];    
-  }
+    }
 
-  $authors = intel_get_authors_report_data($uids);
-  foreach ($d['author'] AS $index => $de) {
-    if (!empty($de['i']) && !empty($authors[(int)$de['i']])) {
-      $d['author'][$index]['author'] = $authors[(int)$de['i']];
-      $d['author'][$index]['author']['profile_url'] = '/user/' . $d['author'][$index]['author']['uid'];
+    if (($attr_info['type'] == 'scalar') || ($attr_info['type'] == 'value')) {
+      $optionInfo = intel_get_attribute_option('page', $attr_key, $de['i'], $data_options);
+    }
+    else if ($attr_info['type'] == 'list') {
+      $a = explode('.', $de['i']);
+      $optionInfo = intel_get_attribute_option('page', $attr_key, $a[1], $data_options);
+    }
+    if (!empty($optionInfo['title'])) {
+      $d[$indexBy][$index]['info'] = $optionInfo;
     }
   }
+
+  //dsm($d);
 
   $vars = array(
     'data' => $d,
@@ -134,8 +136,10 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
     'end_date' => $end_date,
     'context' => $context,
     'report_modes' => $report_modes,
+    'attr_info' => $attr_info,
+    'indexBy' => $indexBy,
   );
-  $output .= theme_intel_author_list_report($vars);
+  $output .= theme_intel_page_attribute_list_report($vars);
 
   $output .= t("Timeframe: %start_date - %end_date %refresh", array(
     '%start_date' => date("Y-m-d H:i", $start_date),
@@ -158,32 +162,20 @@ function intel_scorecard_apply_filters_to_request($request, $filterstr, $segment
 }
 */
 
-function theme_intel_author_list_report($vars) {
-  intel_include_library_file('reports/class.author_report_view.php');
+function theme_intel_page_attribute_list_report($vars) {
+  intel_include_library_file('reports/class.page_attribute_report_view.php');
   
   $output = '';
 
-  $report_view = new LevelTen\Intel\AuthorReportView();
+  $report_view = new LevelTen\Intel\PageAttributeReportView();
   $report_view->setData($vars['data']);
   $report_view->setTableRowCount($vars['row_count']);
   $report_view->setModes($vars['report_modes']);
   $report_view->setDateRange($vars['start_date'], $vars['end_date']);
   $report_view->setTargets(intel_get_targets());
+  $report_view->setAttributeInfo($vars['attr_info']);
   \LevelTen\Intel\ReportPageHeader::setAddScriptCallback('intel_report_add_js_callback');
   $output .= $report_view->renderReport();
   
-  return $output; 
-}
-  
-
-function intel_get_authors_report_data($uids, $start_date = '', $end_date = '') {
-  $query = db_select('users', 'u', array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('u', array('uid', 'name'))
-    ->condition('u.uid', $uids, 'IN');
-  $n = $query->leftJoin('node', 'n', '%alias.uid = u.uid AND %alias.status = 1');
-  $query->groupBy('u.uid'); 
-  $query->addExpression('COUNT(n.nid)', 'published_nodes');
-  $results = $query->execute()->fetchAllAssoc('uid', PDO::FETCH_ASSOC);
-
-  return $results;
+  return $output;
 }

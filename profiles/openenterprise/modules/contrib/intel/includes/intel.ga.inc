@@ -413,7 +413,7 @@ function intel_page_attribute_load($key) {
   return $attribute; 
 }
 
-function intel_get_attribute_option($mode, $attr_key, $option_id) {
+function intel_get_attribute_option($mode, $attr_key, $option_id, $data_options = array()) {
   $info = intel_get_visitor_attributes();
   //dsm($info);
   if ($mode == 'page') {
@@ -426,17 +426,26 @@ function intel_get_attribute_option($mode, $attr_key, $option_id) {
 
   }
 
+  //dsm($attrInfo);
+
   $data = array(
     'title' => '',
   );
 
   if (!empty($attrInfo['options info callback'])) {
-    $data = $attrInfo['options info callback']($option_id);
+    $data = $attrInfo['options info callback']($option_id, $data_options);
   }
   else if (($attrInfo['module'] == 'intel') && isset($attrInfo['source_type']) && ($attrInfo['source_type'] == 'taxonomy')) {
     $term = taxonomy_term_load($option_id);
     if (!empty($term)) {
       $data['title'] = $term->name;
+    }
+    if (!empty($data_options['page_count'])) {
+      $query = db_query("SELECT count(nid) FROM {taxonomy_index} WHERE tid = :tid", array(
+        ':tid' => $option_id,
+      ));
+
+      $data['page_count'] = $query->fetchField();
     }
   }
   else if (isset($attrInfo['options'][$option_id])) {
@@ -446,7 +455,7 @@ function intel_get_attribute_option($mode, $attr_key, $option_id) {
   return $data;
 }
 
-function intel_page_attribute_author_option_info($option_id) {
+function intel_page_attribute_author_option_info($option_id, $data_options) {
   $data = array(
     'title' => '',
   );
@@ -454,25 +463,44 @@ function intel_page_attribute_author_option_info($option_id) {
   if (!empty($account)) {
     $data['title'] = format_username($account);
   }
+
+  if (!empty($data_options['page_count'])) {
+    $query = db_query("SELECT count(nid) FROM {node} WHERE uid = :uid", array(
+      ':uid' => $option_id,
+    ));
+
+    $data['page_count'] = $query->fetchField();
+  }
   return $data;
 }
 
-function intel_page_attribute_content_type_option_info($option_id) {
+function intel_page_attribute_content_type_option_info($option_id, $data_options) {
   $data = array(
     'title' => '',
   );
   $types = node_type_get_types();
   //print_r($types);
+  $type = '';
   if (isset($types[$option_id])) {
     $data['title'] = $types[$option_id]->name;
+    $type = $option_id;
   }
   else if (isset($types['enterprise_' . $option_id])) {
     $data['title'] = $types['enterprise_' . $option_id]->name;
+    $type = 'enterprise_' . $option_id;
+  }
+
+  if ($type && !empty($data_options['page_count'])) {
+    $query = db_query("SELECT count(nid) FROM {node} WHERE type = :type", array(
+      ':type' => $type,
+    ));
+
+    $data['page_count'] = $query->fetchField();
   }
   return $data;
 }
 
-function intel_page_attribute_taxomony_term_option_info($option_id) {
+function intel_page_attribute_taxomony_term_option_info($option_id, $data_options) {
   $data = array(
     'title' => '',
   );
@@ -480,6 +508,15 @@ function intel_page_attribute_taxomony_term_option_info($option_id) {
   if (!empty($term)) {
     $data['title'] = $term->name;
   }
+
+  if (!empty($data_options['page_count'])) {
+    $query = db_query("SELECT count(nid) FROM {taxonomy_index} WHERE tid = :tid", array(
+      ':tid' => $option_id,
+    ));
+
+    $data['page_count'] = $query->fetchField();
+  }
+
   return $data;
 }
 

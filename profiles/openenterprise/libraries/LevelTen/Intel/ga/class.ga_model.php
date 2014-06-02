@@ -125,6 +125,19 @@ class GAModel {
       }
     }
 
+    // TODO: this doesn't work yet, problem with events not filtering correctly
+    if (!empty($filters['page-attr'])) {
+      $a = explode(':', $filters['page-attr']);
+      // TODO add other attribute types
+      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
+        $gafilters['page-attr'] = 'ga:customVarValue1=@&' . $a[0] . '=' . $a[1];
+      }
+      else if ($this->pageAttributeInfo['type'] == 'list') {
+        $gafilters['page-attr'] = 'ga:customVarValue1=@&' . $a[0] . '.' . $a[1];
+      }
+      //$gafilters['page-attr'] .= ';ga:pagePath=@/';  // this entry forces the goal value up to previous pages
+    }
+
     if (!empty($filters['event'])) {
       $gasegments['event'] = "ga:eventCategory=~^" . $filters['event'];
     }
@@ -235,7 +248,7 @@ class GAModel {
 
     $filters = $this->gaFilters['filters'];
     $segments = $this->gaFilters['segments'];
-//Debug::printVar($filters);
+
     if ($type == 'pageviews') {
       if (isset($reportModes[0]) && (($reportModes[0] == 'social') || ($reportModes[0] == 'seo'))) {
         //$request['metrics'] = array('ga:pageviews', 'ga:pageviewsPerVisit', 'ga:timeOnPage', 'ga:exits', 'ga:totalEvents');
@@ -259,6 +272,10 @@ class GAModel {
       else {
         $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerVisit', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
         $request['sort'] = '-ga:goalValueAll,-ga:entrances';
+      }
+      // if filtered by page-attr, extra filter needs to be added to push goal values to previous pages
+      if (!empty($filters['page-attr'])) {
+        $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
       }
     }
     else if ($type == 'pageviews_valuedevents') {
@@ -399,7 +416,10 @@ class GAModel {
       $indexBys = explode(':', $indexBy);
       $request['dimensions'][] = 'ga:customVarValue1';
       // TODO add other attribute types
-      if ($this->pageAttributeInfo['type'] == 'list') {
+      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
+        $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '=';
+      }
+      else if ($this->pageAttributeInfo['type'] == 'list') {
         $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '.';
       }
       $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
@@ -457,14 +477,11 @@ class GAModel {
   }
 
   function addFeedData($feed, $type = '', $indexBy = '', $details = 0) {
-    $args = func_get_args();
-    dsm($args);
     if (empty($feed->results) || !is_array($feed->results)) {
       return;
     }
     $settings = $this->requestSettings;
 
-    dsm($settings);
     $type = ($type) ? $type : $settings['type'];
     $subType = $settings['subType'];
     $indexBy = ($indexBy) ?  $indexBy : $settings['indexBy'];
@@ -709,13 +726,23 @@ class GAModel {
       $d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, $id);
     }
     foreach($feed->results AS $row) {
-      if (!$index = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
         continue;
       }
-      if (!isset($d[$index][$mode])) {
-        $d[$index][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+
+      if (!is_array($indexes)) {
+        $indexes = array($indexes);
       }
-      $keys = array('_all', $index);
+
+      foreach ($indexes AS $index) {
+        if (!isset($d[$index][$mode])) {
+          $d[$index][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+        }
+      }
+
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+
       foreach ($keys AS $k) {
         foreach ($details AS $id) {
           if (!isset($d[$k][$mode]['goals']["n$id"])) {
@@ -890,7 +917,10 @@ class GAModel {
       $row['customVarValue1'] = $decoded;
       $indexBys = explode(':', $indexBy);
 
-      if ($this->pageAttributeInfo['type'] == 'list') {
+      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
+        $index = $data[$indexBys[1]];
+      }
+      else if ($this->pageAttributeInfo['type'] == 'list') {
         $index = array();
         foreach ($data AS $key => $value) {
           if (strpos($key, $indexBys[1]) === 0) {

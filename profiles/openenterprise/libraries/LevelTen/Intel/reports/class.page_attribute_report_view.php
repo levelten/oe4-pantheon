@@ -15,11 +15,16 @@ require_once __DIR__ . '/../charts/class.table_chart.php';
 require_once __DIR__ . '/../charts/class.pie_chart.php';
 require_once __DIR__ . '/../charts/class.bubble_chart.php';
 
-class AuthorReportView extends ReportView {
+class PageAttributeReportView extends ReportView {
   private $tableRowCount = 10;
+  private $attributeInfo = array();
   
   function __construct() {
     parent::__construct();
+  }
+
+  function setAttributeInfo($info) {
+    $this->attributeInfo = $info;
   }
   
   function setTableRowCount($rowCount) {
@@ -28,16 +33,17 @@ class AuthorReportView extends ReportView {
   
   function renderReport() {
     $output = '';
+
     $startDate = $this->dateRange['start'];
     $endDate = $this->dateRange['end'];
     $reportModes = $this->modes;
     $targets = $this->targets;
-    $indexBy = 'author';
-    $indexByLabel = 'Author';
+    $indexBy = 'pageAttribute:' . $this->attributeInfo['key'];
+    $indexByLabel = $this->attributeInfo['title'];
   
     $table = new TableChart('entrances_pageview_value_indicators');
-    $table->setColumnElement(0, 'label', 'Authors');
-    $table->insertColumn(1, 'number', 'Posts');
+    $table->setColumnElement(0, 'label', $this->attributeInfo['title'] . 's');
+    $table->insertColumn(1, 'number', 'Pages');
     $table->setOption('sortColumn', 4);
     $table->removeColumn(8);
 
@@ -117,6 +123,7 @@ class AuthorReportView extends ReportView {
 
     $value_str = '';
     $this->sortData('by_score_then_entrances', $indexBy);
+//dsm($this->data);
     foreach($this->data[$indexBy] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
       
@@ -127,11 +134,24 @@ class AuthorReportView extends ReportView {
       $days = $this->dateRange['days'];
 
       $table->newWorkingRow();
-      if (isset($d['author'])) {
-        $itemLabel = $this->formatRowString($d['author']['name'], 60);      
-        $table->addRowItem(render::link($itemLabel, $d['author']['profile_url']));
+      if (isset($d['info'])) {
+        $itemLabel = $this->formatRowString($d['info']['title'], 60);
+        if (isset($d['info']['uri'])) {
+          $table->addRowItem(render::link($itemLabel, $d['info']['uri']));
+        }
+        else {
+          $table->addRowItem($itemLabel);
+        }
+
+        if (isset($d['info']['page_count'])) {
+          $table->addRowItem((int)$d['info']['page_count']);
+        }
+        else {
+          $table->addRowItem(0);
+        }
+
   
-        $table->addRowItem((int)$d['author']['published_nodes']);
+
       }
       else {
         continue;
@@ -191,7 +211,7 @@ class AuthorReportView extends ReportView {
     $output .= '</div>';   
     
     $output .= '<div id="content-section" class="report-section">';
-    $output .= '<h3>' . t('Authors') . '</h3>';
+    $output .= '<h3>' . t('Page attributes') . '</h3>';
     //$output .= $out_table; 
     $output .= $table->renderOutput();
     $output .= '</div>';  

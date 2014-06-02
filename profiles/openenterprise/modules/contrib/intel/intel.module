@@ -563,6 +563,7 @@ function intel_menu() {
     'file' => 'reports/intel.report_visitor_list.inc',
     'api_access' => 'pro',
   );
+  /*
   $items['admin/reports/intel/team'] = array(
     'title' => 'Team',
     'page callback' => 'intel_author_list_report_page',
@@ -572,6 +573,7 @@ function intel_menu() {
     'weight' => $w++,
     'file' => 'reports/intel.report_author_list.inc',
   );
+  */
 
   $items['admin/reports/intel/ga_explorer'] = array(
     'title' => 'Google Analytics Explorer',
@@ -598,14 +600,14 @@ function intel_menu() {
         'page arguments' => array(4, 5, 6),
         'access callback' => $access,
         'access arguments' => array('view all intel reports'),
-        'type' => ($slug == '-') ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+        'type' => !empty($def['type']) ? $def['type'] : (($slug == '-') ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
         'weight' => $w++,
         'file' => !empty($def['file']) ? $def['file'] : 'reports/intel.report_' . $category . '_list.inc',
         'api_access' => !empty($def['api_access']) ? $def['api_access'] : '',
       );
     }
   }
-dsm($items);
+
   $items['intel/api'] = array(
     'title' => '',
     'page callback' => 'intel_ajax',
@@ -728,9 +730,49 @@ function intel_reports() {
     'key' => 'engagement.top.pageview',
     'title' => t('Engagement'),
   );
-  $reports['content']['terms'] = array(
+  $reports['content']['pa'] = array(
+    'key' => 'default.top.combined',
+    'title' => t('Attraction pages'),
+    'access callback' => '_intel_user_access_extended',
+    'type' => MENU_CALLBACK,
+  );
+  $reports['content']['pa-ct'] = array(
+    'key' => 'page_attribute:ct.top.entrance',
+    'title' => t('Content types'),
+    'page callback' => 'intel_page_attribute_list_report_page',
+    'access callback' => '_intel_user_access_extended',
+    'file' => 'reports/intel.report_page_attribute_list.inc'
+  );
+  $reports['content']['pa-ct-p'] = array(
+    'key' => 'page_attribute:i-t.top.entrance',
+    'title' => t('Attraction pages'),
+    'access callback' => '_intel_user_access_extended',
+    'type' => MENU_CALLBACK,
+  );
+  $reports['content']['pa-i'] = array(
+    'key' => 'page_attribute:i.top.entrance',
+    'title' => t('Page intent'),
+    'page callback' => 'intel_page_attribute_list_report_page',
+    'access callback' => '_intel_user_access_extended',
+    'file' => 'reports/intel.report_page_attribute_list.inc'
+  );
+  $reports['content']['pa-t'] = array(
     'key' => 'page_attribute:t.top.entrance',
     'title' => t('Terms'),
+    'page callback' => 'intel_page_attribute_list_report_page',
+    'access callback' => '_intel_user_access_extended',
+    'file' => 'reports/intel.report_page_attribute_list.inc'
+  );
+  $reports['content']['pa-j'] = array(
+    'key' => 'page_attribute:j.top.entrance',
+    'title' => t('Subjects'),
+    'page callback' => 'intel_page_attribute_list_report_page',
+    'access callback' => '_intel_user_access_extended',
+    'file' => 'reports/intel.report_page_attribute_list.inc'
+  );
+  $reports['content']['pa-a'] = array(
+    'key' => 'page_attribute:a.top.entrance',
+    'title' => t('Authors'),
     'page callback' => 'intel_page_attribute_list_report_page',
     'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
@@ -757,6 +799,10 @@ function intel_reports() {
     'key' => 'searchKeyword.top',
     'title' => t('Search keywords'),
   );
+  $reports['trafficsource']['keyword'] = array(
+    'key' => 'keyword.top',
+    'title' => t('Keywords'),
+  );
   $reports['trafficsource']['socialnetworks'] = array(
     'key' => 'socialNetwork.top',
     'title' => t('Social networks'),
@@ -769,12 +815,14 @@ function intel_reports() {
     'key' => 'campaign.top',
     'title' => t('Campaigns'),
   );
+  /*
   $reports['team'] = array();
   $reports['team']['-'] = array(
     'key' => 'author.top',
     'title' => t('Authors'),
     'default' => 1,
   );
+  */
   $reports['visitor'] = array();
   $reports['visitor']['-'] = array(
     'key' => 'visitor.top',

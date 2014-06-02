@@ -171,7 +171,16 @@ class ContentReportView extends ReportView {
 
     foreach($this->data['content'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
-      list($host, $path) = explode('/', $d['i'], 2);
+      //list($host, $path) = explode('/', $d['i'], 2);
+      $a = explode('/', $d['i'], 2);
+      if (count($a) == 2) {
+        $host = $a[0];
+        $path = $a[1];
+      }
+      else {
+        $host = $a[0];
+        $path = '';
+      }
       $pageMeta = $this->getPageMeta($path);
       
       if ($pageMeta) {

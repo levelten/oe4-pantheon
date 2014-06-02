@@ -39,6 +39,7 @@ function rtDashboardModel (name) {
         visitors: {}
     };
     this.statsDelta = {},
+        /*
     this.paLabels = {
         a: 'Author',
         ct: 'Content type',
@@ -73,6 +74,7 @@ function rtDashboardModel (name) {
         'press_release': 'Press release'
     };
     this.contentTypes = {};
+    */
     this.visitors = {};
     this.scorings = {
         entrance: .05,

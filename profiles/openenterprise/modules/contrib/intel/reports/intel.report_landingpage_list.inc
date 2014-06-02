@@ -26,7 +26,6 @@ function intel_landingpage_list_report_page($sub_index = '-', $filter_type = '',
   if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
     intel_add_report_headers();
 
-    $report_modes = explode('.', $report_mode);
     drupal_set_title(t('Landing page performance report'), PASS_THROUGH);
     $filters += $_GET;
     //$filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);

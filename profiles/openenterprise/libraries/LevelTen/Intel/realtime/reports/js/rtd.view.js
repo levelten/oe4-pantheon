@@ -110,13 +110,29 @@ function rtDashboardView (name) {
             source: 'Source',
             medium: 'Medium',
             campaign: 'Campaign',
-            term: 'Term'
+            term: 'Keywords'
         },
       eventDetails: {
             'Social share': 'Social shares',
             'Social share.PAGES': 'Shared pages',
             'Social share.DEFAULT': 'Shared pages (%subtype)',
             'Comment': 'Comments'
+        }
+    };
+    this.chartCmsLinks = {
+        pageAttrs: {
+            a: 'admin/reports/intel/content/pa-a',
+            ct: 'admin/reports/intel/content/pa-ct',
+            //'ct.DEFAULT': 'admin/reports/intel/content/pa-ct-p/%subtype-key',
+            j: 'admin/reports/intel/content/pa-j',
+            //'j.DEFAULT': 'admin/reports/intel/content/pa-j-p/%subtype-key',
+            t: 'admin/reports/intel/content/pa-t'
+        },
+        tsDetails: {
+            source: 'admin/reports/intel/trafficsource/source',
+            medium: 'admin/reports/intel/trafficsource/medium',
+            campaign: 'admin/reports/intel/trafficsource/campaign',
+            keyword: 'admin/reports/intel/trafficsource/keyword'
         }
     };
     this.chartRotationI = {
@@ -730,7 +746,7 @@ function rtDashboardView (name) {
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
             var label = ''; //'<span class="table-menu">' + this.getIcon('icon-menu', 'icon-menu') + '</span>';
-            label += 'Pages' + this.getCMSLink('link-ext', this.config.settings.cmsPath + 'admin/reports/intel/content')
+            label += 'Pages' + this.getCMSLink('link-ext', this.config.settings.cmsPath + 'admin/reports/intel/content');
             this.chartData[chartKey].addColumn('string', label);
             this.chartData[chartKey].addColumn('number', 'Ent');
             this.chartData[chartKey].addColumn('number', 'Pvs');
@@ -828,6 +844,7 @@ function rtDashboardView (name) {
 
             lkeys = [];
             var headerLabel = 'Page attributes';
+            var headerLink = '';
             if (type.length == 1) {
                 lkeys.push(type[0]);
             }
@@ -838,6 +855,9 @@ function rtDashboardView (name) {
             for (var i = 0; i < lkeys.length; i++) {
                 if (this.chartRotationLabels[chartKey][lkeys[i]] != undefined) {
                     headerLabel = this.chartRotationLabels[chartKey][lkeys[i]];
+                    if (this.chartCmsLinks[chartKey][lkeys[i]] != undefined) {
+                        headerLink = this.chartCmsLinks[chartKey][lkeys[i]];
+                    }
                     break;
                 }
             }
@@ -848,6 +868,10 @@ function rtDashboardView (name) {
             if (type.length == 2) {
                 var rep = (this.model.attrInfo.page[type[0]].options[type[1]] != undefined) ? this.model.attrInfo.page[type[0]].options[type[1]].title : type[1];
                 headerLabel = headerLabel.replace("%subtype", rep);
+            }
+
+            if (headerLink != '') {
+                headerLabel += this.getCMSLink('link-ext', this.config.settings.cmsPath + headerLink);
             }
 
             this.chartData.pageAttrs.setColumnLabel(0, headerLabel);
@@ -942,7 +966,9 @@ function rtDashboardView (name) {
 
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
-            this.chartData[chartKey].addColumn('string', 'Traffic source');
+            var headerLabel = 'Traffic source';
+            headerLabel += this.getCMSLink('link-ext', this.config.settings.cmsPath + 'admin/reports/intel/trafficsource');
+            this.chartData[chartKey].addColumn('string', headerLabel);
             this.chartData[chartKey].addColumn('number', 'Ent');
             this.chartData[chartKey].addColumn('number', 'Pvs');
             this.chartData[chartKey].addColumn('number', 'Val');
@@ -1025,6 +1051,10 @@ function rtDashboardView (name) {
         }
         var labels = {};
         var data = {};
+
+        var headerLabel = 'Traffic source';
+        var headerLink = '';
+
         if (statsData.ts[type[0]] != undefined
         //    && ()
             ) {
@@ -1036,8 +1066,14 @@ function rtDashboardView (name) {
             }
             var lkey = type[0];
             if (this.chartRotationLabels[chartKey][lkey] != undefined) {
-                this.chartData[chartKey].setColumnLabel(0, this.chartRotationLabels[chartKey][lkey]);
+                headerLabel = this.chartRotationLabels[chartKey][lkey]
+
             }
+
+            if (this.chartCmsLinks[chartKey][lkey] != undefined) {
+                headerLabel += this.getCMSLink('link-ext', this.config.settings.cmsPath + this.chartCmsLinks[chartKey][lkey]);
+            }
+            this.chartData[chartKey].setColumnLabel(0, headerLabel);
         }
 
         for (var key in data) {
@@ -1156,19 +1192,23 @@ function rtDashboardView (name) {
 
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
-            this.chartData[chartKey].addColumn('string', 'Calls to action');
+            var headerLabel = 'Calls to action'
+            headerLabel += this.getCMSLink('link-ext', this.config.settings.cmsPath + 'admin/content/cta');
+            this.chartData[chartKey].addColumn('string', headerLabel);
             this.chartData[chartKey].addColumn('number', 'Imps');
             this.chartData[chartKey].addColumn('number', 'Clks');
             this.chartData[chartKey].addColumn('number', 'Clk%');
+            this.chartData[chartKey].addColumn('number', 'Convs');
+            this.chartData[chartKey].addColumn('number', 'Conv%');
             draw = true;
         }
-
+console.log(statsData[chartKey]);
         for (var key in statsData[chartKey]) {
             var c = statsData[chartKey][key];
             draw = true;
             if (this.chartIndex[chartKey][key] == undefined) {
                 this.chartIndex[chartKey][key] = this.chartData[chartKey].getNumberOfRows();
-                this.chartData[chartKey].addRow([key, 0, 0, 0]);
+                this.chartData[chartKey].addRow([key, 0, 0, 0, 0, 0]);
             }
             var row = this.chartIndex[chartKey][key];
 
@@ -1180,6 +1220,12 @@ function rtDashboardView (name) {
 
             var per = (countA != 0) ? 100 * countB/countA : 0;
             this.chartData[chartKey].setValue(row, 3, per);
+
+            var countC = this.chartData[chartKey].getValue(row, 2) + c.conversions;
+            this.chartData[chartKey].setValue(row, 4, countC);
+
+            var per = (countB != 0) ? 100 * countC/countB : 0;
+            this.chartData[chartKey].setValue(row, 5, per);
 
             if (refresh != true) {
                 //if (c.events > 0) {
@@ -1221,7 +1267,9 @@ function rtDashboardView (name) {
 
         if (this.chartData[chartKey] == undefined) {
             this.chartData[chartKey] = new google.visualization.DataTable();
-            this.chartData[chartKey].addColumn('string', 'Landing pages');
+            var headerLabel = 'Landing pages'
+            headerLabel += this.getCMSLink('link-ext', this.config.settings.cmsPath + 'admin/reports/intel/conversion');
+            this.chartData[chartKey].addColumn('string', headerLabel);
             this.chartData[chartKey].addColumn('number', 'Views');
             this.chartData[chartKey].addColumn('number', 'Convs');
             this.chartData[chartKey].addColumn('number', 'Conv%');
