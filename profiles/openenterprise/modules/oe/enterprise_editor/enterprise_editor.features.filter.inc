@@ -14,64 +14,10 @@ function enterprise_editor_filter_default_formats() {
   $formats['advanced_html'] = array(
     'format' => 'advanced_html',
     'name' => 'Advanced HTML',
-    'cache' => 0,
+    'cache' => 1,
     'status' => 1,
     'weight' => -8,
-    'filters' => array(
-      'video_filter' => array(
-        'weight' => -1,
-        'status' => 1,
-        'settings' => array(
-          'video_filter_width' => 400,
-          'video_filter_height' => 400,
-          'video_filter_autoplay' => 0,
-          'video_filter_related' => 1,
-          'video_filter_html5' => 1,
-        ),
-      ),
-      'filter_url' => array(
-        'weight' => 0,
-        'status' => 1,
-        'settings' => array(
-          'filter_url_length' => 72,
-        ),
-      ),
-      'icon' => array(
-        'weight' => 0,
-        'status' => 1,
-        'settings' => array(),
-      ),
-      'insert_block' => array(
-        'weight' => 0,
-        'status' => 1,
-        'settings' => array(
-          'check_roles' => 0,
-        ),
-      ),
-      'picture' => array(
-        'weight' => 0,
-        'status' => 1,
-        'settings' => array(),
-      ),
-      'filter_tokens' => array(
-        'weight' => 0,
-        'status' => 1,
-        'settings' => array(),
-      ),
-      'filter_htmlcorrector' => array(
-        'weight' => 10,
-        'status' => 1,
-        'settings' => array(),
-      ),
-      'pathologic' => array(
-        'weight' => 50,
-        'status' => 1,
-        'settings' => array(
-          'local_paths' => '',
-          'protocol_style' => 'full',
-        ),
-      ),
-    ),
+    'filters' => array(),
   );
 
   // Exported format: Filtered HTML.
