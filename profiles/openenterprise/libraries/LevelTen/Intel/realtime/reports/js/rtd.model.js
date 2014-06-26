@@ -204,7 +204,7 @@ function rtDashboardModel (name) {
 
     this.addToLog = function addToLog(data, ids, lastId) {
         var time;
-        for (var i in data) {
+        for (var i = 0; i < data.length; i++) {
             if (ids[i] < this.logLastId) {
               continue; // we got duplicate data for some reason
             }
@@ -279,7 +279,6 @@ function rtDashboardModel (name) {
 
     this.addVar = function (e) {
         if (e.scope == 'visitor') {
-//console.log(e);
             if (this.visitors[e.vtk] == undefined) {
                 this.visitors[e.vtk] = {
                     name: 'anon (' + e.vtk.substr(0,10) + ')',

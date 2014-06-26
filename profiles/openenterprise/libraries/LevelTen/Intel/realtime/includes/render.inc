@@ -25,6 +25,8 @@ function render_response_json($data, $vars = array()) {
   if (empty($GET['noheaders'])) {
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Mon, 01 Jan 1996 00:00:00 GMT');
+    // tell robots to ignore this url
+    header('X-Robots-Tag: noindex');
   }
   $post_replace = array();
   if (!empty($data['_post_replace']) && is_array($data['_post_replace'])) {

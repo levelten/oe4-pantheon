@@ -128,39 +128,61 @@ function enterprise_landingpages_permission() {
  * @param $page
  */
 function enterprise_landingpages_page_alter(&$page) {
+
   $entity = menu_get_object();
-  if (!empty($entity) && ($entity->type == 'enterprise_landingpage')) {
+  $arg2 = arg(2);
+  if (!empty($entity) && ($entity->type == 'enterprise_landingpage') && (empty($arg2))) {
     if (!empty($entity->entity_data['landingpages']['page_remove_blocks'])) {
-      $ignore = enterprise_landingpages_block_remove_ignore();
-      if (isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'])
-        && is_array($entity->entity_data['landingpages']['page_remove_blocks_ignore'])) {
-        $ignore = $entity->entity_data['landingpages']['page_remove_blocks_ignore'];
+      // add visible blocks to node
+      $save_entity_data = FALSE;
+      if (!isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'])) {
+        $entity->entity_data['landingpages']['page_remove_blocks_ignore'] = array();
+        $save_entity_data = TRUE;
       }
+
+      $ignore = enterprise_landingpages_block_remove_ignore($entity);
+      //if (isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'])
+      //  && is_array($entity->entity_data['landingpages']['page_remove_blocks_ignore'])) {
+      //  $ignore = $entity->entity_data['landingpages']['page_remove_blocks_ignore'];
+      //}
       // iterate through page regions
       foreach(element_children($page) AS $region) {
         // iterate through blocks in each region
         foreach (element_children($page[$region]) AS $block_name) {
-          // remove any blocks not set to ignore
+          // if block does not exist in ignore list, add setting value to -1
+          // if value set to 1, don't remove block
+          if (!isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name])) {
+            $entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name] = '';
+            $save_entity_data = TRUE;
+          }
+          else if ($entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name]) {
+            continue;
+          }
           if (!in_array($block_name, $ignore)) {
             unset($page[$region][$block_name]);
           }
+
         }
+      }
+      if ($save_entity_data) {
+        entity_data_set('node', $entity->nid, 'landingpages', $entity->entity_data['landingpages']);
       }
     }
   }
 }
 
-function enterprise_landingpages_block_remove_ignore() {
+function enterprise_landingpages_block_remove_ignore($node) {
   $ignore = module_invoke_all('enterprise_landingpages_block_remove_ignore');
   if (empty($ignore) || !is_array($ignore)) {
     $ignore = array();
   }
   // add pre defined ignores
-  $ignore += array(
+  $defaults = array(
     'system_main',
     'admin_menu',
     'cta_sel_cta_forms',
   );
+  $ignore = array_merge($ignore, $defaults);
   drupal_alter('enterprise_landingpages_block_remove_ignore', $ignore);
   return $ignore;
 }
@@ -522,6 +544,43 @@ function enterprise_landingpages_landingpage_node_form_alter(&$form, &$form_stat
   );
 
 
+  $form['page_customization']['page_remove_blocks_advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Remove blocks customization'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  if (isset($lp_options['page_remove_blocks_ignore'])) {
+    $desc = t('Check any block you would like to not be removed from the page view when the remove blocks option is enabled.');
+    $desc .= ' ' . t('Note: disabled checkboxes are set to automatically be excluded in the code.');
+    $form['page_customization']['page_remove_blocks_advanced']['page_remove_blocks_ignore'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Don\'t remove'),
+      '#options' => array(),
+      '#default_value' => isset($lp_options['page_remove_blocks_ignore']) ? $lp_options['page_remove_blocks_ignore'] : array(),
+      '#description' => $desc,
+    );
+    $ignore = enterprise_landingpages_block_remove_ignore($form['#node']);
+    $form_state['page_remove_blocks_ignore_defaults'] = $ignore;
+
+    $element = &$form['page_customization']['page_remove_blocks_advanced']['page_remove_blocks_ignore'];
+    foreach ($lp_options['page_remove_blocks_ignore'] AS $block_name => $value) {
+      $element['#options'][$block_name] = $block_name;
+      if (in_array($block_name, $ignore)) {
+        $element[$block_name]['#disabled'] = TRUE;
+        $element['#default_value'][$block_name] = $block_name;
+      }
+    }
+  }
+
+  /*$lp_options = entity_data_get('node', $form['#node']->nid, 'landingpages', array());
+  $form['page_customization']['page_remove_dwyr_blocks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Remove DWYR blocks'),
+    '#default_value' => isset($lp_options['page_remove_dwyr_blocks']) ? $lp_options['page_remove_dwyr_blocks'] : 0,
+    //'#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
+  );*/
   //dsm($selection);
   //dsm($form);
 
@@ -588,6 +647,16 @@ function enterprise_landingpages_landingpage_node_form_validate(&$form, &$form_s
     $form_state['node']->entity_data['landingpages'] = array();
   }
   $form_state['node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
+
+  if (isset($form_state['values']['page_remove_blocks_ignore'])) {
+    $form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore'] = array();
+    $ignore = (isset($form_state['page_remove_blocks_ignore_defaults']) ? $form_state['page_remove_blocks_ignore_defaults'] : array());
+    foreach ($form_state['values']['page_remove_blocks_ignore'] AS $block_name => $value) {
+      // don't set value for blocks provided by ignore function
+      $form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name] = (!in_array($block_name, $ignore)) ? $value : '';
+    }
+  }
+
 
   //$form['#node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
 

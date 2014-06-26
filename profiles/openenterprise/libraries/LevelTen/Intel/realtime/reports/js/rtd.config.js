@@ -412,7 +412,7 @@ function rtDashboardConfig (name) {
         // active visitor table uses floated tds, this corrects for border alignment issues
        // html += "#site-stats-table .key-metric-value-active {font-size: " + keyMetricFontSize + "% !important; }";
         html += "#active-visitors-table .table-header-row td {height: " + (headerRowHeight - 3) + "px; !important; }";
-        html += '.visitor-image-default { background-image:url("' + this.settings.defaultVisitorImg + '"); background-size: contain; }';
+        html += '.visitor-image-default { background-image:url("' + this.settings.defaultVisitorImg + '"); background-size: contain; background-repeat: no-repeat; }';
         css.innerHTML = html;
         document.body.appendChild(css);
 

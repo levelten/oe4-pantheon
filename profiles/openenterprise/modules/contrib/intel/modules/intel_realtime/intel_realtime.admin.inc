@@ -146,6 +146,7 @@ function intel_realtime_log_clear_page($time = -1) {
   else {
     intel_realtime_log_clear($time);
     drupal_set_message(t('Log has been cleared.'));
+    drupal_goto('admin/reports/intel_realtime/log');
   }
 
   return $output;

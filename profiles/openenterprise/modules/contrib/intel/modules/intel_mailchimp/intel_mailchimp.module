@@ -163,6 +163,41 @@ function intel_mailchimp_api_list_member_info_by_leid($list_id, $leid) {
     'leid' => $leid,
   );
   $result = $q->call('lists/member-info', $params);
+
+  if (!empty($result['success_count'])) {
+    return $result['data'][0];
+  }
+  return FALSE;
+}
+
+function intel_mailchimp_api_campaigns_list_by_campaign_id($campaign_id) {
+  if (!is_array($campaign_id)) {
+    $campaign_id = array($campaign_id);
+  }
+  $q = intel_mailchimp_get_api_object();
+  $params = array();
+  $params['filters'] = array(
+    'campaign_id' => implode(',', $campaign_id),
+  );
+
+  $result = $q->call('campaigns/list', $params);
+
+  $campaigns = array();
+  if (!empty($result['total'])) {
+    foreach ($result['data'] AS $i => $campaign) {
+      $campaigns[$campaign['id']] = $campaign;
+    }
+    return $campaigns;
+  }
+  return FALSE;
+}
+
+function intel_mailchimp_api_campaigns_content($cid) {
+  $q = intel_mailchimp_get_api_object();
+  $params = array();
+  $params['cid'] = $cid;
+  $result = $q->call('campaigns/content', $params);
+
   if (!empty($result['success_count'])) {
     return $result['data'][0];
   }
@@ -423,7 +458,7 @@ function intel_mailchimp_intel_sync_visitordata(&$visitor) {
     'source' => 'mailchimp',
   );
   $mvars = $member['merges'];
-  //$prop_info = intel_intel_visitor_property_info();
+  //$prop_info = intel_get_visitor_property_info();
   //$options = intel_visitor_property_select_options();
   $system_vars = intel_mailchimp_system_mergevars();
   foreach ($mvars AS $tag => $mvar) {

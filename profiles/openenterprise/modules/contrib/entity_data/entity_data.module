@@ -30,8 +30,9 @@ function entity_data_entity_save($entity, $type) {
     || !isset($entity_info['entity keys']['id'])) {
     return;
   }
+  $language = isset($entity->language) ? $entity->language : LANGUAGE_NONE;
   foreach ($entity->entity_data AS $name => $value) {
-    entity_data_set($type, $entity->{$entity_info['entity keys']['id']}, $name, $value, $entity->language);
+    entity_data_set($type, $entity->{$entity_info['entity keys']['id']}, $name, $value, $language);
   }
 }
 
@@ -57,7 +58,6 @@ function entity_data_entity_load(&$entities, $types) {
       return;
     }
     $vars = entity_data_get_all($entity->entity_type, $entity->{$entity_info['entity keys']['id']}, array());
-
     if (count($vars)) {
       $entities[$i]->entity_data = $vars;
     }

@@ -262,13 +262,13 @@ class IntelVisitor extends Entity {
     }
     $var['_updated'] = REQUEST_TIME;
  
-    if (isset($prop_info['validate'])) {
-      $funcs = $prop_info['validate'];
+    if (isset($prop_info['process callbacks'])) {
+      $funcs = $prop_info['process callbacks'];
       if (!is_array($funcs)) { 
         $funcs = array($funcs);
       }
       foreach ($funcs AS $func) {
-        $func($var, $this);
+        $func($var, $prop_info, $this);
       }
     }
     
@@ -932,6 +932,81 @@ function intel_visitor_build_profile_content_elements($entity) {
   
   $vdata = $entity->data;
 
+  $emailclicks = 0;
+  if (variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT)) {
+    $filter = array(
+      'conditions' => array(
+        array('c.vid', $entity->identifiers['vid'], 'IN'),
+      ),
+    );
+    $result = intel_load_filtered_emailclick_result($filter);
+    $rows = array();
+    $calls = array();
+    while ($row = $result->fetchObject()) {
+      $clicks[$row->cid] = $row;
+    }
+    uasort($clicks, function ($a, $b) {
+        return ($a->clicked < $b->clicked) ? 1 : -1;
+      }
+    );
+
+
+
+    // TODO: move mailchimp info processing to hook and process in mailchimp module
+
+    $emaildesc = $row->eid;
+    $email_info = array();
+    foreach ($clicks AS $row) {
+      $ops = array();
+      $ops[] = l(t('meta'), 'emailclick/' . $row->cid);
+      $title = 'NA';
+
+      if ($row->type == 'mailchimp') {
+        if (!isset($email_info['mailchimp'])) {
+          $email_info['mailchimp'] = array();
+        }
+        if (!isset($email_info['mailchimp'][$row->eid])) {
+          $campaigns = intel_mailchimp_api_campaigns_list_by_campaign_id($row->eid);
+          if (isset($campaigns[$row->eid])) {
+            $email_info['mailchimp'][$row->eid] = $campaigns[$row->eid];
+          }
+        }
+        if (isset($email_info['mailchimp'][$row->eid]['archive_url_long'])) {
+          $link_options = array(
+            'attributes' => array(
+              'target' => 'mailchimp',
+            ),
+          );
+          $emaildesc = l( $campaigns[$row->eid]['title'], $campaigns[$row->eid]['archive_url_long'], $link_options);
+        }
+      }
+
+      $row = array(
+        format_date($row->clicked, 'medium'),
+        $row->type,
+        $emaildesc,
+        implode(' ', $ops),
+      );
+      $rows[] = $row;
+    }
+    if (count($rows)) {
+      $tvars = array();
+      $tvars['rows'] = $rows;
+      $emailclicks = count($rows);
+      $tvars['header'] = array(
+        t('Clicked'),
+        t('Type'),
+        t('Email'),
+        t('Ops'),
+      );
+      $table = theme('table', $tvars);
+      $entity->content['emailclicks_table'] = array(
+        '#markup' => theme('intel_visitor_profile_block', array('title' => t('Email clicks'), 'markup' => $table)),
+        '#weight' => $weight++,
+      );
+    }
+  }
+
   $phonecalls = 0;
   if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
     $filter = array(
@@ -951,6 +1026,7 @@ function intel_visitor_build_profile_content_elements($entity) {
     );
     foreach ($calls AS $row) {
       $ops = array();
+      $ops[] = l(t('meta'), 'phonecall/' . $row->cid);
       $title = 'NA';
       $rows[] = array(
         format_date($row->initiated, 'medium'),
@@ -1003,6 +1079,7 @@ function intel_visitor_build_profile_content_elements($entity) {
   );  
   foreach ($subs AS $row) {
     $ops = array();
+    $ops[] = l(t('meta'), 'submission/' . $row->sid);
     $title = 'NA';
     if ($row->type == 'webform') {
       if (!isset($wf_nodes[$row->fid])) {
@@ -1104,6 +1181,13 @@ function intel_visitor_build_profile_content_elements($entity) {
     'value' => $form_submissions,
     'title' => t('form submissions'),
   );
+
+  if (variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT)) {
+    $stats[] = array(
+      'value' => $emailclicks,
+      'title' => t('email clicks'),
+    );
+  }
 
   if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
     $stats[] = array(

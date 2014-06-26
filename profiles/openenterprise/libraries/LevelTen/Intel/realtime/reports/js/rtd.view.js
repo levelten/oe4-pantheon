@@ -445,6 +445,8 @@ function rtDashboardView (name) {
             var d = new Date(1000 * t);
             if (t >= minTime0) {
 //console.log(counts);
+
+
                 row = 29 - Math.floor((t - minTime0 - 1) / 60);
 //console.log(row);
                 if (counts.siteAdd.pageviews > 0) {
@@ -1202,7 +1204,7 @@ function rtDashboardView (name) {
             this.chartData[chartKey].addColumn('number', 'Conv%');
             draw = true;
         }
-console.log(statsData[chartKey]);
+
         for (var key in statsData[chartKey]) {
             var c = statsData[chartKey][key];
             draw = true;
@@ -1441,6 +1443,7 @@ console.log(statsData[chartKey]);
     };
 
     this.buildVisitorsReport = function(statsData, refresh) {
+//console.log(statsData.visitors);
         var chartKey = 'visitors';
 
         // check if this report in in another window
@@ -1490,9 +1493,13 @@ console.log(statsData[chartKey]);
         // update stats changes, e.g. pageviews and value.
         // time based updates done in loop below this one
         for (var key in statsData.visitors) {
+           // if (!statsData.visitor.hasOwnProperty(key)
+
 
             var c = statsData.visitors[key];
-            var visitor = this.model.visitors[key];
+//console.log(c);
+            var visitor = (this.model.visitors[key] != undefined) ? this.model.visitors[key] : [];
+//console.log(visitor);
             var sid = visitor.activeSession;
             var session = this.model.sessions[key + '.' + sid];
             var lastPage = session.hits[session.last];
@@ -1529,6 +1536,7 @@ console.log(statsData[chartKey]);
                 var newRow = [img, label, 0, 0, 0, 0, 0, 0];
                 newRow[indexes['lastHit']] = new Date();
                 newRow[indexes['page']] = '';
+//console.log(newRow);
                 this.chartData[chartKey].addRow(newRow);
                 // if no activeVisitor has been set, set it to the first row
                 if (this.activeVisitor == -1) {
@@ -1571,6 +1579,7 @@ console.log(statsData[chartKey]);
         // update time since last hit
         var rows = this.chartData[chartKey].getNumberOfRows();
         var rowAdjust = 0;
+        var curTime = this.model.getTime();
         for (var key in this.chartIndex[chartKey]) {
             if (rowAdjust != 0) {
                 this.chartIndex[chartKey][key] += rowAdjust;
@@ -1579,7 +1588,9 @@ console.log(statsData[chartKey]);
             var visitor = this.model.visitors[key];
             var sid = visitor.activeSession;
             var session = this.model.sessions[key + '.' + sid];
-            var timeFromLastHit = (this.model.getTime() - session.last);
+            var timeFromLastHit = (curTime - session.last);
+//console.log(session);
+//console.log(timeFromLastHit);
 
             // remove visitors without a hit in last 30 mins
             if (timeFromLastHit > 1800) {
@@ -1591,6 +1602,8 @@ console.log(statsData[chartKey]);
                 this.chartData[chartKey].setValue(row, indexes['lastHit'], new Date(1000 * timeFromLastHit));
             }
         }
+
+        //console.log(this.chartData[chartKey].toJSON());
 
         if (this.charts[chartKey] == undefined) {
             this.charts[chartKey] = new google.visualization.Table(document.getElementById(this.chartDivs[chartKey]));
@@ -2462,8 +2475,8 @@ console.log(statsData[chartKey]);
     };
 
     this.getLogElementTypeCount = function getLogElementTypeCount(element) {
-//console.log('getLogElementTypeCount element:');
-//console.log(element);
+console.log('getLogElementTypeCount element:');
+console.log(element);
         var counts = {
           site: {
             pageviews: 0,
@@ -2489,7 +2502,7 @@ console.log(statsData[chartKey]);
                 continue;
             }
             var e = element[i];
-//console.log(e);
+console.log(e);
             var pageKey = e.p;
             var sesKey = e.vtk + '.' + e.sid;
             var visitorKey = e.vtk;

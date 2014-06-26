@@ -55,7 +55,7 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
   $a = explode(':', $report_modes[0]);
   $attr_key = $a[1];
 
-  $attr_info = intel_page_attribute_load($attr_key);
+  $attr_info = intel_get_page_attribute_info($attr_key);
   $indexBy = 'pageAttribute:' . $attr_key;
 
   //dsm($attr_info);
@@ -115,11 +115,11 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
     }
 
     if (($attr_info['type'] == 'scalar') || ($attr_info['type'] == 'value')) {
-      $optionInfo = intel_get_attribute_option('page', $attr_key, $de['i'], $data_options);
+      $optionInfo = intel_get_attribute_option_info('page', $attr_key, $de['i'], $data_options);
     }
     else if ($attr_info['type'] == 'list') {
       $a = explode('.', $de['i']);
-      $optionInfo = intel_get_attribute_option('page', $attr_key, $a[1], $data_options);
+      $optionInfo = intel_get_attribute_option_info('page', $attr_key, $a[1], $data_options);
     }
     if (!empty($optionInfo['title'])) {
       $d[$indexBy][$index]['info'] = $optionInfo;

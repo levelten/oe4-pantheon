@@ -17,6 +17,7 @@ define('INTEL_TRACK_PAGE_TERMS_DEFAULT', 0);
 define('INTEL_TRACK_PAGE_TERMS_VISITOR_DEFAULT', 0);
 define('INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT', 1);
 define('INTEL_TRACK_PHONECALLS_DEFAULT', 0);
+define('INTEL_TRACK_EMAILCLICKS_DEFAULT', 0);
 define('INTEL_TRACK_REALTIME_DEFAULT', 0);
 
 define('INTEL_STATUS_OK', 200);
@@ -448,7 +449,7 @@ function intel_menu() {
     'page callback' => 'intel_admin_people_contacts',
     //'page arguments' => array(4),
     'access callback' => 'intel_visitor_access',
-    'access arguments' => array('view', 1),
+    'access arguments' => array('list'),
     'position' => 'left',
     'weight' => -4,
     //'type' => MENU_NORMAL_ITEM,
@@ -464,13 +465,14 @@ function intel_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_visitor.inc',
   );
+
   $items['admin/people/submissions'] = array(
     'title' => 'Form submissions',
     'description' => 'Information about visitors.',
     'page callback' => 'intel_admin_people_submissions',
     //'page arguments' => array(4),
-    'access callback' => 'intel_submissions_access',
-    'access arguments' => array('view', 1),
+    'access callback' => 'intel_submission_access',
+    'access arguments' => array('list'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'admin/intel.admin_submission.inc',
   );
@@ -481,8 +483,8 @@ function intel_menu() {
       'description' => 'Information about a phone call.',
       'page callback' => 'intel_phonecall_page',
       'page arguments' => array(1),
-      'access callback' => 'user_access',
-      'access arguments' => array('view intel visitor data'),
+      'access callback' => 'intel_phonecall_access',
+      'access arguments' => array('view', 1),
       //'type' => MENU_LOCAL_TASK,
       'file' => 'admin/intel.admin_phonecall.inc',
     );
@@ -491,17 +493,40 @@ function intel_menu() {
       'description' => 'Inbound phone calls.',
       'page callback' => 'intel_admin_people_phonecalls',
       //'page arguments' => array(4),
-      'access callback' => 'user_access',
-      'access arguments' => array('view intel visitor data'),
+      'access callback' => 'intel_phonecall_access',
+      'access arguments' => array('list'),
       'type' => MENU_NORMAL_ITEM,
       'file' => 'admin/intel.admin_phonecall.inc',
+    );
+  }
+
+  if (variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT)) {
+    $items['emailclick/%'] = array(
+      'title' => 'Email click',
+      'description' => 'Information about a pn email click.',
+      'page callback' => 'intel_emailclick_page',
+      'page arguments' => array(1),
+      'access callback' => 'intel_emailclick_access',
+      'access arguments' => array('view', 1),
+      //'type' => MENU_LOCAL_TASK,
+      'file' => 'admin/intel.admin_emailclick.inc',
+    );
+    $items['admin/people/emailclicks'] = array(
+      'title' => 'Email clicks',
+      'description' => 'Clicks from emails.',
+      'page callback' => 'intel_admin_people_emailclicks',
+      //'page arguments' => array(4),
+      'access callback' => 'intel_emailclick_access',
+      'access arguments' => array('list'),
+      'type' => MENU_NORMAL_ITEM,
+      'file' => 'admin/intel.admin_emailclick.inc',
     );
   }
 
   // admin reports callbacks
 
   $items['admin/reports/intel'] = array(
-    'title' => 'LevelTen Intelligence',
+    'title' => 'Intelligence',
     'description' => 'Analytics reports by LevelTen Intelligence.',
     'page callback' => 'intel_dashboard_report_page',
     'access callback' => 'user_access',
@@ -902,6 +927,8 @@ function intel_admin_paths() {
     'node/*/analytics/*' => 1,
     'visitor/*' => 1,
     'submission/*' => 1,
+    'phonecall/*' => 1,
+    'emailclick/*' => 1,
   );
   return $paths;
 }
@@ -911,17 +938,28 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util() {
-dsm($_COOKIE);
-return '';
-  $values = array(
-    'id' => $id,
-  );
-  $entity = entity_get_controller('intel_visitor')->create($values);
 
-  $attributes = variable_get('intel_page_attributes_custom', array());
-dsm($attributes);
-  $attributes = variable_get('intel_visitor_attributes_custom', array());
-dsm($attributes);
+  $query = db_update('system')
+    ->condition('name', 'openenterprise')
+    ->fields(array('status' => 0));
+  $query->execute();
+
+  $info = system_get_info('module', 'views');
+  dsm($info);
+
+  $info = system_get_info('module', 'dwyer');
+  dsm($info);
+
+  $info = system_get_info('module', 'openenterprise');
+  dsm($info);
+
+  return '';
+
+  $prop_info = intel_get_visitor_property_info();
+  dsm($prop_info);
+
+  $prop_info = intel_get_visitor_property_info('data.vtk');
+  dsm($prop_info);
 
   return '';
 
@@ -1046,15 +1084,22 @@ function intel_permission() {
     'title' => t('Delete any visitor'),
     'description' => t('Grants access to delete visitors.'),
   );
-
   $permissions['view all intel submissions'] = array(
     'title' => t('View submissions'),
     'description' => t('Grants access to view submissions.'),
   );
+  $permissions['view all intel phonecalls'] = array(
+    'title' => t('View phonecalls'),
+    'description' => t('Grants access to view phonecalls.'),
+  );
+  $permissions['view all intel emailclicks'] = array(
+    'title' => t('View emailclicks'),
+    'description' => t('Grants access to view emailclicks.'),
+  );
   return $permissions;
 }
 
-function intel_visitor_access($op, $visitor, $account = NULL) {
+function intel_visitor_access($op, $visitor = NULL, $account = NULL) {
   global $user;
   $account = isset($account) ? $account : $user;
 
@@ -1075,13 +1120,45 @@ function intel_visitor_access($op, $visitor, $account = NULL) {
   }
 }
 
-function intel_submission_access($op, $submission, $account = NULL) {
+function intel_submission_access($op, $submission = NULL, $account = NULL) {
   global $user;
   $account = isset($account) ? $account : $user;
 
   $general_access = user_access('view all intel submissions', $account);
 
   $module_access = count(array_filter(module_invoke_all('intel_submission_access', $submission, $op, $account))) > 0;
+
+  switch ($op) {
+    case 'view':
+      return $module_access || $general_access;
+    case 'list':
+      return $module_access || $general_access;
+  }
+}
+
+function intel_phonecall_access($op, $submission = NULL, $account = NULL) {
+  global $user;
+  $account = isset($account) ? $account : $user;
+
+  $general_access = user_access('view all intel phonecalls', $account);
+
+  $module_access = count(array_filter(module_invoke_all('intel_phonecall_access', $submission, $op, $account))) > 0;
+
+  switch ($op) {
+    case 'view':
+      return $module_access || $general_access;
+    case 'list':
+      return $module_access || $general_access;
+  }
+}
+
+function intel_emailclick_access($op, $emailclick = NULL, $account = NULL) {
+  global $user;
+  $account = isset($account) ? $account : $user;
+
+  $general_access = user_access('view all intel emailclicks', $account);
+
+  $module_access = count(array_filter(module_invoke_all('intel_emailclick_access', $emailclick, $op, $account))) > 0;
 
   switch ($op) {
     case 'view':
@@ -2153,7 +2230,7 @@ function intel_get_field_attribute_allowed_values($mode = 'visitor', $existing_f
 
   $attribute_types = array();
   $values = array();
-  $attributes = ($mode == 'page') ?  intel_get_page_attributes() : intel_get_visitor_attributes();
+  $attributes = ($mode == 'page') ?  intel_get_page_attribute_info() : intel_get_visitor_attribute_info();
   foreach ($attributes AS $key => $va) {
     if (empty($va['selectable'])) {
       continue;
@@ -2182,7 +2259,7 @@ function intel_get_field_attribute_allowed_values($mode = 'visitor', $existing_f
 function intel_get_field_intel_event_allowed_values() {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
 
-  $events = intel_get_intel_events(TRUE);
+  $events = intel_get_intel_event_info();
   $values = array();
 
   foreach ($events AS $key => $va) {
@@ -2250,6 +2327,9 @@ function intel_sync_visitordata_page($person_intel) {
   return $output;
 }
 
+/**
+ * Implements hook_cron()
+ */
 function intel_cron() {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.visitor_sync.inc";
   intel_queue_sync_visitor_requests();
@@ -2336,8 +2416,21 @@ function intel_get_visitor_property_construct($name) {
   return FALSE;
 }
 
-function intel_get_visitor_property_info($name) {
+/**
+ * Returns visitor property info.
+ *
+ * @param string $name (optional)
+ *    used to request a specific visitor property by name. If omitted, all
+ *    visitor properties info will be returned as an array.
+ * @return array|bool
+ */
+
+function intel_get_visitor_property_info($name = NULL) {
   $props = intel_get_visitor_property_info_all();
+
+  if (!isset($name)) {
+    return $props;
+  }
   if (!empty($props[$name])) {
     return $props[$name];
   }

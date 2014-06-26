@@ -86,7 +86,7 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
   if (!empty($filters['page-attr'])) {
     $a = explode(':', $filters['page-attr']);
     $attr_key = $a[0];
-    $attr_info = intel_page_attribute_load($attr_key);
+    $attr_info = intel_get_page_attribute_info($attr_key);
   }
   
   $timeops = 'l30d';

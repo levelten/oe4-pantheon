@@ -20,6 +20,7 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
   $api_connection = 0;
   $options = array('none' => 'Select list');
   $q = mailchimp_get_api_object();
+
   if ($q) {
     $lists = mailchimp_get_lists();
     if (!empty($lists)) {
@@ -34,7 +35,7 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
   else {
     drupal_set_message(t('Could not get valid Mailchimp API object'), 'error');
   }
-  dsm($lists);
+
   $list_id = variable_get('intel_mailchimp_default_list_id', '');
   $form['intel_mailchimp_default_list_id'] = array(
     '#type' => 'select',
@@ -57,7 +58,7 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
   if ($list_id && isset($lists[$list_id])) {
     $list = $lists[$list_id];
     $mvars = $list['mergevars'];
-    $prop_info = intel_intel_visitor_property_info();
+    $prop_info = intel_get_visitor_property_info();
     $options = intel_visitor_property_select_options();
     $system_vars = intel_mailchimp_system_mergevars();
     $form['property-map'] = array(
@@ -82,8 +83,8 @@ function intel_mailchimp_admin_config_form($form, $form_state) {
     }
 
     // process interest groups
-    $visitor_attrs = intel_get_visitor_attributes();
-    dsm($visitor_attrs);
+    $visitor_attrs = intel_get_visitor_attribute_info();
+
     // filter compatible visitor_attrs
     $options = array(
       '' => t('- None'),

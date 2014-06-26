@@ -54,6 +54,13 @@ $env_settings['oepro.getlevelten.com']['db'] = array(
   'tableprefix' => 'intel_',
 );
 
+$env_settings['getlevelten.com']['db'] = array(
+  'dsn' => 'mysql:host=localhost;dbname=leveltendesign',
+  'username' => 'root',
+  'password' => 'ET1144sy8He825c',
+  'tableprefix' => 'intel_',
+);
+
 $env_settings['oepro3p.localhost:8082']['db'] = array(
   'dsn' => 'mysql:host=127.0.0.1;dbname=oepro3p;port=33066',
   'username' => 'drupaluser',
@@ -63,6 +70,13 @@ $env_settings['oepro3p.localhost:8082']['db'] = array(
 
 $env_settings['oepro3p_test.localhost:8082']['db'] = array(
   'dsn' => 'mysql:host=127.0.0.1;dbname=oepro3p_test;port=33066',
+  'username' => 'drupaluser',
+  'password' => '',
+  'tableprefix' => 'intel_',
+);
+
+$env_settings['lvlt.localhost:8082']['db'] = array(
+  'dsn' => 'mysql:host=127.0.0.1;dbname=lvlt;port=33066',
   'username' => 'drupaluser',
   'password' => '',
   'tableprefix' => 'intel_',

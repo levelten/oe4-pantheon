@@ -229,7 +229,7 @@ function _intel_intel_visitor_property_info() {
       'following' => NULL,
     ),
     'key' => 'username',
-    'validate' => 'intel_visitor_property_twiter_validate'
+    'process callbacks' => array('intel_visitor_property_twitter_process'),
   );
   $prop['data.vimeo'] = array(
     'title' => t('Vimeo'),
@@ -390,7 +390,7 @@ function intel_get_icon_params() {
   return $params;
 }
 
-function intel_visitor_property_twiter_validate(&$prop, $visitor) {
+function intel_visitor_property_twitter_process(&$prop, $prop_info, $visitor) {
   $key = (!empty($prop['username'])) ? $prop['username'] : '';
   if (empty($prop['url'])) {
     $prop['url'] = 'http://twitter.com/' . $prop['username'];

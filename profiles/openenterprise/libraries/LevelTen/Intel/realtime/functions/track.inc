@@ -28,7 +28,6 @@ function track_pageview() {
   }
   $response = array(
     'message' => "OK",
-    'instance' => $instance,
   );
   return $response;
 }

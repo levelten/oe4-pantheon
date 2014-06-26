@@ -129,7 +129,7 @@ function intel_twilio_process_incoming($number, $options, &$watchdog) {
     'value' => '',
   );
   $scorings = intel_get_scorings();
-  $intel_events = intel_get_intel_events(TRUE);
+  $intel_events = intel_get_intel_event_info();
 
   $phonenumber = intel_phonenumber_load_by_number($phonecall->to_num);
   if ($phonenumber) {

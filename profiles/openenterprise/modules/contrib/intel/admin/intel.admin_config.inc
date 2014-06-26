@@ -120,6 +120,12 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT),
     '#description' => t('Enables phonecall tracking features.'),
   );
+  $form['l10iapi']['advanced']['intel_track_emailclicks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track email clicks'),
+    '#default_value' => variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT),
+    '#description' => t('Enables email click tracking features.'),
+  );
   $form['l10iapi']['advanced']['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
@@ -343,7 +349,7 @@ function intel_admin_scoring($form, &$form_state) {
     );    
   } 
 
-  $events = intel_get_intel_events();
+  $events = intel_get_intel_event_info();
   foreach ($events AS $i => $m) {
     if (empty($m['valued_event'])) {
       continue;
@@ -494,7 +500,7 @@ function intel_admin_scoring_submit(&$form, &$form_state) {
 function intel_admin_intel_event_list_page() {
   require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
  
-  $events = intel_get_intel_events(TRUE);
+  $events = intel_get_intel_event_info();
 
   $header = array(
     t('Category'),
@@ -559,6 +565,7 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
   if (!is_array($event)) {
     $event = array();
   }
+
   $form_state['event'] = $event;
   $add = empty($event['key']);
   $custom = (!$event || !empty($event['custom'])) ? 1 : 0;
@@ -739,7 +746,7 @@ function intel_admin_intel_event_form_validate(&$form, &$form_state) {
   $event = $form_state['event'];
   $key = !empty($values['key']) ? $values['key'] : $event['key'];
   
-  $events = intel_get_intel_events();    
+  $events = intel_get_intel_event_info();
   
   // check unique key if new event
   if (!isset($event['key'])) {
@@ -850,10 +857,10 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
   require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
  
   if ($scope == 'page') {
-    $attributes = intel_get_page_attributes();    
+    $attributes = intel_get_page_attribute_info();
   }
   else {
-    $attributes = intel_get_visitor_attributes();
+    $attributes = intel_get_visitor_attribute_info();
   }
 
   $header = array(
@@ -923,6 +930,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
   if (!is_array($attribute)) {
     $attribute = array();
   }
+
   $form_state['attribute'] = $attribute;
   $form_state['scope'] = $scope;
   $add = (!$attribute) ? 1 : 0;
@@ -1056,10 +1064,10 @@ function intel_admin_attribute_form_validate(&$form, &$form_state) {
   
   $scope = $form_state['scope'];
   if ($scope == 'page') {
-    $attributes = intel_get_page_attributes();    
+    $attributes = intel_get_page_attribute_info();
   }
   else {
-    $attributes = intel_get_visitor_attributes();
+    $attributes = intel_get_visitor_attribute_info();
   }
   
   // check unique key if new attribute

@@ -77,7 +77,7 @@ function intel_webform_settings_form($form, &$form_state, $node) {
     '#title' => t('Additional field maps'),
   );
   
-  $prop_info = intel_intel_visitor_property_info();
+  $prop_info = intel_get_visitor_property_info();
   $options = intel_visitor_property_select_options();
   
   if (!empty($node->webform['components'])) {

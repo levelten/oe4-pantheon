@@ -416,6 +416,11 @@ function intel_admin_people_visitors() {
       'data' => t('Last updated'),
       'type' => 'property',
       'specifier' => 'updated',
+    ),
+    array(
+      'data' => t('Last activity'),
+      'type' => 'property',
+      'specifier' => 'last_activity',
       'sort' => 'desc',
     ),
     array(
@@ -449,8 +454,8 @@ function intel_admin_people_visitors() {
     if ($api_level == 'pro') {
       $row[] = $visitor->location();
     }
-    //$row[] = ((REQUEST_TIME  - $visitor->last_activity) > 172800) ? format_date($visitor->last_activity, 'short') : format_interval(REQUEST_TIME  - $visitor->last_activity) . ' ' . t('ago');
     $row[] = ((REQUEST_TIME  - $visitor->updated) > 172800) ? format_date($visitor->updated, 'short') : format_interval(REQUEST_TIME  - $visitor->updated) . ' ' . t('ago');
+    $row[] = ((REQUEST_TIME  - $visitor->last_activity) > 172800) ? format_date($visitor->last_activity, 'short') : format_interval(REQUEST_TIME  - $visitor->last_activity) . ' ' . t('ago');
     $ops = '';
     $ops .= l(t('Clickstream'), $visitor->uri() . '/clickstream');
     $row[] = $ops;

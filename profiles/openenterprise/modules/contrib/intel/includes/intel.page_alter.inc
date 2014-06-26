@@ -36,7 +36,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $is_landingpage = 0;
   
   $entity = '';
-  $intel_events = intel_get_intel_events(TRUE);
+  $intel_events = intel_get_intel_event_info(TRUE);
   $visitor_attrs = array();
   $page_attrs = array();
   $page_events = array();
@@ -194,9 +194,9 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   if ($user->uid) {
     $cur = isset($ga_va['r']) ? $ga_va['r'] : array();
     foreach ($user->roles AS $i => $l) {
-      // don't send anonomous role
+      // don't send anonymous role
       if ($i == 1) {
-        //continue;
+        continue;
       }
       if (!isset($cur[$i])) { 
         if (!isset($visitor_attrs['r'])) {
@@ -297,6 +297,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $parsed_url = intel_parse_cms_url();
   $js = array(
     'intel' => array(
+      'debug' => intel_debug_mode(),
       'cms_hostpath' => $parsed_url['hostpath'],
       'module_path' => drupal_get_path('module', 'intel'),
       'system_path' => $_GET['q'],
@@ -509,6 +510,7 @@ function intel_init() {
   }
 
   // hack to support dpm/dsm functions if devel not installed
+  /*
   if (intel_debug_mode() && !module_exists('devel')) {
     if (!function_exists('dpm')) {
       function dpm($input) {
@@ -521,6 +523,7 @@ function intel_init() {
       }
     }
   }
+  */
 
 }
 
@@ -733,6 +736,7 @@ function intel_check_form_submission($page) {
   // submission object
   $submission = intel_submission_construct();
   $form_settings = array();
+  $submit_context = array();
   // an array of fields to pass to intel's autofill form feature
   $autofill= array();
   $submission_data = array();
@@ -741,8 +745,9 @@ function intel_check_form_submission($page) {
   // fire hook for modules to report if a form has been submitted by setting $submission->type
   foreach (module_implements('intel_form_submission_check') AS $module) {
     $function = $module . '_intel_form_submission_check';
-    $function($submission, $track, $form_settings, $link_query);
+    $function($submission, $track, $submit_context, $form_settings, $link_query);
   }
+
   // if no submission type set, exit
   if (empty($submission->type)) {
     return;
@@ -824,7 +829,7 @@ function intel_check_form_submission($page) {
   }
   
   $scorings = intel_get_scorings();
-  $submit_context = array();
+
   $cta_context = array();
     
   // if vid not set on visitor, save to create vid
@@ -846,7 +851,11 @@ function intel_check_form_submission($page) {
     if (empty($fsi)) {
       $fsi = $visitor->apiVisitor->getFlag('lfs');  // _updated is a better key for cross site forms
     }
-    $submit_context = $visitor->getVar('api_session', 'form_submit', $fsi);
+
+    // if submit context not set by form_check hook, fetch it from api
+    if (empty($submit_context)) {
+      $submit_context = $visitor->getVar('api_session', 'form_submit', $fsi);
+    }
     if (!empty($submit_context)) {
       $referrer = !empty($submit_context['system_path']) ? $submit_context['system_path'] : $submit_context['location'];
       // strip query string
@@ -955,7 +964,7 @@ function intel_check_form_submission($page) {
     }
   }
 
-  $intel_events = intel_get_intel_events(TRUE);
+  $intel_events = intel_get_intel_event_info(TRUE);
 if (!empty($_GET['debug'])) {
   dpm('$scorings'); dpm($scorings);//
   dpm('$intel_events'); dpm($intel_events);//
@@ -1006,7 +1015,7 @@ if (!empty($_GET['debug'])) {
   // save visitor
   if (!empty($visitor->vid)) {
     intel_visitor_save($visitor);
-    watchdog('intel.page_alter 992', print_r($visitor, 1));
+    //watchdog('intel.page_alter 992', print_r($visitor, 1));
   }
 
   // queue to sync visitor data

@@ -40,14 +40,16 @@ function intel_webform_menu() {
 
 /**
  * Implements hook_page_alter
- * 
+ *
  * @param $page
  */
+/*
 function intel_webform_page_alter(&$page) {
   if ((arg(0) == 'node') && (arg(2) == 'webform-results')) {
     drupal_add_js(drupal_get_path('module', 'intel_webform') . '/intel_webform.admin_submission_results_alter.js');
   }
 }
+*/
 
 /**
  * Implements hook_intel_page_settings_js_alter()
@@ -189,7 +191,7 @@ function intel_webform_node_load($nodes, $types) {
     if (!empty($data)) {
       $nodes[$nid]->webform['intel'] = $data;
     }
-  }  
+  }
 }
 
 /**
@@ -217,16 +219,15 @@ function intel_webform_intel_intel_script() {
 /**
  * Implements hook_intel_form_submission_check
  */
-function intel_webform_intel_form_submission_check(&$submission, &$track, &$form_settings, &$link_query) {
+function intel_webform_intel_form_submission_check(&$submission, &$track, &$submit_context, &$form_settings, &$link_query) {
   if (empty($_GET['sid'])) {
     return;
   }
-  
+
   require_once './' . drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
   $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
   $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
   if (isset($wfsubmission->submitted)) {
-
     $link_query = array('sid' => $_GET['sid']);
     $wf_node = node_load($wfsubmission->nid);
     if (isset($wf_node->field_track_submission[$wf_node->language][0]['value'])) {
@@ -256,6 +257,20 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$form
     if (isset($wf_node->webform['intel'])) {
       $form_settings = $wf_node->webform['intel'];
     }
+    // check if intel_submit_data component exists
+    $data_cid = -1;
+    if (!empty($wf_node->webform['components']) && is_array($wf_node->webform['components'])) {
+      foreach ($wf_node->webform['components'] AS $cid => $component) {
+        if ($component['form_key'] == 'intel_submit_data') {
+          $data_cid = $cid;
+          break;
+        }
+      }
+    }
+    // if component exists, set submit context
+    if (($data_cid >= 0) && isset($wfsubmission->data[$data_cid][0])) {
+      $submit_context = json_decode($wfsubmission->data[$data_cid][0]);
+    }
   }
 }
 
@@ -273,7 +288,7 @@ function intel_webform_form_webform_component_edit_form_alter(&$form, $form_stat
   $options = array(
     '' => t(' - None - '),
   );
-  $prop_info = intel_intel_visitor_property_info();
+  $prop_info = intel_get_visitor_property_info();
 
   if ($type == 'email') {
     $options['email:email'] = t('Email');
