@@ -53,49 +53,55 @@ function socialmedia_widgets_element_info() {
 
   // AddThis follow buttons
   $elements['socialmedia_addthis-facebook-follow'] = array(
-      'label' => t('Addthis Facebook follow'),
+      'label' => t('AddThis Facebook follow'),
       'help' => t(''),
       'group' => t('Social media: Facebook'),
       'template' => '<a class="addthis_button_facebook_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-facebook_userid]?]" title="Follow on Facebook">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-facebook')) . '</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-google-follow'] = array(
-      'label' => t('Addthis Facebook follow'),
+      'label' => t('AddThis Google+ follow'),
       'help' => t(''),
       'group' => t('Social media: Google+'),
       'template' => '<a class="addthis_button_google_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-googleplus_userid]?]" title="Follow on Google+">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-gplus')) . '</a>',
     ) + $defaults;
+  $elements['socialmedia_addthis-instagram-follow'] = array(
+      'label' => t('AddThis Instagram follow'),
+      'help' => t(''),
+      'group' => t('Social media: Instagram'),
+      'template' => '<a class="addthis_button_instagram_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" [?profile_type=addthis:usertype="{[socialmedia:sm-instagram_type]}"?] addthis:userid="[?profile_username=[socialmedia:sm-instagram_userid]?]" title="Follow on Instagram">[?icon-markup={[socialmedia:sm-instagram_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-instagram_icon-path]}" alt="LinkedIn icon">?]</a>',
+    ) + $defaults;
   $elements['socialmedia_addthis-linkedin-follow'] = array(
-      'label' => t('Addthis LinkedIn follow'),
+      'label' => t('AddThis LinkedIn follow'),
       'help' => t(''),
       'group' => t('Social media: LinkedIn'),
       'template' => '<a class="addthis_button_linkedin_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" [?profile_type=addthis:usertype="{[socialmedia:sm-linkedin_type]}"?] addthis:userid="[?profile_username=[socialmedia:sm-linkedin_userid]?]" title="Follow on LinkedIn">[?icon-markup={[socialmedia:sm-linkedin_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-linkedin_icon-path]}" alt="LinkedIn icon">?]</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-pinterest-follow'] = array(
-      'label' => t('Addthis Pinterest follow'),
+      'label' => t('AddThis Pinterest follow'),
       'help' => t(''),
       'group' => t('Social media: Pinterest'),
       'template' => '<a class="addthis_button_pinterest_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-pinterest_userid]?]" title="Follow on Pinterest">[?icon-markup={[socialmedia:sm-pinterest_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-pinterest_icon-path]}" alt="Pinterest icon">?]</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-rss-follow'] = array(
-      'label' => t('Addthis RSS follow'),
+      'label' => t('AddThis RSS follow'),
       'help' => t(''),
       'group' => t('Social media: RSS'),
       'template' => '<a class="addthis_button_rss_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-rss_userid]?]" title="Subscribe to RSS feed">[?icon-markup={[socialmedia:sm-rss_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-rss_icon-path]}" alt="RSS icon">?]</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-twitter-follow'] = array(
-      'label' => t('Addthis Twitter follow'),
+      'label' => t('AddThis Twitter follow'),
       'help' => t(''),
       'group' => t('Social media: Twitter'),
       'template' => '<a class="addthis_button_twitter_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-twitter_userid]?]" title="Follow on Twitter">[?icon-markup={[socialmedia:sm-twitter_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-twitter_icon-path]}" alt="Twitter icon">?]</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-vimeo-follow'] = array(
-      'label' => t('Addthis Vimeo follow'),
+      'label' => t('AddThis Vimeo follow'),
       'help' => t(''),
       'group' => t('Social media: Vimeo'),
       'template' => '<a class="addthis_button_vimeo_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-vimeo_userid]?]" title="Follow on Vimeo">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-youtube')) . '</a>',
     ) + $defaults;
   $elements['socialmedia_addthis-youtube-follow'] = array(
-      'label' => t('Addthis YouTube follow'),
+      'label' => t('AddThis YouTube follow'),
       'help' => t(''),
       'group' => t('Social media: YouTube'),
       'template' => '<a class="addthis_button_youtube_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-youtube_userid]?]" title="Follow on YouTube">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-youtube')) . '</a>',
@@ -228,6 +234,18 @@ function socialmedia_base_platforms() {
     'profile-url' => "[?profile_url=[socialmedia:sm-googleplus_url]?]",
     'profile-text-link' => '<a href="[?profile_url=[socialmedia:sm-googleplus_url]?]" title="' . $title . '"[?link-target= target="{[socialmedia:sm-default_link_target_profile]}"?][?link-rel= rel="{[socialmedia:sm-default_link_rel_profile]}"?]>[?profile_username=[socialmedia:sm-googleplus_username]?]</a>',  
     'profile-button' => '<a href="[?profile_url=[socialmedia:sm-googleplus_url]?]" title="' . $title . '"[?link-target= target="{[socialmedia:sm-default_link_target_profile]}"?][?link-rel= rel="{[socialmedia:sm-default_link_rel_profile]}"?]><img src="[?icon-path=[socialmedia:sm-googleplus_icon-path]?]" alt="Google+ icon" ></a>',
+  );
+
+  $platforms['instagram'] = array(
+    'label' => t('Instagram'),
+    'group' => t('Social media: Instagram'),
+  );
+  $title = t("Visit !varusername on Instagram", array('!varusername' => '[?profile_username=[socialmedia:sm-instagram_username]?]'));
+  $stitle = t("Share on Instagram");
+  $platforms['instagram']['templates'] = array(
+    'profile-url' => "[?profile_url=[socialmedia:sm-instagram_url]?]",
+    'profile-text-link' => '<a href="[?profile_url=[socialmedia:sm-instagram_url]?]" title="' . $title . '"[?link-target= target="{[socialmedia:sm-default_link_target_profile]}"?][?link-rel= rel="{[socialmedia:sm-default_link_rel_profile]}"?]>[?profile_username=[socialmedia:sm-instagram_username]?]</a>',
+    'profile-button' => '<a href="[?profile_url=[socialmedia:sm-instagram_url]?]" title="' . $title . '"[?link-target= target="{[socialmedia:sm-default_link_target_profile]}"?][?link-rel= rel="{[socialmedia:sm-default_link_rel_profile]}"?]><img src="[?icon-path=[socialmedia:sm-instagram_icon-path]?]" alt="Instagram icon" ></a>',
   );
   
   $platforms['linkedin'] = array(
@@ -575,8 +593,8 @@ function socialmedia_widgets_element_addthis_linkedin_share_simple($defaults) {
   $addthis_js = socialmedia_widgets_element_addthis_js();
   $elements['socialmedia_addthis-linkedin-share-simple'] = array(
       'label' => t('Addthis Linkedin share button (simple)'),
-      'group' => t('Social media: Linkedin'),
-      'template' => '<a class="addthis_button_linkedin[?link_class= {[socialmedia:sm-default_link_class_sharing]}?]">[?icon-markup={[socialmedia:sm-linkedin_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-linkedin_icon-path]}" alt="Linkedin icon">?]</a>',
+      'group' => t('Social media: LinkedIn'),
+      'template' => '<a class="addthis_button_linkedin[?link_class= {[socialmedia:sm-default_link_class_sharing]}?]">[?icon-markup={[socialmedia:sm-linkedin_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-linkedin_icon-path]}" alt="LinkedIn icon">?]</a>',
     ) + $defaults;
   return $elements;
 }

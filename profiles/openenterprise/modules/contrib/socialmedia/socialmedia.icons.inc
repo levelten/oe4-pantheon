@@ -248,7 +248,7 @@ function socialmedia_icon_path_thegforce($platform = 'twitter', $style = NULL) {
     'google' => 'Google',
     'googleplus' => 'Google',
     'lastfm' => 'LastFM',
-    'linkedin' => 'Linkedin',
+    'linkedin' => 'LinkedIn',
     'myspace' => 'Myspace',
     'reddit' => 'Reddit',
     'rss' => 'RSS',   

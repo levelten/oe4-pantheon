@@ -49,6 +49,7 @@ function enterprise_social_icon_bundles() {
       'social-facebook' => t('Facebook'),
       'social-github' => t('GitHub'),
       'social-gplus' => t('Google+'),
+      'social-instagram' => t('Instagram'),
       'social-linkedin' => t('LinkedIn'),
       'social-pinterest' => t('Pinterest'),
       'social-link' => t('Link'),

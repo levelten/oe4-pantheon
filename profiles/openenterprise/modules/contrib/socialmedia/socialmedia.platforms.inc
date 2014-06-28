@@ -11,6 +11,7 @@ function socialmedia_socialmedia_platform_info() {
   $platforms = array_merge($platforms, socialmedia_facebook_platform_info());
   $platforms = array_merge($platforms, socialmedia_flickr_platform_info());
   $platforms = array_merge($platforms, socialmedia_googleplus_platform_info());
+  $platforms = array_merge($platforms, socialmedia_instagram_platform_info());
   $platforms = array_merge($platforms, socialmedia_linkedin_platform_info());
   $platforms = array_merge($platforms, socialmedia_pinterest_platform_info());
   $platforms = array_merge($platforms, socialmedia_rss_platform_info());
@@ -345,7 +346,8 @@ function socialmedia_googleplus_platform_info() {
 function socialmedia_googleplus_parser($values, $scope = 'site') {
   $profile = array('url' => '', 'username' => '', 'userid' => '');
   $str = $values['url'];
-  $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i';
+  $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/).?\/?.?\/?([0-9]*)/i';
+  //$pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i';
   //$pattern = '/^http:\/\/(www\.)?twitter\.com\/(#!\/)?(?<name>[^\/]+)(/\w+)*$/';
   if (!preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
     if (trim($values['url'])) {
