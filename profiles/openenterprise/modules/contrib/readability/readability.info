@@ -1,0 +1,9 @@
+name = "Readability"
+description = "Provides several readability tests for content."
+package = Content analysis
+dependencies[] = contentanalysis
+files[] = readability.admin.inc
+files[] = readability.install
+files[] = readability.module
+configure = admin/config/content/contentanalysis/analyzers
+core = 7.x

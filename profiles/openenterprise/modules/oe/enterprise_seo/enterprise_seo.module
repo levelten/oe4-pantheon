@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise SEO feature.
+ */
+
+include_once 'enterprise_seo.features.inc';
