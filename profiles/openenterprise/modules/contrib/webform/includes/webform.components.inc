@@ -764,7 +764,7 @@ function webform_component_insert(&$component) {
       return FALSE;
     }
   }
-dsm($component);
+
   $query = db_insert('webform_component')
     ->fields(array(
       'nid' => $component['nid'],

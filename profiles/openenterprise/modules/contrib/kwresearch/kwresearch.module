@@ -1073,7 +1073,10 @@ function kwresearch_node_save($node) {
     // look for fields
     if ((substr($id, 0, 6) == 'field_')) {
       $fi = field_info_field($id);
-      if (($fi['type'] == 'taxonomy_term_reference') && ($fi['settings']['allowed_values'][0]['vocabulary'] == $sync_vocab)) {
+      if (($fi['type'] == 'taxonomy_term_reference')
+        && ($fi['settings']['allowed_values'][0]['vocabulary'] == $sync_vocab)
+        && isset($field[$node->language]) && is_array($field[$node->language])
+      ) {
 
         foreach ($field[$node->language] AS $i => $ta) {
           $term = strtolower(trim($ta['name']));
