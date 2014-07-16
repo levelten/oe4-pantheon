@@ -306,16 +306,28 @@ function intel_og_artifact_save($artifact_type, $aid, $group_type, $gid) {
 function intel_og_form_alter(&$form, &$form_state, $form_id) {
   // Webform is being presented to visitor.
   if (isset($form['#node']->webform) && in_array('webform_client_form_submit', $form['#submit'])) {
+
+    /* TODO: not sure if this is needed
     $values = array(
       'id' => 'user',
     );
     $entity = entity_get_controller('intel_visitor')->create($values);
+    */
+
+    $og_context = og_context();
+    if (empty($og_context['gid'])) {
+      return;
+    }
+
+    $form_state['og_context'] = $og_context;
 
     // check if og_group_ref field exists and has no default_value
-    if (isset($form['submitted']['og_group_ref']) && empty($form['submitted']['og_group_ref']['#default_value'])) {
-      $og_context = og_context();
-      if (!empty($og_context['gid'])) {
+    if (isset($form['submitted']['og_group_ref'])) {
+      if (isset($form['submitted']['og_group_ref']['#default_value']) && empty($form['submitted']['og_group_ref']['#default_value'])) {
         $form['submitted']['og_group_ref']['#default_value'] = $og_context['gid'];
+      }
+      if (isset($form['submitted']['og_group_ref']['#value']) && empty($form['submitted']['og_group_ref']['#value'])) {
+        $form['submitted']['og_group_ref']['#value'] = $og_context['gid'];
       }
     }
   }

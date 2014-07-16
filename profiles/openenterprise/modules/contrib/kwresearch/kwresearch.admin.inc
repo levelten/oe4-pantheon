@@ -176,7 +176,8 @@ function kwresearch_keywords_list_edit($kid = 'add') {
   if (!isset($keyword->keyword) || !$keyword->keyword) {
     drupal_set_title(t('Add site keyword'));
   }
-  return render(drupal_get_form('kwresearch_site_keywords_edit_form', $keyword));
+  $form = drupal_get_form('kwresearch_site_keywords_edit_form', $keyword);
+  return render($form);
 }
 
 /**
@@ -318,7 +319,8 @@ function kwresearch_site_keywords_edit_form_submit($form, &$form_state) {
  */
 function kwresearch_site_keywords_import($kid = 'add') {
   drupal_set_title(t('Import site keyword'));
-  return render(drupal_get_form('kwresearch_site_keywords_import_form', isset($keyword) ? $keyword : NULL));
+  $form = drupal_get_form('kwresearch_site_keywords_import_form', isset($keyword) ? $keyword : NULL);
+  return render($form);
 }
 
 /**
@@ -472,6 +474,7 @@ function kwresearch_site_keywords_import_form_submit($form, &$form_state) {
  * @param int $kid - keyword id
  */
 function kwresearch_page_keywords_edit($pid, $kid = 'add') {
+  $output = '';
   if ($kid > 0) {
     /*
     $sql = '
@@ -490,7 +493,8 @@ function kwresearch_page_keywords_edit($pid, $kid = 'add') {
   if (!$keyword->keyword) {
     drupal_set_title(t('Add page keyword'));
   }
-  $output .= render(drupal_get_form('kwresearch_page_keywords_edit_form', $pid, $keyword));
+  $form = drupal_get_form('kwresearch_page_keywords_edit_form', $pid, $keyword);
+  $output .= render($form);
   return $output;
 }
 

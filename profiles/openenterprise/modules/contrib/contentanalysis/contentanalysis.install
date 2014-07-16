@@ -6,17 +6,10 @@
 */
 
 /**
- *  Implementation of hook_install().
- */
-function contentanalysis_install() {
-  drupal_set_message(st('Content Analysis has been installed.')); 
-}
-
-/**
  * Implementation of hook_uninstall().
  */
 function contentanalysis_uninstall() {
-  drupal_set_message(st('Content Analysis has been uninstalled.'));  
+
 }
 
 /**

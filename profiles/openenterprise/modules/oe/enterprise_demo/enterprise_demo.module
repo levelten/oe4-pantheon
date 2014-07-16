@@ -63,6 +63,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     'enterprise_webform_content',
     'enterprise_landingpages',
     'enterprise_landingpages_content',
+    'enterprise_seo',
   );
   if (enterprise_apps_module_files_exist('enterprise_faq_content')) {
     $required_apps[] = 'enterprise_faq';

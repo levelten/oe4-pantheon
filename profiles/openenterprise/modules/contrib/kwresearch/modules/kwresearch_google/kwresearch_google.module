@@ -138,12 +138,13 @@ function kwresearch_google_keywords_import_form_submit($form, &$form_state) {
     foreach ($a as $i => $v) {
       $a[$i] = trim($a[$i]);
     }
-    
-    if (($a[1] == t('Keyword')) && ($a[3] == t('Avg. monthly searches'))) {
+
+    // adwords planner format on 6/20/2014
+    if (($a[1] == t('Keyword')) && (strpos(strtolower($a[3]), t('avg. monthly searches')) === 0)) {
       $format = 'adwords_planner';
       $col_count = count($a);
       $bid_enabled = FALSE;
-      if (isset($a[4]) && (strpos($a[5],  'Suggested bid')) === 0) {
+      if (isset($a[4]) && (strpos(strtolower($a[5]),  'suggested bid')) === 0) {
         $bid_enabled = TRUE;
       }
     }

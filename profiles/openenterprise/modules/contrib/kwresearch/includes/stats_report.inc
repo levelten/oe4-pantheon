@@ -37,7 +37,8 @@ function kwresearch_keyword_stats_report_page($keyword = NULL) {
     $analysis['inputs']['operations'] = TRUE;
   }
 
-  $output .= render(drupal_get_form('kwresearch_stats_report_form', $analysis));
+  $form = drupal_get_form('kwresearch_stats_report_form', $analysis);
+  $output .= render($form);
 
   //$output = t('Content Analysis.');
   if ($analysis) {

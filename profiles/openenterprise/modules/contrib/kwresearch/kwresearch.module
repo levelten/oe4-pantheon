@@ -535,12 +535,12 @@ function kwresearch_save_page_keyword($pid, $keyword, $kid = NULL, $page_keyword
 
   $page_keyword_obj0 = kwresearch_load_page_keyword($pid, $kid);
 
-  if (!isset($page_keyword_obj->uid) || !$page_keyword_obj->uid) {
-    $page_keyword_obj->uid = ($page_keyword_obj0->uid) ? $page_keyword_obj0->uid : $GLOBALS['user']->uid; // set logged in user as default
+  if (empty($page_keyword_obj->uid)) {
+    $page_keyword_obj->uid = (!empty($page_keyword_obj0->uid)) ? $page_keyword_obj0->uid : $GLOBALS['user']->uid; // set logged in user as default
 
   }
-  if (!is_numeric($page_keyword_obj->priority)) {
-    $page_keyword_obj->priority = ($page_keyword_obj0->priority) ? $page_keyword_obj0->priority : -1; // set default to standard
+  if (empty($page_keyword_obj->priority) || !is_numeric($page_keyword_obj->priority)) {
+    $page_keyword_obj->priority = (!empty($page_keyword_obj0->priority)) ? $page_keyword_obj0->priority : -1; // set default to standard
 
   }
   $pn = kwresearch_construct_pathnid_obj($pid, $msgs);
@@ -651,6 +651,7 @@ function kwresearch_delete_page_keywords_by_page($pid) {
  */
 function kwresearch_load_page_keyword($pid, $key) {
   $site_keyword_obj = kwresearch_load_site_keyword($key);
+
   $kid = $site_keyword_obj->kid;
 
   $msgs = array();
@@ -668,8 +669,12 @@ function kwresearch_load_page_keyword($pid, $key) {
   );
   $page_keyword_obj = db_query($sql, $args)->fetchObject();
   //$page_keyword_obj = db_fetch_object(db_query($sql, $args));
+  if (empty($page_keyword_obj)) {
+    $page_keyword_obj = (object) array();
+  }
 
   $page_keyword_obj->site = $site_keyword_obj;
+
   return $page_keyword_obj;
 }
 
@@ -1074,6 +1079,7 @@ function kwresearch_node_save($node) {
             'priority' => 50,
           );
           $kid = kwresearch_save_page_keyword($node->nid, $term, NULL, $page_keyword_obj);
+          kwresearch_update_keyword_page_counts($kid);
           $processed[$kid] = 1;
         }        
       }
@@ -1084,8 +1090,11 @@ function kwresearch_node_save($node) {
   foreach ($processed as $kid => $v) {
     if (!$v) {
       kwresearch_delete_page_keyword($kid, $node->nid);
+      kwresearch_update_keyword_page_counts($kid);
     }
   }
+
+
 
   $vocab_filtered = TRUE;
   return;

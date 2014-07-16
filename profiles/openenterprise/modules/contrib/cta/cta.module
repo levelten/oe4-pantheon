@@ -505,8 +505,8 @@ function cta_block_meta_delete($module, $delta) {
   $query->execute();
   
   $query = db_delete('cta_selection')
-    ->condition('module', $module)
-    ->condition('bean_delta', $delta);
+    ->condition('block_module', $module)
+    ->condition('block_delta', $delta);
   $query->execute();
 }
 
@@ -703,8 +703,8 @@ function cta_block_view($delta = '') {
     $block['set'] = 'bean';
   }
   else if (isset($selection['block'])) {
-    $block['subject'] = $selection['block']['subject'];
-    $block['content'] = $selection['block']['content'];
+    $block['subject'] = (isset($selection['block']['subject'])) ? $selection['block']['subject'] : '';
+    $block['content'] = (isset($selection['block']['content'])) ? $selection['block']['content'] : '';
     $block['set'] = 'block';
   }
   else if ($preset_vocab){

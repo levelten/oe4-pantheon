@@ -27,6 +27,13 @@ function entity_data_schema() {
         'default' => 0,
         'description' => 'The entity id this data is attached to',
       ),
+      'revision_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The revision id this data is attached to',
+      ),
       'language' => array(
         'type' => 'varchar',
         'length' => 32,
@@ -52,10 +59,43 @@ function entity_data_schema() {
     'primary key' => array(
       'entity_type',
       'entity_id',
+      'revision_id',
       'language',
       'name',
     ),
   );
 
   return $schema;
+}
+
+/**
+ * Add revision_id field to enable versioning support
+ */
+function entity_data_update_7001() {
+  //$schema = dwyr_franchise_schema();
+  //$schema['dwyr_franchise']['lic']['initial'] = '';
+  //$schema['dwyr_franchise']['slug']['initial'] = '';
+  $revision_id_field = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The revision id this data is attached to',
+  );
+
+  $primary_key = array(
+    'entity_type',
+    'entity_id',
+    'revision_id',
+    'language',
+    'name',
+  );
+
+  db_add_field('entity_data', 'revision_id', $revision_id_field);
+
+  db_drop_primary_key('entity_data');
+  db_add_primary_key('entity_data', $primary_key);
+
+  $query = db_query('UPDATE entity_data SET revision_id = entity_id WHERE revision_id = 0');
+  $query->execute();
 }

@@ -8,25 +8,16 @@
  */
 
 /**
- * Implements hook_install().().
- */
-function kwresearch_install() {
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_install_schema('kwresearch')
-  drupal_set_message(t('Keyword Research has been installed.'));
-}
-
-/**
- * Implements hook_uninstall().().
+ * Implements hook_uninstall().
+().
  */
 function kwresearch_uninstall() {
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_uninstall_schema('kwresearch')
-  drupal_set_message(t('Keyword Research has been uninstalled.'));
+
 }
 
 /**
- * Implements hook_schema().
+ * Implements hook_schema
+().
  */
 function kwresearch_schema() {
 

@@ -938,7 +938,11 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util() {
-
+  $value = array(
+    'page_remove_blocks' => 1
+  );
+  entity_data_set('node', '183', 'landingpages', $value, LANGUAGE_NONE);
+  return 'OK';
   $query = db_update('system')
     ->condition('name', 'openenterprise')
     ->fields(array('status' => 0));
