@@ -13,6 +13,13 @@ function oedemo_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'alchemy_apikey';
+  $strongarm->value = 'f727a95896213643638e796830face3a29ad76ac';
+  $export['alchemy_apikey'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'disqus_domain';
   $strongarm->value = 'oeprodemo';
   $export['disqus_domain'] = $strongarm;

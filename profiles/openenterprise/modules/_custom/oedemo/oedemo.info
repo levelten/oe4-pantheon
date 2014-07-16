@@ -18,6 +18,7 @@ features[features_api][] = api:2
 features[intel_phonenumber][] = main
 features[mailchimp_list][] = open_enterprise_updates
 features[uuid_entities][] = oedemo
+features[variable][] = alchemy_apikey
 features[variable][] = disqus_domain
 features[variable][] = disqus_userapikey
 features[variable][] = google_analytics_reports_oauth_token

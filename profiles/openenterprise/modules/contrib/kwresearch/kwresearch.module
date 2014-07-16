@@ -606,7 +606,7 @@ function kwresearch_delete_page_keyword($key, $pid) {
   if (!isset($msgs)) {
     $msgs = array();
   }
-  $pn = kwresearch_construct_pathnid_obj($pid, $msgs);
+  $pn = kwresearch_construct_pathnid_obj($pid, $msgs = array());
   $sql = "
     DELETE FROM {kwresearch_page_keyword}
     WHERE 
@@ -741,6 +741,7 @@ function kwresearch_load_page_keywords_by_page($pid) {
  */
 function kwresearch_load_top_page_keyword_by_page($pid) {
   $keyword = '';
+  $msgs = array();
   $pn = kwresearch_construct_pathnid_obj($pid, $msgs);
   // if a keyword vocab is used, combine kwresearch page keyword priority and tax field delta to determine order
   if (isset($pn->nid) && $pn->nid && ($sync_vocab = variable_get('kwresearch_keyword_sync_vocabulary', ''))) {
@@ -789,8 +790,11 @@ function kwresearch_load_top_page_keyword_by_page($pid) {
     $query->orderBy("{k}.keyword", 'ASC');
 //dsm(" ".$query);
     $result = $query->execute();
-    $r = $result->fetchObject();
-    $keyword = $r->keyword;    
+    if (!empty($result)) {
+      $r = $result->fetchObject();
+      $keyword = $r->keyword;
+    }
+
   }
 //dsm($page_keywords);
   return $keyword;
