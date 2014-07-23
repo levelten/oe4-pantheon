@@ -36,7 +36,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $is_landingpage = 0;
   
   $entity = '';
-  $intel_events = intel_get_intel_event_info(TRUE);
+  $intel_events = intel_get_intel_event_info();
   $visitor_attrs = array();
   $page_attrs = array();
   $page_events = array();
@@ -964,7 +964,7 @@ function intel_check_form_submission($page) {
     }
   }
 
-  $intel_events = intel_get_intel_event_info(TRUE);
+  $intel_events = intel_get_intel_event_info();
 if (!empty($_GET['debug'])) {
   dpm('$scorings'); dpm($scorings);//
   dpm('$intel_events'); dpm($intel_events);//

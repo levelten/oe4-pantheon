@@ -261,7 +261,6 @@ function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
     return;
   }
 
-  // TODO this is hard coded, need to change
   $entity = entity_load($og_context['group_type'], array($og_context['gid']));
   $entity = $entity[$og_context['gid']];
 

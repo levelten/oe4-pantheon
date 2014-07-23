@@ -186,10 +186,12 @@ class ApiVisitor {
       $this->ext_data = unserialize($this->ext_data);
     }
     // return property if exists
-    if (isset($this->$name)) {
+    //if (isset($this->$name)) {
+    if (property_exists($this, $name)) {
       return $this->$name;
     }
-    if (isset($this->apiVisitor->$name)) {
+    //if (isset($this->apiVisitor->$name)) {
+    if (property_exists($this->apiVisitor, $name)) {
       return $this->apiVisitor->$name;
     }
     return null;
