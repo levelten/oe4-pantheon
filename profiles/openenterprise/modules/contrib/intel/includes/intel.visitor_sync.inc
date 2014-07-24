@@ -81,9 +81,12 @@ function intel_ga_sync_visitordata(&$visitor) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $vtkids = array();
 
-  foreach ($visitor->identifiers['vtk'] AS $vtk) {
-    $vtkids[] = substr($vtk, 0, 20);
+  if (!empty($visitor->identifiers['vtk']) && is_array($visitor->identifiers['vtk'])) {
+    foreach ($visitor->identifiers['vtk'] AS $vtk) {
+      $vtkids[] = substr($vtk, 0, 20);
+    }
   }
+
   $gadata = intel_fetch_analytics_visitor_meta_data($vtkids);
   if (!empty($_GET['debug'])) {
     dpm('gadata'); dpm($gadata);//

@@ -1223,7 +1223,7 @@ function rtDashboardView (name) {
             var per = (countA != 0) ? 100 * countB/countA : 0;
             this.chartData[chartKey].setValue(row, 3, per);
 
-            var countC = this.chartData[chartKey].getValue(row, 2) + c.conversions;
+            var countC = this.chartData[chartKey].getValue(row, 4) + c.conversions;
             this.chartData[chartKey].setValue(row, 4, countC);
 
             var per = (countB != 0) ? 100 * countC/countB : 0;

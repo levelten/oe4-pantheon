@@ -370,7 +370,9 @@ function intel_mailchimp_intel_sync_visitordata(&$visitor) {
         $ret = mailchimp_subscribe_user($mc_list, $id['email'], array());
         $member = mailchimp_get_memberinfo($list_id, $id['email']);
       }
-      $id['leid'] = $member['leid'];
+      if (!empty($member['leid'])) {
+        $id['leid'] = $member['leid'];
+      }
     }
 
     // if member not found, skip
