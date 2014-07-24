@@ -1317,6 +1317,7 @@ function rtDashboardView (name) {
         if (draw) {
             var percentFormatter = this.percentFormatter();
             percentFormatter.format(this.chartData[chartKey], 3);
+            percentFormatter.format(this.chartData[chartKey], 5);
             this.charts[chartKey].draw(this.chartData[chartKey], this.drawTableOptions());
         }
 
