@@ -792,7 +792,9 @@ function kwresearch_load_top_page_keyword_by_page($pid) {
     $result = $query->execute();
     if (!empty($result)) {
       $r = $result->fetchObject();
-      $keyword = $r->keyword;
+      if (!empty($r->keyword)) {
+        $keyword = $r->keyword;
+      }
     }
 
   }
