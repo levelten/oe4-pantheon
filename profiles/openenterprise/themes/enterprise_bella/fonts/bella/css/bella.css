@@ -1,0 +1,65 @@
+@font-face {
+  font-family: 'bella';
+  src: url('../font/bella.eot?73384262');
+  src: url('../font/bella.eot?73384262#iefix') format('embedded-opentype'),
+       url('../font/bella.woff?73384262') format('woff'),
+       url('../font/bella.ttf?73384262') format('truetype'),
+       url('../font/bella.svg?73384262#bella') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'bella';
+    src: url('../font/bella.svg?73384262#bella') format('svg');
+  }
+}
+*/
+ 
+ [class^="bella-"]:before, [class*=" bella-"]:before {
+  font-family: "bella";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+     
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+ 
+.bella-cogs:before { content: '\e800'; } /* '' */
+.bella-adjust:before { content: '\e801'; } /* '' */
+.bella-cogwheel:before { content: '\e802'; } /* '' */
+.bella-drop:before { content: '\e803'; } /* '' */
+.bella-design:before { content: '\e804'; } /* '' */
+.bella-marketing:before { content: '\e805'; } /* '' */
+.bella-star:before { content: '\e806'; } /* '' */
+.bella-tablet:before { content: '\e807'; } /* '' */
+.bella-team:before { content: '\e808'; } /* '' */
+.bella-testing:before { content: '\e809'; } /* '' */
+.bella-desktop:before { content: '\e80a'; } /* '' */
+.bella-ux:before { content: '\e80b'; } /* '' */
+.bella-photos:before { content: '\e80c'; } /* '' */

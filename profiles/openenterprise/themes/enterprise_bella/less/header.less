@@ -1,0 +1,52 @@
+// Insert your styling here.
+header {
+	&.navbar-default {
+		background-color: @brand-primary;
+		border: 0;
+		border-top: 5px solid darken(@brand-primary, 10%);
+	}
+	.navbar-header {
+		overflow: auto;
+		@media @normal, @wide {
+			float: left;
+			width: 18%;
+		}
+	}
+	.navbar-collapse {
+		overflow: auto;
+		@media @normal, @wide {
+			float: left;
+			width: 82%;
+		}
+		.navbar-nav {
+			display: table;
+			text-align: center;
+			width: 100%;
+			counter-reset: navitem;
+			.caret {
+				display: none;
+			}
+			> li {
+				display: table-cell;
+				float: none;
+				> a {
+					text-transform: uppercase;
+					&:before {
+						color: @gray-light;
+						counter-increment: navitem;
+						content: "0" counter(navitem);
+						padding-right: 10px;
+					}
+				}
+				&.active-trail {
+					> a {
+						background: @brand-primary;
+						&:before {
+							color: @brand-secondary;
+						}
+					}
+				}
+			}
+		}
+	}
+}
