@@ -6152,12 +6152,12 @@ body #admin-menu {
 body #admin-menu .dropdown li {
   line-height: normal;
 }
-@media screen and (min-width: 768px) {
+@media screen and (mix-width: 768px) and (max-width: 992px) {
   .navbar.container {
     max-width: 720px;
   }
 }
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 992px) and (max-width: 1200px) {
   .navbar.container {
     max-width: 940px;
   }
@@ -6205,7 +6205,7 @@ body #admin-menu .dropdown li {
   padding-left: 15px;
   padding-right: 15px;
 }
-@media screen and (min-width: 768px) {
+@media screen and (mix-width: 768px) and (max-width: 992px) {
   .navbar .logo {
     margin-right: 0;
     padding-left: 0;
@@ -6214,7 +6214,7 @@ body #admin-menu .dropdown li {
 ul.secondary {
   float: left;
 }
-@media screen and (min-width: 768px) {
+@media screen and (mix-width: 768px) and (max-width: 992px) {
   ul.secondary {
     float: right;
   }
@@ -6243,7 +6243,7 @@ form#search-block-form {
   float: none;
   margin: 5px 0 5px 5px;
 }
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 992px) and (max-width: 1200px) {
   .navbar #block-search-form {
     float: right;
   }
@@ -6683,6 +6683,21 @@ img {
 }
 .krumo-root {
   color: black;
+}
+.page-node-blocks .navbar.navbar-fixed-top {
+  position: static !important;
+  margin-bottom: 1em;
+}
+.page-node-blocks.admin-menu.navbar-is-fixed-top {
+  padding-top: 0 !important;
+}
+.page-node-blocks .region .block-blocker {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0.5em;
+  margin-bottom: 1em;
 }
 .style-date-stacked {
   margin-right: 10px;

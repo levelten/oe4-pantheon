@@ -1,6 +1,7 @@
 // Media query variables.
-@tablet:  ~"screen and (min-width: @{screen-sm-min})";
-@normal:  ~"screen and (min-width: @{screen-md-min})";
+@mobile:  ~"screen and (max-width: @{screen-sm-min})";
+@tablet:  ~"screen and (mix-width: @{screen-sm-min}) and (max-width: @{screen-md-min})";
+@normal:  ~"screen and (min-width: @{screen-md-min}) and (max-width: @{screen-lg-min})";
 @wide:    ~"screen and (min-width: @{screen-lg-min})";
 
 // Drop shadows.
@@ -646,6 +647,22 @@ img {
 
 // Blocker
 .page-node-blocks {
+  .navbar {
+    &.navbar-fixed-top {
+      position: static !important;
+      margin-bottom: 1em;
+    }
+  }
+  &.admin-menu.navbar-is-fixed-top {
+    padding-top: 0 !important;
+  }
+  .region {
+    .block-blocker {
+      .box-sizing;
+      padding: 0.5em;
+      margin-bottom: 1em;
+    }
+  }
   .btn.place-block {
     &:extend(.btn-primary all);
   }

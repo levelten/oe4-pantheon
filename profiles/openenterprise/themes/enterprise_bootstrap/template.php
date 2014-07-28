@@ -9,7 +9,6 @@
  * Implements hook_process_page()
  */
 function enterprise_bootstrap_process_page(&$variables) {
-//dsm($variables);
   // Set the proper attributes for the main menu. There should be a better
   // way of doing this but none of the menu process stuff runs early enough.
   if (isset($variables['page'])
@@ -22,6 +21,43 @@ function enterprise_bootstrap_process_page(&$variables) {
 
   if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
     enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+  }
+}
+
+/**
+ * Implements hook_preprocess_page()
+ */
+function enterprise_bootstrap_preprocess_page(&$variables) {
+  // Preprocess blocks on home page for striping.
+  if (module_exists('block_class')) {
+    $front_blocks = $variables['page']['content'];
+    foreach ($front_blocks as $key => $value) {
+      if (is_array($front_blocks[$key]) && isset($front_blocks[$key]['#block'])) {
+        // Add region to block vars (we only care about content)
+        $front_blocks[$key]['#block']->front_stripe_region = 'content';
+      }
+    }
+  }
+
+  // Set up variables
+  $variables['front_full_width'] = theme_get_setting('enterprise_bootstrap_front_blocks');
+}
+
+/**
+ * Implements hook_preprocess_block()
+ */
+function enterprise_bootstrap_preprocess_block(&$variables) {
+  // Remove duplicate classes and empty classes
+  $variables['classes_array'] = array_unique(array_diff($variables['classes_array'], array('')));
+
+  // Add classes to blocks for front page stripes.
+  if (isset($variables['elements']['#block']->front_stripe_region) && $variables['elements']['#block']->front_stripe_region == 'content') {
+    $variables['classes_array'][] = 'block-row-'.$variables['zebra'];
+    // Only add container class if it's the front page and NOT the main system block.
+    $front_block = theme_get_setting('enterprise_bootstrap_front_blocks');
+    if ($variables['is_front'] && $front_block) {
+      $variables['theme_hook_suggestions'][] = 'block__front';
+    }
   }
 }
 
@@ -160,11 +196,4 @@ function enterprise_bootstrap_task_list($variables) {
   } 
   $output .= '</ol>';
   return $output;
-}
-
-/**
- * Implements hook_theme_enabled()
- */
-function enterprise_bootstrap_themes_enabled($theme_list) {
-  dsm($theme_list);
 }
