@@ -49,6 +49,9 @@ function enterprise_user_strongarm() {
       'list' => array(
         'custom_settings' => FALSE,
       ),
+      'user_social' => array(
+        'custom_settings' => TRUE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
@@ -56,19 +59,28 @@ function enterprise_user_strongarm() {
           'weight' => '9',
         ),
         'account' => array(
-          'weight' => '4',
+          'weight' => '6',
         ),
         'timezone' => array(
           'weight' => '8',
         ),
         'picture' => array(
-          'weight' => '6',
+          'weight' => '7',
         ),
         'overlay_control' => array(
           'weight' => '5',
         ),
         'wysiwyg' => array(
           'weight' => '7',
+        ),
+        'ckeditor' => array(
+          'weight' => '10',
+        ),
+        'googleanalytics' => array(
+          'weight' => '4',
+        ),
+        'metatags' => array(
+          'weight' => '11',
         ),
       ),
       'display' => array(
@@ -103,6 +115,10 @@ function enterprise_user_strongarm() {
           ),
           'presenter_image_medium' => array(
             'weight' => '',
+            'visible' => FALSE,
+          ),
+          'user_social' => array(
+            'weight' => '12',
             'visible' => FALSE,
           ),
         ),

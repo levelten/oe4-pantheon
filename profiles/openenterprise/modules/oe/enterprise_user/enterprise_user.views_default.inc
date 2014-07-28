@@ -78,11 +78,38 @@ function enterprise_user_views_default_views() {
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'team';
   $handler->display->display_options['menu']['type'] = 'normal';
-  $handler->display->display_options['menu']['title'] = 'Team';
-  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['title'] = 'Our Team';
+  $handler->display->display_options['menu']['weight'] = 1;
   $handler->display->display_options['menu']['name'] = 'main-menu';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: Home Block */
+  $handler = $view->new_display('block', 'Home Block', 'block_1');
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '4';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'responsive_grid';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-6';
+  $handler->display->display_options['style_options']['row_classes'] = 'views-row row-fluid';
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['view_mode'] = 'user_social';
+  $handler->display->display_options['row_options']['alternating'] = 0;
+  $handler->display->display_options['row_options']['grouping'] = 0;
+  $handler->display->display_options['row_options']['advanced'] = 0;
+  $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
+  $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'field_data_field_lastname|field_lastname_value';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'user_social';
+  $handler->display->display_options['row_options']['alternating_fieldset']['item_0'] = 'full';
+  $handler->display->display_options['row_options']['alternating_fieldset']['item_1'] = 'full';
+  $handler->display->display_options['row_options']['alternating_fieldset']['item_2'] = 'full';
+  $handler->display->display_options['row_options']['alternating_fieldset']['item_3'] = 'full';
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['block_description'] = 'Enterprise Users - Home';
   $export['enterprise_users'] = $view;
 
   return $export;

@@ -12,7 +12,57 @@ include_once('enterprise_user.features.inc');
  * Provide the necessary classes for blog types.
  */
 function enterprise_user_ds_classes_alter(&$classes, $name) {
-  if ('ds_classes_regions' === $name) {
-    $classes['style-about-author'] = t('User: About Author');
-  }
+	if ('ds_classes_regions' === $name) {
+		$classes['style-about-author'] = t('User: About Author');
+	}
+}
+
+/**
+ * Implements hook_ds_fields_info().
+ */
+function enterprise_user_ds_fields_info($entity_type) {
+	$fields['enterprise_user_real_name'] = array(
+		'title' => t('User: Real Name'),
+		'field_type' => DS_FIELD_TYPE_FUNCTION,
+		'function' => '_enterprise_user_ds_field_real_name',
+		'properties' => array(
+			'formatters' => array(
+				'enterprise_user_none' => 'None',
+				'enterprise_user_h2' => 'H2',
+				'enterprise_user_h3' => 'H3',
+				'enterprise_user_h4' => 'H4',
+				),
+			),
+		);
+	
+	return array('user' => $fields);
+}
+
+/**
+ * Custom field displaying a user's real name.
+ */
+function _enterprise_user_ds_field_real_name($field) {
+	$entity = $field['entity'];
+
+	// Get names
+	$first_name = !empty($entity->field_firstname) ? $entity->field_firstname['und'][0]['safe_value'] : '';
+	$last_name = !empty($entity->field_lastname) ? $entity->field_lastname['und'][0]['safe_value'] : '';
+
+	switch ($field['formatter']) {
+		case 'enterprise_user_h2':
+			$tag = 'h2';
+			break;
+		case 'enterprise_user_h3':
+			$tag = 'h3';
+			break;
+		case 'enterprise_user_h4':
+			$tag = 'h4';
+			break;
+		default:
+			$tag = 'span';
+			break;
+	}
+
+	return '<'.$tag.'>'.$first_name.' '.$last_name.'</'.$tag.'>';
+
 }

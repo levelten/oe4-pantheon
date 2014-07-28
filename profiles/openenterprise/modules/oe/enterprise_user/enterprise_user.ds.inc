@@ -74,6 +74,52 @@ function enterprise_user_ds_field_settings_info() {
   );
   $export['user|user|user_mini'] = $ds_fieldsetting;
 
+  $ds_fieldsetting = new stdClass();
+  $ds_fieldsetting->api_version = 1;
+  $ds_fieldsetting->id = 'user|user|user_social';
+  $ds_fieldsetting->entity_type = 'user';
+  $ds_fieldsetting->bundle = 'user';
+  $ds_fieldsetting->view_mode = 'user_social';
+  $ds_fieldsetting->settings = array(
+    'enterprise_user_real_name' => array(
+      'weight' => '1',
+      'label' => 'hidden',
+      'format' => 'enterprise_user_h2',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
+    ),
+    'socialmedia_user_profile_buttons' => array(
+      'weight' => '3',
+      'label' => 'hidden',
+      'format' => 'default',
+    ),
+    'field_picture' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
+    ),
+  );
+  $export['user|user|user_social'] = $ds_fieldsetting;
+
   return $export;
 }
 
@@ -196,6 +242,42 @@ function enterprise_user_ds_layout_settings_info() {
   );
   $export['user|user|user_mini'] = $ds_layout;
 
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
+  $ds_layout->id = 'user|user|user_social';
+  $ds_layout->entity_type = 'user';
+  $ds_layout->bundle = 'user';
+  $ds_layout->view_mode = 'user_social';
+  $ds_layout->layout = 'bootstrap_12';
+  $ds_layout->settings = array(
+    'regions' => array(
+      'central' => array(
+        0 => 'field_picture',
+        1 => 'enterprise_user_real_name',
+        2 => 'field_title',
+        3 => 'socialmedia_user_profile_buttons',
+      ),
+    ),
+    'fields' => array(
+      'field_picture' => 'central',
+      'enterprise_user_real_name' => 'central',
+      'field_title' => 'central',
+      'socialmedia_user_profile_buttons' => 'central',
+    ),
+    'classes' => array(
+      'layout_class' => array(),
+    ),
+    'wrappers' => array(
+      'central' => 'div',
+    ),
+    'layout_wrapper' => 'div',
+    'layout_attributes' => '',
+    'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
+  );
+  $export['user|user|user_social'] = $ds_layout;
+
   return $export;
 }
 
@@ -222,6 +304,15 @@ function enterprise_user_ds_view_modes_info() {
     'user' => 'user',
   );
   $export['user_mini'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'user_social';
+  $ds_view_mode->label = 'User Social';
+  $ds_view_mode->entities = array(
+    'user' => 'user',
+  );
+  $export['user_social'] = $ds_view_mode;
 
   return $export;
 }

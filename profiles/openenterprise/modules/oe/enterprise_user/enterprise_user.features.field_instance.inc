@@ -141,6 +141,12 @@ function enterprise_user_field_default_field_instances() {
         'type' => 'text_summary_or_trimmed',
         'weight' => 2,
       ),
+      'user_social' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 9,
+      ),
     ),
     'enterprise_edit_form_display' => '',
     'entity_type' => 'user',
@@ -160,7 +166,7 @@ function enterprise_user_field_default_field_instances() {
         'summary_rows' => 5,
       ),
       'type' => 'text_textarea_with_summary',
-      'weight' => 3,
+      'weight' => 5,
     ),
   );
 
@@ -240,6 +246,12 @@ function enterprise_user_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 7,
+      ),
+      'user_social' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 10,
       ),
     ),
     'enterprise_edit_form_display' => '',
@@ -338,6 +350,12 @@ function enterprise_user_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 6,
+      ),
+      'user_social' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 11,
       ),
     ),
     'enterprise_edit_form_display' => '',
@@ -572,6 +590,30 @@ function enterprise_user_field_default_field_instances() {
         'type' => 'image',
         'weight' => 0,
       ),
+      'user_social' => array(
+        'label' => 'hidden',
+        'module' => 'image',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => 'img-thumbnail',
+          'image_link' => '',
+          'image_style' => 'medium',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
+        'type' => 'image',
+        'weight' => 0,
+      ),
     ),
     'enterprise_edit_form_display' => '',
     'entity_type' => 'user',
@@ -648,6 +690,120 @@ function enterprise_user_field_default_field_instances() {
         'progress_indicator' => 'bar',
       ),
       'type' => 'image_image',
+      'weight' => 3,
+    ),
+  );
+
+  // Exported field_instance: 'user-user-field_title'
+  $field_instances['user-user-field_title'] = array(
+    'bundle' => 'user',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Your current job title.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
+        'type' => 'text_default',
+        'weight' => 7,
+      ),
+      'user_about' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'user_mini' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'user_social' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
+        'type' => 'text_default',
+        'weight' => 2,
+      ),
+    ),
+    'enterprise_edit_form_display' => '',
+    'entity_type' => 'user',
+    'field_name' => 'field_title',
+    'label' => 'Title',
+    'required' => 0,
+    'settings' => array(
+      'better_formats' => array(
+        'allowed_formats' => array(
+          'advanced_html' => 'advanced_html',
+          'ds_code' => 'ds_code',
+          'filtered_html' => 'filtered_html',
+          'full_html' => 'full_html',
+          'plain_text' => 'plain_text',
+        ),
+        'allowed_formats_toggle' => 0,
+        'default_order_toggle' => 0,
+        'default_order_wrapper' => array(
+          'formats' => array(
+            'advanced_html' => array(
+              'weight' => -8,
+            ),
+            'ds_code' => array(
+              'weight' => 12,
+            ),
+            'filtered_html' => array(
+              'weight' => -9,
+            ),
+            'full_html' => array(
+              'weight' => -10,
+            ),
+            'plain_text' => array(
+              'weight' => 10,
+            ),
+          ),
+        ),
+      ),
+      'text_processing' => 0,
+      'user_register_form' => 0,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
       'weight' => 2,
     ),
   );
@@ -658,6 +814,8 @@ function enterprise_user_field_default_field_instances() {
   t('First Name');
   t('Last Name');
   t('Picture');
+  t('Title');
+  t('Your current job title.');
 
   return $field_instances;
 }
