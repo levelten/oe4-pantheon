@@ -73,6 +73,10 @@ function ckeditor_blocks_blocks_ajax() {
       $options['[block:' . $block['module'] . '=' . $block['delta'] . ']'] = $block['info'];
     }
   }
+  
+  // Sort alphabetically to find blocks easier.
+  ksort($options);
+
   drupal_json_output($options);
 }
 
