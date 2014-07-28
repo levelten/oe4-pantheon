@@ -93,13 +93,13 @@ function cta_block_setting_features_export_options() {
     $delta = $row->delta;
     $func = $module . '_block_info';
     $infos = $func();
-    $info = $infos[$delta];
+    $info = isset($infos[$delta]) ? $infos[$delta] : '';
 
     // transform id deltas to use uuids
     cta_get_block_uuid_by_id($module, $delta);
 
     $name = $row->module . ':' . $delta;
-    $options[$name] = $info['info'];
+    $options[$name] = is_array($info) ? $info['info'] : '';
   }
   return $options;
 }
