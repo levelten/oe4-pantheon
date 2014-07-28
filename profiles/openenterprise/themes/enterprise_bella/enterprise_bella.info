@@ -9,7 +9,6 @@ base theme = enterprise_bootstrap
 ;;;;;;;;;;;;;;;;;;;;;
 
 regions[navigation]     = 'Navigation'
-regions[header]         = 'Top Bar'
 regions[highlighted]    = 'Highlighted'
 regions[help]           = 'Help'
 regions[content]        = 'Content'
@@ -26,24 +25,24 @@ regions[page_bottom]    = 'Page bottom'
 ;;;;;;;;;;;;;;;;;;;;;
 
 stylesheets[all][] = css/style.css
-stylesheets[all][] = fonts/bella/bella.css
+stylesheets[all][] = fonts/bella/css/bella.css
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
 ;;;;;;;;;;;;;;;;;;;;;
 
-scripts[] = 'bootstrap/js/affix.js'
-scripts[] = 'bootstrap/js/alert.js'
-scripts[] = 'bootstrap/js/button.js'
-scripts[] = 'bootstrap/js/carousel.js'
-scripts[] = 'bootstrap/js/collapse.js'
-scripts[] = 'bootstrap/js/dropdown.js'
-scripts[] = 'bootstrap/js/modal.js'
-scripts[] = 'bootstrap/js/tooltip.js'
-scripts[] = 'bootstrap/js/popover.js'
-scripts[] = 'bootstrap/js/scrollspy.js'
-scripts[] = 'bootstrap/js/tab.js'
-scripts[] = 'bootstrap/js/transition.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/affix.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/alert.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/button.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/carousel.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/collapse.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/dropdown.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/modal.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/tooltip.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/popover.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/scrollspy.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/tab.js'
+scripts[] = '../enterprise_bootstrap/bootstrap/js/transition.js'
 
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
 settings[bootstrap_cdn] = ''
