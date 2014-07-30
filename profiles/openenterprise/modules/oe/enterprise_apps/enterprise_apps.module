@@ -37,6 +37,14 @@ function enterprise_apps_menu() {
     'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
+  $items['enterprise_apps/profile_data_export'] = array(
+    'title' => 'Profile data export',
+    'page callback' => 'enterprise_apps_profile_data_export',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'file' => 'enterprise_apps.profile.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['enterprise_apps/util'] = array(
     'title' => 'Enterprise Apps util',
     'page callback' => 'enterprise_apps_util',
@@ -49,6 +57,13 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
+
+  $numbs = (array) intel_get_phonenumbers();
+  dsm($numbs);
+  $number = intel_phonenumber_load('main');
+  dsm($number);
+
+  return '';
 
   $query = db_select('system', 's')
     ->fields('s')

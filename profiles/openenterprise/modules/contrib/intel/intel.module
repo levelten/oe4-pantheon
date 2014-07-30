@@ -1295,15 +1295,17 @@ function intel_verify_library(&$message = '') {
   return $lib_path;
 }
 
-function intel_verify_apikey(&$message = '', &$tid = '', &$apikey = '', $property = array()) {
+function intel_verify_apikey(&$message = '', &$property = array(), $options = array()) {
   if (!intel_verify_library($message)) {
     return FALSE;
   }
-  if (!$tid = variable_get('intel_ga_account', '')) {
+  $tid = isset($options['tid']) ? $options['tid'] : variable_get('intel_ga_account', '');
+  if (!$tid) {
     $message = t('Tracking id is not set.');
     return FALSE;
   }
-  if (!$apikey = variable_get('intel_apikey', '')) {
+  $apikey = isset($options['apikey']) ? $options['apikey'] : variable_get('intel_apikey', '');
+  if (!$apikey) {
     $message = t('API key is not set');
     return FALSE;
   }
@@ -1317,9 +1319,8 @@ function intel_verify_apikey(&$message = '', &$tid = '', &$apikey = '', $propert
   );
   $apiclient = new \LevelTen\Intel\ApiClient($apiClientProps);
   $ret = '';
-  $params = array(
-    'tid' => $tid,
-  );
+  $params = isset($options['params']) ? $options['params'] : array();
+  $params['tid'] = $tid;
   $data = array(
     'apikey' => $apikey,
   );
@@ -1339,7 +1340,6 @@ function intel_verify_apikey(&$message = '', &$tid = '', &$apikey = '', $propert
     $message = t('API key invalid.') . ' ' . $message;
     return FALSE;
   }
-
 }
 
 /**

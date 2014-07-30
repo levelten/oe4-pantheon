@@ -81,7 +81,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     $required_apps[] = 'enterprise_intel';
   }
   if (enterprise_apps_module_files_exist('oedemo')) {
-    $required_apps[] = 'oedemo';
+    //$required_apps[] = 'oedemo';
   }
 
   foreach ($required_apps AS $i => $app) {
