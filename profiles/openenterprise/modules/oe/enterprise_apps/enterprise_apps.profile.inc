@@ -228,10 +228,12 @@ function enterprise_apps_install_demo(&$install_state) {
       ),
     );
 
+    /*
     $pre_ops[] = array(
       'enterprise_apps_process_profile_settings',
       array(),
     );
+    */
 
     // re-enable app auto config for all apps after demo
     $pre_ops[] = array(
@@ -244,29 +246,40 @@ function enterprise_apps_install_demo(&$install_state) {
     // prepend pre_ops to array
     $batch['operations'] = array_merge($pre_ops, $batch['operations']);
 
+    // process any custom settings from api
+    $batch['operations'][] = array(
+      'enterprise_apps_process_profile_settings',
+      array(),
+    );
+
     return $batch;
   }
 }
 
 function enterprise_apps_process_profile_settings() {
   $settings = variable_get('enterprise_apps_profile_settings', array());
-dsm($settings);
+
+  if (isset($settings['module_enable']) && is_array($settings['module_enable'])) {
+    module_enable($settings['module_enable']);
+  }
+
   if (isset($settings['strongarm']) && is_array($settings['strongarm'])) {
     foreach ($settings['strongarm'] AS $key => $value) {
       variable_set($key, $value);
     }
   }
 
-  if (!empty($settings['intel_phonenumber_defaults']) && is_array($settings['intel_phonenumber_defaults'])) {
+  if (module_exists('intel') && !empty($settings['intel_phonenumber_defaults']) && is_array($settings['intel_phonenumber_defaults'])) {
+    include_once drupal_get_path('module', 'intel') . '/includes/intel.ga.inc';
     foreach ($settings['intel_phonenumber_defaults'] as $name => $number) {
       intel_phonenumber_save($number, $name);
     }
   }
 
-  if (!empty($settings['default_mailchimp_list']) && is_array($settings['default_mailchimp_list'])) {
+  if (module_exists('mailchimp_lists') && !empty($settings['default_mailchimp_list']) && is_array($settings['default_mailchimp_list'])) {
     foreach ($settings['default_mailchimp_list'] as $name => $data) {
       $entity = entity_import('mailchimp_list', $data);
-      entity_save('mailchimp_list', $entity);
+      $entity->save();
     }
   }
 }
@@ -282,9 +295,18 @@ function enterprise_apps_profile_data_export() {
 
 
   // variable table/strongarm data
-  $data = array(
-    'strongarm' => array(),
+  $data = array();
+
+  $data['module_enable'] = array(
+    'intel_mailchimp',
+    'intel_twilio',
+    'mailchimp_lists',
+    'strongarm',
+    'twilio',
+    'webform_mailchimp',
   );
+
+  $data['strongarm'] = array();
 
   $sa_vars = array(
     'alchemy_apikey' => '',

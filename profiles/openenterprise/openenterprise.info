@@ -112,6 +112,8 @@ dependencies[] = enterprise_base
 dependencies[] = enterprise_block
 dependencies[] = enterprise_editor
 ; dependencies[] = enterprise_menus
+; dependencies[] = enterprise_webform
+; dependencies[] = enterprise_intel
 dependencies[] = enterprise_page
 dependencies[] = enterprise_style
 
