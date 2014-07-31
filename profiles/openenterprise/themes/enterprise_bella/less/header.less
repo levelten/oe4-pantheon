@@ -1,0 +1,85 @@
+// Insert your styling here.
+header {
+	overflow: auto;
+	&.navbar-default {
+		background-color: white;
+		border-bottom: 2px solid @gray-light;
+	}
+	.header-container {
+		float: left;
+		overflow: auto;
+		width: 20%;
+	}
+	.navbar-container {
+		float: left;
+		width: 80%;
+	}
+	.navbar-header {
+		overflow: auto;
+		@media @normal, @wide {
+			float: left;
+			width: 18%;
+		}
+		.name {
+			color: @gray-light;
+			.font-size(1.4);
+		}
+		.logo {
+			padding: 5px 0;
+			height: 100%;
+			vertical-align: middle;
+			img {
+				display: inline-block;
+			}
+		}
+		.navbar-toggle {
+			.icon-bar {
+				background-color: @gray-light;
+			}
+		}
+	}
+	.navbar-collapse {
+		overflow: auto;
+		@media @normal, @wide {
+			float: left;
+			width: 82%;
+		}
+		.navbar-nav {
+			display: table;
+			text-align: center;
+			width: 100%;
+			counter-reset: navitem;
+			.caret {
+				display: none;
+			}
+			> li {
+				border-left: 1px solid @gray-light;
+				display: table-cell;
+				float: none;
+				&:last-child {
+					border-right: 1px solid @gray-light;
+				}
+				> a {
+					color: @gray-light;
+					font-weight: 300;
+					padding: 15px 10px;
+					text-transform: uppercase;
+					&:hover {
+						background-color: white;
+						color: @brand-primary;
+					}
+				}
+				&.active-trail {
+					> a {
+						background-color: white;
+						color: @brand-primary;
+						&:hover {
+							background-color: white;
+							color: @brand-primary;
+						}
+					}
+				}
+			}
+		}
+	}
+}
