@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Simple module to glue LESS and CKEditor together.
+ */
+
+/**
+ * Implements hook_ckeditor_settings_alter().
+ */
+function ckeditor_less_ckeditor_settings_alter(&$settings) {
+
+  if (module_exists('less')) {
+    // Build path to generated LESS file directory.
+    $file_path = variable_get('file_public_path', conf_path() . '/files');
+    $less_path = variable_get('less_dir');
+    $theme_path = drupal_get_path('theme', variable_get('theme_default', NULL));
+    $css_path = $file_path . '/less/' . $less_path . '/' . $theme_path . '/less';
+
+    // Get all CSS files from LESS folder.
+    $files = file_scan_directory($css_path, '/.*\.css$/');
+
+    // Add CSS to CKEditor.
+    foreach ($files as $key => $value) {
+      $settings['contentsCss'][] = '/' . $files[$key]->uri;
+    }
+  }
+}

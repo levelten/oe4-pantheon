@@ -1,0 +1,8 @@
+name        = CKEditor Less
+description = Simple module to glue LESS and CKEditor together.
+core        = 7.x
+package     = User interface
+
+; Module dependencies
+dependencies[] = ckeditor (>=7.x-1.14)
+dependencies[] = less
