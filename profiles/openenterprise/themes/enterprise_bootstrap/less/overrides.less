@@ -7,8 +7,8 @@
 // Drop shadows.
 .box-shadow(@shadow) {
   -webkit-box-shadow: @shadow;
-     -moz-box-shadow: @shadow;
-          box-shadow: @shadow;
+  -moz-box-shadow: @shadow;
+  box-shadow: @shadow;
 }
 
 html {
@@ -19,7 +19,7 @@ html {
     // Collapsible fieldsets.
     fieldset.collapsed {
      height: auto;
-    }
+   }
     // Throbbers.
     input.form-autocomplete {
       background-image: none;
@@ -446,7 +446,7 @@ a .glyphicon-spin {
  * @see http://stackoverflow.com/questions/18432577/stacked-tabs-in-bootstrap-3
  * @see http://bootply.com/74926
  */
-.tabbable {
+ .tabbable {
   margin-bottom: 20px;
 }
 .tabs-below, .tabs-left, .tabs-right {
@@ -666,4 +666,19 @@ img {
   .btn.place-block {
     &:extend(.btn-primary all);
   }
+}
+
+// Google Maps
+.google-maps {
+  position: relative;
+  padding-bottom: 75%; // This is the aspect ratio
+  height: 0;
+  overflow: hidden;
+}
+.google-maps iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
