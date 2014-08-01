@@ -257,7 +257,7 @@ html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 body {
-  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "BLOKKNeue-Regular", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.42857143;
   color: #727274;
@@ -343,7 +343,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "BLOKKNeue-Regular", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 300;
   line-height: 1.1;
   color: #727274;
@@ -6223,9 +6223,6 @@ ul.secondary {
 .page-header {
   margin-top: 0;
 }
-.block:first-child h2.block-title {
-  margin-top: 0;
-}
 p:last-child {
   margin-bottom: 0;
 }
@@ -7416,6 +7413,21 @@ fieldset.panel-default .panel-body {
 }
 .style-section-brand.style-block-title .block-title {
   color: #ffffff;
+}
+.btn-default,
+.btn-info {
+  background-color: transparent;
+  border-color: #ea9b3e;
+  color: #ea9b3e;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+.trifold .btn-default {
+  margin-top: 1em;
+}
+.style-section-brand .trifold .btn-default {
+  border-color: white;
+  color: white;
 }
 header {
   overflow: auto;

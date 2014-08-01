@@ -1,4 +1,4 @@
-name = Bella for OpenEnterprise
+name = Bella
 description = A Bootstrap Sub-theme for Open Enterprise.
 core = 7.x
 base theme = enterprise_bootstrap
@@ -46,3 +46,6 @@ scripts[] = '../enterprise_bootstrap/bootstrap/js/transition.js'
 
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
 settings[bootstrap_cdn] = ''
+
+; Default Bella navbar to fixed-top.
+settings[bootstrap_navbar_position] = 'fixed-top'
