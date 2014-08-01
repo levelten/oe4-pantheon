@@ -1,0 +1,12 @@
+.heading-underline(@width: 50%;) {
+	position: relative;
+	&:after {
+		content: "";
+		left: 0;
+		bottom: 0;
+		height: 1px;
+		position: absolute;
+		width: @width;
+		border-bottom: 2px solid @gray-light;
+	}
+}

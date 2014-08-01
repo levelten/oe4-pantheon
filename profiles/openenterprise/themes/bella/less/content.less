@@ -20,3 +20,43 @@
 		color: @brand-primary;
 	}
 }
+
+.carousel {
+	&.slide {
+		position: relative;
+		.carousel-caption {
+			position: absolute;
+			left: 25%;
+			text-align: left;
+			width: 25%;
+			top: 10%;
+			h3 {
+				color: @brand-primary;
+				font-weight: 300;
+				.font-size(2.8);
+				margin-bottom: 1.2em;
+				text-transform: uppercase;
+				text-shadow: none;
+			}
+			p {
+				color: @gray;
+				.font-size(2);
+				font-weight: 300;
+				text-shadow: none;
+				text-transform: uppercase;
+			}
+			.btn {
+				.font-size(1.8);
+				font-weight: 500;
+				margin-top: 1.2em;
+				padding: 10px 15px;
+			}
+		}
+	}
+	.carousel-indicators li {
+		border-color: @brand-primary;
+		&.active {
+			background-color: @brand-primary;
+		}
+	}
+}

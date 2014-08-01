@@ -24,3 +24,31 @@
 		}
 	}
 }
+
+.block-menu-block {
+	.menu {
+		li {
+			float: none;
+			position: relative;
+			a {
+				.font-size(1.8);
+				line-height: 1.5em;
+				padding-left: 20px;
+				&:before {
+					content: '\a0';
+					background-color: @brand-primary;
+					background-repeat: repeat;
+					position: absolute;
+					height: 2px;
+					left: 0;
+					overflow: hidden;
+					top: 48%;
+					width: 12px;
+				}
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+}

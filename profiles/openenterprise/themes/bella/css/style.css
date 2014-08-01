@@ -406,11 +406,11 @@ h6 .small {
 }
 h1,
 .h1 {
-  font-size: 36px;
+  font-size: 33px;
 }
 h2,
 .h2 {
-  font-size: 30px;
+  font-size: 28px;
 }
 h3,
 .h3 {
@@ -7338,7 +7338,7 @@ fieldset.panel-default .panel-body {
   bottom: 0;
   height: 1px;
   position: absolute;
-  width: 25%;
+  width: 50%;
   border-bottom: 2px solid #d7d7d8;
 }
 .style-trifold-icon i {
@@ -7438,6 +7438,30 @@ fieldset.panel-default .panel-body {
 .style-section-brand .trifold .btn-default:hover {
   background-color: white;
   color: #ea9b3e;
+}
+.block-menu-block .menu li {
+  float: none;
+  position: relative;
+}
+.block-menu-block .menu li a {
+  font-size: 18px;
+  font-size: 1.8rem;
+  line-height: 1.5em;
+  padding-left: 20px;
+}
+.block-menu-block .menu li a:before {
+  content: '\a0';
+  background-color: #ea9b3e;
+  background-repeat: repeat;
+  position: absolute;
+  height: 2px;
+  left: 0;
+  overflow: hidden;
+  top: 48%;
+  width: 12px;
+}
+.block-menu-block .menu li a:hover {
+  text-decoration: underline;
 }
 header {
   overflow: auto;
@@ -7544,6 +7568,46 @@ header .navbar-collapse .navbar-nav > li.active-trail > a:hover {
 .btn-social-share .addthis_counter.addthis_bubble_style a.addthis_button_expanded {
   color: #ea9b3e;
 }
+.carousel.slide {
+  position: relative;
+}
+.carousel.slide .carousel-caption {
+  position: absolute;
+  left: 25%;
+  text-align: left;
+  width: 25%;
+  top: 10%;
+}
+.carousel.slide .carousel-caption h3 {
+  color: #ea9b3e;
+  font-weight: 300;
+  font-size: 28px;
+  font-size: 2.8rem;
+  margin-bottom: 1.2em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.carousel.slide .carousel-caption p {
+  color: #727274;
+  font-size: 20px;
+  font-size: 2rem;
+  font-weight: 300;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+.carousel.slide .carousel-caption .btn {
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-top: 1.2em;
+  padding: 10px 15px;
+}
+.carousel .carousel-indicators li {
+  border-color: #ea9b3e;
+}
+.carousel .carousel-indicators li.active {
+  background-color: #ea9b3e;
+}
 .footer {
   border: 0;
   margin: 0;
@@ -7587,32 +7651,14 @@ header .navbar-collapse .navbar-nav > li.active-trail > a:hover {
   bottom: 0;
   height: 1px;
   position: absolute;
-  width: 65%;
+  width: 50%;
   border-bottom: 2px solid #d7d7d8;
 }
-.footer .block-menu-block .menu li {
-  float: none;
-  position: relative;
-}
-.footer .block-menu-block .menu li a {
-  font-size: 18px;
-  font-size: 1.8rem;
-  line-height: 1.5em;
-  padding-left: 20px;
-}
-.footer .block-menu-block .menu li a:before {
-  content: '\a0';
+.footer .block-menu-block .menu a:before {
   background-color: #727274;
-  background-repeat: repeat;
-  position: absolute;
-  height: 2px;
-  left: 0;
-  overflow: hidden;
-  top: 48%;
-  width: 12px;
 }
-.footer .block-menu-block .menu li a:hover {
-  text-decoration: underline;
+.footer .block-menu-block .menu a:hover {
+  background-color: transparent;
 }
 .footer .view-enterprise-blog .views-row {
   margin-bottom: 1em;
@@ -7637,7 +7683,7 @@ header .navbar-collapse .navbar-nav > li.active-trail > a:hover {
   bottom: 0;
   height: 1px;
   position: absolute;
-  width: 65%;
+  width: 20%;
   border-bottom: 2px solid #d7d7d8;
 }
 .footer .btn-social-profile {
