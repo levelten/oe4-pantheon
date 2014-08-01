@@ -39,8 +39,20 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     }
   }
 
-  // Set up variables
+  // Set up variables.
   $variables['front_full_width'] = theme_get_setting('enterprise_bootstrap_front_blocks');
+
+  // Option to use Blokk font.
+  if(theme_get_setting('enterprise_bootstrap_blokkfont')) {
+    $blokk_path = drupal_get_path('theme', 'enterprise_bootstrap').'/fonts/blokkneue/blokkneue.css';
+    $options = array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+      'weight' => -1,
+      'preprocess' => TRUE,
+    );
+    drupal_add_css($blokk_path, $options);
+  }
 }
 
 /**

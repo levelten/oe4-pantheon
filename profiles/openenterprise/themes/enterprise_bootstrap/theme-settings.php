@@ -25,5 +25,14 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#default_value' => theme_get_setting('enterprise_bootstrap_front_blocks'),
 		'#description' => t('If Yes, this will turn the blocks on the front page into full-width containers for horizontal striping.'),
 	);
-
+	$form['enterprise_bootstrap_config']['enterprise_bootstrap_blokkfont'] = array(
+		'#type' => 'select',
+		'#title' => t('Blokk Font'),
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
+		'#description' => t('Enables Blokk Neue as the default font. Great for testing designs.'),
+	);
 }
