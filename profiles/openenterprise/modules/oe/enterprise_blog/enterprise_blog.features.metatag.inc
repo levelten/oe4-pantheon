@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * meta.features.metatag.inc
+ * enterprise_blog.features.metatag.inc
  */
 
 /**

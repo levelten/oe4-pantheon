@@ -89,6 +89,50 @@ function enterprise_blog_ds_field_settings_info() {
 
   $ds_fieldsetting = new stdClass();
   $ds_fieldsetting->api_version = 1;
+  $ds_fieldsetting->id = 'node|enterprise_blog|blog_text';
+  $ds_fieldsetting->entity_type = 'node';
+  $ds_fieldsetting->bundle = 'enterprise_blog';
+  $ds_fieldsetting->view_mode = 'blog_text';
+  $ds_fieldsetting->settings = array(
+    'title' => array(
+      'weight' => '0',
+      'label' => 'hidden',
+      'format' => 'default',
+      'formatter_settings' => array(
+        'link' => '1',
+        'wrapper' => 'h3',
+        'class' => '',
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
+    ),
+    'body' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
+    ),
+  );
+  $export['node|enterprise_blog|blog_text'] = $ds_fieldsetting;
+
+  $ds_fieldsetting = new stdClass();
+  $ds_fieldsetting->api_version = 1;
   $ds_fieldsetting->id = 'node|enterprise_blog|default';
   $ds_fieldsetting->entity_type = 'node';
   $ds_fieldsetting->bundle = 'enterprise_blog';
@@ -96,11 +140,6 @@ function enterprise_blog_ds_field_settings_info() {
   $ds_fieldsetting->settings = array(
     'comments' => array(
       'weight' => '9',
-      'label' => 'hidden',
-      'format' => 'default',
-    ),
-    'social_media_share_buttons' => array(
-      'weight' => '1',
       'label' => 'hidden',
       'format' => 'default',
     ),
@@ -126,6 +165,11 @@ function enterprise_blog_ds_field_settings_info() {
     ),
     'prev_next_node' => array(
       'weight' => '2',
+      'label' => 'hidden',
+      'format' => 'default',
+    ),
+    'social_media_share_buttons' => array(
+      'weight' => '1',
       'label' => 'hidden',
       'format' => 'default',
     ),
@@ -317,6 +361,40 @@ function enterprise_blog_ds_layout_settings_info() {
 
   $ds_layout = new stdClass();
   $ds_layout->api_version = 1;
+  $ds_layout->id = 'node|enterprise_blog|blog_text';
+  $ds_layout->entity_type = 'node';
+  $ds_layout->bundle = 'enterprise_blog';
+  $ds_layout->view_mode = 'blog_text';
+  $ds_layout->layout = 'ds_1col';
+  $ds_layout->settings = array(
+    'regions' => array(
+      'ds_content' => array(
+        0 => 'title',
+        1 => 'body',
+      ),
+    ),
+    'fields' => array(
+      'title' => 'ds_content',
+      'body' => 'ds_content',
+    ),
+    'classes' => array(
+      'layout_class' => array(
+        'style-blog-featured' => 'style-blog-featured',
+      ),
+    ),
+    'wrappers' => array(
+      'ds_content' => 'div',
+    ),
+    'layout_wrapper' => 'div',
+    'layout_attributes' => '',
+    'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
+  );
+  $export['node|enterprise_blog|blog_text'] = $ds_layout;
+
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
   $ds_layout->id = 'node|enterprise_blog|default';
   $ds_layout->entity_type = 'node';
   $ds_layout->bundle = 'enterprise_blog';
@@ -481,6 +559,15 @@ function enterprise_blog_ds_view_modes_info() {
     'node' => 'node',
   );
   $export['blog_mini'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'blog_text';
+  $ds_view_mode->label = 'Blog Text';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['blog_text'] = $ds_view_mode;
 
   return $export;
 }
