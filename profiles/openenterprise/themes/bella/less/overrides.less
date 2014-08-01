@@ -4,7 +4,11 @@
 	color: @brand-primary;
 	font-weight: 300;
 	text-transform: uppercase;
-	
+	&:hover {
+		background-color: @brand-primary;
+		border-color: @brand-primary;
+		color: white;
+	}
 }
 
 .trifold {
@@ -13,6 +17,10 @@
 		.style-section-brand & {
 			border-color: white;
 			color: white;
+			&:hover {
+				background-color: white;
+				color: @brand-primary;
+			}
 		}
 	}
 }

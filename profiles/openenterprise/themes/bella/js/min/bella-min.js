@@ -1,0 +1,1 @@
+var Drupal=Drupal||{};!function($,a){"use strict";a.behaviors.bellaThemeFixes={attach:function(a){var i=$("#navbar",a);$(".main-container").css("margin-top",i.height()+"px"),$(window).resize(function(){$(".main-container").css("margin-top",i.height()+"px")})}}}(jQuery,Drupal);

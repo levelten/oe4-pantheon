@@ -74,80 +74,31 @@
  */
 ?>
 
-<?php include ('includes/header.inc'); ?>
+<?php include 'includes/header.inc'; ?>
 
-<?php if ($is_front && $front_full_width): ?>
-  <div class="main-container">
-  <?php elseif ($is_front && !$front_full_width): ?>
-  <div class="main-container container">
-<?php endif; ?>
-<?php if (!$is_front): ?>
 <div class="main-container">
-<?php endif; ?>
 
-  <?php if (!empty($title)): ?>
-    <div class="page-title">
-      <div class="container">
-      <?php print render($title_prefix); ?>
-      <?php if (!empty($title)): ?>
-        <h1 class="page-header"><?php print $title; ?></h1>
-      <?php endif; ?>
-      <?php print render($title_suffix); ?>
-    </div>
-    </div>
-  <?php endif; ?>
-
-  <?php if (!$is_front): ?>
+  <?php if ($is_front && $front_full_width): ?>
   <div class="container">
   <?php endif; ?>
-
-    <header role="banner" id="page-header">
-      <?php if (!empty($site_slogan)): ?>
-        <p class="lead"><?php print $site_slogan; ?></p>
-      <?php endif; ?>
-      <?php print render($page['header']); ?>
-    </header> <!-- /#page-header -->
+  
+  <?php include 'includes/top_bar.inc'; ?>
+  <?php include 'includes/title.inc'; ?>
+  
+  <?php include 'includes/sidebar_first.inc'; ?>
     
-    <div class="row">
+  <section<?php print $content_column_class; ?>>
+    <?php if (!empty($page['highlighted'])): ?>
+    <div class="highlighted jumbotron"><?php print render($page['highlighted']); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
+    <a id="main-content"></a>
+    <?php include 'includes/tabs_messages_help.inc'; ?>
+    <?php print render($page['content']); ?>
+  </section>
 
-      <?php if (!empty($page['sidebar_first'])): ?>
-        <aside class="col-sm-3" role="complementary">
-          <?php print render($page['sidebar_first']); ?>
-        </aside>  <!-- /#sidebar-first -->
-      <?php endif; ?>
-
-      <section<?php print $content_column_class; ?>>
-        <?php if (!empty($page['highlighted'])): ?>
-          <div class="highlighted jumbotron"><?php print render($page['highlighted']); ?></div>
-        <?php endif; ?>
-        <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
-        <a id="main-content"></a>
-        <?php if ($is_front && $front_full_width): ?>
-          <div class="information container">
-        <?php else: ?>
-          <div class="information">
-        <?php endif; ?>
-          <?php print $messages; ?>
-          <?php if (!empty($tabs)): ?>
-            <?php print render($tabs); ?>
-          <?php endif; ?>
-          <?php if (!empty($page['help'])): ?>
-            <?php print render($page['help']); ?>
-          <?php endif; ?>
-          <?php if (!empty($action_links)): ?>
-            <ul class="action-links"><?php print render($action_links); ?></ul>
-          <?php endif; ?>
-        </div>
-        <?php print render($page['content']); ?>
-      </section>
-
-      <?php if (!empty($page['sidebar_second'])): ?>
-        <aside class="col-sm-3" role="complementary">
-          <?php print render($page['sidebar_second']); ?>
-        </aside>  <!-- /#sidebar-second -->
-      <?php endif; ?>
-    </div>
-  <?php if (!$is_front): ?></div></div><?php endif; ?>
+  <?php include 'includes/sidebar_second.inc'; ?>
+  </div>
 </div>
 
 <?php include('includes/footer.inc'); ?>
