@@ -8,7 +8,7 @@
 /**
  * Implements hook_process_page()
  */
-function enterprise_bella_process_page(&$variables) {
+function bella_process_page(&$variables) {
   // Set the proper attributes for the main menu. There should be a better
   // way of doing this but none of the menu process stuff runs early enough.
   if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
