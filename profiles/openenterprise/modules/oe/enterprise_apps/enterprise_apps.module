@@ -37,6 +37,14 @@ function enterprise_apps_menu() {
     'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
+  $items['enterprise_apps/profile_data_export'] = array(
+    'title' => 'Profile data export',
+    'page callback' => 'enterprise_apps_profile_data_export',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'file' => 'enterprise_apps.profile.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['enterprise_apps/util'] = array(
     'title' => 'Enterprise Apps util',
     'page callback' => 'enterprise_apps_util',
@@ -49,6 +57,101 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
+
+  $data = '{"id":"1","name":"open_enterprise_updates","mc_list_id":"70298b4268","label":"Main","description":"","settings":{"roles":{"2":2,"1":1},"mergefields":{"EMAIL":"mail","FNAME":"field-firstname","LNAME":"field-lastname","L10I_VURL":"","L10I_SCORE":""},"mergefields_display":{"EMAIL":true,"FNAME":0,"LNAME":0,"L10I_VURL":0,"L10I_SCORE":0},"doublein":0,"show_register_form":0,"default_register_form_optin":0,"show_account_form":0,"form_label":"","submit_label":"Subscribe!","include_interest_groups":0,"opt_in_interest_groups":0,"interest_groups_label":"Interest Groups","cron":0,"webhooks":0,"allow_anonymous":1,"required":1},"status":"2","module":"oedemo","entity_type":"mailchimp_list","slug":""}';
+
+  $data = '{
+    "name" : "open_enterprise_updates",
+    "mc_list_id" : "70298b4268",
+    "label" : "Main",
+    "description" : "",
+    "settings" : {
+      "roles" : { "2" : 2, "1" : 1 },
+      "mergefields" : {
+        "EMAIL" : "mail",
+        "FNAME" : "field-firstname",
+        "LNAME" : "field-lastname",
+        "L10I_VURL" : "",
+        "L10I_SCORE" : ""
+      },
+      "mergefields_display" : {
+        "EMAIL" : true,
+        "FNAME" : 0,
+        "LNAME" : 0,
+        "L10I_VURL" : 0,
+        "L10I_SCORE" : 0
+      },
+      "doublein" : 0,
+      "show_register_form" : 0,
+      "default_register_form_optin" : 0,
+      "show_account_form" : 0,
+      "form_label" : "",
+      "submit_label" : "Subscribe!",
+      "include_interest_groups" : 0,
+      "opt_in_interest_groups" : 0,
+      "interest_groups_label" : "Interest Groups",
+      "cron" : 0,
+      "webhooks" : 0,
+      "allow_anonymous" : 1,
+      "required" : 1
+    },
+    "entity_type" : "mailchimp_list",
+    "slug" : ""
+  }';
+
+  //$entity = entity_get_controller('mailchimp_list')->create();
+
+  $entity = entity_import('mailchimp_list', $data);
+  $entity->save();
+
+  dsm($entity);
+
+  return '';
+
+  //$entity = entity_import('mailchimp_list', $data);
+
+  $entity = entity_import('mailchimp_list', '{
+    "name" : "open_enterprise_updates",
+    "mc_list_id" : "70298b4268",
+    "label" : "Main",
+    "description" : "",
+    "settings" : {
+      "roles" : { "2" : 2, "1" : 1 },
+      "mergefields" : {
+        "EMAIL" : "mail",
+        "FNAME" : "field-firstname",
+        "LNAME" : "field-lastname",
+        "L10I_VURL" : "",
+        "L10I_SCORE" : ""
+      },
+      "mergefields_display" : {
+        "EMAIL" : true,
+        "FNAME" : 0,
+        "LNAME" : 0,
+        "L10I_VURL" : 0,
+        "L10I_SCORE" : 0
+      },
+      "doublein" : 0,
+      "show_register_form" : 0,
+      "default_register_form_optin" : 0,
+      "show_account_form" : 0,
+      "form_label" : "",
+      "submit_label" : "Subscribe!",
+      "include_interest_groups" : 0,
+      "opt_in_interest_groups" : 0,
+      "interest_groups_label" : "Interest Groups",
+      "cron" : 0,
+      "webhooks" : 0,
+      "allow_anonymous" : 1,
+      "required" : 1
+    },
+    "entity_type" : "mailchimp_list",
+    "slug" : ""
+  }');
+
+  dsm($entity);
+
+  return '';
 
   $query = db_select('system', 's')
     ->fields('s')
