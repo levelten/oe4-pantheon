@@ -6,6 +6,9 @@
 #color_scheme_form #palette .form-item label {
   width: 15em;
 }
+#placeholder {
+  position: static !important;
+}
 
 /* ---------- Preview Styles ----------- */
 

@@ -25,7 +25,8 @@ regions[page_bottom]    = 'Page bottom'
 ;;;;;;;;;;;;;;;;;;;;;
 
 ;stylesheets[all][] = css/style.css
-stylesheets[all][] = fonts/bella/css/bella.css
+stylesheets[all][] = less/style.less
+stylesheets[all][] = fonts/bella/css/bella_font.css
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
