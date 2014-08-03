@@ -496,40 +496,44 @@ function enterprise_landingpages_landingpage_node_form_alter(&$form, &$form_stat
     $data = unserialize($data);
   }
 
+
+  $lp_options = array();
+  if (isset($form['#node']->nid)) {
+    $lp_options = entity_data_get('node', $form['#node']->nid, 'landingpages', array(), $form['#node']->vid);
+  }
+
   $form['form_customization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Form display customization'),
     '#collapsible' => TRUE,
-    '#collapsed' => (empty($data['block_title']) && empty($data['cta_form_content_prefix']) && empty($data['cta_form_submit_text'])),
+    '#collapsed' => (empty($lp_options['form_title']) && empty($lp_options['form_content_prefix']) && empty($lp_options['form_submit_text'])),
     '#description' => t('Customize form display settings for this landing page.'),
-    '#weight' => 102,
+    '#weight' => 1,
     '#prefix' => '<div class="display_sidebar">',
     '#suffix' => '</div>',
   );
 
-  $form['form_customization']['cta_form_title'] = array(
+  $form['form_customization']['form_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
-    '#default_value' => isset($data['block_title']) ? $data['block_title'] : '',
+    '#default_value' => isset($lp_options['form_title']) ? $lp_options['form_title'] : '',
     '#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
   );
 
-  $form['form_customization']['cta_form_content_prefix'] = array(
+  $form['form_customization']['form_content_prefix'] = array(
     '#type' => 'textarea',
     '#title' => t('Form lead-in'),
-    '#default_value' => isset($data['block_content_prefix']) ? $data['block_content_prefix'] : '',
+    '#default_value' => isset($lp_options['form_content_prefix']) ? $lp_options['form_content_prefix'] : '',
     '#rows' => 3,
     '#description' => t('Enter any text you would like placed before the form.'),
   );
 
-  $form['form_customization']['cta_form_submit_text'] = array(
+  $form['form_customization']['form_submit_text'] = array(
     '#type' => 'textfield',
     '#title' => t('Submit button text'),
-    '#default_value' => isset($data['form_submit_text']) ? $data['form_submit_text'] : '',
+    '#default_value' => isset($lp_options['form_submit_text']) ? $lp_options['form_submit_text'] : '',
     '#description' => t('Enter custom submit button text. Leave blank to keep form default.'),
   );
-
-
 
   $form['form_customization']['advanced'] = array(
     '#type' => 'fieldset',
@@ -538,17 +542,12 @@ function enterprise_landingpages_landingpage_node_form_alter(&$form, &$form_stat
     '#collapsed' => TRUE,
   );
 
-  $form['form_customization']['advanced']['cta_form_submit_class'] = array(
+  $form['form_customization']['advanced']['form_submit_class'] = array(
     '#type' => 'textfield',
     '#title' => t('Submit button class'),
-    '#default_value' => isset($data['form_submit_class']) ? $data['form_submit_class'] : '',
+    '#default_value' => isset($lp_options['form_submit_class']) ? $lp_options['form_submit_class'] : '',
     '#description' => t('Enter any custom classes you would like add to the submit button.'),
   );
-
-  $lp_options = array();
-  if (isset($form['#node']->nid)) {
-    $lp_options = entity_data_get('node', $form['#node']->nid, 'landingpages', array(), $form['#node']->vid);
-  }
 
   // remove entity_data to prevent conflicts with entity_data_entity_save
   $form['page_customization'] = array(
@@ -612,6 +611,36 @@ function enterprise_landingpages_landingpage_node_form_alter(&$form, &$form_stat
 
   enterprise_landingpages_node_form_alter_form_redirect_group($form, $form_state);
 
+  // remove entity_data to prevent conflicts with entity_data_entity_save
+  $form['intel_tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Conversion tracking'),
+    '#collapsible' => TRUE,
+    '#collapsed' => (empty($data['block_title']) && empty($data['cta_form_content_prefix']) && empty($data['cta_form_submit_text'])),
+    //'#description' => t('Customize form display settings for this landing page.'),
+    '#weight' => 6,
+    '#prefix' => '<div class="display_sidebar">',
+    '#suffix' => '</div>',
+  );
+
+  //$form['#groups']['group_form_redirect']['#weight']
+
+
+  $intel_level = intel_api_level();
+  if ($intel_level != 'pro') {
+    $msg = '<div class="messages warning">';
+    $msg .= t('The Pro version of Intel is required to enable form redirects by landing pages.');
+    $msg .= ' ' . l(t('Learn more about API versions'), INTEL_HELP_APIVERS, array('attributes' => array('target' => '_blank'))) . '.';
+    $msg .= '</div>';
+    $form['form_redirect_msg'] = array(
+      '#type' => 'markup',
+      '#markup' => $msg,
+    );
+    //$form['#groups']['group_form_redirect']->children[] = 'form_redirect_msg';
+    $form['#group_children']['form_redirect_msg'] = 'group_form_redirect';
+    $form['field_thankyou']['#disabled'] = TRUE;
+    $form['field_redirect_url']['#disabled'] = TRUE;
+  }
 }
 
 function enterprise_landingpages_landingpage_node_form_validate(&$form, &$form_state) {
@@ -647,24 +676,11 @@ function enterprise_landingpages_landingpage_node_form_validate(&$form, &$form_s
       $selection['block_module'] = $module;
       $selection['block_delta'] = $delta;
     }
-
-    // process customizations
-    if (!empty($form_state['values']['cta_form_title'])) {
-      $selection['data']['block_title'] = $form_state['values']['cta_form_title'];
-    }
-    if (!empty($form_state['values']['cta_form_content_prefix'])) {
-      $selection['data']['block_content_prefix'] = $form_state['values']['cta_form_content_prefix'];
-    }
-    if (!empty($form_state['values']['cta_form_submit_text'])) {
-      $selection['data']['form_submit_text'] = $form_state['values']['cta_form_submit_text'];
-    }
-    if (!empty($form_state['values']['cta_form_submit_class'])) {
-      $selection['data']['form_submit_class'] = $form_state['values']['cta_form_submit_class'];
-    }
-
     // save this to the node in the form_state
     $form_state['node']->cta['selections']['cta_forms'] = $selection;
   }
+
+
 
   if (!isset($form_state['node']->entity_data)) {
     $form_state['node']->entity_data = array();
@@ -672,7 +688,10 @@ function enterprise_landingpages_landingpage_node_form_validate(&$form, &$form_s
   if (!isset($form_state['node']->entity_data['landingpages'])) {
     $form_state['node']->entity_data['landingpages'] = array();
   }
-  $form_state['node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
+  $form_state['node']->entity_data['landingpages']['form_title'] = $form_state['values']['form_title'];
+  $form_state['node']->entity_data['landingpages']['form_content_prefix'] = $form_state['values']['form_content_prefix'];
+  $form_state['node']->entity_data['landingpages']['form_submit_text'] = $form_state['values']['form_submit_text'];
+  $form_state['node']->entity_data['landingpages']['form_submit_class'] = $form_state['values']['form_submit_class'];
 
   // loop through page_remove_blocks_ignore to attach to entity_data.
   if (isset($form_state['values']['page_remove_blocks_ignore'])) {
@@ -1157,26 +1176,50 @@ function enterprise_landingpages_webform_submission_presave($node, &$submission)
 function enterprise_landingpages_cta_block_view_alter(&$block, $selector, $selection) {
 
   if ($selector == 'cta_forms') {
-    if (!empty($selection['data']['form_submit_text'])) {
-      if ($selection['block_module'] == 'webform') {
-        $webform_block = enterprise_landingpages_webform_block_view($selection['block_delta']);
-        //dsm($webform_block);
+    $node = menu_get_object();
+    if (!empty($node)
+      && ($node->type == 'enterprise_landingpage')
+      && !empty($node->entity_data)
+      && !empty($node->entity_data['landingpages']) )
+    {
+      $lp_options = $node->entity_data['landingpages'];
+      if (!empty($lp_options['form_title'])) {
+        $block['subject'] = ($lp_options['form_title'] != '<none>') ? filter_xss($lp_options['form_title']) : '';
       }
 
+      if (!empty($lp_options['form_submit_text'])) {
+        if ($selection['block_module'] == 'webform') {
+          $webform_block = enterprise_landingpages_webform_block_view($selection['block_delta']);
+          //dsm($webform_block);
+        }
+
+        if (isset($webform_block['content']['#form'])) {
+          $webform_block['content']['#form']['actions']['submit']['#value'] = $lp_options['form_submit_text'];
+        }
+      }
+
+      // if webform_block, render before returning and return
       if (isset($webform_block['content']['#form'])) {
-        $webform_block['content']['#form']['actions']['submit']['#value'] = $selection['data']['form_submit_text'];
+        //$block['content']['#contextual_links'] += $webform_block['content']['#contextual_links'];
+        //$block['content']['#markup'] = isset($selection['data']['block_content_prefix']) ? filter_xss($selection['data']['block_content_prefix']) : '';
+        $block['content']['#markup'] = drupal_render($webform_block['content']);
       }
+
+      if (!empty($lp_options['form_content_prefix'])) {
+        if (isset($block['content']['#markup'])) {
+          $block['content']['#markup'] = filter_xss($lp_options['form_content_prefix']) . $block['content']['#markup'];
+        }
+      }
+
+
+      //dsm($block);
+      //dsm($selector);
+      //dsm($selection);
+
+
+
     }
 
-    // if webform_block, render before returning and return
-    if (isset($webform_block['content']['#form'])) {
-      //$block['content']['#contextual_links'] += $webform_block['content']['#contextual_links'];
-      $block['content']['#markup'] = isset($selection['data']['block_content_prefix']) ? filter_xss($selection['data']['block_content_prefix']) : '';
-      $block['content']['#markup'] .= drupal_render($webform_block['content']);
-    }
-    //dsm($block);
-    //dsm($selector);
-    //dsm($selection);
   }
 }
 

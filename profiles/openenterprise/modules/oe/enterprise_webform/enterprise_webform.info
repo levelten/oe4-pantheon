@@ -4,6 +4,7 @@ core = 7.x
 package = Open Enterprise
 dependencies[] = ctools
 dependencies[] = enterprise_fields
+dependencies[] = enterprise_thankyoupage
 dependencies[] = features
 dependencies[] = strongarm
 dependencies[] = text

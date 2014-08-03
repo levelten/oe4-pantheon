@@ -807,7 +807,7 @@ function cta_block_view($delta = '') {
 function cta_process_ga_events($block, $selection) {
 //dsm($block);
 //dsm($selection);
-  if (!isset($selection['meta']['data']['ga_event']) || !module_exists('intel')) {
+  if (!isset($selection['meta']['data']['ga_event']) || !module_exists('intel') || (intel_api_level() != 'pro')) {
     return $block;
   }
   $defs = $ga = $selection['meta']['data']['ga_event'];
@@ -1127,83 +1127,98 @@ function cta_settings_form_fields($meta) {
       '#collapsible' => FALSE,
       //'#collapsed' => (!empty($meta['data']['ga_event']['track_click'])  || !empty($meta['data']['ga_event']['track_display'])) ? FALSE : TRUE,
     );
-    $form['cta']['data']['ga_event']['track'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Track CTA events'),
-      '#description' => t('Check the box to report CTA events (clicks, impressions & conversions) in Google Anatlytics for this CTA.'),
-      '#default_value' => (isset($meta['data']['ga_event']['track'])) ? $meta['data']['ga_event']['track'] : CTA_GA_EVENT_TRACK_DEFAULT,
+    $intel_level = intel_api_level();
+    if ($intel_level == 'pro') {
+      $form['cta']['data']['ga_event']['track'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Track CTA events'),
+        '#description' => t('Check the box to report CTA events (clicks, impressions & conversions) in Google Anatlytics for this CTA.'),
+        '#default_value' => (isset($meta['data']['ga_event']['track'])) ? $meta['data']['ga_event']['track'] : CTA_GA_EVENT_TRACK_DEFAULT,
+      );
+      $form['cta']['data']['ga_event']['options_start'] = array(
+        '#type' => 'markup',
+        '#markup' => '<div class="cta-data-ga-event-track-options-group">',
     );
-    $form['cta']['data']['ga_event']['options_start'] = array(
-      '#type' => 'markup',
-      '#markup' => '<div class="cta-data-ga-event-track-options-group">',
-  );
-    $form['cta']['data']['ga_event']['track_display'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Track impressions'),
-      '#description' => t('Check the box to report display of this CTA as an event to Google Anatlytics.')
-        . ' ' . t('Note that not all display events may register due to Google Analytics limits.'),
-      '#default_value' => (isset($meta['data']['ga_event']['track_display'])) ? $meta['data']['ga_event']['track_display'] : CTA_GA_EVENT_TRACK_DISPLAY_DEFAULT,
-    );
-    $form['cta']['data']['ga_event']['track_click'] = array(
-      '#type' => 'hidden',
-      '#title' => t('Track clicks'),
-      '#description' => t('Check the box to report clicks on this CTA as an event to Google Anatlytics.'),
-      '#default_value' => (isset($meta['data']['ga_event']['track_click'])) ? $meta['data']['ga_event']['track_click'] : CTA_GA_EVENT_TRACK_CLICK_DEFAULT,
-    ); 
-    $form['cta']['data']['ga_event']['track_conversion'] = array(
-      '#type' => 'hidden',
-      '#title' => t('Track conversiond'),
-      '#description' => t('Check the box to report conversions on this CTA as an event to Google Anatlytics.'),
-      '#default_value' => (isset($meta['data']['ga_event']['track_conversion'])) ? $meta['data']['ga_event']['track_conversion'] : CTA_GA_EVENT_TRACK_CONVERSION_DEFAULT,
-    ); 
-    $form['cta']['data']['ga_event']['click']['value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Click value'),
-      '#description' => t('Enter a value to assign to the event when the CTA is clicked. Must be an whole number.'),
-      '#size' => 8,
-      '#default_value' => (isset($meta['data']['ga_event']['click']['value'])) ? $meta['data']['ga_event']['click']['value'] : 0,
-    );
-    $form['cta']['data']['ga_event']['conversion']['value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Conversion value'),
-      '#description' => t('Enter a value to assign to the event when the CTA leads to a conversion. Must be an whole number.'),
-      '#size' => 8,
-      '#default_value' => (isset($meta['data']['ga_event']['conversion']['value'])) ? $meta['data']['ga_event']['conversion']['value'] : 0,
-    );
-    $form['cta']['data']['ga_event']['custom'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Advanced'),
-      '#collapsible' => TRUE,
-      '#collapsed' => (!empty($meta['data']['ga_event']['click']['selector'])  || !empty($meta['data']['ga_event']['click']['event'])) ? FALSE : TRUE,
-    );
-    $form['cta']['data']['ga_event']['custom']['action'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Custom CTA name'),
-      '#description' => t('This is reported as the "action" in Google Analytics. Leave blank to use the block label or enter a custom label.'),
-      '#default_value' => (isset($meta['data']['ga_event']['custom']['action'])) ? $meta['data']['ga_event']['custom']['action'] : '',
-    );
-    $form['cta']['data']['ga_event']['custom']['selector'] = array(
-      '#type' => 'textfield',
-      '#title' => t('jQuery selector'),
-      '#description' => t('Use to set a custom selector to bind the event. Use a vaild jQuery selector. Leave blank to use the block label or enter a custom label.'),
-      '#default_value' => (isset($meta['data']['ga_event']['click']['selector'])) ? $meta['data']['ga_event']['click']['selector'] : '',
-    );
-    $form['cta']['data']['ga_event']['custom']['event'] = array(
-      '#type' => 'textfield',
-      '#title' => t('jQuery event'),
-      '#description' => t('Use to set a custom javascript event. Leave blank to use click().'),
-      '#default_value' => (isset($meta['data']['ga_event']['click']['event'])) ? $meta['data']['ga_event']['click']['event'] : '',
-    );
-    $form['cta']['data']['ga_event']['custom']['callback'] = array(
-      '#type' => 'textfield',
-      '#title' => t('jQuery callback'),
-      '#description' => t('Used to set a custom jQuery callback. Leave blank to use the default.'),
-      '#default_value' => (isset($meta['data']['ga_event']['click']['callback'])) ? $meta['data']['ga_event']['click']['callback'] : '',
-    );
-    $form['cta']['data']['ga_event']['options_end'] = array(
-      '#type' => 'markup',
-      '#markup' => '</div>',
-    );
+      $form['cta']['data']['ga_event']['track_display'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Track impressions'),
+        '#description' => t('Check the box to report display of this CTA as an event to Google Anatlytics.')
+          . ' ' . t('Note that not all display events may register due to Google Analytics limits.'),
+        '#default_value' => (isset($meta['data']['ga_event']['track_display'])) ? $meta['data']['ga_event']['track_display'] : CTA_GA_EVENT_TRACK_DISPLAY_DEFAULT,
+      );
+      $form['cta']['data']['ga_event']['track_click'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Track clicks'),
+        '#description' => t('Check the box to report clicks on this CTA as an event to Google Anatlytics.'),
+        '#default_value' => (isset($meta['data']['ga_event']['track_click'])) ? $meta['data']['ga_event']['track_click'] : CTA_GA_EVENT_TRACK_CLICK_DEFAULT,
+      );
+      $form['cta']['data']['ga_event']['track_conversion'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Track conversiond'),
+        '#description' => t('Check the box to report conversions on this CTA as an event to Google Anatlytics.'),
+        '#default_value' => (isset($meta['data']['ga_event']['track_conversion'])) ? $meta['data']['ga_event']['track_conversion'] : CTA_GA_EVENT_TRACK_CONVERSION_DEFAULT,
+      );
+      $form['cta']['data']['ga_event']['click']['value'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Click value'),
+        '#description' => t('Enter a value to assign to the event when the CTA is clicked. Must be an whole number.'),
+        '#size' => 8,
+        '#default_value' => (isset($meta['data']['ga_event']['click']['value'])) ? $meta['data']['ga_event']['click']['value'] : 0,
+      );
+      $form['cta']['data']['ga_event']['conversion']['value'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Conversion value'),
+        '#description' => t('Enter a value to assign to the event when the CTA leads to a conversion. Must be an whole number.'),
+        '#size' => 8,
+        '#default_value' => (isset($meta['data']['ga_event']['conversion']['value'])) ? $meta['data']['ga_event']['conversion']['value'] : 0,
+      );
+      $form['cta']['data']['ga_event']['custom'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Advanced'),
+        '#collapsible' => TRUE,
+        '#collapsed' => (!empty($meta['data']['ga_event']['click']['selector'])  || !empty($meta['data']['ga_event']['click']['event'])) ? FALSE : TRUE,
+      );
+      $form['cta']['data']['ga_event']['custom']['action'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom CTA name'),
+        '#description' => t('This is reported as the "action" in Google Analytics. Leave blank to use the block label or enter a custom label.'),
+        '#default_value' => (isset($meta['data']['ga_event']['custom']['action'])) ? $meta['data']['ga_event']['custom']['action'] : '',
+      );
+      $form['cta']['data']['ga_event']['custom']['selector'] = array(
+        '#type' => 'textfield',
+        '#title' => t('jQuery selector'),
+        '#description' => t('Use to set a custom selector to bind the event. Use a vaild jQuery selector. Leave blank to use the block label or enter a custom label.'),
+        '#default_value' => (isset($meta['data']['ga_event']['click']['selector'])) ? $meta['data']['ga_event']['click']['selector'] : '',
+      );
+      $form['cta']['data']['ga_event']['custom']['event'] = array(
+        '#type' => 'textfield',
+        '#title' => t('jQuery event'),
+        '#description' => t('Use to set a custom javascript event. Leave blank to use click().'),
+        '#default_value' => (isset($meta['data']['ga_event']['click']['event'])) ? $meta['data']['ga_event']['click']['event'] : '',
+      );
+      $form['cta']['data']['ga_event']['custom']['callback'] = array(
+        '#type' => 'textfield',
+        '#title' => t('jQuery callback'),
+        '#description' => t('Used to set a custom jQuery callback. Leave blank to use the default.'),
+        '#default_value' => (isset($meta['data']['ga_event']['click']['callback'])) ? $meta['data']['ga_event']['click']['callback'] : '',
+      );
+      $form['cta']['data']['ga_event']['options_end'] = array(
+        '#type' => 'markup',
+        '#markup' => '</div>',
+      );
+    }
+    else {
+      $form['cta']['data']['ga_event']['#collapsible'] = TRUE;
+      $form['cta']['data']['ga_event']['#collapsed'] = TRUE;
+      $msg = '<div class="messages warning">';
+      $msg .= t('The Pro version of Intel is required for CTA tracking.');
+      $msg .= ' ' . l(t('Learn more about API versions'), INTEL_HELP_APIVERS, array('attributes' => array('target' => '_blank'))) . '.';
+      $msg .= '</div>';
+      $form['cta']['data']['ga_event']['options_end'] = array(
+        '#type' => 'markup',
+        '#markup' => $msg,
+      );
+    }
   }
   
   // hide field set if there are no fields to display

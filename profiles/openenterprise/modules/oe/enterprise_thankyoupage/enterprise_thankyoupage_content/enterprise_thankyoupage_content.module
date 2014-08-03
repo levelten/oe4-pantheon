@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Thankyou Page Content feature.
+ */
+
+include_once 'enterprise_thankyoupage_content.features.inc';

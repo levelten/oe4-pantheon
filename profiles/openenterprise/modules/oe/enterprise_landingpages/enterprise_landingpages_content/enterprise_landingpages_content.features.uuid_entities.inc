@@ -1491,14 +1491,19 @@ LNAME|last_name
           'bean_delta' => '',
           'block_module' => 'webform',
           'block_delta' => 'client-block-c54a0ce3-e853-470c-a1c6-dcb89c8a5dd3',
-		  'data' => array(
-		    'block_title' => 'Download the Website Redesign Success ebook',
-			'form_submit_text' => 'Get it now',
-		  )
         ),
       ),
     ),
     'ds_switch' => '',
+    'entity_data' => array(
+      'landingpages' => array(
+        'form_title' => 'Download the Website Redesign Success ebook',
+        'page_remove_blocks' => 0,
+        'form_submit_text' => 'Get it now',
+        'form_submit_class' => '',
+        'form_content_prefix' => '',
+      ),
+    ),
     'entity_type' => 'node',
     'field_thankyou' => array(
       'und' => array(
@@ -1577,14 +1582,19 @@ LNAME|last_name
           'bean_delta' => '',
           'block_module' => 'webform',
           'block_delta' => 'client-block-c54a0ce3-e853-470c-a1c6-dcb89c8a5dd3',
-		  'data' => array(
-		    'block_title' => 'Download the Essential Guide to Internet Marketing',
-			'form_submit_text' => 'Get it now',
-		  ),
         ),
       ),
     ),
     'ds_switch' => '',
+    'entity_data' => array(
+      'landingpages' => array(
+        'form_title' => 'Download the Essential Guide to Internet Marketing',
+        'page_remove_blocks' => 0,
+        'form_submit_text' => 'Get it now',
+        'form_submit_class' => '',
+        'form_content_prefix' => '',
+      ),
+    ),
     'entity_type' => 'node',
     'field_thankyou' => array(
       'und' => array(

@@ -1,16 +1,16 @@
 <?php
 /**
  * @file
- * enterprise_demo.features.uuid_entities.inc
+ * enterprise_demo_content.features.uuid_entities.inc
  */
 
 /**
  * Implements hook_uuid_default_entities().
  */
-function enterprise_demo_uuid_default_entities() {
+function enterprise_demo_content_uuid_default_entities() {
   $entities = array();
 
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/048331c3-4a6d-4fea-b346-7bb4c6966451',
@@ -52,7 +52,7 @@ function enterprise_demo_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '048331c3-4a6d-4fea-b346-7bb4c6966451',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/24e9df8b-d343-4e6e-b331-bd8ecac8e225',
@@ -87,7 +87,7 @@ function enterprise_demo_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '24e9df8b-d343-4e6e-b331-bd8ecac8e225',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/4b1c5500-62f2-47b1-9f5d-e69f710707ce',
@@ -115,7 +115,7 @@ function enterprise_demo_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '4b1c5500-62f2-47b1-9f5d-e69f710707ce',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/2d64de35-f9f7-4034-869f-29e2a5eb2b54',
@@ -151,7 +151,7 @@ function enterprise_demo_uuid_default_entities() {
     'uuid' => '2d64de35-f9f7-4034-869f-29e2a5eb2b54',
   );
   
-$entities['enterprise_demo'][] = (object) array(
+$entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/c4096983-3e12-4a9d-81cf-859ba2434a3d',
@@ -303,7 +303,7 @@ $entities['enterprise_demo'][] = (object) array(
     'uuid' => 'c4096983-3e12-4a9d-81cf-859ba2434a3d',
   );
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/40ed782b-6505-4884-be5e-b44bb602673c',
@@ -390,7 +390,7 @@ $entities['enterprise_demo'][] = (object) array(
     ),
     'uuid' => '40ed782b-6505-4884-be5e-b44bb602673c',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/4667f97f-50c3-4b60-a2c0-3384635363de',
@@ -477,7 +477,7 @@ $entities['enterprise_demo'][] = (object) array(
     ),
     'uuid' => '4667f97f-50c3-4b60-a2c0-3384635363de',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/14198418-3495-4c4a-9d88-f721840c1455',
@@ -564,7 +564,7 @@ $entities['enterprise_demo'][] = (object) array(
     ),
     'uuid' => '14198418-3495-4c4a-9d88-f721840c1455',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/d965b042-ad88-4783-bdc6-8d015748f00f',
@@ -658,7 +658,7 @@ $entities['enterprise_demo'][] = (object) array(
   
   // home page
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/da99084c-c5ee-4e6e-9e02-d11c71602daf',
@@ -898,7 +898,7 @@ Open Enterprise is built around a unique combination of world-class content mana
   ////////////////////////////////
   // Attract page  
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/9431960d-168f-4fe0-a4f7-1194c76d506b',
@@ -1011,7 +1011,7 @@ Social Media integration so users can engage with your brand and share your cont
   /////////////////////////////
   // Convert Leads page
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/987015b6-0f3c-48fd-bc39-dfbf4262b416',
@@ -1115,7 +1115,7 @@ Open Enterprise with Intelligence™ tracks conversions, leads and sales through
   ////////////////////////
   // Close Sales page
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/366d1ca9-c66a-45da-bf74-d2eb65287f2e',
@@ -1218,7 +1218,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
   /////////////////////////////
   // Tools and Test page
   
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/258b0793-36be-44b7-9155-ad1df87f2f79',
@@ -2299,7 +2299,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
     ),
     'uuid' => '258b0793-36be-44b7-9155-ad1df87f2f79',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
@@ -2472,62 +2472,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
     'uuid' => 'a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
 
-  $entities['enterprise_demo'][] = (object) array(
-    '__metadata' => array(
-      'type' => 'node',
-      'uri' => 'node/90815ebd-54e6-4bce-9734-676b839e8b65',
-      'cause' => FALSE,
-    ),
-    'body' => array(
-      'und' => array(
-        0 => array(
-          'format' => 'full_html',
-          'summary' => '',
-          'value' => '<p>One of our consultants will get in contact shortly.</p>
-',
-        ),
-      ),
-    ),
-    'cid' => 0,
-    'comment' => 1,
-    'comment_count' => 0,
-    'cta' => array(
-      'selections' => array(),
-    ),
-    'ds_switch' => '',
-    'entity_type' => 'node',
-    'field_file' => array(),
-    'field_track_submission' => array(
-      'und' => array(
-        0 => array(
-          'value' => 'goal_contact-form',
-        ),
-      ),
-    ),
-    'field_track_submission_value' => array(),
-    'language' => 'und',
-    'last_comment_name' => NULL,
-    'last_comment_uid' => 1,
-    'log' => '',
-    'promote' => 0,
-    'slug' => 'thank_you_for_contacting_us',
-    'status' => 1,
-    'sticky' => 0,
-    'title' => 'Thank you for contacting us',
-    'tnid' => 0,
-    'translate' => 0,
-    'type' => 'enterprise_thankyou',
-    'uid' => 1,
-    'url_alias' => array(
-      0 => array(
-        'alias' => 'thank-you/contact',
-        'language' => 'und',
-      ),
-    ),
-    'uuid' => '90815ebd-54e6-4bce-9734-676b839e8b65',
-  );
-
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'bean',
       'uri' => 'bean/6f3c25c0-0265-426d-a693-185a4ed2376e',
@@ -2564,7 +2509,7 @@ Dallas, Texas 75206<br />
     'uuid' => '6f3c25c0-0265-426d-a693-185a4ed2376e',
     'view_mode' => 'default',
   );
-  $entities['enterprise_demo'][] = (object) array(
+  $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'bean',
       'uri' => 'bean/eb1751f9-2176-4bd7-8787-ef2b7280dfc7',

@@ -966,6 +966,11 @@ function enterprise_apps_config_nodes($config_settings, $config_info) {
     $ci_node = isset($config_info['nodes'][$uuid]) ? $config_info['nodes'][$uuid] : array();
 
     $node = enterprise_apps_node_load_by_uuid($uuid);
+
+    // skip if node not found
+    if (empty($node->nid)) {
+      continue;
+    }
 //dsm($node);
     $node_wrapper = entity_metadata_wrapper('node', $node);
     $lang = $node->language;

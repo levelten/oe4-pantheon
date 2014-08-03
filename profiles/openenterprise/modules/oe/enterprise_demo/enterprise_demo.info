@@ -11,19 +11,14 @@ dependencies[] = menu_trail_by_path
 dependencies[] = strongarm
 dependencies[] = uuid
 dependencies[] = uuid_path
-
-dependencies[] = devel
 dependencies[] = dblog
 
 
-features[ctools][] = deploy:deploy_plans:1
 features[ctools][] = strongarm:strongarm:1
-features[deploy_plans][] = enterprise_demo
 features[features_api][] = api:2
 features[field_instance][] = node-enterprise_blog-field_cta_category
 features[field_instance][] = node-enterprise_blog-field_keywords
 features[field_instance][] = node-enterprise_landingpage-field_keywords
-features[uuid_entities][] = enterprise_demo
 features[user_permission][] = search content
 features[variable][] = disqus_developer
 features[variable][] = enterprise_intel_entity_settings_node__enterprise_blog

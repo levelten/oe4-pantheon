@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * enterprise_demo.deploy_plans.inc
+ * enterprise_thankyoupage_content.deploy_plans.inc
  */
 
 /**
  * Implements hook_deploy_plans_default().
  */
-function enterprise_demo_deploy_plans_default() {
+function enterprise_thankyoupage_content_deploy_plans_default() {
   $export = array();
 
   $plan = new DeployPlan();
   $plan->disabled = FALSE; /* Edit this to true to make a default plan disabled initially */
   $plan->api_version = 1;
-  $plan->name = 'enterprise_demo';
-  $plan->title = 'Enterprise Demo';
+  $plan->name = 'enterprise_thankyoupage_content';
+  $plan->title = 'Enterprise Thankyou Page Content';
   $plan->description = '';
   $plan->debug = 0;
   $plan->aggregator_plugin = 'DeployAggregatorManaged';
@@ -25,7 +25,7 @@ function enterprise_demo_deploy_plans_default() {
   $plan->processor_plugin = '';
   $plan->processor_config = array();
   $plan->endpoints = array();
-  $export['enterprise_demo'] = $plan;
+  $export['enterprise_thankyoupage_content'] = $plan;
 
   return $export;
 }

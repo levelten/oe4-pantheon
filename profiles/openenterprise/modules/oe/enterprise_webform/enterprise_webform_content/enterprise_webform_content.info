@@ -5,6 +5,7 @@ dependencies[] = bean
 dependencies[] = bean_uuid
 dependencies[] = ctools
 dependencies[] = deploy
+dependencies[] = enterprise_thankyoupage_content
 dependencies[] = enterprise_webform
 dependencies[] = uuid
 features[ctools][] = deploy:deploy_plans:1
