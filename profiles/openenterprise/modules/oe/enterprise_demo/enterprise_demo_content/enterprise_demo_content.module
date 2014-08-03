@@ -1,0 +1,278 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Demo feature.
+ */
+
+include_once 'enterprise_demo_content.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_demo_content_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_demo_content');
+}
+
+function enterprise_demo_content_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_demo_content' => array(
+      'menus' => array(),
+    ),
+  );
+
+  $menu = array();
+  $menu['node:da99084c-c5ee-4e6e-9e02-d11c71602daf'] = array(
+    'link_title' => t('Home'),
+    'weight' => -10,
+  );
+  $menu['node:43a64850-4c5f-4c33-8625-f058b8165e51'] = array(
+    'link_title' => t('Services'),
+    'weight' => -8,
+    'expanded' => 1,
+  );
+  $menu['node:366d1ca9-c66a-45da-bf74-d2eb65287f2e'] = array(
+    'link_title' => t('Close Sales'),
+    'weight' => -5,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:9431960d-168f-4fe0-a4f7-1194c76d506b'] = array(
+    'link_title' => t('Attract Visitors'),
+    'weight' => 0,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:987015b6-0f3c-48fd-bc39-dfbf4262b416'] = array(
+    'link_title' => t('Convert Leads'),
+    'weight' => 1,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+  $menu['node:366d1ca9-c66a-45da-bf74-d2eb65287f2e'] = array(
+    'link_title' => t('Close Sales'),
+    'weight' => 2,
+    'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
+  );
+
+  $menu['node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7'] = array(
+    'link_title' => t('About us'),
+    'weight' => 5,
+    'expanded' => 1,
+  );
+
+  /*
+  $menu_def['view:enterprise_news:page'] = array(
+    //'link_title' => t('About us'),
+    'weight' => 1,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  */
+
+  $menu['view:enterprise_users:page'] = array(
+    'weight' => 1,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_press'] = array(
+    'weight' => 2,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_news'] = array(
+    'weight' => 3,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['app:enterprise_faq'] = array(
+    'weight' => 4,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+
+  $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
+    'link_title' => t('Contact'),
+    'weight' => 7,
+  );
+
+
+  $settings['enterprise_demo_content']['menus']['main-menu'] = $menu;
+  $weight = 0;
+  $settings['enterprise_demo_content']['blocks'] = array(
+    'search:form' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'title' => t('Search OE Pro'),
+      'weight' => $weight++,
+    ),
+    'widgets:s_twitter-user-timeline-widget' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'weight' => $weight++,
+    ),
+    'widgets:s_facebook-like-box' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'weight' => $weight++,
+    ),
+    'widgets:s_enterprise_social-follow' => array(
+      'title' => t('Follow us'),
+      'regions' => array(
+        'footer',
+      ),
+      'block_row' => array(
+        'row' => 'row2',
+        'row_class' => 'stacked',
+      ),
+      'weight' => $weight++,
+    ),
+    'bean:custom-footer-contact-us' => array(
+      'regions' => array(
+        'footer',
+      ),
+      'block_row' => array(
+        'row' => 'row2',
+        'row_class' => 'stacked',
+      ),
+      'weight' => $weight++,
+    ),
+
+    'views:enterprise_blog_blocks-tags' => array(
+      'weight' => 2,
+    ),
+    'views:enterprise_blog_blocks-recent' => array(
+      'weight' => 4,
+    ),
+    'views:enterprise_blog_blocks-popular' => array(
+      'weight' => 6,
+    ),
+    // disable blog archive block
+    'views:enterprise_blog_blocks-archives' => array(
+      'regions' => -1,
+    ),
+    // add cta footer to blog content type
+    'cta:sel_cta_sidebar' => array(
+      'path' => array(
+        'pages' => array(
+          '<front>',
+          'admin/*',
+          'user',
+          'user/*',
+          'users/*',
+          'offer/*',
+          'thank-you/*',
+          'services',
+          'services/*',
+          'about',
+          'about/*',
+          'team',
+        ),
+      ),
+    ),
+    // add cta footer to blog content type
+    'cta:sel_cta_footer' => array(
+      'node_type' => array(
+        'types' => array(
+          'enterprise_blog',
+        ),
+      ),
+    ),
+  );
+
+  // Webform: Contact us
+  $nodes['cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
+    'webform' => array(
+      'redirect_url' => 'thank-you/contact',
+    ),
+  );
+
+  // Blog post: 5 Tips to Increase Your Conversion Rates
+  $nodes['b7a86778-4129-4756-84d1-5e4780436c0e'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: 11 Beautiful Flat Site Designs
+  $nodes['ada72cc8-57d8-42b8-82ce-dd7188e6dde4'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: How To Optimize Your Website for Search Engines
+  $nodes['3136cbf9-9438-4c87-8c3e-3716cd45184c'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Responsive Design Simplified with Bootstrap
+  $nodes['4a734df2-20a7-44e2-be7c-7ab0497e4945'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Brand Like a Publisher with Style Guides
+  $nodes['3fc7411a-4a40-4c6c-9bc8-a7697cbc8be3'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: Social Media ROI & How to Improve It
+  $nodes['7f7991ee-8cf4-4a80-b379-fc2dc9241227'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '70bfeb95-e156-40eb-9b9b-283af20a9820',
+        ),
+      ),
+    ),
+  );
+
+  // Blog post: 6 Key Metrics for Better Content
+  $nodes['7d7aea4c-1b3c-4377-9613-f37ea43d04d4'] = array(
+
+  );
+
+  // Blog post: 7 Modules To Make Your Drupal Site More Usable
+  $nodes['8caf3e4b-71ed-4fbe-b2a6-f0ddaf733c10'] = array(
+    'field_cta_category' => array(
+      'und' => array(
+        0 => array(
+          'tid' => '87755497-3e33-4637-b9fb-c2e2bb61782f',
+        ),
+      ),
+    ),
+  );
+
+  $settings['enterprise_demo_content']['nodes'] = $nodes;
+
+  return $settings;
+}
+
+function enterprise_demo_content_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_demo_content'] = array(
+    'title' => t('Demo'),
+  );
+
+  return $config;
+}

@@ -23,6 +23,8 @@ $vtk = IntelVisitor::extractVtk();
 watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   }
   */
+
+  $api_level = intel_api_level();
   
   $path_is_admin = path_is_admin(current_path());
   
@@ -107,8 +109,10 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
         $intent => '',
       );
       if ($intent == 'l') {
-        $is_landingpage = 1;  
-        $page_events['landing_page_view'] = $intel_events['landing_page_view'];      
+        $is_landingpage = 1;
+        if ($api_level == 'pro') {
+          $page_events['landing_page_view'] = $intel_events['landing_page_view'];
+        }
       }     
     }
 
@@ -304,7 +308,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
       'lib_path' => intel_get_library_path(),
       'page_title' => $page_title,
       'track_analytics' => 0, // this is set in intel_js_alter if ga script exists
-      'track_adhoc_ctas' => 'track-cta',
+      'track_adhoc_ctas' => ($api_level == 'pro') ? 'track-cta' : '',
       'track_adhoc_events' => 'track-event',
       'track_forms' => $track_forms,
       'track_realtime' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
@@ -810,6 +814,8 @@ function intel_check_form_submission($page) {
     $error = $visitor->apiVisitorLoadError;
     dpm("$error");//
   }
+  watchdog('intel_fs_visitor', print_r($visitor, 1));
+  watchdog('intel_fs_api_data', print_r($api_data, 1));
   
   $a = explode('//', $GLOBALS['base_url']);
   $host = $a[1];

@@ -20,7 +20,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
         'weight' => 0,
       ),
@@ -51,7 +66,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'text',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'text_default',
         'weight' => 1,
       ),
@@ -85,7 +115,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
         'weight' => 0,
       ),
@@ -116,7 +161,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'text',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'text_default',
         'weight' => 1,
       ),
@@ -150,7 +210,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
         'weight' => 0,
       ),
@@ -181,7 +256,22 @@ function enterprise_intel_field_default_field_instances() {
       'default' => array(
         'label' => 'above',
         'module' => 'text',
-        'settings' => array(),
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'text_default',
         'weight' => 1,
       ),
@@ -205,7 +295,7 @@ function enterprise_intel_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-page-field_visitor_attribute_col'
+  // Exported field_instance: 'node-page-field_intel_event_col'
   $field_instances['node-page-field_intel_event_col'] = array(
     'bundle' => 'page',
     'default_value' => NULL,
@@ -317,6 +407,7 @@ function enterprise_intel_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Attribute');
   t('Event');
+  t('Intel events');
   t('Page attributes');
   t('Value');
   t('Visitor attributes');

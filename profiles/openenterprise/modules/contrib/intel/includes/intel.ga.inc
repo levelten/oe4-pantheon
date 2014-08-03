@@ -1720,6 +1720,6 @@ function intel_add_report_headers() {
 }
 
 function intel_get_report_ajax_container() {
-  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-dates="' . $_GET['dates'] . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
+  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-dates="' . ((!empty($_GET['dates'])) ? $_GET['dates'] : '') . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
   return $output;
 }
