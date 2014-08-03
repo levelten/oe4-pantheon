@@ -84,8 +84,9 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
 
   $options = array(
     'min' => '<strong>' . st('Minimal') . '</strong>',
-    'inbound' => '<strong>' . st('Essentials') . '</strong>',
-    'standard' => '<strong>' . st('Full') . '</strong>',
+    'attract' => '<strong>' . st('Attract') . '</strong>',
+    'attract_convert' => '<strong>' . st('Attract & convert') . '</strong>',
+    'standard' => '<strong>' . st('Full suite') . '</strong>',
   );
   $form['install']['demo_mode'] = array(
     '#type' => 'radios',
@@ -94,8 +95,19 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#default_value' => 'standard',
   );
   $form['install']['demo_mode']['min']['#description'] = st('Does not install any content apps. The only available content type will be basic pages.');
-  $form['install']['demo_mode']['inbound']['#description'] = st('Installs essential apps for content marketing including; Blog, Social media, Webform and Landingpages & Calls-to-action.');
+  $form['install']['demo_mode']['attract']['#description'] = st('Installs essential apps for content marketing including; blog, social media, and webforms.');
+  $form['install']['demo_mode']['attract_convert']['#description'] = st('Adds landing pages, calls-to-action and A/B testing to facilitate robust conversion workflows.');
   $form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');
+
+  if (!enterprise_apps_module_files_exist('enterprise_landingpages')) {
+    $form['install']['demo_mode']['attract_convert']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['#default_value'] = 'attract';
+  }
+  else if (!enterprise_apps_module_files_exist('enterprise_press')) {
+    $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['#default_value'] = 'attract_convert';
+  }
 
   /*
   $form['install']['bare'] = array(

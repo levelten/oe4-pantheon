@@ -79,9 +79,12 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     //'enterprise_webform_content', //? why is this before enterprise_webform
     'enterprise_webform',
     'enterprise_webform_content',
-    'enterprise_landingpages',
-    'enterprise_landingpages_content',
   );
+  if (!empty($settings['demo']['mode'])
+    && (($settings['demo']['mode'] == 'attract_convert') || $settings['demo']['mode'] == 'standard')) {
+    $required_apps[] = 'enterprise_landingpages';
+    $required_apps[] = 'enterprise_landingpages_content';
+  }
   if (!empty($settings['demo']['mode']) && ($settings['demo']['mode'] == 'standard')) {
     $required_apps[] = 'enterprise_seo';
     $required_apps[] = 'enterprise_faq';
