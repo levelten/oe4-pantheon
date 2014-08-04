@@ -191,7 +191,7 @@ class ApiVisitor {
       return $this->$name;
     }
     //if (isset($this->apiVisitor->$name)) {
-    if (property_exists($this->apiVisitor, $name)) {
+    if (isset($this->apiVisitor) && property_exists($this->apiVisitor, $name)) {
       return $this->apiVisitor->$name;
     }
     return null;
@@ -203,10 +203,12 @@ class ApiVisitor {
   }
   
   public function __set($name, $value) {
-    if (isset($this->$name)) {
+    //if (isset($this->$name)) {
+    if (property_exists($this, $name)) {
       return $this->$name = $value;
     }
-    if (isset($this->apiVisitor->$name)) {
+    //if (isset($this->apiVisitor->$name)) {
+    if (isset($this->apiVisitor) && property_exists($this->apiVisitor, $name)) {
       $this->apiVisitor->$name = $value;
     }
     return null;

@@ -1,0 +1,21 @@
+name = Enterprise Demo No Content
+description = Provides welcome page and settings for no demo content installs.
+core = 7.x
+package = Open Enterprise Demo
+dependencies[] = bean_uuid
+dependencies[] = ctools
+dependencies[] = deploy
+dependencies[] = devel
+dependencies[] = enterprise_apps
+dependencies[] = enterprise_demo
+dependencies[] = strongarm
+dependencies[] = uuid
+dependencies[] = uuid_path
+dependencies[] = devel
+dependencies[] = dblog
+
+
+features[ctools][] = deploy:deploy_plans:1
+features[deploy_plans][] = enterprise_demo_nocontent
+features[features_api][] = api:2
+features[uuid_entities][] = enterprise_demo_nocontent

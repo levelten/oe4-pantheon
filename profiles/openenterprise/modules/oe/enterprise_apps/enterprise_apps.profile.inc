@@ -70,14 +70,107 @@ function enterprise_apps_profile_install_tasks($install_state) {
 function enterprise_apps_config_features_options_form($form, $form_state, &$install_state) {
   drupal_set_title(t('Install applications'));
 
-  $msg = st('The Intelligence API is required to enable the professional version of Open Enterprise.');
-  $msg .= ' ' . st('To get an API key, visit the !link site.',
+  $msg = st('Major site components such blogs and landing pages are provided in modular features called Apps.');
+  $msg .= ' ' . st('After installation, you can add Apps at anytime using the Features admin.');
+  $msg .= ' ' . st('The selections below provide automated initial setup for popular combinations of Apps.');
+  $form['install'] = array(
+    '#type' => 'fieldset',
+    //'#tree' => TRUE,
+    '#title' => t('Apps'),
+    '#description' => $msg,
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $options = array(
+    'min' => '<strong>' . st('Minimal') . '</strong>',
+    'attract' => '<strong>' . st('Attract') . '</strong>',
+    'attract_convert' => '<strong>' . st('Attract & convert') . '</strong>',
+    'standard' => '<strong>' . st('Full suite') . '</strong>',
+  );
+  $form['install']['demo_mode'] = array(
+    '#type' => 'radios',
+    '#title' => '',
+    '#options' => $options,
+    '#default_value' => 'standard',
+  );
+  $form['install']['demo_mode']['min']['#description'] = st('Does not install any content apps. The only available content type will be basic pages.');
+  $form['install']['demo_mode']['attract']['#description'] = st('Installs essential apps for content marketing including; blog, social media, and webforms.');
+  $form['install']['demo_mode']['attract_convert']['#description'] = st('Adds landing pages, calls-to-action and A/B testing to facilitate robust conversion workflows.');
+  $form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');
+
+  if (!enterprise_apps_module_files_exist('enterprise_landingpages')) {
+    $form['install']['demo_mode']['attract_convert']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['#default_value'] = 'attract';
+  }
+  else if (!enterprise_apps_module_files_exist('enterprise_press')) {
+    $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
+    $form['install']['demo_mode']['#default_value'] = 'attract_convert';
+  }
+
+  /*
+  $form['install']['bare'] = array(
+    '#type' => 'radio',
+    '#name' => 'config_method',
+    //'#default_value' => FALSE,
+    '#return_value' => 'skip',
+    '#title' => st('<strong>Bare</strong>'),
+    '#description' => st('Does not install any content apps. The only available content type will be basic pages.'),
+    '#attributes' => array(
+      'name' => 'install_option',
+    ),
+  );
+
+  $form['install']['inbound'] = array(
+    '#type' => 'radio',
+    '#name' => 'config_method',
+    //'#default_value' => FALSE,
+    '#return_value' => 'inbound',
+    '#title' => st('<strong>Essentials</strong>'),
+    '#description' => st('Installs essential apps for content marketing including; Blog, Social media, Webform and Landingpages & Calls-to-action.'),
+    '#attributes' => array(
+      'name' => 'install_option',
+    ),
+  );
+
+  $form['install']['standard'] = array(
+    '#type' => 'radio',
+    '#name' => 'config_method',
+    //'#default_value' => TRUE,
+    '#return_value' => 'standard',
+    '#title' => st('<strong>Full</strong>'),
+    '#description' => st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.'),
+    '#attributes' => array(
+      'name' => 'install_option',
+    ),
+  );
+  */
+
+  $msg = st('Most Apps provide optional content to help demonstrate functionality. Use the checkbox below to enable demo content to be installed.');
+  $form['install']['demo_content_msg'] = array(
+    '#type' => 'markup',
+    '#markup' => '<hr />' . $msg,
+  );
+
+  $form['install']['demo_content'] = array(
+    '#type' => 'checkbox',
+    '#title' => '<strong>' . st('Install demo content') . '</strong>',
+    '#default_value' => TRUE,
+  );
+
+
+  $link_options = array(
+    'attributes' => array(
+      'target' => 'intelapi',
+    )
+  );
+  $msg = st('The Intelligence API provides enhanced analytics, visitor data and site functionality.');
+  $msg .= ' ' . st('You can get a Free or Pro key at !link.',
       array(
-        '!link' => l(t('Intelligence API'), ENTERPRISE_APPS_L10IAPI_HREF),
+        '!link' => l(t('Intelligence API'), ENTERPRISE_APPS_L10IAPI_HREF, $link_options),
       )
     );
-  $msg .= ' ' . st('The free API key will enable installation of Open Enterprise Pro Essentials.');
-  $msg .= ' ' . st('The Pro version of the API enables installation of the full version of Open Enterprise Pro.');
 
   $form['intel'] = array(
     '#type' => 'fieldset',
@@ -102,45 +195,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#description' => st('Input the property api key.'),
   );
 
-  $form['install'] = array(
-    '#type' => 'container',
-    '#tree' => TRUE,
-  );
-  $form['install']['standard'] = array(
-    '#type' => 'radio',
-    '#name' => 'config_method',
-    '#default_value' => TRUE,
-    '#return_value' => 'standard',
-    '#title' => st('<strong>Install the Open Enterprise suite</strong>'),
-    '#description' => st('Install the standard collection of Open Enterprise applications and example content.'),
-    '#attributes' => array(
-      'name' => 'install_option',
-    ),
-  );
-  /**
-   * @TODO Build out custom installation process.
-   */
-//  $form['install']['custom'] = array(
-//    '#type' => 'radio',
-//    '#name' => 'config_method',
-//    '#default_value' => FALSE,
-//    '#return_value' => 'custom',
-//    '#title' => st('<strong>Choose which applications to install</strong>'),
-//    '#description' => st('Select which Open Enterprise applications you would like to install.'),
-//    '#attributes' => array(
-//      'name' => 'install_option',
-//    ),
-//  );
-  $form['install']['skip'] = array(
-    '#type' => 'radio',
-    '#name' => 'config_method',
-    '#default_value' => FALSE,
-    '#return_value' => 'skip',
-    '#title' => st('<strong>Skip this step</strong>'),
-    '#attributes' => array(
-      'name' => 'install_option',
-    ),
-  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => st('Continue'),
@@ -162,6 +217,7 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
   $property = array();
   $api_level = intel_verify_apikey($message, $property, $options);
   if (!empty($property['status']) && !empty($property['level'])) {
+    $form_state['api_profile_settings'] = $property;
     variable_set('intel_ga_account', $form_state['values']['intel_tid']);
     variable_set('intel_apikey', $form_state['values']['intel_apikey']);
     variable_set('intel_api_level', $property['level']);
@@ -176,8 +232,9 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
         $profile_settings = unserialize($property['profile_settings']);
       }
       if ($profile_settings) {
-        variable_set('enterprise_apps_profile_settings', $profile_settings);
+        $form_state['api_profile_settings'] = $profile_settings;
       }
+
     }
   }
 
@@ -192,15 +249,26 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
   $values = $form_state['values'];
 
   if ($form_state['values']['op'] == t('Continue')) {
-    if (!empty($values['install']['standard'])) {
+    $profile_settings = array();
+    if (isset($form_state['api_profile_settings'])) {
+      $profile_settings = $form_state['api_profile_settings'];
+    }
+    $profile_settings['demo'] = array();
+
+    $profile_settings['apps_debug'] = array(
+      'form_state_values' => $values,
+    );
+
+    if ($values['demo_mode'] != 'min') {
       $_SESSION['enterprise_apps_demo'] = 'enterprise_demo';
     }
-    else if (!empty($values['install']['custom'])) {
-      // @TODO Build out custom installation process.
-    }
-    else if (!empty($values['install']['skip'])) {
+    $profile_settings['demo']['mode'] = $values['demo_mode'];
 
+    if (!empty($values['demo_content'])) {
+      $profile_settings['demo']['demo_content'] = 1;
     }
+
+    variable_set('enterprise_apps_profile_settings', $profile_settings);
   }
 }
 
@@ -332,7 +400,6 @@ function enterprise_apps_profile_data_export() {
 
   // intel data
   $numbs = (array) intel_get_phonenumbers();
-  dsm($numbs);
   if (!empty($numbs) && is_array($numbs)) {
     $data['intel_phonenumber_defaults'] = $numbs;
   }

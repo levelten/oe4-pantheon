@@ -315,6 +315,14 @@ function intel_admin_people_contacts() {
   $output = array();
 
   $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    $vars = array(
+      'message' => t('The Pro version of Intel is required to create contacts.'),
+    );
+    intel_api_access_error($vars);
+  }
+
   
   $header = array();
   $header[] = array(

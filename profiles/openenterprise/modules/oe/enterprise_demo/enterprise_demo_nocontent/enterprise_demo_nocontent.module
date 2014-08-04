@@ -1,0 +1,41 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Demo feature.
+ */
+
+include_once 'enterprise_demo_nocontent.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_demo_nocontent_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_demo_nocontent');
+}
+
+function enterprise_demo_nocontent_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_demo_nocontent' => array(
+      'menus' => array(),
+    ),
+  );
+
+  $menu = array();
+  $menu['node:da99084c-c5ee-4e6e-9e02-d11c71602daf'] = array(
+    'link_title' => t('Home'),
+    'weight' => -10,
+  );
+
+  $settings['enterprise_demo_nocontent']['menus']['main-menu'] = $menu;
+
+  return $settings;
+}
+
+function enterprise_demo_nocontent_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_demo_nocontent'] = array(
+    'title' => t('Demo'),
+  );
+
+  return $config;
+}
