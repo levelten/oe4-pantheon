@@ -7,7 +7,7 @@
   width: 15em;
 }
 #placeholder {
-  position: static !important;
+  /*position: static !important;*/
 }
 
 /* ---------- Preview Styles ----------- */

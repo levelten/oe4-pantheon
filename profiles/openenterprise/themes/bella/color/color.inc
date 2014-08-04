@@ -3,10 +3,42 @@
 // Put the logo path into JavaScript for the live preview.
 drupal_add_js(array('color' => array('logo' => theme_get_setting('logo', 'bella'))), 'setting');
 
+// Add Kuler colors
+$kuler_json = theme_get_setting('bella_kuler_json', 'bella');
+$kuler_colors = array();
+
+if (!empty($kuler_json)) {
+  $json = array_unique(get_object_vars(json_decode($kuler_json)));
+
+  foreach ($json as $key => $value) {
+    if ($value != '[object Object]' && strlen($key) < 56) {
+      $colors = explode(',', $value);
+      $title = trim(str_replace('_', ' ', $key));
+      if (count($colors) == 5) {
+        $colorset = array(
+          'title' => t(ucwords($key)),
+          'colors' => array(
+            'brandprimary' => $colors[0],
+            'brandsecondary' => $colors[1],
+            'brandaccent' => $colors[2],
+            'brandaccent2' => $colors[3],
+            'brandaccent3' => $colors[4],
+          ),
+        );
+      }
+      $kuler_colors[$title] = $colorset;
+    }
+  }
+}
+
 $info = array(
   // Available colors and color labels used in theme.
   'fields' => array(
     'brandprimary' => t('Brand Primary'),
+    'brandsecondary' => t('Brand Secondary'),
+    'brandaccent' => t('Brand Accent'),
+    'brandaccent2' => t('Brand Accent 2'),
+    'brandaccent3' => t('Brand Accent 3'),
   ),
   // Pre-defined color schemes.
   'schemes' => array(
@@ -70,3 +102,14 @@ $info = array(
   // Base file for image generation.
   'base_image' => 'color/base.png',
 );
+
+if (!empty($kuler_colors)) {
+  // Add default value in or else it borks.
+  reset($kuler_colors);
+  $first_key = key($kuler_colors);
+  $temp = $kuler_colors[$first_key];
+  $kuler_colors['default'] = $temp;
+  unset($kuler_colors[$first_key]);
+
+  $info['schemes'] = $kuler_colors;
+}

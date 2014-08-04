@@ -55,6 +55,10 @@ function bella_less_variables() {
   if (empty($color_pallete)) {
     $color_pallete = array(
       'brandprimary' => '#EA9B3E',
+      'brandsecondary' => '#F5F5F5',
+      'brandaccent' => '#FFF',
+      'brandaccent2' => '#EA9B3E',
+      'brandaccent3' => '#EA9B3E',
     );
   }
   // Generate variables with color values.
