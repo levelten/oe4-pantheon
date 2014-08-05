@@ -15,6 +15,16 @@ function bella_form_system_theme_settings_alter(&$form, &$form_state) {
 		'#title' => t('Kuler JSON'),
 		'#description' => t('Adding in text for JSON Kuler'),
 	);
+	$form['bella_config']['bella_kuler'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Use Kuler?'),
+		'#default_value' => theme_get_setting('bella_kuler'),
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+		'#description' => t('Checking this will replace the current color schemes with those provided by the Kuler JSON.'),
+	);
 	$form['bella_config']['bella_kuler_json'] = array(
 		'#type' => 'textarea',
 		'#title' => t('Kuler JSON'),

@@ -3,33 +3,6 @@
 // Put the logo path into JavaScript for the live preview.
 drupal_add_js(array('color' => array('logo' => theme_get_setting('logo', 'bella'))), 'setting');
 
-// Add Kuler colors
-$kuler_json = theme_get_setting('bella_kuler_json', 'bella');
-
-if (!empty($kuler_json)) {
-  $json = array_unique(get_object_vars(json_decode($kuler_json)));
-  $kuler_colors = array();
-  foreach ($json as $key => $value) {
-    if ($value != '[object Object]' && strlen($key) < 56) {
-      $colors = explode(',', $value);
-      $title = trim(str_replace('_', ' ', $key));
-      if (count($colors) == 5) {
-        $colorset = array(
-          'title' => t(ucwords($key)),
-          'colors' => array(
-            'brandprimary' => $colors[0],
-            'brandsecondary' => $colors[1],
-            'brandaccent' => $colors[2],
-            'brandaccent2' => $colors[3],
-            'brandaccent3' => $colors[4],
-          ),
-        );
-      }
-      $kuler_colors[$title] = $colorset;
-    }
-  }
-}
-
 $info = array(
   // Available colors and color labels used in theme.
   'fields' => array(
@@ -107,6 +80,33 @@ $info = array(
   // Base file for image generation.
   'base_image' => 'color/base.png',
 );
+
+// Add Kuler colors
+$kuler_json = theme_get_setting('bella_kuler_json', 'bella');
+$kuler_check = theme_get_setting('bella_kuler', 'bella');
+if (!empty($kuler_json) && $kuler_check) {
+  $json = array_unique(get_object_vars(json_decode($kuler_json)));
+  $kuler_colors = array();
+  foreach ($json as $key => $value) {
+    if ($value != '[object Object]' && strlen($key) < 56) {
+      $colors = explode(',', $value);
+      $title = trim(str_replace('_', ' ', $key));
+      if (count($colors) == 5) {
+        $colorset = array(
+          'title' => t(ucwords($key)),
+          'colors' => array(
+            'brandprimary' => $colors[0],
+            'brandsecondary' => $colors[1],
+            'brandaccent' => $colors[2],
+            'brandaccent2' => $colors[3],
+            'brandaccent3' => $colors[4],
+          ),
+        );
+      }
+      $kuler_colors[$title] = $colorset;
+    }
+  }
+}
 
 if (!empty($kuler_colors)) {
   // Add default value in or else it borks.
