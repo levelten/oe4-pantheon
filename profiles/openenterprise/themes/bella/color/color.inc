@@ -5,11 +5,10 @@ drupal_add_js(array('color' => array('logo' => theme_get_setting('logo', 'bella'
 
 // Add Kuler colors
 $kuler_json = theme_get_setting('bella_kuler_json', 'bella');
-$kuler_colors = array();
 
 if (!empty($kuler_json)) {
   $json = array_unique(get_object_vars(json_decode($kuler_json)));
-
+  $kuler_colors = array();
   foreach ($json as $key => $value) {
     if ($value != '[object Object]' && strlen($key) < 56) {
       $colors = explode(',', $value);
@@ -46,18 +45,24 @@ $info = array(
       'title' => t('Bella (default)'),
       'colors' => array(
         'brandprimary' => '#EA9B3E',
+        'brandsecondary' => '#F5F5F5',
+        'brandaccent' => '#FFFFFF',
       ),
     ),
     'bella_prince' => array(
       'title' => t('Prince'),
       'colors' => array(
         'brandprimary' => '#0995D8',
+        'brandsecondary' => '#F5F5F5',
+        'brandaccent' => '#FFFFFF',
       ),
     ),
     'bella_midnight' => array(
       'title' => t('Midnight'),
       'colors' => array(
         'brandprimary' => '#6E2E62',
+        'brandsecondary' => '#F5F5F5',
+        'brandaccent' => '#FFFFFF',
       ),
     ),
   ),
@@ -112,4 +117,8 @@ if (!empty($kuler_colors)) {
   unset($kuler_colors[$first_key]);
 
   $info['schemes'] = $kuler_colors;
+} else {
+  // Unset the extra color fields.
+  unset($info['fields']['brandaccent2']);
+  unset($info['fields']['brandaccent3']);
 }

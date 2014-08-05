@@ -9,6 +9,9 @@
 #placeholder {
   /*position: static !important;*/
 }
+#edit-color .color-form #palette {
+  min-height: 150px;
+}
 
 /* ---------- Preview Styles ----------- */
 
