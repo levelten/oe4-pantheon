@@ -9,12 +9,18 @@
 		&, p, a, h2, h3, h4 {
 			color: @gray;
 		}
+		.block {
+			> .block-title {
+				margin-bottom: 1em;
+			}
+		}
 	}
 	.footer-bottom {
 		background-color: @gray;
 		padding: 20px 0;
 		&, p, a, h2, h3, h4 {
 			color: white;
+			font-weight: 300;
 		}	
 	}
 	.block-title {
@@ -22,7 +28,7 @@
 		font-weight: 700;
 		text-transform: uppercase;
 		padding-bottom: 0.5em;
-		.heading-underline();
+		.heading-underline(80px);
 	}
 	.block-menu-block {
 		.menu {
@@ -49,7 +55,7 @@
 			line-height: 1.5em;
 			margin-top: 0;
 			padding-bottom: 0.5em;
-			.heading-underline(20%);
+			.heading-underline(40px);
 		}
 	}
 	.btn-social-profile {
@@ -58,12 +64,13 @@
 		.rounded(100%);
 		color: @gray-lighter !important;
 		display: block;
-		margin: 0 0 0.5em;
+		float: left;
+		margin: 0 5px 0.5em 0;
 		width: 35px;
 		height: 35px;
 		padding: 8px 0;
 		&:hover {
-			color: @brand-primary !important;
+			background-color: @brand-primary;
 		}
 	}
 }
