@@ -1,6 +1,11 @@
 // Insert your styling here.
 header {
 	overflow: auto;
+	.navbar {
+		&.navbar-fixed-top {
+			margin-bottom: 0;
+		}
+	}
 	&.navbar-default {
 		background-color: white;
 		border-bottom: 2px solid @gray-light;
@@ -76,22 +81,22 @@ header {
 					border-right: 1px solid @gray-light;
 				}
 				> a {
-					color: @gray-light;
+					color: @gray;
 					font-weight: 300;
 					padding: 15px 10px;
 					text-transform: uppercase;
 					&:hover {
 						background-color: white;
-						color: @gray-dark;
+						color: @brand-primary;
 					}
 				}
 				&.active-trail {
 					> a {
 						background-color: white;
-						color: @gray-dark;
+						color: @brand-primary;
 						&:hover {
 							background-color: white;
-							color: @gray-dark;
+							color: @brand-primary;
 						}
 					}
 				}

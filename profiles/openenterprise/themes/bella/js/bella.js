@@ -14,7 +14,7 @@
     attach: function(context) {
 
       // Add margin depending on height of navbar.
-			var navbar = $("#navbar", context);
+			var navbar = $(".not-logged-in #navbar", context);
 			$(".main-container").css('margin-top', navbar.height()+'px');
 			$(window).resize(function(){
 				$(".main-container").css('margin-top', navbar.height()+'px');

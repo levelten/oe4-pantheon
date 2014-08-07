@@ -29,26 +29,39 @@
 	.menu {
 		li {
 			float: none;
-			position: relative;
+			margin-bottom: 10px;
+			&:last-child {
+				margin-bottom: 0;
+			}
 			a {
-				.font-size(1.8);
+				background-color: @gray-lighter;
+				border-left: 10px solid @gray-light;
+				.box-sizing();
+				color: @gray;
+				.font-size(1.6);
 				line-height: 1.5em;
-				padding-left: 20px;
-				&:before {
-					content: '\a0';
-					background-color: @brand-primary;
-					background-repeat: repeat;
-					position: absolute;
-					height: 2px;
-					left: 0;
-					overflow: hidden;
-					top: 48%;
-					width: 12px;
-				}
+				padding: 5px 20px;
+				text-transform: uppercase;
 				&:hover {
-					text-decoration: underline;
+					background-color: @brand-primary;
+					border: 0;
+					color: @brand-accent;
+					padding-left: 30px;
 				}
 			}
 		}
 	}
 }
+
+ul.tags {
+	a {
+		background-color: @brand-primary;
+		color: @brand-accent;
+		.rounded(3px);
+		&:hover {
+			background-color: darken(@brand-primary, 10%);
+			text-decoration: none;
+		}
+	}
+}
+
