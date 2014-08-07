@@ -25,8 +25,22 @@ function enterprise_blog_ds_field_settings_info() {
         'link' => '1',
         'wrapper' => 'h2',
         'class' => '',
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
         'field_delimiter' => '',
         'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
         'conditions' => array(),
       ),
     ),
@@ -34,6 +48,39 @@ function enterprise_blog_ds_field_settings_info() {
       'weight' => '1',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
+    ),
+    'body' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
+    ),
+    'field_image' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
     ),
   );
   $export['node|enterprise_blog|blog_featured'] = $ds_fieldsetting;
@@ -53,6 +100,9 @@ function enterprise_blog_ds_field_settings_info() {
         'link' => '1',
         'wrapper' => 'h4',
         'class' => '',
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
         'field_delimiter' => '',
         'field_formatter_class' => '',
         'linked_field' => array(
@@ -67,6 +117,13 @@ function enterprise_blog_ds_field_settings_info() {
           ),
         ),
         'conditions' => array(),
+      ),
+    ),
+    'field_image' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
       ),
     ),
   );
@@ -147,6 +204,25 @@ function enterprise_blog_ds_field_settings_info() {
       'weight' => '5',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
     ),
     'submit_info' => array(
       'weight' => '0',
@@ -162,16 +238,95 @@ function enterprise_blog_ds_field_settings_info() {
       'weight' => '8',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
     ),
     'prev_next_node' => array(
       'weight' => '2',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
     ),
     'social_media_share_buttons' => array(
       'weight' => '1',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+        'conditions' => array(),
+      ),
+    ),
+    'body' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
+    ),
+    'field_blog_tags' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+          'lb' => 'Tags',
+        ),
+      ),
+    ),
+    'field_image' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
     ),
   );
   $export['node|enterprise_blog|default'] = $ds_fieldsetting;
@@ -219,10 +374,24 @@ function enterprise_blog_ds_field_settings_info() {
       'format' => 'default',
       'formatter_settings' => array(
         'link' => '1',
-        'wrapper' => 'h2',
+        'wrapper' => 'h3',
         'class' => '',
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
         'field_delimiter' => '',
         'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
         'conditions' => array(),
       ),
     ),
@@ -231,9 +400,37 @@ function enterprise_blog_ds_field_settings_info() {
       'label' => 'hidden',
       'format' => 'default',
       'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
         'field_delimiter' => '',
-        'field_formatter_class' => 'author',
+        'field_formatter_class' => '',
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
         'conditions' => array(),
+      ),
+    ),
+    'body' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
+      ),
+    ),
+    'field_image' => array(
+      'formatter_settings' => array(
+        'ft' => array(
+          'func' => 'theme_ds_field_minimal',
+        ),
       ),
     ),
   );
@@ -254,7 +451,7 @@ function enterprise_blog_ds_layout_settings_info() {
   $ds_layout->entity_type = 'node';
   $ds_layout->bundle = 'enterprise_blog';
   $ds_layout->view_mode = 'blog_featured';
-  $ds_layout->layout = 'bootstrap_2col_fluid_stacked';
+  $ds_layout->layout = 'bootstrap_5_7';
   $ds_layout->settings = array(
     'regions' => array(
       'left' => array(
@@ -276,22 +473,16 @@ function enterprise_blog_ds_layout_settings_info() {
       'layout_class' => array(
         'style-blog-featured' => 'style-blog-featured',
       ),
-      'left' => array(
-        'span5' => 'span5',
-      ),
-      'right' => array(
-        'span7' => 'span7',
-      ),
     ),
     'wrappers' => array(
-      'header' => 'div',
       'left' => 'div',
       'right' => 'div',
-      'footer' => 'div',
     ),
     'layout_wrapper' => 'div',
     'layout_attributes' => '',
     'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
   );
   $export['node|enterprise_blog|blog_featured'] = $ds_layout;
 
