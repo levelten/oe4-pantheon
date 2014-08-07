@@ -77,6 +77,11 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['col-md-11'] = t('Span 11');
     $classes['col-md-12'] = t('Span 12');
 
+    $classes['row'] = t('Row');
+    $classes['row-fluid'] = t('Row Fluid');
+    $classes['container'] = t('Container');
+    $classes['container-fluid'] = t('Container Fluid');
+
     $classes['visible-xs'] = t('Phone: visible');
     $classes['visible-sm'] = t('Tablet: visible');
     $classes['visible-md'] = t('Desktop: visible');
