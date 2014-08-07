@@ -100,7 +100,7 @@
   <?php include 'includes/top_bar.inc'; ?>
 
   <?php if (!$is_front): ?>
-  <div class="container">
+  <div class="main-container-inner container">
   <?php endif; ?>
     
     <div class="row">

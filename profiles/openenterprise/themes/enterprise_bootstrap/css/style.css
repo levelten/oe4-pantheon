@@ -6222,6 +6222,9 @@ ul.secondary {
 .page-header {
   margin-top: 0;
 }
+.field > .label-inline {
+  display: inline;
+}
 p:last-child {
   margin-bottom: 0;
 }
@@ -6771,6 +6774,12 @@ img {
 .style-blog-full .ds-middle .field-name-field-image {
   padding-bottom: 1em;
 }
+.style-blog-featured .field-name-title h2 {
+  margin-top: 0;
+}
+.style-blog-teaser .field-name-title h3 {
+  margin-top: 0;
+}
 .style-about-author .field-name-field-description {
   padding-bottom: 1em;
 }
@@ -6895,13 +6904,6 @@ section.section-style-right figure figcaption {
 }
 section.section-style {
   width: 100%;
-}
-section.section-style > div {
-  -ms-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  width: 50%;
 }
 section.section-style .no-wrap-left {
   float: left;
@@ -7308,4 +7310,7 @@ fieldset.panel-default .panel-body {
 }
 .carousel.slide .carousel-control {
   z-index: 1;
+}
+.view-enterprise-blog.view-display-id-page .views-row {
+  margin-bottom: 2em;
 }

@@ -89,7 +89,20 @@
 		}
 	}
 }
-
+.style-date-stacked {
+	.day {
+		background-color: @brand-primary;
+		color: @brand-accent;
+		font-weight: 300;
+	}
+	.month {
+		background-color: @gray-light;
+		color: @gray;
+	}
+	.arrow {
+		display: none;
+	}
+}
 .style-trifold-alt {
 	.trifold {
 		text-align: left;
@@ -127,5 +140,12 @@
 				background-color: darken(@brand-primary, 10%);
 			}
 		}
+	}
+}
+
+.icon {
+	&.i-circle, &.i-rounded, &.i-thumbnail {
+		background-color: @brand-primary;
+		color: @brand-accent;
 	}
 }
