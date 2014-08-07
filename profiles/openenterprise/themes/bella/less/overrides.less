@@ -96,32 +96,30 @@ ul.tags {
 }
 
 // Awesome bullet list coloring
-// .section-style {
-// 	ul {
-// 		padding-left: 0;
-// 		li {
-// 			list-style-type: none;
-// 			&:before {
-// 				color: @brand-primary;
-// 				content: "\2022";
-// 				padding-right: 5px;
-// 			}
-// 		}
-// 	}
-// 	ol {
-// 		counter-reset: numItem;
-// 		padding-left: 0;
-// 		li {
-// 			list-style-type: none;
-// 			&:before {
-// 				color: @brand-primary;
-// 				counter-increment: numItem;
-// 				content: counter(numItem) ".";
-// 				padding-right: 5px;
-// 			}
-// 		}
-// 	}
-// }
+.section-style {
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\2022";
+				padding-right: 5px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 5px;
+			}
+		}
+	}
+}
 
 blockquote {
 	&.pullquote {
