@@ -97,13 +97,16 @@ ul.tags {
 
 // Awesome bullet list coloring
 .section-style {
+	ul, ol {
+		padding-left: 20px;
+	}
 	ul {
 		li {
 			list-style-type: none;
 			&:before {
 				color: @brand-primary;
-				content: "\2022";
-				padding-right: 5px;
+				content: "\25AA";
+				padding-right: 10px;
 			}
 		}
 	}
@@ -115,7 +118,7 @@ ul.tags {
 				color: @brand-primary;
 				counter-increment: numItem;
 				content: counter(numItem) ".";
-				padding-right: 5px;
+				padding-right: 10px;
 			}
 		}
 	}
