@@ -40,16 +40,11 @@ $info = array(
     ),
   ),
 
+  // We aren't using any of the following, but Color will throw errors if it's missing.
   // CSS files (excluding @import) to rewrite with new color scheme.
-  'css' => array(
-    'css/colors.css',
-  ),
-
+  'css' => array('css/colors.css',),
   // Files to copy.
-  'copy' => array(
-    'logo.png',
-  ),
-
+  'copy' => array('logo.png',),
   // Gradient definitions.
   'gradients' => array(
     array(
@@ -61,22 +56,17 @@ $info = array(
       'colors' => array('top', 'bottom'),
     ),
   ),
-
   // Color areas to fill (x, y, width, height).
   'fill' => array(),
-
   // Coordinates of all the theme slices (x, y, width, height)
   // with their filename as used in the stylesheet.
   'slices' => array(),
-
   // Reference color used for blending. Matches the base.png's colors.
   'blend_target' => '#ffffff',
-
   // Preview files.
   'preview_css' => 'color/preview.css',
   'preview_js' => 'color/preview.js',
   'preview_html' => 'color/preview.html',
-
   // Base file for image generation.
   'base_image' => 'color/base.png',
 );
@@ -93,7 +83,7 @@ if (!empty($kuler_json) && $kuler_check) {
       $colors = explode(',', $value);
       $title = trim(str_replace('_', ' ', $key));
       if (count($colors) == 5) {
-        $colorset = array(
+        $kuler_colors[$title] = array(
           'title' => t(ucwords($key)),
           'colors' => array(
             'brandprimary' => $colors[0],
@@ -104,45 +94,57 @@ if (!empty($kuler_json) && $kuler_check) {
           ),
         );
       }
-      $kuler_colors[$title] = $colorset;
     }
   }
+  reset($kuler_colors);
 }
 
 $colourlovers_palette = variable_get('colourlovers_theme_palette', '');
 $colourlovers_check = theme_get_setting('colourlovers_check', variable_get('theme_default'));
 
 if (module_exists('colourlovers') && $colourlovers_check && !empty($colourlovers_palette)) {
-  
   // Only grab first 5 colors (if available).
   foreach ($colourlovers_palette as $key => $value) {
     foreach ($value['colors'] as $k => $v) {
-      $colourlovers_palette[$key]['colors']['brandprimary'] = (isset($value['colors'][0])) ? '#'.$value['colors'][0] : '#FFF';
-      $colourlovers_palette[$key]['colors']['brandsecondary'] = (isset($value['colors'][1])) ? '#'.$value['colors'][1] : '#FFF';
-      $colourlovers_palette[$key]['colors']['brandaccent'] = (isset($value['colors'][2])) ? '#'.$value['colors'][2] : '#FFF';
-      $colourlovers_palette[$key]['colors']['brandaccent2'] = (isset($value['colors'][3])) ? '#'.$value['colors'][3] : '#FFF';
-      $colourlovers_palette[$key]['colors']['brandaccent3'] = (isset($value['colors'][4])) ? '#'.$value['colors'][4] : '#FFF';
-      unset($colourlovers_palette[$key]['colors'][$k]);
+      $colourlovers_palette[$key]['color']['brandprimary'] = (isset($value['colors'][0])) ? '#'.$value['colors'][0] : '#FFFFFF';
+      $colourlovers_palette[$key]['color']['brandsecondary'] = (isset($value['colors'][1])) ? '#'.$value['colors'][1] : '#FFFFFF';
+      $colourlovers_palette[$key]['color']['brandaccent'] = (isset($value['colors'][2])) ? '#'.$value['colors'][2] : '#FFFFFF';
+      $colourlovers_palette[$key]['color']['brandaccent2'] = (isset($value['colors'][3])) ? '#'.$value['colors'][3] : '#FFFFFF';
+      $colourlovers_palette[$key]['color']['brandaccent3'] = (isset($value['colors'][4])) ? '#'.$value['colors'][4] : '#FFFFFF';
     }
+    $colourlovers_palette[$key]['colors'] = $colourlovers_palette[$key]['color'];
+    unset($colourlovers_palette[$key]['color']);
   }
-  $first_key = key($colourlovers_palette);
-  $temp = $colourlovers_palette[$first_key];
-  $colourlovers_palette['default'] = $temp;
-  unset($colourlovers_palette[$first_key]);
 
+  // Add COLOURlover palette to color palette.
+  reset($colourlovers_palette);
+  $colourlovers_palette = _color_clean_palette($colourlovers_palette);
   $info['schemes'] = $colourlovers_palette;
 
-} else if (!empty($kuler_colors)) {
+} elseif (!empty($kuler_colors) && $kuler_check) {
   // Add default value in or else it borks.
-  reset($kuler_colors);
-  $first_key = key($kuler_colors);
-  $temp = $kuler_colors[$first_key];
-  $kuler_colors['default'] = $temp;
-  unset($kuler_colors[$first_key]);
-
+  $kuler_colors = _color_clean_palette($kuler_colors);
   $info['schemes'] = $kuler_colors;
+
 } else {
   // Unset the extra color fields.
   unset($info['fields']['brandaccent2']);
   unset($info['fields']['brandaccent3']);
+}
+
+// Flush LESS cache
+if (module_exists('less')) {
+  less_flush_caches();
+}
+
+/*
+ * Helper function to get the palettes ready for the Color module.
+ */
+function _color_clean_palette($palette) {
+  $first_key = key($palette);
+  $temp = $palette[$first_key];
+  $palette['default'] = $temp;
+  unset($palette[$first_key]);
+
+  return $palette;
 }

@@ -26,23 +26,6 @@ function bella_process_page(&$variables) {
       }
     }
   }
-
-  // Hook into color.module.
-  if (module_exists('color')) {
-    _color_page_alter($variables);
-    $colors = _color_page_alter($vars);
-  }
-}
-
-
-/**
- * Override or insert variables into the html template.
- */
-function bella_process_html(&$vars) {
-  // Hook into color.module
-  if (module_exists('color')) {
-    _color_html_alter($vars);
-  }
 }
 
 /*
