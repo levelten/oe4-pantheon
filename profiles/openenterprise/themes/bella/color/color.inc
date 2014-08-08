@@ -108,7 +108,28 @@ if (!empty($kuler_json) && $kuler_check) {
   }
 }
 
-if (!empty($kuler_colors)) {
+$colourlovers_palette = variable_get('colourlovers_theme_palette', '');
+if (module_exists('colourlovers') && !empty($colourlovers_palette)) {
+  
+  // Only grab first 5 colors (if available).
+  foreach ($colourlovers_palette as $key => $value) {
+    foreach ($value['colors'] as $k => $v) {
+      $colourlovers_palette[$key]['colors']['brandprimary'] = (isset($value['colors'][0])) ? '#'.$value['colors'][0] : '#FFF';
+      $colourlovers_palette[$key]['colors']['brandsecondary'] = (isset($value['colors'][1])) ? '#'.$value['colors'][1] : '#FFF';
+      $colourlovers_palette[$key]['colors']['brandaccent'] = (isset($value['colors'][2])) ? '#'.$value['colors'][2] : '#FFF';
+      $colourlovers_palette[$key]['colors']['brandaccent2'] = (isset($value['colors'][3])) ? '#'.$value['colors'][3] : '#FFF';
+      $colourlovers_palette[$key]['colors']['brandaccent3'] = (isset($value['colors'][4])) ? '#'.$value['colors'][4] : '#FFF';
+      unset($colourlovers_palette[$key]['colors'][$k]);
+    }
+  }
+  $first_key = key($colourlovers_palette);
+  $temp = $colourlovers_palette[$first_key];
+  $colourlovers_palette['default'] = $temp;
+  unset($colourlovers_palette[$first_key]);
+
+  $info['schemes'] = $colourlovers_palette;
+
+} else if (!empty($kuler_colors)) {
   // Add default value in or else it borks.
   reset($kuler_colors);
   $first_key = key($kuler_colors);
