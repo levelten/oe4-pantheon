@@ -82,8 +82,9 @@ $info = array(
 );
 
 // Add Kuler colors
-$kuler_json = theme_get_setting('bella_kuler_json', 'bella');
-$kuler_check = theme_get_setting('bella_kuler', 'bella');
+$kuler_json = theme_get_setting('kuler_json', variable_get('theme_default'));
+$kuler_check = theme_get_setting('kuler_check', variable_get('theme_default'));
+
 if (!empty($kuler_json) && $kuler_check) {
   $json = array_unique(get_object_vars(json_decode($kuler_json)));
   $kuler_colors = array();
@@ -109,7 +110,9 @@ if (!empty($kuler_json) && $kuler_check) {
 }
 
 $colourlovers_palette = variable_get('colourlovers_theme_palette', '');
-if (module_exists('colourlovers') && !empty($colourlovers_palette)) {
+$colourlovers_check = theme_get_setting('colourlovers_check', variable_get('theme_default'));
+
+if (module_exists('colourlovers') && $colourlovers_check && !empty($colourlovers_palette)) {
   
   // Only grab first 5 colors (if available).
   foreach ($colourlovers_palette as $key => $value) {
