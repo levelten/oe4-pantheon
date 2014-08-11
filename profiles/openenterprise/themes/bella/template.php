@@ -32,7 +32,7 @@ function bella_process_page(&$variables) {
 * Create custom LESS variables
 */
 function bella_less_variables() {
-  // Grab the color pallet saved by the color module.
+  // Grab the color palette saved by the color module.
   $color_pallete = variable_get('color_bella_palette', FALSE);
   // If the color palette hasn't been saved yet, use the default.
   if (empty($color_pallete)) {
