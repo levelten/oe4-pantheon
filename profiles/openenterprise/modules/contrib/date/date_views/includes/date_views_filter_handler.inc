@@ -36,10 +36,6 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     $this->date_combine_conditions('op_simple');
   }
 
-  function op_contains($field) {
-    $this->date_combine_conditions('op_contains');
-  }
-
   /**
    * Combines multiple date WHERE expressions into a single WHERE expression.
    *

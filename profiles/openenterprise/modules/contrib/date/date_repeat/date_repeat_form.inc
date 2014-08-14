@@ -941,6 +941,7 @@ function theme_date_repeat_current_additions($rows = array()) {
  */
 function theme_date_repeat_rrule($vars) {
   $element = $vars['element'];
+  $class = $element['#date_repeat_collapsed'] ? array('date-no-float', 'collapsible', 'collapsed') : array('date-no-float', 'collapsible');
   $id = drupal_html_id('repeat-settings-fieldset');
   $parents = $element['#parents'];
   $selector = "{$parents[0]}[{$parents[1]}][{$parents[2]}][show_repeat_settings]";
@@ -948,10 +949,11 @@ function theme_date_repeat_rrule($vars) {
     '#type' => 'item',
     '#title' => t('Repeat settings'),
     '#title_display' => 'invisible',
+    '#attributes' => array('class' => $class),
     '#markup' => $element['#children'],
     '#states' => array(
-      'invisible' => array(
-        ":input[name=\"{$selector}\"]" => array('checked' => FALSE),
+      'visible' => array(
+        ":input[name=\"{$selector}\"]" => array('checked' => TRUE),
       ),
     ),
     '#id' => $id,

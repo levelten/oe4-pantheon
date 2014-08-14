@@ -20,8 +20,9 @@
  *   Correct sql string for database type.
  */
 function date_sql_concat($array) {
-  switch (Database::getConnection()->databaseType()) {
+  switch (db_driver()) {
     case 'mysql':
+    case 'mysqli':
       return "CONCAT(" . implode(",", $array) . ")";
     case 'pgsql':
       return implode(" || ", $array);
@@ -38,8 +39,9 @@ function date_sql_concat($array) {
  *   SQL statement to return the first non-NULL value in the list.
  */
 function date_sql_coalesce($array) {
-  switch (Database::getConnection()->databaseType()) {
+  switch (db_driver()) {
     case 'mysql':
+    case 'mysqli':
     case 'pgsql':
       return "COALESCE(" . implode(',', $array) . ")";
   }
@@ -87,7 +89,7 @@ class date_sql_handler {
    * The object constuctor.
    */
   function __construct($date_type = DATE_DATETIME, $local_timezone = NULL, $offset = '+00:00') {
-    $this->db_type = Database::getConnection()->databaseType();
+    $this->db_type = db_driver();
     $this->date_type = $date_type;
     $this->db_timezone = 'UTC';
     $this->local_timezone = isset($local_timezone) ? $local_timezone : date_default_timezone();
@@ -103,6 +105,7 @@ class date_sql_handler {
       $has_support = FALSE;
       switch ($this->db_type) {
         case 'mysql':
+        case 'mysqli':
           $test = db_query("SELECT CONVERT_TZ('2008-02-15 12:00:00', 'UTC', 'US/Central')")->fetchField();
           if ($test == '2008-02-15 06:00:00') {
             $has_support = TRUE;
@@ -138,10 +141,11 @@ class date_sql_handler {
    */
   function set_db_timezone($offset = '+00:00') {
     static $already_set = FALSE;
-    $type = Database::getConnection()->databaseType();
+    $type = db_driver();
     if (!$already_set) {
       switch ($type) {
         case 'mysql':
+        case 'mysqli':
           db_query("SET @@session.time_zone = '$offset'");
           break;
         case 'pgsql':
@@ -195,6 +199,7 @@ class date_sql_handler {
     }
     switch ($this->db_type) {
       case 'mysql':
+      case 'mysqli':
         switch ($this->date_type) {
           case DATE_UNIX:
             $field = "FROM_UNIXTIME($field)";
@@ -253,6 +258,7 @@ class date_sql_handler {
     if (!empty($offset)) {
       switch ($this->db_type) {
         case 'mysql':
+        case 'mysqli':
           return "ADDTIME($field, SEC_TO_TIME($offset))";
         case 'pgsql':
           return "($field + INTERVAL '$offset SECONDS')";;
@@ -282,6 +288,7 @@ class date_sql_handler {
     $granularity = strtoupper($granularity);
     switch ($this->db_type) {
       case 'mysql':
+      case 'mysqli':
         switch ($direction) {
           case 'ADD':
             return "DATE_ADD($field, INTERVAL $count $granularity)";
@@ -351,6 +358,7 @@ class date_sql_handler {
     else {
       switch ($this->db_type) {
         case 'mysql':
+        case 'mysqli':
           return "CONVERT_TZ($field, $db_zone, $localzone)";
         case 'pgsql':
           // WITH TIME ZONE assumes the date is using the system
@@ -374,6 +382,7 @@ class date_sql_handler {
   function sql_format($format, $field) {
     switch ($this->db_type) {
       case 'mysql':
+      case 'mysqli':
         $replace = array(
           'Y' => '%Y',
           'y' => '%y',
@@ -544,6 +553,7 @@ class date_sql_handler {
       case 'WEEK':
         switch ($this->db_type) {
           case 'mysql':
+          case 'mysqli':
             // WEEK using arg 3 in MySQl should return the same value as
             // Postgres EXTRACT.
             return "WEEK($field, 3)";
@@ -553,6 +563,7 @@ class date_sql_handler {
       case 'DOW':
         switch ($this->db_type) {
           case 'mysql':
+          case 'mysqli':
             // MySQL returns 1 for Sunday through 7 for Saturday, PHP date
             // functions and Postgres use 0 for Sunday and 6 for Saturday.
             return "INTEGER(DAYOFWEEK($field) - 1)";
@@ -562,6 +573,7 @@ class date_sql_handler {
       case 'DOY':
         switch ($this->db_type) {
           case 'mysql':
+          case 'mysqli':
             return "DAYOFYEAR($field)";
           case 'pgsql':
             return "EXTRACT(DOY FROM($field))";
@@ -884,30 +896,30 @@ class date_sql_handler {
     }
     $formats = array('display', 'sql');
     // Start with the site long date format and add seconds to it.
-    $short = str_replace(':i', ':i:s', variable_get('date_format_short', 'l, F j, Y - H:i'));
+    $long = str_replace(':i', ':i:s', variable_get('date_format_long', 'l, F j, Y - H:i'));
     switch ($granularity) {
       case 'year':
         $formats['display'] = 'Y';
         $formats['sql'] = 'Y';
         break;
       case 'month':
-        $formats['display'] = date_limit_format($short, array('year', 'month'));
+        $formats['display'] = date_limit_format($long, array('year', 'month'));
         $formats['sql'] = 'Y-m';
         break;
       case 'day':
-        $formats['display'] = date_limit_format($short, array('year', 'month', 'day'));
+        $formats['display'] = date_limit_format($long, array('year', 'month', 'day'));
         $formats['sql'] = 'Y-m-d';
         break;
       case 'hour':
-        $formats['display'] = date_limit_format($short, array('year', 'month', 'day', 'hour'));
+        $formats['display'] = date_limit_format($long, array('year', 'month', 'day', 'hour'));
         $formats['sql'] = 'Y-m-d\TH';
         break;
       case 'minute':
-        $formats['display'] = date_limit_format($short, array('year', 'month', 'day', 'hour', 'minute'));
+        $formats['display'] = date_limit_format($long, array('year', 'month', 'day', 'hour', 'minute'));
         $formats['sql'] = 'Y-m-d\TH:i';
         break;
       case 'second':
-        $formats['display'] = date_limit_format($short, array('year', 'month', 'day', 'hour', 'minute', 'second'));
+        $formats['display'] = date_limit_format($long, array('year', 'month', 'day', 'hour', 'minute', 'second'));
         $formats['sql'] = 'Y-m-d\TH:i:s';
         break;
       case 'week':
