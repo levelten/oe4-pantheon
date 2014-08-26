@@ -565,6 +565,7 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
   $api_level = variable_get('intel_api_level', '');
   $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
   $api_js_ver = ($api_js_ver) ? $api_js_ver : INTEL_L10IAPI_JS_VER;
+  $api_sesinit_mode = variable_get('intel_l10iapi_session_init_mode', '');
   if ($l10i_ga_account && !$l10i_ga_tracker_prefix) {
     $l10i_ga_tracker_prefix = 'l10i';
   }
@@ -602,8 +603,11 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     $library_path = libraries_get_path('LevelTen') . 'Intel/scripts';
     //$api_hostpath = variable_get('intel_l10iapi_hostpath', '');
     $api_hostpath = variable_get('intel_l10iapi_url', '');
-    if (!trim($api_hostpath)) {
+    if (empty($api_hostpath)) {
       $api_hostpath = INTEL_L10IAPI_URL;
+    }
+    else if (substr($api_hostpath, 0 ,1) == '/') {
+      $api_hostpath = $_SERVER['HTTP_HOST'] . $api_hostpath;
     }
     $data_mode = (variable_get('intel_api_level', 'free') == 'free') ? 0 : 1;
     $api_pid = variable_get('intel_l10iapi_profileid', '');
@@ -643,12 +647,28 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
         $script .= $s;
       } else {
-        $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : ''; 
-        $script .= "(function() {" . $terminator;
-        $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
-        $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
-        $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
-        $script .= "})();" . $terminator;
+        if ($api_sesinit_mode == 'unifiedjs') {
+          $l10ijs_propdir = '';
+          if ($api_level == 'pro') {
+            $l10ijs_propdir = '/p/' . $l10i_ga_account;
+          }
+          $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
+
+          $script .= "(function() {" . $terminator;
+          $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
+          $script .= "document.cookie='l10i_bt='+t;c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';if(c.indexOf('l10i_s=')==-1){q='?t='+t;}}" . $terminator;
+          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
+          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+          $script .= "})();" . $terminator;
+        }
+        else { // standard mode
+          $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : '';
+          $script .= "(function() {" . $terminator;
+          $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
+          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
+          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+          $script .= "})();" . $terminator;
+        }
       }
 
       if (0) { // use combined l10i.js

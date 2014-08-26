@@ -46,9 +46,9 @@ dependencies[] = transliteration
 ;; Text Editor
 dependencies[] = video_filter
 dependencies[] = ckeditor
-dependencies[] = ckeditor_media
+;dependencies[] = ckeditor_media
 dependencies[] = ckeditor_blocks
-dependencies[] = ckeditor_bootstrap
+;dependencies[] = ckeditor_bootstrap
 dependencies[] = file_entity
 dependencies[] = insert_block
 dependencies[] = media

@@ -6,7 +6,7 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
   $output = '';
   $filters = array();
   $reports = intel_reports();
@@ -15,6 +15,9 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
     if ($filter_type == 'node') {
       $filter_type = 'page';
       $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
+    }
+    if ($filter_value) {
+      $filter_element .= ':' . $filter_value;
     }
     $filters[$filter_type] = urldecode($filter_element);
     $context = $filter_type;
@@ -114,9 +117,21 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   else {
     $cache_options = array('expire' => $end_date);
   }
+
+  $filter_info = array();
+  if (!empty($filters)) {
+    if (isset($filters['page-attr'])) {
+      $a = explode(':', $filters['page-attr']);
+      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
+    }
+  }
   
   // get last month's data  
   $last_month_data = new LevelTen\Intel\GAModel();
+  if (isset($filter_info['page-attr'])) {
+    $last_month_data->setPageAttributeInfo($filter_info['page-attr']);
+  }
+
   $last_month_data->buildFilters($filters, $context);
   $last_month_data->setDateRange($lastmonth_start_date, $lastmonth_end_date);
   $last_month_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -135,6 +150,9 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   
   // get this month's data
   $ga_data = new LevelTen\Intel\GAModel();
+  if (isset($filter_info['page-attr'])) {
+    $ga_data->setPageAttributeInfo($filter_info['page-attr']);
+  }
   $ga_data->buildFilters($filters, $context);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));

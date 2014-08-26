@@ -57,9 +57,91 @@ function intel_webform_page_alter(&$page) {
  */
 function intel_webform_intel_page_settings_js_alter(&$settings) {
   if (is_array($settings['intel']['track_forms'])) {
-    $settings['intel']['track_forms'][] = 'form.webform-client-form';
+    $forms = intel_webform_track_forms();
+    foreach ($forms AS $form) {
+      $settings['intel']['track_forms'][] = $form;
+    }
+    //dsm($forms);
+    //if (!intel_webform_disable_track_forms() ) {
+      //$settings['intel']['track_forms'][] = 'form.webform-client-form';
+    //}
   }
 }
+
+function intel_webform_disable_track_forms($value = null) {
+  static $flag;
+  if (!isset($flag)) {
+    $flag = 0;
+  }
+  if (isset($value)) {
+    $flag = $value;
+  }
+  return $flag;
+}
+
+function intel_webform_track_forms($form = null, $action = 'set') {
+  static $forms;
+  if (!isset($forms)) {
+    $forms = array();
+  }
+  if (isset($form)) {
+    if ($action == 'unset') {
+      if ($forms[$form]) {
+        unset($forms[$form]);
+      }
+    }
+    else {
+      $forms[$form] = $form;
+    }
+
+  }
+  return $forms;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function intel_webform_form_alter(&$form, &$form_state, $form_id) {
+  // Webform is being presented to visitor.
+  if (isset($form['#node']->webform) && in_array('webform_client_form_submit', $form['#submit'])) {
+    // check for special fields
+    if (!isset($form_state['intel_fields'])) {
+      $form_state['intel_fields'] = array();
+      if (isset($form['#node']->webform['components'])) {
+
+        // loop through webform components to find any special fields
+        $comps = &$form['#node']->webform['components'];
+        foreach ($comps AS $i => $comp) {
+          if ($comp['form_key'] == 'intel_submit_data') {
+            $form_state['intel_fields']['intel_submit_data'] = $i;
+
+          }
+        }
+      }
+    }
+
+    $track = 1;
+    if (!empty($form_state['intel_fields']['intel_submit_data'])) {
+      // disable tracking on multi page forms if not on first page
+      if (isset($form_state['webform']['page_count']) && ($form_state['webform']['page_count'] > 1)) {
+        if (isset($form_state['webform']['page_num']) && ($form_state['webform']['page_num'] > 1)) {
+          intel_webform_disable_track_forms(1);
+          $track = 0;
+        }
+      }
+    }
+    if (!$track) {
+      intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid, 'unset');
+    }
+    else {
+      intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid);
+    }
+    //dsm($form);
+    //dsm($form_state);
+  }
+}
+
+
 
 /**
  * Modify a Webform submission, prior to saving it in the database.

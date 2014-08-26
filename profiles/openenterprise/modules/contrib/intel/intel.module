@@ -1203,6 +1203,7 @@ function intel_emailclick_access($op, $emailclick = NULL, $account = NULL) {
  */
 function _intel_permission_access_content_report() {
   global $user;
+
   if (user_access('view all intel reports')) {
     return TRUE;
   }

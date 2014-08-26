@@ -70,10 +70,13 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
   $timeops = 'l30d';
   //$timeops = 'yesterday';
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
-  
+
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->setPageAttributeInfo($attr_info);
   $ga_data->buildFilters($filters, $context);
+
+  //dsm($ga_data->gaFilters);
+
 
   //$ga_data->addGAFilter('ga:customVarValue1!@&a=1&');
 

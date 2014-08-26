@@ -67,3 +67,56 @@ function enterprise_editor_add_upload_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Implements hook_ckeditor_plugin()
+ *
+ * @return type
+ */
+function enterprise_editor_ckeditor_plugin() {
+  $plugins = array();
+  //$plugin_path = drupal_get_path('module', 'ckeditor_bootstrap');
+  $plugin_path = libraries_get_path('enterprise_editor');
+  $plugins['trifold'] = array(
+    'name' => 'trifold',
+    'desc' => t('Bootstrap Trifold Plugin'),
+    'path' => $plugin_path . '/plugins/trifold/',
+    'buttons' => array(
+      'Trifold' => array('label' => 'Trifold', 'icon' => 'icons/trifold.png'),
+    )
+  );
+  $plugins['featurette'] = array(
+    'name' => 'featurette',
+    'desc' => t('Bootstrap Featurette Plugin'),
+    'path' => $plugin_path . '/plugins/featurette/',
+    'buttons' => array(
+      'Featurette' => array('label' => 'Featurette', 'icon' => 'icons/featurette.png'),
+    )
+  );
+  $plugins['carousel'] = array(
+    'name' => 'carousel',
+    'desc' => t('Bootstrap Carousel Plugin'),
+    'path' => $plugin_path . '/plugins/carousel/',
+    'buttons' => array(
+      'Carousel' => array('label' => 'Carousel', 'icon' => 'icons/carousel.png'),
+    )
+  );
+  $plugins['jumbotron'] = array(
+    'name' => 'jumbotron',
+    'desc' => t('Bootstrap Jumbotron Plugin'),
+    'path' => $plugin_path . '/plugins/jumbotron/',
+    'buttons' => array(
+      'Jumbotron' => array('label' => 'Jumbotron', 'icon' => 'icons/jumbotron.png'),
+    )
+  );
+
+  $plugins['mediaBrowser'] = array(
+    // Plugin name.
+    'name' => 'mediaBrowser',
+    // Plugin description - it will be displayed in the plugins management section of the profile settings.
+    'desc' => t('Media Browser for File Upload/Browsing'),
+    // The full path to the CKEditor plugin directory, trailing slash included.
+    'path' => $plugin_path . '/plugins/mediaBrowser/',
+  );
+  return $plugins;
+}
+

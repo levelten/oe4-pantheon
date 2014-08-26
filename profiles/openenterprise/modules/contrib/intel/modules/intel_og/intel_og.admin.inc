@@ -21,12 +21,26 @@ function intel_og_admin_config_form($form, $form_state) {
 function intel_og_admin_page($group_type, $gid) {
   og_set_breadcrumb($group_type, $gid, array(l(t('Intel'), "$group_type/$gid/intel")));
 
+  $output = array();
+  $output[] = array(
+    '#markup' => '<h3>' . t('Reports') . '</h3>',
+  );
   $items = array();
+  $items[] = l(t('Dashboard'), current_path() . '/analytics/dashboard');
+  $items[] = l(t('Scorecard'), current_path() . '/analytics/scorecard');
+  $output[]  = array(
+    '#theme' => 'item_list',
+    '#items' => $items,
+  );
 
-  $items[] = l(t('Contacts'), current_path() . '/contacts');
-  $items[] = l(t('Submissions'), current_path() . '/submissions');
 
-  $output = array(
+  $output[] = array(
+    '#markup' => '<h3>' . t('People') . '</h3>',
+  );
+  $items = array();
+  $items[] = l(t('Contacts'), current_path() . 'people/contacts');
+  $items[] = l(t('Submissions'), current_path() . 'people/submissions');
+  $output[]  = array(
     '#theme' => 'item_list',
     '#items' => $items,
   );

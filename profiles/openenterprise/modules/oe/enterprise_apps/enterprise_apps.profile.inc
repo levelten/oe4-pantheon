@@ -94,7 +94,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#options' => $options,
     '#default_value' => 'standard',
   );
-  $form['install']['demo_mode']['min']['#description'] = st('Does not install any content apps. The only available content type will be basic pages.');
+  $form['install']['demo_mode']['min']['#description'] = st('Only installs base Open Enterprise apps. The only available content type will be basic pages.');
   $form['install']['demo_mode']['attract']['#description'] = st('Installs essential apps for content marketing including; blog, social media, and webforms.');
   $form['install']['demo_mode']['attract_convert']['#description'] = st('Adds landing pages, calls-to-action and A/B testing to facilitate robust conversion workflows.');
   $form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');

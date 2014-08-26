@@ -26,27 +26,76 @@ function intel_og_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'intel_og.admin.inc',
   );
-  $items['group/%/%/admin/intel/contacts'] = array(
+
+  $items['group/%/%/admin/intel/analytics'] = array(
+    'title' => 'Analytics',
+    'page callback' => 'intel_scorecard_report_page',
+    'page arguments' => array('-', 'page-attr', 'og', 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('view referenced reports', 1, 2),
+    'file path' => drupal_get_path('module', 'intel'),
+    'file' => 'reports/intel.report_scorecard.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  $items['group/%/%/admin/intel/analytics/scorecard'] = array(
+    'title' => 'Scorecard',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['group/%/%/admin/intel/analytics/dashboard'] = array(
+    'title' => 'Dashboard',
+    'page callback' => 'intel_dashboard_report_page',
+    'page arguments' => array('-', 'page-attr', 'og', 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('view referenced reports', 1, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file path' => drupal_get_path('module', 'intel'),
+    'file' => 'reports/intel.report_dashboard.inc',
+  );
+
+  $items['group/%/%/admin/intel/people'] = array(
+    'title' => 'People',
+    'description' => 'Information about visitors.',
+    'page callback' => 'intel_og_admin_people_contacts',
+    'page arguments' => array(1, 2),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('view referenced intel visitors', 1, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'intel_og.admin.inc',
+  );
+  $items['group/%/%/admin/intel/people/contacts'] = array(
     'title' => 'Contacts',
     'description' => 'Information about visitors.',
     'page callback' => 'intel_og_admin_people_contacts',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('view intel visitor data', 1, 2),
+    'access arguments' => array('view referenced intel visitors', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'intel_og.admin.inc',
   );
-  $items['group/%/%/admin/intel/submissions'] = array(
+  $items['group/%/%/admin/intel/people/submissions'] = array(
     'title' => 'Submissions',
     'description' => 'Information about visitors.',
     'page callback' => 'intel_og_admin_people_submissions',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('view intel visitor data', 1, 2),
+    'access arguments' => array('view referenced intel visitors', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'intel_og.admin.inc',
   );
   return $items;
+}
+
+function intel_og_intel_reports_alter(&$reports) {
+  $reports['content']['pa-og'] = array(
+    'key' => 'page_attribute:og.top.entrance',
+    'title' => t('Organic groups'),
+    'page callback' => 'intel_page_attribute_list_report_page',
+    'access callback' => '_intel_user_access_extended',
+    'file' => 'reports/intel.report_page_attribute_list.inc'
+  );
 }
 
 /**
@@ -54,6 +103,11 @@ function intel_og_menu() {
  */
 function intel_og_og_permission() {
   $items = array();
+
+  $items['view referenced reports'] = array(
+    'title' => t('View referenced reports'),
+    'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+  );
 
   $items['view referenced intel visitors'] = array(
     'title' => t('View referenced visitor intel'),
@@ -266,14 +320,23 @@ function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
 
   if (isset($entity->field_ga_code)) {
     $wrapper = entity_metadata_wrapper('dwyr_franchise', $entity);
-    $ga_code = $wrapper->field_ga_code->value();
+    $ga_codes = $wrapper->field_ga_code->value();
 
-    if (!empty($ga_code)) {
+    if (!empty($ga_codes)) {
       // insert the second tracking code after the first so that the main tracking
       // code remains the default
       foreach ($l10iq_pushes AS $i => $push) {
         if ($push[0] == '_setAccount') {
-          array_splice($l10iq_pushes, $i+1, 0, array(array('_setAccount', $ga_code, 'l10i_og')));
+          if (is_array($ga_codes)) {
+            $j = 0;
+            foreach ($ga_codes AS $ga_code) {
+              array_splice($l10iq_pushes, $i+$j+1, 0, array(array('_setAccount', $ga_code, 'l10i_og' . $j)));
+              $j++;
+            }
+          }
+          else {
+            array_splice($l10iq_pushes, $i+1, 0, array(array('_setAccount', $ga_codes, 'l10i_og')));
+          }
           return;
         }
       }
@@ -296,6 +359,32 @@ function intel_og_artifact_save($artifact_type, $aid, $group_type, $gid) {
   );
   $query = db_merge('intel_og_artifact')
     ->key($key);
+  $query->execute();
+}
+
+/**
+ * Deletes og artifacts
+ * @param null $artifact_type
+ * @param null $aid
+ * @param null $group_type
+ * @param null $gid
+ */
+function intel_og_artifact_delete($artifact_type = null, $aid = null, $group_type = null, $gid = null) {
+  $query = db_delete('intel_og_artifact');
+
+  if (isset($artifact_type)) {
+    $query->condition('artifact_type', $artifact_type);
+  }
+  if (isset($aid)) {
+    $query->condition('aid', $aid);
+  }
+  if (isset($group_type)) {
+    $query->condition('group_type', $group_type);
+  }
+  if (isset($gid)) {
+    $query->condition('gid', $gid);
+  }
+
   $query->execute();
 }
 
@@ -330,6 +419,49 @@ function intel_og_form_alter(&$form, &$form_state, $form_id) {
       }
     }
   }
+}
+
+function intel_og_intel_page_attribute_info() {
+  $attributes = array();
+  $attributes['og'] = array(
+    'title' => t('Organic group'),
+    'description' => t('The organic group context of a page.'),
+    'type' => 'scalar',
+    'options_description' => t('Auto generated from og_context.'),
+    'options info callback' => 'intel_og_page_attribute_og_option_info',
+  );
+  return $attributes;
+}
+
+function intel_og_page_attribute_og_option_info($option_id, $data_options) {
+  $data = array(
+    'title' => '',
+  );
+  $group_type = variable_get('intel_og_default_group_type', 'node');
+  $entity = entity_load($group_type, array($option_id));
+  $entity = $entity[$option_id];
+  if (!empty($entity)) {
+    $data['title'] = $entity->label();
+  }
+
+  if (!empty($data_options['page_count'])) {
+    $query_str = "
+      SELECT count(id)
+      FROM {og_membership}
+      WHERE
+        entity_type = 'node'
+        AND group_type = :group_type
+        AND gid = :gid
+    ";
+
+    $query = db_query($query_str, array(
+      ':gid' => $option_id,
+      ':group_type' => $group_type,
+    ));
+
+    $data['page_count'] = $query->fetchField();
+  }
+  return $data;
 }
 
 function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $context) {
@@ -474,5 +606,19 @@ function intel_og_query_alter($query) {
 //dsm($query);
 //dsm(" " . $query);
   }
+}
+
+/**
+ * Implements hook_entity_delete()
+ *
+ * delete artifact data if group entity is deleted
+ * @param $entity
+ * @param $type
+ */
+function intel_og_entity_delete($entity, $type) {
+  // go ahead and just delete all entities from table. If entity is not a group, it won't
+  // exist in the table
+  list($gid) = entity_extract_ids($type, $entity);
+  intel_og_artifact_delete(null, null, $type, $gid);
 }
 
