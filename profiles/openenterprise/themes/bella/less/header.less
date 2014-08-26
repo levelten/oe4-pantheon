@@ -1,6 +1,11 @@
 // Insert your styling here.
 header {
 	overflow: auto;
+	.navbar {
+		&.navbar-fixed-top {
+			margin-bottom: 0;
+		}
+	}
 	&.navbar-default {
 		background-color: white;
 		border-bottom: 2px solid @gray-light;
@@ -21,8 +26,17 @@ header {
 			width: 18%;
 		}
 		.name {
-			color: @gray-light;
-			.font-size(1.4);
+			color: @brand-primary;
+			.font-size(3.6);
+			font-weight: 700;
+			line-height: 1em;
+			letter-spacing: 3px;
+			margin: 0 !important;
+			padding: 5px 10px;
+			text-transform: uppercase;
+			&:hover {
+				color: @brand-primary;
+			}
 		}
 		.logo {
 			padding: 5px 0;
@@ -56,11 +70,18 @@ header {
 				border-left: 1px solid @gray-light;
 				display: table-cell;
 				float: none;
+				&.expanded {
+					&:hover {
+						> .dropdown-menu {
+							display: none !important;
+						}
+					}
+				}
 				&:last-child {
 					border-right: 1px solid @gray-light;
 				}
 				> a {
-					color: @gray-light;
+					color: @gray;
 					font-weight: 300;
 					padding: 15px 10px;
 					text-transform: uppercase;

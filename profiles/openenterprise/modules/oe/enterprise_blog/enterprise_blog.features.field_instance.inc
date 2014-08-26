@@ -130,10 +130,10 @@ function enterprise_blog_field_default_field_instances() {
           ),
           'more_link' => 1,
           'more_text' => 'Read more',
-          'summary_handler' => 'full',
-          'trim_length' => 600,
+          'summary_handler' => 'trim',
+          'trim_length' => 450,
           'trim_options' => array(
-            'text' => 0,
+            'text' => 'text',
           ),
           'trim_suffix' => '...',
           'trim_type' => 'chars',
@@ -317,10 +317,10 @@ function enterprise_blog_field_default_field_instances() {
           ),
           'more_link' => 1,
           'more_text' => 'Read more',
-          'summary_handler' => 'full',
-          'trim_length' => 300,
+          'summary_handler' => 'trim',
+          'trim_length' => 250,
           'trim_options' => array(
-            'text' => 0,
+            'text' => 'text',
           ),
           'trim_suffix' => '...',
           'trim_type' => 'chars',
@@ -841,13 +841,14 @@ function enterprise_blog_field_default_field_instances() {
       ),
       'blog_featured' => array(
         'label' => 'hidden',
-        'module' => 'image',
+        'module' => 'picture',
         'settings' => array(
+          'colorbox' => 'full-0',
           'conditions' => array(),
+          'fallback_image_style' => '',
           'field_delimiter' => '',
           'field_formatter_class' => 'image',
           'image_link' => 'content',
-          'image_style' => '',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
@@ -859,22 +860,9 @@ function enterprise_blog_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
-          'styles' => array(
-            'breakpoint_1' => 150,
-            'breakpoint_2' => 300,
-            'breakpoint_3' => 400,
-            'breakpoint_4' => '',
-            'breakpoint_5' => '',
-            'fallback_style' => '600x300',
-            'max_style' => '600x300',
-            'style_1' => '150x75',
-            'style_2' => '300x150',
-            'style_3' => '400x200',
-            'style_4' => '',
-            'style_5' => '',
-          ),
+          'picture_group' => 'full-16x9',
         ),
-        'type' => 'image',
+        'type' => 'picture',
         'weight' => 3,
       ),
       'blog_full' => array(
@@ -915,13 +903,14 @@ function enterprise_blog_field_default_field_instances() {
       ),
       'blog_mini' => array(
         'label' => 'hidden',
-        'module' => 'image',
+        'module' => 'picture',
         'settings' => array(
+          'colorbox' => 'full-0',
           'conditions' => array(),
+          'fallback_image_style' => '',
           'field_delimiter' => '',
           'field_formatter_class' => 'image',
           'image_link' => 'content',
-          'image_style' => '',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
@@ -933,8 +922,9 @@ function enterprise_blog_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
+          'picture_group' => 'large-16x9',
         ),
-        'type' => 'image',
+        'type' => 'picture',
         'weight' => 0,
       ),
       'blog_related' => array(
@@ -1019,13 +1009,14 @@ function enterprise_blog_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'hidden',
-        'module' => 'image',
+        'module' => 'picture',
         'settings' => array(
+          'colorbox' => 'full-0',
           'conditions' => array(),
+          'fallback_image_style' => '',
           'field_delimiter' => '',
           'field_formatter_class' => 'image',
           'image_link' => '',
-          'image_style' => '',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
@@ -1037,8 +1028,9 @@ function enterprise_blog_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
+          'picture_group' => 'full-16x9',
         ),
-        'type' => 'image',
+        'type' => 'picture',
         'weight' => 3,
       ),
       'rss' => array(

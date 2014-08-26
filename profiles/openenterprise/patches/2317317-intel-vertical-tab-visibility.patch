@@ -1,0 +1,80 @@
+From 5b83c55d270ea135904a45d53bb2b6cf45a4fc82 Mon Sep 17 00:00:00 2001
+From: Ian Whitcomb <ianw@getlevelten.com>
+Date: Thu, 7 Aug 2014 11:09:29 -0500
+Subject: [PATCH] Fixed vertical tab issue with intel
+
+---
+ .../contrib/intel/admin/intel.admin_entity.inc     | 56 ++++++++++++----------
+ 1 file changed, 30 insertions(+), 26 deletions(-)
+
+diff --git a/profiles/openenterprise/modules/contrib/intel/admin/intel.admin_entity.inc b/profiles/openenterprise/modules/contrib/intel/admin/intel.admin_entity.inc
+index ad15c68..f7a4342 100644
+--- a/profiles/openenterprise/modules/contrib/intel/admin/intel.admin_entity.inc
++++ b/profiles/openenterprise/modules/contrib/intel/admin/intel.admin_entity.inc
+@@ -247,33 +247,37 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
+   ); 
+   $field_count = 0;
+   $lang = !empty($form['language']['#value']) ? $form['language']['#value'] : LANGUAGE_NONE;
+-  if (isset($form['field_page_intent'])) {
+-    $form_add['field_page_intent'] = $form['field_page_intent'];
+-    unset($form['field_page_intent']);
+-    $field_count++;
+-  }
+-  if (isset($form['field_page_attribute_col'])) {
+-    $form_add['intel']['field_page_attribute_col'] = $form['field_page_attribute_col'];
+-    unset($form['field_page_attribute_col']);
+-    $field_count++;
+-  }
+-  if (isset($form['field_visitor_attribute_col'])) {
+-    $form_add['field_visitor_attribute_col'] = $form['field_visitor_attribute_col'];
+-    unset($form['field_visitor_attribute_col']);
+-    $field_count++;
+-  }
+-  if (isset($form['field_intel_event_col'])) {
+-    $form_add['field_intel_event_col'] = $form['field_intel_event_col'];
+-    unset($form['field_intel_event_col']);
+-    $field_count++;
+-  }
+-  if ($field_count) {
+-    $form['intel'] = $form_add;
+-  }
++	if ((!empty($form['field_page_attribute_col']['#access']) && $form['field_page_attribute_col']['#access'] == TRUE) ||
++		(!empty($form['field_visitor_attribute_col']['#access']) && $form['field_visitor_attribute_col']['#access'] == TRUE) ||
++		(!empty($form['field_intel_event_col']['#access']) && $form['field_intel_event_col']['#access'] == TRUE)) {
++		if (isset($form['field_page_intent'])) {
++			$form_add['field_page_intent'] = $form['field_page_intent'];
++			unset($form['field_page_intent']);
++			$field_count++;
++		}
++		if (isset($form['field_page_attribute_col'])) {
++			$form_add['intel']['field_page_attribute_col'] = $form['field_page_attribute_col'];
++			unset($form['field_page_attribute_col']);
++			$field_count++;
++		}
++		if (isset($form['field_visitor_attribute_col'])) {
++			$form_add['field_visitor_attribute_col'] = $form['field_visitor_attribute_col'];
++			unset($form['field_visitor_attribute_col']);
++			$field_count++;
++		}
++		if (isset($form['field_intel_event_col'])) {
++			$form_add['field_intel_event_col'] = $form['field_intel_event_col'];
++			unset($form['field_intel_event_col']);
++			$field_count++;
++		}
++		if ($field_count) {
++			$form['intel'] = $form_add;
++		}
+ 
+-  if (isset($form['field_visitor_category_col'])) {
+-    $form['field_visitor_category_col']['#prefix'] = '<div class="intel-visitor-action-col">';
+-    $form['field_visitor_category_col']['#suffix'] = '</div>';
++		if (isset($form['field_visitor_category_col'])) {
++			$form['field_visitor_category_col']['#prefix'] = '<div class="intel-visitor-action-col">';
++			$form['field_visitor_category_col']['#suffix'] = '</div>';
++		}
+   }
+   //dsm($form);
+   
+-- 
+1.8.5.2 (Apple Git-48)
+

@@ -29,26 +29,113 @@
 	.menu {
 		li {
 			float: none;
-			position: relative;
+			margin-bottom: 10px;
+			&:last-child {
+				margin-bottom: 0;
+			}
 			a {
-				.font-size(1.8);
+				background-color: @gray-lighter;
+				border-left: 10px solid @gray-light;
+				.box-sizing();
+				color: @gray;
+				.font-size(1.6);
 				line-height: 1.5em;
-				padding-left: 20px;
-				&:before {
-					content: '\a0';
-					background-color: @brand-primary;
-					background-repeat: repeat;
-					position: absolute;
-					height: 2px;
-					left: 0;
-					overflow: hidden;
-					top: 48%;
-					width: 12px;
-				}
+				padding: 5px 20px;
+				text-transform: uppercase;
 				&:hover {
-					text-decoration: underline;
+					background-color: @brand-primary;
+					border: 0;
+					color: @brand-accent;
+					padding-left: 30px;
 				}
 			}
+		}
+	}
+	.footer & {
+		.menu {
+			li {
+				position: relative;
+				a {
+					background-color: transparent;
+					border: 0;
+					.font-size(1.8);
+					padding-left: 20px;
+					&:before {
+						content: '\a0';
+						background-color: @gray;
+						background-repeat: repeat;
+						position: absolute;
+						height: 2px;
+						left: 0;
+						overflow: hidden;
+						top: 48%;
+						width: 12px;
+					}
+					&:hover {
+						background-color: transparent;
+						color: @gray;
+						padding-left: inherit;
+						text-decoration: underline;
+					}
+				}
+			}
+		}
+	}
+}
+
+ul.tags {
+	a {
+		background-color: @brand-primary;
+		color: @brand-accent;
+		.rounded(3px);
+		&:hover {
+			background-color: darken(@brand-primary, 10%);
+			text-decoration: none;
+		}
+	}
+}
+
+// Awesome bullet list coloring
+.section-style {
+	ul, ol {
+		padding-left: 20px;
+	}
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
+}
+
+blockquote {
+	&.pullquote {
+		border: 0;
+		position: relative;
+		&:before {
+			color: @brand-primary;
+			content: "\201C";
+			.font-size(6);
+			left: 0;
+			line-height: 0em;
+			position: absolute;
+			top: 30px;
 		}
 	}
 }

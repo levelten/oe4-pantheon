@@ -1004,7 +1004,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
   $handler->display->display_options['style_options']['columns'] = '2';
-  $handler->display->display_options['style_options']['column_classes'] = 'views-column equal-height-element col-md-6 well well-sm';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column equal-height-element col-md-6';
   $handler->display->display_options['style_options']['row_classes'] = 'views-row equal-height-container row-fluid';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;

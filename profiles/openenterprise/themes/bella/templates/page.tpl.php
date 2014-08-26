@@ -96,17 +96,12 @@
     </div>
     </div>
   <?php endif; ?>
+  
+  <?php include 'includes/top_bar.inc'; ?>
 
   <?php if (!$is_front): ?>
-  <div class="container">
+  <div class="main-container-inner container">
   <?php endif; ?>
-
-    <header role="banner" id="page-header">
-      <?php if (!empty($site_slogan)): ?>
-        <p class="lead"><?php print $site_slogan; ?></p>
-      <?php endif; ?>
-      <?php print render($page['header']); ?>
-    </header> <!-- /#page-header -->
     
     <div class="row">
 

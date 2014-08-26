@@ -26,35 +26,22 @@ function bella_process_page(&$variables) {
       }
     }
   }
-
-  // Hook into color.module.
-  if (module_exists('color')) {
-    _color_page_alter($variables);
-    $colors = _color_page_alter($vars);
-  }
-}
-
-
-/**
- * Override or insert variables into the html template.
- */
-function bella_process_html(&$vars) {
-  // Hook into color.module
-  if (module_exists('color')) {
-    _color_html_alter($vars);
-  }
 }
 
 /*
 * Create custom LESS variables
 */
 function bella_less_variables() {
-  // Grab the color pallet saved by the color module.
+  // Grab the color palette saved by the color module.
   $color_pallete = variable_get('color_bella_palette', FALSE);
   // If the color palette hasn't been saved yet, use the default.
   if (empty($color_pallete)) {
     $color_pallete = array(
       'brandprimary' => '#EA9B3E',
+      'brandsecondary' => '#F5F5F5',
+      'brandaccent' => '#FFF',
+      'brandaccent2' => '#EA9B3E',
+      'brandaccent3' => '#EA9B3E',
     );
   }
   // Generate variables with color values.

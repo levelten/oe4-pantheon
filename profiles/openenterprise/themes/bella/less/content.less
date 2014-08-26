@@ -2,7 +2,6 @@
 
 .page-title {
 	background-color: @gray;
-	margin-bottom: 2em;
 	&, h1, h2, .page-header {
 		color: white;
 	}
@@ -14,10 +13,35 @@
 		padding: 0.5em 0;
 	}
 }
+#page-header {
+	background-color: @brand-secondary;
+	padding: 2em 0;
+	margin-bottom: 2em;
+}
+
+.main-container-inner {
+	margin-top: 70px;
+	margin-bottom: 45px;
+}
+
+.region-sidebar-first, .region-sidebar-second {
+	.block {
+		margin-bottom: 24px;
+		.block-title {
+			margin-top: 0;
+		}
+	}
+	.block-menu-block {
+		.menu {
+			width: 100%;
+		}
+	}
+}
 
 .btn-social-share {
 	.addthis_counter.addthis_bubble_style a.addthis_button_expanded {
 		color: @brand-primary;
+		font-size: @font-size-base;
 	}
 }
 
@@ -34,13 +58,13 @@
 				color: @brand-primary;
 				font-weight: 300;
 				.font-size(2.8);
-				margin-bottom: 1em;
+				margin-bottom: 0.75em;
 				text-transform: uppercase;
 				text-shadow: none;
 			}
 			p {
 				color: @gray;
-				.font-size(2);
+				.font-size(1.75);
 				font-weight: 300;
 				text-shadow: none;
 			}
@@ -57,5 +81,11 @@
 		&.active {
 			background-color: @brand-primary;
 		}
+	}
+}
+
+.webform-client-form {
+	.webform-component, .form-submit {
+		margin-top: 15px;
 	}
 }

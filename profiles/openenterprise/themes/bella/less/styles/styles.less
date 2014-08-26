@@ -13,9 +13,8 @@
 	}
 	h3 {
 		margin: 0 0 0.5em;
-		font-weight: bold;
 		padding-bottom: 0.5em;
-		.heading-underline;
+		.heading-underline(86px);
 	}
 	i {
 		color: @brand-primary;
@@ -60,7 +59,7 @@
 .style-section-brand {
 	background-color: @brand-primary;
 	padding: 30px 0 50px;
-	&, p, h2, h3, h4, h5 {
+	&, a, p, h2, h3, h4, h5 {
 		color: @brand-accent;
 	}
 	&.block-blocker {
@@ -88,5 +87,88 @@
 		.block-title {
 			color: @brand-accent;
 		}
+	}
+}
+.style-date-stacked {
+	.day {
+		background-color: @brand-primary;
+		color: @brand-accent;
+		font-weight: 300;
+	}
+	.month {
+		background-color: @gray-light;
+		color: @gray;
+	}
+	.arrow {
+		display: none;
+	}
+}
+.style-trifold-alt {
+	.trifold {
+		text-align: left;
+		img {
+			width: 100% !important;
+			height: auto !important;
+		}
+		h3 {
+			margin-bottom: 5px;
+		}
+		.lead {
+			font-weight: 100;
+			margin-bottom: 10px;
+			padding-bottom: 10px;
+			text-align: left;
+			.heading-underline(70px, white);
+		}
+		.social {
+			a {
+				.font-size(1.8);
+			}
+		}
+		.button {
+			display: none;
+		}
+	}
+}
+
+.style-social-media {
+	&.style-social-profile {
+		.btn-social {
+			background-color: @brand-primary;
+			color: @brand-accent;
+			&:hover {
+				background-color: darken(@brand-primary, 10%);
+			}
+		}
+	}
+}
+
+.icon {
+	&.i-circle, &.i-rounded, &.i-thumbnail {
+		background-color: @brand-primary;
+		color: @brand-accent;
+	}
+}
+
+.style-color {
+	&.brand-primary {
+		color: @brand-primary;
+	}
+	&.brand-secondary {
+		color: @brand-secondary;
+	}
+	&.brand-accent {
+		color: @brand-accent;
+	}
+}
+.style-background {
+	&.brand-primary {
+		background-color: @brand-primary;
+	}
+	&.brand-secondary {
+		background-color: @brand-secondary;
+	}
+	&.brand-accent {
+		background-color: @brand-accent;
 	}
 }
