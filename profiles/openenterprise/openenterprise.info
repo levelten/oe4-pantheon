@@ -7,6 +7,7 @@ version = "7.x-3.x"
 dependencies[] = block
 dependencies[] = comment
 dependencies[] = contextual
+dependencies[] = dblog
 dependencies[] = help
 dependencies[] = image
 dependencies[] = list
@@ -40,13 +41,13 @@ dependencies[] = options_element
 dependencies[] = globalredirect
 dependencies[] = pathauto
 dependencies[] = redirect
-dependencies[] = slug
+;dependencies[] = slug
 dependencies[] = transliteration
 
 ;; Text Editor
 dependencies[] = video_filter
 dependencies[] = ckeditor
-;dependencies[] = ckeditor_media
+dependencies[] = ckeditor_media
 dependencies[] = ckeditor_blocks
 ;dependencies[] = ckeditor_bootstrap
 dependencies[] = file_entity
