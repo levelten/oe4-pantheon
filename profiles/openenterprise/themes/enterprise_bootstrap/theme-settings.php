@@ -39,7 +39,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_js'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
-		'#title' => t('Javascript Settings'),
+		'#title' => t('Bootstrap JavaScript'),
 		'#description' => t('Which Bootstrap JS files to include.'),
 	);
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
