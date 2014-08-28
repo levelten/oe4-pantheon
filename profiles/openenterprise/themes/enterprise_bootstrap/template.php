@@ -53,6 +53,20 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     );
     drupal_add_css($blokk_path, $options);
   }
+
+  // Add Bootstrap JS files from Enterprise Bootstrap settings
+  $bootstrap_js = array_filter(theme_get_setting('enterprise_bootstrap_js_options'));
+  if(!empty($bootstrap_js)) {
+    $js_path = drupal_get_path('theme', 'enterprise_bootstrap').'/bootstrap/js/';
+    $options = array(
+      'group' => JS_THEME,
+      'every_page' => TRUE,
+      'preprocess' => TRUE,
+    );
+    foreach ($bootstrap_js as $key => $value) {
+      drupal_add_js($js_path.$key.'.js', $options);
+    }
+  }
 }
 
 /**
