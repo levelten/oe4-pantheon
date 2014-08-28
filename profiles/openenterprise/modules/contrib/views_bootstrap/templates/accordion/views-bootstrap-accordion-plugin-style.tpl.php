@@ -12,7 +12,7 @@
         </h4>
       </div>
 
-      <div id="collapse<?php print $key ?>" class="panel-collapse collapse">
+      <div id="collapse<?php print $key ?>" class="panel-collapse collapse <?php if($key == '0' && $open_first_panel): ?>in<?php endif; ?>">
         <div class="panel-body">
           <?php print $row ?>
         </div>
