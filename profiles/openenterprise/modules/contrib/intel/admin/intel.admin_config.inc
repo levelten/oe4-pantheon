@@ -87,13 +87,14 @@ function intel_admin_settings($form, $form_state) {
   );
   $options = array(
     '' => t('Standard'),
-    'unifiedjs' => t('Dynamic gen'),
+    'property' => t('Property static'),
+    'property_dynsesinit' => t('Property static w/ dynamic session init'),
   );
-  $form['l10iapi']['advanced']['intel_l10iapi_session_init_mode'] = array(
+  $form['l10iapi']['advanced']['intel_l10iapi_js_embed_style'] = array(
     '#type' => 'select',
-    '#title' => t('Session init mode'),
+    '#title' => t('Embed style'),
     '#options' => $options,
-    '#default_value' => variable_get('intel_l10iapi_session_init_mode', ''),
+    '#default_value' => variable_get('intel_l10iapi_js_embed_style', ''),
     '#description' => t('Select variant for session init script/method.'),
   );
   $form['l10iapi']['advanced']['intel_l10iapi_connector'] = array(

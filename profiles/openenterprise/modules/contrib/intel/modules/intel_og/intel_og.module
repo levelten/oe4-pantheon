@@ -480,8 +480,11 @@ function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $
       foreach ($wf_node->webform['components'] AS $id => $comp) {
         if ($comp['form_key'] == 'og_group_ref') {
           $wf_submission = webform_get_submission($submission->fid, $submission->fsid);
-          if (isset($wf_submission->data[$id]))
+          if (isset($wf_submission->data[$id])
+            && !empty($wf_submission->data[$id]['value'][0])
+          ) {
             $gid = $wf_submission->data[$id]['value'][0];
+          }
         }
       }
     }

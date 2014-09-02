@@ -963,6 +963,17 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util() {
+
+  $loc = 'http://oepro3p_testpro.localhost/blog';
+
+  $a = parse_url($loc);
+  dsm($a);
+
+  $a = intel_parse_url($loc);
+  dsm($a);
+
+  return '';
+
   $value = array(
     'page_remove_blocks' => 1
   );

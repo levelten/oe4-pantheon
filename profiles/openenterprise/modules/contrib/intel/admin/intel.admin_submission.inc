@@ -78,8 +78,11 @@ function intel_submission_page($submission) {
 
   if ($submission->cta_page_path) {
     $url = "http://" . $submission->cta_page_host . $submission->cta_page_path;
-    if ($submission->form_page_id) {
+    if ($submission->cta_page_id) {
       $url = 'node/' . $submission->cta_page_id;
+    }
+    else if ($submission->cta_page_host == $_SERVER['HTTP_HOST']) {
+      $url = str_replace($GLOBALS['base_path'], '', $submission->cta_page_path);
     }
     $markup = l(url($url), $url);
   }

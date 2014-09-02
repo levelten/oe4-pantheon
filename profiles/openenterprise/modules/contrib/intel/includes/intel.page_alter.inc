@@ -565,7 +565,7 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
   $api_level = variable_get('intel_api_level', '');
   $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
   $api_js_ver = ($api_js_ver) ? $api_js_ver : INTEL_L10IAPI_JS_VER;
-  $api_sesinit_mode = variable_get('intel_l10iapi_session_init_mode', '');
+  $js_embed_style = variable_get('intel_l10iapi_js_embed_style', '');
   if ($l10i_ga_account && !$l10i_ga_tracker_prefix) {
     $l10i_ga_tracker_prefix = 'l10i';
   }
@@ -621,8 +621,8 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     if ($l10i_domain_name) {
       $l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
     }
-    $l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
-    $l10iq_pushes[] = array('_setDataMode', $data_mode);
+    //$l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
+    //$l10iq_pushes[] = array('_setDataMode', $data_mode);
     $l10iq_pushes[] = array('_setOptions', (object) array());
 
     // trigger alter to enable other modules to add pushes
@@ -647,16 +647,20 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
         $script .= $s;
       } else {
-        if ($api_sesinit_mode == 'unifiedjs') {
+        if ($js_embed_style != '') {
           $l10ijs_propdir = '';
-          if ($api_level == 'pro') {
+          $q_script = '';
+          if (($api_level == 'pro') || ($api_level == 'basic')) {
             $l10ijs_propdir = '/p/' . $l10i_ga_account;
+            if (($js_embed_style == 'property_dynsesinit') && ($api_level == 'pro')) {
+              $q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t;}";
+            }
           }
           $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
 
           $script .= "(function() {" . $terminator;
           $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
-          $script .= "document.cookie='l10i_bt='+t;c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';if(c.indexOf('l10i_s=')==-1){q='?t='+t;}}" . $terminator;
+          $script .= "document.cookie='l10i_bt='+t;c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
           $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
           $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
           $script .= "})();" . $terminator;

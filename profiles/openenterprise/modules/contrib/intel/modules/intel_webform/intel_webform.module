@@ -130,11 +130,15 @@ function intel_webform_form_alter(&$form, &$form_state, $form_id) {
         }
       }
     }
+    // note that webforms have a form id of webform-client-form-[nid] if a page form
+    // and the format webform-client-form-[nid]--[other id] when used as a block
     if (!$track) {
-      intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid, 'unset');
+      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid, 'unset');
+      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']", 'unset');
     }
     else {
-      intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid);
+      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid);
+      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']");
     }
     //dsm($form);
     //dsm($form_state);
