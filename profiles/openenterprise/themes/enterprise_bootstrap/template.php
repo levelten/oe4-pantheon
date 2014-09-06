@@ -55,7 +55,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   }
 
   // Add Bootstrap JS files from Enterprise Bootstrap settings
-  if ($js_options = theme_get_setting('enterprise_bootstrap_js_options') && is_array($js_options)) {
+  if ($js_options = theme_get_setting('enterprise_bootstrap_js_options') && isset($js_options) && is_array($js_options)) {
     $bootstrap_js = array_filter($js_options);
 	if(!empty($bootstrap_js)) {
 	  $js_path = drupal_get_path('theme', 'enterprise_bootstrap').'/bootstrap/js/';
