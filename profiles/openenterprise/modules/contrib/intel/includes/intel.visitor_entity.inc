@@ -357,8 +357,24 @@ class IntelVisitor extends Entity {
     intel_include_library_file('class.visitor.php');
     return \LevelTen\Intel\ApiVisitor::extractVtk();
   }
+
+  /**
+   * TODO build this to be more robust
+   * @param $type
+   * @param $value
+   */
+  public function filterIdentifier($type, $value) {
+    if ($type == 'email') {
+      return filter_var($value, FILTER_VALIDATE_EMAIL);
+    }
+    return $value;
+  }
   
   public function setIdentifier($type, $value, $is_primary = TRUE, $mergeDuplicate = TRUE) {
+    if (!$value = $this->filterIdentifier($type, $value)) {
+      return;
+    }
+
     if (!isset($this->identifiers[$type])) {
       $this->identifiers[$type] = array();
     }
@@ -670,37 +686,10 @@ class IntelVisitorController extends EntityAPIControllerExportable {
     if (empty($entity->contact_created) && !empty($entity->email)) {
       $entity->contact_created = REQUEST_TIME;
     }
+    $return = parent::save($entity);
 
-    // Invoke hook_entity_presave().
-    module_invoke_all('entity_presave', $entity, 'intel_visitor');
-    module_invoke_all('intel_visitor_presave', $entity);
-    // The 'primary_keys' argument determines whether this will be an insert
-    // or an update. So if the entity already has an ID, we'll specify
-    // eid as the key.
-    $primary_keys = $entity->vid ? 'vid' : array();
-    // Write out the entity record.
-    drupal_write_record('intel_visitor', $entity, $primary_keys);
-
-    // save identifiers to intel_visitor_identifier table
     $this->saveIdentifiers($entity);
-    // We're going to invoke either hook_entity_update() or
-    // hook_entity_insert(), depending on whether or not this is a
-    // new entity.
-    $invocation = '_insert';
-    // Now we need to either insert or update the fields which are
-    // attached to this entity. We use the same primary_keys logic
-    // to determine whether to update or insert, and which hook we
-    // need to invoke.
-    if (empty($primary_keys)) {
-      field_attach_insert('intel_visitor', $entity);
-    }
-    else {
-      field_attach_update('intel_visitor', $entity);
-      $invocation = '_update';
-    }
-    // Invoke either hook_entity_update() or hook_entity_insert().
-    module_invoke_all('entity' . $invocation, $entity, 'intel_visitor');
-    module_invoke_all('intel_visitor' . $invocation, $entity);
+
     return $entity;
   }
   
@@ -1065,6 +1054,9 @@ function intel_visitor_build_profile_content_elements($entity) {
       array('s.vid', $entity->identifiers['vid'], 'IN'),
     ),
   );
+  $ignore_field = array(
+    'intel_submit_data' => 1
+  );
   $result = intel_submission_load_filtered($filter);
   $rows = array();
   $wf_nodes = array();
@@ -1090,6 +1082,9 @@ function intel_visitor_build_profile_content_elements($entity) {
       if (isset($d->data) && is_array($d->data)) {
         $comps = $wf_nodes[$row->fid]->webform['components'];
         foreach ($d->data AS $i => $v) {
+          if (!empty($ignore_field[$comps[$i]['form_key']])) {
+            continue;
+          }
           $items['webform-field-' . $comps[$i]['form_key']] = array(
             '#title' => $comps[$i]['name'],
             '#markup' => $v['value'][0],

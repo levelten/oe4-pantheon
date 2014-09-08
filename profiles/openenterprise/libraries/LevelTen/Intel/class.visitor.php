@@ -41,10 +41,17 @@ class ApiVisitor {
   	  throw new Exception('Unable to load visitor: ' . $e);
   	}
   }
-    
+
   public static function extractVtk() {
     if (!empty($_COOKIE['l10ivtk'])) {
       return $_COOKIE['l10ivtk'];
+    }
+    // alternate name for work around for varnish filtering
+    if (!empty($_COOKIE['SESSl10ivtk'])) {
+      return $_COOKIE['SESSl10ivtk'];
+    }
+    if (!empty($_SESSION) && !empty($_SESSION['l10ivtk'])) {
+      return $_SESSION['l10ivtk'];
     }
     return '';
   }
@@ -191,7 +198,7 @@ class ApiVisitor {
       return $this->$name;
     }
     //if (isset($this->apiVisitor->$name)) {
-    if (isset($this->apiVisitor) && property_exists($this->apiVisitor, $name)) {
+    if (property_exists($this->apiVisitor, $name)) {
       return $this->apiVisitor->$name;
     }
     return null;
@@ -203,12 +210,10 @@ class ApiVisitor {
   }
   
   public function __set($name, $value) {
-    //if (isset($this->$name)) {
-    if (property_exists($this, $name)) {
+    if (isset($this->$name)) {
       return $this->$name = $value;
     }
-    //if (isset($this->apiVisitor->$name)) {
-    if (isset($this->apiVisitor) && property_exists($this->apiVisitor, $name)) {
+    if (isset($this->apiVisitor->$name)) {
       $this->apiVisitor->$name = $value;
     }
     return null;

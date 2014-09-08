@@ -290,10 +290,13 @@ class DashboardReportView extends ReportView {
     $entrances_summary .= '<div class="key-metric-value">' . number_format($totals['entrance']['entrances']) . '</div>'; 
     $entrances_summary .= '<div class="key-metric-desc">visitors in ' . $mostr . '</div>'; 
     $entrances_summary .= '</div>';
+
     $entrances_summary .= '<div class="key-metric-change-box">';
-    $mark = $cur_days_per * $targets['entrances_per_month'];
-    $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['entrances'], $mark) . '</div>'; 
-    $entrances_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    if (!empty($targets['entrances_per_month'])) {
+      $mark = $cur_days_per * $targets['entrances_per_month'];
+      $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['entrances'], $mark) . '</div>';
+      $entrances_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    }
     $mark = $cur_days_per * $data['lastmonth']['_all']['entrance']['entrances'];
     $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['entrances'], $mark) . '</div>'; 
     $entrances_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
@@ -319,23 +322,30 @@ class DashboardReportView extends ReportView {
     $leads_summary .= '<div class="key-metric-desc">new contacts in  ' . $mostr . '</div>'; 
     $leads_summary .= '</div>';
     $leads_summary .= '<div class="key-metric-change-box">';
-    $mark = $cur_days_per * $targets['leads_per_month'];
-    $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['lead']['leads'], $mark) . '</div>'; 
-    $leads_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    if (!empty($targets['leads_per_month'])) {
+      $mark = $cur_days_per * $targets['leads_per_month'];
+      $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['lead']['leads'], $mark) . '</div>';
+      $leads_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    }
     $mark = $cur_days_per * $data['lastmonth']['_all']['lead']['leads'];
     $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['lead']['leads'], $mark) . '</div>'; 
     $leads_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
     $leads_summary .= '</div>';
     $leads_summary .= '</div>';
-    
+
+    // TODO: this logic was added to deal with dashboard filtered by organic group
+    // because goalCompletionAll values did not exist when filter applied.
+    // look deeper into why
+    $goalCompletionsAll = isset($totals['entrance']['goals']['_all']['completions']) ? $totals['entrance']['goals']['_all']['completions'] : $totals['entrance']['goalCompletionsAll'];
+    $goalCompletionsAll_lm = isset($data['lastmonth']['_all']['entrance']['goals']['_all']['completions']) ? $data['lastmonth']['_all']['entrance']['goals']['_all']['completions'] : $data['lastmonth']['_all']['entrance']['goalCompletionsAll'];
     $leads_summary .= '<div class="summary-box">';
     $leads_summary .= '<div class="key-metric-box">';
-    $leads_summary .= '<div class="key-metric-value">' . number_format($totals['entrance']['goalCompletionsAll']) . '</div>'; 
+    $leads_summary .= '<div class="key-metric-value">' . number_format($goalCompletionsAll) . '</div>';
     $leads_summary .= '<div class="key-metric-desc">conversions in ' . $mostr . '</div>'; 
     $leads_summary .= '</div>';
     $leads_summary .= '<div class="key-metric-change-box">';
-    $mark = $cur_days_per * $data['lastmonth']['_all']['entrance']['goalCompletionsAll'];
-    $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['goalCompletionsAll'], $mark) . '</div>'; 
+    $mark = $cur_days_per * $goalCompletionsAll_lm;
+    $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($goalCompletionsAll, $mark) . '</div>';
     $leads_summary .= '<div class="key-metric-change-desc">vs. last month</div>';
     //$leads_summary .= '<div class="key-metric-change-value">' . number_format($cur_leads_objective - $totals['entrance']['newVisits']) . '</div>'; 
     //$leads_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
@@ -349,9 +359,11 @@ class DashboardReportView extends ReportView {
     $posts_summary .= '<div class="key-metric-desc">new posts in  ' . $mostr . '</div>'; 
     $posts_summary .= '</div>';
     $posts_summary .= '<div class="key-metric-change-box">';
-    $mark = $cur_days_per * $targets['posts_per_month'];
-    $posts_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['post']['published'], $mark) . '</div>'; 
-    $posts_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    if (!empty($targets['posts_per_month'])) {
+      $mark = $cur_days_per * $targets['posts_per_month'];
+      $posts_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['post']['published'], $mark) . '</div>';
+      $posts_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
+    }
     $mark = $cur_days_per * $data['lastmonth']['_all']['post']['published'];
     $posts_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['post']['published'], $mark) . '</div>'; 
     $posts_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  

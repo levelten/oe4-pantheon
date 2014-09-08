@@ -159,6 +159,20 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   global $base_path;
   $idents = array();
   $vtk = IntelVisitor::extractVtk();
+  if (empty($vtk)) {
+    return;
+  }
+
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    return;
+  }
+
+  // cache in Drupal session also incase varnish or other caching is filtering
+  // cookies
+  $_SESSION['l10ivtk'] = $vtk;
+  $_SESSION['intel_cookie'] = $_COOKIE;
+
   $visitor = intel_visitor_load_or_create('user');
   $api_level = variable_get('intel_api_level', '');
 
@@ -188,7 +202,12 @@ function intel_webform_webform_submission_presave($node, &$submission) {
         if (!isset($merge_data[$key])) {
           $merge_data[$key] = array();
         }
-        $merge_data[$key][$elem] = trim($submission->data[$cid]['value'][0]);
+
+        $value = trim($submission->data[$cid]['value'][0]);
+        // don't add value if it is blank
+        if ($value) {
+          $merge_data[$key][$elem] = trim($submission->data[$cid]['value'][0]);
+        }
       }
     }
   }
@@ -236,7 +255,7 @@ function intel_webform_webform_submission_insert($node, $submission) {
     $data = variable_get('intel_webform_temp_submission_data', array());
     $data[$node->nid . '_' . $submission->sid] = array(
       'time' => REQUEST_TIME,
-      'vid' => $submission->intel_vid
+      'vid' => $submission->intel_vid,
     );
     variable_set('intel_webform_temp_submission_data', $data);
   }

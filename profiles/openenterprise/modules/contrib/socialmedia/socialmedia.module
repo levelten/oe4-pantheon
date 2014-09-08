@@ -399,8 +399,6 @@ function socialmedia_platform_definition_load($platform, $uid = NULL) {
 }
 
 function socialmedia_widgets_set_form_alter(&$form, $set) {
-//dsm($form);
-//dsm($set);
   $data = $set['data'];
   $form['socialmedia'] = array(
     '#type' => 'fieldset',

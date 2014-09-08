@@ -964,6 +964,137 @@ function intel_admin_paths() {
  */
 function intel_util() {
 
+  $info = entity_get_info('og_membership');
+
+  dsm($info);
+  return '';
+
+  $visitor = intel_visitor_load(1);
+  $visitor->og_gid = 307;
+
+  $field_info = field_info_field(OG_AUDIENCE_FIELD);
+
+  $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
+
+  $og_membership = $wrapper->og_group_ref__og_membership->value();
+
+  $add = 1;
+  if (is_array($og_membership)) {
+    foreach ($og_membership AS $i => $ogm) {
+      if ($ogm->gid == $visitor->og_gid) {
+        $add = 0;
+        break;
+      }
+    }
+  }
+
+  if (!$add) {
+    return;
+  }
+
+  $values = array(
+    'entity_type' => 'intel_visitor',
+    'entity' => $visitor,
+    'field_name' => 'og_group_ref',
+    'state' => OG_STATE_ACTIVE,
+  );
+  $new_og_mem = og_group('dwyr_franchise', $visitor->og_gid, $values, FALSE);
+
+  if ($field_info['cardinality'] <= count($og_membership)) {
+    og_membership_delete($og_membership[0]->id);
+  }
+
+  $new_og_mem = og_group('dwyr_franchise', $visitor->og_gid, $values);
+dsm($new_og_mem);
+
+  return '';
+
+  $wrapper->og_group_ref__og_membership->set($og_membership);
+  $wrapper->save();
+
+  return '';
+
+  og_membership_save($og_membership);
+
+  return '';
+
+  $index = 0;
+  if ($field_info['cardinality'] == 1) {
+    $og_mem[0]->gid = $visitor->og_gid;
+  }
+  else {
+    if (!$refs) {
+      $refs = array();
+    }
+    if (in_array($visitor->og_gid, $refs)) {
+      $add_gid = 0;
+    }
+    else {
+      $refs[] = $visitor->og_gid;
+    }
+  }
+
+  dsm($og_mem);
+
+  //og_membership_save($og_mem['index']);
+
+  //$wrapper->og_group_ref__og_membership->value();
+
+  return '';
+
+
+
+  $og_mem = og_membership_create('dwyr_franchise', 307, 'intel_visitor', 1, 'og_group_ref');
+  dsm($og_mem);
+  og_membership_save($og_mem);
+
+  return '';
+
+  $visitor = intel_visitor_load(5);
+  $gid = 307;
+
+dsm($visitor);
+
+  $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
+
+  // load new reference by GID
+  $group_type = variable_get('intel_og_default_group_type', 'node');
+  $new_ref = entity_load($group_type, array($gid));
+  $new_ref = $new_ref[$gid];
+
+  $field_info = field_info_field('og_group_ref');
+
+  $refs = $wrapper->og_group_ref->value();
+  // if only one value is allowed, set $refs to single value, otherwise it is
+  // an array
+  if ($field_info['cardinality'] == 1) {
+    $refs = $new_ref;
+  }
+  else {
+    if (!$refs) {
+      $refs = array();
+    }
+    $refs[] = $new_ref;
+  }
+
+  dsm($refs);
+
+  $wrapper->og_group_ref->set($refs);
+  $wrapper->save();
+
+  return '';
+
+  $entity_info = entity_get_info('intel_visitor');
+  dsm($entity_info);
+
+  $info = field_info_field('og_group_ref');
+  dsm($info);
+
+  $entity_info = field_info_instances('intel_visitor', 'intel_visitor');
+  dsm($entity_info);
+
+  return '';
+
   $loc = 'http://oepro3p_testpro.localhost/blog';
 
   $a = parse_url($loc);

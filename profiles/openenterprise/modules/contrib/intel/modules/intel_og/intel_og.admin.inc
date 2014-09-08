@@ -18,7 +18,7 @@ function intel_og_admin_config_form($form, $form_state) {
   return system_settings_form($form);
 }
 
-function intel_og_admin_page($group_type, $gid) {
+function intel_og_admin_page($group_type, $gid, $options) {
   og_set_breadcrumb($group_type, $gid, array(l(t('Intel'), "$group_type/$gid/intel")));
 
   $output = array();
@@ -38,8 +38,8 @@ function intel_og_admin_page($group_type, $gid) {
     '#markup' => '<h3>' . t('People') . '</h3>',
   );
   $items = array();
-  $items[] = l(t('Contacts'), current_path() . 'people/contacts');
-  $items[] = l(t('Submissions'), current_path() . 'people/submissions');
+  $items[] = l(t('Contacts'), current_path() . '/people/contacts');
+  $items[] = l(t('Submissions'), current_path() . '/people/submissions');
   $output[]  = array(
     '#theme' => 'item_list',
     '#items' => $items,

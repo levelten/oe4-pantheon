@@ -566,6 +566,7 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
   $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
   $api_js_ver = ($api_js_ver) ? $api_js_ver : INTEL_L10IAPI_JS_VER;
   $js_embed_style = variable_get('intel_l10iapi_js_embed_style', '');
+  $api_local = 0;
   if ($l10i_ga_account && !$l10i_ga_tracker_prefix) {
     $l10i_ga_tracker_prefix = 'l10i';
   }
@@ -608,12 +609,16 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     }
     else if (substr($api_hostpath, 0 ,1) == '/') {
       $api_hostpath = $_SERVER['HTTP_HOST'] . $api_hostpath;
+      $api_local = 1;
     }
     $data_mode = (variable_get('intel_api_level', 'free') == 'free') ? 0 : 1;
     $api_pid = variable_get('intel_l10iapi_profileid', '');
     $sv = (variable_get('intel_debug_mode', 0)) ? '' : '.min';
     //$script .= "// LevelTen Intelligence" . $terminator;
     $script .= "var _l10iq = _l10iq || [];" . $terminator;
+    if ($api_local) {
+      $script .= 'var _l10iss = {"apiUrl": "' . $api_hostpath . '/", "apiLevel": "' . $api_level . '"};' . $terminator;
+    }
     //$script .= "var _intel = _intel || [];" . $terminator;
     $l10iq_pushes = array();
     //$l10iq_pushes[] = array('_setTrackerPrefix', $l10i_ga_tracker_prefix);
@@ -735,6 +740,7 @@ function intel_js_alter(&$javascript) {
       $options['track_analytics'] = 1;
     }
     $json = drupal_json_encode($options);
+
     $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["_setOptions",{}]);', '_l10iq.push(["_setOptions",' . $json . ']);', $javascript[$intel_i]['data']);
   }
 
@@ -749,8 +755,17 @@ function intel_js_alter(&$javascript) {
 }
 
 function intel_check_form_submission($page) {
+  $vtk = IntelVisitor::extractVtk();
+  // if vtk not present, don't processes
+  if (empty($vtk)) {
+    return;
+  }
+
   // if api_level!=pro, vtk will not exist to process submission data correctly
-  $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    return;
+  }
 
   // check for webform submission
   $track = array(
@@ -857,7 +872,6 @@ function intel_check_form_submission($page) {
   if (!empty($node)) {
     $submission->response_page_id = $node->nid; 
   }
-  
   $scorings = intel_get_scorings();
 
   $cta_context = array();

@@ -222,12 +222,16 @@ function socialmedia_admin_settings() {
       }
     }
     else {
-      $str = t('<strong>Not installed.</strong><br />To install: !download and install into %dir.',
-        array(
-          '!download' => l(t('download'), $iconset['download'], array('attributes' => array('target' => '_blank'))),
-          '%dir' => drupal_get_path('module', 'socialmedia') . '/icons/' . $iconset_name . '/',
-        )
-      );
+      if (isset($iconset['download'])) {
+        $str = t('<strong>Not installed.</strong><br />To install: !download and install into %dir.',
+          array(
+            '!download' => l(t('download'), $iconset['download'], array('attributes' => array('target' => '_blank'))),
+            '%dir' => drupal_get_path('module', 'socialmedia') . '/icons/' . $iconset_name . '/',
+          )
+        );
+      } else {
+        $str = '';
+      }
       if (isset($iconset['additional instructions'])) {
         $str .= ' ' . $iconset['additional instructions'];
       }
@@ -466,8 +470,7 @@ function socialmedia_admin_profile_widgets_form($form, $form_state) {
   
   $defs = socialmedia_widgets_set_profile_default_elements();
   $set = variable_get('socialmedia_widget_set_default_profile', socialmedia_widgets_set_profile_default());
-//dsm($defs);
-//dsm($set);
+
   foreach ($defs AS $group => $defs2) {
     $form[$group] = array(
       '#type' => 'fieldset',

@@ -22,7 +22,7 @@ function intel_og_menu() {
     'page callback' => 'intel_og_admin_page',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('view intel visitor data', 1, 2),
+    'access arguments' => array('view referenced reports', 1, 2),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'intel_og.admin.inc',
   );
@@ -81,11 +81,74 @@ function intel_og_menu() {
     'page callback' => 'intel_og_admin_people_submissions',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('view referenced intel visitors', 1, 2),
+    'access arguments' => array('view referenced intel submissions', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'intel_og.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Implements hook_menu_alter()
+ *
+ * Alter page analytics tab permissions to give group member access
+ *
+ * @param $items
+ */
+function intel_og_menu_alter(&$items) {
+  foreach ($items as $router_path => $item) {
+    if (strpos($router_path, 'node/%node/analytics') !== FALSE) {
+      $items[$router_path]['access callback'] = '_intel_og_permission_access_content_report';
+      $items[$router_path]['access arguments'] = array(1);
+    }
+  }
+}
+
+function _intel_og_permission_access_content_report($node) {
+  static $access;
+  if (isset($access)) {
+    return $access;
+  }
+  $access = FALSE;
+  if (_intel_permission_access_content_report()) {
+    $access = TRUE;
+  }
+  else {
+    // try to get gid by og_context first, then see if og_group_ref on node
+    $group_type = variable_get('intel_og_default_group_type', 'node');
+    $gid = 0;
+
+    $og_context = og_context($group_type);
+    if (!empty($og_context['gid'])) {
+      $gid = $og_context['gid'];
+    }
+    if (!$gid) {
+      $lang = isset($node->language) ? $node->language : LANGUAGE_NONE;
+      if (isset($node->og_group_ref) && isset($node->og_group_ref[$lang][0]['target_id'])) {
+        $gid = $node->og_group_ref[$lang][0]['target_id'];
+      }
+    }
+    if ($gid) {
+      $access = og_user_access($group_type, $gid, 'view referenced reports');
+    }
+  }
+
+  return $access;
+  /*
+  $wrapper = new EntityDrupalWrapper('node', $node->nid);
+  if (!isset($wrapper->og_group_ref)) {
+    return FALSE;
+  }
+  $franchise = $wrapper->og_group_ref->value();
+  if (!empty($franchise->fid)) {
+    return og_user_access('dwyr_franchise', $franchise->fid, 'view intel reports');
+  }
+  else {
+    return FALSE;
+  }
+  */
+
+
 }
 
 function intel_og_intel_reports_alter(&$reports) {
@@ -105,22 +168,26 @@ function intel_og_og_permission() {
   $items = array();
 
   $items['view referenced reports'] = array(
-    'title' => t('View referenced reports'),
+    'title' => t('View referenced analytics reports'),
+    'description' => t('Provides access to analytics reports for traffic on group pages.'),
     'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
   );
 
   $items['view referenced intel visitors'] = array(
     'title' => t('View referenced visitor intel'),
+    'description' => t('Enabled visitors that have been linked with the group to be viewed by group members.'),
     'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
   );
 
   $items['update referenced intel visitors'] = array(
     'title' => t('Edit referenced visitor intel'),
+    'description' => t('Enables editing of visitors linked to the group.'),
     'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
   );
 
   $items['delete referenced intel visitors'] = array(
     'title' => t('Delete referenced visitors'),
+    'description' => t('Enables deleting of visitors linked to the group.'),
     'roles' => array(OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
   );
 
@@ -429,6 +496,7 @@ function intel_og_intel_page_attribute_info() {
     'type' => 'scalar',
     'options_description' => t('Auto generated from og_context.'),
     'options info callback' => 'intel_og_page_attribute_og_option_info',
+    'data contacts per day callback'
   );
   return $attributes;
 }
@@ -495,43 +563,85 @@ function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $
     // be saved after submission and sid is created
     $submission->og_gid = $gid;
     $visitor->og_gid = $gid;
-
-    // check if intel_visitor has an og_group_ref field
-    if (!isset($visitor->og_group_ref)) {
-      return;
-    }
-    return;
-    // create entity wrapper to make it easer to work with field data
-    $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
-
-    // load new reference by GID
-    $group_type = variable_get('intel_og_default_group_type', 'node');
-    $new_ref = entity_load($group_type, array($gid));
-    $new_ref = $new_ref[$gid];
-
-    $refs = $wrapper->og_group_ref->value();
-    if (!$refs) {
-      $refs = array();
-    }
-    $refs[] = $new_ref;
-    $wrapper->og_group_ref->set($refs);
-    //$wrapper->save();
   }
 }
 
 function intel_og_intel_visitor_insert($visitor) {
+  //dsm('hook_intel_visitor_insert');
+  //dsm($visitor);
   intel_og_intel_visitor_save($visitor);
 }
 
 function intel_og_intel_visitor_update($visitor) {
+  //dsm('hook_intel_visitor_update');
+  //dsm($visitor);
   intel_og_intel_visitor_save($visitor);
 }
 
 function intel_og_intel_visitor_save($visitor) {
-//dsm($visitor);
   if (!empty($visitor->og_gid)) {
-    $group_type = variable_get('intel_og_default_group_type', 'node');
-    intel_og_artifact_save('visitor', $visitor->vid, $group_type, $visitor->og_gid);
+    // called used to stop endless loop on visitor save
+    static $done;
+    if (!isset($done)) {
+      $done = array(
+        'artifact' => 0,
+        'field' => 0,
+      );
+    }
+    if (empty($done['artifact'])) {
+      $done['artifact'] = 1;
+      $group_type = variable_get('intel_og_default_group_type', 'node');
+      intel_og_artifact_save('visitor', $visitor->vid, $group_type, $visitor->og_gid);
+    }
+
+    $field_name = 'og_group_ref';
+    if (!isset($visitor->og_group_ref)) {
+      return;
+    }
+
+    $lang = LANGUAGE_NONE;
+
+    $og_values = array(
+      'entity_type' => 'intel_visitor',
+      'entity' => $visitor,
+      'field_name' => $field_name,
+      'state' => OG_STATE_ACTIVE,
+    );
+
+    // load the og membership for visitor using submitted og_gid
+    // 4th param as false means it will not automatically be saved
+    $og_mem = og_group('dwyr_franchise', $visitor->og_gid, $og_values, FALSE);
+//dsm($og_mem);
+    // if it already exists, exit. We are done.
+    if (empty($og_mem->is_new)) {
+      return;
+    }
+
+    // we need to check the max number of values the og_group_ref field can hold
+    // and the number of existing values. If we try to set more values than the
+    // field can hold we will get a nasty error
+
+    // for some dumb reason you have to reload the visitor for the og_group
+    // function to work and actually save a membership
+    $visitorl = intel_visitor_load($visitor->vid);
+    $field_info = field_info_field($field_name);
+
+//dsm($visitorl);
+
+    // if the group_ref field is not set to unlimted and we are at the max number
+    // of values, delete one of the values
+    if (($field_info['cardinality'] != -1) && ($field_info['cardinality'] <= count($visitorl->og_group_ref[$lang]))) {
+      $og_mem_replace = og_group('dwyr_franchise', $visitorl->og_group_ref[$lang][0]['target_id'], $og_values);
+//dsm($og_mem_replace);
+      og_membership_delete($og_mem_replace->id);
+      // reload again
+      $visitorl = intel_visitor_load($visitor->vid);
+      $og_values['entity'] = $visitorl;
+    }
+
+    // save the new og_membership
+    $og_mem = og_group('dwyr_franchise', $visitor->og_gid, $og_values);
+    return;
   }
 }
 
@@ -542,6 +652,43 @@ function intel_og_intel_submission_insert($submission) {
     intel_og_artifact_save('submission', $submission->sid, $group_type, $submission->og_gid);
   }
 
+}
+
+/**
+ * Implements hook_intel_visitor_select_query_alter()
+ * @param $query
+ * @param $context
+ */
+function intel_og_intel_visitor_select_query_alter($query, $context, $vars = array()) {
+  $valid_contexts = array(
+    'report_dashboard_new_contacts' => 1,
+    'report_dashboard_new_contacts_count_last_month' => 1,
+  );
+  if (!empty($valid_contexts[$context])) {
+    if (isset($vars['report']['filters']['page-attr']) && (substr($vars['report']['filters']['page-attr'], 0, 3) == 'og:')) {
+      $gid = (int)substr($vars['report']['filters']['page-attr'], 3);
+      intel_og_add_group_visitor_query_join($query, $gid, $vars);
+    }
+  }
+}
+
+/**
+ * Implements hook_intel_visitor_select_query_alter()
+ * @param $query
+ * @param $context
+ */
+function intel_og_intel_node_select_query_alter($query, $context, $vars = array()) {
+  $valid_contexts = array(
+    'report_dashboard_new_nodes' => 1,
+    'report_dashboard_new_nodes_count_last_month' => 1,
+  );
+  if (!empty($valid_contexts[$context])) {
+    if (isset($vars['report']['filters']['page-attr']) && (substr($vars['report']['filters']['page-attr'], 0, 3) == 'og:')) {
+      $gid = (int)substr($vars['report']['filters']['page-attr'], 3);
+      intel_og_add_group_node_query_join($query, $gid, $vars);
+    }
+    //dsm(" " . $query);
+  }
 }
 
 function intel_og_query_alter($query) {
@@ -555,7 +702,6 @@ function intel_og_query_alter($query) {
   }
 
   $menu_item = menu_get_item();
-
   $callbacks = array(
     'intel_og_admin_people_contacts',
     'intel_og_admin_people_visitors',
@@ -580,16 +726,35 @@ function intel_og_query_alter($query) {
   if (
     $query->hasTag('intel_admin_people_contacts')
     || $query->hasTag('intel_admin_people_visitors')
+    || $query->hasTag('intel_report_dashboard_new_contacts')
   ) {
-    // need to filter by og ownership by using inner join
-    $join_on = '%alias.etid = intel_visitor.vid
+    intel_og_add_group_visitor_query_join($query, $gid);
+    /*
+    // check if og_group_ref field exists on intel_visitor entity
+    $field_info = field_info_instances('intel_visitor', 'intel_visitor');
+    if (isset($field_info['og_group_ref'])) {
+      // need to filter by og ownership by using inner join
+      $join_on = '%alias.etid = intel_visitor.vid
         AND %alias.entity_type = :og_entity_type
         AND %alias.gid = :gid';
-    $join_vars = array(
-      ':og_entity_type' => 'intel_visitor',
-      ':gid' => $gid,
-    );
-    $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
+      $join_vars = array(
+        ':og_entity_type' => 'intel_visitor',
+        ':gid' => $gid,
+      );
+      $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
+    }
+    // else use artifacts table
+    else {
+      $join_on =  "%alias.artifact_type = 'visitor'
+        AND %alias.aid = s.sid
+        AND %alias.gid = :gid";
+      $join_vars = array(
+        ':gid' => $gid,
+      );
+      $i = $query->innerJoin('intel_og_artifact', 'a', $join_on, $join_vars);
+    }
+    */
+
 //print_r($query);
 //dsm(" " . $query);
   }
@@ -609,6 +774,51 @@ function intel_og_query_alter($query) {
 //dsm($query);
 //dsm(" " . $query);
   }
+  //dsm($query);
+}
+
+function intel_og_add_group_visitor_query_join($query, $gid, $vars = array()) {
+  static $field_info;
+  if (!isset($field_info)) {
+    $field_info = field_info_instances('intel_visitor', 'intel_visitor');
+  }
+  if (isset($field_info['og_group_ref'])) {
+    $alias = isset($vars['table_alias']['intel_visitor']) ? $vars['table_alias']['intel_visitor'] : 'intel_visitor';
+    // need to filter by og ownership by using inner join
+    $join_on = '%alias.etid = ' . $alias . '.vid
+      AND %alias.entity_type = :og_entity_type
+      AND %alias.gid = :gid';
+    $join_vars = array(
+      ':og_entity_type' => 'intel_visitor',
+      ':gid' => $gid,
+    );
+    $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
+  }
+  // else use artifacts table
+  else {
+    $join_on =  "%alias.artifact_type = 'visitor'
+      AND %alias.aid = s.sid
+      AND %alias.gid = :gid";
+    $join_vars = array(
+      ':gid' => $gid,
+    );
+    $i = $query->innerJoin('intel_og_artifact', 'a', $join_on, $join_vars);
+  }
+}
+
+function intel_og_add_group_node_query_join($query, $gid, $vars = array()) {
+  static $field_info;
+
+  $alias = isset($vars['table_alias']['node']) ? $vars['table_alias']['node'] : 'node';
+  // need to filter by og ownership by using inner join
+  $join_on = '%alias.etid = ' . $alias . '.nid
+    AND %alias.entity_type = :og_entity_type
+    AND %alias.gid = :gid';
+  $join_vars = array(
+    ':og_entity_type' => 'node',
+    ':gid' => $gid,
+  );
+  $i = $query->innerJoin('og_membership', 'm', $join_on, $join_vars);
 }
 
 /**

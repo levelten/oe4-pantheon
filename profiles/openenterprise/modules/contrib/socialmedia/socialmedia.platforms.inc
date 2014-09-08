@@ -346,21 +346,34 @@ function socialmedia_googleplus_platform_info() {
 function socialmedia_googleplus_parser($values, $scope = 'site') {
   $profile = array('url' => '', 'username' => '', 'userid' => '');
   $str = $values['url'];
-  $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/).?\/?.?\/?([0-9]*)/i';
-  //$pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i';
-  //$pattern = '/^http:\/\/(www\.)?twitter\.com\/(#!\/)?(?<name>[^\/]+)(/\w+)*$/';
-  if (!preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
-    if (trim($values['url'])) {
-      form_set_error('input_googleplus_url', t('Google+ URL invalid.'));
+
+
+  // check +name format
+  $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i';
+  if (preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
+    $a = explode('plus.google.com/', $str);
+    $profile['url'] = 'plus.google.com/' . $a[1];
+    $b = explode('/', $a[1]);
+    // check if + format name is used
+    if (substr($b[0], 0, 1) == '+') {
+      $profile['userid'] = $b[0];
+      $values['username'] = substr($b[0], 1);
     }
-    return FALSE;
   }
-  $a = explode('plus.google.com/', $str);
-  $profile['url'] = 'plus.google.com/' . $a[1];
-  $b = explode('/', $a[1]);
-  if (substr($b[0], 0, 1) == '+') {
-    $profile['userid'] = $values['username'] = $b[0];
+  else {
+    // check numeric id format.
+    $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?([0-9]*)/i';
+    if (!preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
+      if (!isset($matches[3][0])) {
+        form_set_error('input_googleplus_url', t('Google+ URL invalid.'));
+      }
+      return FALSE;
+    }
+    $a = explode('plus.google.com/', $str);
+    $profile['url'] = 'plus.google.com/' . $a[1];
+    $profile['userid'] = $matches[3][0];
   }
+
 
   if (isset($values['username']) && trim($values['username'])) {
     $profile['username'] = $values['username'];
@@ -576,17 +589,17 @@ function socialmedia_pinterest_platform_info() {
     'description' => t('URL to your LinkedIn profile'),
   );
   $platforms['pinterest']['tokens']['multi'] = array(
-    'linkedin_url' => array(
+    'pinterest_url' => array(
       'name' => t("Pinterest profile url"), 
-      'description' => t("URL to LinkedIn profile."),
+      'description' => t("URL to Pinterest profile."),
     ),
-    'linkedin_url-brief' => array(
+    'pinterest_url-brief' => array(
       'name' => t("Pinterest profile url (brief)"), 
-      'description' => t("URL to LinkedIn profile without protocol."),
+      'description' => t("URL to Pinterest profile without protocol."),
     ), 
-    'linkedin_username' => array(
+    'pinterest_username' => array(
       'name' => t("Pinterest name"), 
-      'description' => t("LinkedIn profile name"),
+      'description' => t("Pinterest profile name"),
     ),   
   );
   return $platforms;  
@@ -603,13 +616,10 @@ function socialmedia_pinterest_parser($values, $scope = 'site') {
     }
     return FALSE;
   }
+
   $a = explode('pinterest.com/', $str);
   $profile['url'] = 'pinterest.com/' . $a[1];
-
-  $b = explode('/', $a[1]);
-  if (isset($b[1])) {
-    $profile['userid'] = $profile['username'] = $b[1];
-  }
+  $profile['userid'] = $profile['username'] = $a[1];
 
   if (isset($values['username']) && trim($values['username'])) {
     $profile['username'] = $values['username'];
