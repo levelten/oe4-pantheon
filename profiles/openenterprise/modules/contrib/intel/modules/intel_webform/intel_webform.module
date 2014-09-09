@@ -57,9 +57,95 @@ function intel_webform_page_alter(&$page) {
  */
 function intel_webform_intel_page_settings_js_alter(&$settings) {
   if (is_array($settings['intel']['track_forms'])) {
-    $settings['intel']['track_forms'][] = 'form.webform-client-form';
+    $forms = intel_webform_track_forms();
+    foreach ($forms AS $form) {
+      $settings['intel']['track_forms'][] = $form;
+    }
+    //dsm($forms);
+    //if (!intel_webform_disable_track_forms() ) {
+      //$settings['intel']['track_forms'][] = 'form.webform-client-form';
+    //}
   }
 }
+
+function intel_webform_disable_track_forms($value = null) {
+  static $flag;
+  if (!isset($flag)) {
+    $flag = 0;
+  }
+  if (isset($value)) {
+    $flag = $value;
+  }
+  return $flag;
+}
+
+function intel_webform_track_forms($form = null, $action = 'set') {
+  static $forms;
+  if (!isset($forms)) {
+    $forms = array();
+  }
+  if (isset($form)) {
+    if ($action == 'unset') {
+      if ($forms[$form]) {
+        unset($forms[$form]);
+      }
+    }
+    else {
+      $forms[$form] = $form;
+    }
+
+  }
+  return $forms;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function intel_webform_form_alter(&$form, &$form_state, $form_id) {
+  // Webform is being presented to visitor.
+  if (isset($form['#node']->webform) && in_array('webform_client_form_submit', $form['#submit'])) {
+    // check for special fields
+    if (!isset($form_state['intel_fields'])) {
+      $form_state['intel_fields'] = array();
+      if (isset($form['#node']->webform['components'])) {
+
+        // loop through webform components to find any special fields
+        $comps = &$form['#node']->webform['components'];
+        foreach ($comps AS $i => $comp) {
+          if ($comp['form_key'] == 'intel_submit_data') {
+            $form_state['intel_fields']['intel_submit_data'] = $i;
+
+          }
+        }
+      }
+    }
+
+    $track = 1;
+    if (!empty($form_state['intel_fields']['intel_submit_data'])) {
+      // disable tracking on multi page forms if not on first page
+      if (isset($form_state['webform']['page_count']) && ($form_state['webform']['page_count'] > 1)) {
+        if (isset($form_state['webform']['page_num']) && ($form_state['webform']['page_num'] > 1)) {
+          intel_webform_disable_track_forms(1);
+          $track = 0;
+        }
+      }
+    }
+    // note that webforms have a form id of webform-client-form-[nid] if a page form
+    // and the format webform-client-form-[nid]--[other id] when used as a block
+    if (!$track) {
+      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid, 'unset');
+      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']", 'unset');
+    }
+    else {
+      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid);
+      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']");
+    }
+    //dsm($form);
+    //dsm($form_state);
+  }
+}
+
+
 
 /**
  * Modify a Webform submission, prior to saving it in the database.
@@ -71,8 +157,22 @@ function intel_webform_intel_page_settings_js_alter(&$settings) {
  */
 function intel_webform_webform_submission_presave($node, &$submission) {
   global $base_path;
+
   $idents = array();
   $vtk = IntelVisitor::extractVtk();
+  if (empty($vtk)) {
+    return;
+  }
+
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    return;
+  }
+
+  // cache in Drupal session also in case varnish or other caching is filtering
+  // cookies
+  intel_session_cookie_merge();
+
   $visitor = intel_visitor_load_or_create('user');
   $api_level = variable_get('intel_api_level', '');
 
@@ -99,17 +199,36 @@ function intel_webform_webform_submission_presave($node, &$submission) {
       }
       if (!empty($component['extra']['intel_field_map'])) {
         list($key, $elem) = explode(':', $component['extra']['intel_field_map']);
+
         if (!isset($merge_data[$key])) {
           $merge_data[$key] = array();
         }
-        $merge_data[$key][$elem] = trim($submission->data[$cid]['value'][0]);
+
+        // name field maping of multiple keyed elements
+        if ($elem == 'name_automap') {
+          $comp_keys = array(
+            'given' => 'first',
+            'family' => 'last',
+            'title' => 'title',
+            'middle' => 'middle',
+            'generational' => 'generational',
+            'credentials' => 'credentials',
+          );
+          foreach ($comp_keys AS $comp_key => $intel_key) {
+            if (!empty($submission->data[$cid]['value'][$comp_key])) {
+              $merge_data[$key][$intel_key] = trim($submission->data[$cid]['value'][$comp_key]);
+            }
+          }
+        }
+        else {
+          $value = trim($submission->data[$cid]['value'][0]);
+          // don't add value if it is blank
+          if ($value) {
+            $merge_data[$key][$elem] = $value;
+          }
+        }
       }
     }
-  }
-
-  // if api_level != pro, vtk data will not be available to link visitors
-  if ($api_level != 'pro') {
-    return;
   }
 
   $prop_options = array(
@@ -126,34 +245,6 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   }
 
   $visitor->merge();
-  // set intel_vid on submission to pass it to intel_webform_webform_submission_insert
-  // so the vid can be saved after sid is created
-  if (($api_level == 'pro') && empty($visitor->vtk)) {
-    $submission->intel_vid = $visitor->vid;
-  }
-}
-
-function intel_webform_webform_submission_insert($node, $submission) {
-  // OK this is a bit of a hack, but not sure of a better way given issues with
-  // sessions data for anonomous users. It is not a good idea to use the variables
-  // table to store this info.
-  //
-  // The problem is if a form is submitted without a vtk set. This shouldn't happen,
-  // but if it does, you get two visitors created, one by intel_webform_webform_submission_presave
-  // and one in intel_do_submission check.
-  //
-  // The variable should be deleted in intel_webform_intel_form_submission_check
-
-  // check if intel_vid is set, which happens in webform_submission_presave only
-  // if api is set to pro and vtk is not passed
-  if (isset($submission->intel_vid)) {
-    $data = variable_get('intel_webform_temp_submission_data', array());
-    $data[$node->nid . '_' . $submission->sid] = array(
-      'time' => REQUEST_TIME,
-      'vid' => $submission->intel_vid
-    );
-    variable_set('intel_webform_temp_submission_data', $data);
-  }
 }
 
 /**
@@ -237,15 +328,6 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
       $track['category_id'] = $wf_node->field_track_submission_value[$wf_node->language][0]['value'];
     }
 
-    $submission_data = variable_get('intel_webform_temp_submission_data', array());
-    $key = $wfsubmission->nid . '_' . $wfsubmission->sid;
-    if (isset($submission_data[$key])) {
-      $submission->vid = $submission_data[$key]['vid'];
-      // delete entry in variable
-      unset($submission_data[$key]);
-      variable_set('intel_webform_temp_submission_data', $submission_data);
-    }
-
     $submission->type = 'webform';
     $submission->fid = $wfsubmission->nid;
     $submission->fsid = $wfsubmission->sid;
@@ -275,9 +357,6 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
 }
 
 function intel_webform_form_webform_component_edit_form_alter(&$form, $form_state, $node) {
-//dsm($form);
-//dsm($form_state);
-
   $nid = $form['nid']['#value'];
   $cid = $form['cid']['#value'];
   $type = $form['type']['#value'];
@@ -293,8 +372,13 @@ function intel_webform_form_webform_component_edit_form_alter(&$form, $form_stat
   if ($type == 'email') {
     $options['email:email'] = t('Email');
   }
+  // phone field (contrib module)
   if ($type == 'phone') {
     $options['phone:phone'] = t('Phone');
+  }
+  // name field (contrib module)
+  if ($type == 'name') {
+    $options['name:name_automap'] = t('Name (auto-map elements)');
   }
   // TODO: get this auto building from intel properties
   if ($type == 'textfield') {

@@ -216,11 +216,16 @@ function intel_hubspot_intel_visitor_presave($visitor) {
 function intel_hubspot_extract_user_token() {
 //dpm($_COOKIE);
   $hsutks = '';
-  if (!empty($_COOKIE['hubspotutk'])) {
-    return $_COOKIE['hubspotutk'];
+  if (!intel_include_library_file('class.visitor.php')) {
+    return FALSE;
   }
-  if (!empty($_COOKIE['__hstc'])) {
-    $a = explode('.', $_COOKIE['__hstc']);
+  $hubspotutk = \LevelTen\Intel\ApiVisitor::getCookie('hubspotutk');
+  if (!empty($hubspotutk)) {
+    return $hubspotutk;
+  }
+  $hstc = \LevelTen\Intel\ApiVisitor::getCookie('__hstc');
+  if (!empty($hstc)) {
+    $a = explode('.', $hstc);
     return $a[1];
   }
   return FALSE;
@@ -230,10 +235,13 @@ function intel_hubspot_extract_user_tokens() {
   $hsutks = array(
     'domain' => intel_hubspot_extract_user_token(),
   );
-  if (!empty($_COOKIE['l10i_ehsutk'])) {
-    $hsutks['external'] = $_COOKIE['l10i_ehsutk'];
-  }  
-  return $hsutks;  
+  if (!intel_include_library_file('class.visitor.php')) {
+    $cookie = \LevelTen\Intel\ApiVisitor::getCookie('l10i_ehsutk');
+    if (!empty($cookie)) {
+      $hsutks['external'] = $cookie;
+    }
+  }
+  return $hsutks;
 }
 
 function intel_hubspot_get_form_submission_path($vid, $submitted) {
@@ -259,7 +267,7 @@ function intel_hubspot_include_library_file($file_name) {
       )
     );
     drupal_set_message($msg, 'error');
-  } 
+  }
   else {
     require_once $req_path;
     $included[$file_name] = 1;

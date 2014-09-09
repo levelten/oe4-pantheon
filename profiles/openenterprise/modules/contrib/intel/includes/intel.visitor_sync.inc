@@ -15,7 +15,7 @@ if (!empty($_GET['debug'])) {
   $statuses = array();
 
   // don't sync data if no pro api
-  $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
   if ($api_level != 'pro') {
     $statuses['na'] = 1;
     return $statuses;
@@ -85,6 +85,11 @@ function intel_ga_sync_visitordata(&$visitor) {
     foreach ($visitor->identifiers['vtk'] AS $vtk) {
       $vtkids[] = substr($vtk, 0, 20);
     }
+  }
+
+  // if no vtkids, return true to unset future requests
+  if (empty($vtkids)) {
+    return TRUE;
   }
 
   $gadata = intel_fetch_analytics_visitor_meta_data($vtkids);

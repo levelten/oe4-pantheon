@@ -12,6 +12,7 @@
 */ 
 function intel_admin_settings($form, $form_state) {
   global $base_url;
+
   $apiUrl = variable_get('intel_l10iapi_url', '');
   $api_params = variable_get('intel_l10iapi_custom_params', array());
   $apiClientProps = array(
@@ -83,7 +84,19 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_l10iapi_url', ''),
     '#description' => t('The URL for the API without the protocall. Leave blank to use the default of api.getlevelten.com/api/intel.'),
     '#field_suffix' => '/',
-  ); 
+  );
+  $options = array(
+    '' => t('Standard'),
+    'property' => t('Property static'),
+    'property_dynsesinit' => t('Property static w/ dynamic session init'),
+  );
+  $form['l10iapi']['advanced']['intel_l10iapi_js_embed_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Embed style'),
+    '#options' => $options,
+    '#default_value' => variable_get('intel_l10iapi_js_embed_style', ''),
+    '#description' => t('Select variant for session init script/method.'),
+  );
   $form['l10iapi']['advanced']['intel_l10iapi_connector'] = array(
     '#type' => 'textfield',
     '#title' => t('Custom API connector'),

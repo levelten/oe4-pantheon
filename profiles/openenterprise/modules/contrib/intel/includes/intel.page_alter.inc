@@ -29,7 +29,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $path_is_admin = path_is_admin(current_path());
   
   $ga_va = array();
-  if ($user->uid && !empty($_COOKIE['__utmv'])) {
+  if ($user->uid) {
     if (intel_include_library_file('class.visitor.php')) {
       $ga_va = \LevelTen\Intel\ApiVisitor::extractCookieVa();
     }
@@ -565,6 +565,8 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
   $api_level = variable_get('intel_api_level', '');
   $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
   $api_js_ver = ($api_js_ver) ? $api_js_ver : INTEL_L10IAPI_JS_VER;
+  $js_embed_style = variable_get('intel_l10iapi_js_embed_style', '');
+  $api_local = 0;
   if ($l10i_ga_account && !$l10i_ga_tracker_prefix) {
     $l10i_ga_tracker_prefix = 'l10i';
   }
@@ -602,14 +604,21 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     $library_path = libraries_get_path('LevelTen') . 'Intel/scripts';
     //$api_hostpath = variable_get('intel_l10iapi_hostpath', '');
     $api_hostpath = variable_get('intel_l10iapi_url', '');
-    if (!trim($api_hostpath)) {
+    if (empty($api_hostpath)) {
       $api_hostpath = INTEL_L10IAPI_URL;
+    }
+    else if (substr($api_hostpath, 0 ,1) == '/') {
+      $api_hostpath = $_SERVER['HTTP_HOST'] . $api_hostpath;
+      $api_local = 1;
     }
     $data_mode = (variable_get('intel_api_level', 'free') == 'free') ? 0 : 1;
     $api_pid = variable_get('intel_l10iapi_profileid', '');
     $sv = (variable_get('intel_debug_mode', 0)) ? '' : '.min';
     //$script .= "// LevelTen Intelligence" . $terminator;
     $script .= "var _l10iq = _l10iq || [];" . $terminator;
+    if ($api_local) {
+      $script .= 'var _l10iss = {"apiUrl": "' . $api_hostpath . '/", "apiLevel": "' . $api_level . '"};' . $terminator;
+    }
     //$script .= "var _intel = _intel || [];" . $terminator;
     $l10iq_pushes = array();
     //$l10iq_pushes[] = array('_setTrackerPrefix', $l10i_ga_tracker_prefix);
@@ -617,8 +626,8 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     if ($l10i_domain_name) {
       $l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
     }
-    $l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
-    $l10iq_pushes[] = array('_setDataMode', $data_mode);
+    //$l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
+    //$l10iq_pushes[] = array('_setDataMode', $data_mode);
     $l10iq_pushes[] = array('_setOptions', (object) array());
 
     // trigger alter to enable other modules to add pushes
@@ -643,12 +652,32 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
         $script .= $s;
       } else {
-        $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : ''; 
-        $script .= "(function() {" . $terminator;
-        $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
-        $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
-        $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
-        $script .= "})();" . $terminator;
+        if ($js_embed_style != '') {
+          $l10ijs_propdir = '';
+          $q_script = '';
+          if (($api_level == 'pro') || ($api_level == 'basic')) {
+            $l10ijs_propdir = '/p/' . $l10i_ga_account;
+            if (($js_embed_style == 'property_dynsesinit') && ($api_level == 'pro')) {
+              $q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t;}";
+            }
+          }
+          $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
+
+          $script .= "(function() {" . $terminator;
+          $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
+          $script .= "document.cookie='l10i_bt='+t;c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
+          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
+          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+          $script .= "})();" . $terminator;
+        }
+        else { // standard mode
+          $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : '';
+          $script .= "(function() {" . $terminator;
+          $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
+          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
+          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+          $script .= "})();" . $terminator;
+        }
       }
 
       if (0) { // use combined l10i.js
@@ -711,6 +740,7 @@ function intel_js_alter(&$javascript) {
       $options['track_analytics'] = 1;
     }
     $json = drupal_json_encode($options);
+
     $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["_setOptions",{}]);', '_l10iq.push(["_setOptions",' . $json . ']);', $javascript[$intel_i]['data']);
   }
 
@@ -725,8 +755,17 @@ function intel_js_alter(&$javascript) {
 }
 
 function intel_check_form_submission($page) {
+  $vtk = IntelVisitor::extractVtk();
+  // if vtk not present, don't processes
+  if (empty($vtk)) {
+    return;
+  }
+
   // if api_level!=pro, vtk will not exist to process submission data correctly
-  $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    return;
+  }
 
   // check for webform submission
   $track = array(
@@ -814,8 +853,8 @@ function intel_check_form_submission($page) {
     $error = $visitor->apiVisitorLoadError;
     dpm("$error");//
   }
-  watchdog('intel_fs_visitor', print_r($visitor, 1));
-  watchdog('intel_fs_api_data', print_r($api_data, 1));
+  //watchdog('intel_fs_visitor', print_r($visitor, 1));
+  //watchdog('intel_fs_api_data', print_r($api_data, 1));
   
   $a = explode('//', $GLOBALS['base_url']);
   $host = $a[1];
@@ -833,7 +872,6 @@ function intel_check_form_submission($page) {
   if (!empty($node)) {
     $submission->response_page_id = $node->nid; 
   }
-  
   $scorings = intel_get_scorings();
 
   $cta_context = array();
@@ -959,8 +997,11 @@ function intel_check_form_submission($page) {
   }
 
   // if submit_context not available in api, check redirect using cookie
-  if (empty($submit_context['location']) && !empty($_COOKIE['l10i_l'])) {
-    $loc_comps = intel_parse_url($_COOKIE['l10i_l']);
+  if (intel_include_library_file('class.visitor.php')) {
+    $loc0 = \LevelTen\Intel\ApiVisitor::getCookie('l10i_l');
+  }
+  if (empty($submit_context['location']) && !empty($loc0)) {
+    $loc_comps = intel_parse_url($loc0);
     if (!empty($loc_comps['system_path'])) {
       $a = explode('/', $loc_comps['system_path']);
       if (($a[0] == 'node') && is_numeric($a[1])) {
@@ -1092,11 +1133,22 @@ function intel_execute_response_redirect_if_set($lp_node, $link_query = array())
       $url = trim($lp_node->field_redirect_url[$lp_node->language][0]['url']);
     }
     if ($url && ($url != $_GET['q'])) {
+      // cache cookies in Drupal session in case varnish or other caching is filtering
+      // cookies
+      intel_session_cookie_merge();
       $options = array('query' => $link_query);
       drupal_goto($url, $options);
       exit;
     }
   }
+}
+
+function intel_session_cookie_merge() {
+  $c0 = array();
+  if (!empty($_SESSION['l10i_cookie']) && is_array($_SESSION['l10i_cookie'])) {
+    $c0 = $_SESSION['l10i_cookie'];
+  }
+  $_SESSION['l10i_cookie'] = $_COOKIE + $c0;
 }
 
 function intel_visitor_sync_user($account) {

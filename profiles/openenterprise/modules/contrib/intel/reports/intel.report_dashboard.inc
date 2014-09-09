@@ -6,7 +6,7 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
   $output = '';
   $filters = array();
   $reports = intel_reports();
@@ -15,6 +15,9 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
     if ($filter_type == 'node') {
       $filter_type = 'page';
       $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
+    }
+    if ($filter_value) {
+      $filter_element .= ':' . $filter_value;
     }
     $filters[$filter_type] = urldecode($filter_element);
     $context = $filter_type;
@@ -42,7 +45,6 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
   }  
    
   return $output;
-  
   
   
 }
@@ -114,9 +116,21 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   else {
     $cache_options = array('expire' => $end_date);
   }
+
+  $filter_info = array();
+  if (!empty($filters)) {
+    if (isset($filters['page-attr'])) {
+      $a = explode(':', $filters['page-attr']);
+      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
+    }
+  }
   
   // get last month's data  
   $last_month_data = new LevelTen\Intel\GAModel();
+  if (isset($filter_info['page-attr'])) {
+    $last_month_data->setPageAttributeInfo($filter_info['page-attr']);
+  }
+
   $last_month_data->buildFilters($filters, $context);
   $last_month_data->setDateRange($lastmonth_start_date, $lastmonth_end_date);
   $last_month_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -135,6 +149,9 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   
   // get this month's data
   $ga_data = new LevelTen\Intel\GAModel();
+  if (isset($filter_info['page-attr'])) {
+    $ga_data->setPageAttributeInfo($filter_info['page-attr']);
+  }
   $ga_data->buildFilters($filters, $context);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -229,10 +246,27 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
       $visitors[$row['customVarValue5']] = $cat;
     }
   }
+
+  $query_alter_vars = array(
+    'table_alias' => array(
+      'intel_visitor' => 'v',
+      'node' => 'n',
+    ),
+    'report' => array(
+      'filters' => $filters,
+      'context' => $context,
+      'sub_index' => $sub_index,
+    )
+  );
   
   $query = db_select('intel_visitor', 'v')
     ->fields('v', array('contact_created', 'vid'))
     ->condition('contact_created', $start_date, '>=');
+  // enable other modules to alter this query
+  $query->addTag('intel_report_dashboard_new_contacts');
+  $context = 'report_dashboard_new_contacts';
+  drupal_alter('intel_visitor_select_query', $query, $context, $query_alter_vars);
+
   $result = $query->execute();
   $unknowns = array();
   $d['date']['_all']['lead'] = array(
@@ -250,24 +284,17 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
     }
     $d['date'][$index]['lead']['leads']++; 
     $d['date']['_all']['lead']['leads']++;
-    /*
-    $vtkid = substr($row->vtk, 0, 20);
-    $cat = $visitors[$vtkid];
-    if (empty($cat)) {
-      $cat = 'unknown';
-      $unknowns[$vtkid ];
-    }
-    if (!isset($d['date'][$index]['lead']['trafficcategory'][$cat])) {
-      $d['date'][$index]['lead']['trafficcategory'][$cat] = 0;
-    }
-    $d['date'][$index]['lead']['trafficcategory'][$cat]++;
-    */
   }
   $query = db_select('intel_visitor', 'v')
     ->fields('v', array('contact_created', 'vid'))
     ->condition('contact_created', $lastmonth_start_date, '>=')
     ->condition('contact_created', $lastmonth_end_date, '<=');
   $query->addExpression('COUNT(v.vid)', 'leads_created');
+
+  // enable other modules to alter this query
+  $query->addTag('intel_report_dashboard_new_contacts_count_last_month');
+  $context = 'report_dashboard_new_contacts_count_last_month';
+  drupal_alter('intel_visitor_select_query', $query, $context, $query_alter_vars);
 
   $row = $query->execute()->fetchObject();
   $d['lastmonth']['_all']['lead'] = array(
@@ -277,9 +304,16 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   // get nodes published this month
   $query = db_select('node', 'n')
     ->fields('n')
-    ->condition('status', 1)
-    ->condition('created', $start_date, '>=');
+    ->condition('n.status', 1)
+    ->condition('n.created', $start_date, '>=');
+
+  // enable other modules to alter this query
+  $query->addTag('intel_report_dashboard_new_contacts');
+  $context = 'report_dashboard_new_nodes';
+  drupal_alter('intel_node_select_query', $query, $context, $query_alter_vars);
+
   $result = $query->execute();
+
   $page_filter = '';
   $entrance_filter = '';
   $count = 0;
@@ -316,10 +350,16 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   
   $query = db_select('node', 'n')
     ->fields('n')
-    ->condition('status', 1)
-    ->condition('created', $lastmonth_start_date, '>=')
-    ->condition('created', $lastmonth_end_date, '<=');
+    ->condition('n.status', 1)
+    ->condition('n.created', $lastmonth_start_date, '>=')
+    ->condition('n.created', $lastmonth_end_date, '<=');
   $query->addExpression('COUNT(n.nid)', 'published_nodes');
+
+  // enable other modules to alter this query
+  $query->addTag('intel_report_dashboard_new_nodes_count_last_month');
+  $context = 'report_dashboard_new_nodes_count_last_month';
+  drupal_alter('intel_node_select_query', $query, $context, $query_alter_vars);
+
   $row = $query->execute()->fetchObject();
   $d['lastmonth']['_all']['post'] = array(
     'published' => $row->published_nodes,
@@ -427,16 +467,24 @@ dsm($ga_data->data['content']);
   */
   // order date data cronologically
   ksort($d['date']);
-  
+
+  $targets = intel_get_targets();
+  if (isset($filters['page-attr'])) {
+    $targets['entrances_per_month'] = 0;
+    $targets['leads_per_month'] = 0;
+    $targets['posts_per_month'] = 0;
+  }
+
   $vars = array(
     'data' => $d,
     'number_of_days' => $number_of_days,
     'start_date' => $start_date,
     'end_date' => $end_datemo,
     'goals' => $goals,
-    'targets' => intel_get_targets(),
+    'targets' => $targets,
     'analysis_days' => $analysis_days,
     'context' => $context,
+    'filters' => $filters,
   );
   $output .= theme_intel_dashboard_report($vars);
 
@@ -453,7 +501,6 @@ dsm($ga_data->data['content']);
 
 function theme_intel_dashboard_report($vars) {
   intel_include_library_file("reports/class.dashboard_report_view.php");
-  
   $output = '';
 
   $report_view = new LevelTen\Intel\DashboardReportView();
@@ -465,7 +512,8 @@ function theme_intel_dashboard_report($vars) {
   //$report_view->setObjective('entrances_per_month', 3000);
   //$report_view->setObjective('leads_per_month', 30);
   //$report_view->setObjective('posts_per_month', 8);
-  $report_view->setTargets(intel_get_targets());
+
+  $report_view->setTargets($vars['targets']);
   $report_view->setGoals($vars['goals']);
   $report_view->setDateRange($vars['start_date'], $vars['end_date']);
   $report_view->setLibraryUri(libraries_get_path('LevelTen') . '/Intel');

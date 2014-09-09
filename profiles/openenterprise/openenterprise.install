@@ -168,12 +168,15 @@ function openenterprise_install_theme_settings() {
   variable_set('theme_default', $theme_default);
 
   theme_enable($themes_enable);
-  $settings = variable_get('theme_spacelab_settings', array());
-  $settings['bootstrap_navbar_position'] = 'static-top';
-  // turn off non block primary nav element, main-menu implemented as block
-  $settings['toggle_main_menu'] = 0;
+  foreach ($themes_enable AS $theme) {
+    $settings = variable_get('theme_' . $theme . '_settings', array());
+    $settings['bootstrap_navbar_position'] = 'static-top';
+    // turn off non block primary nav element, main-menu implemented as block
+    $settings['toggle_main_menu'] = 0;
 
-  variable_set('theme_spacelab_settings', $settings);
+    variable_set('theme_' . $theme . '_settings', $settings);
+  }
+
   theme_disable(array('bartik'));
 
   variable_set('admin_theme', 'rubik');
@@ -181,12 +184,20 @@ function openenterprise_install_theme_settings() {
 }
 
 function openenterprise_themes_enable_list() {
-  $themes_enable = array(
-    'enterprise_bootstrap',
-  );
   $themes = list_themes(TRUE); //Get all the available themes
-  if(isset($themes['unify'])) {
-    $themes_enable[] = 'unify';
+  watchdog('install', print_r($themes, 1));
+  $themes_enable = array();
+  if(isset($themes['enterprise_bootstrap'])) {
+    $themes_enable[] = 'enterprise_bootstrap';
+  }
+  else if(isset($themes['enterprise_bootstrap_ce'])) {
+    $themes_enable[] = 'enterprise_bootstrap_ce';
+  }
+  if(isset($themes['bella'])) {
+    $themes_enable[] = 'bella';
+  }
+  if (empty($themes_enable)) {
+    $themes_enable[] = 'bootstrap';
   }
   return $themes_enable;
 }

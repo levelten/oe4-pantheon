@@ -6,7 +6,6 @@ version = 7.x-2.0
 project = enterprise_editor
 dependencies[] = ckeditor
 dependencies[] = ckeditor_blocks
-dependencies[] = ckeditor_bootstrap
 dependencies[] = ckeditor_media
 dependencies[] = ctools
 dependencies[] = features

@@ -455,7 +455,7 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
     foreach ($a AS $k => $v) {
       $v['module'] = $module;
       $v['key'] = $k;
-      $attributes[$k] = $v;
+      $attrs[$k] = $v;
     }
   }
 

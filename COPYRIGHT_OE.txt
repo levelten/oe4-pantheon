@@ -1,0 +1,7 @@
+Open Enterprise is a Drupal distribution. It is primarily comprised of Drupal code which is copyright by the original authors and licensed under GNU General Pubic License (GPL). Drupal’s standard copyright (COPYRIGHT.txt) and license (LICENSE.txt) notices are included with the distribution and pertain to all Drupal components of the software.
+
+Open Enterprise also includes various libraries, themes and components that are not a part of the Drupal project and are governed by their own licenses and copyrights.
+
+The Community Edition of Open Enterprise is designed to be a fully open source project that and can be modified and/or redistributed underneath the terms of the GPL and other relevant licenses. 
+
+The Premium Edition of Open Enterprise contains some components that are copyright by LevelTen and provided under the Open Enterprise Licensing Agreement (LICENSE_OE.txt)

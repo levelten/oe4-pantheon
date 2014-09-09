@@ -41,16 +41,25 @@ CKEDITOR.editorConfig = function(config) {
   config.bodyId = '';
   config.templates_replaceContent = false;
   if (Drupal.settings.enterprise_editor) {
-    config.stylesSet = 'default:' + Drupal.settings.enterprise_editor.path + '/ckeditor/styles.js?' + Drupal.settings.enterprise_editor.query ;
-    config.templates_files = [ Drupal.settings.enterprise_editor.path + '/ckeditor/templates.js?' + Drupal.settings.enterprise_editor.query ];
+    config.stylesSet = 'default:' + Drupal.settings.enterprise_editor.module_path + '/ckeditor/styles.js?' + Drupal.settings.enterprise_editor.query ;
+    if (Drupal.settings.enterprise_editor.plugins && Drupal.settings.enterprise_editor.plugins.templates) {
+        config.templates_files = [ Drupal.settings.enterprise_editor.path + '/templates/templates.js?' + Drupal.settings.enterprise_editor.query ];
+    }
+
   }
 };
 
 (function($){
+
+  $(document).ready(function(){
+    window.OE = {
+        settings: {
+            enterprise_editor: Drupal.settings.enterprise_editor
+        }
+    };
   /**
    * Set style dropdown height and width so it's easier to navigate.
    */
-  $(document).ready(function(){
     $('head').once('ckeditor', function(){
       $('<style/>').attr('type', 'text/css').html('.cke_combopanel{height:300px !important;width:200px !important;}').appendTo(this);
     });

@@ -606,7 +606,7 @@ function kwresearch_delete_page_keyword($key, $pid) {
   if (!isset($msgs)) {
     $msgs = array();
   }
-  $pn = kwresearch_construct_pathnid_obj($pid, $msgs = array());
+  $pn = kwresearch_construct_pathnid_obj($pid, $msgs);
   $sql = "
     DELETE FROM {kwresearch_page_keyword}
     WHERE 
@@ -790,13 +790,10 @@ function kwresearch_load_top_page_keyword_by_page($pid) {
     $query->orderBy("{k}.keyword", 'ASC');
 //dsm(" ".$query);
     $result = $query->execute();
-    if (!empty($result)) {
-      $r = $result->fetchObject();
-      if (!empty($r->keyword)) {
-        $keyword = $r->keyword;
-      }
+    $r = $result->fetchObject();
+    if (!empty($r->keyword)) {
+      $keyword = $r->keyword;
     }
-
   }
 //dsm($page_keywords);
   return $keyword;
@@ -1063,6 +1060,7 @@ function kwresearch_node_save($node) {
   if (!$sync_vocab = variable_get('kwresearch_keyword_sync_vocabulary', '')) {
     return;
   }
+
   $processed = array();
   $page_keywords = kwresearch_load_page_keywords_by_page($node->nid);
   foreach ($page_keywords as $page_keyword) {
@@ -1075,22 +1073,20 @@ function kwresearch_node_save($node) {
     // look for fields
     if ((substr($id, 0, 6) == 'field_')) {
       $fi = field_info_field($id);
-      if (($fi['type'] == 'taxonomy_term_reference')
-        && ($fi['settings']['allowed_values'][0]['vocabulary'] == $sync_vocab)
-        && isset($field[$node->language]) && is_array($field[$node->language])
-      ) {
-
-        foreach ($field[$node->language] AS $i => $ta) {
-          $term = strtolower(trim($ta['name']));
-          // filter tax terms
-          //$node->{$fi}[$node->language][$i]['name'] = $term;
-          $page_keyword_obj = (object) array(
-            'priority' => 50,
-          );
-          $kid = kwresearch_save_page_keyword($node->nid, $term, NULL, $page_keyword_obj);
-          kwresearch_update_keyword_page_counts($kid);
-          $processed[$kid] = 1;
-        }        
+      if (($fi['type'] == 'taxonomy_term_reference') && ($fi['settings']['allowed_values'][0]['vocabulary'] == $sync_vocab)) {
+        if (!empty($field[$node->language]) && is_array($field[$node->language])) {
+          foreach ($field[$node->language] AS $i => $ta) {
+            $term = strtolower(trim($ta['name']));
+            // filter tax terms
+            //$node->{$fi}[$node->language][$i]['name'] = $term;
+            $page_keyword_obj = (object) array(
+              'priority' => 50,
+            );
+            $kid = kwresearch_save_page_keyword($node->nid, $term, NULL, $page_keyword_obj);
+            kwresearch_update_keyword_page_counts($kid);
+            $processed[$kid] = 1;
+          }
+        }
       }
     }
   }

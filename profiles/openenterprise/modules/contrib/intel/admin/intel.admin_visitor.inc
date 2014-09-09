@@ -101,15 +101,30 @@ dsm($refs);
     '#default_value' => $entity->phone,
   );
 
-  $form['vtk'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Tracking visitor token'),
-    //'#required' => TRUE,
-    '#default_value' => $entity->vtk,
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
+  if (empty($entity->vtk)) {
+    $form['advanced']['vtk'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tracking visitor token'),
+      '#default_value' => $entity->vtk,
+    );
+  }
+  else {
+    $form['advanced']['vtk'] = array(
+      '#type' => 'item',
+      '#title' => t('Tracking visitor token'),
+      '#markup' => $entity->vtk,
+    );
+  }
+
 
   field_attach_form('intel_visitor', $entity, $form, $form_state);
-  $form['intel_sync_visitordata_fullcontact'] = array(
+  $form['advanced']['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
     '#default_value' => $entity->getVar('data', 'settings', 'sync_visitordata.fullcontact', INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT),

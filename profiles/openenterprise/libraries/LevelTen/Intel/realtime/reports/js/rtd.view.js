@@ -1223,7 +1223,7 @@ function rtDashboardView (name) {
             var per = (countA != 0) ? 100 * countB/countA : 0;
             this.chartData[chartKey].setValue(row, 3, per);
 
-            var countC = this.chartData[chartKey].getValue(row, 4) + c.conversions;
+            var countC = this.chartData[chartKey].getValue(row, 2) + c.conversions;
             this.chartData[chartKey].setValue(row, 4, countC);
 
             var per = (countB != 0) ? 100 * countC/countB : 0;
@@ -1250,7 +1250,6 @@ function rtDashboardView (name) {
         if (draw) {
             var percentFormatter = this.percentFormatter();
             percentFormatter.format(this.chartData[chartKey], 3);
-            percentFormatter.format(this.chartData[chartKey], 5);
             this.charts[chartKey].draw(this.chartData[chartKey], this.drawTableOptions());
         }
 

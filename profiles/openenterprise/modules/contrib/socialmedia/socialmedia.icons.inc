@@ -35,7 +35,10 @@ function socialmedia_iconset_is_installed($iconset) {
   if (!empty($iconset['icon api'])) {
     return 1;
   }
-  return file_exists(call_user_func($iconsets[$iconset]['path callback']));
+  if (isset($iconsets[$iconset]['path callback'])) {
+    return file_exists(call_user_func($iconsets[$iconset]['path callback']));
+  }
+  return;
 }
 
 function socialmedia_icon_platforms($featured = FALSE) {

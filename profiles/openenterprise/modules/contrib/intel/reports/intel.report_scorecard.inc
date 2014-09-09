@@ -6,7 +6,7 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_scorecard_report_page($context = '-', $filter_type = '', $filter_element = '') {
+function intel_scorecard_report_page($context = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
   $output = '';
   $filters = array();
   if ($filter_type) {
@@ -15,8 +15,10 @@ function intel_scorecard_report_page($context = '-', $filter_type = '', $filter_
       $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
     }
     elseif ($filter_type == 'visitor') {
-      $filter_type = 'visitor';
       $filter_element = 'vtk:' . substr($filter_element->vtk, 0, 20);
+    }
+    elseif ($filter_value) {
+      $filter_element .= ':' . $filter_value;
     }
     $filters[$filter_type] = urldecode($filter_element);
     $context = $filter_type;
@@ -52,14 +54,26 @@ function intel_scorecard_report_page($context = '-', $filter_type = '', $filter_
 function intel_scorecard_report($filters = array(), $context = '-', $sub_index = '-', $mode = '') {
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
-  
-  $reports = intel_reports();
-  $report_mode = $reports['visitor'][$sub_index]['key'];
-  $report_modes = explode('.', $report_mode);
+
+  $filter_info = array();
+  if (!empty($filters)) {
+    if (isset($filters['page-attr'])) {
+      $a = explode(':', $filters['page-attr']);
+      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
+    }
+  }
   
   if ($context == '-') {
     $context = 'site';
   }
+/*
+  else {
+    $reports = intel_reports();
+    $report_mode = $reports[$context][$sub_index]['key'];
+    $report_modes = explode('.', $report_mode);
+  }
+*/
+
   $cache_options = array();
   $row_count = 100;
   
@@ -70,12 +84,18 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
 
   $ga_data = new LevelTen\Intel\GAModel();
+  $filter_info = array();
+  if (!empty($filters)) {
+    if (isset($filters['page-attr'])) {
+      $a = explode(':', $filters['page-attr']);
+      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
+      $ga_data->setPageAttributeInfo($filter_info['page-attr']);
+    }
+  }
   $ga_data->buildFilters($filters, $context);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
-//dsm($ga_data->gaFilters);
 
-  
   $ga_data->setRequestSetting('indexBy', 'date');
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 30); 

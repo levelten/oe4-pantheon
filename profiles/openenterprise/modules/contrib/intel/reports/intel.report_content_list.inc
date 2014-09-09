@@ -6,7 +6,7 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_content_list_report_page($report_mode = '-', $filter_type = '', $filter_element = '') {
+function intel_content_list_report_page($report_mode = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
   $output = '';
   $filters = array();
   $context = 'site';
@@ -25,9 +25,11 @@ function intel_content_list_report_page($report_mode = '-', $filter_type = '', $
     if ($filter_type == 'page-attr') {
 
     }
+    if ($filter_value) {
+      $filter_element .= ':' . $filter_value;
+    }
     $filters[$filter_type] = urldecode($filter_element);
     $context = $filter_type;
-
   }  
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
   

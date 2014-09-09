@@ -112,107 +112,107 @@ function cke_tpl_collapse(accordion) {
 }
 // Adds default templates to choose from.
 CKEDITOR.addTemplates('default', {
-  imagesPath: Drupal.settings.enterprise_editor.path + '/ckeditor/images/',
+  imagesPath: OE.settings.enterprise_editor.path + '/templates/images/',
   templates: [
     {
       title: 'Section',
-      image: 'section.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'section.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title.',
       html: cke_tpl_section( cke_tpl_header() + cke_tpl_text(3) )
     },
     {
       title: 'Section - Left Image',
-      image: 'section-left.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'section-left.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the left of the content. Content wraps around the image.',
       html: cke_tpl_section( cke_tpl_img(null, 'image-left-style') + cke_tpl_header() + cke_tpl_text(3), 'section-style-left' )
     },
     {
       title: 'Section - Right Image',
-      image: 'section-right.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'section-right.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the right of the content. Content wraps around the image.',
       html: cke_tpl_section( cke_tpl_img(null, 'image-right-style') + cke_tpl_header() + cke_tpl_text(3), 'section-style-right' )
     },
     {
       title: 'Section - Left Image (no wrap)',
-      image: 'section-left-no-wrap.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'section-left-no-wrap.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the left of the content. Content does not wrap around the image.',
       html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_img(null, 'image-left-style') + '</div><div class="no-wrap-right">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
     },
     {
       title: 'Section - Right Image (no wrap)',
-      image: 'section-right-no-wrap.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'section-right-no-wrap.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the right of the content. Content does not wrap around the image.',
       html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_header() + cke_tpl_text(3) + '</div><div class="no-wrap-right">' + cke_tpl_img(null, 'image-right-style') + '</div>' )
     },
     {
       title: 'Row',
-      image: 'row.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row.png?' + OE.settings.enterprise_editor.query,
       description: 'A container row.',
       html: cke_tpl_section( cke_tpl_text(4) )
     },
     {
       title: 'Row - Two Columns (50/50)',
-      image: 'row-50-50.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row-50-50.png?' + OE.settings.enterprise_editor.query,
       description: 'A row of two equally sized columns with a margin in-between them. NOTE: Columns are responsive. Widths, margins and position will vary upon the device it is viewed on.',
       html: cke_tpl_section( cke_tpl_span(null, 6) + cke_tpl_span(null, 6) )
     },
     {
       title: 'Row - Two columns (33/66)',
-      image: 'row-33-66.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row-33-66.png?' + OE.settings.enterprise_editor.query,
       description: 'A row of two columns smaller one on the left with a margin in-between them. NOTE: Columns are responsive. Widths, margins and position will vary upon the device it is viewed on.',
       html: cke_tpl_section( cke_tpl_span(null, 4) + cke_tpl_span(null, 8) )
     },
     {
       title: 'Row - Two columns (66/33)',
-      image: 'row-66-33.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row-66-33.png?' + OE.settings.enterprise_editor.query,
       description: 'A row of two columns smaller one on the right with a margin in-between them. NOTE: Columns are responsive. Widths, margins and position will vary upon the device it is viewed on.',
       html: cke_tpl_section( cke_tpl_span(null, 8) + cke_tpl_span(null, 4) )
     },
     {
       title: 'Row - Three columns (33/33/33)',
-      image: 'row-33-33-33.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row-33-33-33.png?' + OE.settings.enterprise_editor.query,
       description: 'A row of three equally sized columns with margins in-between them. NOTE: Columns are responsive. Widths, margins and position will vary upon the device it is viewed on.',
       html: cke_tpl_section( cke_tpl_span(null, 4) + cke_tpl_span(null, 4) + cke_tpl_span(null, 4) )
     },
     {
       title: 'Row - Four columns (25/25/25/25)',
-      image: 'row-25-25-25-25.png?' + Drupal.settings.enterprise_editor.query,
+      image: 'row-25-25-25-25.png?' + OE.settings.enterprise_editor.query,
       description: 'A row of four equally sized columns with margins in-between them. NOTE: Columns are responsive. Widths, margins and position will vary upon the device it is viewed on.',
       html: cke_tpl_section( cke_tpl_span(null, 3) + cke_tpl_span(null, 3) + cke_tpl_span(null, 3) + cke_tpl_span(null, 3) )
-    },
+    }
 //    {
 //      title: 'Tabs - top',
-//      image: 'tabs-top.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'tabs-top.png?' + OE.settings.enterprise_editor.query,
 //      description: 'Bring life to your content with toggable tabs.',
 //      html: function() { return cke_tpl_tabs(); }
 //    },
 //    {
 //      title: 'Tabs - bottom',
-//      image: 'tabs-bottom.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'tabs-bottom.png?' + OE.settings.enterprise_editor.query,
 //      description: 'Bring life to your content with toggable tabs.',
 //      html: function() { return cke_tpl_tabs('below'); }
 //    },
 //    {
 //      title: 'Tabs - left',
-//      image: 'tabs-left.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'tabs-left.png?' + OE.settings.enterprise_editor.query,
 //      description: 'Bring life to your content with toggable tabs.',
 //      html: function() { return cke_tpl_tabs('left'); }
 //    },
 //    {
 //      title: 'Tabs - right',
-//      image: 'tabs-right.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'tabs-right.png?' + OE.settings.enterprise_editor.query,
 //      description: 'Bring life to your content with toggable tabs.',
 //      html: function() { return cke_tpl_tabs('right'); }
 //    },
 //    {
 //      title: 'Collapsible Sections',
-//      image: 'collapse.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'collapse.png?' + OE.settings.enterprise_editor.query,
 //      description: 'The collapsible state of each section can be toggled independently.',
 //      html: function() { return cke_tpl_collapse(); }
 //    },
 //    {
 //      title: 'Collapsible Sections (accordion style)',
-//      image: 'collapse-accordion.png?' + Drupal.settings.enterprise_editor.query,
+//      image: 'collapse-accordion.png?' + OE.settings.enterprise_editor.query,
 //      description: 'The collapsible state of each section is determined by the currently viewed section. Only one section can be visible at a time.',
 //      html: function() { return cke_tpl_collapse(true); }
 //    }

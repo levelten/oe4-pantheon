@@ -18,16 +18,23 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   static $base_path;
   static $module_path;
   static $query;
+  static $plugins;
   if (!isset($base_path)) {
     $base_path = base_path();
   }
+  if (!isset($plugins)) {
+    $plugins = enterprise_editor_available_plugins();
+  }
   if (!isset($module_path)) {
     $module_path = drupal_get_path('module', 'enterprise_editor');
+    $library_path = libraries_get_path('enterprise_editor');
     $query = variable_get('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
     $js_settings = array(
       'enterprise_editor' => array(
-        'path' => $base_path . $module_path,
+        'path' => $base_path . $library_path,
         'query' => $query,
+        'module_path' => $base_path . $module_path,
+        'plugins' => $plugins,
       ),
     );
     drupal_add_js($js_settings, 'setting');
@@ -36,10 +43,18 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
       drupal_add_js($file->uri);
     }
   }
+  // filter out unavailable plugins
+  foreach ($plugins AS $name => $flag) {
+    if (!$flag && isset($settings['loadPlugins'][$name])) {
+      unset($settings['loadPlugins'][$name]);
+    }
+  }
+
   // Change the ckeditor config path.
   $settings['customConfig'] = $base_path . $module_path . '/ckeditor/config.js?' . $query;
   // Add additional styling for Bootstrap based themes.
   $settings['contentsCss'][] = $base_path . $module_path . '/ckeditor/ckeditor.css?' . $query;
+
   if (!empty($settings['stylesCombo_stylesSet'])) {
     unset($settings['stylesCombo_stylesSet']);
   }
@@ -66,4 +81,108 @@ function enterprise_editor_add_upload_validate($form, &$form_state) {
     $params['file_directory'] = 'media/' . ((!empty($file->type)) ? $file->type : 'other' );
   }
 }
+
+/**
+ * Returns list of available plugins
+ * @return array
+ */
+function enterprise_editor_available_plugins() {
+  $plugins = &drupal_static(__FUNCTION__);
+  if (isset($plugins)) {
+    return $plugins;
+  }
+  $plugin_path = libraries_get_path('enterprise_editor');
+  $plugins = array(
+    'carousel' => 0,
+    'featurette' => 0,
+    'jumbotron' => 0,
+    'trifold' => 0,
+    'templates' => 0,
+  );
+  foreach ($plugins AS $name => $value) {
+    if (file_exists($plugin_path . '/plugins/' . $name . '/plugin.js')) {
+      $plugins[$name] = 1;
+    }
+  }
+
+  if (file_exists($plugin_path . '/templates/templates.js')) {
+    $plugins['templates'] = 1;
+  }
+  return $plugins;
+}
+
+/**
+ * Implements hook_ckeditor_plugin()
+ *
+ * @return type
+ */
+function enterprise_editor_ckeditor_plugin() {
+  $plugins = array();
+  //$plugin_path = drupal_get_path('module', 'ckeditor_bootstrap');
+
+  $plugin_path = libraries_get_path('enterprise_editor');
+  $plugins['trifold'] = array(
+    'name' => 'trifold',
+    'desc' => t('Bootstrap Trifold Plugin'),
+    'path' => $plugin_path . '/plugins/trifold/',
+    'buttons' => array(
+      'Trifold' => array('label' => 'Trifold', 'icon' => 'icons/trifold.png'),
+    )
+  );
+  $plugins['featurette'] = array(
+    'name' => 'featurette',
+    'desc' => t('Bootstrap Featurette Plugin'),
+    'path' => $plugin_path . '/plugins/featurette/',
+    'buttons' => array(
+      'Featurette' => array('label' => 'Featurette', 'icon' => 'icons/featurette.png'),
+    )
+  );
+  $plugins['carousel'] = array(
+    'name' => 'carousel',
+    'desc' => t('Bootstrap Carousel Plugin'),
+    'path' => $plugin_path . '/plugins/carousel/',
+    'buttons' => array(
+      'Carousel' => array('label' => 'Carousel', 'icon' => 'icons/carousel.png'),
+    )
+  );
+  $plugins['jumbotron'] = array(
+    'name' => 'jumbotron',
+    'desc' => t('Bootstrap Jumbotron Plugin'),
+    'path' => $plugin_path . '/plugins/jumbotron/',
+    'buttons' => array(
+      'Jumbotron' => array('label' => 'Jumbotron', 'icon' => 'icons/jumbotron.png'),
+    )
+  );
+
+  $available_plugins = enterprise_editor_available_plugins();
+  foreach ($plugins AS $name => $val) {
+    if (empty($available_plugins[$name])) {
+      unset($plugins[$name]);
+    }
+  }
+
+  return $plugins;
+}
+
+/*
+function enterprise_editor_ckeditor_profile_alter(&$data) {
+  dsm($data);
+}
+
+//function ckeditor_profile_features_revert($component) {
+//  dsm($component);
+//}
+
+function enterprise_editor_pre_features_revert($component) {
+  dsm($component);
+}
+*/
+
+/*
+function enterprise_editor_ckeditor_default_settings_alter(&$settings) {
+  dsm($settings);
+  //$settings['show_toggle'] = 'f';
+}
+*/
+
 

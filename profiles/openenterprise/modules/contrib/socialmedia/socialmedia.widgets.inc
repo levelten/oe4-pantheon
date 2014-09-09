@@ -81,6 +81,8 @@ function socialmedia_widgets_element_info() {
       'help' => t(''),
       'group' => t('Social media: Pinterest'),
       'template' => '<a class="addthis_button_pinterest_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" addthis:userid="[?profile_username=[socialmedia:sm-pinterest_userid]?]" title="Follow on Pinterest">[?icon-markup={[socialmedia:sm-pinterest_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-pinterest_icon-path]}" alt="Pinterest icon">?]</a>',
+      //'template' => '<a class="addthis_button_pinterest_follow[?link_class= {[socialmedia:sm-default_link_class_profile]}?]" [?addthis:userid="[?profile_username=[socialmedia:sm-pinterest_userid]?]" title="Follow on Pinterest">[?icon-markup={[socialmedia:sm-pinterest_icon-markup]}?][?icon-path=<img src="{[socialmedia:sm-pinterest_icon-path]}" alt="Pinterest icon">?]</a>',
+
     ) + $defaults;
   $elements['socialmedia_addthis-rss-follow'] = array(
       'label' => t('AddThis RSS follow'),
