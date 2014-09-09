@@ -185,7 +185,7 @@ function openenterprise_install_theme_settings() {
 
 function openenterprise_themes_enable_list() {
   $themes = list_themes(TRUE); //Get all the available themes
-  watchdog('install', print_r($themes, 1));
+
   $themes_enable = array();
   if(isset($themes['enterprise_bootstrap'])) {
     $themes_enable[] = 'enterprise_bootstrap';

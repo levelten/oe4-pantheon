@@ -107,6 +107,10 @@ dependencies[] = views_bulk_operations
 dependencies[] = views_litepager
 dependencies[] = views_responsive_grid
 
+;; Themeing
+dependencies[] = less
+dependencies[] = ckeditor_less
+
 ;; Enterprise Modules
 dependencies[] = enterprise_apps
 dependencies[] = enterprise_base
