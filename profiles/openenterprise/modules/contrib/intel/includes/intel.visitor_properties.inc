@@ -60,6 +60,12 @@ function _intel_intel_visitor_property_info() {
       'full' => NULL,
       'first' => NULL,
       'last' => NULL,
+      'title' => NULL,
+      'given' => NULL,
+      'middle' => NULL,
+      'family' => NULL,
+      'generational' => NULL,
+      'credentials' => NULL,
     ),
   );
   // contact points

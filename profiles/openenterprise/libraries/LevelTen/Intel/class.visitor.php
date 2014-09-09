@@ -17,11 +17,12 @@ class ApiVisitor {
 	protected $vtk;
 	public $apiVisitor;
 	protected $apiClient;
-	protected $cookies;
+	protected $cookies = array();
+  protected static $cookieStrings;
 
   public function __construct($vtk = '', $apiClientProperties = array()) {
     $this->apiClient = new ApiClient($apiClientProperties);
-    $this->vtk = ($vtk == '') ? $this->extractVtk() : $vtk; 
+    $this->vtk = ($vtk == '') ? $this->extractVtk() : $vtk;
     $this->cookies['va'] = $this->extractCookieVa();
   }
 	
@@ -43,22 +44,14 @@ class ApiVisitor {
   }
 
   public static function extractVtk() {
-    if (!empty($_COOKIE['l10ivtk'])) {
-      return $_COOKIE['l10ivtk'];
-    }
-    // alternate name for work around for varnish filtering
-    if (!empty($_COOKIE['SESSl10ivtk'])) {
-      return $_COOKIE['SESSl10ivtk'];
-    }
-    if (!empty($_SESSION) && !empty($_SESSION['l10ivtk'])) {
-      return $_SESSION['l10ivtk'];
-    }
-    return '';
+    $vtk = self::getCookie('l10ivtk');
+    return !empty($vtk) ? $vtk : '';
   }
   
   public static function extractCookieVa() {
-    if (!empty($_COOKIE['__utmv'])) {
-      $a = explode('3=va=', $_COOKIE['__utmv']);
+    $cookie = self::getCookie('__utmv');
+    if (!empty($cookie)) {
+      $a = explode('3=va=', $cookie);
       if (empty($a[1])) {
         return array();
       }
@@ -127,6 +120,34 @@ class ApiVisitor {
       return $flags[$name];
     }
     return null;
+  }
+
+  public static function getCookie ($name) {
+    // initialize cookieStrings property if not already done
+    self::setCookieStrings();
+    return (isset(self::$cookieStrings[$name])) ? self::$cookieStrings[$name] : null;
+  }
+
+  private static function setCookieStrings() {
+    if (isset(self::$cookieStrings)) {
+      return;
+    }
+    $cookieAlt = 'SESSl10i';
+
+    self::$cookieStrings = array();
+    if (isset($_COOKIE) && is_array($_COOKIE)) {
+      self::$cookieStrings = $_COOKIE;
+      if (isset($_COOKIE[$cookieAlt])) {
+        $c = json_decode($_COOKIE[$cookieAlt], true);
+        //unset(self::$cookieStrings[$cookieAlt]);
+        if (!empty($c) && is_array($c)) {
+          self::$cookieStrings += $c;
+        }
+      }
+    }
+    if (isset($_SESSION) && isset($_SESSION['l10i_cookie']) && is_array($_SESSION['l10i_cookie'])) {
+      self::$cookieStrings += $_SESSION['l10i_cookie'];
+    }
   }
   
   public static function encodeCookieElements ($elements) {

@@ -29,7 +29,7 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $path_is_admin = path_is_admin(current_path());
   
   $ga_va = array();
-  if ($user->uid && !empty($_COOKIE['__utmv'])) {
+  if ($user->uid) {
     if (intel_include_library_file('class.visitor.php')) {
       $ga_va = \LevelTen\Intel\ApiVisitor::extractCookieVa();
     }
@@ -853,8 +853,8 @@ function intel_check_form_submission($page) {
     $error = $visitor->apiVisitorLoadError;
     dpm("$error");//
   }
-  watchdog('intel_fs_visitor', print_r($visitor, 1));
-  watchdog('intel_fs_api_data', print_r($api_data, 1));
+  //watchdog('intel_fs_visitor', print_r($visitor, 1));
+  //watchdog('intel_fs_api_data', print_r($api_data, 1));
   
   $a = explode('//', $GLOBALS['base_url']);
   $host = $a[1];
@@ -997,8 +997,11 @@ function intel_check_form_submission($page) {
   }
 
   // if submit_context not available in api, check redirect using cookie
-  if (empty($submit_context['location']) && !empty($_COOKIE['l10i_l'])) {
-    $loc_comps = intel_parse_url($_COOKIE['l10i_l']);
+  if (intel_include_library_file('class.visitor.php')) {
+    $loc0 = \LevelTen\Intel\ApiVisitor::getCookie('l10i_l');
+  }
+  if (empty($submit_context['location']) && !empty($loc0)) {
+    $loc_comps = intel_parse_url($loc0);
     if (!empty($loc_comps['system_path'])) {
       $a = explode('/', $loc_comps['system_path']);
       if (($a[0] == 'node') && is_numeric($a[1])) {
@@ -1130,11 +1133,22 @@ function intel_execute_response_redirect_if_set($lp_node, $link_query = array())
       $url = trim($lp_node->field_redirect_url[$lp_node->language][0]['url']);
     }
     if ($url && ($url != $_GET['q'])) {
+      // cache cookies in Drupal session in case varnish or other caching is filtering
+      // cookies
+      intel_session_cookie_merge();
       $options = array('query' => $link_query);
       drupal_goto($url, $options);
       exit;
     }
   }
+}
+
+function intel_session_cookie_merge() {
+  $c0 = array();
+  if (!empty($_SESSION['l10i_cookie']) && is_array($_SESSION['l10i_cookie'])) {
+    $c0 = $_SESSION['l10i_cookie'];
+  }
+  $_SESSION['l10i_cookie'] = $_COOKIE + $c0;
 }
 
 function intel_visitor_sync_user($account) {

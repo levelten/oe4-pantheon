@@ -157,6 +157,7 @@ function intel_webform_form_alter(&$form, &$form_state, $form_id) {
  */
 function intel_webform_webform_submission_presave($node, &$submission) {
   global $base_path;
+
   $idents = array();
   $vtk = IntelVisitor::extractVtk();
   if (empty($vtk)) {
@@ -168,10 +169,9 @@ function intel_webform_webform_submission_presave($node, &$submission) {
     return;
   }
 
-  // cache in Drupal session also incase varnish or other caching is filtering
+  // cache in Drupal session also in case varnish or other caching is filtering
   // cookies
-  $_SESSION['l10ivtk'] = $vtk;
-  $_SESSION['intel_cookie'] = $_COOKIE;
+  intel_session_cookie_merge();
 
   $visitor = intel_visitor_load_or_create('user');
   $api_level = variable_get('intel_api_level', '');
@@ -199,22 +199,36 @@ function intel_webform_webform_submission_presave($node, &$submission) {
       }
       if (!empty($component['extra']['intel_field_map'])) {
         list($key, $elem) = explode(':', $component['extra']['intel_field_map']);
+
         if (!isset($merge_data[$key])) {
           $merge_data[$key] = array();
         }
 
-        $value = trim($submission->data[$cid]['value'][0]);
-        // don't add value if it is blank
-        if ($value) {
-          $merge_data[$key][$elem] = trim($submission->data[$cid]['value'][0]);
+        // name field maping of multiple keyed elements
+        if ($elem == 'name_automap') {
+          $comp_keys = array(
+            'given' => 'first',
+            'family' => 'last',
+            'title' => 'title',
+            'middle' => 'middle',
+            'generational' => 'generational',
+            'credentials' => 'credentials',
+          );
+          foreach ($comp_keys AS $comp_key => $intel_key) {
+            if (!empty($submission->data[$cid]['value'][$comp_key])) {
+              $merge_data[$key][$intel_key] = trim($submission->data[$cid]['value'][$comp_key]);
+            }
+          }
+        }
+        else {
+          $value = trim($submission->data[$cid]['value'][0]);
+          // don't add value if it is blank
+          if ($value) {
+            $merge_data[$key][$elem] = $value;
+          }
         }
       }
     }
-  }
-
-  // if api_level != pro, vtk data will not be available to link visitors
-  if ($api_level != 'pro') {
-    return;
   }
 
   $prop_options = array(
@@ -231,34 +245,6 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   }
 
   $visitor->merge();
-  // set intel_vid on submission to pass it to intel_webform_webform_submission_insert
-  // so the vid can be saved after sid is created
-  if (($api_level == 'pro') && empty($visitor->vtk)) {
-    $submission->intel_vid = $visitor->vid;
-  }
-}
-
-function intel_webform_webform_submission_insert($node, $submission) {
-  // OK this is a bit of a hack, but not sure of a better way given issues with
-  // sessions data for anonomous users. It is not a good idea to use the variables
-  // table to store this info.
-  //
-  // The problem is if a form is submitted without a vtk set. This shouldn't happen,
-  // but if it does, you get two visitors created, one by intel_webform_webform_submission_presave
-  // and one in intel_do_submission check.
-  //
-  // The variable should be deleted in intel_webform_intel_form_submission_check
-
-  // check if intel_vid is set, which happens in webform_submission_presave only
-  // if api is set to pro and vtk is not passed
-  if (isset($submission->intel_vid)) {
-    $data = variable_get('intel_webform_temp_submission_data', array());
-    $data[$node->nid . '_' . $submission->sid] = array(
-      'time' => REQUEST_TIME,
-      'vid' => $submission->intel_vid,
-    );
-    variable_set('intel_webform_temp_submission_data', $data);
-  }
 }
 
 /**
@@ -342,15 +328,6 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
       $track['category_id'] = $wf_node->field_track_submission_value[$wf_node->language][0]['value'];
     }
 
-    $submission_data = variable_get('intel_webform_temp_submission_data', array());
-    $key = $wfsubmission->nid . '_' . $wfsubmission->sid;
-    if (isset($submission_data[$key])) {
-      $submission->vid = $submission_data[$key]['vid'];
-      // delete entry in variable
-      unset($submission_data[$key]);
-      variable_set('intel_webform_temp_submission_data', $submission_data);
-    }
-
     $submission->type = 'webform';
     $submission->fid = $wfsubmission->nid;
     $submission->fsid = $wfsubmission->sid;
@@ -380,9 +357,6 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
 }
 
 function intel_webform_form_webform_component_edit_form_alter(&$form, $form_state, $node) {
-//dsm($form);
-//dsm($form_state);
-
   $nid = $form['nid']['#value'];
   $cid = $form['cid']['#value'];
   $type = $form['type']['#value'];
@@ -398,8 +372,13 @@ function intel_webform_form_webform_component_edit_form_alter(&$form, $form_stat
   if ($type == 'email') {
     $options['email:email'] = t('Email');
   }
+  // phone field (contrib module)
   if ($type == 'phone') {
     $options['phone:phone'] = t('Phone');
+  }
+  // name field (contrib module)
+  if ($type == 'name') {
+    $options['name:name_automap'] = t('Name (auto-map elements)');
   }
   // TODO: get this auto building from intel properties
   if ($type == 'textfield') {
