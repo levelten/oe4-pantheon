@@ -42,6 +42,14 @@ class ViewsBootstrapAccordionPluginStyle extends views_plugin_style {
         '#default_value' => $this->options['title_field'],
         '#description' => t('Select the field that will be used as the title.'),
       );
+
+      $form['open_first_panel'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Open First Panel'),
+        '#default_value' => $this->options['open_first_panel'],
+        '#description' => t('Open the first panel by default.'),
+      );
+
     }
   }
 }
