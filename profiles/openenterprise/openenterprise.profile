@@ -122,6 +122,7 @@ function openenterprise_block_view($delta = '') {
  * Implements hook_appstore_stores_info
  */
 function openenterprise_apps_servers_info() {
+
   $profile = variable_get('install_profile', 'standard');
   $info =  drupal_parse_info_file(drupal_get_path('profile', $profile) . '/' . $profile . '.info');
   return array(
@@ -142,6 +143,11 @@ function openenterprise_apps_servers_info() {
  */
 function openenterprise_install_tasks($install_state) {
   $tasks = array();
+
+  // Add profile CSS for installation process
+  drupal_add_css(drupal_get_path('profile', 'openenterprise') . '/openenterprise.css');
+
+
   $path = drupal_get_path('module', 'enterprise_apps');
   if ($path) {
     require_once($path . '/enterprise_apps.profile.inc');

@@ -179,6 +179,12 @@ function _enterprise_demo_config_app_batch_finished($success, $results, $operati
   $context = array();
   node_pathauto_bulk_update_batch_process($context);
 
+  // set default front page
+  $path = drupal_lookup_path("source", 'home');
+  if (!empty($path)) {
+    variable_set('site_frontpage', $path);
+  }
+
   drupal_flush_all_caches();
 
   // clear status messages

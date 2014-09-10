@@ -82,7 +82,15 @@ function openenterprise_install_tasks_alter(&$tasks, $install_state) {
  */
 function install_welcome($form, &$form_state, &$install_state) {
   drupal_set_title(st('Welcome'));
-  $message = '<p>' . st('Thank you for choosing Open Enterprise, a product offered by LevelTen Interactive.') . '</p>';
+  $message = '<p>' . st('Thank you for choosing Open Enterprise by LevelTen.') . '</p>';
+  $options = array(
+    'attributes' => array(
+      'target' => 'getcm2',
+    )
+  );
+  $message .= '<p>' . l('Learn more at getCM2.com', 'http://getcm2.com', $options) . '</p>';
+  //$message .= '<p>' . st('Learn more at') . ' ' . l('getCM2.com', 'http://getcm2.com', $options) . '</p>';
+  $message .= '<br />';
   $form = array();
   $form['welcome_message'] = array(
     '#markup' => $message,
@@ -95,6 +103,7 @@ function install_welcome($form, &$form_state, &$install_state) {
     '#value' => st("Let's Get Started!"),
     '#weight' => 10,
   );
+
   return $form;
 }
 

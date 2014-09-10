@@ -1,0 +1,11 @@
+/**
+ * Stylesheet for Open Enterprise Profile
+ */
+
+body.maintenance-page #logo {
+    background:transparent url(openenterprise_logo.png) no-repeat top left;
+    height:0;
+    overflow:hidden;
+    padding-top: 50px; /* height of logo  */
+    width: 640px; /* width of logo  */
+}
