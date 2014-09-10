@@ -114,14 +114,5 @@ function enterprise_demo_strongarm() {
   );
   $export['intel_entity_settings_taxonomy__blog_tags'] = $strongarm;
 
-  /*
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'site_frontpage';
-  $strongarm->value = 'home';
-  $export['site_frontpage'] = $strongarm;
-  */
-
   return $export;
 }

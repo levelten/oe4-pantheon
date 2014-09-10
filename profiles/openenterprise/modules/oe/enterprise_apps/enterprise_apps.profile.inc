@@ -166,7 +166,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     )
   );
   $msg = st('The Intelligence API provides enhanced analytics, visitor data and site functionality.');
-  $msg .= ' ' . st('You can get a Free or Pro key at !link.',
+  $msg .= ' ' . st('You can get a Free, Basic or Pro key at !link.',
       array(
         '!link' => l(t('Intelligence API'), ENTERPRISE_APPS_L10IAPI_HREF, $link_options),
       )
