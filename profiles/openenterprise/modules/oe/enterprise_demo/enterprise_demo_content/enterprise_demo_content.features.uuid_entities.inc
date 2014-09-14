@@ -896,8 +896,8 @@ Open Enterprise is built around a unique combination of world-class content mana
   );
   
   ////////////////////////////////
-  // Attract page  
-  
+  // Attract page
+
   $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',

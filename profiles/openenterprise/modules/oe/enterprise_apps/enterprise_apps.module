@@ -58,6 +58,26 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $profile = drupal_get_profile();
+  dsm($profile);
+
+  $options = array(
+    'pkey' => '168596',
+    'apikey' => 'e67e82b2bd029a000f9302d32674118b',
+    'apiUrl' => 'getcm2.localhost:8082/api/v1',
+  );
+  $message = '';
+  try {
+    $property = openenterprise_api_property_load($options, $message);
+  }
+  catch (Exception $e) {
+    dsm($e);
+    return;
+  }
+  dsm($property);
+
+  return '';
+
   $p = enterprise_editor_available_plugins();
   dsm($p);
 
@@ -242,34 +262,36 @@ function enterprise_apps_config_settings_all() {
   $settings = array();
   // process settings (defaults in config_info)
   $config_infos = enterprise_apps_config_info_all();
-  foreach ($config_infos AS $app_name => $config_info) {
-    if (!empty($config_info['blocks']) && is_array($config_info['blocks'])) {
-      $settings[$app_name]['blocks'] = array();
-      foreach ($config_info['blocks'] AS $block_name => $ci_block) {
-        if (isset($ci_block['default'])) {
-          $settings[$app_name]['blocks'][$block_name] = $ci_block['default'];
-          list($bmod, $delta) = explode(':', $block_name);
-          if (($bmod == 'views') && (strlen($delta) >= 32)) {
-            $delta = md5($delta);
+  if (!empty($config_infos) && is_array($config_infos)) {
+    foreach ($config_infos AS $app_name => $config_info) {
+      if (!empty($config_info['blocks']) && is_array($config_info['blocks'])) {
+        $settings[$app_name]['blocks'] = array();
+        foreach ($config_info['blocks'] AS $block_name => $ci_block) {
+          if (isset($ci_block['default'])) {
+            $settings[$app_name]['blocks'][$block_name] = $ci_block['default'];
+            list($bmod, $delta) = explode(':', $block_name);
+            if (($bmod == 'views') && (strlen($delta) >= 32)) {
+              $delta = md5($delta);
+            }
+            $settings[$app_name]['blocks'][$block_name]['module'] = $bmod;
+            $settings[$app_name]['blocks'][$block_name]['delta'] = $delta;
           }
-          $settings[$app_name]['blocks'][$block_name]['module'] = $bmod;
-          $settings[$app_name]['blocks'][$block_name]['delta'] = $delta;
         }
       }
-    }
-    if (isset($config_info['nodes']) && is_array($config_info['nodes'])) {
-      $settings['nodes'] = array();
-      foreach ($config_info['nodes'] AS $name => $ci_node) {
-        if (isset($ci_node['default'])) {
-          $settings[$app_name]['nodes'][$name] = $ci_node['default'];
+      if (isset($config_info['nodes']) && is_array($config_info['nodes'])) {
+        $settings['nodes'] = array();
+        foreach ($config_info['nodes'] AS $name => $ci_node) {
+          if (isset($ci_node['default'])) {
+            $settings[$app_name]['nodes'][$name] = $ci_node['default'];
+          }
         }
       }
-    }
-    if (isset($config_info['menus']) && is_array($config_info['menus'])) {
-      $settings['menus'] = array();
-      foreach ($config_info['menus'] AS $name => $ci_menu) {
-        if (isset($ci_menu['default'])) {
-          $settings[$app_name]['menus'][$name] = $ci_menu['default'];
+      if (isset($config_info['menus']) && is_array($config_info['menus'])) {
+        $settings['menus'] = array();
+        foreach ($config_info['menus'] AS $name => $ci_menu) {
+          if (isset($ci_menu['default'])) {
+            $settings[$app_name]['menus'][$name] = $ci_menu['default'];
+          }
         }
       }
     }
@@ -1309,5 +1331,49 @@ function enterprise_apps_entity_dependencies($entity, $entity_type) {
     // The node has a 'node' dependency through the 'tnid' property.
     entity_dependency_add($dependencies, $entity, 'node', 'tnid');
     return $dependencies;
+  }
+}
+
+function enterprise_apps_api_property_load($options, &$message = '') {
+  if (!intel_verify_library($message)) {
+    return FALSE;
+  }
+  $pkey = isset($options['pkey']) ? $options['pkey'] : variable_get('oeapi_pkey', '-');
+  if (!$pkey) {
+    $message = t('API property id is not set.');
+    return FALSE;
+  }
+  $apikey = isset($options['apikey']) ? $options['apikey'] : variable_get('oeapi_apikey', '');
+  if (!$apikey) {
+    $message = t('API key is not set');
+    return FALSE;
+  }
+  intel_include_library_file('class.apiclient.php');
+  $apiUrl = (isset($options['apiUrl'])) ? $options['apiUrl'] : variable_get('oeapi_url', '');
+  $api_params = variable_get('intel_l10iapi_custom_params', array());
+  $apiClientProps = array(
+    'apiUrl' => ($apiUrl ? $apiUrl : ENTERPRISE_APPS_OEAPI_URL) . '/' . $pkey . '/',
+    'apiConnector' => variable_get('oeapi_connector', ''),
+    'apiParams' => $api_params,
+    'urlrewrite' => 1,
+  );
+  $apiclient = new \LevelTen\Intel\ApiClient($apiClientProps);
+  $ret = '';
+  $params = isset($options['params']) ? $options['params'] : array();
+  $data = array(
+    'apikey' => $apikey,
+  );
+  try {
+    $ret = $apiclient->getJSON('property', $params, $data);
+  }
+  catch (Exception $e) {
+    $message = $e->getMessage();
+  }
+  if (!empty($ret['property'])) {
+    return (object)$ret['property'];
+  }
+  else {
+    $message = t('API key invalid.') . ' ' . $message;
+    return FALSE;
   }
 }

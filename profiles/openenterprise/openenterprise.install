@@ -12,8 +12,8 @@ function openenterprise_form_install_configure_form_alter(&$form, &$form_state) 
   // Many modules set messages during installation that are very annoying.
   // We don't want to confuse people during the install with random messages.
   // (I'm looking at you date and menu_block)
-  drupal_get_messages('status');
-  drupal_get_messages('warning');
+  //drupal_get_messages('status');
+  //drupal_get_messages('warning');
 
   $form['site_information']['site_name']['#default_value'] = 'Open Enterprise';
   $form['site_information']['site_mail']['#default_value'] = 'admin@'. $_SERVER['HTTP_HOST'];
@@ -65,7 +65,7 @@ function openenterprise_install_tasks_alter(&$tasks, $install_state) {
   $tasks['install_select_locale']['display'] = FALSE;
   $tasks['install_profile_modules']['display_name'] = 'Install site';
   
-    // The "Welcome" screen needs to come after the first two steps
+  // The "Welcome" screen needs to come after the first two steps
   // (profile and language selection), despite the fact that they are disabled.
   $new_task['install_welcome'] = array(
     'display' => TRUE,
@@ -110,7 +110,7 @@ function install_welcome($form, &$form_state, &$install_state) {
 function install_welcome_submit($form, &$form_state) {
   global $install_state;
 
-  $install_state['parameters']['welcome'] = 'done';  
+  $install_state['parameters']['welcome'] = 'done';
 }
 
 /**
@@ -123,7 +123,7 @@ function install_welcome_submit($form, &$form_state) {
  *   A message informing the user that the installation is complete.
  */
 function openenterprise_install_finished(&$install_state) {
-  // CKEditor sets some settings that override the openenterprise_editor. Make sure the 
+  // CKEditor sets some settings that override the openenterprise_editor. Make sure the
   // feature is fully reverted at this time.
   features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
   
