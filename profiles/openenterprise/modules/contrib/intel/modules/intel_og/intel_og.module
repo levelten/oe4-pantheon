@@ -156,7 +156,6 @@ function intel_og_intel_reports_alter(&$reports) {
     'key' => 'page_attribute:og.top.entrance',
     'title' => t('Organic groups'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
 }
@@ -496,7 +495,6 @@ function intel_og_intel_page_attribute_info() {
     'type' => 'scalar',
     'options_description' => t('Auto generated from og_context.'),
     'options info callback' => 'intel_og_page_attribute_og_option_info',
-    'data contacts per day callback'
   );
   return $attributes;
 }
@@ -510,6 +508,7 @@ function intel_og_page_attribute_og_option_info($option_id, $data_options) {
   $entity = $entity[$option_id];
   if (!empty($entity)) {
     $data['title'] = $entity->label();
+    $data['uri'] = $entity->uri();
   }
 
   if (!empty($data_options['page_count'])) {

@@ -1033,6 +1033,39 @@ function enterprise_landingpages_node_update($node) {
  *
  */
 function enterprise_landingpages_node_presave($node) {
+  if ($node->type == 'webform') {
+    // detect if settings are from form settings or node edit
+    $nid = 0;
+    $form_settings = (strpos($_GET['q'], '/webform/configure')) ? 1 : 0;
+    if ($form_settings) {
+      $sys_path = drupal_get_normal_path($node->webform['redirect_url']);
+      $e = explode('/', $sys_path);
+      if ((count($e) == 2) && $e[0] == 'node' && is_numeric($e[1])) {
+        $nid = $e[1];
+      }
+      if (isset($node->field_thankyou)) {
+        $node->field_thankyou = array($node->language => array());
+        if ($nid) {
+          $node->field_thankyou[$node->language][] = array('target_id' => $nid);
+        }
+      }
+      if (isset($node->field_redirect_url)) {
+        $node->field_redirect_url = array($node->language => array());
+        if (!$nid) {
+          $node->field_redirect_url[$node->language][] = array('url' => $node->webform['redirect_url']);
+        }
+      }
+    }
+    else {
+      if (!empty($node->field_thankyou[$node->language][0]['target_id'])) {
+        $node->webform['redirect_url'] = 'node/' . $node->field_thankyou[$node->language][0]['target_id'];
+      }
+      else if (!empty($node->field_redirect_url[$node->language][0]['url'])) {
+        $node->webform['redirect_url'] = $node->field_redirect_url[$node->language][0]['url'];
+      }
+    }
+  }
+
   // save landingpage_webform_block setting before node is saved
   // (do other settings after nid is created)
   if (isset($node->landingpages_webform_block)) {
@@ -1082,6 +1115,7 @@ function enterprise_landingpages_node_presave($node) {
  */
 function enterprise_landingpages_node_save($node) {
   if ($node->type == 'webform') {
+dsm($node);
     if (isset($node->landingpages_webform_block)) {
       //entity_data_set('node', $node->nid, 'landingpages_webform_block', $node->landingpages_webform_block);
       $delta = 'client-block-' . $node->nid;
