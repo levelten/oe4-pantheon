@@ -1,5 +1,8 @@
 <?php
 
+define('OE_API_URL', 'getcm2.com/api/v1');
+define('OE_HOME_URL', 'getcm2.com');
+
 /**
  * Determine whether or not to skip the profile selection process. Normally when
  * downloading a distribution, there is only one additional profile to choose from
@@ -106,7 +109,9 @@ function openenterprise_block_view($delta = '') {
       return array(
         'subject' => NULL,
         'content' => array(
-          '#markup' => '<div class="row clearfix"><div>' . variable_get('site_name', t('This site')) . ' ' . t('is powered by <a href="http://drupal.org/project/openenterprise" title="OpenEnterprise" target="_blank">!openenterprise</a>. A distribution by <a href="http://www.leveltendesign.com" title="LevelTen Interactive" target="_blank">!levelten</a>.', array('!openenterprise' => $openenterprise, '!levelten' => $levelten)) . '</div></div>',
+          //'#markup' => '<div class="row clearfix"><div>' . variable_get('site_name', t('This site')) . ' ' . t('is powered by <a href="http://getcm2.com" title="OpenEnterprise" target="_blank">!openenterprise</a> A distribution by <a href="http://getlevelten.com" title="LevelTen Interactive" target="_blank">!levelten</a>.', array('!openenterprise' => $openenterprise, '!levelten' => $levelten)) . '</div></div>',
+          '#markup' => '<div class="row clearfix"><div>' . variable_get('site_name', t('This site')) . ' ' . t('is powered by <a href="http://getcm2.com" title="OpenEnterprise" target="getcm2" alt="OpenEnterprise logo">!openenterprise</a>', array('!openenterprise' => $openenterprise, '!levelten' => $levelten)) . '</div></div>',
+
         ),
         'gridmagic' => array(
           'attributes' => array(
@@ -116,6 +121,26 @@ function openenterprise_block_view($delta = '') {
         ),
       );
   }
+}
+
+/**
+ * Implements hook_install_tasks
+ */
+function openenterprise_install_tasks($install_state) {
+  $tasks = array();
+
+  watchdog('openenterprise_install_tasks install_state', print_r($install_state, 1), array(), WATCHDOG_DEBUG);
+
+  // Add profile CSS for installation process
+  drupal_add_css(drupal_get_path('profile', 'openenterprise') . '/openenterprise.css');
+
+
+  $path = drupal_get_path('module', 'enterprise_apps');
+  if ($path) {
+    require_once($path . '/enterprise_apps.profile.inc');
+    $tasks += enterprise_apps_profile_install_tasks($install_state);
+  }
+  return $tasks;
 }
 
 /**
@@ -138,20 +163,89 @@ function openenterprise_apps_servers_info() {
   );
 }
 
-/**
- * Implements hook_install_tasks
- */
-function openenterprise_install_tasks($install_state) {
-  $tasks = array();
-
-  // Add profile CSS for installation process
-  drupal_add_css(drupal_get_path('profile', 'openenterprise') . '/openenterprise.css');
-
-
-  $path = drupal_get_path('module', 'enterprise_apps');
-  if ($path) {
-    require_once($path . '/enterprise_apps.profile.inc');
-    $tasks += enterprise_apps_profile_install_tasks($install_state);
+function openenterprise_property_save($property) {
+  if (isset($property->profile_settings)) {
+    unset($property->profile_settings);
   }
-  return $tasks;
+  variable_set('oe_property', $property);
+
+  if (!empty($property->intel_tid)) {
+    variable_set('intel_ga_account', $property->intel_tid);
+  }
+  if (!empty($property->intel_apikey)) {
+    variable_set('intel_apikey', $property->intel_apikey);
+  }
+  if (!empty($property->intel_level)) {
+    variable_set('intel_api_level', $property->intel_level);
+  }
+}
+
+function openenterprise_property_load() {
+  return variable_get('oe_property', FALSE);
+}
+
+function openenterprise_support_level() {
+  $oe_prop = variable_get('oe_property', FALSE);
+  if (!empty($oe_prop->support_level)) {
+    return $oe_prop->support_level;
+  }
+  return '';
+}
+
+function openenterprise_api_property_load($options, &$message = '', &$status = 200) {
+  if (!intel_verify_library($message)) {
+    return FALSE;
+  }
+  $oe_property = openenterprise_property_load();
+  $pkey = isset($oe_property->pkey) ? $oe_property->pkey : '';
+  $apikey = isset($oe_property->apikey) ? $oe_property->apikey : '';
+  if (!empty($options['pkey'])) {
+    $pkey = $options['pkey'];
+  }
+  if (!$pkey) {
+    $message = t('API property id is not set.');
+    return FALSE;
+  }
+  if (!empty($options['apikey'])) {
+    $apikey = $options['apikey'];
+  }
+  if (!$apikey) {
+    $message = t('API key is not set');
+    return FALSE;
+  }
+  intel_include_library_file('class.apiclient.php');
+  $apiUrl = (isset($options['apiUrl'])) ? $options['apiUrl'] : variable_get('oe_api_url', '');
+  $api_params = variable_get('intel_l10iapi_custom_params', array());
+  $apiClientProps = array(
+    'apiUrl' => ($apiUrl ? $apiUrl : OE_API_URL) . '/' . $pkey . '/',
+    'apiConnector' => variable_get('oe_api_connector', ''),
+    'apiParams' => $api_params,
+    'urlrewrite' => 1,
+  );
+  $apiclient = new \LevelTen\Intel\ApiClient($apiClientProps);
+  $ret = '';
+  $params = isset($options['params']) ? $options['params'] : array();
+  $data = array(
+    'apikey' => $apikey,
+  );
+  try {
+    $ret = $apiclient->getJSON('property', $params, $data);
+  }
+  catch (Exception $e) {
+    $status = 501;
+    $message = $e->getMessage();
+    return FALSE;
+  }
+  if (!empty($ret['property'])) {
+    return (object)$ret['property'];
+  }
+  else {
+    if ($ret['status']) {
+      $status = $ret['status'];
+    }
+    if ($ret['message']) {
+      $message = $ret['message'];
+    }
+    return FALSE;
+  }
 }

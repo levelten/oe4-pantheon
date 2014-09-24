@@ -913,7 +913,7 @@ function intel_check_form_submission($page) {
         $a = explode('/', $submit_context['system_path']);
         $lp_node = node_load($a[1]);
         $submission->form_page_id = !empty($lp_node->nid) ? $lp_node->nid : 0;
-        intel_execute_response_redirect_if_set($lp_node, $link_query);
+        intel_execute_response_redirect_if_set($lp_node, $node, $link_query);
       }
 
       if (!empty($submit_context['is_landingpage'])) {
@@ -1006,7 +1006,7 @@ function intel_check_form_submission($page) {
       $a = explode('/', $loc_comps['system_path']);
       if (($a[0] == 'node') && is_numeric($a[1])) {
         $lp_node = node_load($a[1]);
-        intel_execute_response_redirect_if_set($lp_node, $link_query);
+        intel_execute_response_redirect_if_set($lp_node, $node, $link_query);
       }
     }
   }
@@ -1121,18 +1121,24 @@ if (!empty($_GET['debug'])) {
 /**
  * Determines of redirect has been set on
  * @param $lp_node - the landing page node
+ * @param $menu_object - the object returned from get_menu_object, i.e. the
+ * current node
  */
-function intel_execute_response_redirect_if_set($lp_node, $link_query = array()) {
+function intel_execute_response_redirect_if_set($lp_node, $menu_object = null, $link_query = array()) {
   // check if redirect set
   if (isset($lp_node->language)) {
+    $sys_path = '';
     $url = '';
     if (isset($lp_node->field_thankyou[$lp_node->language][0]['target_id'])) {
-      $url = 'node/' . $lp_node->field_thankyou[$lp_node->language][0]['target_id'];
+      $nid = $lp_node->field_thankyou[$lp_node->language][0]['target_id'];
+      $sys_path = $url = 'node/' . $nid;
     }
     elseif (isset($lp_node->field_redirect_url[$lp_node->language][0]['url'])) {
       $url = trim($lp_node->field_redirect_url[$lp_node->language][0]['url']);
+      $sys_path = drupal_get_normal_path($url);
     }
-    if ($url && ($url != $_GET['q'])) {
+    // if url set and sys_path does not equal q, (on same page) do redirect.
+    if ($url && ($sys_path != $_GET['q'])) {
       // cache cookies in Drupal session in case varnish or other caching is filtering
       // cookies
       intel_session_cookie_merge();

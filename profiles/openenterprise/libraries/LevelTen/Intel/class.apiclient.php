@@ -24,26 +24,12 @@ class ApiClient {
     protected $isTest = FALSE;
     protected $host;
     protected $path;
-    protected $userAgent = 'LevelTen\Intel\ApiClient';  
+    protected $userAgent = 'LevelTen\Intel\ApiClient';
+    protected $urlrewrite = 0;
 
-    /**
-     * The HTTP code for a successful request
-     */
     const STATUS_OK = 200;
-
-    /**
-     * The HTTP code for bad request
-     */
     const STATUS_BAD_REQUEST = 400;
-
-    /**
-     * The HTTP code for unauthorized
-     */
     const STATUS_UNAUTHORIZED = 401;
-
-    /**
-     * The HTTP code for resource not found
-     */
     const STATUS_NOT_FOUND = 404;
 
     /**
@@ -152,9 +138,17 @@ class ApiClient {
     **/
     public function getJSONUrl($endpoint, $params) {
       $url = $this->apiUrl;
-      $url .= 'index.php?q=' . $endpoint;
+      $demark = '';
+      if ($this->urlrewrite) {
+        $url .= $endpoint;
+        $demark = '?';
+      }
+      else {
+        $url .= 'index.php?q=' . $endpoint;
+        $demark = '&';
+      }
       if (!empty($params)) {
-        $url .= '&' . $this->encodeQueryParams($params);
+        $url .= $demark . $this->encodeQueryParams($params);
       }
       return $url;
     }

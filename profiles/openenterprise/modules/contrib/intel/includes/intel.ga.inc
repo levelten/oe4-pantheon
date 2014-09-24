@@ -589,6 +589,7 @@ function intel_page_attribute_taxomony_term_option_info($option_id, $data_option
   $term = taxonomy_term_load($option_id);
   if (!empty($term)) {
     $data['title'] = $term->name;
+    //$data['uri'] = $term->uri();
   }
 
   if (!empty($data_options['page_count'])) {

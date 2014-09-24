@@ -29,12 +29,17 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
     $module_path = drupal_get_path('module', 'enterprise_editor');
     $library_path = libraries_get_path('enterprise_editor');
     $query = variable_get('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
+
+    $icons = enterprise_editor_get_icons();
+
+
     $js_settings = array(
       'enterprise_editor' => array(
         'path' => $base_path . $library_path,
         'query' => $query,
         'module_path' => $base_path . $module_path,
         'plugins' => $plugins,
+        'icons' => $icons,
       ),
     );
     drupal_add_js($js_settings, 'setting');
@@ -58,6 +63,23 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   if (!empty($settings['stylesCombo_stylesSet'])) {
     unset($settings['stylesCombo_stylesSet']);
   }
+}
+
+function enterprise_editor_get_icons() {
+  $icons = array();
+
+  $bundle_info = icon_bundles();
+  if (!empty($bundle_info) && is_array($bundle_info)) {
+    foreach ($bundle_info AS $name => $v) {
+      $ib =  icon_bundle_load($name);
+      if (!empty($ib['icons']) && is_array($ib['icons'])) {
+        foreach ($ib['icons'] AS $key => $value) {
+          $icons[] = array($key, $value);
+        }
+      }
+    }
+  }
+  return $icons;
 }
 
 // Organize media uploads under files/media directory
@@ -97,6 +119,7 @@ function enterprise_editor_available_plugins() {
     'featurette' => 0,
     'jumbotron' => 0,
     'trifold' => 0,
+    'icon' => 0,
     'templates' => 0,
   );
   foreach ($plugins AS $name => $value) {
@@ -151,6 +174,14 @@ function enterprise_editor_ckeditor_plugin() {
     'path' => $plugin_path . '/plugins/jumbotron/',
     'buttons' => array(
       'Jumbotron' => array('label' => 'Jumbotron', 'icon' => 'icons/jumbotron.png'),
+    )
+  );
+  $plugins['icon'] = array(
+    'name' => 'icon',
+    'desc' => t('Plugin for icons'),
+    'path' => $plugin_path . '/plugins/icon/',
+    'buttons' => array(
+      'icon' => array('label' => 'Icon', 'icon' => 'icons/icon.png'),
     )
   );
 

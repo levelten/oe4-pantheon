@@ -127,6 +127,7 @@ files[] = openenterprise.profile
 ;; Testing
 dependencies[] = config
 dependencies[] = enterprise_config
+; dependencies[] = devel
 
 
 ; Information added by drush on 2013-12-30

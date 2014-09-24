@@ -40,10 +40,14 @@ CKEDITOR.editorConfig = function(config) {
   config.bodyClass = '';
   config.bodyId = '';
   config.templates_replaceContent = false;
+  config.extraAllowedContent = 'i {*}(*)';
   if (Drupal.settings.enterprise_editor) {
     config.stylesSet = 'default:' + Drupal.settings.enterprise_editor.module_path + '/ckeditor/styles.js?' + Drupal.settings.enterprise_editor.query ;
     if (Drupal.settings.enterprise_editor.plugins && Drupal.settings.enterprise_editor.plugins.templates) {
         config.templates_files = [ Drupal.settings.enterprise_editor.path + '/templates/templates.js?' + Drupal.settings.enterprise_editor.query ];
+    }
+    if (Drupal.settings.enterprise_editor.icons) {
+      config.icons = Drupal.settings.enterprise_editor.icons;
     }
 
   }

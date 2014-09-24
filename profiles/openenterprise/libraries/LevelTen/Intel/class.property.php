@@ -27,11 +27,14 @@ class ApiProperty {
 	
   public function load($params = array(), $data = array()){
   	$endpoint = 'property/load';
-    if (empty($params['pid'])) {
+    if (!isset($params['pid'])) {
       $params['pid'] = $this->pid;
     }
   	try {
   	  $ret = $this->apiClient->getJSON($endpoint, $params, $data);
+      if (empty($ret['property'])) {
+        return FALSE;
+      }
   	  $this->apiProperty = (object)$ret['property'];
   		return $this->apiProperty;
   	} 
@@ -42,7 +45,7 @@ class ApiProperty {
   
   public function save($params = array(), $data = array()){
     $endpoint = 'property/save';
-    if (empty($params['pid'])) {
+    if (!isset($params['pid'])) {
       $params['pid'] = $this->pid;
     }
     try {

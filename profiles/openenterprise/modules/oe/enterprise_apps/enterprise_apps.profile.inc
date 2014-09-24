@@ -4,8 +4,6 @@
  * Code for the Enterprise CRM feature.
  */
 
-define('ENTERPRISE_APPS_L10IAPI_HREF', 'http://api.getlevelten.com');
-
 /**
  * Add install tasks to profile install tasks.
  *
@@ -35,34 +33,6 @@ function enterprise_apps_profile_install_tasks($install_state) {
       'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
       'function' => 'enterprise_apps_install_cleanup',
     );
-    /*
-      'apps_profile_download_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_download_app_modules',
-      ),
-      // Only need this if using filetransfer authorization.
-      'apps_profile_authorize_transfer_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'form',
-        'run' => (!is_writeable(conf_path()) && isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_authorize_transfer',
-      ),
-      'apps_profile_install_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_install_app_modules',
-      ),
-      'apps_profile_enable_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_enable_app_modules',
-      ),
-    );
-    */
   }
   return $tasks;
 }
@@ -165,10 +135,10 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
       'target' => 'intelapi',
     )
   );
-  $msg = st('The Intelligence API provides enhanced analytics, visitor data and site functionality.');
-  $msg .= ' ' . st('You can get a Free, Basic or Pro key at !link.',
+  $msg = st('Enter your Open Enterprise API connection info to access to extended apps, enhanced analytics, updates &amp; support.');
+  $msg .= ' ' . st('To get an API key visit !link.',
       array(
-        '!link' => l(t('Intelligence API'), ENTERPRISE_APPS_L10IAPI_HREF, $link_options),
+        '!link' => l(t('getCM2.com'), 'http://' . OE_HOME_URL, $link_options),
       )
     );
 
@@ -180,15 +150,15 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#collapsed' => FALSE,
   );
 
-  $form['intel']['intel_tid'] = array(
+  $form['intel']['oe_pkey'] = array(
     '#type' => 'textfield',
-    '#title' => st('Tid'),
+    '#title' => st('Property ID'),
     '#default_value' => '',
-    '#description' => st('Input the Intel property tracking id.'),
+    '#description' => st('Input your property id.'),
     '#size' => 32,
   );
 
-  $form['intel']['intel_apikey'] = array(
+  $form['intel']['oe_apikey'] = array(
     '#type' => 'textfield',
     '#title' => st('API key'),
     '#default_value' => '',
@@ -204,45 +174,59 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
 }
 
 function enterprise_apps_config_features_options_form_validate($form, &$form_state) {
-
   include_once drupal_get_path('module', 'intel') . '/intel.module';
+
+  // if not api connect info given, return.
+  if (empty($form_state['values']['oe_pkey']) || empty($form_state['values']['oe_apikey'])) {
+    return;
+  }
+
   $options = array(
-    'tid' => $form_state['values']['intel_tid'],
-    'apikey' => $form_state['values']['intel_apikey'],
-    'params' => array(
-      'ext_data' => 1,
-    ),
+    'pkey' => $form_state['values']['oe_pkey'],
+    'apikey' => $form_state['values']['oe_apikey'],
+    //'apiUrl' => 'getcm2.localhost:8082/api/v1',
   );
   $message = '';
-  $property = array();
-  $api_level = intel_verify_apikey($message, $property, $options);
-  if (!empty($property['status']) && !empty($property['level'])) {
-    $form_state['api_profile_settings'] = $property;
-    variable_set('intel_ga_account', $form_state['values']['intel_tid']);
-    variable_set('intel_apikey', $form_state['values']['intel_apikey']);
-    variable_set('intel_api_level', $property['level']);
-    if (!empty($property['profile_settings'])) {
-      $profile_settings = '';
-      // check format
-      $property['profile_settings'] = trim($property['profile_settings']);
-      if (substr($property['profile_settings'], 0, 5) == 'array') {
-        eval('$profile_settings = ' . $property['profile_settings'] . ';');
-      }
-      else if (substr($property['profile_settings'], 0, 2) == 'a:') {
-        $profile_settings = unserialize($property['profile_settings']);
-      }
-      if ($profile_settings) {
-        $form_state['api_profile_settings'] = $profile_settings;
-      }
+  $status = 200;
 
+
+  try {
+    $property = openenterprise_api_property_load($options, $message, $status);
+  }
+  catch (Exception $e) {
+    // continue
+  }
+
+  if (empty($property) || empty($property->status)) {
+    if ($status == 404) {
+      form_set_error('oe_pkey', t('Property not found. Please select a different property id.'));
+    }
+    if ($status == 403) {
+      form_set_error('oe_apikey', t('API key does not match key found in API.'));
+    }
+    return;
+  }
+
+
+  if (!empty($property->profile_settings)) {
+    $profile_settings = '';
+    // check format
+    $property->profile_settings = trim($property->profile_settings);
+    if (substr($property->profile_settings, 0, 5) == 'array') {
+      eval('$profile_settings = ' . $property->profile_settings . ';');
+    }
+    else if (substr($property->profile_settings, 0, 2) == 'a:') {
+      $profile_settings = unserialize($property->profile_settings);
+    }
+    if ($profile_settings) {
+      $form_state['api_profile_settings'] = $profile_settings;
     }
   }
 
-  /*
-  if (!valid_email_address($form_state['values']['client_mail'])) {
-    form_set_error('client_mail', st('Please enter a valid email address'));
-  }
-  */
+  $property->apikey = $property->intel_apikey = $form_state['values']['oe_apikey'];
+  $property->pkey = $form_state['values']['oe_pkey'];
+  openenterprise_property_save($property);
+
 }
 
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
@@ -267,7 +251,6 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
     if (!empty($values['demo_content'])) {
       $profile_settings['demo']['demo_content'] = 1;
     }
-
     variable_set('enterprise_apps_profile_settings', $profile_settings);
   }
 }
@@ -360,8 +343,6 @@ function enterprise_apps_install_cleanup(&$install_state) {
 }
 
 function enterprise_apps_profile_data_export() {
-
-
   // variable table/strongarm data
   $data = array();
 

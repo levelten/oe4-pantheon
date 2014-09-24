@@ -777,7 +777,6 @@ function intel_reports() {
     'key' => 'page_attribute:ct.top.entrance',
     'title' => t('Content types'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
   $reports['content']['pa-ct-p'] = array(
@@ -790,28 +789,24 @@ function intel_reports() {
     'key' => 'page_attribute:i.top.entrance',
     'title' => t('Page intent'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
   $reports['content']['pa-t'] = array(
     'key' => 'page_attribute:t.top.entrance',
     'title' => t('Terms'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
   $reports['content']['pa-j'] = array(
     'key' => 'page_attribute:j.top.entrance',
     'title' => t('Subjects'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
   $reports['content']['pa-a'] = array(
     'key' => 'page_attribute:a.top.entrance',
     'title' => t('Authors'),
     'page callback' => 'intel_page_attribute_list_report_page',
-    'access callback' => '_intel_user_access_extended',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
   $reports['trafficsource'] = array();
@@ -1005,7 +1000,7 @@ function intel_util() {
   }
 
   $new_og_mem = og_group('dwyr_franchise', $visitor->og_gid, $values);
-dsm($new_og_mem);
+  dsm($new_og_mem);
 
   return '';
 
@@ -1053,7 +1048,7 @@ dsm($new_og_mem);
   $visitor = intel_visitor_load(5);
   $gid = 307;
 
-dsm($visitor);
+  dsm($visitor);
 
   $wrapper = entity_metadata_wrapper('intel_visitor', $visitor);
 
@@ -1163,12 +1158,12 @@ dsm($visitor);
 
 
   $vars = array(
-   'title' => t('Test header'),
-   'body' => t('Here is some text...'),
-   'link' => array(
-     'text' => t('click here'),
-     'path' => 'contact',
-   ),
+    'title' => t('Test header'),
+    'body' => t('Here is some text...'),
+    'link' => array(
+      'text' => t('click here'),
+      'path' => 'contact',
+    ),
   );
   $out = theme('bootstrap_jumbotron', $vars);
   return $out;
@@ -2521,8 +2516,12 @@ function intel_sync_visitor_request_worker($item) {
   if (!isset($requeues)) {
     $requeues = variable_get('intel_sync_visitor_requests', array());
   }
+  // if vtk does not exist, do not process the visitor
+  if (empty($item->vtk)) {
+    return;
+  }
   // if run_after has not occured, requeue the item
-  if ($item->run_after > time()) {
+  if ($item->run_after > REQUEST_TIME) {
     $requeues[$item->vtk] = $item;
     variable_set('intel_sync_visitor_requests', $requeues);
     return;
@@ -2544,7 +2543,7 @@ function intel_sync_visitor_request_worker($item) {
       return;
     }
     $item->attempts++;
-    $item->run_after = time() + ((!empty($_GET['debug'])) ? 30 : 300);  // delay for at least 5 minutes
+    $item->run_after = REQUEST_TIME + ((!empty($_GET['debug'])) ? 30 : 300);  // delay for at least 5 minutes
     $requeues[$item->vtk] = $item;
     variable_set('intel_sync_visitor_requests', $requeues);
   }
@@ -2648,8 +2647,8 @@ function intel_debug_mode() {
 }
 
 /**
-* Implements hook_theme().
-*/
+ * Implements hook_theme().
+ */
 function intel_theme() {
   $themes = array();
   $themes['intel_visitor_profile'] = array(
