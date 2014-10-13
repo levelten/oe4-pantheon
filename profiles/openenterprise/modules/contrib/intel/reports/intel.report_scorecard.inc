@@ -6,114 +6,80 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_scorecard_report_page($context = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
+/**
+ * @param string $context
+ * @param string $filter_type -
+ *  page-attr: page attribute
+ * @param string $filter_element - key for attribute, e.g. 'a' = author
+ * @param string $filter_value - value for attribute, e.g. 5 = nid 5
+ *
+ * @return string
+ */
+function intel_scorecard_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
-  $filters = array();
-  if ($filter_type) {
-    if ($filter_type == 'node') {
-      $filter_type = 'page';
-      $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
-    }
-    elseif ($filter_type == 'visitor') {
-      $filter_element = 'vtk:' . substr($filter_element->vtk, 0, 20);
-    }
-    elseif ($filter_value) {
-      $filter_element .= ':' . $filter_value;
-    }
-    $filters[$filter_type] = urldecode($filter_element);
-    $context = $filter_type;
-  }
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
-  
-  if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
-    intel_add_report_headers();
 
-    drupal_set_title(t('Scorecard'), PASS_THROUGH); 
-    $filters += $_GET;
-    $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
-    $output .= drupal_render($filter_form);  
-  }
-  
-  if (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
-  }
-  elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_scorecard_report($filters, $context);
-  }
-  elseif ($_GET['return_type'] == 'json') {
-    $data = array(
-      'report' => intel_scorecard_report($filters, $context),
-    );
-    drupal_json_output($data);
-    return;    
-  }  
-   
+  $vars = intel_init_reports_vars('scorecard', 'scorecard', $report_params, $report_subtype, $entity_type, $entity);
+  $vars['title'] = $title = t('Scorecard');
+
+  $output = intel_build_report($vars);
+
   return $output;
 }
 
-function intel_scorecard_report($filters = array(), $context = '-', $sub_index = '-', $mode = '') {
+//function intel_scorecard_report($filters = array(), $context = '-', $sub_index = '-', $mode = '') {
+function intel_scorecard_report($vars) {
+
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
-  $filter_info = array();
-  if (!empty($filters)) {
-    if (isset($filters['page-attr'])) {
-      $a = explode(':', $filters['page-attr']);
-      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
-    }
-  }
-  
-  if ($context == '-') {
-    $context = 'site';
-  }
-/*
-  else {
-    $reports = intel_reports();
-    $report_mode = $reports[$context][$sub_index]['key'];
-    $report_modes = explode('.', $report_mode);
-  }
-*/
+  $filters = $vars['filters'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
 
   $cache_options = array();
   $row_count = 100;
   
   $output = '';    
   
-  $timeops = 'l30d';
+  $timeops = $vars['timeframe'];
   //$timeops = 'yesterday';
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
 
   $ga_data = new LevelTen\Intel\GAModel();
-  $filter_info = array();
-  if (!empty($filters)) {
-    if (isset($filters['page-attr'])) {
-      $a = explode(':', $filters['page-attr']);
-      $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
-      $ga_data->setPageAttributeInfo($filter_info['page-attr']);
-    }
-  }
-  $ga_data->buildFilters($filters, $context);
+//$ga_data->setDebug(1);
+  $ga_data->setContext($vars['context']);
+  $ga_data->setContextMode($vars['context_mode']);
+  $ga_data->setAttributeInfoAll($vars['attribute_info']);
+  $ga_data->buildFilters($filters, $vars['subsite']);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 
   $ga_data->setRequestSetting('indexBy', 'date');
   $ga_data->setRequestSetting('details', 0);
-  $ga_data->setRequestDefaultParam('max_results', 30); 
+  // note: add +1 to number of days incase timeframe is not an exact day, e.g. l30dfn
+  $ga_data->setRequestDefaultParam('max_results', ($number_of_days+1));
   
   $ga_data->loadFeedData('pageviews');
 
-  $ga_data->loadFeedData('entrances'); 
-  
-  $ga_data->setRequestSetting('details', 1);
-  $ga_data->setRequestDefaultParam('max_results', 10 * 30); 
-  if ($context == 'page') { 
-    $ga_data->loadFeedData('pageviews_valuedevents');  
+  $ga_data->loadFeedData('entrances');
+
+  if ($context == 'page' || $context == 'page-attr' || $context_mode == 'subsite') {
+    $ga_data->loadFeedData('sessions');
   }
- 
-  $ga_data->loadFeedData('entrances_valuedevents'); 
-  
+
+  $ga_data->setRequestSetting('details', 1);
+  $ga_data->setRequestDefaultParam('max_results', 10 *  ($number_of_days+1));
+
+  $ga_data->loadFeedData('pageviews_valuedevents');
+
+  if ($context == 'page' || $context == 'page-attr') {
+    $ga_data->loadFeedData('entrances_valuedevents');
+  }
+
   //$ga_data->setRequestSetting('details', 1);
-  $ga_data->setRequestDefaultParam('max_results', 5 * 31);
+  $ga_data->setRequestDefaultParam('max_results', 5 *  ($number_of_days+1));
   $goals = array();
   $submission_goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
   $i = 0;
@@ -127,15 +93,30 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
     $goals["n$id"] = $submission_goals[$key]['title'];
     $i++;
     if ($i >= 5) {
-      $ga_data->loadFeedData('entrances_goals', 'date', $details); 
+      if ($context == 'page' || $context == 'page-attr') {
+        $ga_data->loadFeedData('entrances_goals', 'date', $details);
+      }
+      else {
+        $ga_data->loadFeedData('pageviews_goals', 'date', $details);
+      }
+
       $i = 0;
     } 
   }
   if ($i > 0) {
-    $ga_data->loadFeedData('entrances_goals', 'date', $details);
+    if ($context == 'page' || $context == 'page-attr') {
+      $ga_data->loadFeedData('entrances_goals', 'date', $details);
+    }
+    else {
+      $ga_data->loadFeedData('pageviews_goals', 'date', $details);
+    }
   }
 
- 
+  if ($context == 'page-attr' || $context_mode == 'subsite') {
+    $ga_data->loadFeedData('sessions_goals', 'date', 0);
+  }
+
+  //$ga_data->setDebug(1);
   if ($context != 'page') {
     $ga_data->setRequestDefaultParam('max_results', 200); 
     $request = $ga_data->loadFeedData('pageviews', 'content'); 
@@ -164,23 +145,21 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
   
   foreach ($d['date'] AS $index => $de) {
     $score_components = array();
-    if ($context == 'page') {
-      $d['date'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);      
-    } 
-    else {
-      $d['date'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
-    } 
+    $method = 'site';
+    if ($context == 'page' || $context == 'page-attr') {
+      $method = 'page';
+    }
+    $d['date'][$index]['score'] = intel_score_item($de, 1, $score_components, '', $method);
     $d['date'][$index]['score_components'] = $score_components;  
   }
   if (isset($d['content'])) {
     foreach ($d['content'] AS $index => $de) {
       $score_components = array();
-      if ($context == 'page') {
-        $d['content'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);      
-      } 
-      else {
-        $d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
-      } 
+
+      //$d['content'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components, '', array('method' => 'direct'));
+      //$d['content'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);
+      $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'page');
+
       $d['content'][$index]['score_components'] = $score_components;  
     }    
   }
@@ -189,7 +168,8 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
     foreach ($sub_indexes AS $sub_index) {
       foreach ($d['trafficsources'][$sub_index] AS $index => $de) {
         $score_components = array();
-        $d['trafficsources'][$sub_index][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
+        //$d['trafficsources'][$sub_index][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
+        $d['trafficsources'][$sub_index][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'entrance');
         $d['trafficsources'][$sub_index][$index]['score_components'] = $score_components;  
       } 
     }   
@@ -197,8 +177,8 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
   // order date data cronologically
   ksort($d['date']);
   
-//dsm($d); 
-  
+//dsm($d);
+
   $vars = array(
     'data' => $d,
     'row_count' => $row_count,
@@ -207,8 +187,10 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
     'end_date' => $end_date,
     'goals' => $goals,
     'analysis_days' => $analysis_days,
-    'context' => $context,    
-    'report_modes' => $report_modes,
+    'context' => $context,
+    'context_mode' => $context_mode,
+    'report_modes' => array(),
+    //'report_modes' => $report_modes,
   );
   $output .= theme_intel_content_scorecard($vars);
 
@@ -221,6 +203,30 @@ function intel_scorecard_report($filters = array(), $context = '-', $sub_index =
   return $output;  
 }
 
+function theme_intel_content_scorecard($vars) {
+  intel_include_library_file("reports/class.scorecard_report_view.php");
+
+  $output = '';
+  $report_view = new LevelTen\Intel\ScorecardReportView();
+  $report_view->setData($vars['data']);
+  $report_view->setTableRowCount($vars['row_count']);
+  $report_view->setModes($vars['report_modes']);
+  $report_view->setParam('context', $vars['context']);
+  $report_view->setParam('context_mode', $vars['context_mode']);
+  $report_view->setParam('analysis_days', $vars['analysis_days']);
+  $report_view->setPageMetaCallback('intel_get_page_meta_callback');
+  $report_view->setTargets(intel_get_targets());
+  $report_view->setGoals($vars['goals']);
+  $report_view->setDateRange($vars['start_date'], $vars['end_date']);
+  \LevelTen\Intel\ReportPageHeader::setAddScriptCallback('intel_report_add_js_callback');
+  $output .= $report_view->renderReport();
+
+  return $output;
+}
+
+/*
+
+
 function intel_scorecard_apply_filters_to_request($request, $filterstr, $segmentstr) {
   if ($filterstr) {
     $request['filters'] .= (($request['filters']) ? ';' : '') . $filterstr;
@@ -231,25 +237,7 @@ function intel_scorecard_apply_filters_to_request($request, $filterstr, $segment
   return $request;
 }
 
-function theme_intel_content_scorecard($vars) {
-  intel_include_library_file("reports/class.scorecard_report_view.php");
-  
-  $output = '';
-  $report_view = new LevelTen\Intel\ScorecardReportView();
-  $report_view->setData($vars['data']);
-  $report_view->setTableRowCount($vars['row_count']);
-  $report_view->setModes($vars['report_modes']);
-  $report_view->setParam('context', $vars['context']);
-  $report_view->setParam('analysis_days', $vars['analysis_days']);
-  $report_view->setPageMetaCallback('intel_get_page_meta_callback');
-  $report_view->setTargets(intel_get_targets());
-  $report_view->setGoals($vars['goals']);
-  $report_view->setDateRange($vars['start_date'], $vars['end_date']);
-  \LevelTen\Intel\ReportPageHeader::setAddScriptCallback('intel_report_add_js_callback');
-  $output .= $report_view->renderReport();
-  
-  return $output; 
-}
+
   
 function theme_intel_content_scorecard_main_chart($vars) {
   $data = $vars['data'];

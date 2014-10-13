@@ -6,77 +6,56 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_trafficsource_list_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_trafficsource_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
-  $filters = array();
-  $context = 'site';
-  $reports = intel_reports();
-  if ($filter_type) {
-    if ($filter_type == 'node') {
-      $filter_type = 'page';
-      $node = $filter_element;
-      //$title_for = t('node') . ' ' . $node->title;
-      $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
-    }
-    elseif ($filter_type == 'visitor') {
-      $filter_type = 'visitor';
-      $filter_element = 'vtk:' . substr($filter_element->vtk, 0, 20);
-    }
-    $filters[$filter_type] = urldecode($filter_element);
-    $context = $filter_type;
-  }
 
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
-  
-  if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
-    intel_add_report_headers();
+  $vars = intel_init_reports_vars('trafficsource_list', 'trafficsource', $report_params, $report_subtype, $entity_type, $entity);
 
-    drupal_set_title(t('@title report', array('@title' => $reports['trafficsource'][$sub_index]['title'])), PASS_THROUGH);
-    $filters += $_GET;
-    $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
-    $output .= drupal_render($filter_form);  
-  }
-  
-  if (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
-  }
-  elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_trafficsource_list_report($filters, $context, $sub_index);
-  }
-  elseif ($_GET['return_type'] == 'json') {
-    $data = array(
-      'report' => intel_trafficsource_list_report($filters, $context, $sub_index),
-    );
-    drupal_json_output($data);
-    return;    
-  }  
-   
-  return $output;  
+  $output = intel_build_report($vars);
+
+  return $output;
 }
 
-function intel_trafficsource_list_report($filters = array(), $context = 'site', $sub_index = '-') {
+//function intel_trafficsource_list_report($filters = array(), $context = 'site', $sub_index = '-') {
+function intel_trafficsource_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php');
-  
-  $reports = intel_reports();
-  $report_mode = $reports['trafficsource'][$sub_index]['key'];
+
+  $filters = $vars['filters'];
+  $sub_index = $vars['report_subtype'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
+
+  $report_mode = $vars['report_info']['key'];
   $report_modes = explode('.', $report_mode);
   $indexBy = $report_modes[0];
-  $indexByLabel = $reports['trafficsource'][$sub_index]['title'];
+  $indexByLabel = $vars['report_info']['title'];
 //dsm($indexBy);
 
   $cache_options = array();
   $row_count = 100;
   $feed_rows = 2 * $row_count;
   
-  $output = '';    
-  
+  $output = '';
+
+  /*
+  if (!empty($filters['page'])) {
+    $a = explode(":", $filters['page']);
+    $path = $a[1];
+  }
+  */
+
   $timeops = 'l30d';
   //$timeops = 'yesterday';
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
 
   $ga_data = new LevelTen\Intel\GAModel();
+  $ga_data->setContext($vars['context']);
+  $ga_data->setContextMode($vars['context_mode']);
   $ga_data->setReportModes($report_modes);
-  $ga_data->buildFilters($filters, $context);
+  $ga_data->setAttributeInfoAll($vars['attribute_info']);
+  $ga_data->buildFilters($filters, $vars['subsite']);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 //$ga_data->setDebug(1);
@@ -91,7 +70,7 @@ function intel_trafficsource_list_report($filters = array(), $context = 'site', 
   }
   $ga_data->loadFeedData('entrances'); 
   $ga_data->loadFeedData('entrances_valuedevents');  
-  
+
   $d = $ga_data->data;
 
   // append array if no data exists
@@ -108,13 +87,27 @@ function intel_trafficsource_list_report($filters = array(), $context = 'site', 
 
   foreach ($d[$indexBy] AS $index => $de) {
     $score_components = array();
-    $d[$indexBy][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
-    $d[$indexBy][$index]['score_components'] = $score_components;  
-    $d[$indexBy][$index]['links'] = array();
+    //$d[$indexBy][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
+    $d[$indexBy][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'entrance');
+    $d[$indexBy][$index]['score_components'] = $score_components;
+    if (empty($de['i'])) {
+      continue;
+    }
+
     if (isset($de['i'])) {
-      $d[$indexBy][$index]['links'][] = l(t('scorecard'), 'admin/reports/intel/scorecard/trafficsource/trafficsource/' . $indexBy . ':' . urlencode($de['i']));
-      $d[$indexBy][$index]['links'][] = l(t('content'), 'admin/reports/intel/content/-/trafficsource/' . $indexBy . ':' . urlencode($de['i']));
-      $d[$indexBy][$index]['links'][] = l(t('visitors'), 'admin/reports/intel/visitor/-/trafficsource/' . $indexBy . ':' . urlencode($de['i']));
+      $d[$indexBy][$index]['links'] = array();
+      $val = $de['i'];
+      // encode paths in filters
+      if ($indexBy == 'referralHostpath') {
+        $val = str_replace('/', '|', $val);
+      }
+      $params = $vars['report_params'];
+      $params['ft'] = 'trafficsource';
+      $params['f'] = $indexBy . ':' . urlencode($val);
+
+      $d[$indexBy][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
+      $d[$indexBy][$index]['links'][] = l(t('content'), intel_build_report_path('content', $params));
+      $d[$indexBy][$index]['links'][] = l(t('visitors'), intel_build_report_path('visitor', $params));
     }
   }    
 
@@ -132,6 +125,7 @@ function intel_trafficsource_list_report($filters = array(), $context = 'site', 
     'targets' => intel_get_targets(),
     'analysis_days' => $number_of_days,
     'context' => $context,
+    'context_mode' => $context_mode,
     'indexBy' => $indexBy,
     'indexByLabel' => $indexByLabel,
     'report_modes' => $report_modes,
@@ -156,6 +150,8 @@ function theme_intel_trafficsource_list_report($vars) {
   $report_view->setData($vars['data']);
   $report_view->setTableRowCount($vars['row_count']);
   $report_view->setModes($vars['report_modes']);
+  $report_view->setParam('context', $vars['context']);
+  $report_view->setParam('context_mode', $vars['context_mode']);
   $report_view->setParam('indexBy', $vars['indexBy']);
   $report_view->setParam('indexByLabel', $vars['indexByLabel']);
   $report_view->setDateRange($vars['start_date'], $vars['end_date']);

@@ -16,23 +16,31 @@ if (!empty($_GET['debug'])) {
 
 class GAModel {
   public  $data = array();
-  public  $filters;
+  public  $inputFilters = array();
   public  $gaFilters = array();
+  public  $inputSubsite = '';
+  public  $gaSubsite = '';
   public  $customFilters = array(
     'filter' => '',
     'segement' => '',
   );
-  public  $context;
+  public  $context = '';
+  public  $context_mode = '';
   private $start_date;
   private $end_date;
   public  $settings;
   public  $pathQueryFilters = array();
-  private $pageAttributeFilter = array();
-  private $pageAttributeInfo = array();
+  //private $pageAttributeFilter = array();
+  private $attributeInfo = array(
+    'page' => array(),
+    'visitor' => array(),
+  );
   private $requestCallback = '';
   private $requestCallbackOptions = array();
   private $dataIndexCallbacks = array();
   private $debug = 0;
+  // flag to enable
+  private $advancedSort = 0;
   private $reportModes = array();
   private $requestDefault = array(
     'dimensions' => array(),
@@ -53,6 +61,8 @@ class GAModel {
     'sortType' => '',
     'excludeGoalFields' => 0,
   );
+  // stores array of entities, e.g. page attributes, indexed by pagepaths
+  public $pagePathMap = array();
 
   function __contruct() {
 
@@ -89,6 +99,18 @@ class GAModel {
     $this->reportModes = $modes;
   }
 
+  function setContext($value) {
+    $this->context = $value;
+  }
+
+  function setContextMode($value) {
+    $this->context_mode = $value;
+  }
+
+  function setAdvancedSort($value) {
+    $this->advancedSort = $value;
+  }
+
   function setDebug($debug) {
     $this->debug = $debug;
     if ($this->debug && !function_exists('Debug::printVar')) {
@@ -96,8 +118,10 @@ class GAModel {
     }
   }
 
-  function buildFilters($filters, $context = 'site') {
-    $gasegments = array();
+  function buildFilters($filters, $subsite = '') {
+    $this->inputFilters = $filters;
+    $this->inputSubsite = $subsite;
+    //$gasegments = array();
     $gafilters = array();
     $gapaths = array(
       'pagePath' => '',
@@ -105,71 +129,157 @@ class GAModel {
     );
 
     if (!empty($filters['page'])) {
-      $a = explode(":", $filters['page']);
-      $path = $a[1];
-      // TODO remove this dependency
-      $pathfilter = $this->formatPathFilter($path);
-      $landingpagefilter = str_replace('pagePath', 'landingPagePath', $pathfilter);
-
-      if ($context == 'page') {
-        $gapaths['pagePath'] = $pathfilter;
-        $gapaths['landingPagePath'] = str_replace('pagePath', 'landingPagePath', $landingpagefilter);
+      $gafilters['page'] = array();
+      if (!is_array($filters['page'])) {
+        $filters['page'] = array($filters['page']);
       }
-      else {
-        if ($a[0] == 'landingPagePath') {
-          $gafilters['page'] = $landingpagefilter;
+      foreach ($filters['page'] AS $i => $filter) {
+        $a = explode(":", $filter);
+        $path = $a[1];
+
+        $pathfilter = $this->formatPathFilter($path);
+        //$landingpagefilter = str_replace('pagePath', 'landingPagePath', $pathfilter);
+
+        $gafilters['page'][] = $pathfilter;
+
+        /*
+
+        if ($context == 'page') {
+          $gapaths['pagePath'] = $pathfilter;
+          $gapaths['landingPagePath'] = str_replace('pagePath', 'landingPagePath', $landingpagefilter);
         }
         else {
-          $gafilters['page'] = $pathfilter;
+          if ($a[0] == 'landingPagePath') {
+            $gafilters['page'][] = $landingpagefilter;
+          }
+          else {
+            $gafilters['page'][] = $pathfilter;
+          }
         }
+        */
       }
     }
 
-    // TODO: this doesn't work yet, problem with events not filtering correctly
     if (!empty($filters['page-attr'])) {
-      $a = explode(':', $filters['page-attr']);
-      // TODO add other attribute types
-      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
-        $gafilters['page-attr'] = 'ga:customVarValue1=@&' . $a[0] . '=' . $a[1];
+      $gafilters['page-attr'] = array();
+      if (!is_array($filters['page-attr'])) {
+        $filters['page-attr'] = array($filters['page-attr']);
       }
-      else if ($this->pageAttributeInfo['type'] == 'list') {
-        $gafilters['page-attr'] = 'ga:customVarValue1=@&' . $a[0] . '.' . $a[1];
+
+      foreach ($filters['page-attr'] AS $i => $filter) {
+        $a = explode(':', $filter);
+        $attr_key = $a[0];
+        $attr_value = isset($a[1]) ? $a[1] : '';
+        // TODO add other attribute types
+        $f = '';
+        if (isset($this->attributeInfo['page'][$attr_key])) {
+
+          if ($this->attributeInfo['page'][$attr_key]['type'] == 'flag') {
+            $f = 'ga:customVarValue1=@&' . $attr_key . '&';
+          }
+          elseif (($this->attributeInfo['page'][$attr_key]['type'] == 'scalar') || ($this->attributeInfo['page'][$attr_key]['type'] == 'item')) {
+            $f = 'ga:customVarValue1=@&' . $attr_key . '=' . $attr_value . '&';
+          }
+          else if ($this->attributeInfo['page'][$attr_key]['type'] == 'list') {
+            $f = 'ga:customVarValue1=@&' . $attr_key . '.' . $attr_value . '&';
+          }
+        }
+        if ($f) {
+          $gafilters['page-attr'][] = $f;
+          if ($filter == $subsite) {
+            $this->gaSubsite = $f;
+          }
+        }
+
       }
-      //$gafilters['page-attr'] .= ';ga:pagePath=@/';  // this entry forces the goal value up to previous pages
     }
 
     if (!empty($filters['event'])) {
-      $gasegments['event'] = "ga:eventCategory=~^" . $filters['event'];
+      $gafilter['event'] = array();
+      foreach ($filters['event'] AS $i => $filter) {
+        $gafilter['event'][] = "ga:eventCategory=~^" . $filter;
+      }
     }
 
     if (!empty($filters['trafficsource'])) {
-      $a = explode(":", $filters['trafficsource']);
-      $gafilters['trafficsource'] = "ga:{$a[0]}=={$a[1]}";
+      $gafilter['trafficsource'] = array();
+      foreach ($filters['trafficsource'] AS $i => $filter) {
+        $a = explode(":", $filter);
+        if ($a[0] == 'trafficcategory') {
+          if ($a[1] == 'organic search') {
+            $gafilters['trafficsource'][] = "ga:medium==organic";
+          }
+          elseif ($a[1] == 'cpc' || $a[1] == 'ppc') {
+            $gafilters['trafficsource'][] = "ga:medium=~(cpc|ppc)";
+          }
+          elseif ($a[1] == 'social network') {
+            //$gafilters['trafficsource'][] = "ga:hasSocialSourceReferral==Yes"; // this is incompataible with entrance request
+            $gafilters['trafficsource'][] = "ga:socialNetwork!=(not set)";
+          }
+          elseif ($a[1] == 'direct') {
+            $gafilters['trafficsource'][] = "ga:medium==(none)";
+          }
+          elseif ($a[1] == 'email') {
+            $gafilters['trafficsource'][] = "ga:medium==email";
+          }
+          elseif ($a[1] == 'referral') {
+            $gafilters['trafficsource'][] = "ga:medium==referral";
+          }
+          elseif ($a[1] == 'feed') {
+            $gafilters['trafficsource'][] = "ga:medium==feed";
+          }
+          elseif ($a[1] == 'other') {
+            $gafilters['trafficsource'][] = "ga:medium!~(feed|email|referral|organic|(none));ga:socialNetwork==(not set)";
+          }
+          else {
+            $gafilters['trafficsource'][] = "ga:medium=={$a[1]}";
+          }
+        }
+        elseif ($a[0] == 'searchKeyword') {
+          $gafilters['trafficsource'][] = "ga:medium==organic;ga:keyword=={$a[1]}";
+        }
+        elseif ($a[0] == 'searchEngine') {
+          //$gafilters['trafficsource'][] = "ga:source=={$a[1]};ga:medium==organic";
+          $gafilters['trafficsource'][] = "ga:sourceMedium=={$a[1]} / organic";
+        }
+        elseif ($a[0] == 'referralHostpath') {
+          $b = explode('/', $a[1], 2);
+          $gafilters['trafficsource'][] = "ga:source=={$b[0]};ga:referralPath==/{$b[1]}";
+        }
+        else {
+          $gafilters['trafficsource'][] = "ga:{$a[0]}=={$a[1]}";
+        }
+      }
     }
 
     if (!empty($filters['location'])) {
-      $a = explode(":", $filters['location']);
-      $gafilters['location'] = "ga:{$a[0]}=={$a[1]}";
-      if (($a[0] == 'country') || ($a[0] == 'region') || ($a[0] == 'city') || ($a[0] == 'metro')) {
-        $this->settings['location_dimension_level'] = 'region';
+      $gafilter['location'] = array();
+      foreach ($filters['location'] AS $i => $filter) {
+        $a = explode(":", $filter);
+        $gafilters['location'][] = "ga:{$a[0]}=={$a[1]}";
+        if (($a[0] == 'country') || ($a[0] == 'region') || ($a[0] == 'city') || ($a[0] == 'metro')) {
+          $this->settings['location_dimension_level'] = 'region';
+        }
       }
     }
 
     if (!empty($filters['visitor'])) {
-      $a = explode(":", $filters['visitor']);
-      $vtk = $a[1];
-      //$gasegments['visitor'] = "ga:customVarValue5==" . $vtk;
-      $gafilters['visitor'] = "ga:customVarValue5==" . $vtk;
+      $gafilter['visitor'] = array();
+      foreach ($filters['visitor'] AS $i => $filter) {
+        $a = explode(":", $filter);
+        $gafilters['visitor'][] = "ga:customVarValue5==" . $a[1];
+      }
     }
 
+    // TODO
     if (!empty($filters['visitor-attr'])) {
-      $a = str_replace(':', '=', $filters['visitor-attr']);
-      $query = l10insight_build_ga_filter_from_serialized_customvar($a);
+      //$a = str_replace(':', '=', $filters['visitor-attr']);
+      //$query = l10insight_build_ga_filter_from_serialized_customvar($a);
       //$ga_segments['visitor-attr'] = "dynamic::ga:customVarValue3=" . $query;
     }
     $this->gaFilters = array(
       'filters' => $gafilters,
-      'segments' => $gasegments,
+      //'segments' => $gasegments,
       //'filter' => implode(";", $gafilters),
       //'segment' => implode(";", $gasegments),
       'paths' => $gapaths,
@@ -191,12 +301,18 @@ class GAModel {
     }
   }
 
+  /*
   function setPageAttributeFilter($filter) {
     $this->pageAttributeFilter = $filter;
   }
+  */
+  function addAttributeInfo($info, $type = 'page') {
+    $this->attributeInfo[$type][$info['key']] = $info;
+  }
 
-  function setPageAttributeInfo($info) {
-    $this->pageAttributeInfo = $info;
+
+  function setAttributeInfoAll($infos) {
+    $this->attributeInfo = $infos;
   }
 
 
@@ -216,10 +332,28 @@ class GAModel {
 
   //function loadFeedData($type, $indexBy = '', $details = 0, $max_results = 100, $results_index = 0) {
   function loadFeedData($type = '', $indexBy = '', $details = 0) {
+    $settings = $this->requestSettings;
+    $indexBy = ($indexBy) ?  $indexBy : $settings['indexBy'];
+
     // format the ga request array
     $request = $this->getRequestArray($type, $indexBy, $details);
     if ($this->debug) { Debug::printVar($request); }
 
+    // advanced sort used on requests with 2 sorts to split the requests into
+    // two
+    $sorts = array();
+    $threshold = 0;
+    $advancedSort = $this->advancedSort;
+    if ($advancedSort) {
+      $sorts = explode(',', $request['sort']);
+      if (count($sorts) == 2) {
+        // if two sorts, implement advancedSort using half the max results on each request
+        $request['max_results'] = floor($request['max_results']/2);
+      }
+      else {
+        $advancedSort = 0;
+      }
+    }
     // call dyanmic function to fetch data from ga
     if ($this->requestCallback) {
       $func = $this->requestCallback;
@@ -227,17 +361,100 @@ class GAModel {
     }
     if ($this->debug) { Debug::printVar($feed); }
 
+    /*
+    if ($type == 'entrances' && $this->context_mode == 'subsite' && $indexBy == 'trafficsources') {
+      $request = $this->getRequestArray('entrances', 'trafficsources_intersite', $details);
+      if ($this->debug) { Debug::printVar($request); }
+      if ($this->requestCallback) {
+        $func = $this->requestCallback;
+        $feed2 = $func($request, $this->requestCallbackOptions);
+      }
+      if ($this->debug) { Debug::printVar($feed2); }
+    }
+    */
+
+    // if max_results not returned, disable advancedSort
+    if (is_array($feed->results) && (count($feed->results) < $request['max_results'])) {
+      $advancedSort = 0;
+    }
+
+    // if advanced search, determine the threshold for next request by looking
+    // at the bottom values for the primary sort field
+    if ($advancedSort && is_array($feed->results)) {
+      // remove - sign if it exists on sort field
+      $field = str_replace('-', '', $sorts[0]);
+      $field = str_replace('ga:', '', $field);
+      $last_i = count($feed->results)-1;
+      $threshold = $feed->results[$last_i][$field];
+
+      for ($i = $last_i - 1; $i; $i--) {
+        if ($feed->results[$i][$field] != $threshold) {
+          $last_i = $i;
+          break;
+        }
+      }
+      // unset records at the threshold
+      for ($i = count($feed->results)-1; $i > $last_i; $i--) {
+        // decrement totals for removed records
+        foreach ($feed->totals AS $key => $value) {
+          $feed->totals[$key] -= $feed->results[$i][$key];
+        }
+        unset($feed->results[$i]);
+      }
+      if ($this->debug) { Debug::printVar("field=$field, thresh=$threshold, last_i=$last_i"); }
+      if ($this->debug) { Debug::printVar($feed); }
+    }
+
     // parse data into $this->data
     $this->addFeedData($feed, $type, $indexBy, $details);
     if ($this->debug) { Debug::printVar($this->data); }
+
+    // if advanced search, run second request fliping the sort and using the
+    // threshold to
+    if ($advancedSort && is_array($feed->results)) {
+      $request['sort'] = $sorts[1] . ',' . $sorts[0];
+      $request['filters'] .= ($request['filters'] ? ';' : '') . 'ga:' . $field . '<=' . $threshold;
+      // expand result to cover unset records from prior query
+      $request['max_results'] += ($request['max_results'] - $last_i);
+      if ($this->debug) { Debug::printVar($request); }
+
+      // call dyanmic function to fetch data from ga
+      if ($this->requestCallback) {
+        $func = $this->requestCallback;
+        $feed = $func($request, $this->requestCallbackOptions);
+      }
+      if ($this->debug) { Debug::printVar($feed); }
+
+      // parse data into $this->data
+      $this->addFeedData($feed, $type, $indexBy, $details);
+      if ($this->debug) { Debug::printVar($this->data); }
+
+    }
 
     return $this->data;
   }
 
   //function getRequestArray($type, $sub_type = 'value_desc', $indexBy = '', $details = 0, $max_results = 100, $results_index = 0) {
+  /**
+   * Builds query array for Google Analytics API request.
+   *
+   * @param string $type
+   *   pageviews: general metrics for page hits
+   *   entrances: associates all general pageview metrics during sessions with
+   *     first page hit of the session (entrance page)
+   *   pageviews_valuedevents: valued event metrics associated with the prior pageview
+   *   entrances_valuedevents: valued event metrics associated with entrance pages
+   *   pageviews_goals: goal values & completions associated with the prior pageview
+   *   entrances_goals: goal values & completions associated with entrance pages
+   * @param string $indexBy
+   * @param int $details
+   * @return array
+   */
   function getRequestArray($type = '', $indexBy = '', $details = 0) {
     $request = $this->requestDefault;
     $settings = $this->requestSettings;
+    $context = $this->context;
+    $context_mode = $this->context_mode;
     $type = ($type) ? $type : $settings['type'];
     $types = explode('_', $type);
     $subType = $settings['subType'];
@@ -245,38 +462,39 @@ class GAModel {
     $subIndexBy = $settings['subIndexBy'];
     $details = ($details) ? $details : $settings['details'];
     $reportModes = $this->reportModes;
+    $filters = array();
+    $segments = array();
+    $gaFilters = $this->gaFilters['filters'];
+    $inputFilters = $this->inputFilters;
+    //$segments = $this->gaFilters['segments'];
 
-    $filters = $this->gaFilters['filters'];
-    $segments = $this->gaFilters['segments'];
+    if ($this->debug) { Debug::printVar("getRequestArray: $type, $indexBy, $subIndexBy, $details"); Debug::printVar(array('details' => $details, 'reportModes' => $reportModes, 'gaFilters' => $this->gaFilters, 'gaSubsite' => $this->gaSubsite, 'context' => $context, 'context_mode' => $context_mode)); }
 
+    // Phase I: Set metrics based on request $type
+    // later, phase II: sets dimentions based on $indexBy
     if ($type == 'pageviews') {
       if (isset($reportModes[0]) && (($reportModes[0] == 'social') || ($reportModes[0] == 'seo'))) {
-        //$request['metrics'] = array('ga:pageviews', 'ga:pageviewsPerVisit', 'ga:timeOnPage', 'ga:exits', 'ga:totalEvents');
-        //$request['sort'] = '-ga:totalEvents,-ga:pageviews';
-        $request['metrics'] = array('ga:pageviews', 'ga:pageviewsPerVisit', 'ga:timeOnPage', 'ga:exits');
+        $request['metrics'] = array('ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnPage', 'ga:exits');
         $request['sort'] = '-ga:pageviews';
       }
       else {
-        $request['metrics'] = array('ga:pageviews', 'ga:pageviewsPerVisit', 'ga:timeOnPage', 'ga:exits', 'ga:goalValueAll', 'ga:goalCompletionsAll');
-        $request['sort'] = '-ga:goalValueAll,-ga:pageviews';
+        $request['metrics'] = array('ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnPage', 'ga:exits', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalCompletionsAll');
+        $request['sort'] = '-ga:pageValue,-ga:pageviews';
       }
     }
     else if ($type == 'entrances') {
       if (isset($reportModes[0]) && (($reportModes[0] == 'social') || ($reportModes[0] == 'seo'))) {
-        //$request['dimensions'][] = 'ga:hasSocialSourceReferral';
-        //$request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerVisit', 'ga:timeOnSite', 'ga:bounces');
-        //$request['sort'] = '-ga:hasSocialSourceReferral,-ga:entrances';
-        $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerVisit', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
+        $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
         $request['sort'] = '-ga:entrances';
       }
       else {
-        $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerVisit', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
+        $request['metrics'] = array('ga:entrances', 'ga:newVisits', 'ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnSite', 'ga:bounces', 'ga:goalValueAll', 'ga:goalCompletionsAll');
         $request['sort'] = '-ga:goalValueAll,-ga:entrances';
       }
-      // if filtered by page-attr, extra filter needs to be added to push goal values to previous pages
-      if (!empty($filters['page-attr'])) {
-        $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
-      }
+    }
+    else if ($type == 'sessions') {
+      $request['metrics'] = array('ga:sessions', 'ga:newVisits', 'ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnSite', 'ga:pageValue');
+      $request['sort'] = '-ga:pageviews';
     }
     else if ($type == 'pageviews_valuedevents') {
       $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
@@ -298,18 +516,44 @@ class GAModel {
       $filters[] = "ga:eventCategory=~^*!$";
       $request['sort'] = '-ga:eventValue,-ga:totalEvents';
     }
+    else if ($type == 'pageviews_goals_assist') {
+      $request['metrics'] = array('ga:goalValueAll', 'ga:goalCompletionsAll');
+      $request['dimensions'] = array('ga:goalCompletionLocation', 'ga:goalPreviousStep1', 'ga:goalPreviousStep2', 'ga:goalPreviousStep3');
+    }
+    else if ($types[1] == 'goals') {
+      if (!empty($details) && is_array($details)) {
+        foreach ($details AS $id) {
+          $request['metrics'][] = "ga:goal{$id}Completions";
+          $request['metrics'][] = "ga:goal{$id}Value";
+        }
+      }
+      else {
+        $request['metrics'][] = "ga:goalCompletionsAll";
+        $request['metrics'][] = "ga:goalValueAll";
+      }
+    }
+    /*
     else if ($type == 'pageviews_goals') {
-      foreach ($details AS $id) {
-        $request['metrics'][] = "ga:goal{$id}Completions";
-        $request['metrics'][] = "ga:goal{$id}Value";
+      if (!empty($details) && is_array($details)) {
+        foreach ($details AS $id) {
+          $request['metrics'][] = "ga:goal{$id}Completions";
+          $request['metrics'][] = "ga:goal{$id}Value";
+        }
+      }
+      else {
+        $request['metrics'][] = "ga:goalCompletionsAll";
+        $request['metrics'][] = "ga:goalValueAll";
       }
     }
     else if ($type == 'entrances_goals') {
-      foreach ($details AS $id) {
-        $request['metrics'][] = "ga:goal{$id}Completions";
-        $request['metrics'][] = "ga:goal{$id}Value";
+      if (!empty($details) && is_array($details)) {
+        foreach ($details AS $id) {
+          $request['metrics'][] = "ga:goal{$id}Completions";
+          $request['metrics'][] = "ga:goal{$id}Value";
+        }
       }
     }
+    */
     else if ($type == 'eventsource_events') {
       $request['dimensions'][] = 'ga:eventCategory';
       $request['dimensions'][] = 'ga:eventAction';
@@ -322,51 +566,48 @@ class GAModel {
       $request['dimensions'][] = 'ga:country';
       $request['dimensions'][] = 'ga:medium';
       $request['dimensions'][] = 'ga:socialNetwork';
-      $request['metrics'] = array('ga:entrances', 'ga:goalValueAll');
-      if ($reportModes[0] == 'visit') {  // visit.recent report
-        $request['dimensions'][] = 'ga:visitCount';
-        $request['dimensions'][] = 'ga:customVarValue4';
-      }
-      $request['sort'] = '-ga:goalValueAll,-ga:entrances';
+      $request['metrics'] = array('ga:entrances', 'ga:pageviews', 'ga:goalValueAll');
+      $request['sort'] = '-ga:goalValueAll,-ga:entrances,-ga:pageviews';
       if ($this->gaFilters['paths']['pagePath']) {
         $segments[] = $this->gaFilters['paths']['pagePath'];
       }
     }
-
-    if (($types[0] == 'entrances') && ($this->gaFilters['paths']['landingPagePath'])) {
-      $filters[] = $this->gaFilters['paths']['landingPagePath'];
+    else if ($type == 'entrances_pagepathmap') {
+      $request['dimensions'][] = 'ga:customVarValue1';
+      $request['dimensions'][] = 'ga:pagePath';
+      $request['metrics'] = array('ga:entrances', 'ga:pageviews', 'ga:pageValue');
+      $request['sort'] = '-ga:pageValue,-ga:entrances';
+      $filters[] = 'ga:entrances>0';
     }
-    if (($types[0] == 'pageviews') && ($this->gaFilters['paths']['pagePath'])) {
-      $filters[] = $this->gaFilters['paths']['pagePath'];
-    }
 
-    $request = $this->applyFiltersToRequest($request);
+    // Phase II. Set elements based on indexBy
+
+    // if indexing on content, add hostname and landingPagePath dimentions
     if ($indexBy == 'date') {
       $request['dimensions'][] = 'ga:date';
+      if (isset($filters['page-attr'])) {
+        if ($type == 'entrances') {
+          $request['dimensions'][] = 'ga:landingPagePath';
+        }
+      }
       // TODO do real days calculation
       //$request['max_results'] = 30 * $items;  
     }
-    else if ($indexBy == 'content') {
-      $request['dimensions'][] = 'ga:hostname';
-      if ($types[0] == 'entrances') {
+    else if ($indexBy == 'content' || $indexBy == 'pagePath') {
+      if ($type == 'entrances' || $type == 'entrances_valuedevents') {
         $request['dimensions'][] = 'ga:landingPagePath';
       }
       else {
         $request['dimensions'][] = 'ga:pagePath';
       }
-      //$request['max_results'] = 4 * $items;  
-    }
-    else if ($indexBy == 'pagePath') {
-      if ($types[0] == 'entrances') {
-        $request['dimensions'][] = 'ga:landingPagePath';
-      }
-      else {
-        $request['dimensions'][] = 'ga:pagePath';
-      }
-      //$request['max_results'] = 4 * $items;  
     }
     else if ($indexBy == 'visitor') {
       $request['dimensions'][] = 'ga:customVarValue5';
+      // for entrance requests sorting by pageviews is somewhat more effective
+      // for visitors
+      if ($types[0] == 'entrances') {
+        $request['sort'] = '-ga:goalValueAll,-ga:pageviews,-ga:entrances';
+      }
     }
     else if ($indexBy == 'visit') {
       $request['dimensions'][] = 'ga:customVarValue5';
@@ -375,7 +616,7 @@ class GAModel {
         $request['dimensions'][] = 'ga:customVarValue4';
         $request['sort'] = '-ga:customVarValue4';
         if ($type == 'entrances') {
-          $filter[] = 'ga:entrances>0';
+          $filters[] = 'ga:entrances>0';
         }
       }
       //$request['segment'] = (!empty($request['segment']) ? ';' . $this->gaFilters['paths']['pagePath'] : ''); 
@@ -406,23 +647,49 @@ class GAModel {
       $request['dimensions'][] = 'ga:source';
       $request['dimensions'][] = 'ga:referralPath';
     }
-    else if ($indexBy == 'landingpage') {
-      $filters[] = "ga:eventCategory=~^Landing page";
-    } else if ($indexBy == 'author') {
-      $request['dimensions'][] = 'ga:customVarValue1';
-      $filters[] = 'ga:customVarValue1=@&a=';
-      $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
-    } else if (strpos($indexBy, 'pageAttribute:') === 0) {
+    else if ($indexBy == 'referralHostpath') {
+      $request['dimensions'][] = 'ga:source';
+      $request['dimensions'][] = 'ga:referralPath';
+    }
+    else if ($indexBy == 'trafficsources_intersite') {
+      $request['dimensions'][] = 'ga:hostname';
+      $request['dimensions'][] = 'ga:pagePath';
+      $filters[] = 'ga:entrances>0';
+    }
+    else if (strpos($indexBy, 'pageAttribute:') === 0) {
       $indexBys = explode(':', $indexBy);
-      $request['dimensions'][] = 'ga:customVarValue1';
-      // TODO add other attribute types
-      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
-        $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '=';
+      $attr_key = $indexBys[1];
+      // add customVarValue1 as dimension
+
+      $filt = '';
+      if (isset($this->attributeInfo['page'][$attr_key])) {
+        if (($this->attributeInfo['page'][$attr_key]['type'] == 'flag')) {
+          $filt = 'ga:customVarValue1=@&';
+        }
+        else if (($this->attributeInfo['page'][$attr_key]['type'] == 'scalar') || ($this->attributeInfo['page'][$attr_key]['type'] == 'item')) {
+          $filt = 'ga:customVarValue1=@&' . $indexBys[1] . '=';
+        }
+        else if ($this->attributeInfo['page'][$attr_key]['type'] == 'list') {
+          $filt = 'ga:customVarValue1=@&' . $indexBys[1] . '.';
+        }
+        // don't add customVarValue dimension to entrance oriented requests.
+        // the customVarValue for every session hit will be included
+        if ($types[0] == 'entrances') {
+          if ($type != 'entrances_pagepathmap') {
+            $request['dimensions'][] = 'ga:landingPagePath';
+          }
+          // helps to reduce records by filtering only records that enter in page-attr
+          $segments[] = 'sessions::sequence::^' . $filt;
+        }
+        else if ($type == 'pageviews') {
+          $request['dimensions'][] = 'ga:customVarValue1';
+        }
+        else if ($type == 'pageviews_valuedevents') {
+          $request['dimensions'][] = 'ga:customVarValue1';
+          // reduce records by filtering only pageviews in page-attr
+          $filters[] = $filt;
+        }
       }
-      else if ($this->pageAttributeInfo['type'] == 'list') {
-        $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '.';
-      }
-      $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
     }
     else if (!empty($indexBy)) {
       $request['dimensions'][] = 'ga:' . $indexBy;
@@ -469,9 +736,90 @@ class GAModel {
 
       }
     }
-    $request['filters'] = $this->customFilters['filter'] . (($this->customFilters['filter'] && count($filters)) ? ';' : '') . implode(';', $filters);
-    if (count($segments) || !empty($this->customFilters['segment'])) {
-      $request['segment'] = 'dynamic::' . $this->customFilters['segment'] . (($this->customFilters['segment'] && count($segments)) ? ';' : '') . implode(';', $segments);
+
+    // Phase III apply filters
+
+    // if page path filter
+    if (($types[0] == 'entrances') && ($this->gaFilters['paths']['landingPagePath'])) {
+      $filters[] = $this->gaFilters['paths']['landingPagePath'];
+    }
+    if (($types[0] == 'pageviews') && ($this->gaFilters['paths']['pagePath'])) {
+      $filters[] = $this->gaFilters['paths']['pagePath'];
+    }
+
+    foreach ($gaFilters AS $filter_type => $gafarr) {
+      foreach ($gafarr AS $i => $filt) {
+
+        if ($types[0] == 'entrances') {
+
+          // traffic sources cannot be used in segments, make exception
+          if ($filter_type == 'trafficsource') {
+            $filters[] = $filt;
+          }
+          elseif ($filter_type == 'page') {
+            // change default of pagePath to landingPagePath
+            $filters[] = str_replace('pagePath', 'landingPagePath', $filt);
+          }
+          else {
+            if ($indexBy == 'trafficsources_intersite') {
+              $notfilt = str_replace('=@', '!@', $filt);
+              $notfilt = str_replace('==', '!=', $notfilt);
+              $notfilt = str_replace('=~', '!~', $notfilt);
+              $segments[] = 'sessions::sequence::^' . $notfilt . ';->>' . $filt;
+            }
+            else {
+              // if filter is page_group, don't apply as segment
+              if ($filter_type == 'page-attr' && ($filt == $this->gaSubsite)) {
+                $filters[] = $filt;
+              }
+              else {
+                $segments[] = 'sessions::sequence::^' . $filt;
+              }
+
+              /*
+              if ($context_mode == 'subsite') {
+                $filters[] = $filt;
+              }
+              */
+            }
+          }
+        }
+        elseif ($types[0] == 'sessions') {
+          if ($filter_type == 'page-attr' && ($filt == $this->gaSubsite)) {
+            if ($type != 'sessions') {
+              $filters[] = $filt;
+            }
+          }
+          else {
+            if ($type == 'sessions') {
+              $segments[] = 'sessions::sequence::' . $filt;
+            }
+            elseif($types[1] == 'valuedevents') {
+              $segments[] = 'sessions::sequence::' . $filt . ';->>ga:eventCategory=~\!$';
+            }
+            elseif($types[1] == 'goals') {
+              $segments[] = 'sessions::sequence::' . $filt . ';->>ga:eventCategory=~\+$';
+            }
+          }
+        }
+        else {
+          $filters[] = $filt;
+        }
+      }
+    }
+
+    // join filters into request
+    if (!empty($this->customFilters['filter'])) {
+      $request['filters'] = $this->customFilters['filter'];
+    }
+    if (count($filters)) {
+      $request['filters'] = (!empty($request['filters']) ? ';' : '') . implode(';', $filters);
+    }
+    if (!empty($this->customFilters['segment'])) {
+      $request['segment'] = $this->customFilters['segment'];
+    }
+    if (count($segments)) {
+      $request['segment'] = (!empty($request['segment']) ? ';' : '') . implode(';', $segments);
     }
     return $request;
   }
@@ -487,6 +835,13 @@ class GAModel {
     $indexBy = ($indexBy) ?  $indexBy : $settings['indexBy'];
     $subIndexBy = !empty($settings['subIndexBy']) ? $settings['subIndexBy'] : '';
     $details = ($details) ? $details : $settings['details'];
+
+    // pagepathmap is a special case
+    if ($type == 'entrances_pagepathmap') {
+      $this->pagePathMap = $this->addPagePathMapFeedData($this->pagePathMap, $feed, $indexBy);
+      return;
+    }
+
     if (!isset($this->data[$indexBy])) {
       $this->data[$indexBy] = $this->initIndexDataStruc();
     }
@@ -525,11 +880,17 @@ class GAModel {
         case 'entrances':
           $d = $this->addEntranceFeedData($d, $feed, $curIndex, $subIndexBy);
           break;
+        case 'sessions':
+          $d = $this->addSessionFeedData($d, $feed, $curIndex, $subIndexBy);
+          break;
         case 'pageviews_valuedevents':
           $d = $this->addValuedeventsFeedData($d, $feed, $curIndex, 'pageview');
           break;
         case 'entrances_valuedevents':
           $d = $this->addValuedeventsFeedData($d, $feed, $curIndex, 'entrance');
+          break;
+        case 'sessions_valuedevents':
+          $d = $this->addValuedeventsFeedData($d, $feed, $curIndex, 'session');
           break;
         case 'pageviews_goals':
           $d = $this->addGoalsFeedData($d, $feed, $curIndex, 'pageview', $details);
@@ -537,11 +898,20 @@ class GAModel {
         case 'entrances_goals':
           $d = $this->addGoalsFeedData($d, $feed, $curIndex, 'entrance', $details);
           break;
+        case 'sessions_goals':
+          $d = $this->addGoalsFeedData($d, $feed, $curIndex, 'session', $details);
+          break;
+        case 'pageviews_goals_assist':
+          $d = $this->addGoalsAssistFeedData($d, $feed, $curIndex, 'pageview', $details);
+          break;
         case 'eventsource_events':
           $d = $this->addEventsourceEventFeedData($d, $feed, $curIndex, 'pageview');
           break;
         case 'visit_info':
           $d = $this->addVisitInfoFeedData($d, $feed, $curIndex, 'entrance', $details);
+          break;
+        case 'pagepathmap_entrances':
+          $d = $this->addPagePathMapFeedData($d, $feed, $curIndex, 'entrance');
           break;
       }
       if ($sub_index != '-') {
@@ -577,18 +947,41 @@ class GAModel {
       foreach ($keys AS $k) {
         $this->_addPageviewFeedDataRow($d[$k]['pageview'], $row);
       }
-
     }
     return $d;
   }
 
   function _addPageviewFeedDataRow(&$data, $row) {
+    $data['recordCount']++;
+
     $data['pageviews'] += $row['pageviews'];
-    $data['pageviewsPerVisit'] += ($row['pageviews'] * $row['pageviewsPerVisit']);
+    $data['uniquePageviews'] += !empty($row['uniquePageviews']) ? $row['uniquePageviews'] : 0;
+    //$data['pageviewsPerSession'] += ($row['pageviews'] * $row['pageviewsPerSession']);
     $data['timeOnPage'] += $row['timeOnPage'];
     $data['sticks'] += ($row['pageviews'] - $row['exits']);
     $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
     $data['goalCompletionsAll'] += !empty($row['goalCompletionsAll']) ? $row['goalCompletionsAll'] : 0;
+
+    // for queries with a single record per indexed entity, these numbers are exact
+    // for queries with multiple records, this algo provides an estimated pageValueAll
+    // using a weighted average across all records for the entity
+    if (!empty($row['pageValue']) && !empty($row['uniquePageviews'])) {
+      if ($data['uniquePageviews'] != 0) {
+        $upv0 = $data['uniquePageviews'] - $row['uniquePageviews'];
+        $data['pageValue'] =
+          (($data['pageValue'] * $upv0) + ($row['pageValue'] * $row['uniquePageviews']))
+          / ($upv0 + $row['uniquePageviews']);
+      }
+      //$data['pageValueAll'] = ($data['pageValue'] * $data['uniquePageviews']) / $data['recordCount'];
+      $data['pageValueAll'] = ($data['pageValue'] * $data['uniquePageviews']); // / 2;
+    }
+    if (!empty($row['customVarValue4'])) {
+      // set the timestamp of the earilest pageview
+      if (!isset($data['timestamp']) || ($row['customVarValue4'] < $data['timestamp'])) {
+        $data['timestamp'] = $row['customVarValue4'];
+      }
+    }
+
     return $data;
   }
 
@@ -602,7 +995,7 @@ class GAModel {
     }
     $this->_addEntranceFeedDataRow($d['_totals']['entrance'], $feed->totals);
     foreach($feed->results AS $row) {
-      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d)) {
         continue;
       }
       $subIndex = $this->initFeedIndex($row, $subIndexBy);
@@ -650,8 +1043,6 @@ class GAModel {
           $this->_addEntranceFeedDataRow($d[$k]['entrance'], $row);
         }
       }
-
-
     }
     return $d;
   }
@@ -659,8 +1050,10 @@ class GAModel {
   function _addEntranceFeedDataRow(&$data, $row) {
     $data['entrances'] += $row['entrances'];
     $data['newVisits'] += $row['newVisits'];
-    $data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : ($row['entrances'] * $row['pageviewsPerVisit']);
-    $data['pageviewsPerVisit'] += ($row['entrances'] * $row['pageviewsPerVisit']);
+    //$data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : ($row['entrances'] * $row['pageviewsPerSession']);
+    $data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : 0;
+    $data['uniquePageviews'] += !empty($row['uniquePageviews']) ? $row['uniquePageviews'] : 0;
+    //$data['pageviewsPerSession'] += ($row['entrances'] * $row['pageviewsPerSession']);
     $data['timeOnSite'] += $row['timeOnSite'];
     $data['sticks'] += ($row['entrances'] - $row['bounces']);
     $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
@@ -668,6 +1061,69 @@ class GAModel {
     if (!empty($row['customVarValue4'])) {
       $data['timestamp'] = $row['customVarValue4'];
     }
+    $data['recordCount']++;
+    return $data;
+  }
+
+  function addSessionFeedData($d, $feed, $indexBy, $subIndexBy) {
+    if (!isset($d['_all']['session'])) {
+      $d['_all']['session'] = $this->initSessionDataStruc();
+      $d['_totals']['session'] = $this->initSessionDataStruc();
+    }
+    $this->_addSessionFeedDataRow($d['_totals']['session'], $feed->totals);
+    $pagePath = '';
+    foreach($feed->results AS $row) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+        continue;
+      }
+      if (!is_array($indexes)) {
+        $indexes = array($indexes);
+      }
+      foreach ($indexes AS $index) {
+        if (!isset($d[$index]['session'])) {
+          $d[$index]['session'] = $this->initSessionDataStruc();
+        }
+      }
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+      //$keys = array('_all', $indexes);
+      foreach ($keys AS $k) {
+        $this->_addSessionFeedDataRow($d[$k]['session'], $row);
+      }
+    }
+    return $d;
+  }
+
+  function _addSessionFeedDataRow(&$data, $row) {
+    $data['recordCount']++;
+
+    $data['sessions'] += !empty($row['sessions']) ? $row['sessions'] : 0;
+    $data['newVisits'] += !empty($row['newVisits']) ? $row['newVisits'] : 0;
+    $data['pageviews'] += !empty($row['pageviews']) ? $row['pageviews'] : 0;
+    $data['uniquePageviews'] += !empty($row['uniquePageviews']) ? $row['uniquePageviews'] : 0;
+    $data['timeOnSite'] += !empty($row['timeOnSite']) ? $row['timeOnSite'] : 0;
+    $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
+    $data['goalCompletionsAll'] += !empty($row['goalCompletionsAll']) ? $row['goalCompletionsAll'] : 0;
+
+    // for queries with a single record per indexed entity, these numbers are exact
+    // for queries with multiple records, this algo provides an estimated pageValueAll
+    // using a weighted average across all records for the entity
+    if (!empty($row['pageValue']) && !empty($row['uniquePageviews'])) {
+      if ($data['uniquePageviews'] != 0) {
+        $upv0 = $data['uniquePageviews'] - $row['uniquePageviews'];
+        $data['pageValue'] =
+          (($data['pageValue'] * $upv0) + ($row['pageValue'] * $row['uniquePageviews']))
+          / ($upv0 + $row['uniquePageviews']);
+      }
+      $data['pageValueAll'] = ($data['pageValue'] * $data['uniquePageviews']); // / 2;
+    }
+    if (!empty($row['customVarValue4'])) {
+      // set the timestamp of the earilest pageview
+      if (!isset($data['timestamp']) || ($row['customVarValue4'] < $data['timestamp'])) {
+        $data['timestamp'] = $row['customVarValue4'];
+      }
+    }
+
     return $data;
   }
 
@@ -722,11 +1178,17 @@ class GAModel {
       $d['_all'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
       $d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
     }
-    foreach ($details AS $id) {
-      $d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, $id);
+    if (is_array($details)) {
+      foreach ($details AS $id) {
+        $d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, $id);
+      }
     }
+    else {
+      $d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, 0);
+    }
+
     foreach($feed->results AS $row) {
-      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d, $pagePath)) {
+      if (!$indexes = $this->initFeedIndex($row, $indexBy, $d)) {
         continue;
       }
 
@@ -744,13 +1206,18 @@ class GAModel {
       array_unshift($keys, '_all');
 
       foreach ($keys AS $k) {
-        foreach ($details AS $id) {
-          if (!isset($d[$k][$mode]['goals']["n$id"])) {
-            $d[$k][$mode]['goals']["n$id"] = $this->initGoalsDataStruc();
-            $d[$k][$mode]['goals']["n$id"]['i'] = "n$id";
+        if (is_array($details)) {
+          foreach ($details AS $id) {
+            if (!isset($d[$k][$mode]['goals']["n$id"])) {
+              $d[$k][$mode]['goals']["n$id"] = $this->initGoalsDataStruc();
+              $d[$k][$mode]['goals']["n$id"]['i'] = "n$id";
+            }
+            $d[$k][$mode]['goals']["n$id"] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']["n$id"], $row, $id);
+            $d[$k][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']['_all'], $row, $id);
           }
-          $d[$k][$mode]['goals']["n$id"] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']["n$id"], $row, $id);
-          $d[$k][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']['_all'], $row, $id);
+        }
+        else {
+          $d[$k][$mode]['goals']['_all'] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']['_all'], $row, 0);
         }
       }
     }
@@ -758,6 +1225,56 @@ class GAModel {
   }
 
   function _addGoalsFeedDataRow($data, $row, $id) {
+    if ($id) {
+      $data["completions"] += $row["goal{$id}Completions"];
+      $data["value"] += $row["goal{$id}Value"];
+    }
+    else {
+      $data["completions"] += !empty($row["goalCompletionsAll"]) ? $row["goalCompletionsAll"] : 0;
+      $data["value"] += !empty($row["goalValueAll"]) ? $row["goalValueAll"] : 0;
+    }
+
+    return $data;
+  }
+
+  function addGoalsAssistFeedData($d, $feed, $indexBy, $mode = 'entrance', $details = array()) {
+    // TODO: incomplete. not used in any reports
+    if (!isset($d['_all'][$mode])) {
+      //$d['_all'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+      //$d['_totals'][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+    }
+    foreach ($details AS $id) {
+      //$d['_totals'][$mode]['goals']['_all'] = $this->_addGoalsAssistFeedDataRow($d['_totals'][$mode]['goals']['_all'], $feed->totals, $id);
+    }
+    foreach($feed->results AS $row) {
+
+
+      $indexes = array();
+
+      foreach ($indexes AS $i => $index) {
+        if (!isset($d[$index][$mode])) {
+          $d[$index][$mode] = $this->{'init' . $mode . 'DataStruc'}();
+        }
+      }
+
+      $keys = $indexes;
+      array_unshift($keys, '_all');
+
+      foreach ($keys AS $k) {
+        foreach ($details AS $id) {
+          if (!isset($d[$k][$mode]['goals']["n$id"])) {
+            //$d[$k][$mode]['goals']["n$id"] = $this->initGoalsDataStruc();
+            //$d[$k][$mode]['goals']["n$id"]['i'] = "n$id";
+          }
+          //$d[$k][$mode]['goals']["n$id"] = $this->_addGoalsFeedDataRow($d[$k][$mode]['goals']["n$id"], $row, $id);
+          $d[$k][$mode]['goalsAssist']['_all'] = $this->_addGoalsAssistFeedDataRow($d[$k][$mode]['goals']['_all'], $row, $id);
+        }
+      }
+    }
+    return $d;
+  }
+
+  function _addGoalsAssistFeedDataRow($data, $row, $id) {
     $data["completions"] += $row["goal{$id}Completions"];
     $data["value"] += $row["goal{$id}Value"];
     return $data;
@@ -832,6 +1349,24 @@ class GAModel {
     return $data;
   }
 
+  function addPagePathMapFeedData($d, $feed, $indexBy) {
+    $pathField = 'pagePath';
+    $entityField = 'customVarValue1';
+    foreach($feed->results AS $row) {
+      if (!isset($d[$row[$pathField]])) {
+        $d[$row[$pathField]] = array();
+      }
+      $d[$row[$pathField]][$row[$entityField]] = array();
+      foreach ($row AS $key => $value) {
+        if ($key == $pathField || $key == $entityField) {
+          continue;
+        }
+        $d[$row[$pathField]][$row[$entityField]][$key] = $value;
+      }
+    }
+    return $d;
+  }
+
   function initFeedIndex(&$row, $indexBy, &$d = array(), &$pagePath = '') {
     if (!$indexBy) {
       return '';
@@ -844,10 +1379,10 @@ class GAModel {
       $index = $func($row);
     }
     else if ($indexBy == 'content') {
-      $index = $row['hostname'] . $path;
+      $index = (!empty($row['hostname']) ? $row['hostname'] : '') . $path;
     }
     else if ($indexBy == 'pagePath') {
-      $index = $path;
+      $index = (!empty($row['hostname']) ? $row['hostname'] : '') . $path;
     }
     else if ($indexBy == 'referralHostpath') {
       $index = ($row['referralPath'] != '(not set)') ? $row['source'] . $row['referralPath'] : FALSE;
@@ -905,27 +1440,56 @@ class GAModel {
         $index = $row['country'];
       }
     }
+    /*
     else if ($indexBy == 'author') {
       $decoded = '';
       $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
       $row['customVarValue1'] = $decoded;
       $index = $data['a'];
     }
+    */
     else if (strpos($indexBy, 'pageAttribute:') === 0) {
       $decoded = '';
-      $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
+      $data = '';
+      if (isset($row['customVarValue1'])) {
+        $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
+      }
+      // if customVarValue1 not in request, try looking for path in pagePathMap
+      else {
+        $v = '';
+        if (isset($row['pagePath']) && isset($this->pagePathMap[$row['pagePath']])) {
+          // get first key
+          reset($this->pagePathMap[$row['pagePath']]);
+          $v = key($this->pagePathMap[$row['pagePath']]);
+        }
+        else if (isset($row['landingPagePath']) && isset($this->pagePathMap[$row['landingPagePath']])) {
+          // get first key
+          reset($this->pagePathMap[$row['landingPagePath']]);
+          $v = key($this->pagePathMap[$row['landingPagePath']]);
+        }
+
+        if ($v) {
+          $data = $this->unserializeCustomVar($v, $decoded);
+        }
+      }
+
       $row['customVarValue1'] = $decoded;
       $indexBys = explode(':', $indexBy);
+      $attr_key = $indexBys[1];
 
-      if (($this->pageAttributeInfo['type'] == 'scalar') || ($this->pageAttributeInfo['type'] == 'value')) {
-        $index = $data[$indexBys[1]];
+      if (($this->attributeInfo['page'][$attr_key]['type'] == 'flag')) {
+        $index = isset($data[$indexBys[1]]) ? $data[$indexBys[1]] : '';
       }
-      else if ($this->pageAttributeInfo['type'] == 'list') {
+      else if (($this->attributeInfo['page'][$attr_key]['type'] == 'scalar') || ($this->attributeInfo['page'][$attr_key]['type'] == 'item')) {
+        $index = isset($data[$indexBys[1]]) ? $data[$indexBys[1]] : '';
+      }
+      else if ($this->attributeInfo['page'][$attr_key]['type'] == 'list') {
         $index = array();
         foreach ($data AS $key => $value) {
           if (strpos($key, $indexBys[1]) === 0) {
             $a = explode('.', $key);
-            $index[] = $key;
+            $index[] = $a[1];
+            //$index[] = $key;
           }
         }
       }
@@ -954,6 +1518,7 @@ class GAModel {
   }
 
   function determineTrafficCategoryIndex($row) {
+    $medium = strtolower($row['medium']);
     if (!empty($row['socialNetwork']) && ($row['socialNetwork'] != '(not set)')) {
       return 'social network';
     }
@@ -974,6 +1539,9 @@ class GAModel {
     }
     if ($row['medium'] == 'organic') {
       return 'organic search';
+    }
+    if ($medium == 'ppc' || $medium == 'cpc') {
+      return 'ppc';
     }
     if ($row['medium'] == 'email') {
       return 'email';
@@ -1015,11 +1583,14 @@ class GAModel {
       'entrances' => 0,
       'newVisits' => 0,
       'pageviews' => 0,
-      'pageviewsPerVisit' => 0,
+      'uniquePageviews' => 0,
       'timeOnSite' => 0,
       'sticks' => 0,
       'goalValueAll' => 0,
       'goalCompletionsAll' => 0,
+      'pageValue' => 0,
+      'pageValueAll' => 0,
+      'recordCount' => 0,
     );
     return $a;
   }
@@ -1028,12 +1599,34 @@ class GAModel {
     $a = array(
       'events' => $this->initEventsDataArrayStruc(),
       'goals' => $this->initGoalsDataArrayStruc(),
+      'goalsAssist' => $this->initGoalsAssistDataArrayStruc(),
       'pageviews' => 0,
-      'pageviewsPerVisit' => 0,
+      'uniquePageviews' => 0,
       'timeOnPage' => 0,
       'sticks' => 0,
-      'goalValueAll' => 0,
+      'goalValueAll' => 0, // the goalValue directly generated by the entity
       'goalCompletionsAll' => 0,
+      'pageValue' => 0,
+      'pageValueAll' => 0, // the goalValue of any downstream goals (ie goal assists)
+      'recordCount' => 0,
+    );
+    return $a;
+  }
+
+  function initSessionDataStruc() {
+    $a = array(
+      'events' => $this->initEventsDataArrayStruc(),
+      'goals' => $this->initGoalsDataArrayStruc(),
+      'sessions' => 0,
+      'newVisits' => 0,
+      'pageviews' => 0,
+      'uniquePageviews' => 0,
+      'timeOnSite' => 0,
+      'goalValueAll' => 0, // the goalValue directly generated by the entity
+      'goalCompletionsAll' => 0,
+      'pageValue' => 0,
+      'pageValueAll' => 0, // the goalValue of any downstream goals (ie goal assists)
+      'recordCount' => 0,
     );
     return $a;
   }
@@ -1056,15 +1649,33 @@ class GAModel {
   }
 
   function initGoalsDataArrayStruc() {
-    $a = array();
-    $a['_all'] = $this->initGoalsDataStruc();
-    return $a;
-  }
+  $a = array();
+  $a['_all'] = $this->initGoalsDataStruc();
+  return $a;
+}
 
   function initGoalsDataStruc() {
     $a = array(
       'value' => 0,
       'completions' => 0,
+    );
+    return $a;
+  }
+
+  function initGoalsAssistDataArrayStruc() {
+    $a = array();
+    $a['_all'] = $this->initGoalsAssistDataStruc();
+    return $a;
+  }
+
+  function initGoalsAssistDataStruc() {
+    $a = array(
+      'prev1Value' => 0,
+      'prev1Completions' => 0,
+      'prev2Value' => 0,
+      'prev2Completions' => 0,
+      'prev3Value' => 0,
+      'prev3Completions' => 0,
     );
     return $a;
   }

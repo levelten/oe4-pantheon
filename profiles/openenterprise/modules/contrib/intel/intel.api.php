@@ -187,14 +187,14 @@ function hook_intel_MODE_attribute_info() {
   $attributes['a'] = array(
     'title' => t('Author'),
     'description' => t('The uid of a node author.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'options_description' => t('Auto generated from entity uid.'),
     'options info callback' => 'intel_page_attribute_author_option_info',
   );
   $attributes['ct'] = array(
     'title' => t('Content type'),
     'description' => t('Node type or entity bundle type.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'options_description' => t('Auto generated from entity type/bundle.'),
     'type' => 'value',
     'options info callback' => 'intel_page_attribute_content_type_option_info',

@@ -505,6 +505,9 @@ function intel_schema() {
  * Implements hook_requirements().
  */
 function intel_requirements($phase) {
+  if ($phase == 'update') {
+    return array();
+  }
   $requirements = array();
   // Ensure translations don't break at install time:
   $t = get_t();
