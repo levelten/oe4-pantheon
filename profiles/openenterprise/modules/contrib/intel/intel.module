@@ -1080,9 +1080,9 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util() {
-
-  $pa_info = intel_get_page_attribute_info();
-  dsm($pa_info);
+  $params = array();
+  $feed = google_analytics_api_report_data($params);
+  dsm($feed);
   return '';
 
   $visitor = intel_visitor_load(1);
