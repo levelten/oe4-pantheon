@@ -17,11 +17,14 @@
 	background-color: @brand-secondary;
 	padding: 2em 0;
 	margin-bottom: 2em;
+	@media @mobile {
+		padding: 2em 15px;
+	}
 }
 
 .main-container-inner {
-	margin-top: 70px;
-	margin-bottom: 45px;
+	margin-top: 2em;
+	margin-bottom: 2em;
 }
 
 .region-sidebar-first, .region-sidebar-second {
@@ -74,13 +77,42 @@
 				margin-top: 1em;
 				padding: 10px 15px;
 			}
+			@media @mobile, @tablet-max {
+				left: 0;
+				top: 0;
+				padding: 0 15px;
+				position: relative;
+				text-align: center;
+				width: 100%;
+				p {
+					text-align: left;
+					width: 100%;
+				}
+				.btn {
+					margin-right: auto;
+					margin-left: auto;
+					.font-size(1.4);
+					padding: 6px 10px;
+				}
+			}
 		}
 	}
-	.carousel-indicators li {
-		border-color: @brand-primary;
-		&.active {
-			background-color: @brand-primary;
+	.carousel-indicators {
+		@media @mobile {
+			display: none;
 		}
+		li {
+			border-color: @brand-primary;
+			&.active {
+				background-color: @brand-primary;
+			}
+		}
+	}
+}
+.carousel-inner {
+	@media @mobile {
+		overflow: auto;
+		padding-bottom: 5px;
 	}
 }
 

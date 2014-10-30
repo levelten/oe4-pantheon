@@ -1,7 +1,9 @@
 // Media query variables.
 @mobile:  ~"screen and (max-width: @{screen-sm-min})";
-@tablet:  ~"screen and (mix-width: @{screen-sm-min}) and (max-width: @{screen-md-min})";
-@normal:  ~"screen and (min-width: @{screen-md-min}) and (max-width: @{screen-lg-min})";
+@tablet:  ~"screen and (min-width: @{screen-sm-min})";
+@tablet-max: ~"(max-width: @{screen-md-min})";
+@normal:  ~"screen and (min-width: @{screen-md-min})";
+@normal-max: ~"(max-width: @{screen-lg-min})";
 @wide:    ~"screen and (min-width: @{screen-lg-min})";
 
 // Drop shadows.
@@ -140,7 +142,7 @@ ul.secondary {
 // Blocks
 .block {
   &:first-child h2.block-title {
-    //margin-top: 0;
+
   }
 }
 
@@ -688,4 +690,25 @@ img {
   left: 0;
   width: 100% !important;
   height: 100% !important;
+}
+
+// Webform Components
+.webform-client-form {
+  .webform-component {
+    label {
+      display: block;
+    }
+    &.webform-container-inline {
+      label {
+        display: inline-block;
+        margin-right: 2%;
+        max-width: 20%;
+      }
+      .form-control {
+        display: inline-block;
+        margin: 0;
+        max-width: 78%;
+      }
+    }
+  }
 }

@@ -1,5 +1,5 @@
 <?php if (!empty($page['sidebar_second'])): ?>
-	<aside class="col-sm-3" role="complementary">
+	<aside class="<?php print $sidebar_column_class; ?>" role="complementary">
 		<?php print render($page['sidebar_second']); ?>
-	</aside>  <!-- /#sidebar-second -->
+	</aside>
 <?php endif; ?>

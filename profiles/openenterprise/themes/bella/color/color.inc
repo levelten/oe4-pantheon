@@ -71,34 +71,6 @@ $info = array(
   'base_image' => 'color/base.png',
 );
 
-// Add Kuler colors
-$kuler_json = theme_get_setting('kuler_json', variable_get('theme_default'));
-$kuler_check = theme_get_setting('kuler_check', variable_get('theme_default'));
-
-if (!empty($kuler_json) && $kuler_check) {
-  $json = array_unique(get_object_vars(json_decode($kuler_json)));
-  $kuler_colors = array();
-  foreach ($json as $key => $value) {
-    if ($value != '[object Object]' && strlen($key) < 56) {
-      $colors = explode(',', $value);
-      $title = trim(str_replace('_', ' ', $key));
-      if (count($colors) == 5) {
-        $kuler_colors[$title] = array(
-          'title' => t(ucwords($key)),
-          'colors' => array(
-            'brandprimary' => $colors[0],
-            'brandsecondary' => $colors[1],
-            'brandaccent' => $colors[2],
-            'brandaccent2' => $colors[3],
-            'brandaccent3' => $colors[4],
-          ),
-        );
-      }
-    }
-  }
-  reset($kuler_colors);
-}
-
 $colourlovers_palette = variable_get('colourlovers_theme_palette', '');
 $colourlovers_check = theme_get_setting('colourlovers_check', variable_get('theme_default'));
 
@@ -120,11 +92,6 @@ if (module_exists('colourlovers') && $colourlovers_check && !empty($colourlovers
   reset($colourlovers_palette);
   $colourlovers_palette = _color_clean_palette($colourlovers_palette);
   $info['schemes'] = $colourlovers_palette;
-
-} elseif (!empty($kuler_colors) && $kuler_check) {
-  // Add default value in or else it borks.
-  $kuler_colors = _color_clean_palette($kuler_colors);
-  $info['schemes'] = $kuler_colors;
 
 } else {
   // Unset the extra color fields.

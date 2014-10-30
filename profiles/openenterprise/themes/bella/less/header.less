@@ -1,14 +1,12 @@
 // Insert your styling here.
 header {
 	overflow: auto;
-	.navbar {
-		&.navbar-fixed-top {
-			margin-bottom: 0;
-		}
-	}
 	&.navbar-default {
 		background-color: white;
-		border-bottom: 2px solid @gray-light;
+		border-bottom: 1px solid @gray-light;
+	}
+	&.navbar-fixed-top {
+		margin-bottom: 0;
 	}
 	.header-container {
 		float: left;
@@ -25,25 +23,40 @@ header {
 			float: left;
 			width: 18%;
 		}
-		.name {
+		@media @mobile {
+			text-align: center;
+			padding-top: 1em;
+		}
+		.name, .navbar-brand {
 			color: @brand-primary;
 			.font-size(3.6);
 			font-weight: 700;
 			line-height: 1em;
 			letter-spacing: 3px;
 			margin: 0 !important;
-			padding: 5px 10px;
+			padding: 5px 0 0;
 			text-transform: uppercase;
 			&:hover {
 				color: @brand-primary;
 			}
+			@media @mobile {
+				display: block;
+				float: none;
+				overflow: auto;
+				width: 100%;
+			}
 		}
 		.logo {
-			padding: 5px 0;
-			height: 100%;
-			vertical-align: middle;
 			img {
 				display: inline-block;
+				max-height: 100%;
+				max-width: 100%;
+			}
+			@media @mobile {
+				display: block;
+				float: none;
+				overflow: auto;
+				width: 100%;
 			}
 		}
 		.navbar-toggle {
@@ -58,49 +71,89 @@ header {
 			float: left;
 			width: 82%;
 		}
-		.navbar-nav {
-			display: table;
-			text-align: center;
-			width: 100%;
-			counter-reset: navitem;
-			.caret {
-				display: none;
-			}
-			> li {
-				border-left: 1px solid @gray-light;
-				display: table-cell;
-				float: none;
-				&.expanded {
-					&:hover {
-						> .dropdown-menu {
-							display: none !important;
-						}
-					}
-				}
-				&:last-child {
-					border-right: 1px solid @gray-light;
-				}
-				> a {
-					color: @gray;
-					font-weight: 300;
-					padding: 15px 10px;
-					text-transform: uppercase;
-					&:hover {
-						background-color: white;
-						color: @brand-primary;
-					}
-				}
-				&.active-trail {
-					> a {
-						background-color: white;
-						color: @brand-primary;
+	}
+}
+
+.navbar-default {
+	.navbar-nav {
+		display: table;
+		text-align: center;
+		width: 100%;
+		counter-reset: navitem;
+		@media @mobile {
+			display: block;
+			margin: 0;
+		}
+		.caret {
+			display: none;
+		}
+		> li {
+			border-left: 1px solid @gray-light;
+			display: table-cell;
+			float: none;
+			&.expanded {
+				> .dropdown-menu {
+					background-color: rgba(red(@brand-primary), green(@brand-primary), blue(@brand-primary), 0.75);
+					border: 0;
+					.box-shadow(none);
+					left: 0;
+					position: fixed;
+					width: 100%;
+					a {
+						color: @brand-accent;
 						&:hover {
-							background-color: white;
-							color: @brand-primary;
+							text-shadow: 0 0 10px darken(@brand-primary, 20%);
 						}
+					}
+					@media @mobile {
+						.box-shadow(none);
+						position: relative;
+						top: 0 !important;
+					}
+				}
+				&:hover {
+					> .dropdown-menu {
+						display: block;
+					}
+				}
+			}
+			&:last-child {
+				border-right: 1px solid @gray-light;
+			}
+			> a {
+				color: @gray;
+				font-weight: 300;
+				padding: 15px 10px;
+				text-transform: uppercase;
+				&:hover {
+					background-color: white;
+					color: @brand-primary;
+				}
+			}
+				// Mobile navbar-nav > li
+				@media @mobile {
+					border-left: 0;
+					border-right: 0;
+					border-bottom: 1px solid @gray-light;
+					display: block;
+					float: none;
+					&:last-child {
+						border: 0;
+					}
+					> a {
+
+					}
+				}
+			}
+			> .active {
+				> a {
+					background-color: white;
+					color: @brand-primary;
+					&:hover, &:focus {
+						background-color: white;
+						color: @brand-primary;
 					}
 				}
 			}
 		}
 	}
-}
