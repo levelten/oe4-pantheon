@@ -152,12 +152,12 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     }
   }
   // equalize.js
-  $equalize = theme_get_setting('equalize');
-  if (!empty($equalize)) {
-    if ($equalize == 1) {
-      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');        
-    }
-  }
+  // $equalize = theme_get_setting('equalize');
+  // if (!empty($equalize)) {
+  //   if ($equalize == 1) {
+  //     drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');        
+  //   }
+  // }
 
   $bootstrap_js = theme_get_setting('enterprise_bootstrap_js_options');
   if(!empty($bootstrap_js)) {
@@ -262,7 +262,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
       // The values don't make sense. Just go with it.
       $non_mega = TRUE;
       foreach ($element['#below'] as $key => $value) {
-        if ($value['#mega'] == TRUE) {
+        if (isset($value['#mega']) && $value['#mega'] == TRUE) {
           $non_mega = FALSE;
           break;
         }

@@ -36,21 +36,19 @@
     }
   }
   .non-mega {
-    @media @normal {
-      > li {
-        .box-sizing;
-        float: left;
-        padding-right: 10px;
-        width: 25%;
-        &:last-child {
-          padding-right: 0;
-        }
-        > a {
-          display: block;
-          padding: 15px 0;
-          &:hover {
-            text-decoration: none;
-          }
+    li {
+      .box-sizing;
+      float: left;
+      padding-right: 10px;
+      width: 25%;
+      &:last-child {
+        padding-right: 0;
+      }
+      > a {
+        display: block;
+        padding: 15px 0;
+        &:hover {
+          text-decoration: none;
         }
       }
     }

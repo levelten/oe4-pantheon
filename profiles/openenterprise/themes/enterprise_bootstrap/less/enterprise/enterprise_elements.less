@@ -73,11 +73,11 @@
 .scale(@ratio:1.5){
   .transform(scale(@ratio));
 }
-.transition(@duration:0.2s, @ease:ease-out, @delay: 0s) {
-  -webkit-transition: all @duration @ease @delay;
-  -moz-transition: all @duration @ease @delay;
-  -o-transition: all @duration @ease @delay;
-  transition: all @duration @ease @delay;
+.transition(@prop:all, @duration:0.2s, @ease:ease-out, @delay: 0s) {
+  -webkit-transition: @prop @duration @ease @delay;
+  -moz-transition: @prop @duration @ease @delay;
+  -o-transition: @prop @duration @ease @delay;
+  transition: @prop @duration @ease @delay;
 }
 .inner-shadow(@horizontal:0, @vertical:1px, @blur:2px, @alpha: 0.4) {
   -webkit-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);

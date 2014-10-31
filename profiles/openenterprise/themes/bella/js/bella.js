@@ -23,37 +23,21 @@
       }
 
       // Use equalize if loaded.
-      function waitFitText(fitTextFinished) {
-        if (!fitTextFinished) {
-          setTimeout(waitFitText(fitTextFinished), 100);
-          $("#navbar .equalizer", context).equalize();
-        }
-      }
-      if(jQuery.fn.equalize) {
-        window.console.log("loaded equalize.js");
-        $("#navbar .navbar-header", context).addClass("equalizer");
-        $("#navbar .navbar-collapse .navbar-nav > li > a", context).addClass("equalizer");
-        waitFitText(fitTextFinished);
-      }
+      $("#navbar .navbar-header", context).addClass("equalizer");
+      $("#navbar .navbar-collapse .navbar-nav > li > a", context).addClass("equalizer");
 
       // Add margin depending on height of navbar.
-      var $navbar = $("header.navbar-default", context);
-      var navbarHeight = $navbar.height();
-
+      var $navbar = $("#navbar.navbar", context);
+      var navbarHeight = $navbar.height()+1;
       if ($("body", context).hasClass("logged-in", "admin-menu")){
-        var adminMenu = $("#admin-menu", context);
-        if (adminMenu.length > 0) {
-          navbarHeight += adminMenu.height();
-        } else {
-          navbarHeight += 14;
-        }
+        navbarHeight += 28;
       }
 
-      $("body.html").css("padding-top", navbarHeight+"px");
-      $("header.navbar-default .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
+      $("body.html", context).css("padding-top", navbarHeight+"px");
+      $("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
       $(window).resize(function(){
-        $("body.html").css("padding-top", navbarHeight+"px");
-        $("header.navbar-default .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
+        $("body.html", context).css("padding-top", navbarHeight+"px");
+        $("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
       });
 
     }

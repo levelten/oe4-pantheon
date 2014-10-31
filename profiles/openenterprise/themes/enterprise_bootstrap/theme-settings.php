@@ -255,16 +255,17 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('Development - jquery.fittext.js'),
 		),
 	);
-	$form['enterprise_bootstrap_js']['equalize'] = array(
-		'#type' => 'select',
-		'#title' => t('equalize.js'),
-		'#description' => t('The jQuery plugin for equalizing the height or width of your elements. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/tsvensen/equalize.js'))),
-		'#default_value' => (theme_get_setting('equalize')) ? theme_get_setting('equalize') : 0,
-		'#options' => array(
-			0 => t('Disabled'),
-			1 => t('Enabled'),
-		),
-	);
+	// Equalizer plugin
+	// $form['enterprise_bootstrap_js']['equalize'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('equalize.js'),
+	// 	'#description' => t('The jQuery plugin for equalizing the height or width of your elements. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/tsvensen/equalize.js'))),
+	// 	'#default_value' => (theme_get_setting('equalize')) ? theme_get_setting('equalize') : 0,
+	// 	'#options' => array(
+	// 		0 => t('Disabled'),
+	// 		1 => t('Enabled'),
+	// 	),
+	// );
 
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
