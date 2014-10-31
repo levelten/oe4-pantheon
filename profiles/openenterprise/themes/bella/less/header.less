@@ -73,9 +73,10 @@ header {
 		}
 	}
 	.dropdown-menu {
-		background-color: rgba(red(@gray-light), green(@gray-light), blue(@gray-light), 0.95);
+		background-color: rgba(255, 255, 255, 0.95);
+		border-bottom: 1px solid darken(@brand-primary, 15%);
 		a {
-			color: @brand-accent;
+			color: @brand-primary;
 			&:hover {
 				background-color: transparent;
 			}
@@ -179,7 +180,6 @@ header {
 			float: none;
 			&.expanded {
 				> .dropdown-menu {
-					border: 0;
 					.box-shadow(none);
 					left: 0;
 					opacity: 0;
@@ -226,9 +226,14 @@ header {
 .mega {
 	.mega-content, .non-mega {
 		li a {
-			.navbar-default &, .navbar-inverse & {
+			.navbar-default & {
 				&, &:hover {
 					color: @brand-accent;
+				}
+			}
+			.navbar-inverse & {
+				&, &:hover {
+					color: @brand-primary;
 				}
 			}
 			&:hover {

@@ -28,7 +28,7 @@
 
       // Add margin depending on height of navbar.
       var $navbar = $("#navbar.navbar", context);
-      var navbarHeight = $navbar.height()+1;
+      var navbarHeight = $navbar.height();
       if ($("body", context).hasClass("logged-in", "admin-menu")){
         navbarHeight += 28;
       }
