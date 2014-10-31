@@ -14,12 +14,10 @@
     attach: function(context) {
 
       // Use fitText if loaded.
-      var fitTextFinished = false;
       if(jQuery.fn.fitText) {
         window.console.log("loaded Fittext.js");
         $(".not-logged-in #navbar .navbar-header .name", context).fitText(2);
         $(".logged-in #navbar .navbar-header .name", context).fitText(1.6);
-        fitTextFinished = true;
       }
 
       // Use equalize if loaded.
