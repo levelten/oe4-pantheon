@@ -34,8 +34,8 @@
 		<?php endif; ?>
 	<?php else: ?>
 		<?php if (!empty($page['header']) || !empty($site_slogan)): ?>
-			<div class="page-header-container container">
-				<header role="banner" id="page-header" class="row">
+			<div class="page-header-container">
+				<header role="banner" id="page-header">
 					<?php if (!empty($site_slogan)): ?>
 						<p class="lead"><?php print $site_slogan; ?></p>
 					<?php endif; ?>		

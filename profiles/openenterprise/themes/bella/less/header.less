@@ -1,81 +1,161 @@
 // Insert your styling here.
 header {
 	overflow: auto;
-	&.navbar-default {
-		background-color: white;
-		border-bottom: 1px solid @gray-light;
-	}
-	&.navbar-fixed-top {
-		margin-bottom: 0;
-	}
-	.header-container {
-		float: left;
-		overflow: auto;
-		width: 20%;
-	}
-	.navbar-container {
-		float: left;
-		width: 80%;
-	}
-	.navbar-header {
-		overflow: auto;
-		@media @normal, @wide {
-			float: left;
-			width: 18%;
+}
+
+// Navbar colors
+.navbar-default {
+	background-color: white;
+	border-bottom: 1px solid @gray-light;
+	color: @gray;
+	.navbar-nav {
+		> li {
+			border-left: 1px solid @gray-light;
+			&:last-child {
+				border-right: 1px solid @gray-light;
+			}
 		}
-		@media @mobile {
-			text-align: center;
-			padding-top: 1em;
-		}
-		.name, .navbar-brand {
-			color: @brand-primary;
-			.font-size(3.6);
-			font-weight: 700;
-			line-height: 1em;
-			letter-spacing: 3px;
-			margin: 0 !important;
-			padding: 5px 0 0;
-			text-transform: uppercase;
-			&:hover {
+		> .active {
+			> a {
+				background-color: white;
 				color: @brand-primary;
-			}
-			@media @mobile {
-				display: block;
-				float: none;
-				overflow: auto;
-				width: 100%;
-			}
-		}
-		.logo {
-			img {
-				display: inline-block;
-				max-height: 100%;
-				max-width: 100%;
-			}
-			@media @mobile {
-				display: block;
-				margin: 0;
-				overflow: auto;
-				text-align: left;
-				max-width: 80%;
-			}
-		}
-		.navbar-toggle {
-			.icon-bar {
-				background-color: @gray-light;
+				&:hover, &:focus {
+					background-color: white;
+					color: @brand-primary;
+				}
 			}
 		}
 	}
-	.navbar-collapse {
-		overflow: auto;
-		@media @normal, @wide {
-			float: left;
-			width: 82%;
+	a {
+		color: @gray;
+		&:hover {
+			background-color: white;
+			color: @brand-primary;
+		}
+	}
+	.dropdown-menu {
+		background-color: rgba(256, 256, 256, 0.95);
+		a {
+			color: @brand-accent;
 		}
 	}
 }
+.navbar-inverse {
+	background-color: @brand-primary;
+	color: @brand-accent;
+	border-bottom: darken(@brand-primary, 15%);
+	.navbar-nav {
+		> li {
+			border-left: 1px solid darken(@brand-primary, 15%);
+			&:last-child {
+				border-right: 1px solid darken(@brand-primary, 15%);
+			}
+		}
+		> .active {
+			> a {
+				background-color: darken(@brand-primary, 10%);
+				color: @brand-accent;
+				&:hover, &:focus {
+					background-color: darken(@brand-primary, 10%);
+					color: @brand-accent;
+				}
+			}
+		}
+	}
+	a {
+		color: @gray;
+		&:hover {
+			background-color: white;
+			color: @brand-primary;
+		}
+	}
+	.dropdown-menu {
+		background-color: rgba(256, 256, 256, 0.95);
+		a {
+			color: @brand-accent;
+		}
+	}
+}
+.navbar-fixed-top {
+	margin-bottom: 0;
+}
+.header-container {
+	float: left;
+	overflow: auto;
+	width: 20%;
+}
+.navbar-container {
+	float: left;
+	width: 80%;
+}
 
-.navbar-default {
+// Navbar functionality
+.navbar-header {
+	overflow: auto;
+	@media @normal, @wide {
+		float: left;
+		width: 18%;
+	}
+	@media @mobile {
+		text-align: center;
+		padding-top: 1em;
+	}
+	.name, .navbar-brand {
+		color: @brand-primary;
+		.font-size(3.6);
+		font-weight: 700;
+		line-height: 1em;
+		letter-spacing: 3px;
+		margin: 0 !important;
+		padding: 5px 0 0;
+		text-transform: uppercase;
+		&:hover {
+			color: @brand-primary;
+		}
+		.navbar-inverse & {
+			&, &:hover {
+				color: @brand-accent;
+			}
+		}
+		@media @mobile {
+			display: block;
+			float: none;
+			overflow: auto;
+			width: 100%;
+		}
+	}
+	.logo {
+		img {
+			display: inline-block;
+			max-height: 100%;
+			max-width: 100%;
+		}
+		@media @mobile {
+			display: block;
+			margin: 0;
+			overflow: auto;
+			text-align: left;
+			max-width: 80%;
+		}
+	}
+	.navbar-toggle {
+		.icon-bar {
+			background-color: @gray-light;
+			.navbar-inverse & {
+				background-color: @brand-primary;
+			}
+		}
+	}
+}
+.navbar-collapse {
+	overflow: auto;
+	@media @normal, @wide {
+		float: left;
+		width: 82%;
+	}
+}
+
+.navbar-default, .navbar-inverse {
 	.navbar-nav {
 		display: table;
 		text-align: center;
@@ -89,23 +169,15 @@ header {
 			display: none;
 		}
 		> li {
-			border-left: 1px solid @gray-light;
 			display: table-cell;
 			float: none;
 			&.expanded {
 				> .dropdown-menu {
-					background-color: rgba(red(@brand-primary), green(@brand-primary), blue(@brand-primary), 0.95);
 					border: 0;
 					.box-shadow(none);
 					left: 0;
 					position: fixed;
 					width: 100%;
-					a {
-						color: @brand-accent;
-						&:hover {
-							text-decoration: underline;
-						}
-					}
 					@media @mobile {
 						.box-shadow(none);
 						position: relative;
@@ -118,17 +190,11 @@ header {
 					}
 				}
 			}
-			&:last-child {
-				border-right: 1px solid @gray-light;
-			}
 			> a {
-				color: @gray;
 				font-weight: 300;
 				padding: 15px 10px;
 				text-transform: uppercase;
 				&:hover {
-					background-color: white;
-					color: @brand-primary;
 				}
 			}
 			// Mobile navbar-nav > li
@@ -144,16 +210,6 @@ header {
 				}
 				> a {
 
-				}
-			}
-		}
-		> .active {
-			> a {
-				background-color: white;
-				color: @brand-primary;
-				&:hover, &:focus {
-					background-color: white;
-					color: @brand-primary;
 				}
 			}
 		}
