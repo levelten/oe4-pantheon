@@ -139,15 +139,16 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Inside content area'),
 		),
 	);
-	$form['enterprise_bootstrap_region_settings']['title']['title_container'] = array(
-		'#type' => 'select',
-		'#title' => t('Title Container'),
-		'#default_value' => theme_get_setting('title_container'),
-		'#options' => array(
-			'container' => t('Boxed'),
-			'wide' => t('Wide'),
-		),
-	);
+	// We might not actually need this. Keep in for historical purposes.
+	// $form['enterprise_bootstrap_region_settings']['title']['title_container'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('Title Container'),
+	// 	'#default_value' => theme_get_setting('title_container'),
+	// 	'#options' => array(
+	// 		'container' => t('Boxed'),
+	// 		'wide' => t('Wide'),
+	// 	),
+	// );
 	$form['enterprise_bootstrap_region_settings']['title']['title_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Title Class'),
@@ -255,6 +256,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('Development - jquery.fittext.js'),
 		),
 	);
+
 	// Equalizer plugin
 	// $form['enterprise_bootstrap_js']['equalize'] = array(
 	// 	'#type' => 'select',
@@ -311,4 +313,4 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'][$key]['#description'] = $bootstrap_desc[$key];
 	}
 
- } // end settings_alter
+} // end settings_alter

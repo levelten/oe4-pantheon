@@ -74,44 +74,29 @@
  */
 ?>
 
-  <!-- Navigation region -->
+  
   <?php include 'includes/navigation.inc'; ?>
-
-  <!-- Title -->
   <?php if(!$title_placement): include 'includes/title.inc'; endif; ?>
-  <!-- Top Bar (header) -->
   <?php include 'includes/header.inc'; ?>
-  <!-- Highlighted -->
   <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
 
   <div class="main-container container">
 
-  <div class="main-container-inner">
-    <!-- Sidebar First -->
-    <?php include 'includes/sidebar_first.inc'; ?>
-    <!-- /Sidebar First -->
+    <div class="main-container-inner">
+      <?php include 'includes/sidebar_first.inc'; ?>
+      <section id="main-content-region" <?php print $content_column_class; ?>>
 
-    <section id="main-content-region" <?php print $content_column_class; ?>>
+        <?php if($highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
+        <?php if($title_placement): include 'includes/title.inc'; endif; ?>
+        <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
 
-      <?php if($highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-      <?php if($title_placement): include 'includes/title.inc'; endif; ?>
-      <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
-      <a id="main-content"></a>
+        <a id="main-content"></a>
+        <?php include 'includes/information.inc'; ?>
+        <?php print render($page['content']); ?>
 
-      <!-- Information -->
-      <?php include 'includes/information.inc'; ?>
-      <!-- /Information -->
-
-      <?php print render($page['content']); ?>
-    </section>
-
-    <?php if (!empty($page['sidebar_second'])): ?>
-      <aside class="<?php print $sidebar_column_class; ?>" role="complementary">
-        <?php print render($page['sidebar_second']); ?>
-      </aside>  <!-- /#sidebar-second -->
-    <?php endif; ?>
+      </section>
+      <?php include 'includes/sidebar_second.inc'; ?>
     </div>
   </div>
 
-<!-- Footer region -->
 <?php include 'includes/footer.inc'; ?>

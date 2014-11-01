@@ -201,7 +201,7 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
         $mega = TRUE;
         continue;
       }
-  $primary_nav = &$variables['primary_nav'];
+      $primary_nav = &$variables['primary_nav'];
     }
     foreach(element_children($menu_array[$level1]['#below']) as $level2) {
       $menu_array[$level1]['#below'][$level2]['#mega'] = $mega;

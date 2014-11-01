@@ -1,3 +1,4 @@
+<!-- Information -->
 <?php if($is_front): ?>
 <div class="information <?php print $full_width_anti_container; ?>">
   <?php print render($title_suffix); ?>

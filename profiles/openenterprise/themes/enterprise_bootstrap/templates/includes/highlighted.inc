@@ -1,3 +1,4 @@
+<!-- Highlighted -->
 <?php if ($is_front): ?>
 	<?php if (!$full_width_front): ?>
 		<?php if (!empty($page['highlighted'])): ?>

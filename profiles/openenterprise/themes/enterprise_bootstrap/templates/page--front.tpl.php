@@ -74,28 +74,16 @@
  */
 ?>
 
-  <!-- Navigation region -->
   <?php include 'includes/navigation.inc'; ?>
-  <!-- /Navigation region -->
 
   <!-- Main Container -->
   <div class="main-container <?php print $full_width_container; ?>">
 
-    <!-- Top Bar (Header) -->
     <?php include 'includes/header.inc'; ?>
-    <!-- /Top Bar (Header) -->
 
-    <!-- Highlighted -->
     <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-    <!-- /Highlighted -->
-
-    <!-- #sidebar-first -->
     <?php if ($sidebars_front): include 'includes/sidebar_first.inc'; endif; ?>
-    <!-- /#sidebar-first -->
-
-    <!-- #information -->
     <?php include 'includes/information.inc'; ?>
-    <!-- /#information -->
 
     <section id="main-content-region" <?php if ($sidebars_front && !empty($page['sidebar_first']) || !empty($page['sidebar_second'])): print $content_column_class; endif; ?>>
 
@@ -106,12 +94,9 @@
       <?php print render($page['content']); ?>
     </section>
 
-    <!-- #sidebar-second -->
     <?php include 'includes/sidebar_second.inc'; ?>
-    <!-- /#sidebar-second -->
 
   </div>
   <!-- End Main Container -->
 
-<!-- Footer region -->
 <?php include 'includes/footer.inc'; ?>

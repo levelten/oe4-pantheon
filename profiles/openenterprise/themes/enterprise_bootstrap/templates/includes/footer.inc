@@ -1,3 +1,4 @@
+<!-- #sidebar-second -->
 <?php if ($footer_container): ?>
   <footer class="footer <?php print $footer_class; ?>">
     <?php if (!empty($page['footer'])): ?>

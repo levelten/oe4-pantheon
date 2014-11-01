@@ -1,3 +1,4 @@
+<!-- Top Bar (header) -->
 <?php if($is_front): ?>
 	<?php if(!$header_container_front): ?>
 		<?php if (!empty($page['header']) || !empty($site_slogan)): ?>
