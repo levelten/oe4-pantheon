@@ -20,10 +20,6 @@
         $(".logged-in #navbar .navbar-header .name", context).fitText(1.6);
       }
 
-      // Use equalize if loaded.
-      $("#navbar .navbar-header", context).addClass("equalizer");
-      $("#navbar .navbar-collapse .navbar-nav > li > a", context).addClass("equalizer");
-
       // Add margin depending on height of navbar.
       var $navbar = $("#navbar.navbar", context);
       var navbarHeight = $navbar.height();
