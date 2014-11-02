@@ -26,15 +26,15 @@ function blocker_get_blocks_list($region, $object, $account) {
   global $user;
   // No clean way to pass in url or user so override system and reset.
   $orig_q = $_GET['q'];
-//  $orig_user = $user;
+  // $orig_user = $user;
   
   $entity_uri = entity_uri($object->entity_type, $object);
   $_GET['q'] = $entity_uri['path'];
-//  $user = $account;
+  // $user = $account;
   
   $blocks = block_list($region);
   
-//  $user = $orig_user;
+  // $user = $orig_user;
   $_GET['q'] = $orig_q;
 
   // Unset static cache as it is storing the wrong results.
@@ -52,15 +52,18 @@ function blocker_get_blocks_list($region, $object, $account) {
       if ($blocker->title) {
         $block->title = $blocker->title;
       }
-      $block->css_class = $blocker->css_class;
+      // Append class if checked.
+      if ($blocker->block_class_check) {
+        $block->css_class = trim($block->css_class.' '.$blocker->css_class);
+      }
       $block->row = $blocker->row;
       $block->row_class = $blocker->row_class;
       $block->brid = $blocker->brid; // Save off brid to use later for edit link.
       $blocks[$block->module . '_' . $block->delta] = $block;
     }
   }
-  
   return $blocks;
+  
 }
 
 /**
@@ -100,9 +103,12 @@ function blocker_page_build(&$page) {
       foreach($blockers as $brid => $blocker) {
         $block = block_load($blocker->module, $blocker->delta);
         $block->weight = $blocker->weight;
-        $block->css_class = $blocker->css_class;
         $block->row = $blocker->row;
         $block->row_class = $blocker->row_class;
+        // Append class if checked.
+        if ($blocker->block_class_check) {
+          $block->css_class = trim($block->css_class.' '.$blocker->css_class);
+        }
         if ($blocker->title == '<none>') {
           $block->title = '';
         }
@@ -318,11 +324,7 @@ function blocker_form_block_admin_configure_alter(&$form, &$form_state, $form_id
  */
 function blocker_preprocess_block(&$variables, $hook) {
   $block = &$variables['block'];
-  if (isset($block->css_class)) {
-    foreach(explode(' ' , $block->css_class) as $class) {
-      if (!in_array($class, $variables['classes_array'])) {
-        $variables['classes_array'][] = $class;
-      }
-    }
+  if (isset($block->css_class) && $block->css_class != '') {
+    $variables['classes_array'] = array_merge($variables['classes_array'], explode(' ', $block->css_class));
   }
 }
