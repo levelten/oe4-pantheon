@@ -1,6 +1,18 @@
 <?php
 
 /**
+* Implements hook_permission().
+*/
+function blocker_ui_permission() {
+  return array(
+    'manage blocker blocks' => array(
+      'title' => t('Manage Blocker blocks'),
+      'description' => t('Access Blocker block management page and associated settings.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function blocker_ui_menu() {
@@ -41,7 +53,7 @@ function blocker_ui_menu() {
     'description' => t('Manage blocks with Blocker on this content.'),
     'page callback' => 'blocker_ui_blocks_page',
     'page arguments' => array(1, 'node'),
-    'access callback' => 'node_access',
+    'access callback' => 'blocker_ui_blocks_page_access',
     'access arguments' => array('update', 1),
     'type' => MENU_LOCAL_TASK,
   );
@@ -70,10 +82,20 @@ function blocker_ui_menu() {
   return $items;
 }
 
+function blocker_ui_blocks_page_access($op, $node) {
+  if (!user_access('manage blocker blocks')) {
+    return false;
+  }
+  return node_access($op, $node);
+}
+
 /**
  * Access callback for adding blockers
  */
 function blocker_ui_add_access($entity_type, $entity_id) {
+  if (!user_access('manage blocker blocks')) {
+    return false;
+  }
   $entities = entity_load($entity_type, array($entity_id));
   return blocker_ui_entity_access_check(reset($entities), 'update');
 }
@@ -84,6 +106,9 @@ function blocker_ui_add_access($entity_type, $entity_id) {
  * @param type $blocker
  */
 function blocker_ui_access($blocker) {
+  if (!user_access('manage blocker blocks')) {
+    return false;
+  }
   $entities = entity_load($blocker->entity_type, array($blocker->entity_id));
   return blocker_ui_entity_access_check(reset($entities), 'update');
 }
