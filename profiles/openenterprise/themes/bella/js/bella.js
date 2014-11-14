@@ -20,17 +20,23 @@
         $(".logged-in #navbar .navbar-header .name", context).fitText(1.6);
       }
 
-      // Add margin depending on height of navbar.
+      // Use for the following navigation updates.
       var $navbar = $("#navbar", context);
-      var navbarHeight = $navbar.height();
 
       // Equal width nav items.
       var $navbarNav = $(".navbar-nav", $navbar);
-      var navbarChildren = $navbarNav.children().length;
-      $navbarNav.children().width(100/navbarChildren+"%");
+      var $navbarChildren = $navbarNav.children();
+      $navbarNav.width(100+"%");
+      $navbarChildren.width(100/$navbarChildren.length+"%");
+      $navbarChildren.each(function() {
+        $(".dropdown-menu", this).width($(this).width());
+      });
 
       // Set height of header for logo positioning.
+      var navbarHeight = $navbar.height();
       var headerHeight = $(".navbar-header", $navbar).height();
+      window.console.log("Navbar height: "+navbarHeight);
+      window.console.log("Header height: "+headerHeight);
       if (headerHeight < navbarHeight) {
         $(".navbar-header", $navbar).height(navbarHeight);
       }
