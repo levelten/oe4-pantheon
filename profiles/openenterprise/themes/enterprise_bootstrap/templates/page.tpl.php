@@ -82,7 +82,7 @@
 
   <div class="main-container container">
 
-    <div class="main-container-inner">
+    <div class="main-container-inner row">
       <?php include 'includes/sidebar_first.inc'; ?>
       <section id="main-content-region" <?php print $content_column_class; ?>>
 

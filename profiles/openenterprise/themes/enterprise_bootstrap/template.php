@@ -228,6 +228,8 @@ function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
  */
 function enterprise_bootstrap_menu_link(array $variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  
   if (!$enterprise_mega) {
     // Default Bootstrap menu
     $element = $variables['element'];
@@ -248,11 +250,13 @@ function enterprise_bootstrap_menu_link(array $variables) {
         $element['#attributes']['class'][] = 'dropdown';
         $element['#localized_options']['html'] = TRUE;
 
-        // Set dropdown trigger element to # to prevent inadvertant page loading
-        // when a submenu link is clicked.
-        $element['#localized_options']['attributes']['data-target'] = '#';
-        $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
-        $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
+        if ($mobile_dropdown) {
+          // Set dropdown trigger element to # to prevent inadvertant page loading
+          // when a submenu link is clicked.
+          $element['#localized_options']['attributes']['data-target'] = '#';
+          $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
+          $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
+        }
       }
     }
     // On primary navigation menu, class 'active' is not set on active menu item.
