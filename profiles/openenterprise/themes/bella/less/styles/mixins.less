@@ -10,3 +10,23 @@
 		border-bottom: 2px solid @color;
 	}
 }
+
+.heading-underline-center(@left: 25%, @width: 50%, @color: @gray-light) {
+	position: relative;
+	&:after {
+		content: "";
+		left: @left;
+		bottom: 0;
+		height: 1px;
+		position: absolute;
+		width: @width;
+		border-bottom: 2px solid @color;
+	}
+}
+
+.transition-transform(@property:all, @duration:0.2s, @delay: 0s) {
+  -webkit-transition: @property @duration -webkit-transform @delay;
+  -moz-transition: @property @duration, -moz-transform @delay;
+  -o-transition: @property @duration, -o-transform @delay;
+  transition: @property @duration, transform @delay;
+}

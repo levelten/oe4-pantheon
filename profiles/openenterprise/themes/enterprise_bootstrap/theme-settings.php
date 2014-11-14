@@ -15,9 +15,21 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#title' => t('Display settings'),
 		'#description' => t('Full width, block striping, etc.'),
 	);
-	$form['enterprise_bootstrap_config']['enterprise_bootstrap_front_container'] = array(
+	$form['enterprise_bootstrap_config']['column_left'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('column-left'),
+	  ),
+	);
+	$form['enterprise_bootstrap_config']['column_right'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('column-right'),
+	  ),
+	);
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_front_container'] = array(
 		'#type' => 'select',
-		'#title' => t('Full Width Block Containers'),
+		'#title' => t('Full Width Front Page'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_front_container'),
 		'#description' => t('Choose to either turn the blocks on the front page into full-width containers or leave them boxed.'),
 		'#options' => array(
@@ -25,7 +37,22 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Wide'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['enterprise_bootstrap_sidebar_column'] = array(
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_sidebars_front'] = array(
+		'#type' => 'select',
+		'#title' => t('Sidebars on Front'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_sidebars_front'),
+		'#description' => t('If no, the sidebars will never be loaded on the front page. Alternatively, if sidebars are allowed and exist, the front page will never be rendered as wide.'),
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+		'#states' => array(
+      'visible' => array(
+        ':input[name=enterprise_bootstrap_front_container]' => array('value' => 0),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_sidebar_column'] = array(
 		'#type' => 'select',
 		'#title' => t('Sidebar Column Width'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_sidebar_column'),
@@ -35,27 +62,37 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Wide'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['enterprise_bootstrap_sidebars_front'] = array(
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_megamenu'] = array(
 		'#type' => 'select',
-		'#title' => t('Sidebars on Front'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_sidebars_front'),
-		'#description' => t('If no, the sidebars will never be loaded on the front page. Alternatively, if sidebars are allowed and exist, the front page will never be rendered as wide.'),
+		'#title' => t('Mega Menu'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_megamenu'),
+		'#description' => t('Choose either the default Bootstrap or Enterprise Bootstrap mega menu.'),
 		'#options' => array(
-			0 => t('No'),
+			1 => t('Enterprise Mega Menu'),
+			0 => t('Bootstrap Default'),
+		),
+	);
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_dropdown'] = array(
+		'#type' => 'select',
+		'#title' => t('Mobile Dropdown Menu'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
+		'#description' => t('Allow secondary dropdown menus on mobile. For example, dropdowns inside of dropdowns.'),
+		'#options' => array(
+			0 => t('No (default)'),
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['enterprise_bootstrap_block_striping'] = array(
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
-		'#description' => t('Adds block striping classes to the home page.'),
+		'#description' => t('Adds odd/even classes to blocks on the home page.'),
 		'#options' => array(
 			0 => t('No'),
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['enterprise_bootstrap_blokkfont'] = array(
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_blokkfont'] = array(
 		'#type' => 'select',
 		'#title' => t('Blokk Font'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
@@ -71,33 +108,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#group' => 'enterprise_bootstrap',
 		'#title' => t('Region settings'),
 		'#description' => t('Settings regarding the container status of each region (excluding the front page).'),
-	);
-
-	/********************* Front Page Settings ***********************/
-	$form['enterprise_bootstrap_region_settings']['front_page'] = array(
-		'#type' => 'fieldset',
-		'#group' => 'enterprise_bootstrap_region_settings',
-		'#title' => t('Front Page Settings Only'),
-		'#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-	);
-	$form['enterprise_bootstrap_region_settings']['front_page']['header_container_front'] = array(
-		'#type' => 'select',
-		'#title' => t('Top Bar (Header) Container'),
-		'#default_value' => theme_get_setting('header_container_front'),
-		'#options' => array(
-			0 => t('Boxed'),
-			1 => t('Wide'),
-		),
-	);
-	$form['enterprise_bootstrap_region_settings']['front_page']['highlighted_container_front'] = array(
-		'#type' => 'select',
-		'#title' => t('Highlighted Container'),
-		'#default_value' => theme_get_setting('highlighted_container_front'),
-		'#options' => array(
-			0 => t('Boxed'),
-			1 => t('Wide'),
-		),
 	);
 
 	/********************* Navigation Region Settings ***********************/
@@ -256,18 +266,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('Development - jquery.fittext.js'),
 		),
 	);
-
-	// Equalizer plugin
-	// $form['enterprise_bootstrap_js']['equalize'] = array(
-	// 	'#type' => 'select',
-	// 	'#title' => t('equalize.js'),
-	// 	'#description' => t('The jQuery plugin for equalizing the height or width of your elements. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/tsvensen/equalize.js'))),
-	// 	'#default_value' => (theme_get_setting('equalize')) ? theme_get_setting('equalize') : 0,
-	// 	'#options' => array(
-	// 		0 => t('Disabled'),
-	// 		1 => t('Enabled'),
-	// 	),
-	// );
 
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',

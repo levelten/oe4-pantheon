@@ -18,9 +18,27 @@ function enterprise_bootstrap_process_page(&$variables) {
   ) {
     enterprise_bootstrap_transform_main_menu($variables['page']['navigation']['system_main-menu']);
   }
+    if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
+      enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+    }
+}
 
-  if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
-    enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+/**
+ * Set proper attributes for main menu
+ */
+function enterprise_bootstrap_transform_main_menu(&$menu_array) {
+  foreach(element_children($menu_array) as $level1) {
+    $mega = FALSE;
+    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
+      if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
+        $mega = TRUE;
+        continue;
+      }
+      $primary_nav = &$variables['primary_nav'];
+    }
+    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
+      $menu_array[$level1]['#below'][$level2]['#mega'] = $mega;
+    }
   }
 }
 
@@ -28,7 +46,10 @@ function enterprise_bootstrap_process_page(&$variables) {
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
-    // Preprocess blocks on home page for striping.
+  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  drupal_add_js(array('enterprise_bootstrap' => array('mobilemenu' => $mobile_dropdown)), array('type' => 'setting'));
+
+  // Preprocess blocks on home page for striping.
   if (module_exists('block_class')) {
     $front_blocks = $variables['page']['content'];
     foreach ($front_blocks as $key => $value) {
@@ -191,42 +212,58 @@ function enterprise_bootstrap_preprocess_block(&$variables) {
 }
 
 /**
- * Set proper attributes for main menu
- */
-function enterprise_bootstrap_transform_main_menu(&$menu_array) {
-  foreach(element_children($menu_array) as $level1) {
-    $mega = FALSE;
-    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
-      if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
-        $mega = TRUE;
-        continue;
-      }
-      $primary_nav = &$variables['primary_nav'];
-    }
-    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
-      $menu_array[$level1]['#below'][$level2]['#mega'] = $mega;
-    }
-  }
-}
-
-/**
- * Bootstrap theme wrapper function for the primary menu links.
- */
-function enterprise_bootstrap_menu_tree__primary(&$variables) {
-  return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
-}
-
-/**
  * Bootstrap theme wrapper function for the primary menu links.
  */
 function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
-  return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  if ($enterprise_mega) {
+    return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+  } else {
+    return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+  }
 }
 
 /**
  * Overrides theme_menu_link().
  */
 function enterprise_bootstrap_menu_link(array $variables) {
+  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  if (!$enterprise_mega) {
+    // Default Bootstrap menu
+    $element = $variables['element'];
+    $sub_menu = '';
+
+    if ($element['#below']) {
+      // Prevent dropdown functions from being added to management menu so it
+      // does not affect the navbar module.
+      if (($element['#original_link']['menu_name'] == 'management') && (module_exists('navbar'))) {
+        $sub_menu = drupal_render($element['#below']);
+      }
+      elseif ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 1)) {
+        // Add our own wrapper.
+        unset($element['#below']['#theme_wrappers']);
+        $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
+        // Generate as standard dropdown.
+        $element['#title'] .= ' <span class="caret"></span>';
+        $element['#attributes']['class'][] = 'dropdown';
+        $element['#localized_options']['html'] = TRUE;
+
+        // Set dropdown trigger element to # to prevent inadvertant page loading
+        // when a submenu link is clicked.
+        $element['#localized_options']['attributes']['data-target'] = '#';
+        $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
+        $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
+      }
+    }
+    // On primary navigation menu, class 'active' is not set on active menu item.
+    // @see https://drupal.org/node/1896674
+    if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
+      $element['#attributes']['class'][] = 'active';
+    }
+    $output = l($element['#title'], $element['#href'], $element['#localized_options']);
+    return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
+  } // end default Bootstrap
+
   $element = $variables['element'];
   $sub_menu = '';
 

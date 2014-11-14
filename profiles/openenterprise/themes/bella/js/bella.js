@@ -24,7 +24,9 @@
       var $navbar = $("#navbar.navbar", context);
       var navbarHeight = $navbar.height();
       if ($("body", context).hasClass("logged-in", "admin-menu")){
-        navbarHeight += 28;
+        navbarHeight += 30;
+      } else {
+        navbarHeight += 1;
       }
 
       $("body.html", context).css("padding-top", navbarHeight+"px");
