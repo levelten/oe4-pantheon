@@ -24,6 +24,11 @@
       var $navbar = $("#navbar", context);
       var navbarHeight = $navbar.height();
 
+      // Equal width nav items.
+      var $navbarNav = $(".navbar-nav", $navbar);
+      var navbarChildren = $navbarNav.children().length;
+      $navbarNav.children().width(100/navbarChildren+"%");
+
       // Set height of header for logo positioning.
       var headerHeight = $(".navbar-header", $navbar).height();
       if (headerHeight < navbarHeight) {
