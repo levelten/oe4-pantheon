@@ -21,14 +21,20 @@
       }
 
       // Add margin depending on height of navbar.
-      var $navbar = $("#navbar.navbar", context);
+      var $navbar = $("#navbar", context);
       var navbarHeight = $navbar.height();
+
+      // Set height of header for logo positioning.
+      var headerHeight = $(".navbar-header", $navbar).height();
+      if (headerHeight < navbarHeight) {
+        $(".navbar-header", $navbar).height(navbarHeight);
+      }
+
       if ($("body", context).hasClass("logged-in", "admin-menu")){
         navbarHeight += 30;
       } else {
         navbarHeight += 1;
       }
-
       $("body.html", context).css("padding-top", navbarHeight+"px");
       $("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
       $(window).resize(function(){

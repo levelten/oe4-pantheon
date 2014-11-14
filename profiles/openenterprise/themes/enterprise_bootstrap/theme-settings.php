@@ -12,7 +12,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_config'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
-		'#title' => t('Display settings'),
+		'#title' => t('Display'),
 		'#description' => t('Full width, block striping, etc.'),
 	);
 	$form['enterprise_bootstrap_config']['column_left'] = array(
@@ -106,7 +106,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
-		'#title' => t('Region settings'),
+		'#title' => t('Region'),
 		'#description' => t('Settings regarding the container status of each region (excluding the front page).'),
 	);
 
@@ -252,7 +252,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_js'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
-		'#title' => t('Javascript settings'),
+		'#title' => t('Javascript'),
 		'#description' => t('Which Javascript libraries or scripts to include.'),
 	);
 	$form['enterprise_bootstrap_js']['fittext'] = array(
