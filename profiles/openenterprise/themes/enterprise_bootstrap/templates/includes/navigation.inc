@@ -23,7 +23,7 @@
 
     <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
       <div class="navbar-collapse collapse <?php print $nav_menu_class; ?>">
-        <nav role="navigation">
+        <nav class="navbar-menu" role="navigation">
           <?php if (!empty($primary_nav)): ?>
             <?php print render($primary_nav); ?>
           <?php endif; ?>

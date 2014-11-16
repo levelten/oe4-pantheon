@@ -33,12 +33,13 @@
       });
 
       // Set height of header for logo positioning.
+      var logoHeight = $(".navbar-header img", $navbar).height();
       var navbarHeight = $navbar.height();
-      var headerHeight = $(".navbar-header", $navbar).height();
+      window.console.log("Logo height: "+logoHeight);
       window.console.log("Navbar height: "+navbarHeight);
-      window.console.log("Header height: "+headerHeight);
-      if (headerHeight < navbarHeight) {
+      if (logoHeight < navbarHeight) {
         $(".navbar-header", $navbar).height(navbarHeight);
+        $(".navbar-header .logo", $navbar).addClass("vertical-align");
       }
 
       if ($("body", context).hasClass("logged-in", "admin-menu")){
