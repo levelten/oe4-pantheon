@@ -21,37 +21,55 @@
       }
 
       // Use for the following navigation updates.
-      var $navbar = $("#navbar", context);
+      var navbar = context.getElementById("navbar");
 
       // Equal width nav items.
-      var $navbarNav = $(".navbar-nav", $navbar);
-      var $navbarChildren = $navbarNav.children();
-      $navbarNav.width(100+"%");
-      $navbarChildren.width(100/$navbarChildren.length+"%");
-      $navbarChildren.each(function() {
-        $(".dropdown-menu", this).width($(this).width());
+      var navbarNav = navbar.querySelector(".navbar-nav");
+      var navbarChildren = navbarNav.children;
+      navbarNav.style.width = "100%";
+      var navbarChildWidth = 100/navbarChildren.length+"%";
+
+      Array.prototype.forEach.call(navbarChildren,function(el){
+        el.style.width = navbarChildWidth;
       });
 
       // Set height of header for logo positioning.
-      var logoHeight = $(".navbar-header img", $navbar).height();
-      var navbarHeight = $navbar.height();
-      window.console.log("Logo height: "+logoHeight);
-      window.console.log("Navbar height: "+navbarHeight);
-      if (logoHeight < navbarHeight) {
-        $(".navbar-header", $navbar).height(navbarHeight);
-        $(".navbar-header .logo", $navbar).addClass("vertical-align");
+      var brand = navbar.querySelector(".navbar-header .navbar-brand");
+      var brandHeight = brand.offsetHeight;
+      var navbarHeight = navbar.offsetHeight;
+
+      // If the branding area is smaller than the navigation, vertically align the branding (name, logo).
+      if (brandHeight < navbarHeight) {
+        var regionHeight = navbar.querySelector(".region-navigation").offsetHeight;
+        brand.style.maxHeight = (regionHeight-10)+"px";
+        navbar.querySelector(".navbar-header").style.height = context.getElementById("navbar").offsetHeight+"px";
+        if (brand.classList) {
+          brand.classList.add("vertical-align");
+        } else {
+          brand.className += " " + "vertical-align";
+        }
       }
 
+      // Add extra pixels if we're logged in.
       if ($("body", context).hasClass("logged-in", "admin-menu")){
         navbarHeight += 30;
       } else {
         navbarHeight += 1;
       }
-      $("body.html", context).css("padding-top", navbarHeight+"px");
-      $("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
+
+      // Set up objects.
+      var bodyHtml = context.querySelector("body.html");
+      var dropdownMenu = context.querySelector("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu");
+
+      // Add padding and top to dropwdown to position correctly for fixed menu.
+      bodyHtml.style.paddingTop = navbarHeight+"px";
+      dropdownMenu.style.top = navbarHeight+"px";
+
+      // Update based on window resizing.
       $(window).resize(function(){
-        $("body.html", context).css("padding-top", navbarHeight+"px");
-        $("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu", context).css("top", navbarHeight+"px");
+        navbarHeight = context.getElementById("navbar").offsetHeight;
+        bodyHtml.style.paddingTop = navbarHeight+"px";
+        dropdownMenu.style.top = navbarHeight+"px";
       });
 
     }
