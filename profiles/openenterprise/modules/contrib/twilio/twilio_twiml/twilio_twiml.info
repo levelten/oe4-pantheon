@@ -1,8 +1,8 @@
-name = Twilio
-description = Integration the Twilio cloud communication service with Drupal
+name = Twilio TwiML
+description = Add TwiML support to the Twilio Module
 core = 7.x
 package = Twilio
-dependencies[] = libraries
+dependencies[] = twilio
 
 ; Information added by Drupal.org packaging script on 2014-09-12
 version = "7.x-1.9"

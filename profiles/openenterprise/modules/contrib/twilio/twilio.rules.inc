@@ -5,6 +5,54 @@
  */
 
 /**
+ * Implementation hook_rules_data_info().
+ */
+function twilio_rules_data_info() {
+  return array(
+    'sms' => array(
+      'label' => t('Twilio incoming SMS'),
+      'wrap' => TRUE,
+      'property info' => array(
+        'number' => array(
+          'type' => 'text',
+          'label' => t('Number'),
+          'description' => t('The phone number of the incoming SMS.'),
+          'getter callback' => 'entity_property_verbatim_get',
+          'setter callback' => 'entity_property_verbatim_set',
+        ),
+        'message' => array(
+          'type' => 'text',
+          'label' => t('Message'),
+          'description' => t('The message of the incoming SMS.'),
+          'getter callback' => 'entity_property_verbatim_get',
+          'setter callback' => 'entity_property_verbatim_set',
+        ),
+        'media' => array(
+          'type' => 'text',
+          'label' => t('Media'),
+          'description' => t('The media attached to the incoming SMS.'),
+          'getter callback' => 'entity_property_verbatim_get',
+          'setter callback' => 'entity_property_verbatim_set',
+        ),
+      ),
+    ),
+    'voice' => array(
+      'label' => t('Twilio incoming Voice'),
+      'wrap' => TRUE,
+      'property info' => array(
+        'number' => array(
+          'type' => 'text',
+          'label' => t('Number'),
+          'description' => t('The phone number of the incoming call.'),
+          'getter callback' => 'entity_property_verbatim_get',
+          'setter callback' => 'entity_property_verbatim_set',
+        ),
+      ),
+    ),
+  );
+}
+
+/**
  * Implements hook_event_info().
  */
 function twilio_rules_event_info() {
@@ -16,40 +64,18 @@ function twilio_rules_event_info() {
     'twilio_sms_incoming' => $defaults + array(
       'label' => t('Drupal receives an SMS'),
       'variables' => array(
-        'number' => array(
-          'type' => 'text',
-          'label' => t('Number'),
-        ),
-        'message' => array(
-          'type' => 'text',
-          'label' => t('Message'),
+        'sms' => array(
+          'type' => 'sms',
+          'label' => t('Twilio incoming SMS'),
         ),
       ),
     ),
     'twilio_voice_incoming' => $defaults + array(
       'label' => t('Drupal receives a voice call'),
       'variables' => array(
-        'number' => array(
-          'type' => 'text',
-          'label' => t('Number'),
-        ),
-      ),
-    ),
-    'twilio_sms_incoming_from_user' => $defaults + array(
-      'label' => t('Drupal receives an SMS from a site user'),
-      'variables' => array(
-        'number' => array(
-          'type' => 'text',
-          'label' => t('Number'),
-        ),
-        'message' => array(
-          'type' => 'text',
-          'label' => t('Message'),
-        ),
-        'account' => array(
-          'type' => 'user',
-          'label' => t('User'),
-          'save' => TRUE,
+        'voice' => array(
+          'type' => 'voice',
+          'label' => t('Twilio incoming Voice'),
         ),
       ),
     ),
@@ -67,6 +93,17 @@ function twilio_rules_condition_info() {
         'number' => array(
           'type' => 'text',
           'label' => t('Phone Number'),
+        ),
+      ),
+      'group' => t('Twilio'),
+      'module' => 'twilio',
+    ),
+    'twilio_rules_condition_user_has_verified_number' => array(
+      'label' => t('User has a verified number'),
+      'arguments' => array(
+        'account' => array(
+          'type' => 'user',
+          'label' => t('User'),
         ),
       ),
       'group' => t('Twilio'),
@@ -96,17 +133,10 @@ function twilio_rules_action_info() {
         'type' => 'text',
         'label' => t('Message'),
       ),
-    ),
-  );
-  $actions['twilio_twiml_output'] = $defaults + array(
-    'label' => t('Output TwiML'),
-    'base' => 'twilio_rules_twiml_output',
-    'parameter' => array(
-      'twiml_id' => array(
+      'media' => array(
         'type' => 'text',
-        'label' => t('TwiML'),
-        'options list' => 'twilio_twiml_options_list',
-        'restriction' => 'input',
+        'optional' => TRUE,
+        'label' => t('Media path'),
       ),
     ),
   );
@@ -127,6 +157,11 @@ function twilio_rules_action_info() {
         'type' => 'text',
         'label' => t('Message'),
       ),
+      'media' => array(
+        'type' => 'text',
+        'optional' => TRUE,
+        'label' => t('Media path'),
+      ),
     ),
   );
   return $actions;
@@ -135,17 +170,17 @@ function twilio_rules_action_info() {
 /**
  * Action: Send an SMS to a user.
  */
-function twilio_rules_action_send_sms_to_user($account, $message) {
+function twilio_rules_action_send_sms_to_user($account, $message, $media) {
   if (!empty($account->twilio_user['number']) && $account->twilio_user['status'] == 2) {
-    twilio_send($account->twilio_user['number'], $message, $account->twilio_user['country']);
+    twilio_send($account->twilio_user['number'], $message, $account->twilio_user['country'], $media);
   }
 }
 
 /**
  * Action: Send an SMS to a number.
  */
-function twilio_rules_action_send_sms_to_number($country, $number, $message) {
-  twilio_send($number, $message, $country);
+function twilio_rules_action_send_sms_to_number($country, $number, $message, $media) {
+  twilio_send($number, $message, $country, $media);
 }
 
 /**
@@ -156,10 +191,12 @@ function twilio_rules_condition_number_belongs_to_user($number) {
 }
 
 /**
- * Action: Output TwiML.
+ * Condition: Validate if the user has a verified number.
  */
-function twilio_rules_twiml_output($twiml_id) {
-  $twiml = twilio_twiml_load($twiml_id);
-  echo $twiml['data'];
-  exit();
+function twilio_rules_condition_user_has_verified_number($user) {
+  // Check if the user has TWILIO_USER_CONFIRMED status.
+  if (!empty($user->twilio_user) && $user->twilio_user['status'] == TWILIO_USER_CONFIRMED) {
+    return TRUE;
+  }
+  return FALSE;
 }
