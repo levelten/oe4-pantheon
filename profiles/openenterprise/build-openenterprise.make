@@ -27,7 +27,8 @@ projects[drupal][patch][865536] = http://drupal.org/files/drupal-865536-204.patc
 
 ; _menu_load_objects() is not always called when building menu trees
 ; http://drupal.org/node/1697570
-projects[drupal][patch][1697570] = http://drupal.org/files/drupal-menu_always_load_objects-1697570-5.patch
+; projects[drupal][patch][1697570] = http://drupal.org/files/drupal-menu_always_load_objects-1697570-5.patch
+projects[drupal][patch][1697570] = https://www.drupal.org/files/drupal7.menu-system.1697570-29.patch
 
 ; user_role_grant_permissions() throws PDOException when used for a disabled module's permission or with non-existent permissions
 ; http://drupal.org/node/737816
