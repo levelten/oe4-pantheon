@@ -46,23 +46,26 @@ Drupal.behaviors.disqus = {
           if (settings.disqus.sso || false) {
             this.sso = settings.disqus.sso;
           }
-          if (settings.disqus.callback_onnewcomment || false) {
-            this.callbacks.onNewComment = [function(comment) { 
-              var namespaces = settings.disqus.callback_onnewcomment.split(".");
-              var func = namespaces.pop();
-              var context = window;
-              for(var i = 0; i < namespaces.length; i++) {
-                context = context[namespaces[i]];
+          if (settings.disqus.callbacks || false) {
+            for (var key in settings.disqus.callbacks) {
+              for (var i = 0; i < settings.disqus.callbacks[key].length; i++) {
+                var callback = settings.disqus.callbacks[key][i].split('.');
+                var fn = window;
+                for (var j = 0; j < callback.length; j++) {
+                  fn = fn[callback[j]];
+                }
+                if(typeof fn === 'function') {
+                  this.callbacks[key].push(fn);
+                }
               }
-              context[func](comment);
-             }];
+            }
           }
         };
 
         // Make the AJAX call to get the Disqus comments.
         jQuery.ajax({
           type: 'GET',
-          url: 'http://' + disqus_shortname + '.disqus.com/embed.js',
+          url: '//' + disqus_shortname + '.disqus.com/embed.js',
           dataType: 'script',
           cache: false
         });
@@ -74,7 +77,7 @@ Drupal.behaviors.disqus = {
         // Make the AJAX call to get the number of comments.
         jQuery.ajax({
           type: 'GET',
-          url: 'http://' + disqus_shortname + '.disqus.com/count.js',
+          url: '//' + disqus_shortname + '.disqus.com/count.js',
           dataType: 'script',
           cache: false
         });
