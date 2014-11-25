@@ -17,6 +17,12 @@ header {
 					color: @brand-primary;
 				}
 			}
+			&.active-trail, &:hover {
+				> a {
+					background-color: transparent;
+					color: @brand-primary;
+				}
+			}
 		}
 		> .active {
 			> a {
@@ -37,6 +43,12 @@ header {
 	.navbar-nav {
 		> li {
 			border-left: 1px solid darken(@brand-primary, 15%);
+			&.active-trail, &:hover {
+				> a {
+					background-color: darken(@brand-primary, 10%);
+					color: @brand-accent;
+				}
+			}
 			&:last-child {
 				border-right: 1px solid darken(@brand-primary, 15%);
 			}
@@ -184,12 +196,6 @@ header {
 				overflow: auto;
 				width: 50% !important;
 			}
-			&.active-trail, &:hover {
-				> a {
-					background-color: transparent;
-					color: @brand-primary;
-				}
-			}
 			&.expanded {
 				@media @tablet {
 					> .dropdown-menu {
@@ -216,11 +222,13 @@ header {
 						}
 					}
 					&:hover {
-						> .dropdown-menu {
-							border-top: 0;
-							display: block;
-							position: fixed;
-							left: auto;
+						.navbar-is-fixed-top & {
+							> .dropdown-menu {
+								border-top: 0;
+								display: block;
+								position: fixed;
+								left: auto;
+							}
 						}
 					}
 				}
