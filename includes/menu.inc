@@ -2832,10 +2832,9 @@ function _menu_navigation_links_rebuild($menu) {
     // check this for parents instead of querying the database.
     $parent_candidates = array();
     // Make sure no child comes before its parent.
-    asort($sort, SORT_NUMERIC);
+    array_multisort($sort, SORT_NUMERIC, $menu_links);
 
-    foreach (array_keys($sort) as $path) {
-      $item = $menu_links[$path];
+    foreach ($menu_links as $key => $item) {
       $existing_item = db_select('menu_links')
         ->fields('menu_links')
         ->condition('link_path', $item['path'])
@@ -2863,7 +2862,7 @@ function _menu_navigation_links_rebuild($menu) {
         $item = _menu_link_build($item);
         menu_link_save($item, $existing_item, $parent_candidates);
         $parent_candidates[$item['mlid']] = $item;
-        unset($menu_links[$path]);
+        unset($menu_links[$key]);
       }
     }
   }
@@ -3626,9 +3625,9 @@ function _menu_router_build($callbacks) {
       $sort[$path] = $number_parts;
     }
   }
-  asort($sort, SORT_NUMERIC);
+  array_multisort($sort, SORT_NUMERIC, $menu);
   // Apply inheritance rules.
-  foreach (array_keys($sort) as $path) {
+  foreach ($menu as $path => $v) {
     $item = &$menu[$path];
     if (!$item['_tab']) {
       // Non-tab items.
