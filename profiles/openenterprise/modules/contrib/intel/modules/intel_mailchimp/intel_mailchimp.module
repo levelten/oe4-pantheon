@@ -332,7 +332,7 @@ function intel_mailchimp_intel_sync_visitordata(&$visitor) {
     }
   }
 
-  if (empty($sync_ids) && (!$default_list_id || !empty($visitor) && !$visitor->email)) {
+  if (empty($sync_ids) && (!$default_list_id || empty($visitor) || !$visitor->email)) {
     return TRUE;
   }
 
