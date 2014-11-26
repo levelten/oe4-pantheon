@@ -61,6 +61,7 @@ dependencies[] = token_filter
 dependencies[] = admin_menu
 dependencies[] = admin_menu_toolbar
 dependencies[] = better_formats
+dependencies[] = fitvids
 dependencies[] = jquery_update
 dependencies[] = luxe
 dependencies[] = module_filter

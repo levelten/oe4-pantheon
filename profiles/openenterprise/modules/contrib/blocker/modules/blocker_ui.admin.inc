@@ -80,12 +80,23 @@ function blocker_ui_edit_form($form, $form_state, $blocker) {
   );
   
   if (module_exists('block_class')) {
-    $form['css_class'] = array(
+    $form['block_class'] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['block_class']['css_class'] = array(
       '#type' => 'textfield',
       '#title' => t('CSS class(es)'),
       '#default_value' => isset($blocker->css_class) ? $blocker->css_class : '',
       '#description' => t('Customize the styling of this block by adding CSS classes. Separate multiple classes by spaces.'),
       '#maxlength' => 255,
+    );
+    $form['block_class']['block_class_check'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Append existing CSS class(es)'),
+      '#default_value' => isset($blocker->block_class_check) ? $blocker->block_class_check : 0,
+      '#description' => t('If this block has existing CSS classes, you can choose to have them appended.'),
     );
   }
   

@@ -303,10 +303,10 @@ img {
   border-radius: 0;
   -webkit-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
-  -webkit-transition: all all 0.2s ease-in-out ease-out 0s;
-  -moz-transition: all all 0.2s ease-in-out ease-out 0s;
-  -o-transition: all all 0.2s ease-in-out ease-out 0s;
-  transition: all all 0.2s ease-in-out ease-out 0s;
+  -webkit-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  -moz-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  -o-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  transition: all 0.2s ease-in-out 0.2s ease-out 0s;
   display: inline-block;
   max-width: 100%;
   height: auto;
@@ -1633,10 +1633,10 @@ output {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-  -webkit-transition: all border-color ease-in-out .15s, box-shadow ease-in-out .15s ease-out 0s;
-  -moz-transition: all border-color ease-in-out .15s, box-shadow ease-in-out .15s ease-out 0s;
-  -o-transition: all border-color ease-in-out .15s, box-shadow ease-in-out .15s ease-out 0s;
-  transition: all border-color ease-in-out .15s, box-shadow ease-in-out .15s ease-out 0s;
+  -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s 0.2s ease-out 0s;
+  -moz-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s 0.2s ease-out 0s;
+  -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s 0.2s ease-out 0s;
+  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s 0.2s ease-out 0s;
 }
 .form-control:focus {
   border-color: #66afe9;
@@ -2297,10 +2297,10 @@ input[type="button"].btn-block {
   opacity: 0;
   -webkit-transition: opacity 0.15s linear;
   transition: opacity 0.15s linear;
-  -webkit-transition: all opacity 0.15s linear ease-out 0s;
-  -moz-transition: all opacity 0.15s linear ease-out 0s;
-  -o-transition: all opacity 0.15s linear ease-out 0s;
-  transition: all opacity 0.15s linear ease-out 0s;
+  -webkit-transition: opacity 0.15s linear 0.2s ease-out 0s;
+  -moz-transition: opacity 0.15s linear 0.2s ease-out 0s;
+  -o-transition: opacity 0.15s linear 0.2s ease-out 0s;
+  transition: opacity 0.15s linear 0.2s ease-out 0s;
 }
 .fade.in {
   opacity: 1;
@@ -2317,10 +2317,10 @@ input[type="button"].btn-block {
   overflow: hidden;
   -webkit-transition: height 0.35s ease;
   transition: height 0.35s ease;
-  -webkit-transition: all height 0.35s ease ease-out 0s;
-  -moz-transition: all height 0.35s ease ease-out 0s;
-  -o-transition: all height 0.35s ease ease-out 0s;
-  transition: all height 0.35s ease ease-out 0s;
+  -webkit-transition: height 0.35s ease 0.2s ease-out 0s;
+  -moz-transition: height 0.35s ease 0.2s ease-out 0s;
+  -o-transition: height 0.35s ease 0.2s ease-out 0s;
+  transition: height 0.35s ease 0.2s ease-out 0s;
 }
 @font-face {
   font-family: 'Glyphicons Halflings';
@@ -4443,10 +4443,10 @@ a.list-group-item.active > .badge,
   border-radius: 0;
   -webkit-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
-  -webkit-transition: all all 0.2s ease-in-out ease-out 0s;
-  -moz-transition: all all 0.2s ease-in-out ease-out 0s;
-  -o-transition: all all 0.2s ease-in-out ease-out 0s;
-  transition: all all 0.2s ease-in-out ease-out 0s;
+  -webkit-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  -moz-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  -o-transition: all 0.2s ease-in-out 0.2s ease-out 0s;
+  transition: all 0.2s ease-in-out 0.2s ease-out 0s;
 }
 .thumbnail > img,
 .thumbnail a > img {
@@ -4578,10 +4578,10 @@ a.thumbnail.active {
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   -webkit-transition: width 0.6s ease;
   transition: width 0.6s ease;
-  -webkit-transition: all width 0.6s ease ease-out 0s;
-  -moz-transition: all width 0.6s ease ease-out 0s;
-  -o-transition: all width 0.6s ease ease-out 0s;
-  transition: all width 0.6s ease ease-out 0s;
+  -webkit-transition: width 0.6s ease 0.2s ease-out 0s;
+  -moz-transition: width 0.6s ease 0.2s ease-out 0s;
+  -o-transition: width 0.6s ease 0.2s ease-out 0s;
+  transition: width 0.6s ease 0.2s ease-out 0s;
 }
 .progress-striped .progress-bar {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -5376,10 +5376,10 @@ button.close {
   position: relative;
   -webkit-transition: 0.6s ease-in-out left;
   transition: 0.6s ease-in-out left;
-  -webkit-transition: all 0.6s ease-in-out left ease-out 0s;
-  -moz-transition: all 0.6s ease-in-out left ease-out 0s;
-  -o-transition: all 0.6s ease-in-out left ease-out 0s;
-  transition: all 0.6s ease-in-out left ease-out 0s;
+  -webkit-transition: 0.6s ease-in-out left 0.2s ease-out 0s;
+  -moz-transition: 0.6s ease-in-out left 0.2s ease-out 0s;
+  -o-transition: 0.6s ease-in-out left 0.2s ease-out 0s;
+  transition: 0.6s ease-in-out left 0.2s ease-out 0s;
 }
 .carousel-inner > .item > img,
 .carousel-inner > .item > a > img {
@@ -6111,6 +6111,25 @@ td.visible-print {
   text-decoration: none;
   color: #262626;
 }
+.mega .non-mega li {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  padding-right: 10px;
+  width: 25%;
+}
+.mega .non-mega li:last-child {
+  padding-right: 0;
+}
+.mega .non-mega li > a {
+  display: block;
+  padding: 15px 0;
+}
+.mega .non-mega li > a:hover {
+  text-decoration: none;
+}
 html.overlay-open .navbar-fixed-top {
   z-index: 400;
 }
@@ -6129,9 +6148,6 @@ body.admin-expanded.admin-vertical.admin-sw .navbar {
 }
 body.admin-menu .navbar-fixed-top {
   top: 29px;
-}
-body.admin-menu.navbar-is-fixed-top {
-  padding-top: 93px !important;
 }
 body div#admin-toolbar {
   z-index: 1600;
@@ -6152,12 +6168,12 @@ body #admin-menu {
 body #admin-menu .dropdown li {
   line-height: normal;
 }
-@media screen and (mix-width: 768px) and (max-width: 992px) {
+@media screen and (min-width: 768px) {
   .navbar.container {
     max-width: 720px;
   }
 }
-@media screen and (min-width: 992px) and (max-width: 1200px) {
+@media screen and (min-width: 992px) {
   .navbar.container {
     max-width: 940px;
   }
@@ -6205,7 +6221,7 @@ body #admin-menu .dropdown li {
   padding-left: 15px;
   padding-right: 15px;
 }
-@media screen and (mix-width: 768px) and (max-width: 992px) {
+@media screen and (min-width: 768px) {
   .navbar .logo {
     margin-right: 0;
     padding-left: 0;
@@ -6214,7 +6230,7 @@ body #admin-menu .dropdown li {
 ul.secondary {
   float: left;
 }
-@media screen and (mix-width: 768px) and (max-width: 992px) {
+@media screen and (min-width: 768px) {
   ul.secondary {
     float: right;
   }
@@ -6243,7 +6259,7 @@ form#search-block-form {
   float: none;
   margin: 5px 0 5px 5px;
 }
-@media screen and (min-width: 992px) and (max-width: 1200px) {
+@media screen and (min-width: 992px) {
   .navbar #block-search-form {
     float: right;
   }
@@ -6712,6 +6728,19 @@ img {
   width: 100% !important;
   height: 100% !important;
 }
+.webform-client-form .webform-component label {
+  display: block;
+}
+.webform-client-form .webform-component.webform-container-inline label {
+  display: inline-block;
+  margin-right: 2%;
+  max-width: 20%;
+}
+.webform-client-form .webform-component.webform-container-inline .form-control {
+  display: inline-block;
+  margin: 0;
+  max-width: 78%;
+}
 .style-date-stacked {
   margin-right: 10px;
   position: relative;
@@ -6796,10 +6825,10 @@ i.i-rounded {
   line-height: 1em;
   padding: 0.3em 0 0;
   text-align: center;
-  -webkit-transition: all 0.2s ease 0s;
-  -moz-transition: all 0.2s ease 0s;
-  -o-transition: all 0.2s ease 0s;
-  transition: all 0.2s ease 0s;
+  -webkit-transition: 0.2s ease 0s 0s;
+  -moz-transition: 0.2s ease 0s 0s;
+  -o-transition: 0.2s ease 0s 0s;
+  transition: 0.2s ease 0s 0s;
   top: 0px;
   width: 1.5em !important;
   height: 1.5em;
@@ -6821,10 +6850,10 @@ i.i-thumbnail {
   line-height: 1em;
   padding: 0.3em 0 0;
   text-align: center;
-  -webkit-transition: all 0.2s ease 0s;
-  -moz-transition: all 0.2s ease 0s;
-  -o-transition: all 0.2s ease 0s;
-  transition: all 0.2s ease 0s;
+  -webkit-transition: 0.2s ease 0s 0s;
+  -moz-transition: 0.2s ease 0s 0s;
+  -o-transition: 0.2s ease 0s 0s;
+  transition: 0.2s ease 0s 0s;
   top: 0px;
   width: 1.5em !important;
   height: 1.5em;
@@ -6849,10 +6878,10 @@ i.i-circle {
   line-height: 1em;
   padding: 0.3em 0 0;
   text-align: center;
-  -webkit-transition: all 0.2s ease 0s;
-  -moz-transition: all 0.2s ease 0s;
-  -o-transition: all 0.2s ease 0s;
-  transition: all 0.2s ease 0s;
+  -webkit-transition: 0.2s ease 0s 0s;
+  -moz-transition: 0.2s ease 0s 0s;
+  -o-transition: 0.2s ease 0s 0s;
+  transition: 0.2s ease 0s 0s;
   top: 0px;
   width: 1.5em !important;
   height: 1.5em;

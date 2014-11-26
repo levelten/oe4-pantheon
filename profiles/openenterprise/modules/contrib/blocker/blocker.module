@@ -1,6 +1,18 @@
 <?php
 
 /**
+* Implements hook_permission().
+*/
+function blocker_permission() {
+  return array(
+    'administer blocker' => array(
+      'title' => t('Administer Blocker'),
+      'description' => t('Choose which blocks and regions can be managed using Blocker module.')
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function blocker_menu() {
@@ -12,7 +24,7 @@ function blocker_menu() {
     'description' => t('Settings for Blocker module'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('blocker_admin_settings'),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer blocker'),
     'file' => 'blocker.admin.inc',
   );
 
@@ -39,6 +51,9 @@ function blocker_get_blocks_list($region, $object, $account) {
 
   // Unset static cache as it is storing the wrong results.
   drupal_static_reset('block_list');
+
+  // Get block_class version
+  $bc_version = variable_get('blocker_block_class_version',blocker_block_class_version());
   
   // Now add in blocks from this module.
   // We only want to display the blocks on the main entity page.
@@ -52,14 +67,28 @@ function blocker_get_blocks_list($region, $object, $account) {
       if ($blocker->title) {
         $block->title = $blocker->title;
       }
-      $block->css_class = $blocker->css_class;
+      
+      // Append existing block_class if checked.
+      if ($blocker->block_class_check) {
+        if ($bc_version < 2) {
+          // If using version 1, use the function.
+          $block->css_class = blocker_block_class($block, $blocker);
+        } else {
+          // Or just append the classes.
+          $block_class = (isset($block->css_class)) ? $block->css_class : '';
+          $block->css_class = trim($block_class.' '.$blocker->css_class);
+        }
+      } else {
+        // Replace the class. In block_class 7x-1.x, it will add it's block class regardless.
+        $block->css_class = $blocker->css_class;
+      }
+
       $block->row = $blocker->row;
       $block->row_class = $blocker->row_class;
       $block->brid = $blocker->brid; // Save off brid to use later for edit link.
       $blocks[$block->module . '_' . $block->delta] = $block;
     }
   }
-  
   return $blocks;
 }
 
@@ -95,14 +124,31 @@ function blocker_page_build(&$page) {
       $theme = variable_get('theme_default', 'bartik');
       $object_ids = entity_extract_ids($object->entity_type, $object);
       $blockers = blocker_get_blocks($object->entity_type, $object_ids[0], $theme);
+      // Get block_class version
+      $bc_version = variable_get('blocker_block_class_version',blocker_block_class_version());
       // Load in the block information by region.
       $blocks = array();
       foreach($blockers as $brid => $blocker) {
         $block = block_load($blocker->module, $blocker->delta);
         $block->weight = $blocker->weight;
-        $block->css_class = $blocker->css_class;
         $block->row = $blocker->row;
         $block->row_class = $blocker->row_class;
+        
+        // Append existing block_class if checked.
+        if ($blocker->block_class_check) {
+          if ($bc_version < 2) {
+            // If using version 1, use the function.
+            $block->css_class = blocker_block_class($block, $blocker);
+          } else {
+            // Or just append the classes.
+            $block_class = (isset($block->css_class)) ? $block->css_class : '';
+            $block->css_class = trim($block_class.' '.$blocker->css_class);
+          }
+        } else {
+          // Replace the class. In block_class 7x-1.x, it will add it's block class regardless.
+          $block->css_class = $blocker->css_class;
+        }
+
         if ($blocker->title == '<none>') {
           $block->title = '';
         }
@@ -318,11 +364,30 @@ function blocker_form_block_admin_configure_alter(&$form, &$form_state, $form_id
  */
 function blocker_preprocess_block(&$variables, $hook) {
   $block = &$variables['block'];
-  if (isset($block->css_class)) {
-    foreach(explode(' ' , $block->css_class) as $class) {
-      if (!in_array($class, $variables['classes_array'])) {
-        $variables['classes_array'][] = $class;
-      }
-    }
+  // Use class application from block_class module
+  if (isset($block->css_class) && $block->css_class != '') {
+    $variables['classes_array'] = array_merge($variables['classes_array'], explode(' ', $block->css_class));
   }
+}
+
+/**
+ * Get current major version of the block_class module.
+ */
+function blocker_block_class_version() {
+  if (module_exists('block_class')) {
+    // Get current major version of block_class
+    $info = drupal_parse_info_file(drupal_get_path('module', 'block_class') . '/block_class.info');
+    $version = explode('-', $info['version']);
+    $current_version = intval($version[1]);
+    variable_set('blocker_block_class_version', $current_version);
+    return $current_version;
+  }
+}
+
+/**
+ * Helper function for adding classes depending on the version of block_class.
+ */
+function blocker_block_class(&$block, &$blocker) {
+    module_load_include('module', 'block_class');
+    return trim(block_class($block).' '.$blocker->css_class);
 }

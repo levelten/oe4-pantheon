@@ -33,19 +33,6 @@ stylesheets[all][] = fonts/bella/css/bella_font.css
 ;; Scripts
 ;;;;;;;;;;;;;;;;;;;;;
 
-scripts[] = '../enterprise_bootstrap/bootstrap/js/affix.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/alert.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/button.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/carousel.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/collapse.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/dropdown.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/modal.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/tooltip.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/popover.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/scrollspy.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/tab.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/transition.js'
-
 scripts[] = 'js/bella.js'
 
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.

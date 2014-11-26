@@ -1,5 +1,4 @@
 .mega {
-
   .nav, .collapse, .dropup, .dropdown {
     position: static;
   }  
@@ -33,6 +32,26 @@
       &:focus {
         text-decoration: none;
         color: @dropdown-link-hover-color;
+      }
+    }
+  }
+  .non-mega {
+    .navbar-is-fixed-top & {
+      li {
+        .box-sizing;
+        float: left;
+        padding-right: 10px;
+        width: 25%;
+        &:last-child {
+          padding-right: 0;
+        }
+        > a {
+          display: block;
+          padding: 15px 0;
+          &:hover {
+            text-decoration: none;
+          }
+        }
       }
     }
   }

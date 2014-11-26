@@ -5,10 +5,3 @@ package = "User interface"
 dependencies[] = block
 
 configure = admin/config/user-interface/blocker
-
-; Information added by drupal.org packaging script on 2013-08-12
-version = "7.x-1.0-alpha3"
-core = "7.x"
-project = "blocker"
-datestamp = "1376326568"
-

@@ -2,30 +2,6 @@
 
 function bella_form_system_theme_settings_alter(&$form, &$form_state) {
 
-	$form['kuler_settings'] = array(
-		'#type' => 'fieldset',
-		'#title' => t('Adobe Kuler Settings'),
-		'#description' => t('Adding in text for JSON Kuler'),
-		'#weight' => -1,
-	);
-	$form['kuler_settings']['kuler_check'] = array(
-		'#type' => 'checkbox',
-		'#title' => t('Enable Adobe Kuler'),
-		'#default_value' => theme_get_setting('kuler_check'),
-		'#description' => t('Checking this will replace the current color schemes with those provided by the Kuler JSON.'),
-	);
-	$form['kuler_settings']['kuler_json'] = array(
-		'#type' => 'textarea',
-		'#title' => t('Kuler JSON'),
-		'#default_value' => theme_get_setting('kuler_json'),
-		'#description' => t('If you have Kuler JSON, you can enter it here to provide theme color options. You can get Kuler JSON by using this gist: !gist', array('!gist' => l('Kuler JSON Gist', 'https://gist.github.com/kyletaylored/1a2edba96509277cfcca', array('attributes' => array('target' => '_blank',))))),
-		'#states' => array(
-			'visible' => array(
-				':input[name="kuler_check"]' => array('checked' => TRUE),
-			),
-		),
-	);
-
 	$form['colourlovers_settings'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('COLOURLovers Settings'),

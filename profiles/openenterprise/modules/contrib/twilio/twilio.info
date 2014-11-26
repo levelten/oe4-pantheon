@@ -1,11 +1,12 @@
 name = Twilio
 description = Integration the Twilio cloud communication service with Drupal
 core = 7.x
+package = Twilio
 dependencies[] = libraries
 
-; Information added by drupal.org packaging script on 2013-10-28
-version = "7.x-1.5"
+; Information added by Drupal.org packaging script on 2014-09-12
+version = "7.x-1.9"
 core = "7.x"
 project = "twilio"
-datestamp = "1382928634"
+datestamp = "1410550746"
 

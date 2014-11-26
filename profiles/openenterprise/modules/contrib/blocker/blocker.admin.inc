@@ -8,6 +8,16 @@
 function blocker_admin_settings() {
   $theme = variable_get('theme_default', 'bartik');
 
+  if (module_exists('block_class')) {
+    $form['blocker_block_class_version'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Block Class major version'),
+      '#description' => t('The current version of the Block Class module. Some functionality depends on the version.'),
+      '#default_value' => variable_get('blocker_block_class_version', blocker_block_class_version()),
+      '#disabled' => TRUE,
+    );
+  }
+
   $form['blocker_regions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available regions'),

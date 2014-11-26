@@ -64,6 +64,13 @@ function blocker_schema() {
         'default' => '',
         'not null'    => TRUE,
       ),
+      'block_class_check' => array(
+        'description' => 'Check to use existing CSS classes.',
+        'type'        => 'int',
+        'size'        => 'tiny',
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
       'row' => array(
         'type'        => 'varchar',
         'length'      => 255,
@@ -98,12 +105,20 @@ function blocker_schema() {
 }
 
 /**
+ * Implements hook_install()
+ */
+function blocker_install() {
+  blocker_block_class_version();
+}
+
+/**
  * Implements hook_uninstall()
  */
 function blocker_uninstall() {
   $variables = array(
     'blocker_regions',
     'blocker_blocks',
+    'blocker_block_class_version',
   );
   foreach($variables as $variable) {
     variable_del($variable);
@@ -135,3 +150,29 @@ function blocker_update_7100() {
   );
   
 }
+
+/**
+ * Add option to append existing block classes .
+ */
+function blocker_update_7101() {
+  // Add fields for block_class module.
+  db_add_field('blocker', 'block_class_check',
+    array(
+      'type'        => 'int',
+      'size'        => 'tiny',
+      'not null'    => TRUE,
+      'default'     => 0,
+      'description' => 'Check to use existing CSS classes.',
+    )
+  );
+
+  // Get current major version of block_class
+  if (module_exists('block_class')) {
+    $info = drupal_parse_info_file(drupal_get_path('module', 'block_class') . '/block_class.info');
+    $version = explode('-', $info['version']);
+    $current_version = intval($version[1]);
+    variable_set('blocker_block_class_version', $current_version);
+  }
+  
+}
+
