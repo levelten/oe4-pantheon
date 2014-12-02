@@ -107,7 +107,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
 		'#title' => t('Region'),
-		'#description' => t('Settings regarding the container status of each region (excluding the front page).'),
+		'#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+	);
+	$form['enterprise_bootstrap_region_settings']['region_description'] = array(
+  	'#markup' => '<div class="description"><p><ul><li><strong>Boxed:</strong> Container class added, pushes content inward.</li><li><strong>Wide:</strong> No container classes, content flows to the edge.</li></ul></p></div>',
+  	'#attributes' => array('class' => array('description')),
 	);
 
 	/********************* Navigation Region Settings ***********************/

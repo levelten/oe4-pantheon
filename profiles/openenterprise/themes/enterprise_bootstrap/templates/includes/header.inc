@@ -23,7 +23,7 @@
 		<?php endif; ?>
 	<?php endif; ?>
 <?php else: ?>
-	<?php if($header_container): ?>
+	<?php if(!$header_container): ?>
 		<?php if (!empty($page['header']) || !empty($site_slogan)): ?>
 		<!-- Top Bar (header) -->
 			<header role="banner" id="page-header">
