@@ -99,10 +99,6 @@ function enterprise_editor_ckeditor_profile_defaults() {
       'name' => 'Full',
       'settings' => array(
         'ss' => 2,
-        'default' => 't',
-        'show_toggle' => 't',
-        'uicolor' => 'default',
-        'uicolor_user' => 'default',
         'toolbar' => '[
     [\'Undo\',\'Redo\'],
     [\'Cut\',\'Copy\',\'Paste\',\'PasteText\',\'PasteFromWord\'],
@@ -115,7 +111,11 @@ function enterprise_editor_ckeditor_profile_defaults() {
     [\'Bold\',\'Italic\',\'Underline\',\'Strike\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Outdent\',\'Indent\'],
     [\'Blockquote\',\'-\',\'Subscript\',\'Superscript\']
 ]',
-        'expand' => 'f',
+        'expand' => 't',
+        'default' => 't',
+        'show_toggle' => 't',
+        'uicolor' => 'default',
+        'uicolor_user' => 'default',
         'width' => '100%',
         'lang' => 'en',
         'auto_lang' => 't',

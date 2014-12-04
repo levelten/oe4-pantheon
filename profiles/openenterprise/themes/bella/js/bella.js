@@ -22,7 +22,7 @@
 
       // Use for the following navigation updates.
       var navbar = context.getElementById("navbar");
-      var $navbar = $("navbar", context);
+      var $navbar = $(".navbar", context);
 
       // Equal width nav items.
       var navbarNav = navbar.querySelector(".navbar-nav");
@@ -51,31 +51,39 @@
         }
       }
 
+      // Add extra pixels if we're logged in.
+      if ($("body", context).hasClass("admin-menu")){
+        window.console.log("Has admin menu");
+        navbarHeight += 30;
+      } else {
+        navbarHeight += 1;
+      }
+      window.console.log(navbarHeight);
+
+      // Add padding to body.
+      var bodyHtml = context.querySelector("body.html");
+      bodyHtml.style.paddingTop = navbarHeight+"px";
+
       // Only do the following if the navbar is fixed.
       var navbarHasClass = $navbar.hasClass("navbar-fixed-top");
       if (navbarHasClass) {
-        // Add extra pixels if we're logged in.
-        if ($("body", context).hasClass("logged-in", "admin-menu")){
-          navbarHeight += 30;
-        } else {
-          navbarHeight += 1;
-        }
-
         // Set up objects.
-        var bodyHtml = context.querySelector("body.html");
         var dropdownMenu = context.querySelector("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu");
-
         // Add padding and top to dropwdown to position correctly for fixed menu.
-        bodyHtml.style.paddingTop = navbarHeight+"px";
         dropdownMenu.style.top = navbarHeight+"px";
 
         // Update based on window resizing.
         $(window).resize(function(){
           navbarHeight = context.getElementById("navbar").offsetHeight;
-          bodyHtml.style.paddingTop = navbarHeight+"px";
           dropdownMenu.style.top = navbarHeight+"px";
         });
       }
+
+      // Update based on window resizing.
+      $(window).resize(function(){
+        navbarHeight = context.getElementById("navbar").offsetHeight;
+        bodyHtml.style.paddingTop = navbarHeight+"px";
+      });
 
     }
   };

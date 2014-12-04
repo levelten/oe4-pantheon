@@ -107,7 +107,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
 		'#title' => t('Region'),
-		'#description' => t('Settings regarding the container status of each region (excluding the front page).'),
+		'#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+	);
+	$form['enterprise_bootstrap_region_settings']['region_description'] = array(
+  	'#markup' => '<div class="description"><p><ul><li><strong>Boxed:</strong> Container class added, pushes content inward.</li><li><strong>Wide:</strong> No container classes, content flows to the edge.</li></ul></p></div>',
+  	'#attributes' => array('class' => array('description')),
 	);
 
 	/********************* Navigation Region Settings ***********************/
@@ -267,6 +271,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+	$bootstrap_default = array(
+		'affix' => 0,'alert' => 1,'button' => 0,'carousel' => 1,'collapse' => 1,'dropdown' => 1,
+    'modal' => 0,'tooltip' => 0,'popover' => 0,'scrollspy' => 0,'tab' => 0,'transition' => 1,
+  );
+  
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Bootstrap Javascript'),
@@ -286,11 +295,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'transition' => t('Transition'),
 		),
 	);
-
-	$bootstrap_default = array(
-		'affix' => 0,'alert' => 1,'button' => 0,'carousel' => 1,'collapse' => 1,'dropdown' => 1,
-    'modal' => 0,'tooltip' => 0,'popover' => 0,'scrollspy' => 0,'tab' => 0,'transition' => 1,
-  );
 
   $bootstrap_desc = array(
 		'affix' => t('The subnavigation on the right is a live demo of the affix plugin.'),
