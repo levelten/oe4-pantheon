@@ -917,15 +917,13 @@ function _menu_link_translate(&$item, $translate = FALSE) {
       $item['access'] = FALSE;
       return FALSE;
     }
-    // We always need to load objects where appropriate.
-    // Problems may arise if this step is skipped.
-    if (!empty($item['load_functions']) && !_menu_load_objects($item, $map)) {
-      // An error occurred loading an object.
-      $item['access'] = FALSE;
-      return FALSE;
-    }
     // menu_tree_check_access() may set this ahead of time for links to nodes.
     if (!isset($item['access'])) {
+      if (!empty($item['load_functions']) && !_menu_load_objects($item, $map)) {
+        // An error occurred loading an object.
+        $item['access'] = FALSE;
+        return FALSE;
+      }
       _menu_check_access($item, $map);
     }
     // For performance, don't localize a link the user can't access.
@@ -1002,7 +1000,7 @@ function menu_tree($menu_name) {
 }
 
 /**
- * Returns a rendered menu tree.
+ * Returns an output structure for rendering a menu tree.
  *
  * The menu item's LI element is given one of the following classes:
  * - expanded: The menu item is showing its submenu.
@@ -2497,6 +2495,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     $query->addField('ml', 'weight', 'link_weight');
     $query->fields('m');
     $query->condition('ml.link_path', $path_candidates, 'IN');
+    $query->addTag('preferred_menu_links');
 
     // Sort candidates by link path and menu name.
     $candidates = array();
@@ -2833,10 +2832,9 @@ function _menu_navigation_links_rebuild($menu) {
     // check this for parents instead of querying the database.
     $parent_candidates = array();
     // Make sure no child comes before its parent.
-    asort($sort, SORT_NUMERIC);
+    array_multisort($sort, SORT_NUMERIC, $menu_links);
 
-    foreach (array_keys($sort) as $path) {
-      $item = $menu_links[$path];
+    foreach ($menu_links as $key => $item) {
       $existing_item = db_select('menu_links')
         ->fields('menu_links')
         ->condition('link_path', $item['path'])
@@ -2864,7 +2862,7 @@ function _menu_navigation_links_rebuild($menu) {
         $item = _menu_link_build($item);
         menu_link_save($item, $existing_item, $parent_candidates);
         $parent_candidates[$item['mlid']] = $item;
-        unset($menu_links[$path]);
+        unset($menu_links[$key]);
       }
     }
   }
@@ -3627,9 +3625,9 @@ function _menu_router_build($callbacks) {
       $sort[$path] = $number_parts;
     }
   }
-  asort($sort, SORT_NUMERIC);
+  array_multisort($sort, SORT_NUMERIC, $menu);
   // Apply inheritance rules.
-  foreach (array_keys($sort) as $path) {
+  foreach ($menu as $path => $v) {
     $item = &$menu[$path];
     if (!$item['_tab']) {
       // Non-tab items.
