@@ -661,10 +661,6 @@ class CascadingStylesheetsTestCase extends DrupalWebTestCase {
     drupal_add_css($css);
     $styles = drupal_get_css();
     $this->assertTrue(strpos($styles, $css) > 0, 'Rendered CSS includes the added stylesheet.');
-    // Verify that newlines are properly added inside style tags.
-    $query_string = variable_get('css_js_query_string', '0');
-    $css_processed = "<style type=\"text/css\" media=\"all\">\n@import url(\"" . check_plain(file_create_url($css)) . "?" . $query_string ."\");\n</style>";
-    $this->assertEqual(trim($styles), $css_processed, 'Rendered CSS includes newlines inside style tags for JavaScript use.');
   }
 
   /**
@@ -918,10 +914,9 @@ class CascadingStylesheetsUnitTest extends DrupalUnitTestCase {
    * Tests basic CSS loading with and without optimization via drupal_load_stylesheet().
    *
    * Known tests:
-   * - Retain white-space in selectors. (https://drupal.org/node/472820)
-   * - Proper URLs in imported files. (https://drupal.org/node/265719)
-   * - Retain pseudo-selectors. (https://drupal.org/node/460448)
-   * - Don't adjust data URIs. (https://drupal.org/node/2142441)
+   * - Retain white-space in selectors. (http://drupal.org/node/472820)
+   * - Proper URLs in imported files. (http://drupal.org/node/265719)
+   * - Retain pseudo-selectors. (http://drupal.org/node/460448)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
@@ -1027,8 +1022,8 @@ class DrupalHTTPRequestTestCase extends DrupalWebTestCase {
     $result = drupal_http_request($auth);
 
     $this->drupalSetContent($result->data);
-    $this->assertRaw($username, 'Username is passed correctly.');
-    $this->assertRaw($password, 'Password is passed correctly.');
+    $this->assertRaw($username, '$_SERVER["PHP_AUTH_USER"] is passed correctly.');
+    $this->assertRaw($password, '$_SERVER["PHP_AUTH_PW"] is passed correctly.');
   }
 
   function testDrupalHTTPRequestRedirect() {
@@ -1084,74 +1079,6 @@ class DrupalHTTPRequestTestCase extends DrupalWebTestCase {
     // Request front page and check for matching Content-Language.
     $request = drupal_http_request(url('<front>', array('absolute' => TRUE)));
     $this->assertEqual($request->headers['content-language'], 'de', 'Content-Language HTTP header is German.');
-  }
-}
-
-/**
- * Tests parsing of the HTTP response status line.
- */
-class DrupalHTTPResponseStatusLineTest extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Drupal HTTP request response status parsing',
-      'description' => 'Perform unit tests on _drupal_parse_response_status().',
-      'group' => 'System',
-    );
-  }
-
-  /**
-   * Tests parsing HTTP response status line.
-   */
-  public function testStatusLine() {
-    // Grab the big array of test data from statusLineData().
-    $data = $this->statusLineData();
-    foreach($data as $test_case) {
-      $test_data = array_shift($test_case);
-      $expected = array_shift($test_case);
-
-      $outcome = _drupal_parse_response_status($test_data);
-
-      foreach(array_keys($expected) as $key) {
-        $this->assertIdentical($outcome[$key], $expected[$key]);
-      }
-    }
-  }
-
-  /**
-   * Data provider for testStatusLine().
-   *
-   * @return array
-   *   Test data.
-   */
-  protected function statusLineData() {
-    return array(
-      array(
-        'HTTP/1.1 200 OK',
-        array(
-          'http_version' => 'HTTP/1.1',
-          'response_code' => '200',
-          'reason_phrase' => 'OK',
-        ),
-      ),
-      // Data set with no reason phrase.
-      array(
-        'HTTP/1.1 200',
-        array(
-          'http_version' => 'HTTP/1.1',
-          'response_code' => '200',
-          'reason_phrase' => '',
-        ),
-      ),
-      // Arbitrary strings.
-      array(
-        'version code multi word explanation',
-        array(
-          'http_version' => 'version',
-          'response_code' => 'code',
-          'reason_phrase' => 'multi word explanation',
-        ),
-      ),
-    );
   }
 }
 
@@ -1484,6 +1411,75 @@ class JavaScriptTestCase extends DrupalWebTestCase {
     $cache = array_keys(variable_get('drupal_js_cache_files', array()));
     $key = $cache[0];
     $this->assertEqual($key, $expected_key, 'JavaScript aggregation is not affected by ordering in different scopes.');
+  }
+
+  /**
+   * Test adding JavaScript within conditional comments.
+   *
+   * @see drupal_pre_render_conditional_comments()
+   */
+  function testBrowserConditionalComments() {
+    $default_query_string = variable_get('css_js_query_string', '0');
+
+    drupal_add_js('misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
+    drupal_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
+    $javascript = drupal_get_js();
+
+    $expected_1 = "<!--[if lte IE 8]>\n" . '<script type="text/javascript" src="' . file_create_url('misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
+    $expected_2 = "<!--[if !IE]><!-->\n" . '<script type="text/javascript">' . "\n<!--//--><![CDATA[//><!--\n" . 'jQuery(function () { });' . "\n//--><!]]>\n" . '</script>' . "\n<!--<![endif]-->";
+
+    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
+    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
+  }
+
+  /**
+   * Test JavaScript versioning.
+   */
+  function testVersionQueryString() {
+    drupal_add_js('misc/collapse.js', array('version' => 'foo'));
+    drupal_add_js('misc/ajax.js', array('version' => 'bar'));
+    $javascript = drupal_get_js();
+    $this->assertTrue(strpos($javascript, 'misc/collapse.js?v=foo') > 0 && strpos($javascript, 'misc/ajax.js?v=bar') > 0 , t('JavaScript version identifiers correctly appended to URLs'));
+  }
+
+  /**
+   * Test JavaScript grouping and aggregation.
+   */
+  function testAggregation() {
+    $default_query_string = variable_get('css_js_query_string', '0');
+
+    // To optimize aggregation, items with the 'every_page' option are ordered
+    // ahead of ones without. The order of JavaScript execution must be the
+    // same regardless of whether aggregation is enabled, so ensure this
+    // expected order, first with aggregation off.
+    drupal_add_js('misc/ajax.js');
+    drupal_add_js('misc/authorize.js', array('every_page' => TRUE));
+    drupal_add_js('misc/autocomplete.js');
+    drupal_add_js('misc/batch.js', array('every_page' => TRUE));
+    $javascript = drupal_get_js();
+    $expected = implode("\n", array(
+      '<script type="text/javascript" src="' . file_create_url('misc/authorize.js') . '?' . $default_query_string . '"></script>',
+      '<script type="text/javascript" src="' . file_create_url('misc/batch.js') . '?' . $default_query_string . '"></script>',
+      '<script type="text/javascript" src="' . file_create_url('misc/ajax.js') . '?' . $default_query_string . '"></script>',
+      '<script type="text/javascript" src="' . file_create_url('misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
+    ));
+    $this->assertTrue(strpos($javascript, $expected) > 0, t('Unaggregated JavaScript is added in the expected group order.'));
+
+    // Now ensure that with aggregation on, one file is made for the
+    // 'every_page' files, and one file is made for the others.
+    drupal_static_reset('drupal_add_js');
+    variable_set('preprocess_js', 1);
+    drupal_add_js('misc/ajax.js');
+    drupal_add_js('misc/authorize.js', array('every_page' => TRUE));
+    drupal_add_js('misc/autocomplete.js');
+    drupal_add_js('misc/batch.js', array('every_page' => TRUE));
+    $js_items = drupal_add_js();
+    $javascript = drupal_get_js();
+    $expected = implode("\n", array(
+      '<script type="text/javascript" src="' . file_create_url(drupal_build_js_cache(array('misc/authorize.js' => $js_items['misc/authorize.js'], 'misc/batch.js' => $js_items['misc/batch.js']))) . '"></script>',
+      '<script type="text/javascript" src="' . file_create_url(drupal_build_js_cache(array('misc/ajax.js' => $js_items['misc/ajax.js'], 'misc/autocomplete.js' => $js_items['misc/autocomplete.js']))) . '"></script>',
+    ));
+    $this->assertTrue(strpos($javascript, $expected) > 0, t('JavaScript is aggregated in the expected groups and order.'));
   }
 
   /**
@@ -2857,29 +2853,4 @@ class ArrayDiffUnitTest extends DrupalUnitTestCase {
 
     $this->assertIdentical(drupal_array_diff_assoc_recursive($this->array1, $this->array2), $expected);
   }
-}
-
-/**
- * Tests the functionality of drupal_get_query_array().
- */
-class DrupalGetQueryArrayTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Query parsing using drupal_get_query_array()',
-      'description' => 'Tests that drupal_get_query_array() correctly parses query parameters.',
-      'group' => 'System',
-    );
-  }
-
-  /**
-   * Tests that drupal_get_query_array() correctly explodes query parameters.
-   */
-  public function testDrupalGetQueryArray() {
-    $url = "http://my.site.com/somepath?foo=/content/folder[@name='foo']/folder[@name='bar']";
-    $parsed = parse_url($url);
-    $result = drupal_get_query_array($parsed['query']);
-    $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'drupal_get_query_array() should only explode parameters on the first equals sign.');
-  }
-
 }
