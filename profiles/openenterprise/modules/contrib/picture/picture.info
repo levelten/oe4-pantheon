@@ -1,15 +1,17 @@
 name = Picture
 description = Picture element
 core = 7.x
+dependencies[] = ctools
 dependencies[] = image
 dependencies[] = breakpoints
+files[] = includes/PictureMapping.php
 configure = admin/config/media/picture
 package = Picture
 stylesheets[all][] = picture_wysiwyg.css
 
-; Information added by drupal.org packaging script on 2013-10-30
-version = "7.x-1.2"
+; Information added by Drupal.org packaging script on 2014-09-05
+version = "7.x-2.7"
 core = "7.x"
 project = "picture"
-datestamp = "1383130545"
+datestamp = "1409909629"
 
