@@ -21,7 +21,7 @@ function intel_author_list_report_page($sub_index = '-', $filter_type = '', $fil
   if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
     intel_add_report_headers();
 
-    drupal_set_title(t('Author report', array('@title' => $reports['team'][$sub_index]['title'])), PASS_THROUGH);
+    drupal_set_title(t('Author report', array('@title' => $reports['trafficsource'][$sub_index]['title'])), PASS_THROUGH); 
     $filters += $_GET;
     $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
     $output .= drupal_render($filter_form);  
@@ -49,9 +49,11 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
   $reports = intel_reports();
-  $report_mode = $reports['team'][$sub_index]['key'];
+  $report_mode = $reports['trafficsource'][$sub_index]['key'];
   $report_modes = explode('.', $report_mode);
 
+//$args = func_get_args();
+//dsm($args);
   $cache_options = array();
   $row_count = 100;
   $feed_rows = 2 * $row_count;
@@ -70,13 +72,11 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
-  $ga_data->setDebug(1);
+  //$ga_data->setDebug(1);
   $ga_data->setRequestSetting('indexBy', 'author');
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews');
-
-  return '';
   
   $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
   $ga_data->loadFeedData('entrances');
@@ -109,7 +109,8 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
       $d['author'][$index]['author']['profile_url'] = '/user/' . $d['author'][$index]['author']['uid'];
     }
   }
-
+//dsm($d);
+  
   $vars = array(
     'data' => $d,
     'row_count' => $row_count,
@@ -168,6 +169,6 @@ function intel_get_authors_report_data($uids, $start_date = '', $end_date = '') 
   $query->groupBy('u.uid'); 
   $query->addExpression('COUNT(n.nid)', 'published_nodes');
   $results = $query->execute()->fetchAllAssoc('uid', PDO::FETCH_ASSOC);
-
+  
   return $results;
 }

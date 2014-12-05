@@ -102,7 +102,6 @@ function intel_trafficsource_list_report($filters = array(), $context = 'site', 
     'referralHostpath' => array(),
     'socialNetwork' => array(),
     'searchKeyword' => array(),
-    'keyword' => array(),
     'campaign' => array(),
   );
 

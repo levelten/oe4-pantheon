@@ -1,8 +1,0 @@
-name = Twilio Intelligence
-core = "7.x"
-description = "Integrates Twilio with LevelTen Intel EXPERIMENTAL"
-package = Intelligence
-
-dependencies[] = intel
-dependencies[] = twilio
-

@@ -2,7 +2,7 @@
 
 function intel_linkedin_menu() {
   $items = array();
-  $items['admin/config/intel/settings/modules/linkedin'] = array(
+  $items['admin/config/services/intel/modules/linkedin'] = array(
     'title' => 'Modules',
     'description' => 'Add on module configuration',
     'page callback' => 'intel_admin_modules',

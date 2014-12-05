@@ -1,8 +1,0 @@
-name = Organic Groups Intelligence
-core = "7.x"
-description = "Integrates Intelligence with Organic Groups"
-package = Intelligence
-
-dependencies[] = entity_data
-dependencies[] = intel
-dependencies[] = og

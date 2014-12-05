@@ -8,15 +8,12 @@ Drupal.behaviors.intelReport = {
     
     if ($('#intel-report-container').length > 0) {
       var data = {
-        return_type: 'json'
+        return_type: 'json',
       };
       var url = ('https:' == document.location.protocol) ? 'https://' : 'http://'; 
 	  url += Drupal.settings.intel.cms_hostpath + $('#intel-report-container').attr("data-q"); //?callback=?";
       if ($('#intel-report-container').attr("data-refresh")) {
         data.refresh = 1;
-      }
-      if ($('#intel-report-container').attr("data-dates")) {
-        data.dates = $('#intel-report-container').attr("data-dates");
       }
       jQuery.ajax();
       jQuery.getJSON(url, data, function(data) { 

@@ -6,45 +6,6 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-/**
- * Similar to PHP's parse_url function. Parses a url and returns its components.
- * Includes Drupal centric components such as system path and able to handle'
- * relative urls.
- *
- * returns:
- * scheme - e.g. http
- * host - domain name
- * port
- * user
- * pass
- * path
- * query
- * fragment
- * system_path - Drupal path
- * system_alias - Drupal path alias (default)
- *
- * @param $url URL to be parsed.
- * @param string $location used to designate url of page if href is a link on a
- *   page. This is used to add context for relative href urls.
- * @return array|bool
- */
-function intel_parse_url($url, $location = '') {
-  $comps = intel_parse_href($url, $location = '');
-  $c = parse_url($comps['location']);
-  if (!empty($c) && is_array($c)) {
-    $comps = $c + $comps;
-  }
-  if (!empty($comps['system_path']) && (substr($comps['system_path'], 0, 5) == 'node/')) {
-    $a = explode('/', $comps['system_path']);
-    $comps['nid'] = (int)$a[1];
-  }
-
-  return $comps;
-}
-
-/*
- * Normalizes Drupal urls.
- */
 function intel_parse_href($href, $location = '') {
   global $base_url, $base_path;
   // removed urls that cause errors
@@ -62,6 +23,7 @@ function intel_parse_href($href, $location = '') {
   $is_external = 0;
 
   $urlc = parse_url($href);
+  
   $a = explode('//', $base_url);
   $internal_domains = array(
     $a[1] => $a[1],

@@ -17,7 +17,7 @@
  */
 ?>
 <?php if ($markup): ?>
-  <div class="social-profile-links">
+  <div class="social-links">
     <?php print $markup; ?>
   </div>
 <?php endif; ?>

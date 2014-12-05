@@ -1,7 +1,8 @@
 <?php
 
 function intel_webform_admin_submission_results_alter_js() {
-  // strip starting /
+//watchdog('wfvr 4', print_r($_POST, 1));
+  // strip starting / 
   $a = explode("/", $_POST['path']);  
   $wf_path = 'node/' . $a[2] . "/submission/"; 
   //require_once './' . drupal_get_path('module', 'l10insight') . "/l10insight.report.inc";

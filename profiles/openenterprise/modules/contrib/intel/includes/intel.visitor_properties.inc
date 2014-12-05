@@ -6,8 +6,6 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-
-
 function _intel_intel_visitor_property_info() {
   $prop = array();
   // identity properties
@@ -60,12 +58,6 @@ function _intel_intel_visitor_property_info() {
       'full' => NULL,
       'first' => NULL,
       'last' => NULL,
-      'title' => NULL,
-      'given' => NULL,
-      'middle' => NULL,
-      'family' => NULL,
-      'generational' => NULL,
-      'credentials' => NULL,
     ),
   );
   // contact points
@@ -89,18 +81,7 @@ function _intel_intel_visitor_property_info() {
     'variables' => array(
       'url' => NULL,
     ),
-  );
-
-  // organization
-  // social properties
-  $prop['data.organization'] = array(
-    'title' => t('Organization'),
-    'category' => 'organization',
-    'variables' => array(
-      'name' => NULL,
-      'title' => NULL,
-    ),
-  );
+  );    
   
   // social properties
   $prop['data.aboutme'] = array(
@@ -209,14 +190,7 @@ function _intel_intel_visitor_property_info() {
       'url' => NULL,
     ),
   );
-  $prop['data.quora'] = array(
-    'title' => t('Quora'),
-    'category' => 'social',
-    'variables' => array(
-      'url' => NULL,
-      'username' => NULL,
-    ),
-  );
+
   $prop['data.tumblr'] = array(
     'title' => t('tumblr'),
     'category' => 'social',
@@ -235,7 +209,7 @@ function _intel_intel_visitor_property_info() {
       'following' => NULL,
     ),
     'key' => 'username',
-    'process callbacks' => array('intel_visitor_property_twitter_process'),
+    'validate' => 'intel_visitor_property_twiter_validate'
   );
   $prop['data.vimeo'] = array(
     'title' => t('Vimeo'),
@@ -396,32 +370,9 @@ function intel_get_icon_params() {
   return $params;
 }
 
-function intel_visitor_property_twitter_process(&$prop, $prop_info, $visitor) {
+function intel_visitor_property_twiter_validate(&$prop, $visitor) {
   $key = (!empty($prop['username'])) ? $prop['username'] : '';
   if (empty($prop['url'])) {
     $prop['url'] = 'http://twitter.com/' . $prop['username'];
   }
-}
-
-/**
- * groups flat level properties into multi dimensional array
- * @param $values
- */
-function intel_visitor_property_group($values) {
-  $grouped = array();
-  foreach ($values AS $coded => $value) {
-    $codes = explode(':', $coded);
-    $prop_name = $codes[0];
-    $elem = $codes[1];
-    $index = isset($codes[2]) ? $codes[2] : 0;
-
-    if (!isset($grouped[$prop_name])) {
-      $grouped[$prop_name] = array();
-    }
-    if (!isset($grouped[$prop_name][$index])) {
-      $grouped[$prop_name][$index] = array();
-    }
-    $grouped[$prop_name][$index] = $value;
-  }
-  return $grouped;
 }

@@ -2,59 +2,53 @@
 /**
  * @file
  * Functions to support extended Google Analytics data.
- *
+ * 
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
 /**
- * types = flag, list, scalar, vector
+ * types = flag, list, scalar, vector 
  */
-function intel_get_intel_event_info_default() {
+function intel_get_intel_events_default() {
   $event = array();
 
   $event['landing_page_view'] = array(
-    'title' => t('Landing page view'),
-    'description' => t('Landing page pageview'),
+    'title' => t('Landing page view'), 
+    'description' => t('Landing page pageview'),   
     //'event' => 'pageshow',
   );
   $event['landing_page_conversion'] = array(
-    'title' => t('Landing page conversion'),
-    'description' => t('Form submission from a landing page'),
+    'title' => t('Landing page conversion'), 
+    'description' => t('Form submission from a landing page'),   
     'valued_event' => 1,
     'value' => 0,
   );
   $event['form_submission'] = array(
-    'title' => t('Form submission'),
-    'description' => t('General form submission'),
-    'valued_event' => 1,
-    'value' => 25,
-  );
-  $event['phone_call'] = array(
-    'title' => t('Phone call'),
-    'description' => t('General phone call'),
+    'title' => t('Form submission'), 
+    'description' => t('Genearl form submission'),   
     'valued_event' => 1,
     'value' => 25,
   );
   $event['addthis_social_share'] = array(
-    'title' => t('AddThis social share'),
-    'category' => t('Social share'),
-    'description' => t('Click on social sharing widget'),
+    'title' => t('AddThis social share'), 
+    'category' => t('Social share'), 
+    'description' => t('Click on social sharing widget'),  
     'valued_event' => 1,
-    'value' => 5,
+    'value' => 5, 
     'js_setting' => 1,
   );
   $event['addthis_social_share_clickback'] = array(
-    'title' => t('AddThis social share clickback'),
-    'category' => t('Social share clickback'),
-    'description' => t('Visitor referred from a social share'),
+    'title' => t('AddThis social share clickback'), 
+    'category' => t('Social share clickback'), 
+    'description' => t('Visitor referred from a social share'),  
     'valued_event' => 1,
-    'value' => 0,
+    'value' => 0, 
     'js_setting' => 1,
   );
   $event['disqus_comment'] = array(
-    'title' => t('Disqus comment'),
-    'category' => t('Comment'),
-    'description' => t('Click on social sharing widget'),
+    'title' => t('Disqus comment'), 
+    'category' => t('Comment'), 
+    'description' => t('Click on social sharing widget'),   
     'valued_event' => 1,
     'value' => 10,
     'js_setting' => 1,
@@ -62,10 +56,9 @@ function intel_get_intel_event_info_default() {
   return $event;
 }
 
-function intel_get_event_goal_info() {
+function intel_get_event_goals() {
   $event = array();
   $goals = variable_get('intel_event_goals', array());
-
   foreach ($goals AS $key => $goal) {
     $ekey = 'goal_' . $key;
     $event[$ekey] = $goal;
@@ -73,7 +66,7 @@ function intel_get_event_goal_info() {
     $event[$ekey]['category'] .= '+';
     $event[$ekey]['selectable'] = 1;
   }
-
+  
   $goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
 
   foreach ($goals AS $key => $goal) {
@@ -83,34 +76,19 @@ function intel_get_event_goal_info() {
     $event[$ekey]['category'] .= '+';
     $event[$ekey]['event'] = 'form_submission';
   }
-
-  $goals = variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default());
-
-  foreach ($goals AS $key => $goal) {
-    $ekey = 'phonecall_goal_' . $key;
-    $event[$ekey] = $goal;
-    $event[$ekey]['title'] = $event[$ekey]['category'] = t('Phone call') . ': ' . $goal['title'];
-    $event[$ekey]['category'] .= '+';
-    $event[$ekey]['event'] = 'phonecall';
-  }
   return $event;
 }
 
-function intel_get_intel_event_info($name = NULL, $options = array()) {
+function intel_get_intel_events($include_goals = FALSE) {
   $events = &drupal_static(__FUNCTION__);
   if (count($events)) {
-    if (isset($name)) {
-      if (isset($events[$name])) {
-        return $events[$name];
-      }
-    }
-    else {
-      return $events;
-    }
+    return $events;
   }
-  $events = intel_get_intel_event_info_default();
-  $events = array_merge($events, intel_get_event_goal_info());
-
+  $events = intel_get_intel_events_default();
+  if (1 || $include_goals) {
+    $events = array_merge($events, intel_get_event_goals());
+  }
+  
   foreach ($events AS $k => $v) {
     if (isset($v['static_options'])) {
       $events[$k]['options'] = $v['static_options'];
@@ -119,16 +97,14 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
       $events[$k]['category'] = $v['title'];
     }
     $events[$k]['module']  = 'intel';
-    $events[$k]['key']  = $k;
-  }
+  } 
 
   $custom = variable_get('intel_intel_events_custom', array());
-
   foreach ($custom AS $k => $v) {
     // check if custom attribute
     if (isset($events[$k])) {
       foreach ($v AS $a => $b) {
-        $events[$k][$a] = $b;
+        $events[$k][$a] = $b; 
       }
     }
     else {
@@ -148,9 +124,8 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
         $events[$k]['options'] += $custom[$k]['custom_options'];
       }
     }
-    $events[$k]['key']  = $k;
-  }
-
+  } 
+  
   foreach (module_implements('intel_intel_events') AS $module) {
     $function = $module . '_intel_intel_events';
     $a = $function();
@@ -159,101 +134,66 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
     }
     foreach ($a AS $k => $v) {
       $v['module'] = $module;
-      $v['key']  = $k;
       $events[$k] = $v;
     }
   }
 
   drupal_alter('intel_intel_events', $events);
-
+  
   uasort($events, '_intel_sort_by_category');
-
-  if (isset($name)) {
-    if (isset($events[$name])) {
-      return $events[$name];
-    }
-    else {
-      return FALSE;
-    }
-  }
-  else {
-    return $events;
-  }
+ 
+  return $events;  
 }
 
-/**
- * Alias of intel_get_intel_event_info for use with hook_menu autoloading
- *
- * @param $key
- * @return mixed
- */
 function intel_intel_event_load($key) {
-  return intel_get_intel_event_info($key);
-}
-
-function intel_intel_event_all_pages_load() {
-  $events = &drupal_static(__FUNCTION__);
-  if (isset($events)) {
-    return $events;
-  }
-  $events = array();
-  $e = intel_get_intel_event_info();
-  foreach ($e AS $key => $event) {
-    if (!empty($event['enable_all_pages'])) {
-      $events[$key] = $event;
-    }
-  }
-  return $events;
+  $events = intel_get_intel_events();
+  $event = $events[$key];
+  $event['key'] = $key;
+  return $event; 
 }
 
 /**
- * types = flag, list, scalar, vector
+ * types = flag, list, scalar, vector 
  */
-function intel_get_visitor_attribute_info_default() {
+function intel_get_visitor_attributes_default() {
   $attributes = array();
   $user_roles = user_roles();
   // remove anonymous user
   unset($user_roles[1]);
 
-  $options = array();
-  foreach ($user_roles AS $rid => $role) {
-    $options[$rid] = (object)array(
-      'title' => $role,
-    );
-  }
   $attributes['r'] = array(
-    'title' => t('User roles'),
-    'description' => t('Set to Drupal user roles for authenticated visitors.'),
+    'title' => t('User roles'), 
+    'description' => t('Set to Drupal user roles for authenticated visitors.'),   
     'type' => 'list',
-    'static_options' => $options,
+    'coded_options' => $user_roles,
   );
   $attributes['k'] = array(
-    'title' => t('Known'),
-    'description' => t('If a visitor has submitted an email address.'),
+    'title' => t('Known'), 
+    'description' => t('If a visitor has submitted an email address.'),      
     'type' => 'flag',
   );
   $attributes['s'] = array(
-    'title' => t('Score'),
-    'description' => t('Sum of valued events and goals triggered by visitor.'),
+    'title' => t('Score'),  
+    'description' => t('Sum of valued events and goals triggered by visitor.'),    
     'type' => 'scalar',
     'selectable' => 1,
   );
   $attributes['l'] = array(
-    'title' => t('Lead score'),
-    'description' => t('Used to value visitors customer potential.'),
+    'title' => t('Lead score'), 
+    'description' => t('Used to value visitors customer potential.'),    
     'type' => 'scalar',
     'selectable' => 1,
   );
   $attributes['g'] = array(
-    'title' => t('Groups'),
-    'description' => t('Used to categorize visitors by a defining characteristics.'),
+    'title' => t('Groups'),  
+    'description' => t('Used to categorize visitors by a defining characteristics.'),    
     'type' => 'list',
     'custom_options' => array(),
     'selectable' => 1,
   );
   $attributes['i'] = array(
-    'title' => t('Interests'),
-    'description' => t('Used to value a visitors interest in various items.'),
+    'title' => t('Interests'),  
+    'description' => t('Used to value a visitors interest in various items.'),    
     'type' => 'vector',
     'custom_options' => array(),
     'selectable' => 1,
@@ -261,177 +201,89 @@ function intel_get_visitor_attribute_info_default() {
   return $attributes;
 }
 
-function intel_get_page_attribute_info_default() {
+function intel_get_page_attributes_default() {
   $attributes = array();
 
   $attributes['a'] = array(
-    'title' => t('Author'),
-    'description' => t('The uid of a node author.'),
+    'title' => t('Author'), 
+    'description' => t('The uid of a node author.'),   
     'type' => 'scalar',
-    'options_description' => t('Auto generated from entity uid.'),
-    'options info callback' => 'intel_page_attribute_author_option_info',
+    'options_description' => t('Auto generated from entity uid.'),  
   );
   $attributes['ct'] = array(
-    'title' => t('Content type'),
-    'description' => t('Node type or entity bundle type.'),
+    'title' => t('Content type'),  
+    'description' => t('Node type or entity bundle type.'), 
     'type' => 'scalar',
-    'options_description' => t('Auto generated from entity type/bundle.'),
+    'options_description' => t('Auto generated from entity type/bundle.'),    
     'type' => 'value',
-    'options info callback' => 'intel_page_attribute_content_type_option_info',
   );
   $attributes['et'] = array(
-    'title' => t('Entity type'),
-    'description' => t('The entity type of the page. (node, user...)'),
+    'title' => t('Entity type'), 
+    'description' => t('The entity type of the page. (node, user...)'),      
     'type' => 'list',
   );
   $attributes['i'] = array(
-    'title' => t('Page intent'),
-    'description' => t('The role a page plays on the site.'),
+    'title' => t('Page intent'),  
+    'description' => t('The role a page plays on the site.'),    
     'type' => 'list',
     'static_options' => intel_get_page_intents_default('config'),
     'custom_options' => array(),
     'selectable' => 1,
   );
   $attributes['pt'] = array(
-    'title' => t('Publish time'),
+    'title' => t('Publish time'), 
     'description' => t('The time (unix timestamp) a node was created.'),
-    'options_description' => t('Auto generated from entity created date.'),
+    'options_description' => t('Auto generated from entity created date.'), 
     'type' => 'scalar',
   );
   $attributes['s'] = array(
-    'title' => t('Section'),
-    'description' => t('Node type or entity bundle type.'),
+    'title' => t('Section'),  
+    'description' => t('Node type or entity bundle type.'),    
     'type' => 'scalar',
     'custom_options' => array(),
     'selectable' => 1,
   );
   $attributes['t'] = array(
-    'title' => t('Taxomony term'),
-    'description' => t('List of taxomonies term ids.'),
+    'title' => t('Taxomony term'), 
+    'description' => t('List of taxomonies term ids.'),   
     'type' => 'list',
-    'options_description' => t('Auto generated from terms in selected taxonomy fields.'),
-    'options info callback' => 'intel_page_attribute_taxomony_term_option_info',
+    'options_description' => t('Auto generated from terms in selected taxonomy fields.'),  
   );
   return $attributes;
 }
 
-/**
- * Returns page attribute definitions.
- * @param null $name
- *   Designates a specific visitor attribute to return. If null, all visitor
- *   attributes will be returned as an array.
- * @return array
- */
-function intel_get_page_attribute_info($name = NULL) {
-  return intel_get_attribute_info($name, 'page');
+function intel_get_page_attributes() {
+  return intel_get_attributes('page');
 }
 
-/**
- * Alias for intel_get_page_attribute_info() to be used with hook_menu's
- * autoloading
- */
-function intel_page_attribute_load($name) {
-  return intel_get_page_attribute_info($name);
+function intel_get_visitor_attributes() {
+  return intel_get_attributes('visitor');
 }
 
-/**
- * Returns page attribute definitions.
- * @param null $name
- *   Designates a specific visitor attribute to return. If null, all visitor
- *   attributes will be returned as an array.
- * @return array
- */
-function intel_get_visitor_attribute_info($name = NULL) {
-  return intel_get_attribute_info($name, 'visitor');
-}
-
-/**
- * Alias for intel_get_visitor_attribute_info() to be used with hook_menu's
- * autoloading
- */
-function intel_visitor_attribute_load($name) {
-  return intel_get_visitor_attribute_info($name);
-}
-
-function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
+function intel_get_attributes($mode = 'visitor') {
   $attributes = &drupal_static(__FUNCTION__);
   if (isset($attributes[$mode])) {
-    if (isset($name)) {
-      if (isset($attributes[$mode][$name])) {
-        return $attributes[$mode][$name];
-      }
-    } else {
-      return $attributes[$mode];
-    }
+    return $attributes[$mode];
   }
-  $attrs = ($mode == 'page') ? intel_get_page_attribute_info_default() : intel_get_visitor_attribute_info_default();
+  $attrs = ($mode == 'page') ? intel_get_page_attributes_default() : intel_get_visitor_attributes_default();
 
   foreach ($attrs AS $k => $v) {
     if (isset($v['static_options'])) {
       $attrs[$k]['options'] = $v['static_options'];
     }
     $attrs[$k]['module']  = 'intel';
-    $attrs[$k]['key'] = $k;
-  }
+  } 
 
-  // process vocabularies set as custom attributes
-  $entity_settings = intel_get_entity_settings_multi('taxonomy');
-  foreach ($entity_settings AS $k => $v) {
-
-    // check if attribute key is set or if intel_track_page_terms_visitor
-    if ((isset($v[$mode . '_attribute']) && !empty($v[$mode . '_attribute']['key']))
-      || (($mode == 'visitor') && !empty($v['track_page_terms_visitor']))
-    ) {
-      $vocab_info = taxonomy_vocabulary_machine_name_load($k);
-      if (empty($vocab_info->vid)) {
-        continue;
-      }
-      // if mode == visitor,
-      if (($mode == 'visitor') && (empty($v[$mode . '_attribute']['key']))) {
-        $key = !empty($v['page_attribute']['key']) ? $v['page_attribute']['key'] : 't';
-        if (!isset($v['visitor_attribute'])) {
-          $v['visitor_attribute'] = array();
-        }
-        $v['visitor_attribute'] += $v['page_attribute'];
-      }
-      else {
-        $key = $v[$mode . '_attribute']['key'];
-      }
-
-      $attrs[$key] = $v[$mode . '_attribute'];
-      if (empty($attrs[$key]['title'])) {
-        $attrs[$key]['title'] = $vocab_info->name;
-      }
-      if (empty($attrs[$key]['description'])) {
-        $attrs[$key]['description'] = $vocab_info->description;
-      }
-      $attrs[$key]['options_description'] = t('Generated from taxonomy vocabulary !link.',
-        array(
-          '!link' => l($vocab_info->name, 'admin/structure/taxonomy/' . $k . '/edit'),
-        )
-      );
-      $attrs[$key]['key'] = $key;
-      $attrs[$key]['type'] = ($mode == 'visitor') ? 'vector' : 'list';
-      $attrs[$key]['module']  = 'intel';
-      $attrs[$key]['source_type']  = 'taxonomy';
-      $attrs[$key]['source_bundle']  = $k;
-      $attrs[$key]['options'] = array();
-
-    }
-  }
-
-  // load custom attributes and overrides
-  $custom = intel_get_page_attributes_custom_multi($mode);
+  $custom = variable_get('intel_' . $mode . '_attributes_custom', array());
   foreach ($custom AS $k => $v) {
     // check if custom attribute
     if (isset($attrs[$k])) {
       foreach ($v AS $a => $b) {
-        $attrs[$k][$a] = $b;
+        $attrs[$k][$a] = $b; 
       }
     }
     else {
       $custom[$k]['module']  = 'intel';
-      $custom[$k]['key']  = $k;
       $custom[$k]['custom'] = 1;
       $attrs[$k] = $custom[$k];
     }
@@ -444,163 +296,33 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
         $attrs[$k]['options'] += $custom[$k]['custom_options'];
       }
     }
-  }
-
-  foreach (module_implements('intel_' . $mode . '_attribute_info') AS $module) {
-    $function = $module . '_intel_' . $mode . '_attribute_info';
+  } 
+  
+  foreach (module_implements('intel_' . $mode . '_attributes') AS $module) {
+    $function = $module . '_intel_' . $mode . '_attributes';
     $a = $function();
     if (empty($a) || !is_array($a)) {
       continue;
     }
     foreach ($a AS $k => $v) {
       $v['module'] = $module;
-      $v['key'] = $k;
-      $attrs[$k] = $v;
+      $attributes[$k] = $v;
     }
   }
 
-  drupal_alter('intel_' . $mode . '_attribute_info', $attrs);
-
+  drupal_alter('intel_' . $mode . '_attributes', $attrs);
+  
   uasort($attrs, '_intel_sort_by_title');
-
-  $attributes[$mode] = $attrs;
-
-  if (isset($name)) {
-    if (isset($attributes[$mode][$name])) {
-      return $attributes[$mode][$name];
-    }
-    else {
-      return FALSE;
-    }
-  } else {
-    return $attributes[$mode];
-  }
+  
+  $attributes[$mode] = $attrs;  
+  return $attributes[$mode];  
 }
 
-/**
- * Provides visitor and page attribute option meta data. Primarily used to provide
- * a human readable title for a given attribute option id.
- *
- * @param $mode
- *   sets the type of attribute, page | visitor
- * @param $attr_key
- *   The name that identifies the attribute
- * @param $option_id
- *   Attribute specific key that identifies which option id to provide info.
- *   Typically a numeric id or machine name, e.g. uid for authors, tid for tax
- *   terms, content type machine name.
- * @param array $data_options (optional)
- *
- * @return array
- *   - title: human readable label for the option
- *   - [extras]: additional data may be added as requested in $data_options
- */
-function intel_get_attribute_option_info($mode, $attr_key, $option_id, $data_options = array()) {
-  $info = intel_get_visitor_attribute_info();
-  //dsm($info);
-  if ($mode == 'page') {
-    $attrInfo = intel_get_page_attribute_info($attr_key);
-  }
-  else {
-    $attrInfo = intel_get_visitor_attribute_info($attr_key);
-  }
-  if (!empty($attrInfo)) {
-
-  }
-
-  //dsm($attrInfo);
-
-  $data = array(
-    'title' => '',
-  );
-
-  if (!empty($attrInfo['options info callback'])) {
-    $data = $attrInfo['options info callback']($option_id, $data_options);
-  }
-  else if (($attrInfo['module'] == 'intel') && isset($attrInfo['source_type']) && ($attrInfo['source_type'] == 'taxonomy')) {
-    $term = taxonomy_term_load($option_id);
-    if (!empty($term)) {
-      $data['title'] = $term->name;
-    }
-    if (!empty($data_options['page_count'])) {
-      $query = db_query("SELECT count(nid) FROM {taxonomy_index} WHERE tid = :tid", array(
-        ':tid' => $option_id,
-      ));
-
-      $data['page_count'] = $query->fetchField();
-    }
-  }
-  else if (isset($attrInfo['options'][$option_id])) {
-    $data = $attrInfo['options'][$option_id];
-  }
-
-  return $data;
-}
-
-function intel_page_attribute_author_option_info($option_id, $data_options) {
-  $data = array(
-    'title' => '',
-  );
-  $account = user_load($option_id);
-  if (!empty($account)) {
-    $data['title'] = format_username($account);
-  }
-
-  if (!empty($data_options['page_count'])) {
-    $query = db_query("SELECT count(nid) FROM {node} WHERE uid = :uid", array(
-      ':uid' => $option_id,
-    ));
-
-    $data['page_count'] = $query->fetchField();
-  }
-  return $data;
-}
-
-function intel_page_attribute_content_type_option_info($option_id, $data_options) {
-  $data = array(
-    'title' => '',
-  );
-  $types = node_type_get_types();
-  //print_r($types);
-  $type = '';
-  if (isset($types[$option_id])) {
-    $data['title'] = $types[$option_id]->name;
-    $type = $option_id;
-  }
-  else if (isset($types['enterprise_' . $option_id])) {
-    $data['title'] = $types['enterprise_' . $option_id]->name;
-    $type = 'enterprise_' . $option_id;
-  }
-
-  if ($type && !empty($data_options['page_count'])) {
-    $query = db_query("SELECT count(nid) FROM {node} WHERE type = :type", array(
-      ':type' => $type,
-    ));
-
-    $data['page_count'] = $query->fetchField();
-  }
-  return $data;
-}
-
-function intel_page_attribute_taxomony_term_option_info($option_id, $data_options) {
-  $data = array(
-    'title' => '',
-  );
-  $term = taxonomy_term_load($option_id);
-  if (!empty($term)) {
-    $data['title'] = $term->name;
-    //$data['uri'] = $term->uri();
-  }
-
-  if (!empty($data_options['page_count'])) {
-    $query = db_query("SELECT count(nid) FROM {taxonomy_index} WHERE tid = :tid", array(
-      ':tid' => $option_id,
-    ));
-
-    $data['page_count'] = $query->fetchField();
-  }
-
-  return $data;
+function intel_page_attribute_load($key) {
+  $attributes = intel_get_page_attributes();
+  $attribute = $attributes[$key];
+  $attribute['key'] = $key;
+  return $attribute; 
 }
 
 function intel_get_page_intents_default($filter = 'report') {
@@ -647,239 +369,134 @@ function intel_get_page_intents($filter = 'report') {
   if (!empty($intents)) {
     return $intents;
   }
-  $page_attributes = intel_get_page_attribute_info();
-
+  $page_attributes = intel_get_page_attributes();
+  
   $page_intents = $page_attributes['i']['options'];
-
+  
   uasort($page_intents, '_intel_sort_by_title');
-
+  
   return $page_intents;
 }
 
 
-/*
+
 function intel_visitor_attribute_load($key) {
-  $attributes = intel_get_visitor_attribute_info();
+  $attributes = intel_get_visitor_attributes();
   $attribute = $attributes[$key];
   $attribute['key'] = $key;
-  return $attribute;
-}
-*/
-
-
-function intel_get_phonenumbers() {
-  $phonenumbers = &drupal_static(__FUNCTION__);
-  if (count($phonenumbers)) {
-    return $phonenumbers;
-  }
-  $phonenumbers = variable_get('intel_phonenumbers', array());
-  foreach ($phonenumbers AS $name => $number) {
-    $phonenumbers[$name]['custom'] = 1;
-  }
-
-  drupal_alter('intel_phonenumbers', $phonenumbers);
-
-  return $phonenumbers;
-}
-
-function intel_phonenumber_load($key) {
-  $phonenumbers = intel_get_phonenumbers();
-  if (!isset($phonenumbers[$key])) {
-    return FALSE;
-  }
-  $phonenumber = $phonenumbers[$key];
-  $phonenumber['key'] = $key;
-  return $phonenumber;
-}
-
-function intel_phonenumber_load_by_number($number) {
-  $numbers = &drupal_static(__FUNCTION__);
-  if (isset($numbers[$number])) {
-    return $numbers[$number];
-  }
-  $phonenumbers = intel_get_phonenumbers();
-  foreach ($phonenumbers AS $name => $phonenumber) {
-    if ($phonenumber['number'] == $number) {
-      $numbers[$number] = $phonenumber;
-      break;
-    }
-  }
-
-  if (isset($numbers[$number])) {
-    return $numbers[$number];
-  }
-  // number not found
-  else {
-    return FALSE;
-  }
-}
-
-function intel_phonenumber_save($phonenumber, $key = '') {
-  if (empty($key)) {
-    if (!empty($phonenumber['key'])) {
-      $key = $phonenumber['key'];
-    }
-    else {
-      return FALSE;
-    }
-  }
-  if (empty($phonenumber['title'])) {
-    $phonenumber['title'] = $phonenumber['number'];
-  }
-  if (empty($phonenumber['number_display'])) {
-    $phonenumber['number_display'] = $phonenumber['number'];
-  }
-
-  $phonenumbers = variable_get('intel_phonenumbers', array());
-  $phonenumbers[$key] = $phonenumber;
-  $phonenumbers = variable_set('intel_phonenumbers', $phonenumbers);
-  return $phonenumber;
-}
-
-function intel_get_page_attributes_custom_multi($mode = 'visitor') {
-  $query = db_select('variable', 'v')
-    ->fields('v')
-    ->condition('name', 'intel_' . $mode . '_attribute_custom_%', 'LIKE');
-  $result = $query->execute();
-
-  $data = array();
-  while ($row = $result->fetchObject()) {
-    $a = explode('_', $row->name);
-    $data[$a[4]] = unserialize($row->value);
-  }
-  return $data;
-}
-
-function intel_get_entity_settings_multi($entity_type, $bundle = '') {
-  $query = db_select('variable', 'v')
-    ->fields('v');
-
-  if ($bundle == '') {
-    $query->condition('name', 'intel_entity_settings_' . $entity_type . '__%', 'LIKE');
-  }
-  else {
-    $query->condition('name', 'intel_entity_settings_' . $entity_type . '__' . $bundle);
-  }
-  $result = $query->execute();
-
-  $data = array();
-  while ($row = $result->fetchObject()) {
-    $a = explode('_', $row->name, 6);
-    $data[$a[5]] = unserialize($row->value);
-  }
-  return $data;
+  return $attribute; 
 }
 
 function _intel_sort_by_title($a, $b) {
-  return ($a['title'] > $b['title']) ? 1 : -1;
+  return ($a['title'] > $b['title']) ? 1 : -1; 
 }
 
 function _intel_sort_by_category($a, $b) {
-  return ($a['category'] > $b['category']) ? 1 : -1;
+  return ($a['category'] > $b['category']) ? 1 : -1; 
 }
 
 function _intel_sort_by_rtime($a, $b) {
-  return ($a['time'] < $b['time']) ? 1 : -1;
+  return ($a['time'] < $b['time']) ? 1 : -1; 
 }
 
 function intel_init_targets() {
   $target = array();
   $target['entrances_per_month'] = array(
-    'title' => t('Total visitors / month'),
+    'title' => t('Total visitors / month'),    
     'description' => t('Your target for the number of total visitors you want to get to the site.'),
     'value' => 3000,
     'group' => 'site_kpi_month',
   );
   $target['leads_per_month'] = array(
-    'title' => t('New contacts / month'),
+    'title' => t('New contacts / month'),    
     'description' => t('Your target for the number of contacts in a month.'),
     'value' => 30,
     'group' => 'site_kpi_month',
   );
   $target['posts_per_month'] = array(
-    'title' => t('Posts / month'),
+    'title' => t('Posts / month'),    
     'description' => t('Your target attraction, e.i. blog, posts in a month.'),
     'value' => 8,
     'group' => 'site_kpi_month',
   );
   $target['entrances_per_day'] = array(
-    'title' => t('Total visitors / day'),
+    'title' => t('Total visitors / day'),    
     'description' => t('Your target for the number of total visitors you want to get to the site.'),
     'value' => 100.00,
     'group' => 'site_day',
   );
   $target['entrances_per_day_warning'] = array(
-    'title' => t('Total visitors / day (warning)'),
+    'title' => t('Total visitors / day (warning)'),    
     'description' => t('Your target for the number of total visitors you want to get to the site.'),
     'value' => 25.00,
     'group' => 'site_day',
   );
-
+  
   $target['value_per_day'] = array(
-    'title' => t('Total value / day'),
+    'title' => t('Total value / day'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 100.00,
     'group' => 'site_day',
   );
   $target['value_per_day_warning'] = array(
-    'title' => t('Total value / day (warning)'),
+    'title' => t('Total value / day (warning)'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 25.00,
     'group' => 'site_day',
   );
-
+  
   $target['conversions_per_day'] = array(
-    'title' => t('Total conversions / day'),
+    'title' => t('Total conversions / day'),    
     'description' => t('Your target for the number of total visitors you want to get to the site.'),
     'value' => 4.00,
     'group' => 'site_day',
   );
   $target['conversions_per_day_warning'] = array(
-    'title' => t('Total conversions / day (warning)'),
+    'title' => t('Total conversions / day (warning)'),    
     'description' => t('Your target for the number of total visitors you want to get to the site.'),
     'value' => 1.00,
     'group' => 'site_day',
   );
-
+  
   $target['value_per_page_per_day'] = array(
-    'title' => t('Value per page / day'),
+    'title' => t('Value per page / day'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 1.00,
     'group' => 'page',
-  );
+  ); 
   $target['value_per_page_per_day_warning'] = array(
-    'title' => t('Value per page / day (warning)'),
+    'title' => t('Value per page / day (warning)'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 0.10,
     'group' => 'page',
   );
-
+  
   $target['value_per_page_per_entrance'] = array(
-    'title' => t('Value per page / entry'),
+    'title' => t('Value per page / entry'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 0.50,
     'group' => 'page',
-  );
+  ); 
   $target['value_per_page_per_entrance_warning'] = array(
-    'title' => t('Value per page / entry (warning)'),
+    'title' => t('Value per page / entry (warning)'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 0.20,
     'group' => 'page',
   );
 
   $target['value_per_visit'] = array(
-    'title' => t('Value / visit'),
+    'title' => t('Value / visit'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 1.00,
     'group' => 'visit',
-  );
+  ); 
   $target['value_per_visit_warning'] = array(
-    'title' => t('Value per page / day (warning)'),
+    'title' => t('Value per page / day (warning)'),    
     'description' => t('Your target for the total value of all traffic to the site.'),
     'value' => 0.10,
     'group' => 'visit',
-  );
-
+  ); 
+  
 
   return $target;
 }
@@ -912,7 +529,7 @@ function intel_get_targets() {
 function intel_get_base_scorings() {
   $scoring = array();
   $scoring['entrance'] = array(
-    'title' => t('Entrances'),
+    'title' => t('Entrances'),    
     'description' => t('A visit to the site.'),
     'value' => 0.05,
   );
@@ -954,26 +571,14 @@ function intel_get_submission_goals_default() {
     'description' => t('Subscribe to email updates form submission'),
     'value' => 25,
     'ga_id' => 4,
-  );
+  ); 
   $defs['contact-form'] = array(
     'title' => t('Contact form'),
     'description' => t('Main contact form submission'),
     'value' => 25,
     'ga_id' => 5,
   );
-
-  return $defs;
-}
-
-function intel_get_phonecall_goals_default() {
-  $defs = array();
-  $defs['contact-call'] = array(
-    'title' => t('Contact call'),
-    'description' => t('Main contact number called'),
-    'value' => 25,
-    'ga_id' => 6,
-  );
-
+  
   return $defs;
 }
 
@@ -992,12 +597,12 @@ function intel_get_scorings($filter = '') {
   $base = intel_get_base_scorings();
   foreach ($base AS $i => $m) {
     if (($filter == 'js_setting') && (empty($m['js_setting']))) {
-      //continue;
+      continue;
     }
     $scorings[$filter][$i] = isset($custom[$i]) ? $custom[$i] : $m['value'];
   }
-
-  $events = intel_get_intel_event_info();
+  
+  $events = intel_get_intel_events();
   foreach ($events AS $i => $m) {
     if (($filter == 'js_setting') && (empty($m['js_setting']))) {
       continue;
@@ -1006,10 +611,9 @@ function intel_get_scorings($filter = '') {
       $scorings[$filter][$i] = isset($custom[$i]) ? $custom[$i] : $m['value'];
     }
   }
-
+  
   $goals = variable_get('intel_event_goals', array());
   $goals = array_merge($goals, variable_get('intel_submission_goals', intel_get_submission_goals_default()));
-  $goals = array_merge($goals, variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default()));
   foreach ($goals AS $i => $m) {
     if (($filter == 'js_setting') && (empty($m['js_setting']))) {
       continue;
@@ -1023,7 +627,7 @@ function intel_get_scorings($filter = '') {
 
 function intel_get_scoring($event, $mode = 'machinename') {
   $scoring = intel_get_scorings();
-
+  
   return $scoring;
 }
 
@@ -1033,9 +637,9 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
     '_all' => 0,
     'events' => 0,
     'goals' => 0,
-    'traffic' => 0,
+    'traffic' => 0, 
   );
-
+  
   $entrance = array(
     'entrances' => 0,
   );
@@ -1067,7 +671,7 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
     $scores['goals'] += $entrance['goalValueAll'];
     // the value of any goal achieved on any page during a visit that entererd through this page
     if (isset($entrance['events']['_all'])) {
-      $scores['events'] += ($entrance['events']['_all']['value']);
+      $scores['events'] += ($entrance['events']['_all']['value']); 
     }
     $scores['traffic'] += $entrance['entrances'] * $scoring['entrance'];
     if (!empty($entrance['sticks'])) {
@@ -1076,16 +680,16 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
     if ($entrance['pageviews'] > ($entrance['entrances'] - $entrance['sticks'])) {
       $scores['traffic'] += ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
     }
-  }
-
+  } 
+  
   foreach ($scores AS $i => $score) {
     if (substr($i, 0, 1) == '_') {
       continue;
-    }
+    }      
     $scores[$i] = $score / $divideby;
     $scores['_all'] += $scores[$i];
   }
-
+  
   $score_components = $scores;
   return $scores['_all'];
 }
@@ -1097,18 +701,18 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
       '_all' => 0,
       'events' => 0,
       'goals' => 0,
-      'traffic' => 0,
+      'traffic' => 0, 
     ),
     'entrance' => array(
       '_all' => 0,
       'events' => 0,
       'goals' => 0,
-      'traffic' => 0,
+      'traffic' => 0, 
     ),
     'assist' =>  array(
       '_all' => 0,
       'events' => 0,
-      'goals' => 0,
+      'goals' => 0, 
       'traffic' => 0,
     ),
   );
@@ -1137,11 +741,11 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
     // the value of any goal achieved on any page during a entrance that entererd through this page    
     $scores['entrance']['goals'] += $entrance['goalValueAll'];
     $scores['_all']['goals'] += (1 - $ac) * $entrance['goalValueAll'];
-
+    
     // the value of any goal achieved on any page during a entrance that entererd through this page
-    if (isset($entrance['events']['_all'])) {
-      $scores['entrance']['events'] += $entrance['events']['_all']['value'];
-      $scores['_all']['events'] += $ac * ($entrance['events']['_all']['value'] - $page['events']['_all']['value']);
+    if (isset($entrance['events']['_all'])) {      
+      $scores['entrance']['events'] += $entrance['events']['_all']['value'];      
+      $scores['_all']['events'] += $ac * ($entrance['events']['_all']['value'] - $page['events']['_all']['value']); 
     }
     $scores['entrance']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
     $scores['_all']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
@@ -1153,7 +757,7 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
       $scores['entrance']['traffic'] += ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
       $scores['_all']['traffic'] += (1 - $ac) * ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
     }
-  }
+  } 
 
   // page hit scoring
   // the value of any goal achieved on any page during a entrance that entererd through this page
@@ -1167,25 +771,25 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
   }
   // the value of any goal achieved on any page during a entrance that entererd through this page
   if (isset($page['events']['_all'])) {
-    $scores['assist']['events'] += $page['events']['_all']['value'];
-    $scores['_all']['events'] += (1 - $ac) * $page['events']['_all']['value'];
+    $scores['assist']['events'] += $page['events']['_all']['value']; 
+    $scores['_all']['events'] += (1 - $ac) * $page['events']['_all']['value']; 
   }
   $scores['assist']['traffic'] += ($page['pageviews'] - $entrance['entrances']) * $scoring['additional_pages'];
   $scores['_all']['traffic'] += $ac * ($page['pageviews'] - $entrance['entrances']) * $scoring['additional_pages'];
-
+  
   // do divide bys and total up alls
   foreach ($scores AS $i => $a) {
     foreach ($a AS $j => $b) {
       if (substr($j, 0, 1) == '_') {
         continue;
-      }
+      }      
       $scores[$i][$j] = $scores[$i][$j] / $divideby;
       $scores[$i]['_all'] += $scores[$i][$j];
     }
   }
 
   $score_components = $scores;
-  return $scores['_all']['_all'];
+  return $scores['_all']['_all']; 
 }
 
 function intel_ga_feed_request_callback($request, $args) {
@@ -1217,20 +821,20 @@ function intel_report_add_js_callback($script, $type = 'file') {
  */
 function intel_fetch_analytics_visitor_meta_data($vtkids) {
   intel_include_library_file('ga/class.ga_model.php');
-
+  
   $visitor = array(
     'location' => array(),
     'environment' => array(),
     'lasthit' => 0,
   );
-
+  
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates("-1 year", "Today");
   $cache = array(
     'refresh' => 1,
   );
-
-  $segment = 'dynamic::ga:customVarValue5==' . implode(',dynamic::ga:customVarValue5==', $vtkids);
-
+  
+  $segment = 'dynamic::ga:customVarValue5==' . implode(',dynamic::ga:customVarValue5==', $vtkids);  
+  
   $request = array(
     'dimensions' => array('ga:browser', 'ga:browserVersion', 'ga:operatingSystem', 'ga:operatingSystemVersion', 'ga:language', 'ga:screenResolution', 'ga:customVarValue4'),
     'metrics' => array('ga:entrances'),
@@ -1239,8 +843,8 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
     'end_date' => $end_date,
     'segment' => $segment,
     'max_results' => 1,
-  );
-
+  );  
+  
   $data = google_analytics_api_report_data($request, $cache);
   if (!empty($_GET['debug'])) {
     dpm('ga_request'); dpm($request);//
@@ -1261,9 +865,9 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       $visitor['environment']['screenResolution'] = $row['screenResolution'];
     }
   }
-
+  
   $request['dimensions'] = array('ga:isMobile', 'ga:mobileDeviceBranding', 'ga:mobileDeviceModel', 'ga:mobileDeviceInfo', 'ga:customVarValue4');
-  $request['metrics'] = array('ga:entrances');
+  $request['metrics'] = array('ga:entrances'); 
 
   $data = google_analytics_api_report_data($request, $cache);
 
@@ -1275,10 +879,10 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       $visitor['environment']['mobileDeviceModel'] = $row['mobileDeviceModel'];
       $visitor['environment']['mobileDeviceInfo'] = $row['mobileDeviceInfo'];
     }
-  }
-
+  }  
+  
   $request['dimensions'] = array('ga:country', 'ga:region', 'ga:city', 'ga:metro', 'ga:latitude', 'ga:longitude', 'ga:customVarValue4');
-  $request['metrics'] = array('ga:entrances');
+  $request['metrics'] = array('ga:entrances'); 
 
   $data = google_analytics_api_report_data($request, $cache);
 
@@ -1296,7 +900,7 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       $visitor['location']['longitude'] = $row['longitude'];
     }
   }
-
+  
   $visitor['visits'] = array(
     '_all' => array(
       'entrance' => array(
@@ -1308,9 +912,9 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
   );
   $request['max_results'] = 10;
 
-
+    
   $request['dimensions'] = array('ga:visitCount', 'ga:medium', 'ga:source', 'ga:referralPath', 'ga:keyword', 'ga:socialNetwork', 'ga:customVarValue4');
-  $request['metrics'] = array('ga:entrances');
+  $request['metrics'] = array('ga:entrances'); 
   $request['sort_metric'] = '-ga:customVarValue4';  // note: cant sort by visitCount as it is treated as a string not an int
 
   $data = google_analytics_api_report_data($request, $cache);
@@ -1338,7 +942,7 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
   }
   $request['dimensions'] = array('ga:visitCount', 'ga:campaign');
   $request['metrics'] = array('ga:pageviews', 'ga:bounces', 'ga:timeOnSite', 'ga:goalValueAll');
-  $request['sort_metric'] = '';
+  $request['sort_metric'] = ''; 
   $visitCountFilter = ($visitCountMin > 1) ? LevelTen\Intel\GAModel::formatGtRegexFilter('ga:visitCount', ($visitCountMin-1)) : '';
   $request['filters'] = $visitCountFilter;
 
@@ -1354,17 +958,17 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       $visitor['visits'][$i]['entrance']['timeOnSite'] = $row['timeOnSite'];
       $visitor['visits'][$i]['entrance']['goalValueAll'] = $row['goalValueAll'];
       $visitor['visits'][$i]['trafficsource']['campaign'] = $row['campaign'];
-
+      
       $visitor['visits']['_all']['entrance']['entrances'] ++;
       $visitor['visits']['_all']['entrance']['pageviews'] += $row['pageviews'];
       $visitor['visits']['_all']['entrance']['timeOnSite'] += $row['timeOnSite'];
     }
   }
   $visitor['visits']['_all']['visitCount'] = $visitCountMax;
-
+  
   // get valued events
   $request['dimensions'] = array('ga:visitCount');
-  $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
+  $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue'); 
   $request['filters'] = 'ga:eventCategory=~^*!$' . (($visitCountFilter) ? ';' . $visitCountFilter : '');
 
   $data = google_analytics_api_report_data($request, $cache);
@@ -1389,11 +993,11 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       continue;
     }
     $visitor['visits'][$index]['score'] = intel_score_visit_aggregation($visitor['visits'][$index], 1, $score_components);
-    $score += $visitor['visits'][$index]['score'];
+    $score += $visitor['visits'][$index]['score']; 
     //$visitor['visits'][$index]['score_components'] = $score_components;  
   }
   $visitor['visits']['_all']['score'] = $score;
-
+  
   if ($visitor['lasthit']) {
     return $visitor;
   }
@@ -1408,7 +1012,7 @@ function _intel_get_report_dates_from_ops($ops = 'l30d', &$cache_options = array
   if (!empty($_GET['timeops'])) {
     $ops = $_GET['timeops'];
   }
-
+  
   if ($ops == 'today') {
     $start = 'midnight';
     $end = 'now';
@@ -1465,7 +1069,7 @@ function _intel_get_report_dates($start_default = "-31 days", $end_default = "-1
   }
   $start_date = (!empty($_GET['start_date'])) ? strtotime($_GET['start_date']) : strtotime($start_default);
   $end_date = (!empty($_GET['end_date'])) ? strtotime($_GET['end_date']) : strtotime($end_default);
-  $number_of_days = round(($end_date - $start_date)/60/60/24);
+  $number_of_days = round(($end_date - $start_date)/60/60/24);  
   if (!$return_hash) {
     return array(
       $start_date,
@@ -1486,21 +1090,21 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
   $dynamic_filters = array();
   $static_filter = '';
   $form['filters'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Filters'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#type' => 'fieldset', 
+    '#title' => t('Filters'), 
+    '#collapsible' => TRUE, 
+    '#collapsed' => TRUE,  
   );
   $events = array(
     '' => t('-'),
   );
-  $metas = intel_get_intel_event_info();
+  $metas = intel_get_intel_events();
   foreach ($metas AS $meta) {
     if (isset($meta['category'])) {
       $events[$meta['category']] = $meta['title'];
     }
   }
-
+  
   if ($context != 'page') {
     $modes = array(
       '' => '-',
@@ -1514,7 +1118,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       $mode_default = $a[0];
       $path_default = $a[1];
       $dynamic_filters['page'] = "{$a[0]}={$a[1]}";
-    }
+    }  
     $form['filters']['page_mode'] = array(
       '#type' => 'select',
       '#title' => t('Page mode'),
@@ -1532,7 +1136,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       '#suffix' => '</div>',
     );
   }
-
+  
   $form['filters']['event'] = array(
     '#type' => 'select',
     '#title' => t('Events'),
@@ -1542,7 +1146,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
     '#prefix' => '<div class="filter-fieldset filter-fieldset-event">',
     '#suffix' => '</div>',
   );
-
+  
   if ($context != 'trafficsource') {
     $trafficsource_types = array(
       '' => t('-'),
@@ -1550,7 +1154,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       'medium' => t('Medium'),
       'referralPath' => t('Referral path'),
       'socialNetwork' => t('Social network'),
-      'keyword' => t('Keyword'),
+      'keyword' => t('Keyword'),    
     );
     $trafficsource_type_default = '';
     $trafficsource_value_default = '';
@@ -1577,7 +1181,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       '#suffix' => '</div>',
     );
   }
-
+  
   $loc_types = array(
     '' => t('-'),
     'subContinent' => t('Sub Continent'),
@@ -1610,7 +1214,7 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
     '#default_value' => $loc_value_default,
     '#suffix' => '</div>',
   );
-
+  
   if ($context != 'visitor') {
     $visitor_options = array(
       '' => t('-'),
@@ -1640,8 +1244,8 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       '#size' => 80,
       '#default_value' => $visitor_value_default,
       '#suffix' => '</div>',
-    );
-
+    ); 
+    
     $va_options = array(
       '' => t('-'),
     );
@@ -1669,39 +1273,39 @@ function intel_report_filters_form($form, &$form_state, $filters = array(), $con
       '#size' => 80,
       '#default_value' => $va_value_default,
       '#suffix' => '</div>',
-    );
-  }
+    ); 
+  } 
 
   $form['filters']['apply'] = array(
     '#type' => 'markup',
     '#markup' => '<input type="button" id="apply-report-filter" value="Apply" class="form-submit">',
   );
-
+  
   // do not display form if not in extended mode
   if (!variable_get('intel_extended_mode', 0)) {
     $form = array();
   }
-
+  
   if (($context == 'page') && ($filters['page'])) {
     $a = explode(':', $filters['page']);
     $form['filters_display'] = array(
       '#type' => 'markup',
       '#markup' => '<strong>' . t('Page') . '</strong>' . ': ' . $a[1],
-    );
+    );    
   }
   if (($context == 'trafficsource') && ($filters['trafficsource'])) {
     $a = explode(':', $filters['trafficsource']);
     $form['filters_display'] = array(
       '#type' => 'markup',
       '#markup' => '<strong>' . t('Traffic source') . '</strong>' . ': ' . $a[1] . " ({$a[0]})",
-    );
+    );    
   }
   if (($context == 'visitor') && ($filters['visitor'])) {
     $a = explode(':', $filters['visitor']);
     $form['filters_display'] = array(
       '#type' => 'markup',
       '#markup' => '<strong>' . t('Visitor') . '</strong>' . ': ' . $a[1],
-    );
+    );    
   }
   if (count($dynamic_filters)) {
     $form['filters_display'] = array(
@@ -1717,10 +1321,10 @@ function intel_add_report_headers() {
   drupal_add_js("google.load('visualization', '1', {packages: ['corechart']});google.load('visualization', '1', {packages: ['table']});", array('type' => 'inline', 'scope' => 'header'));
   drupal_add_js(libraries_get_path('LevelTen') . '/Intel/charts/charts.js');
   drupal_add_css(drupal_get_path('module', 'intel') . '/css/intel.report.css');
-  drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.report.js');
+  drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.report.js'); 
 }
 
 function intel_get_report_ajax_container() {
-  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-dates="' . ((!empty($_GET['dates'])) ? $_GET['dates'] : '') . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
+  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
   return $output;
 }

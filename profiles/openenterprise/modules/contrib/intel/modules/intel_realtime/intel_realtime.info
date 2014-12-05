@@ -1,6 +1,0 @@
-name = Realtime Intelligence
-core = "7.x"
-description = "Provides realtime data and analytics support EXPERIMENTAL"
-package = Intelligence
-
-dependencies[] = intel

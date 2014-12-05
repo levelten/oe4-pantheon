@@ -24,6 +24,8 @@ function intel_hubspot_admin_config_page() {
 }
 
 function intel_hubspot_admin_config_form($form, $form_state) {
+  $form = array();
+
   $api_connection = 0;
   if (count($form_state['input']) == 0) { // hack to assure check and messages are only done once when form is submitted
     if ($HAPIKey = variable_get('intel_hubspot_api_key', '')) {

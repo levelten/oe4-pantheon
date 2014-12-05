@@ -3,7 +3,6 @@
 function intel_webform_menu() {
   $items = array();
 
-  /*
   $items['node/%webform_menu/webform/intel'] = array(
     'title' => 'Intelligence',
     'page callback' => 'intel_webform_manage',
@@ -14,19 +13,6 @@ function intel_webform_menu() {
     'weight' => 10,
     'type' => MENU_LOCAL_TASK,
   );
-  */
-  if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
-    $items['node/%webform_menu/webform/phone'] = array(
-      'title' => 'Phone notifications',
-      'page callback' => 'intel_webform_manage_phone',
-      'page arguments' => array(1),
-      'access callback' => 'node_access',
-      'access arguments' => array('update', 1),
-      'file' => 'intel_webform.admin.inc',
-      'weight' => 1,
-      'type' => MENU_LOCAL_TASK,
-    );
-  }
   $items['intel_webform/admin_submission_results_alter_js'] = array(
     'title' => '',
     'page callback' => 'intel_webform_admin_submission_results_alter_js',
@@ -40,112 +26,14 @@ function intel_webform_menu() {
 
 /**
  * Implements hook_page_alter
- *
+ * 
  * @param $page
  */
-/*
 function intel_webform_page_alter(&$page) {
   if ((arg(0) == 'node') && (arg(2) == 'webform-results')) {
     drupal_add_js(drupal_get_path('module', 'intel_webform') . '/intel_webform.admin_submission_results_alter.js');
   }
 }
-*/
-
-/**
- * Implements hook_intel_page_settings_js_alter()
- * @param $settings
- */
-function intel_webform_intel_page_settings_js_alter(&$settings) {
-  if (is_array($settings['intel']['track_forms'])) {
-    $forms = intel_webform_track_forms();
-    foreach ($forms AS $form) {
-      $settings['intel']['track_forms'][] = $form;
-    }
-    //dsm($forms);
-    //if (!intel_webform_disable_track_forms() ) {
-      //$settings['intel']['track_forms'][] = 'form.webform-client-form';
-    //}
-  }
-}
-
-function intel_webform_disable_track_forms($value = null) {
-  static $flag;
-  if (!isset($flag)) {
-    $flag = 0;
-  }
-  if (isset($value)) {
-    $flag = $value;
-  }
-  return $flag;
-}
-
-function intel_webform_track_forms($form = null, $action = 'set') {
-  static $forms;
-  if (!isset($forms)) {
-    $forms = array();
-  }
-  if (isset($form)) {
-    if ($action == 'unset') {
-      if ($forms[$form]) {
-        unset($forms[$form]);
-      }
-    }
-    else {
-      $forms[$form] = $form;
-    }
-
-  }
-  return $forms;
-}
-
-/**
- * Implements hook_form_alter().
- */
-function intel_webform_form_alter(&$form, &$form_state, $form_id) {
-  // Webform is being presented to visitor.
-  if (isset($form['#node']->webform) && in_array('webform_client_form_submit', $form['#submit'])) {
-    // check for special fields
-    if (!isset($form_state['intel_fields'])) {
-      $form_state['intel_fields'] = array();
-      if (isset($form['#node']->webform['components'])) {
-
-        // loop through webform components to find any special fields
-        $comps = &$form['#node']->webform['components'];
-        foreach ($comps AS $i => $comp) {
-          if ($comp['form_key'] == 'intel_submit_data') {
-            $form_state['intel_fields']['intel_submit_data'] = $i;
-
-          }
-        }
-      }
-    }
-
-    $track = 1;
-    if (!empty($form_state['intel_fields']['intel_submit_data'])) {
-      // disable tracking on multi page forms if not on first page
-      if (isset($form_state['webform']['page_count']) && ($form_state['webform']['page_count'] > 1)) {
-        if (isset($form_state['webform']['page_num']) && ($form_state['webform']['page_num'] > 1)) {
-          intel_webform_disable_track_forms(1);
-          $track = 0;
-        }
-      }
-    }
-    // note that webforms have a form id of webform-client-form-[nid] if a page form
-    // and the format webform-client-form-[nid]--[other id] when used as a block
-    if (!$track) {
-      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid, 'unset');
-      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']", 'unset');
-    }
-    else {
-      //intel_webform_track_forms('form#webform-client-form-' . $form['#node']->nid);
-      intel_webform_track_forms("form.webform-client-form[id^='webform-client-form-{$form['#node']->nid}']");
-    }
-    //dsm($form);
-    //dsm($form_state);
-  }
-}
-
-
 
 /**
  * Modify a Webform submission, prior to saving it in the database.
@@ -157,29 +45,11 @@ function intel_webform_form_alter(&$form, &$form_state, $form_id) {
  */
 function intel_webform_webform_submission_presave($node, &$submission) {
   global $base_path;
-
   $idents = array();
   $vtk = IntelVisitor::extractVtk();
-  if (empty($vtk)) {
-    return;
-  }
-
-  $api_level = intel_api_level();
-  if ($api_level != 'pro') {
-    return;
-  }
-
-  // cache in Drupal session also in case varnish or other caching is filtering
-  // cookies
-  intel_session_cookie_merge();
-
   $visitor = intel_visitor_load_or_create('user');
-  $api_level = variable_get('intel_api_level', '');
 
   $wf_settings = variable_get('intel_webform_settings_node_' . $node->nid, array());
-//dsm($wf_settings);
-//dsm($submission);
-//dsm($node->webform['components']);
   $merge_data = array();
   $update_name_prop = 0;
   $name_prop = $visitor->getProp('data.name');
@@ -197,55 +67,46 @@ function intel_webform_webform_submission_presave($node, &$submission) {
       if (!empty($visitor->vid) && ($component['form_key'] == 'intel_visitor_url')) {
         $submission->data[$cid]['value'][0] ='http://' . $_SERVER['HTTP_HOST'] . $base_path . $visitor->uri();
       }
-      if (!empty($component['extra']['intel_field_map'])) {
-        list($key, $elem) = explode(':', $component['extra']['intel_field_map']);
-
-        if (!isset($merge_data[$key])) {
-          $merge_data[$key] = array();
-        }
-
-        // name field maping of multiple keyed elements
-        if ($elem == 'name_automap') {
-          $comp_keys = array(
-            'given' => 'first',
-            'family' => 'last',
-            'title' => 'title',
-            'middle' => 'middle',
-            'generational' => 'generational',
-            'credentials' => 'credentials',
-          );
-          foreach ($comp_keys AS $comp_key => $intel_key) {
-            if (!empty($submission->data[$cid]['value'][$comp_key])) {
-              $merge_data[$key][$intel_key] = trim($submission->data[$cid]['value'][$comp_key]);
-            }
-          }
-        }
-        else {
-          $value = trim($submission->data[$cid]['value'][0]);
-          // don't add value if it is blank
-          if ($value) {
-            $merge_data[$key][$elem] = $value;
-          }
-        }
+      if ($key = array_search($component['form_key'], $wf_settings)) {
+        $merge_data[$key] = trim($submission->data[$cid]['value'][0]);
+      }
+      else if (!empty($wf_settings['fieldmap'][$component['form_key']])) {
+        $merge_data['fieldmap_' . $component['form_key']] = trim($submission->data[$cid]['value'][0]);
       }
     }
   }
-
-  $prop_options = array(
-    'source' => 'form',
-  );
-  foreach ($merge_data AS $prop_name => $values) {
-    $visitor->setProp($prop_name, $values, $prop_options);
+  if (!empty($merge_data['field_visitor_email'])) {
+    $visitor->setIdentifier('email', $merge_data['field_visitor_email']);
+    if (empty($visitor->contact_created) && !empty($visitor->email)) {
+      $visitor->setContactCreated(REQUEST_TIME);
+    }
   }
-
-  $visitor->setLastActivity(REQUEST_TIME);
-
-  if (isset($visitor->is_new) || count($merge_data)) {
-    $visitor->updated = REQUEST_TIME;
+  if (!empty($merge_data['field_visitor_name'])) {
+    $name_prop['first'] = $merge_data['field_visitor_name'];
+    $name = $merge_data['field_visitor_name'];
+    if ($merge_data['field_visitor_name2']) {
+      $name_prop['last'] = $merge_data['field_visitor_name2'];
+      $name .= ((!empty($merge_data['field_visitor_name2'])) ? " " . $merge_data['field_visitor_name2'] : '');
+    }
+    $visitor->setName($name);
+    $visitor->setProp('name', $name_prop, $prop_options);
   }
-
+  if (isset($wf_settings['fieldmap']) && is_array($wf_settings['fieldmap'])) {
+    foreach ($wf_settings['fieldmap'] AS $field_key => $prop_keys) {
+      if (empty($merge_data['fieldmap_' . $field_key])) {
+        continue;
+      }
+      $a = explode(':', $prop_keys);
+      if (count($a) == 2) {
+        $prop = $visitor->getProp($a[0]);
+        $prop[$a[1]] = $merge_data['fieldmap_' . $field_key];
+        $visitor->setProp($a[0], $prop, $prop_options);
+      }
+    }
+  }
   $visitor->merge();
 }
+
 
 /**
  * Implements hook_node_insert().
@@ -267,7 +128,6 @@ function intel_webform_node_save($node) {
   }
 }
 
-
 function intel_webform_node_load($nodes, $types) {
   // Quick check to see if we need to do anything at all for these nodes.
   $webform_types = webform_variable_get('webform_node_types');
@@ -282,7 +142,7 @@ function intel_webform_node_load($nodes, $types) {
     if (!empty($data)) {
       $nodes[$nid]->webform['intel'] = $data;
     }
-  }
+  }  
 }
 
 /**
@@ -310,14 +170,14 @@ function intel_webform_intel_intel_script() {
 /**
  * Implements hook_intel_form_submission_check
  */
-function intel_webform_intel_form_submission_check(&$submission, &$track, &$submit_context, &$form_settings, &$link_query) {
+function intel_webform_intel_form_submission_check(&$submission, &$track, &$link_query) {
   if (empty($_GET['sid'])) {
     return;
   }
-
+  
   require_once './' . drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
   $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
-  $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
+  $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent    
   if (isset($wfsubmission->submitted)) {
     $link_query = array('sid' => $_GET['sid']);
     $wf_node = node_load($wfsubmission->nid);
@@ -327,337 +187,11 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
     if (isset($wf_node->field_track_submission_value[$wf_node->language][0]['value'])) {
       $track['category_id'] = $wf_node->field_track_submission_value[$wf_node->language][0]['value'];
     }
-
     $submission->type = 'webform';
     $submission->fid = $wfsubmission->nid;
     $submission->fsid = $wfsubmission->sid;
     $submission->details_url = "node/{$wfsubmission->nid}/submission/{$wfsubmission->sid}";
-
     $track['form_title'] = $wf_node->title;
-    $track['submission_path'] = $submission->details_url;
-    $wf_node = node_load($wfsubmission->nid);
-    if (isset($wf_node->webform['intel'])) {
-      $form_settings = $wf_node->webform['intel'];
-    }
-    // check if intel_submit_data component exists
-    $data_cid = -1;
-    if (!empty($wf_node->webform['components']) && is_array($wf_node->webform['components'])) {
-      foreach ($wf_node->webform['components'] AS $cid => $component) {
-        if ($component['form_key'] == 'intel_submit_data') {
-          $data_cid = $cid;
-          break;
-        }
-      }
-    }
-    // if component exists, set submit context
-    if (($data_cid >= 0) && isset($wfsubmission->data[$data_cid][0])) {
-      $submit_context = json_decode($wfsubmission->data[$data_cid][0]);
-    }
-  }
-}
-
-function intel_webform_form_webform_component_edit_form_alter(&$form, $form_state, $node) {
-  $nid = $form['nid']['#value'];
-  $cid = $form['cid']['#value'];
-  $type = $form['type']['#value'];
-  $node = node_load($nid);
-  // get existing component, empty array if new component
-  $component = (isset($node->webform['components'][$cid])) ? $node->webform['components'][$cid] : array();
-
-  $options = array(
-    '' => t(' - None - '),
-  );
-  $prop_info = intel_get_visitor_property_info();
-
-  if ($type == 'email') {
-    $options['email:email'] = t('Email');
-  }
-  // phone field (contrib module)
-  if ($type == 'phone') {
-    $options['phone:phone'] = t('Phone');
-  }
-  // name field (contrib module)
-  if ($type == 'name') {
-    $options['name:name_automap'] = t('Name (auto-map elements)');
-  }
-  // TODO: get this auto building from intel properties
-  if ($type == 'textfield') {
-    $options['name:full'] = t('Full name');
-    $options['name:first'] = t('First name');
-    $options['name:last'] = t('Last name');
-    $options['facebook:url'] = t('Facebook (url)');
-    $options['twitter:username'] = t('Twitter (username)');
-    $options['twitter:url'] = t('Twitter (url)');
-    $options['linkedin:url'] = t('LinkedIn (url)');
-    $options['website:url'] = t('Website');
-  }
-  if (count($options) > 1) {
-    $form['extra']['intel_field_map'] = array(
-      '#type' => 'select',
-      '#title' => t('Save to Intel visitor property'),
-      '#description' => t('To save this components submission data to Intel visitor data, select which property to map this component. '),
-      '#options' => $options,
-      '#default_value' => isset($component['extra']['intel_field_map']) ? $component['extra']['intel_field_map'] : '',
-    );
-  }
-}
-
-function intel_webform_present_components() {
-  $components = array();
-  $weight = 0;
-  $components['first_name'] = array(
-    'name' => t('First name'),
-    'form_key' => 'first_name',
-    'type' => 'textfield',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'name:first',
-    ),
-  );
-  $components['last_name'] = array(
-    'name' => t('Last name'),
-    'form_key' => 'last_name',
-    'type' => 'textfield',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'name:last',
-    ),
-  );
-  $components['email'] = array(
-    'name' => t('Email'),
-    'form_key' => 'email',
-    'type' => 'email',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'email:email',
-    ),
-  );
-  $components['phone'] = array(
-    'name' => t('Phone number'),
-    'form_key' => 'phone',
-    'type' => 'phone',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'phone:phone',
-    ),
-  );
-  $components['website'] = array(
-    'name' => t('Website'),
-    'form_key' => 'website',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'website:url',
-    ),
-  );
-  $components['twitter_username'] = array(
-    'name' => t('Twitter username'),
-    'form_key' => 'twitter_username',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'twitter:username',
-    ),
-  );
-  $components['facebook_url'] = array(
-    'name' => t('Facebook page'),
-    'form_key' => 'facebook_url',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'facebook:url',
-    ),
-  );
-  $components['linkedin_url'] = array(
-    'name' => t('LinkedIn profile'),
-    'form_key' => 'linkedin_url',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'linkedin:url',
-    ),
-  );
-  $components['organization_name'] = array(
-    'name' => t('Organization'),
-    'form_key' => 'organization_name',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'organization:name',
-    ),
-  );
-  $components['organization_title'] = array(
-    'name' => t('Title'),
-    'form_key' => 'organization_title',
-    'type' => 'textfield',
-    'mandatory' => 0,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-      'intel_field_map' => 'organization:title',
-    ),
-  );
-  $components['subject'] = array(
-    'name' => 'Subject',
-    'form_key' => 'subject',
-    'type' => 'textfield',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-    ),
-  );
-  $components['message'] = array(
-    'name' => 'Message',
-    'form_key' => 'message',
-    'type' => 'textarea',
-    'mandatory' => 1,
-    'weight' => $weight++,
-    'pid' => 0,
-    'extra' => array(
-      'title_display' => 'before',
-      'private' => 0,
-    ),
-  );
-  return $components;
-}
-
-function intel_webform_existing_components($exclude_presets = FALSE, $ignore = array(), $ignore_type = array()) {
-  $query = db_select('webform_component', 'c')
-    ->fields('c');
-  $result = $query->execute();
-
-  $ignore[] = 'mailchimp';
-  $ignore[] = 'email_updates';
-  $ignore[] = 'intel_visitor_url';
-
-  if ($exclude_presets) {
-    $ignore = array_merge($ignore, array_keys(intel_webform_present_components()));
-  }
-
-  $components = array();
-
-  while ($r = $result->fetchAssoc()) {
-    $key = $r['form_key'];
-    if (!isset($components[$key]) && !in_array($key, $ignore) && !in_array($r['type'], $ignore_type)) {
-      $r['extra'] = unserialize($r['extra']);
-      $components[$key] = $r;
-    }
-  }
-
-  return $components;
-}
-
-function intel_webform_setup_webform_config(&$node) {
-  $webform = &$node->webform;
-  $existing_comps = array();
-  foreach ($webform['components'] AS $cid => $comp) {
-    $existing_comps[$comp['form_key']] = $comp;
-  }
-  $cid = count($webform['components']) + 1;
-  if (!isset($existing_comps['intel_visitor_url'])) {
-    $webform['components'][$cid] = array(
-      'name' => 'Visitor intel',
-      'form_key' => 'intel_visitor_url',
-      'type' => 'hidden',
-      'mandatory' => 0,
-      'weight' => 99,
-      'pid' => 0,
-      'extra' => array(
-        'hidden_type' => 'hidden',
-        'private' => 0,
-      ),
-    );
-    $cid++;
-  }
-
-  if (module_exists('webform_mailchimp') && !isset($existing_comps['email_updates'])) {
-    $list_id = variable_get('intel_mailchimp_default_list_id', '');
-    if ($list_id) {
-      $webform['components'][$cid] = array(
-        'name' => 'Email updates',
-        'form_key' => 'email_updates',
-        'type' => 'mailchimp',
-        'mandatory' => 0,
-        'weight' => 100,
-        'pid' => 0,
-        'extra' => array(
-          'mailchimp_list' => $list_id,
-          'use_existing_email_field' => 'email',
-          'checkbox_label' => 'Subscribe to updates',
-          'checkbox_checked_by_default' => 1,
-          'checkbox_hidden' => 1,
-          'mergefields' => 'FNAME|first_name
-  LNAME|last_name',
-          'title_display' => 'before',
-          'private' => 0,
-        ),
-      );
-    }
-  }
-
-}
-
-/**
- * Implements hook_cron
- *
- * Used to clear out expired data in intel_webform_temp_submission_data
- */
-function intel_webform_cron() {
-  $data = variable_get('intel_webform_temp_submission_data', array());
-
-  foreach ($data AS $key => $value) {
-    // if data more than 60 seconds old, remove it
-    if ($value['time'] < (REQUEST_TIME - 60)) {
-      unset($data[$key]);
-    }
-  }
-
-  // save purged data or delete variable if any values still exist
-  if (count($data)) {
-    variable_get('intel_webform_temp_submission_data', $data);
-  }
-  else {
-    variable_del('intel_webform_temp_submission_data');
+    $track['submission_path'] = $submission->details_url;      
   }
 }

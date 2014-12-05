@@ -54,9 +54,7 @@ function intel_admin_content_alter_js($content_type = '') {
     if (empty($d['i']) || (substr($d['i'], 0, 1) == '_')) {
       continue;
     }
-    $a = explode('/', $d['i'], 2);
-    $host = $a[0];
-    $path = isset($a[1]) ? $a[1] : '';
+    list($host, $path) = explode('/', $d['i'], 2);
     $path = '/' . $path;
     if (!in_array($path, $_REQUEST['hrefs'])) {
       continue;
