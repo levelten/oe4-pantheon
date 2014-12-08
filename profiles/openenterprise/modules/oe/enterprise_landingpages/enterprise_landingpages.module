@@ -1115,7 +1115,6 @@ function enterprise_landingpages_node_presave($node) {
  */
 function enterprise_landingpages_node_save($node) {
   if ($node->type == 'webform') {
-dsm($node);
     if (isset($node->landingpages_webform_block)) {
       //entity_data_set('node', $node->nid, 'landingpages_webform_block', $node->landingpages_webform_block);
       $delta = 'client-block-' . $node->nid;
