@@ -9,23 +9,9 @@
 function intel_page_alter(&$page) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   global $user;
-//print_r($user);
-  /*
-  if ($user->uid != 1) {
-  //dsm($user);
-  print_r($_SESSION);
-  watchdog('intel: ' . $_GET['q'], print_r($_SESSION, 1));
-
-// testing how session work. Looking at login/logout transition
-// TODO remove (form testing only)
-$_SESSION['intel'] = isset($_SESSION['intel']) ? $_SESSION['intel'] + 1 : 0;
-$vtk = IntelVisitor::extractVtk();
-watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
-  }
-  */
 
   $api_level = intel_api_level();
-  
+
   $path_is_admin = path_is_admin(current_path());
   
   $ga_va = array();
@@ -38,161 +24,41 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   $is_landingpage = 0;
   
   $entity = '';
+  $entity_type = '';
   $intel_events = intel_get_intel_event_info();
-  $visitor_attrs = array();
-  $page_attrs = array();
   $page_events = array();
-  $page_title = drupal_get_title();
-  $l10i_var_action = array(
-    'method' => '_setIntelVar',
-    'scope' => 'page',
-    'namespace' => 'analytics',
-  );
-  // Add section and content type custom vars  
+  $page_attrs = array();
+  $visitor_attrs = array();
+
+  // if entity not provided, lookup based on menu path
   if (arg(0) == 'node') {
     $entity = menu_get_object();
-
-    if ($entity) {
-      $entity_type = 'node';
-      $entity_bundle = $entity->type;
-      $page_title = $entity->title;
-
-      $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
-
-      $page_attrs['pt'] = $entity->created;
-      $page_attrs['et'] = 'n';
-      $page_attrs['ct'] = str_replace('enterprise_', '', $entity->type); // trim enterprise namespace in Open Enterprise
-    }
+    $entity_type = 'node';
   }
   elseif (arg(0) == 'user') {
     $entity = menu_get_object('user');
-    if ($entity) {
-      $entity_type = 'user';
-      $entity_bundle = 'user';
+    $entity_type = 'user';
+  }
 
-      $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
+  $page_title = isset($entity->title) ? $entity->title : drupal_get_title();
 
-      $page_attrs['pt'] = $entity->created;
-      $page_attrs['et'] = 'u';
+  if ($entity_type && !empty($entity)) {
+    $attrs = intel_get_entity_intel_attributes($entity, $entity_type);
+    $page_attrs = $attrs['page'];
+    $visitor_attrs = $attrs['visitor'];
+  }
 
+  if ($path_is_admin) {
+    $intent = 'a';
+  }
+
+  if (isset($page_attrs['i']) && $page_attrs['i'] == 'l') {
+    $is_landingpage = 1;
+    if ($api_level == 'pro') {
+      $page_events['landing_page_view'] = $intel_events['landing_page_view'];
     }
   }
-  // TODO support for taxomony terms listing page
 
-  // do field operations
-  if ($entity) {
-    $lang = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
-    $fields_info = field_info_instances($entity_type, $entity_bundle);
-
-    // track entity uid (e.g. node author)
-    if (!isset($page_entity_settings['track_page_uid']) || $page_entity_settings['track_page_uid']) {
-      $key = !empty($page_entity_settings['track_page_uid']) ? $page_entity_settings['track_page_uid'] : 'a';
-      if ($key == 1) {
-        $key = 'a';
-      }
-      $page_attrs[$key] = $entity->uid;
-    } 
-    
-    // track page intent
-    $intent = INTEL_PAGE_INTENT_DEFAULT;
-    if ($path_is_admin) {
-      $intent = 'a';
-    }
-    if (!empty($page_entity_settings['page_intent'])) {
-      $intent = $page_entity_settings['page_intent'];
-    }
-    if (!empty($entity->field_page_intent[$lang][0]['value']) && ($entity->field_page_intent[$lang][0]['value'] != '_default')) {
-      $intent = $entity->field_page_intent[$lang][0]['value'];
-    }
-    if ($intent) {
-      $page_attrs['i'] = array(
-        $intent => '',
-      );
-      if ($intent == 'l') {
-        $is_landingpage = 1;
-        if ($api_level == 'pro') {
-          $page_events['landing_page_view'] = $intel_events['landing_page_view'];
-        }
-      }     
-    }
-
-    $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
-
-    // process vocabularies with global tracking enabled
-    foreach ($fields_info AS $key => $field) {
-      if (isset($entity->{$key}[$lang][0]['tid'])) {
-        // get field_info to get associated vocabulary
-        $field_info = field_info_field($key);
-        $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
-        // check if tracking is enabled at the content type level or on globally on the vocabulary
-        if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
-          $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
-          foreach ($entity->{$key}[$lang] AS $t) {
-            if (!isset($page_attrs[$page_attr_key])) {
-              $page_attrs[$page_attr_key] = array();
-            }
-            $page_attrs[$page_attr_key][$t['tid']] = '';
-            if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
-              $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
-              if (!isset($visitor_attrs[$visitor_attr_key])) {
-                $visitor_attrs[$visitor_attr_key] = array();
-              }
-              $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
-            }
-          }
-        }
-      }
-    }
-
-    // set custom page attributes if page_attribute_col field exists
-    if (!empty($entity->field_page_attribute_col[$lang]) && is_array($entity->field_page_attribute_col[$lang])) {
-      foreach ($entity->field_page_attribute_col[$lang] AS $i => $e) {
-        $collection = field_collection_item_load($e['value']);
-        $keys = explode('.', $collection->field_page_attribute[$lang][0]['value']);
-        $value = !empty($collection->field_page_attribute_value[$lang][0]['value']) ? $collection->field_page_attribute_value[$lang][0]['value'] : '';
-        if (count($keys) == 1) {  // flag and scalar values
-          $page_attrs[$keys[0]] = $value; 
-        } 
-        else {
-          if (!isset($page_attrs[$keys[0]])) {
-            $page_attrs[$keys[0]] = array();
-          }
-          $page_attrs[$keys[0]][$keys[1]] = $value;
-        }        
-      }
-    }
-    
-      // set custom visitor attributes if visitor_attribute_col field exists
-    if (!empty($entity->field_visitor_attribute_col[$lang]) && is_array($entity->field_visitor_attribute_col[$lang])) {
-      foreach ($entity->field_visitor_attribute_col[$lang] AS $i => $e) {
-        $collection = field_collection_item_load($e['value']);
-        $keys = explode('.', $collection->field_visitor_attribute[$lang][0]['value']);
-        $value = !empty($collection->field_visitor_attribute_value[$lang][0]['value']) ? $collection->field_visitor_attribute_value[$lang][0]['value'] : '';
-        if (count($keys) == 1) {  // flag and scalar values
-          $visitor_attrs[$keys[0]] = $value; 
-        } 
-        else {
-          if (!isset($visitor_attrs[$keys[0]])) {
-            $visitor_attrs[$keys[0]] = array();
-          }
-          $visitor_attrs[$keys[0]][$keys[1]] = $value;
-        }        
-      }
-    } 
-
-    // set attached intel events if intel_event_col field exists
-    if (!empty($entity->field_intel_event_col[$lang]) && is_array($entity->field_intel_event_col[$lang])) {
-      foreach ($entity->field_intel_event_col[$lang] AS $i => $e) {
-        $collection = field_collection_item_load($e['value']);
-        $key = $collection->field_intel_event[$lang][0]['value'];
-        $page_events[$key] = $intel_events[$key];
-        if(!empty($collection->field_intel_event_value[$lang][0]['value'])) {
-          $page_events[$key]['value'] = $collection->field_intel_event_value[$lang][0]['value'];
-        }
-      }
-    } 
-  }
-  
   // set user role visitor attribute
   // only when user is logged in (otherwise page caching will cause errors)
   if ($user->uid) {
@@ -202,12 +68,12 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
       if ($i == 1) {
         continue;
       }
-      if (!isset($cur[$i])) { 
+      if (!isset($cur[$i])) {
         if (!isset($visitor_attrs['r'])) {
           $visitor_attrs['r'] = array();
         }
         $visitor_attrs['r'][$i] = '';
-      }     
+      }
     }
   }
 
@@ -389,6 +255,148 @@ watchdog('intel_page_alter session test', "$vtk = {$_SESSION['intel']}");
   drupal_add_js($js, 'setting');
 }
 
+function intel_get_entity_intel_attributes($entity = '', $entity_type = '') {
+  global $user;
+  $visitor_attrs = array();
+  $page_attrs = array();
+
+  // if entity not found, return empty attributes
+  if (!$entity || !$entity_type) {
+    return array(
+      'page' => $page_attrs,
+      'visitor' => $visitor_attrs,
+    );
+  }
+
+  if ($entity_type == 'node') {
+    $entity_bundle = $entity->type;
+    $page_title = $entity->title;
+
+    $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
+
+    $page_attrs['pt'] = $entity->created;
+    $page_attrs['et'] = 'n';
+    $page_attrs['ct'] = str_replace('enterprise_', '', $entity->type); // trim enterprise namespace in Open Enterprise
+    $path_entity = 1;
+  }
+  elseif ($entity_type == 'user') {
+    $entity_bundle = 'user';
+
+    $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
+
+    $page_attrs['pt'] = $entity->created;
+    $page_attrs['et'] = 'u';
+    $path_entity = 1;
+  }
+
+  $lang = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
+  $fields_info = field_info_instances($entity_type, $entity_bundle);
+  // track entity uid (e.g. node author)
+  if (!isset($page_entity_settings['track_page_uid']) || $page_entity_settings['track_page_uid']) {
+    $key = !empty($page_entity_settings['track_page_uid']) ? $page_entity_settings['track_page_uid'] : 'a';
+    if ($key == 1) {
+      $key = 'a';
+    }
+    $page_attrs[$key] = $entity->uid;
+  }
+
+  // track page intent
+  $intent = INTEL_PAGE_INTENT_DEFAULT;
+
+  if (!empty($page_entity_settings['page_intent'])) {
+    $intent = $page_entity_settings['page_intent'];
+  }
+  if (!empty($entity->field_page_intent[$lang][0]['value']) && ($entity->field_page_intent[$lang][0]['value'] != '_default')) {
+    $intent = $entity->field_page_intent[$lang][0]['value'];
+  }
+  if ($intent) {
+    $page_attrs['i'] = array(
+      $intent => '',
+    );
+  }
+
+  $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
+
+  // process vocabularies with global tracking enabled
+  foreach ($fields_info AS $key => $field) {
+    if (isset($entity->{$key}[$lang][0]['tid'])) {
+      // get field_info to get associated vocabulary
+      $field_info = field_info_field($key);
+      $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
+      // check if tracking is enabled at the content type level or on globally on the vocabulary
+      if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
+        $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
+        foreach ($entity->{$key}[$lang] AS $t) {
+          if (!isset($page_attrs[$page_attr_key])) {
+            $page_attrs[$page_attr_key] = array();
+          }
+          $page_attrs[$page_attr_key][$t['tid']] = '';
+          if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
+            $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
+            if (!isset($visitor_attrs[$visitor_attr_key])) {
+              $visitor_attrs[$visitor_attr_key] = array();
+            }
+            $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
+          }
+        }
+      }
+    }
+  }
+
+  // set custom page attributes if page_attribute_col field exists
+  if (!empty($entity->field_page_attribute_col[$lang]) && is_array($entity->field_page_attribute_col[$lang])) {
+    foreach ($entity->field_page_attribute_col[$lang] AS $i => $e) {
+      $collection = field_collection_item_load($e['value']);
+      $keys = explode('.', $collection->field_page_attribute[$lang][0]['value']);
+      $value = !empty($collection->field_page_attribute_value[$lang][0]['value']) ? $collection->field_page_attribute_value[$lang][0]['value'] : '';
+      if (count($keys) == 1) {  // flag and scalar values
+        $page_attrs[$keys[0]] = $value;
+      }
+      else {
+        if (!isset($page_attrs[$keys[0]])) {
+          $page_attrs[$keys[0]] = array();
+        }
+        $page_attrs[$keys[0]][$keys[1]] = $value;
+      }
+    }
+  }
+
+  // set custom visitor attributes if visitor_attribute_col field exists
+  if (!empty($entity->field_visitor_attribute_col[$lang]) && is_array($entity->field_visitor_attribute_col[$lang])) {
+    foreach ($entity->field_visitor_attribute_col[$lang] AS $i => $e) {
+      $collection = field_collection_item_load($e['value']);
+      $keys = explode('.', $collection->field_visitor_attribute[$lang][0]['value']);
+      $value = !empty($collection->field_visitor_attribute_value[$lang][0]['value']) ? $collection->field_visitor_attribute_value[$lang][0]['value'] : '';
+      if (count($keys) == 1) {  // flag and scalar values
+        $visitor_attrs[$keys[0]] = $value;
+      }
+      else {
+        if (!isset($visitor_attrs[$keys[0]])) {
+          $visitor_attrs[$keys[0]] = array();
+        }
+        $visitor_attrs[$keys[0]][$keys[1]] = $value;
+      }
+    }
+  }
+
+  // set attached intel events if intel_event_col field exists
+  if (!empty($entity->field_intel_event_col[$lang]) && is_array($entity->field_intel_event_col[$lang])) {
+    foreach ($entity->field_intel_event_col[$lang] AS $i => $e) {
+      $collection = field_collection_item_load($e['value']);
+      $key = $collection->field_intel_event[$lang][0]['value'];
+      $page_events[$key] = $intel_events[$key];
+      if(!empty($collection->field_intel_event_value[$lang][0]['value'])) {
+        $page_events[$key]['value'] = $collection->field_intel_event_value[$lang][0]['value'];
+      }
+    }
+  }
+
+  return array(
+    'page' => $page_attrs,
+    'visitor' => $visitor_attrs,
+  );
+}
+
 function intel_add_page_intel_push($push, $index = '') {
   return intel_page_intel_pushes('add', $push, $index);
 }
@@ -551,31 +559,59 @@ function intel_parse_cms_url() {
 }
 
 /**
- * Implements hook_page_alter().
+ * Generates async embed code for Intel. The generated code is designed to be
+ * used on Drupal generated pages and on static pages via copy and paste.
+ *
+ * @param string $type -
+ *   l10i: only code to embed intel,
+ *   ga: Google Analytics code using Google Analytics module settings
+ *   combined: provides GA and Intel embed codes. Used for external pages
+ * @param string $mode:
+ *   null | internal: sets format for use on Drupal generated pages
+ *   external: used to set formating for external page use
+ * @param string $version: used to experiment with embed styles
+ * @param string $terminator: specifies end of line terminator
+ * @return string - embed code
  */
-function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'latest', $terminator = "") {
+function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'latest', $terminator = "") {
   $script = '';
+  $l10i_ga_account = variable_get('intel_ga_account', '');
+  // if l01i_ga_account not set, don't generate embed
+  if (!$l10i_ga_account) {
+    return $script;
+  }
+  $api_level = intel_api_level();
+
   $debug = intel_debug_mode();
   if ($debug) {
     $terminator = "\n";
   }
-  $l10i_ga_account = variable_get('intel_ga_account', '');
+
   $l10i_domain_name = variable_get('intel_domain_name', '');
-  $l10i_ga_tracker_prefix = variable_get('intel_ga_tracker_prefix', 'l10i');
-  $api_level = variable_get('intel_api_level', '');
-  $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
-  $api_js_ver = ($api_js_ver) ? $api_js_ver : INTEL_L10IAPI_JS_VER;
-  $js_embed_style = variable_get('intel_l10iapi_js_embed_style', '');
-  $api_local = 0;
-  if ($l10i_ga_account && !$l10i_ga_tracker_prefix) {
+
+  $l10i_ga_tracker_prefix = variable_get('intel_ga_tracker_prefix', '');
+  if (!$l10i_ga_tracker_prefix) {
     $l10i_ga_tracker_prefix = 'l10i';
   }
 
+  $api_js_ver = trim(variable_get('intel_l10iapi_js_ver', ''));
+  if (!$api_js_ver) {
+    $api_js_ver = INTEL_L10IAPI_JS_VER;
+  }
+
+  $js_embed_style = variable_get('intel_l10iapi_js_embed_style', '');
+
+  // set if api is installed locally with website, e.g. enterprise mode
+  $api_local = 0;
+
   $wrap = ($mode == 'external') ? 1 : 0;
+
   if ($version == 'simple') {
     $wrap = 0;
     $script .= '<script>' . $terminator;
   }
+
+  // generate GoA embed based on Google Analtyics module settings
   if (($type == 'ga') || ($type == 'combined')) {
     $library_tracker_url = '.google-analytics.com/ga.js';
     $library_cache_url = 'http://www' . $library_tracker_url;
@@ -599,65 +635,70 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
     $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);" . $terminator;
     $script .= "})();" . $terminator;
   }
+
+  // generate Intel embed
   if ($api_level && (($type == 'l10i') || ($type == 'combined'))) {
-    //$host_root = intel_get_host_root();
     $library_path = libraries_get_path('LevelTen') . 'Intel/scripts';
-    //$api_hostpath = variable_get('intel_l10iapi_hostpath', '');
     $api_hostpath = variable_get('intel_l10iapi_url', '');
     if (empty($api_hostpath)) {
       $api_hostpath = INTEL_L10IAPI_URL;
     }
+    // if api_hostpathe is relative (begins with '/'), install is local
     else if (substr($api_hostpath, 0 ,1) == '/') {
       $api_hostpath = $_SERVER['HTTP_HOST'] . $api_hostpath;
       $api_local = 1;
     }
-    $data_mode = (variable_get('intel_api_level', 'free') == 'free') ? 0 : 1;
-    $api_pid = variable_get('intel_l10iapi_profileid', '');
+    // verify compatible js_embed_style with api_level and $api_local
+    if ($api_level == 'pro' || $api_level == 'basic') {
+      if (!$js_embed_style) {
+        $js_embed_style = 'property';
+      }
+      if (!$js_embed_style == 'property_dynsesinit' && $api_level == 'basic' ) {
+        $js_embed_style = 'property';
+      }
+    }
+    else {
+      $js_embed_style = 'standard';
+    }
+    // if enterprise installation, use standard embed
+    if ($api_local) {
+      $js_embed_style = 'standard';
+    }
+
     $sv = (variable_get('intel_debug_mode', 0)) ? '' : '.min';
     //$script .= "// LevelTen Intelligence" . $terminator;
     $script .= "var _l10iq = _l10iq || [];" . $terminator;
     if ($api_local) {
       $script .= 'var _l10iss = {"apiUrl": "' . $api_hostpath . '/", "apiLevel": "' . $api_level . '"};' . $terminator;
     }
-    //$script .= "var _intel = _intel || [];" . $terminator;
     $l10iq_pushes = array();
-    //$l10iq_pushes[] = array('_setTrackerPrefix', $l10i_ga_tracker_prefix);
     $l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
     if ($l10i_domain_name) {
       $l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
     }
-    //$l10iq_pushes[] = array('_setApiUrl', $api_hostpath . '/');
-    //$l10iq_pushes[] = array('_setDataMode', $data_mode);
     $l10iq_pushes[] = array('_setOptions', (object) array());
 
     // trigger alter to enable other modules to add pushes
     drupal_alter('intel_l10iq_pushes', $l10iq_pushes);
-
     foreach ($l10iq_pushes AS $p) {
       $script .= "_l10iq.push(" . json_encode($p) . ");" . $terminator;
     }
 
-/*
-    $script .= "_l10iq.push(['_setTrackerPrefix', '$l10i_ga_tracker_prefix']);" . $terminator;  
-    $script .= "_l10iq.push(['_setAccount', '$l10i_ga_account']);" . $terminator; 
-    if ($l10i_domain_name) {
-      $script .= "_l10iq.push(['_setDomainName', '$l10i_domain_name']);" . $terminator;
+    if ($version == 'simple') {
+      $script .= '</script>' . $terminator;
+      $script .= '<script src="http://' . $api_hostpath . '/js/' . $api_js_ver . '/l10i' . $sv . '.js"></script>' . $terminator;
     }
-    $script .= "_l10iq.push(['_setApiUrl', '$api_hostpath/']);" . $terminator; 
-    $script .= "_l10iq.push(['_setDataMode', $data_mode]);" . $terminator;  
-    $script .= "_l10iq.push(['_setOptions', {}]);" . $terminator;
-*/
-    
-    if ($version == 'latest') {
+    // default version (async)
+    else {
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
         $script .= $s;
       } else {
-        if ($js_embed_style != '') {
+        if ($js_embed_style != 'standard') {
           $l10ijs_propdir = '';
           $q_script = '';
           if (($api_level == 'pro') || ($api_level == 'basic')) {
             $l10ijs_propdir = '/p/' . $l10i_ga_account;
-            if (($js_embed_style == 'property_dynsesinit') && ($api_level == 'pro')) {
+            if ($js_embed_style == 'property_dynsesinit') {
               $q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t;}";
             }
           }
@@ -665,7 +706,7 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
 
           $script .= "(function() {" . $terminator;
           $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
-          $script .= "document.cookie='l10i_bt='+t;c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
+          $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
           $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
           $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
           $script .= "})();" . $terminator;
@@ -679,26 +720,13 @@ function intel_get_js_embed($type = 'intel', $mode = 'external', $version = 'lat
           $script .= "})();" . $terminator;
         }
       }
-
-      if (0) { // use combined l10i.js
-        $script .= "(function() {" . $terminator;
-        $script .= "var l10il = document.createElement('script'); l10il.type = 'text/javascript'; l10il.async = true;" . $terminator;
-        $script .= "l10il.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/intel$sv.js'$fr;" . $terminator;
-        $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10il, s);" . $terminator;
-        $script .= "})();" . $terminator;
-      }
-    }
-    elseif ($version == 'simple') {
-      $script .= '</script>' . $terminator;
-      $script .= '<script src="http://' . $api_hostpath . '/js/' . $api_js_ver . '/l10i' . $sv . '.js"></script>' . $terminator;
-      if (0) { // use combined l10i.js
-        $script .= '<script src="http://' . $api_hostpath . '/js/intel.js"></script>' . $terminator;
-      }
     }
   }
+
   if ($wrap) {
     $script = '<script>' . $script . '</script>'; 
   }
+
   return $script;
 }
 

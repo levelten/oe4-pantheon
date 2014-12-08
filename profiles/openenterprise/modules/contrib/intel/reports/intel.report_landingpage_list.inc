@@ -6,58 +6,32 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_landingpage_list_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_landingpage_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
-  $filters = array();
-  $reports = intel_reports();
-  if ($filter_type) {
-    if ($filter_type == 'node') {
-      $filter_type = 'page';
-      $node = $filter_element;
-      //$title_for = t('node') . ' ' . $node->title;
-      $filter_element = 'landingPagePath:' . url('node/' . $filter_element->nid);
-    }
-    $filters[$filter_type] = urldecode($filter_element);
-    $context = $filter_type;
-  }
-  
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
-  
-  if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
-    intel_add_report_headers();
 
-    drupal_set_title(t('Landing page performance report'), PASS_THROUGH);
-    $filters += $_GET;
-    //$filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
-    $output .= drupal_render($filter_form);  
-  }
-  
-  if (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
-  }
-  elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_landingpage_list_report($filters, $context, $sub_index);
-  }
-  elseif ($_GET['return_type'] == 'json') {
-    $data = array(
-      'report' => intel_landingpage_list_report($filters, $context, $sub_index),
-    );
-    drupal_json_output($data);
-    return;    
-  }  
-   
-  return $output;  
+  $vars = intel_init_reports_vars('landingpage_list', 'conversion', $report_params, $report_subtype, $entity_type, $entity);
+
+  $output = intel_build_report($vars);
+
+  return $output;
 }
 
-function intel_landingpage_list_report($filters = array(), $context = 'site', $sub_index = '-') {
+function intel_landingpage_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php');
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
+
+  $filters = $vars['filters'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
+
+  $report_mode = !empty($vars['report_info']['key']) ? $vars['report_info']['key'] : 'landingpage.top';
+  $report_modes = explode('.', $report_mode);
   
-  $reports = intel_reports();
-  $report_mode = $reports['landingpage'][$sub_index]['key'];
-  $report_mode = 'landingpage.top';
   $report_modes = explode('.', $report_mode);
   $indexBy = $report_modes[0];
-  $indexByLabel = $reports['landingpage'][$sub_index]['title'];
+  $indexByLabel = $vars['report_info']['title'];
   
   $indexBy = '';
 //dsm($indexBy);

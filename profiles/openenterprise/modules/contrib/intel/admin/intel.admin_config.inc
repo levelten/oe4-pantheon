@@ -86,7 +86,8 @@ function intel_admin_settings($form, $form_state) {
     '#field_suffix' => '/',
   );
   $options = array(
-    '' => t('Standard'),
+    '' => t('Default'),
+    'standard' => t('Standard'),
     'property' => t('Property static'),
     'property_dynsesinit' => t('Property static w/ dynamic session init'),
   );
@@ -980,6 +981,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
   
   $types = array(
     'flag' => t('Flag'),
+    'item' => t('Item'),
     'scalar' => t('Scalar'),
     'list' => t('List'),
     'list_t' => t('List (taxonomy)'),

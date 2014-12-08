@@ -22,7 +22,7 @@
 
       // Use for the following navigation updates.
       var navbar = context.getElementById("navbar");
-      var $navbar = $("navbar", context);
+      var $navbar = $(".navbar", context);
 
       // Equal width nav items.
       var navbarNav = navbar.querySelector(".navbar-nav");

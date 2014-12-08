@@ -51,7 +51,9 @@ class ApiProperty {
     try {
       $ret = $this->apiClient->getJSON($endpoint, $params, $data);
       if (isset($ret['property'])) {
-        $this->apiProperty = (object)$ret['property'];
+        $prop = (object)$ret['property'];
+        $this->apiProperty = $prop;
+        return $prop;
       }
       else {
         throw new L10IntelException('Property not returned from API. msg: ' . $ret['message']);

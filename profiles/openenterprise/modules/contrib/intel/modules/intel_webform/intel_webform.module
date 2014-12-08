@@ -635,29 +635,4 @@ function intel_webform_setup_webform_config(&$node) {
       );
     }
   }
-
-}
-
-/**
- * Implements hook_cron
- *
- * Used to clear out expired data in intel_webform_temp_submission_data
- */
-function intel_webform_cron() {
-  $data = variable_get('intel_webform_temp_submission_data', array());
-
-  foreach ($data AS $key => $value) {
-    // if data more than 60 seconds old, remove it
-    if ($value['time'] < (REQUEST_TIME - 60)) {
-      unset($data[$key]);
-    }
-  }
-
-  // save purged data or delete variable if any values still exist
-  if (count($data)) {
-    variable_get('intel_webform_temp_submission_data', $data);
-  }
-  else {
-    variable_del('intel_webform_temp_submission_data');
-  }
 }

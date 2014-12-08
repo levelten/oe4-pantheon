@@ -18,7 +18,7 @@ Drupal.behaviors.intelSettingsSummary = {
       id = id.split('-');
       id[id.length-1] = 'value';
       id = id.join('-');
-      if ((Drupal.settings.intel.page_attribute_types[a[0]] == 'scalar') || (Drupal.settings.intel.page_attribute_types[a[0]] == 'vector')) {
+      if ((Drupal.settings.intel.page_attribute_types[a[0]] == 'item') || (Drupal.settings.intel.page_attribute_types[a[0]] == 'scalar') || (Drupal.settings.intel.page_attribute_types[a[0]] == 'vector')) {
         $('#' + id).css('display', 'block');
       } 
       else {
@@ -34,7 +34,7 @@ Drupal.behaviors.intelSettingsSummary = {
         id = id.split('-');
         id[id.length-1] = 'value';
         id = id.join('-');
-        if ((Drupal.settings.intel.visitor_attribute_types[a[0]] == 'scalar') || (Drupal.settings.intel.visitor_attribute_types[a[0]] == 'vector')) {
+        if ((Drupal.settings.intel.visitor_attribute_types[a[0]] == 'item') || (Drupal.settings.intel.visitor_attribute_types[a[0]] == 'scalar') || (Drupal.settings.intel.visitor_attribute_types[a[0]] == 'vector')) {
           $('#' + id).css('display', 'block');
         } 
         else {
