@@ -58,8 +58,7 @@ dependencies[] = picture
 dependencies[] = token_filter
 
 ;; UX Enhancements
-dependencies[] = admin_menu
-dependencies[] = admin_menu_toolbar
+dependencies[] = adminimal_admin_menu
 dependencies[] = better_formats
 dependencies[] = fitvids
 dependencies[] = jquery_update
