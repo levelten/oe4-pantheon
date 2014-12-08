@@ -6,19 +6,42 @@
 CKEDITOR.dialog.add( 'icon', function( editor ) {
 	// Simulate "this" of a dialog for non-dialog events.
 	// @type {CKEDITOR.dialog}
+	var icon_editor_debug = false;
+if(window.console && icon_editor_debug){
+	console.log('editor:');
+	console.log(editor);
+	console.log('start add...');
+}
 	var dialog,
 		lang = editor.lang.icon;
 
 	var onChoice = function( evt ) {
+if(window.console && icon_editor_debug){
+	console.log('on choice...');
+}
 			var target, value;
 			if ( evt.data )
 				target = evt.data.getTarget();
 			else
 				target = new CKEDITOR.dom.element( evt );
-console.log(target);
-
-			if ( target.getName() == 'a' && ( value = target.getChild( 0 ).getHtml() ) ) {
-console.log(value);
+if(window.console && icon_editor_debug){
+	console.log('target:');
+	console.log(target);
+	console.log('target.getName:');
+	console.log(target.getName());
+	console.log('target.getChild.getHtml:');
+	console.log(target.getChild( 0 ).getHtml());
+	console.log('v: ' + value);
+}
+			if ( target.getName() === 'a' && ( value = target.getChild( 0 ).getHtml() ) ) {
+if(window.console && icon_editor_debug){
+	console.log('v2: ' + value);
+	console.log('insertHTML...');
+}
+                editor.insertHtml(value);
+if(window.console && icon_editor_debug){
+	console.log('insertHTML done...');
+}
 				target.removeClass( "cke_light_background" );
 				dialog.hide();
 
@@ -28,10 +51,10 @@ console.log(value);
 //console.log(span);
 				//editor.insertText( span.getText() );
                 //editor.insertHTML('');
-value = 'hi';
-                editor.insertHTML(value);
-                //var element = CKEDITOR.dom.element.createFromHtml(value);
-                //editor.insertElement(element);
+//value = 'hi';
+// editor.insertHTML(value);
+                // var element = CKEDITOR.dom.element.createFromHtml(value);
+                // editor.insertElement(element);
 			}
 		};
 
@@ -42,20 +65,28 @@ value = 'hi';
 	var onFocus = function( evt, target ) {
 			var value;
 			target = target || evt.data.getTarget();
-
-console.log(target.getName());
-			if ( target.getName() == 'span' )
+if(window.console && icon_editor_debug){
+	console.log('start onfocus...');
+	console.log('target.getName:');
+	console.log(target.getName());
+}
+			if ( target.getName() === 'span' )
 				target = target.getParent();
-console.log(target);
+if(window.console && icon_editor_debug){
+	console.log('target:');
+	console.log(target);
+}
 			//if ( target.getName() == 'a' && ( value = target.getChild( 0 ).getHtml() ) ) {
 
-        if (target.getName() == 'a') {
+        if (target.getName() === 'a') {
             value = target.getChild( 0 ).getHtml();
         }
-        else if (target.getName() == 'i') {
+        else if (target.getName() === 'i') {
             value = target.getParent().getHtml();
         }
-console.log(value);
+if(window.console && icon_editor_debug){
+	console.log('v: ' + value);
+}
         if (value) {
 				// Trigger blur manually if there is focused node.
 				if ( focusedNode )
@@ -217,9 +248,9 @@ console.log(value);
 							charDesc = lang[ _tmpName ] || character;
 						}
                         character = '<i class="icon ' + character + '" style="font-size:inherit;"></i>';
-
-                        console.log(character);
-
+if(window.console && icon_editor_debug){
+	console.log('c: ' + character);
+}
 						var charLabelId = 'cke_icon_label_' + i + '_' + CKEDITOR.tools.getNextNumber();
 
 						html.push( '<td class="cke_dark_background" style="cursor: default" role="presentation">' +
