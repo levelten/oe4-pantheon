@@ -1,6 +1,7 @@
 var _l10iq = _l10iq || [];
 
 function l10iMailChimpTracker() {  
+
   this.init = function init() {
 	var e, action, timestamp, emailclick, listname, listid, userid, campaignid, campaignname;
     _l10iq.push(['_log', "l10iMailChimpTracker.init()"]);
@@ -96,7 +97,7 @@ function l10iMailChimpTracker() {
     _l10iq.push(['_triggerCallbacks', 'emailClickAlter', [json_params, json_data, {}, {}]]);
     // TODO: should we save this data?
     //_l10iq.push(['_getJSON', 'var/merge', json_params, json_data, 'l10iMailChimp.emailClick']);
-      l10iMailChimp.emailClick({ 'return': json_data.return});
+    l10iMailChimp.emailClick({"return": json_data.return});
   };
 
   this.emailClick = function emailClick(data) {

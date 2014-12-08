@@ -67,6 +67,7 @@ class ScorecardReportView extends ReportView {
     $output = '';
     
     $context = $this->params['context'];
+    $context_mode = $this->params['context_mode'];
     
     $output .= $this->renderMainChart();
     
@@ -87,10 +88,11 @@ class ScorecardReportView extends ReportView {
     return '<div id="intel-report">' . $output . '</div>';    
   }
   
-  function renderMainChart() {  
+  function renderMainChart() {
     $output = '';
     $data = $this->data;
     $context = $this->params['context'];
+    $context_mode = $this->params['context_mode'];
     $main_chart = new ComboChart('objectives');
     //$entrances_chart->setOption('title', 'Performance');
     $main_chart->addColumn('date', 'day');
@@ -111,17 +113,10 @@ class ScorecardReportView extends ReportView {
       $main_chart->newWorkingRow();
       $main_chart->addRowItem($jstime);
       $main_chart->addRowItem($d['entrance']['entrances']);
-      $main_chart->addRowItem(round($d['entrance']['pageviews'] - $d['entrance']['entrances']));
-      if ($context == 'page') {
-        $main_chart->addRowItem($d['score_components']['_all']['goals']);
-        $main_chart->addRowItem($d['score_components']['_all']['events']);
-        $main_chart->addRowItem($d['score_components']['_all']['traffic']);
-      }
-      else {
-        $main_chart->addRowItem($d['score_components']['goals']);
-        $main_chart->addRowItem($d['score_components']['events']);
-        $main_chart->addRowItem($d['score_components']['traffic']);      
-      }
+      $main_chart->addRowItem(round($d['pageview']['pageviews'] - $d['entrance']['entrances']));
+      $main_chart->addRowItem($d['score_components']['_all']['goals']);
+      $main_chart->addRowItem($d['score_components']['_all']['events']);
+      $main_chart->addRowItem($d['score_components']['_all']['traffic']);
       $main_chart->addRowToSettings();
     } 
   
@@ -168,14 +163,29 @@ class ScorecardReportView extends ReportView {
   function renderSummarySection() {
     $output = '';
     $data = $this->data;
+
     $datasum = $data['date']['_all'];
     $context = $this->params['context'];
+    $context_mode = $this->params['context_mode'];
     $targets = $this->targets;
     $analysis_days = $this->params['analysis_days'];
     $statusColorsBg = $this->statusColorsBackground;
     $statusColors = $this->statusColors;
     $summary_elements = array();
-  
+
+    $visitTitle = 'Visit';
+    $visitTitleAbv = 'Visit';
+    $visitDataKeys = 'entrance.entrances';
+    $visitDataIndexes = array('entrance', 'entrances');
+    if ($context_mode == 'subsite') {
+      $visitDataKeys = 'session.sessions';
+      $visitDataIndexes = array('session', 'sessions');
+    }
+    else if ($context == 'page' || $context == 'page-attr') {
+      $visitTitle = 'Entrance';
+      $visitTitleAbv = 'Entr';
+    }
+
     $init_e = array(
       'data' => $data['date'],
       'linecolor' => $this->chartColors[0],
@@ -193,11 +203,12 @@ class ScorecardReportView extends ReportView {
     $e['linecolor'] = $statusColors[$status];
     $e['bgcolor'] = $statusColorsBg[$status];
     $e['keys'] = 'score';
-    $e['title'] = t('Value/Day');
+    $e['title'] = 'Value/Day';
     $e['total'] = number_format($value, 2);
     $summary_elements['value_per_day'] = self::renderSparklineValueElement($e);
-    
-    $value = $datasum['entrance']['entrances'] / $analysis_days;
+
+    $value = $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]] / $analysis_days;
+
     $status = 'complete';
     if ($value < $targets['entrances_per_page_per_day']) {
       $status = 'warning';
@@ -208,12 +219,20 @@ class ScorecardReportView extends ReportView {
     $e = $init_e;
     $e['linecolor'] = $statusColors[$status];
     $e['bgcolor'] = $statusColorsBg[$status];
-    $e['keys'] = 'entrance.entrances';
-    $e['title'] = t('Entrances/Day');
+    if ($context_mode == 'subsite') {
+      $e['keys'] = 'session.sessions';
+      $e['title'] = 'Visits/Day';
+    }
+    else {
+      $e['keys'] = 'entrance.entrances';
+      $e['title'] = 'Entrances/Day';
+    }
+
     $e['total'] = number_format($value, 1);
     $summary_elements['entrances_per_day'] = self::renderSparklineValueElement($e);
 
-    $value = !empty($datasum['entrance']['entrances']) ? ($datasum['score'] / $datasum['entrance']['entrances']) : 0;
+    !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum['score'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
+
     $status = 'complete';
     if ($value < $targets['value_per_page_per_entrance']) {
       $status = 'warning';
@@ -225,26 +244,33 @@ class ScorecardReportView extends ReportView {
     $e['linecolor'] = $statusColors[$status];
     $e['bgcolor'] = $statusColorsBg[$status];
     $e['keys'] = 'score';
-    $e['keys2'] = 'entrance.entrances';
+    $e['keys2'] = $visitDataKeys;
     $e['keys_operator'] = '/';
     $e['format'] = array(
       'type' => 'money',
       'decimals' => 2,
     );
-    $e['title'] = t('Value/Visit');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['score'] / $datasum['entrance']['entrances']) : 0;
+    $e['title'] = 'Value/' . $visitTitleAbv;
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum['score'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = '$' . number_format($total, 2);
     $summary_elements['valuePerVisit'] = self::renderSparklineValueElement($e);
-  
-  
+
     $e = $init_e;
-    $e['keys'] = 'entrance.entrances';
-    $e['title'] = t('Entrances');
-    $e['total'] = number_format($datasum['entrance']['entrances']);
-    $summary_elements['entrances'] = self::renderSparklineValueElement($e);
-    
+    $e['keys'] = $visitDataKeys;
+    $e['title'] = $visitTitle . 's';
+    $e['total'] = number_format($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]);
+    $summary_elements['visits'] = self::renderSparklineValueElement($e);
+
+    if ($context_mode == 'subsite') {
+      $e = $init_e;
+      $e['keys'] = 'entrance.entrances';
+      $e['title'] = 'Entrances';
+      $e['total'] = number_format($datasum['entrance']['entrances']);
+      $summary_elements['entrances'] = self::renderSparklineValueElement($e);
+    }
+
     $e['keys'] = 'pageview.pageviews';
-    $e['title'] = t('Pageviews');
+    $e['title'] = 'Pageviews';
     $e['total'] = number_format($datasum['pageview']['pageviews']);
     $summary_elements['pageviews'] = self::renderSparklineValueElement($e);
     
@@ -255,35 +281,35 @@ class ScorecardReportView extends ReportView {
       'type' => 'percentage',
       'decimals' => 1,
     );
-    $e['title'] = t('Stick rate');
+    $e['title'] = 'Stick rate';
     $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['sticks'] / $datasum['entrance']['entrances']) : 0;
     $e['total'] = number_format(100 * $total, 1) . "%";
     $summary_elements['stickrate'] = self::renderSparklineValueElement($e);
     
     $e = $init_e;
   
-    $e['keys'] = 'entrance.newVisits';
-    $e['title'] = t('New Visits');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['newVisits'] / $datasum['entrance']['entrances']) : 0;
+    $e['keys'] = $visitDataIndexes[0] . '.newVisits';
+    $e['title'] = 'New Visits';
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum[$visitDataIndexes[0]]['newVisits'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = number_format(100 * $total, 1) . "%";
     $summary_elements['percentNewVisits'] = self::renderSparklineValueElement($e);
   
     $e = $init_e;
-    $e['keys'] = 'entrance.timeOnSite';
-    $e['keys2'] = 'entrance.entrances';
+    $e['keys'] = $visitDataIndexes[0] . '.timeOnSite';
+    $e['keys2'] = $visitDataKeys;
     $e['keys_operator'] = '/';
-    $e['title'] = t('Avg. Time on Site');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['timeOnSite'] / $datasum['entrance']['entrances']) : 0;
+    $e['title'] = 'Avg. Time on Site';
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum[$visitDataIndexes[0]]['timeOnSite'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = self::formatDeltaTime($total);
     $summary_elements['avgTimeOnSite'] = self::renderSparklineValueElement($e);
     
-    $e['keys'] = 'entrance.pageviews';
-    $e['keys2'] = 'entrance.entrances';
+    $e['keys'] = $visitDataIndexes[0] . '.pageviews';
+    $e['keys2'] = $visitDataKeys;
     $e['keys_operator'] = '/';
-    $e['title'] = t('Pages/Visit');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['pageviews'] / $datasum['entrance']['entrances']) : 0;
+    $e['title'] = 'Pages/' . $visitTitleAbv;
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum['pageview']['pageviews'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = number_format($total, 2);
-    $summary_elements['pageviewsPerVisit'] = self::renderSparklineValueElement($e);
+    $summary_elements['pageviewsPerSession'] = self::renderSparklineValueElement($e);
     
     $e = $init_e;
     $e['keys'] = 'score';
@@ -291,7 +317,7 @@ class ScorecardReportView extends ReportView {
       'type' => 'money',
       'decimals' => 2,
     );
-    $e['title'] = t('Value');
+    $e['title'] = 'Value';
     if ($data['date']['_all']['score'] > 1000) {
       $e['total'] = number_format($data['date']['_all']['score'], 0);
     }
@@ -305,30 +331,31 @@ class ScorecardReportView extends ReportView {
       'type' => 'money',
       'decimals' => 2,
     );
-    $e['title'] = t('Value/Day');
+    $e['title'] = 'Value/Day';
     $e['total'] = number_format($data['date']['_all']['score'] / $analysis_days, 2);
     
     $e = $init_e;
-    $e['keys'] = 'entrance.goalCompletionsAll';
-    $e['title'] = t('Goals completed');
-    $e['total'] = number_format($datasum['entrance']['goalCompletionsAll']);
+    $ib = ($context_mode == 'subsite') ? 'pageview' : 'entrance';
+    $e['keys'] = $ib . '.goalCompletionsAll';
+    $e['title'] = 'Goals completed';
+    $e['total'] = number_format($datasum[$ib]['goalCompletionsAll']);
     $summary_elements['goals'] = self::renderSparklineValueElement($e);
     
-    $e['keys2'] = 'entrance.entrances';
+    $e['keys2'] = $visitDataKeys;
     $e['keys_operator'] = '/';
     $e['format'] = array(
       'type' => 'percentage',
       'decimals' => 1,
     );
-    $e['title'] = t('Conversion/Visit');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['goalCompletionsAll'] / $datasum['entrance']['entrances']) : 0;
+    $e['title'] = 'Conversion/' . $visitTitleAbv;
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum[$ib]['goalCompletionsAll'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = number_format(100 * $total, 2) . '%';
     $summary_elements['goalsPerVisit'] = self::renderSparklineValueElement($e);
     
     $e = $init_e;
-    $e['keys'] = 'entrance.events._all.totalValuedEvents';
-    $e['title'] = t('Val. events (entr)');
-    $e['total'] = number_format($datasum['entrance']['events']['_all']['totalValuedEvents']);
+    $e['keys'] = 'pageview.events._all.totalValuedEvents';
+    $e['title'] = 'Val. events';
+    $e['total'] = number_format($datasum['pageview']['events']['_all']['totalValuedEvents']);
     $summary_elements['valuedEventsVisit'] = self::renderSparklineValueElement($e);
     
     $e['keys2'] = 'entrance.entrances';
@@ -337,15 +364,15 @@ class ScorecardReportView extends ReportView {
       'type' => 'percentage',
       'decimals' => 1,
     );
-    $e['title'] = t('Val. events/dVisits');
-    $total = !empty($datasum['entrance']['entrances']) ? ($datasum['entrance']['events']['_all']['totalValuedEvents'] / $datasum['entrance']['entrances']) : 0;
+    $e['title'] = 'Val. events/dVisits';
+    $total = !empty($datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) ? ($datasum['pageview']['events']['_all']['totalValuedEvents'] / $datasum[$visitDataIndexes[0]][$visitDataIndexes[1]]) : 0;
     $e['total'] = number_format(100 * $total, 2);
 
     $summary_elements['valuedEventsPerVisit'] = self::renderSparklineValueElement($e);
     
     $output = '<div id="key-metrics-section" class="report-section">';
     $decimal = ($analysis_days < 10) ? 1 : 0;
-    $output .= '<h3>' . t('Key metrics (%days)', array('%days' => number_format($analysis_days, $decimal) . " days")) . '</h3>';
+    $output .= '<h3>' . 'Key metrics (' . number_format($analysis_days, $decimal) . ' days)</h3>';
     
     //$output = '<div class="kpis">';
     
@@ -354,12 +381,14 @@ class ScorecardReportView extends ReportView {
     $output .= $summary_elements['valuePerVisit'];
     
     //$output .= '</div>';
-    
-    $output .= $summary_elements['entrances'];
+    $output .= $summary_elements['visits'];
+    if (isset($summary_elements['entrances'])) {
+      $output .= $summary_elements['entrances'];
+    }
     $output .= $summary_elements['stickrate']; 
   
     $output .= $summary_elements['pageviews'];
-    $output .= $summary_elements['pageviewsPerVisit'];
+    $output .= $summary_elements['pageviewsPerSession'];
   
     $output .= $summary_elements['percentNewVisits'];
     $output .= $summary_elements['avgTimeOnSite']; 
@@ -383,64 +412,77 @@ class ScorecardReportView extends ReportView {
     $data = $this->data;
     $datasum = $data['date']['_all'];
     $context = $this->params['context'];
+    $context_mode = $this->params['context_mode'];
     $targets = $this->targets;
     $analysis_days = $this->params['analysis_days'];
     $goals = $this->goals;
+
+    // select which context to get data from
+    $goalSrc = 'pageview';
+    if ($context == 'page' || $context == 'page-attr') {
+      $goalSrc = 'entrance';
+    }
+    $eventSrc = 'pageview';
+    $eventSrc2 = 'entrance';
+    if ($context == 'page' || $context == 'page-attr') {
+      $eventSrc = 'entrance';
+      $eventSrc2 = 'pageview';
+    }
     
     $pie_chart1 = new PieChart();
     $pie_chart1->addColumn('string', '');
     $pie_chart1->addColumn('number', 'Value');
     $pie_chart1->setSetting('useTotal', 1);
-    if ($context == 'page') {
+    if ($context == 'page' || $context == 'page-attr') {
       $total = $data['date']['_all']['entrance']['events']['_all']['value'] + $data['date']['_all']['entrance']['goalValueAll'];
     }
     else {
-      $total = $data['date']['_all']['entrance']['goalValueAll'];
+      $total = $data['date']['_all'][$goalSrc]['goalValueAll'];
     }
     $pie_chart1->setSetting('total', $total);
     
-    if ($context != 'page') {
+    if ($context != 'page' && $context != 'page-attr') {
       $pie_chart2 = new PieChart();
       $pie_chart2->addColumn('string', '');
       $pie_chart2->addColumn('number', 'Value');
       $pie_chart2->setSetting('useTotal', 1);
-      $total = $data['date']['_all']['entrance']['events']['_all']['value'];
+      $total = $data['date']['_all'][$eventSrc]['events']['_all']['value'];
       $pie_chart2->setSetting('total', $total);
     }
     
-    $goals_entrance_table = new TableChart('blank');
-    $goals_entrance_table->addColumn('string', 'Goals');
-    $goals_entrance_table->addColumn('number', 'Completed');
-    $goals_entrance_table->addColumn('number', 'Value');
-    $goals_entrance_table->setOption('sortColumn', 2);
+    $goals_table = new TableChart('blank');
+    $goals_table->addColumn('string', 'Goals');
+    $goals_table->addColumn('number', 'Completed');
+    $goals_table->addColumn('number', 'Value');
+    $goals_table->setOption('sortColumn', 2);
   
-    $events_entrance_table = new TableChart('blank');
-    $events_entrance_table->addColumn('string', 'Goals');
-    $events_entrance_table->addColumn('number', 'Completed');
-    $events_entrance_table->addColumn('number', 'Value');
-    $events_entrance_table->setOption('sortColumn', 2);
+    $events_table = new TableChart('blank');
+    $events_table->addColumn('string', 'Events');
+    $events_table->addColumn('number', 'Completed');
+    $events_table->addColumn('number', 'Value');
+    $events_table->setOption('sortColumn', 2);
     
-    $events_pageview_table = new TableChart('blank');
-    $events_pageview_table->addColumn('string', 'Goals');
-    $events_pageview_table->addColumn('number', 'Completed');
-    $events_pageview_table->addColumn('number', 'Value');
-    $events_pageview_table->setOption('sortColumn', 2);
+    $events_2_table = new TableChart('blank');
+    $events_2_table->addColumn('string', 'Events');
+    $events_2_table->addColumn('number', 'Completed');
+    $events_2_table->addColumn('number', 'Value');
+    $events_2_table->setOption('sortColumn', 2);
 
     
-    // Goals (entrance)
+    // Goals
     $rowlimit = 5;
     $chartdata_goals = array();
     $chartdata_events = array();
     
-    usort($datasum['entrance']['goals'], array($this, 'usort_by_value_then_completions'));
+    usort($datasum[$goalSrc]['goals'], array($this, 'usort_by_value_then_completions'));
     $i = 1;
-    foreach($datasum['entrance']['goals'] AS $n => $d) {
+    foreach($datasum[$goalSrc]['goals'] AS $n => $d) {
       if (empty($d['i'])) { continue; }
-      $goals_entrance_table->newWorkingRow();
-      $goals_entrance_table->addRowItem($goals[$d['i']]);
-      $goals_entrance_table->addRowItem($d['completions']);
-      $goals_entrance_table->addRowItem($d['value']);
-      $goals_entrance_table->addRow();
+      $goals_table->newWorkingRow();
+      $goals_table->addRowItem($goals[$d['i']]);
+      $goals_table->addRowItem($d['completions']);
+      $goals_table->addRowItem($d['value']);
+      $goals_table->addRow();
       
       $pie_chart1->newWorkingRow();
       $pie_chart1->addRowItem($goals[$d['i']]);
@@ -449,20 +491,20 @@ class ScorecardReportView extends ReportView {
       if ($i++ >= $rowlimit) {
         break;
       }
-    } 
+    }
     
-    usort($datasum['entrance']['events'], array($this, 'usort_by_value_then_totalValuedEvents'));
+    usort($datasum[$eventSrc]['events'], array($this, 'usort_by_value_then_totalValuedEvents'));
     $i = 1;
     $v['rows'] = array();
-    foreach($datasum['entrance']['events'] AS $n => $d) {
+    foreach($datasum[$eventSrc]['events'] AS $n => $d) {
       if (empty($d['i'])) { continue; }
-      $events_entrance_table->newWorkingRow();
-      $events_entrance_table->addRowItem($d['i']);
-      $events_entrance_table->addRowItem($d['totalValuedEvents']);
-      $events_entrance_table->addRowItem($d['value']);
-      $events_entrance_table->addRow();
+      $events_table->newWorkingRow();
+      $events_table->addRowItem($d['i']);
+      $events_table->addRowItem($d['totalValuedEvents']);
+      $events_table->addRowItem($d['value']);
+      $events_table->addRow();
       
-      if ($context == 'page') {
+      if ($context == 'page' || $context == 'page-attr') {
         $pie_chart1->newWorkingRow();
         $pie_chart1->addRowItem($d['i']);
         $pie_chart1->addRowItem($d['value']);
@@ -477,33 +519,32 @@ class ScorecardReportView extends ReportView {
       if ($i++ >= $rowlimit) {
         break;
       }
-    } 
-  
-    usort($datasum['pageview']['events'],  array($this, 'usort_by_value_then_totalValuedEvents'));
+    }
+
+    usort($datasum[$eventSrc2]['events'],  array($this, 'usort_by_value_then_totalValuedEvents'));
     $i = 1;
     $v['rows'] = array();
-    foreach($datasum['pageview']['events'] AS $cat => $d) {
+    foreach($datasum[$eventSrc2]['events'] AS $cat => $d) {
     if (empty($d['i'])) { continue; }
-      $events_pageview_table->newWorkingRow();
-      $events_pageview_table->addRowItem($d['i']);
-      $events_pageview_table->addRowItem($d['totalValuedEvents']);
-      $events_pageview_table->addRowItem($d['value']);
-      $events_pageview_table->addRow();
+      $events_2_table->newWorkingRow();
+      $events_2_table->addRowItem($d['i']);
+      $events_2_table->addRowItem($d['totalValuedEvents']);
+      $events_2_table->addRowItem($d['value']);
+      $events_2_table->addRow();
       if ($i++ >= $rowlimit) {
         break;
       }
     }
-    
-   
+
     $output .= '<div id="goals-section" class="report-section">';
     $output .= '<h3>Goals &amp; valued events</h3>';
     $output .= '<div class="pane-left">';
     $output .= $pie_chart1->renderOutput();
     $output .= '</div><div class="pane-spacer">&nbsp;</div>';
     $output .= '<div class="pane-right">';
-    if ($context == 'page') {
+    if ($context == 'page' || $context == 'page-attr') {
       $output .= '<h3>Valued events (onpage)</h3>';
-      $output .= $events_pageview_table->renderOutput();
+      $output .= $events_2_table->renderOutput();
     }
     else {
       $output .= $pie_chart2->renderOutput();
@@ -511,12 +552,12 @@ class ScorecardReportView extends ReportView {
     $output .= '</div>'; 
 
     $output .= '<div class="pane-left" style="clear: left;">';
-    $output .= '<h3>Goals' . (($context == 'page') ? ' (entrance)': '') . '</h3>';
-    $output .= $goals_entrance_table->renderOutput();
+    $output .= '<h3>Goals' . (($context == 'page'  || $context == 'page-attr') ? ' (entrance)': '') . '</h3>';
+    $output .= $goals_table->renderOutput();
     $output .= '</div><div class="pane-spacer">&nbsp;</div>';
     $output .= '<div class="pane-right">';
-    $output .= '<h3>Valued events' . (($context == 'page') ? ' (entrance)': '') . '</h3>';
-    $output .= $events_entrance_table->renderOutput();
+    $output .= '<h3>Valued events' . (($context == 'page' || $context == 'page-attr') ? ' (entrance)': '') . '</h3>';
+    $output .= $events_table->renderOutput();
     $output .= '</div>';    
     $output .= '</div>';
     
@@ -550,8 +591,11 @@ class ScorecardReportView extends ReportView {
     $value_str = '';
     $this->sortData('by_score_then_entrances', 'content');
     foreach($this->data['content'] AS $n => $d) {
-      if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
-      list($host, $path) = explode('/', $d['i'], 2);
+      if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
+      $a = explode('/', $d['i'], 2);
+      $host = $a[0];
+      $path = (isset($a[1])) ? $a[1] : '';
+
       $pageMeta = $this->getPageMeta($path);
       
       if ($pageMeta) {
@@ -631,6 +675,8 @@ class ScorecardReportView extends ReportView {
     );
     $startDate = $this->dateRange['start'];
     $endDate = $this->dateRange['end'];
+    $context = $this->params['context'];
+    $context_mode = $this->params['context_mode'];
    
     $categories = new TableChart('blank');
     $categories->addColumn('string', 'Traffic categories');
@@ -682,7 +728,24 @@ class ScorecardReportView extends ReportView {
     $pie_chart->setSetting('total', $total);
   
     $rowlimit = 5;
-  
+
+    /*
+    if ($context_mode == 'subsite') {
+      $val0 = $data['trafficsources']['trafficcategory']['_all'];
+      $vali = $data['date']['_all'];
+      $isData = array(
+        'i' => 'intersite',
+        'entrance' => array(
+          'entrances' => $vali['session']['sessions'] - $val0['entrance']['entrances'],
+          'pageviews' => $vali['session']['pageviews'] - $val0['entrance']['pageviews'],
+        ),
+        'score' => $vali['score'] - $val0['score'],
+      );
+      $data['trafficsources']['trafficcategory']['intersite'] = $isData;
+      $data['trafficsources']['source']['intersite'] = $isData;
+    }
+    */
+
     usort($data['trafficsources']['trafficcategory'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['trafficcategory'] AS $n => $d) {

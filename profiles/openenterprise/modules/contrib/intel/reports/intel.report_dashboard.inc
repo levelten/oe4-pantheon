@@ -6,7 +6,22 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
+function intel_dashboard_report_page($report_subtype = '-', $context = '-', $timeframe = '-', $filter_type = '-', $filter_element = '-', $subsite = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
+  $output = '';
+
+  $vars = intel_init_reports_vars('dashboard', 'dashboard', $report_subtype, $context, $timeframe, $filter_type, $filter_element, $subsite);
+  $vars['title'] = $title = t('Dashboard');
+  dsm($vars);
+  $output = intel_build_report($vars);
+
+  return $output;
+}
+/*
 function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
+  $args = func_get_args();
+  dsm($args);
   $output = '';
   $filters = array();
   $reports = intel_reports();
@@ -45,9 +60,8 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
   }  
    
   return $output;
-  
-  
 }
+*/
 
 function intel_dashboard_report($filters = array(), $context = 'site', $sub_index = '-') {
   intel_include_library_file('ga/class.ga_model.php');

@@ -18,8 +18,20 @@ function l10iAddthisTracker() {
     else {
       addthis.addEventListener('addthis.menu.share', this.eventHandler);
       addthis.addEventListener('addthis.user.clickback', this.eventHandler);
+
+      // verify addthis returned proper user object
+      if (addthis.user == undefined || (typeof addthis.user.ready != 'function')) {
+          return;
+      }
       addthis.user.ready(function (data){
-        var services = addthis.user.services().toMap();
+        var services = {};
+        // verify we have proper user.services object
+        if (typeof addthis.user.services == 'function') {
+           var s = addthis.user.services();
+           if (typeof s.toMap == 'function') {
+                services = s.toMap();
+           }
+        }
         var action = [];
         var count = 0;
         for (i in services) {  

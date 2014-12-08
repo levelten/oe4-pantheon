@@ -6,67 +6,28 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_content_list_report_page($report_mode = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
+function intel_content_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
-  $filters = array();
-  $context = 'site';
-  $reports = intel_reports();
-  if (isset($reports['content'][$report_mode]['page callback'])) {
-    if (isset($reports['content'][$report_mode]['file'])) {
-      include_once drupal_get_path('module', 'intel') . '/' . $reports['content'][$report_mode]['file'];
-    }
-    return $reports['content'][$report_mode]['page callback']($report_mode, $filter_type, $filter_element);
-  }
-  if ($filter_type) {
-    if ($filter_type == 'visitorid') {
-      $filter_type = 'visitor';
-      $filter_element = 'vtk:' . substr($filter_element, 0, 20);
-    }
-    if ($filter_type == 'page-attr') {
 
-    }
-    if ($filter_value) {
-      $filter_element .= ':' . $filter_value;
-    }
-    $filters[$filter_type] = urldecode($filter_element);
-    $context = $filter_type;
-  }  
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
-  
-  if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
-    intel_add_report_headers();
+  $vars = intel_init_reports_vars('content_list', 'content', $report_params, $report_subtype, $entity_type, $entity);
 
-    $report_modes = explode('.', $report_mode);
-    drupal_set_title(t('Content: @title report', array('@title' => $reports['content'][$report_mode]['title'])), PASS_THROUGH);
-    $filters += $_GET;
-    $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
-    $output .= drupal_render($filter_form);  
-  }
-  
-  if (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
-  }
-  elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_content_list_report($filters, $context, $report_mode);
-  }
-  elseif ($_GET['return_type'] == 'json') {
-    $data = array(
-      'report' => intel_content_list_report($filters, $context, $report_mode),
-    );
-    drupal_json_output($data);
-    return;    
-  }  
-   
+  $output = intel_build_report($vars);
+
   return $output;
-  
 }
 
-function intel_content_list_report($filters = array(), $context = 'site', $report_mode = '-', $mode = '') {
+//function intel_content_list_report($filters = array(), $context = 'site', $report_mode = '-', $mode = '') {
+function intel_content_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
-  if ($report_mode == '-') {
-    $report_mode = 'default.top.combined';
-  }
+
+  $filters = $vars['filters'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
+
+  $report_mode = !empty($vars['report_info']['key']) ? $vars['report_info']['key'] : 'default.top.combined';
   $report_modes = explode('.', $report_mode);
   
   $cache_options = array();
@@ -79,49 +40,48 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
   }
   
   $output = '';    
-  
+
+  /*
   if (!empty($filters['page'])) {
     $a = explode(":", $filters['page']);
     $path = $a[1];
   }
+  */
 
-  if (!empty($filters['page-attr'])) {
-    $a = explode(':', $filters['page-attr']);
-    $attr_key = $a[0];
-    $attr_info = intel_get_page_attribute_info($attr_key);
-  }
-  
-  $timeops = 'l30d';
+  $timeops = $vars['timeframe'];
   //$timeops = 'yesterday';
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
   
   $ga_data = new LevelTen\Intel\GAModel();
+  $ga_data->setContext($vars['context']);
+  $ga_data->setContextMode($vars['context_mode']);
   $ga_data->setReportModes($report_modes);
-  if (!empty($attr_info)) {
-    $ga_data->setPageAttributeInfo($attr_info);
-  }
-  $ga_data->buildFilters($filters, $context);
+  $ga_data->setAttributeInfoAll($vars['attribute_info']);
+  $ga_data->buildFilters($filters, $vars['subsite']);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
-//$ga_data->setDebug(1); 
+//$ga_data->setDebug(1);
 //dsm($context);  
 //dsm($ga_data->gaFilters); 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');  
 
   $ga_data->setRequestSetting('indexBy', 'content');
   $ga_data->setRequestSetting('details', 0);
-    
+
+  //$ga_data->setDebug(1);
   // base pageview/entrance data
   if (($report_modes[0] != 'social') && ($report_modes[0] != 'seo')) {
     $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
     $ga_data->loadFeedData('pageviews'); 
-  } 
+  }
+
+  //$ga_data->setDebug(0);
 
   if (($report_modes[0] != 'social') && ($report_modes[0] != 'seo')) {
-    $ga_data->setRequestDefaultParam('max_results', $feed_rows);
-    $ga_data->loadFeedData('entrances'); 
-  } 
-  
+    $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
+    $ga_data->loadFeedData('entrances');
+  }
+
   // events data
 //$ga_data->setDebug(1);
   $use_default = 1;
@@ -163,7 +123,6 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
     $ga_data->loadFeedData('entrances');
   }
 
-
   $d = $ga_data->data;
 //dsm($data);
 
@@ -171,33 +130,41 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
     $score_components = array();
 
     if ($report_modes[0] == 'seo') {
-      $d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components, 'seo');   
+      //$d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components, 'seo');
+      $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, 'seo', 'entrance');
     }
     elseif ($report_modes[0] == 'social') {
-      $d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components, 'social');   
+      //$d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components, 'social');
+      $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, 'social', 'entrance');
       $d['content'][$index]['score'] += $d['content'][$index]['pageview']['events']['_all']['value'];  
     }
     elseif ($report_modes[0] == 'engagement') {
       $d['content'][$index]['score'] = $d['content'][$index]['pageview']['events']['_all']['value'];      
     }
     else {
-      if ($context == 'page') {
-        $d['content'][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);      
+      if ($context == 'page' || $context == 'page-attr') {
+        $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'page');
       }
       else { 
-        $d['content'][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
+        $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'site');
       }
     } 
     $d['content'][$index]['score_components'] = $score_components;  
     if (isset($de['i'])) {
+      $params = $vars['report_params'];
+      $params['ft'] = 'page';
       $u = explode('/', $de['i'], 2);
       $uri = isset($u[1]) ? '/' . $u[1] : '/';
+      $uri = str_replace('/', '|', $uri);
+      $params['f'] = 'pagePath:' . urlencode($uri);
       $d['content'][$index]['links'] = array();
-      $d['content'][$index]['links'][] = l(t('scorecard'), 'admin/reports/intel/scorecard/page/page/landingPagePath:' . urlencode($uri));
-      $d['content'][$index]['links'][] = l(t('sources'), 'admin/reports/intel/trafficsource/-/page/landingPagePath:' . urlencode($uri));
-      $d['content'][$index]['links'][] = l(t('visitors'), 'admin/reports/intel/visitor/-/page/landingPagePath:' . urlencode($uri));
+      $d['content'][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
+      $d['content'][$index]['links'][] = l(t('sources'), intel_build_report_path('trafficsource', $params));
+      $d['content'][$index]['links'][] = l(t('visitors'), intel_build_report_path('visitor', $params));
     }
   }
+
+//dsm($d);
 
   // order date data cronologically
   //ksort($d['content']);
@@ -209,6 +176,7 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
     'end_date' => $end_date,
     'targets' => intel_get_targets(),
     'context' => $context,
+    'context_mode' => $context_mode,
     'report_modes' => $report_modes,
   );
   $output .= theme_intel_content_list_report($vars);
@@ -231,6 +199,8 @@ function theme_intel_content_list_report($vars) {
   $report_view->setData($vars['data']);
   $report_view->setTableRowCount($vars['row_count']);
   $report_view->setModes($vars['report_modes']);
+  $report_view->setParam('context', $vars['context']);
+  $report_view->setParam('context_mode', $vars['context_mode']);
   $report_view->setDateRange($vars['start_date'], $vars['end_date']);
   $report_view->setPageMetaCallback('intel_get_page_meta_callback');
   $report_view->setTargets(intel_get_targets());

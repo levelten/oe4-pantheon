@@ -16,6 +16,8 @@ class ReportView {
   public  $data = array();
   public  $model = array();
   protected $modes = array();
+  protected $context = '';
+  protected $context_mode = '';
   protected $params = array();
   protected $dateRange = array();
   protected $chartColors = array(
@@ -63,7 +65,7 @@ class ReportView {
   function setModes($modes) {
     $this->modes = $modes;
   }
-  
+
   function setParam($key, $value) {
     $this->params[$key] = $value;
   }

@@ -45,7 +45,7 @@ class PageAttributeReportView extends ReportView {
     $table->setColumnElement(0, 'label', $this->attributeInfo['title'] . 's');
     $table->insertColumn(1, 'number', 'Pages');
     $table->setOption('sortColumn', 4);
-    $table->removeColumn(8);
+    //$table->removeColumn(8);
 
     $entrs_pie_chart = new PieChart();
     $entrs_pie_chart->addColumn('string', $indexByLabel);
@@ -123,12 +123,12 @@ class PageAttributeReportView extends ReportView {
 
     $value_str = '';
     $this->sortData('by_score_then_entrances', $indexBy);
-//dsm($this->data);
+
     foreach($this->data[$indexBy] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
       
       $entrances = !empty($d['entrance']['entrances']) ? $d['entrance']['entrances'] : 0;
-      $pageviews = !empty($d['entrance']['pageviews']) ? $d['entrance']['pageviews'] : 0;
+      $pageviews = !empty($d['pageview']['pageviews']) ? $d['pageview']['pageviews'] : 0;
       $pageviews = round($pageviews);
       $value = round($d['score'], 2);
       $days = $this->dateRange['days'];
@@ -178,8 +178,11 @@ class PageAttributeReportView extends ReportView {
         $table->addRowItem(0);
         $table->addRowItem(0);
       }
- 
-      //$table->addRowItem(implode(' ', $d['links']));
+
+      if (!empty($d['links'])) {
+        $table->addRowItem(implode(' ', $d['links']));
+      }
+
       $table->addRow();
       
         $entrs_pie_chart->addRow(array($itemLabel, $entrances));

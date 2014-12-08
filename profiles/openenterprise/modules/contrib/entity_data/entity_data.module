@@ -25,6 +25,7 @@ function entity_data_entity_save($entity, $type) {
     return;
   }
   $entity_info = entity_get_info($type);
+
   if (!isset($entity->entity_data)
     || !is_array($entity->entity_data)
     || !isset($entity_info['entity keys']['id'])) {
@@ -81,10 +82,8 @@ function entity_data_entity_load(&$entities, $types) {
 }
 
 function entity_data_set($entity_type, $entity_id, $name, $value, $revision_id = 0, $language = LANGUAGE_NONE) {
-  // serialize if not string
-  if (!is_string($value)) {
-    $value = serialize($value);
-  }
+  $value = serialize($value);
+  
   if (!$revision_id) {
     $revision_id = $entity_id;
   }

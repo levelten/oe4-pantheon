@@ -154,8 +154,9 @@ function _intel_og_permission_access_content_report($node) {
 function intel_og_intel_reports_alter(&$reports) {
   $reports['content']['pa-og'] = array(
     'key' => 'page_attribute:og.top.entrance',
-    'title' => t('Organic groups'),
+    'title' => t('Segment') . ': ' . t('Organic groups'),
     'page callback' => 'intel_page_attribute_list_report_page',
+    'intel_api_access' => 'basic',
     'file' => 'reports/intel.report_page_attribute_list.inc'
   );
 }
@@ -491,8 +492,9 @@ function intel_og_intel_page_attribute_info() {
   $attributes = array();
   $attributes['og'] = array(
     'title' => t('Organic group'),
+    'title_plural' => t('Organic groups'),
     'description' => t('The organic group context of a page.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'options_description' => t('Auto generated from og_context.'),
     'options info callback' => 'intel_og_page_attribute_og_option_info',
   );

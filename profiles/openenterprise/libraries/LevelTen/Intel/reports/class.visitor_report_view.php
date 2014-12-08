@@ -134,7 +134,7 @@ class VisitorReportView extends ReportView {
         list($vtkid, $visitCount) = explode('-', $d['i']);
       }
       $entrances = !empty($d['entrance']['entrances']) ? $d['entrance']['entrances'] : 0;
-      $pageviews = !empty($d['entrance']['pageviews']) ? $d['entrance']['pageviews'] : 0;
+      $pageviews = !empty($d['pageview']['pageviews']) ? $d['pageview']['pageviews'] : 0;
       $pageviews = round($pageviews);
       $value = round($d['score'], 2);
       $days = $this->dateRange['days'];
@@ -150,7 +150,14 @@ class VisitorReportView extends ReportView {
       $table->newWorkingRow();
       $table->addRowItem($itemLink);
       if ($reportModes[1] == 'recent') {
-        $table->addRowItem(Date('m/d/y H:i', $d['entrance']['timestamp']));
+        $timestamp = 0;
+        if (!empty($d['entrance']['timestamp'])) {
+          $timestamp = $d['entrance']['timestamp'];
+        }
+        else if (!empty($d['pageview']['timestamp'])) {
+          $timestamp = $d['pageview']['timestamp'];
+        }
+        $table->addRowItem(Date('m/d/y H:i', $timestamp));
       }
       else {
         $table->addRowItem($entrances);
@@ -158,9 +165,15 @@ class VisitorReportView extends ReportView {
       
       $table->addRowItem($pageviews);
       $table->addRowItem($value);
-      
-      $table->addRowItem($this->formatRowString($d['visitinfo']['trafficcategory'], 60));
-      $table->addRowItem($this->formatRowString($d['visitinfo']['location'], 60));
+      if (isset($d['visitinfo'])) {
+        $table->addRowItem($this->formatRowString($d['visitinfo']['trafficcategory'], 60));
+        $table->addRowItem($this->formatRowString($d['visitinfo']['location'], 60));
+      }
+      else {
+        $table->addRowItem('(not set)');
+        $table->addRowItem('(not set)');
+      }
+
         
       $table->addRowItem(implode(' ', $d['links']));
       $table->addRow();

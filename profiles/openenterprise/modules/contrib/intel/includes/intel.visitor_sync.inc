@@ -42,21 +42,7 @@ function intel_sync_visitordata($visitor, $request = array()) {
   return $statuses;
 }
 
-function intel_work_sync_visitor_request_queue($runtime = 15) {
-  // get existing sync requests and add them to DrupalQueue
-  intel_queue_sync_visitor_requests();
 
-  $end = REQUEST_TIME + $runtime;
-  $queue = DrupalQueue::get('intel_sync_visitor_requests');
-  while (REQUEST_TIME < $end && ($item = $queue->claimItem())) {
-    if (!empty($_GET['debug'])) {
-      dpm('syncing from queue:');//
-      dpm($item);//
-    }
-    intel_sync_visitor_request_worker($item->data);
-    $queue->deleteItem($item);
-  }
-}
 
 /**
  * Adds visitors to DrupalQueue
@@ -64,14 +50,18 @@ function intel_work_sync_visitor_request_queue($runtime = 15) {
 function intel_queue_sync_visitor_requests() {
   // get existing sync requests
   $items = variable_get('intel_sync_visitor_requests', array());
+
+  if (!count($items)) {
+    return;
+  }
+
   // add them to the DrupalQueue
-  if (count($items)) {
-    $queue = DrupalQueue::get('intel_sync_visitor_requests');
-    $i = 0;
-    $limit = 20;
-    foreach ($items AS $i => $item) {
-      if ($item->run_after < REQUEST_TIME) {
-        $queue->createItem($item);
+  $queue = DrupalQueue::get('intel_sync_visitor_requests');
+  $i = 0;
+  $limit = 20;
+  foreach ($items AS $i => $item) {
+    if ($item->run_after < REQUEST_TIME) {
+      if($queue->createItem($item)) {
         // remove items from request variable. If sync fails they will be re-added
         // in intel_sync_visitor_request_worker
         unset($items[$i]);
@@ -82,11 +72,29 @@ function intel_queue_sync_visitor_requests() {
         }
       }
     }
-    variable_set('intel_sync_visitor_requests', $items);
   }
+
+  variable_set('intel_sync_visitor_requests', $items);
 }
 
+// alternate way to work sync_visitor_request queue
+function intel_work_sync_visitor_request_queue($limit = 10, $runtime = 60) {
 
+  $end = REQUEST_TIME + $runtime;
+  $queue = DrupalQueue::get('intel_sync_visitor_requests');
+  $items = array();
+  $i = 0;
+  while (($i < $limit) && (REQUEST_TIME < $end) && ($item = $queue->claimItem())) {
+    if (!empty($_GET['debug'])) {
+      dpm('syncing from queue:');//
+      dpm($item);//
+    }
+    $items[] = intel_sync_visitor_request_worker($item->data);
+    $queue->deleteItem($item);
+    $i++;
+  }
+  return $items;
+}
 
 /**
  * Implements intel_sync_visitordata

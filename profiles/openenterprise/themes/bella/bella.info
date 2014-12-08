@@ -38,5 +38,10 @@ scripts[] = 'js/bella.js'
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
 settings[bootstrap_cdn] = ''
 
-; Default Bella navbar to fixed-top.
+; Default Bella settings
 settings[bootstrap_navbar_position] = 'fixed-top'
+settings[enterprise_bootstrap_megamenu] = 0
+settings[fittext] = 1
+settings[toggle_slogan] = 0
+settings[toggle_name] = 0
+settings[toggle_logo] = 1

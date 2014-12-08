@@ -217,7 +217,7 @@ function intel_get_visitor_attribute_info_default() {
 
   $options = array();
   foreach ($user_roles AS $rid => $role) {
-    $options[$rid] = (object)array(
+    $options[$rid] = array(
       'title' => $role,
     );
   }
@@ -266,23 +266,27 @@ function intel_get_page_attribute_info_default() {
 
   $attributes['a'] = array(
     'title' => t('Author'),
+    'title_plural' => t('Authors'),
     'description' => t('The uid of a node author.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'options_description' => t('Auto generated from entity uid.'),
     'options info callback' => 'intel_page_attribute_author_option_info',
   );
   $attributes['ct'] = array(
     'title' => t('Content type'),
+    'title_plural' => t('Content types'),
     'description' => t('Node type or entity bundle type.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'options_description' => t('Auto generated from entity type/bundle.'),
-    'type' => 'value',
     'options info callback' => 'intel_page_attribute_content_type_option_info',
   );
   $attributes['et'] = array(
     'title' => t('Entity type'),
+    'title_plural' => t('Entity types'),
     'description' => t('The entity type of the page. (node, user...)'),
-    'type' => 'list',
+    'type' => 'item',
+    'options_description' => t('Auto generated from page entity.'),
+    'options info callback' => 'intel_page_attribute_entity_type_option_info',
   );
   $attributes['i'] = array(
     'title' => t('Page intent'),
@@ -300,14 +304,16 @@ function intel_get_page_attribute_info_default() {
   );
   $attributes['s'] = array(
     'title' => t('Section'),
+    'title_plural' => t('Sections'),
     'description' => t('Node type or entity bundle type.'),
-    'type' => 'scalar',
+    'type' => 'item',
     'custom_options' => array(),
     'selectable' => 1,
   );
   $attributes['t'] = array(
-    'title' => t('Taxomony term'),
-    'description' => t('List of taxomonies term ids.'),
+    'title' => t('Tag'),
+    'title_plural' => t('Tags'),
+    'description' => t('List of taxomony term ids.'),
     'type' => 'list',
     'options_description' => t('Auto generated from terms in selected taxonomy fields.'),
     'options info callback' => 'intel_page_attribute_taxomony_term_option_info',
@@ -414,7 +420,8 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
       $attrs[$key]['type'] = ($mode == 'visitor') ? 'vector' : 'list';
       $attrs[$key]['module']  = 'intel';
       $attrs[$key]['source_type']  = 'taxonomy';
-      $attrs[$key]['source_bundle']  = $k;
+      $attrs[$key]['options info callback']  = 'intel_page_attribute_taxomony_term_option_info';
+      $attrs[$key]['module']  = 'intel';
       $attrs[$key]['options'] = array();
 
     }
@@ -544,6 +551,7 @@ function intel_page_attribute_author_option_info($option_id, $data_options) {
   $account = user_load($option_id);
   if (!empty($account)) {
     $data['title'] = format_username($account);
+    $data['uri'] = 'user/' . $account->uid;
   }
 
   if (!empty($data_options['page_count'])) {
@@ -582,6 +590,33 @@ function intel_page_attribute_content_type_option_info($option_id, $data_options
   return $data;
 }
 
+// TODO: Not completed
+function intel_page_attribute_entity_type_option_info($option_id, $data_options) {
+  $data = array(
+    'title' => '',
+  );
+  $types = node_type_get_types();
+  //print_r($types);
+  $type = '';
+  if (isset($types[$option_id])) {
+    $data['title'] = $types[$option_id]->name;
+    $type = $option_id;
+  }
+  else if (isset($types['enterprise_' . $option_id])) {
+    $data['title'] = $types['enterprise_' . $option_id]->name;
+    $type = 'enterprise_' . $option_id;
+  }
+
+  if ($type && !empty($data_options['page_count'])) {
+    $query = db_query("SELECT count(nid) FROM {node} WHERE type = :type", array(
+      ':type' => $type,
+    ));
+
+    $data['page_count'] = $query->fetchField();
+  }
+  return $data;
+}
+
 function intel_page_attribute_taxomony_term_option_info($option_id, $data_options) {
   $data = array(
     'title' => '',
@@ -589,7 +624,7 @@ function intel_page_attribute_taxomony_term_option_info($option_id, $data_option
   $term = taxonomy_term_load($option_id);
   if (!empty($term)) {
     $data['title'] = $term->name;
-    //$data['uri'] = $term->uri();
+    $data['uri'] = 'taxonomy/term/' . $option_id;
   }
 
   if (!empty($data_options['page_count'])) {
@@ -1027,6 +1062,15 @@ function intel_get_scoring($event, $mode = 'machinename') {
   return $scoring;
 }
 
+/**
+ * Scores data feed item in a entrance (session) context
+ *
+ * @param $data
+ * @param int $divideby
+ * @param array $score_components
+ * @param string $mode
+ * @return mixed
+ */
 function intel_score_visit_aggregation($data, $divideby = 1, &$score_components = array(), $mode = '') {
   $scoring = intel_get_scorings();
   $scores = array(
@@ -1063,12 +1107,13 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
 
   // entrance scoring
   if ($entrance['entrances']) {
-    // the value of any goal achieved on any page during a visit that entererd through this page
+    // the value of any goals achieved during sessions started by the item
     $scores['goals'] += $entrance['goalValueAll'];
-    // the value of any goal achieved on any page during a visit that entererd through this page
+    // the value of any valued events triggered during sessions started by the item
     if (isset($entrance['events']['_all'])) {
       $scores['events'] += ($entrance['events']['_all']['value']);
     }
+    // scoring of traffic genearted by the item
     $scores['traffic'] += $entrance['entrances'] * $scoring['entrance'];
     if (!empty($entrance['sticks'])) {
       $scores['traffic'] += $entrance['sticks'] * $scoring['stick'];
@@ -1076,6 +1121,9 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
     if ($entrance['pageviews'] > ($entrance['entrances'] - $entrance['sticks'])) {
       $scores['traffic'] += ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
     }
+  }
+  if (isset($data['pageview'])) {
+
   }
 
   foreach ($scores AS $i => $score) {
@@ -1090,7 +1138,15 @@ function intel_score_visit_aggregation($data, $divideby = 1, &$score_components 
   return $scores['_all'];
 }
 
-function intel_score_page_aggregation($data, $divideby = 1, &$score_components = array(), $mode = '') {
+/**
+ * Scores data feed item in page or page-attr context
+ * @param $data
+ * @param int $divideby
+ * @param array $score_components
+ * @param string $mode
+ * @return mixed
+ */
+function intel_score_page_aggregation($data, $divideby = 1, &$score_components = array(), $mode = '', $method = 'site', $options = array()) {
   $scoring = intel_get_scorings();
   $scores = array(
     '_all' => array(
@@ -1099,19 +1155,30 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
       'goals' => 0,
       'traffic' => 0,
     ),
+    // stats for values generated directly by the item on non
+    'onpage' => array(
+      '_all' => 0,
+      'events' => 0,
+      'goals' => 0,
+      'traffic' => 0,
+    ),
+    // stats for values generated during sessions where the item is the entrance
     'entrance' => array(
       '_all' => 0,
       'events' => 0,
       'goals' => 0,
       'traffic' => 0,
     ),
+    // stats generated downstream from page hit
     'assist' =>  array(
       '_all' => 0,
-      'events' => 0,
+      'events' => 0, // N/A
       'goals' => 0,
-      'traffic' => 0,
+      'traffic' => 0, // N/A
     ),
   );
+  // Note that entrance and assist stats include onpage data
+
   $ac = .1; // assist coef
   $page = $data['pageview'];
   $entrance = array(
@@ -1132,46 +1199,226 @@ function intel_score_page_aggregation($data, $divideby = 1, &$score_components =
       $entrance = $data['entrance'];
     }
   }
+  ///////////////////////
   // entrance scoring
-  if ($entrance['entrances']) {
-    // the value of any goal achieved on any page during a entrance that entererd through this page    
-    $scores['entrance']['goals'] += $entrance['goalValueAll'];
-    $scores['_all']['goals'] += (1 - $ac) * $entrance['goalValueAll'];
 
-    // the value of any goal achieved on any page during a entrance that entererd through this page
+  if ($entrance['entrances']) {
+    // the value of any goal achieved on any page in sessions started
+    // on this page or segement but not directly by the page
+    $scores['entrance']['goals'] += $entrance['goalValueAll'];
+
+    // the value of any valued events generated on any page in sessions started
+    // on this page or segement
     if (isset($entrance['events']['_all'])) {
       $scores['entrance']['events'] += $entrance['events']['_all']['value'];
-      $scores['_all']['events'] += $ac * ($entrance['events']['_all']['value'] - $page['events']['_all']['value']);
     }
+    // traffic scoring based on traffic generated by this page or segement
     $scores['entrance']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
-    $scores['_all']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
+    //$scores['_all']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
     if (!empty($entrance['sticks'])) {
       $scores['entrance']['traffic'] += $entrance['sticks'] * $scoring['stick'];
-      $scores['_all']['traffic'] += $entrance['sticks'] * $scoring['stick'];
     }
     if ($entrance['pageviews']['traffic'] > 2) {
       $scores['entrance']['traffic'] += ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
-      $scores['_all']['traffic'] += (1 - $ac) * ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
     }
   }
 
+  ///////////////////////
   // page hit scoring
-  // the value of any goal achieved on any page during a entrance that entererd through this page
-  if (!empty($entrance['goalValueAll'])) {
-    $scores['assist']['goals'] += ($page['goalValueAll'] - $entrance['goalValueAll']);
-    $scores['_all']['goals'] += $ac * ($page['goalValueAll'] - $entrance['goalValueAll']);
+
+  // the value of any goals achieved on the page or a page in the segment
+  if (!empty($page['goalValueAll'])) {
+    $scores['onpage']['goals'] += $page['goalValueAll'];
+  }
+
+  // the value of any goal achieved on this page/segement or downstream
+  if (!empty($page['pageValueAll'])) {
+    $scores['assist']['goals'] += ($page['pageValueAll'] - $page['goalValueAll']);
+  }
+
+  // the value of events triggered on this page/segment
+  if (isset($page['events']['_all'])) {
+    $scores['onpage']['events'] += $page['events']['_all']['value'];
+  }
+  // traffic scoring based on hit on this page/segment
+  $scores['onpage']['traffic'] += ($page['pageviews'] - $entrance['entrances']) * $scoring['additional_pages'];
+
+  // tally up scores from components
+  $method = !empty($options['method']) ? !empty($options['method']) :'';
+  if ($method == 'direct') {
+
   }
   else {
-    $scores['assist']['goals'] += $page['goalValueAll'];
-    $scores['_all']['goals'] += $ac * $page['goalValueAll'];
+    $scores['_all']['goals'] = (1 - $ac) * $scores['entrance']['goals'] + $ac * ($scores['assist']['goals']);
+    $scores['_all']['events'] = (1 - $ac) * $scores['onpage']['events'] + $ac * ($scores['entrance']['events']);
+    $scores['_all']['traffic'] = $scores['entrance']['traffic'] + $scores['onpage']['traffic'];
   }
-  // the value of any goal achieved on any page during a entrance that entererd through this page
+
+
+  // do divide bys and total up alls
+  foreach ($scores AS $i => $a) {
+    foreach ($a AS $j => $b) {
+      if (substr($j, 0, 1) == '_') {
+        continue;
+      }
+      $scores[$i][$j] = $scores[$i][$j] / $divideby;
+      $scores[$i]['_all'] += $scores[$i][$j];
+    }
+  }
+
+  $score_components = $scores;
+  return $scores['_all']['_all'];
+}
+
+/**
+ * Scores data feed item in page or page-attr context
+ * @param $data
+ * @param int $divideby
+ * @param array $score_components
+ * @param string $mode
+ * @return mixed
+ */
+function intel_score_item($data, $divideby = 1, &$score_components = array(), $mode = '', $method = '', $options = array()) {
+  $scoring = intel_get_scorings();
+  $scores = array(
+    '_all' => array(
+      '_all' => 0,
+      'events' => 0,
+      'goals' => 0,
+      'traffic' => 0,
+    ),
+    // stats for values generated directly by the item on non
+    'onpage' => array(
+      '_all' => 0,
+      'events' => 0,
+      'goals' => 0,
+      'traffic' => 0,
+    ),
+    // stats for values generated during sessions where the item is the entrance
+    'entrance' => array(
+      '_all' => 0,
+      'events' => 0,
+      'goals' => 0,
+      'traffic' => 0,
+    ),
+    // stats generated downstream from page hit
+    'assist' =>  array(
+      '_all' => 0,
+      'events' => 0,
+      'goals' => 0,
+      'traffic' => 0,
+    ),
+  );
+  // Note that entrance and assist stats include onpage data
+
+  $ac = .1; // assist coef
+  $page = array(
+    'pageviews' => 0,
+    'goalsValueAll' => 0,
+    'pageValueAll' => 0,
+  );
+  if (isset($data['pageview'])) {
+    $page = $data['pageview'];
+  }
+
+  $entrance = array();
+
+  if ($mode == 'social') {
+    if (!empty($data['socialNetwork']['_all']['entrance'])) {
+      $entrance = $data['socialNetwork']['_all']['entrance'];
+    }
+  }
+  elseif ($mode == 'seo') {
+    if (!empty($data['organicSearch']['_all']['entrance'])) {
+      $entrance = $data['organicSearch']['_all']['entrance'];
+    }
+  }
+  else {
+    if (!empty($data['entrance'])) {
+      $entrance = $data['entrance'];
+    }
+  }
+  $entrance += array(
+    'entrances' => 0,
+    'pageviews' => 0,
+    'goalsValueAll' => 0,
+  );
+  ///////////////////////
+  // entrance scoring
+
+  if ($entrance['entrances']) {
+    // the value of any goal achieved on any page in sessions started
+    // on this page or segement but not directly by the page
+    $scores['entrance']['goals'] += $entrance['goalValueAll'];
+
+    // the value of any valued events generated on any page in sessions started
+    // on this page or segement
+    if (isset($entrance['events']['_all'])) {
+      $scores['entrance']['events'] += $entrance['events']['_all']['value'];
+    }
+    // traffic scoring based on traffic generated by this page or segement
+    $scores['entrance']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
+    //$scores['_all']['traffic'] += $entrance['entrances'] * $scoring['entrance'];
+    if (!empty($entrance['sticks'])) {
+      $scores['entrance']['traffic'] += $entrance['sticks'] * $scoring['stick'];
+    }
+    if ($entrance['pageviews'] > 2) {
+      $scores['entrance']['traffic'] += ($entrance['pageviews'] - $entrance['entrances'] - $entrance['sticks']) * $scoring['additional_pages'];
+    }
+  }
+
+  ///////////////////////
+  // page hit scoring
+
+  // the value of any goals achieved on the page or a page in the segment
+  if (!empty($page['goalValueAll'])) {
+    $scores['onpage']['goals'] += $page['goalValueAll'];
+  }
+
+  // the value of any goal achieved on this page/segement or downstream
+  if (!empty($page['pageValueAll'])) {
+    $scores['assist']['goals'] += ($page['pageValueAll'] - $page['goalValueAll']);
+  }
+
+  // the value of events triggered on this page/segment
   if (isset($page['events']['_all'])) {
-    $scores['assist']['events'] += $page['events']['_all']['value'];
-    $scores['_all']['events'] += (1 - $ac) * $page['events']['_all']['value'];
+    $scores['onpage']['events'] += $page['events']['_all']['value'];
   }
-  $scores['assist']['traffic'] += ($page['pageviews'] - $entrance['entrances']) * $scoring['additional_pages'];
-  $scores['_all']['traffic'] += $ac * ($page['pageviews'] - $entrance['entrances']) * $scoring['additional_pages'];
+  // traffic scoring based on hit on this page/segment
+  $scores['onpage']['traffic'] += ($page['pageviews'] - $entrance['pageviews']) * $scoring['additional_pages'];
+
+  // tally up scores from components
+  if ($method == 'direct') {
+
+  }
+  else if ($method == 'page') {
+    $scores['_all']['goals'] = (1 - $ac) * $scores['entrance']['goals'] + $ac * ($scores['assist']['goals']);
+    $scores['_all']['events'] = (1 - $ac) * $scores['onpage']['events'] + $ac * ($scores['entrance']['events']);
+    $scores['_all']['traffic'] = $scores['entrance']['traffic'] + $scores['onpage']['traffic'];
+  }
+  else if ($method == 'visitor') {
+    // use for visitors
+    $scores['_all']['goals'] = $scores['onpage']['goals'];
+    $scores['_all']['events'] = $scores['onpage']['events'];
+    // if visitor is filtered, entrance may not be included in filtered item
+    // if entrance score is 0, use pageview for traffic
+    $scores['_all']['traffic'] = !empty($scores['entrance']['traffic']) ? $scores['entrance']['traffic'] : $scores['onpage']['traffic'];
+  }
+  else if ($method == 'site') {
+    // use for visitors
+    $scores['_all']['goals'] = $scores['onpage']['goals'];
+    $scores['_all']['events'] = $scores['onpage']['events'];
+    // if visitor is filtered, entrance may not be included in filtered item
+    // if entrance score is 0, use pageview for traffic
+    $scores['_all']['traffic'] = $scores['entrance']['traffic'] + $scores['onpage']['traffic'];
+  }
+  else {
+    // use entrance, trafficsources
+    $scores['_all']['goals'] = $scores['entrance']['goals'];
+    $scores['_all']['events'] = $scores['entrance']['events'];
+    $scores['_all']['traffic'] = $scores['entrance']['traffic'];
+  }
+
 
   // do divide bys and total up alls
   foreach ($scores AS $i => $a) {
@@ -1400,327 +1647,4 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
   else {
     return FALSE;
   }
-}
-
-function _intel_get_report_dates_from_ops($ops = 'l30d', &$cache_options = array(), $return_hash = FALSE) {
-  $start = '';
-  $end = '';
-  if (!empty($_GET['timeops'])) {
-    $ops = $_GET['timeops'];
-  }
-
-  if ($ops == 'today') {
-    $start = 'midnight';
-    $end = 'now';
-    $cache_options = array('refresh' => 1);
-  }
-  elseif (($ops == 'l24') || ($ops == 'l24fn')) {
-    $start = '-24 hours';
-    $end = 'now';
-    $cache_options = array('refresh' => 1);
-  }
-  elseif ($ops == 'yesterday') {
-    $start = '-1 day midnight';
-    $end = "midnight - 1 second";
-  }
-  elseif ($ops == 'l7dfn') {
-    $start = "-7 days";
-    $end = "now";
-    $cache_options = array('refresh' => 1);
-  }
-  elseif ($ops == 'l7d') {
-    $start = "-7 days midnight";
-    $end = "midnight - 1 second";
-    $cache_options = array('refresh' => 1);
-  }
-  elseif ($ops == 'l30dfn') {
-    $start = "-30 days";
-    $end = "now";
-    $cache_options = array('refresh' => 1);
-  }
-  elseif ($ops == 'thismonth') {
-    $start = "midnight first day of this month";
-    $end = "midnight first day of next month - 1 second";
-  }
-  elseif ($ops == 'lastmonth') {
-    $start = "midnight first day of last month";
-    $end = "midnight first day of this month - 1 second";
-  }
-  elseif ($ops == 'monthtodate') {
-    $start = "midnight first day of this month";
-    $end = "now";
-  }
-  else  {  // "l30d" last 30 days from yesterday
-    $start = "-30 days midnight";
-    $end = "midnight - 1 second";
-  }
-  return _intel_get_report_dates($start, $end);
-}
-
-function _intel_get_report_dates($start_default = "-31 days", $end_default = "-1 day", $return_hash = FALSE) {
-  if (!empty($_GET['dates'])) {
-    $a = explode(":", $_GET['dates']);
-    $_GET['start_date'] = $a[0];
-    $_GET['end_date'] = $a[1];
-  }
-  $start_date = (!empty($_GET['start_date'])) ? strtotime($_GET['start_date']) : strtotime($start_default);
-  $end_date = (!empty($_GET['end_date'])) ? strtotime($_GET['end_date']) : strtotime($end_default);
-  $number_of_days = round(($end_date - $start_date)/60/60/24);
-  if (!$return_hash) {
-    return array(
-      $start_date,
-      $end_date,
-      $number_of_days,
-    );
-  }
-  else {
-    return array(
-      'start_date' => $start_date,
-      'end_date' => $end_date,
-      'number_of_days' => $number_of_days,
-    );
-  }
-}
-
-function intel_report_filters_form($form, &$form_state, $filters = array(), $context = 'site') {
-  $dynamic_filters = array();
-  $static_filter = '';
-  $form['filters'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Filters'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $events = array(
-    '' => t('-'),
-  );
-  $metas = intel_get_intel_event_info();
-  foreach ($metas AS $meta) {
-    if (isset($meta['category'])) {
-      $events[$meta['category']] = $meta['title'];
-    }
-  }
-
-  if ($context != 'page') {
-    $modes = array(
-      '' => '-',
-      'landingPagePath' => t('Entrance'),
-      'pagePath' => t('View'),
-    );
-    $mode_default = 'entrance';
-    $path_default = '';
-    if (!empty($filters['page'])) {
-      $a = explode(':', $filters['page']);
-      $mode_default = $a[0];
-      $path_default = $a[1];
-      $dynamic_filters['page'] = "{$a[0]}={$a[1]}";
-    }
-    $form['filters']['page_mode'] = array(
-      '#type' => 'select',
-      '#title' => t('Page mode'),
-      '#id' => 'page-mode',
-      '#options' => $modes,
-      '#default_value' => $mode_default,
-      '#prefix' => '<div class="filter-fieldset filter-fieldset-page">',
-    );
-    $form['filters']['page_path'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Page path'),
-      '#id' => 'page-path',
-      '#size' => 80,
-      '#default_value' => $path_default,
-      '#suffix' => '</div>',
-    );
-  }
-
-  $form['filters']['event'] = array(
-    '#type' => 'select',
-    '#title' => t('Events'),
-    '#id' => 'event-filter',
-    '#options' => $events,
-    '#default_value' => !empty($filters['event']) ? $filters['event'] : '',
-    '#prefix' => '<div class="filter-fieldset filter-fieldset-event">',
-    '#suffix' => '</div>',
-  );
-
-  if ($context != 'trafficsource') {
-    $trafficsource_types = array(
-      '' => t('-'),
-      'source' => t('Source'),
-      'medium' => t('Medium'),
-      'referralPath' => t('Referral path'),
-      'socialNetwork' => t('Social network'),
-      'keyword' => t('Keyword'),
-    );
-    $trafficsource_type_default = '';
-    $trafficsource_value_default = '';
-    if (!empty($filters['trafficsource'])) {
-      $a = explode(':', $filters['trafficsource']);
-      $trafficsource_type_default = $a[0];
-      $trafficsource_value_default = $a[1];
-      $dynamic_filters['trafficsource'] = "{$a[0]}={$a[1]}";
-    }
-    $form['filters']['trafficsource_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Traffic source type'),
-      '#id' => 'trafficsource-type',
-      '#options' => $trafficsource_types,
-      '#default_value' => $trafficsource_type_default,
-      '#prefix' => '<div class="filter-fieldset filter-fieldset-referrer">',
-    );
-    $form['filters']['trafficsource_value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Traffic source value'),
-      '#id' => 'trafficsource-value',
-      '#size' => 80,
-      '#default_value' => $trafficsource_value_default,
-      '#suffix' => '</div>',
-    );
-  }
-
-  $loc_types = array(
-    '' => t('-'),
-    'subContinent' => t('Sub Continent'),
-    'country' => t('Country'),
-    'region' => t('Region / state'),
-    'city' => t('City'),
-    'metro' => t('Metro'),
-  );
-  $loc_type_default = '';
-  $loc_value_default = '';
-  if (!empty($filters['location'])) {
-    $a = explode(':', $filters['location']);
-    $loc_type_default = $a[0];
-    $loc_value_default = $a[1];
-    $dynamic_filters['location'] = "{$a[0]}={$a[1]}";
-  }
-  $form['filters']['location_type'] = array(
-    '#type' => 'select',
-    '#title' => t('Location type'),
-    '#id' => 'location-type',
-    '#options' => $loc_types,
-    '#default_value' => $loc_type_default,
-    '#prefix' => '<div class="filter-fieldset filter-fieldset-location">',
-  );
-  $form['filters']['loc_value'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Location value'),
-    '#id' => 'location-value',
-    '#size' => 80,
-    '#default_value' => $loc_value_default,
-    '#suffix' => '</div>',
-  );
-
-  if ($context != 'visitor') {
-    $visitor_options = array(
-      '' => t('-'),
-      'vtkid' => t('By visitor token'),
-      'email' => t('By email address'),
-    );
-    $visitor_type_default = '';
-    $visitor_value_default = '';
-    if (!empty($filters['visitor'])) {
-      $a = explode(':', $filters['visitor']);
-      $visitor_type_default = $a[0];
-      $visitor_value_default = $a[1];
-      $dynamic_filters['visitor'] = "{$a[0]}={$a[1]}";
-    }
-    $form['filters']['visitor_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Visitor'),
-      '#id' => 'visitor-type',
-      '#options' => $visitor_options,
-      '#default_value' => $visitor_type_default,
-      '#prefix' => '<div class="filter-fieldset filter-fieldset-visitor">',
-    );
-    $form['filters']['visitor_value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Visitor value'),
-      '#id' => 'visitor-value',
-      '#size' => 80,
-      '#default_value' => $visitor_value_default,
-      '#suffix' => '</div>',
-    );
-
-    $va_options = array(
-      '' => t('-'),
-    );
-    $va_options = array_merge($va_options, intel_get_field_visitor_attribute_allowed_values());
-    $va_type_default = '';
-    $va_value_default = '';
-    if (!empty($filters['visitor-attr'])) {
-      $a = explode(':', $filters['visitor-attr']);
-      $va_type_default = $a[0];
-      $va_value_default = $a[1];
-      $dynamic_filters['visitor-attr'] = "{$a[0]}={$a[1]}";
-    }
-    $form['filters']['visitor_attr_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Visitor attribute'),
-      '#id' => 'visitor-attr-type',
-      '#options' => $va_options,
-      '#default_value' => $va_type_default,
-      '#prefix' => '<div class="filter-fieldset filter-fieldset-visitor-attr">',
-    );
-    $form['filters']['visitor_attr_value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Visitor attribute value'),
-      '#id' => 'visitor-attr-value',
-      '#size' => 80,
-      '#default_value' => $va_value_default,
-      '#suffix' => '</div>',
-    );
-  }
-
-  $form['filters']['apply'] = array(
-    '#type' => 'markup',
-    '#markup' => '<input type="button" id="apply-report-filter" value="Apply" class="form-submit">',
-  );
-
-  // do not display form if not in extended mode
-  if (!variable_get('intel_extended_mode', 0)) {
-    $form = array();
-  }
-
-  if (($context == 'page') && ($filters['page'])) {
-    $a = explode(':', $filters['page']);
-    $form['filters_display'] = array(
-      '#type' => 'markup',
-      '#markup' => '<strong>' . t('Page') . '</strong>' . ': ' . $a[1],
-    );
-  }
-  if (($context == 'trafficsource') && ($filters['trafficsource'])) {
-    $a = explode(':', $filters['trafficsource']);
-    $form['filters_display'] = array(
-      '#type' => 'markup',
-      '#markup' => '<strong>' . t('Traffic source') . '</strong>' . ': ' . $a[1] . " ({$a[0]})",
-    );
-  }
-  if (($context == 'visitor') && ($filters['visitor'])) {
-    $a = explode(':', $filters['visitor']);
-    $form['filters_display'] = array(
-      '#type' => 'markup',
-      '#markup' => '<strong>' . t('Visitor') . '</strong>' . ': ' . $a[1],
-    );
-  }
-  if (count($dynamic_filters)) {
-    $form['filters_display'] = array(
-      '#type' => 'markup',
-      '#markup' => '<strong>' . t('Filters') . '</strong>' . ': ' . implode(', ', $filters_display),
-    );
-  }
-  return $form;
-}
-
-function intel_add_report_headers() {
-  drupal_add_js('https://www.google.com/jsapi', array('type' => 'external', 'scope' => 'header'));
-  drupal_add_js("google.load('visualization', '1', {packages: ['corechart']});google.load('visualization', '1', {packages: ['table']});", array('type' => 'inline', 'scope' => 'header'));
-  drupal_add_js(libraries_get_path('LevelTen') . '/Intel/charts/charts.js');
-  drupal_add_css(drupal_get_path('module', 'intel') . '/css/intel.report.css');
-  drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.report.js');
-}
-
-function intel_get_report_ajax_container() {
-  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-dates="' . ((!empty($_GET['dates'])) ? $_GET['dates'] : '') . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
-  return $output;
 }

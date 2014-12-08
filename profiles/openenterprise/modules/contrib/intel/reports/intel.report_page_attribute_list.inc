@@ -6,56 +6,38 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_page_attribute_list_report_page($sub_index = '-', $filter_type = '', $filter_element = '') {
+function intel_page_attribute_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
-  $filters = array();
-  $context = 'site';
-  $reports = intel_reports();
-  
-  if ($filter_type) {
-    $filters[$filter_type] = urldecode($filter_element);
-    $context = $filter_type;
-  }  
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";  
-  
-  if (empty($_GET['return_type']) || ($_GET['return_type'] == 'nonajax')) {
-    intel_add_report_headers();
 
-    drupal_set_title(t('@title report', array('@title' => $reports['content'][$sub_index]['title'])), PASS_THROUGH);
-    $filters += $_GET;
-    $filter_form = drupal_get_form('intel_report_filters_form', $filters, $context);
-    $output .= drupal_render($filter_form);  
-  }
-  
-  if (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
-  }
-  elseif ($_GET['return_type'] == 'nonajax') {
-    $output .= intel_page_attribute_list_report($filters, $context, $sub_index);
-  }
-  elseif ($_GET['return_type'] == 'json') {
-    $data = array(
-      'report' => intel_page_attribute_list_report($filters, $context, $sub_index),
-    );
-    drupal_json_output($data);
-    return;    
-  }  
-   
+  $vars = intel_init_reports_vars('page_attribute_list', 'content', $report_params, $report_subtype, $entity_type, $entity);
+
+  $output = intel_build_report($vars);
+
   return $output;
 }
 
-function intel_page_attribute_list_report($filters = array(), $context = 'site', $sub_index = '-', $mode = '') {
+//function intel_page_attribute_list_report($filters = array(), $context = 'site', $sub_index = '-', $mode = '') {
+function intel_page_attribute_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
-  $reports = intel_reports();
-  $report_mode = $reports['content'][$sub_index]['key'];
+  $filters = $vars['filters'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
+
+  $report_mode = $vars['report_info']['key'];
+
+  //$reports = intel_reports();
+  //$report_mode = $reports['content'][$sub_index]['key'];
   $report_modes = explode('.', $report_mode);
 
   $a = explode(':', $report_modes[0]);
   $attr_key = $a[1];
 
   $attr_info = intel_get_page_attribute_info($attr_key);
+  $vars['attribute_info']['page'][$attr_key] = $attr_info;
   $indexBy = 'pageAttribute:' . $attr_key;
 
   //dsm($attr_info);
@@ -63,17 +45,23 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
 
   $cache_options = array();
   $row_count = 100;
-  $feed_rows = 2 * $row_count;
+  // user larger than default number of result rows to get larger sampling
+  // needed since data is summed across customVar strings (i.e. page) in
+  // segment
+  $feed_rows = 50 * $row_count;
   
   $output = '';    
 
-  $timeops = 'l30d';
+  $timeops = $vars['timeframe'];
   //$timeops = 'yesterday';
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
 
   $ga_data = new LevelTen\Intel\GAModel();
-  $ga_data->setPageAttributeInfo($attr_info);
-  $ga_data->buildFilters($filters, $context);
+  $ga_data->setContext($vars['context']);
+  $ga_data->setContextMode($vars['context_mode']);
+//$ga_data->setDebug(1);
+  $ga_data->setAttributeInfoAll($vars['attribute_info']);
+  $ga_data->buildFilters($filters, $vars['subsite']);
 
   //dsm($ga_data->gaFilters);
 
@@ -82,32 +70,35 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
 
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
+  // set advancedSort to get better mix of data for pageviews and entraces
+  $ga_data->setAdvancedSort(1);
 
   //$ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
-  //$ga_data->setDebug(1);
 
   $ga_data->setRequestSetting('indexBy', $indexBy);
+  $ga_data->setRequestSetting('context', $vars['context']);
+
+  // build pagepath map
+  $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
+  $ga_data->loadFeedData('entrances_pagepathmap');
+
   $ga_data->setRequestSetting('details', 0);
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews');
 
   $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
   $ga_data->loadFeedData('entrances');
-  
+
+  // advanced sort not needed for valued events
+  $ga_data->setAdvancedSort(0);
+
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('pageviews_valuedevents');
-
+  
+  $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
   $ga_data->loadFeedData('entrances_valuedevents');
   
   $d = $ga_data->data;
-
-//dsm($d);
-
-  foreach ($d[$indexBy] AS $index => $de) {
-    $score_components = array();
-    $d[$indexBy][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);
-    $d[$indexBy][$index]['score_components'] = $score_components;
-  }   
 
   $data_options = array(
     'page_count' => 1,
@@ -117,19 +108,35 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
       continue; 
     }
 
-    if (($attr_info['type'] == 'scalar') || ($attr_info['type'] == 'value')) {
+    if (($attr_info['type'] == 'item') || ($attr_info['type'] == 'scalar')) {
       $optionInfo = intel_get_attribute_option_info('page', $attr_key, $de['i'], $data_options);
     }
     else if ($attr_info['type'] == 'list') {
-      $a = explode('.', $de['i']);
-      $optionInfo = intel_get_attribute_option_info('page', $attr_key, $a[1], $data_options);
+      $optionInfo = intel_get_attribute_option_info('page', $attr_key, $de['i'], $data_options);
     }
     if (!empty($optionInfo['title'])) {
       $d[$indexBy][$index]['info'] = $optionInfo;
     }
   }
 
-  //dsm($d);
+  foreach ($d[$indexBy] AS $index => $de) {
+    $score_components = array();
+    $d[$indexBy][$index]['score'] = intel_score_page_aggregation($de, 1, $score_components);
+    $d[$indexBy][$index]['score_components'] = $score_components;
+    if (isset($de['i'])) {
+      $val = $de['i'];
+      $params = $vars['report_params'];
+      $params['ft'] = 'page-attr';
+      $params['f'] = $attr_key . ':' . urlencode($val);
+      $d[$indexBy][$index]['links'] = array();
+      $d[$indexBy][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
+      //$d[$indexBy][$index]['links'][] = l(t('content'), intel_build_report_path('content', $params));
+      $d[$indexBy][$index]['links'][] = l(t('sources'), intel_build_report_path('trafficsource', $params));
+      $d[$indexBy][$index]['links'][] = l(t('visitors'), intel_build_report_path('visitor', $params));
+    }
+  }
+
+//dsm($d);
 
   $vars = array(
     'data' => $d,
@@ -138,6 +145,7 @@ function intel_page_attribute_list_report($filters = array(), $context = 'site',
     'start_date' => $start_date,
     'end_date' => $end_date,
     'context' => $context,
+    'context_mode' => $context_mode,
     'report_modes' => $report_modes,
     'attr_info' => $attr_info,
     'indexBy' => $indexBy,
@@ -174,6 +182,8 @@ function theme_intel_page_attribute_list_report($vars) {
   $report_view->setData($vars['data']);
   $report_view->setTableRowCount($vars['row_count']);
   $report_view->setModes($vars['report_modes']);
+  $report_view->setParam('context', $vars['context']);
+  $report_view->setParam('context_mode', $vars['context_mode']);
   $report_view->setDateRange($vars['start_date'], $vars['end_date']);
   $report_view->setTargets(intel_get_targets());
   $report_view->setAttributeInfo($vars['attr_info']);
