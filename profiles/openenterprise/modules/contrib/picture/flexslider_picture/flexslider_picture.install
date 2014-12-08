@@ -43,12 +43,6 @@ function flexslider_picture_schema() {
         'length' => 255,
         'not null' => FALSE,
       ),
-      'fallback' => array(
-        'description' => 'The style machine name.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -70,7 +64,6 @@ function flexslider_picture_schema_alter(&$schema) {
     'load' => array(
       'imagestyle_type',
       'mapping',
-      'fallback',
     ),
     'fields' => array(
       'imagestyle_type' => array(
@@ -85,25 +78,6 @@ function flexslider_picture_schema_alter(&$schema) {
         'length' => 255,
         'not null' => FALSE,
       ),
-      'fallback' => array(
-        'description' => 'The style machine name.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
     ),
-  );
-}
-
-function flexslider_picture_update_7001() {
-  db_add_field(
-    'flexslider_picture_optionset',
-    'fallback',
-    array(
-      'description' => 'The style machine name.',
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-    )
   );
 }

@@ -20,17 +20,17 @@ span[data-picture-align="center"], img[data-picture-align="center"]  {
 }
 /* The following is an example of what you could put in your theme
  * to control the size of images. It is formatted as
- * span[data-picture-mapping="[The machine name of your picture mapping]"
-span[data-picture-mapping="wide"] {
+ * span[data-picture-group="[The machine name of your picture group]"
+span[data-picture-group="wide"] {
   width: 100%;
 }
-span[data-picture-mapping="normal"] {
+span[data-picture-group="normal"] {
   width: 50%;
 }
-span[data-picture-mapping="narrow"] {
+span[data-picture-group="narrow"] {
   width: 33%;
 }
-span[data-picture-mapping] img {
+span[data-picture-group] img {
   width: 100%;
   height: auto;
 }*/

@@ -21,7 +21,7 @@ function template_preprocess_flexslider_picture_list(&$vars) {
     $items = &$vars['items'];
 
     // Get the breakpoints based on the mapping.
-    $fallback_image_style = $optionset->fallback;
+    $fallback_image_style = '';
     $mappings = picture_mapping_load($optionset->mapping);
     $breakpoint_styles = picture_get_mapping_breakpoints($mappings, $fallback_image_style);
 
@@ -34,7 +34,7 @@ function template_preprocess_flexslider_picture_list(&$vars) {
         drupal_add_js(drupal_get_path('module', 'colorbox') . '/js/colorbox_inline.js');
       }
 
-      $colorbox_fallback_image_style = $optionset->options['colorboxFallbackImageStyle'];
+      $colorbox_fallback_image_style = '';
       $mappings = picture_mapping_load($optionset->options['colorboxImageStyle']);
       $colorbox_breakpoints = picture_get_mapping_breakpoints($mappings, $colorbox_fallback_image_style);
       // Grouping ID for the colorbox gallery. Use more_entropy to ensure the
@@ -47,10 +47,8 @@ function template_preprocess_flexslider_picture_list(&$vars) {
       if (isset($item['item'])) {
         $item['slide'] = array(
           '#theme' => 'picture',
-          '#style_name' => $fallback_image_style,
+          '#style_name' => $optionset->imagestyle_normal,
           '#uri' => $item['item']['uri'],
-          '#height' => $item['item']['height'],
-          '#width' => $item['item']['width'],
           '#alt' => $item['item']['alt'],
           '#title' => $item['item']['title'],
           '#breakpoints' => $breakpoint_styles,
@@ -61,42 +59,19 @@ function template_preprocess_flexslider_picture_list(&$vars) {
           $item['slide'] = array(
             '#theme' => 'picture_formatter_colorbox',
             '#item' => $item['item'],
-            '#image_style' => $fallback_image_style,
+            '#image_style' => $optionset->imagestyle_normal,
             '#path' => $item['item']['uri'],
             '#colorbox_image_style' => $colorbox_fallback_image_style,
             '#colorbox' => $colorbox_breakpoints,
             '#colorbox_group_id' => $colorbox_group_id,
-            '#width' => $item['item']['width'],
-            '#height' => $item['item']['height'],
             '#alt' => $item['item']['alt'],
             '#title' => $item['item']['title'],
             '#breakpoints' => $breakpoint_styles,
           );
         }
         if (!isset($item['thumb'])) {
-          $item['thumb'] = image_style_url($fallback_image_style, $item['item']['uri']);
+          $item['thumb'] = image_style_url($optionset->imagestyle_thumbnail, $item['item']['uri']);
         }
-      }
-    }
-  }
-}
-
-function template_process_flexslider_picture_list_item(&$vars) {
-  // Call the default process function first.
-  template_process_flexslider_list_item($vars);
-
-  $settings = $vars['settings'];
-  $attributes = &$vars['settings']['attributes'];
-  if (isset($settings['optionset']->options['controlNav']) and $settings['optionset']->options['controlNav'] === "thumbnails" && !isset($attributes['data-thumb']) || empty($attributes['data-thumb'])) {
-    if (isset($vars['thumb'])) {
-      $attributes['data-thumb'] = $vars['thumb'];
-    }
-    else {
-      $src = array();
-      preg_match("<img.+?srcset=[\"'](.+?)[\"'\s].+?>", $vars['item'], $src);
-
-      if (!empty($src[1])) {
-        $attributes['data-thumb'] = $src[1];
       }
     }
   }
