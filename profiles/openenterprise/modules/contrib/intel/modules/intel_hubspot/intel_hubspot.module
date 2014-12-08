@@ -3,7 +3,7 @@
 function intel_hubspot_menu() {
   $items = array();
   
-  $items['admin/config/services/intel/modules/hubspot'] = array(
+  $items['admin/config/intel/hubspot'] = array(
     'title' => 'HubSpot',
     'description' => 'Add on module configuration',
     'page callback' => 'intel_hubspot_admin_config_page',
@@ -11,7 +11,7 @@ function intel_hubspot_menu() {
     //'page arguments' => array('intel_hubspot_admin_config'),
     'access callback' => 'user_access',
     'access arguments' => array('admin intel'),
-    'type' => MENU_LOCAL_TASK,
+    //'type' => MENU_LOCAL_TASK,
     'file' => 'intel_hubspot.admin.inc',
   );  
   
@@ -133,6 +133,18 @@ function intel_hubspot_util_fetch_contact($hsutk) {
 }
 
 /**
+ * Implements hook_intel_page_settings_js_alter()
+ *
+ * enables submission tracking for HubSpot forms
+ * @param $settings
+ */
+function intel_hubspot_intel_page_settings_js_alter(&$settings) {
+  if (is_array($settings['intel']['track_forms'])) {
+    $settings['intel']['track_forms'][] = 'form.hs-form';
+  }
+}
+
+/**
  * Implements hook_intel_intel_script
  */
 function intel_hubspot_intel_intel_script() {
@@ -148,7 +160,7 @@ function intel_hubspot_intel_intel_script() {
 /**
  * Implements hook_intel_form_submission_check()
  */
-function intel_hubspot_intel_form_submission_check(&$submission, &$track, &$link_query) {
+function intel_hubspot_intel_form_submission_check(&$submission, &$track, &$submit_context, &$form_settings, &$link_query) {
   if (empty($_GET['submissionGuid'])) {
     return;
   }
@@ -176,7 +188,7 @@ function intel_hubspot_intel_form_submission_data(&$visitor, &$submission, &$tra
       $submission->fid = $context['submit_context']['fid'];
     }
     // if hubspot form submitted and not contact created yet, set contact created time
-    if (($submit_context['type'] == 'hubspot') && (empty($visitor->contact_created))) {
+    if (($context['submit_context']['type'] == 'hubspot') && (empty($visitor->contact_created))) {
       $visitor->setContactCreated(REQUEST_TIME);
     }
   } 
@@ -194,7 +206,7 @@ function intel_hubspot_intel_form_submission_data(&$visitor, &$submission, &$tra
 /**
  * Implements hook_intel_visitor_presave()
  */
-function intel_hubspot_intel_visitor_presave(&$visitor) {
+function intel_hubspot_intel_visitor_presave($visitor) {
   $hsutk = intel_hubspot_extract_user_token();
   if ($hsutk) {
     $visitor->setVar('ext', 'hubspot', 'utk', $hsutk);
@@ -204,11 +216,16 @@ function intel_hubspot_intel_visitor_presave(&$visitor) {
 function intel_hubspot_extract_user_token() {
 //dpm($_COOKIE);
   $hsutks = '';
-  if (!empty($_COOKIE['hubspotutk'])) {
-    return $_COOKIE['hubspotutk'];
+  if (!intel_include_library_file('class.visitor.php')) {
+    return FALSE;
   }
-  if (!empty($_COOKIE['__hstc'])) {
-    $a = explode('.', $_COOKIE['__hstc']);
+  $hubspotutk = \LevelTen\Intel\ApiVisitor::getCookie('hubspotutk');
+  if (!empty($hubspotutk)) {
+    return $hubspotutk;
+  }
+  $hstc = \LevelTen\Intel\ApiVisitor::getCookie('__hstc');
+  if (!empty($hstc)) {
+    $a = explode('.', $hstc);
     return $a[1];
   }
   return FALSE;
@@ -218,10 +235,13 @@ function intel_hubspot_extract_user_tokens() {
   $hsutks = array(
     'domain' => intel_hubspot_extract_user_token(),
   );
-  if (!empty($_COOKIE['l10i_ehsutk'])) {
-    $hsutks['external'] = $_COOKIE['l10i_ehsutk'];
-  }  
-  return $hsutks;  
+  if (!intel_include_library_file('class.visitor.php')) {
+    $cookie = \LevelTen\Intel\ApiVisitor::getCookie('l10i_ehsutk');
+    if (!empty($cookie)) {
+      $hsutks['external'] = $cookie;
+    }
+  }
+  return $hsutks;
 }
 
 function intel_hubspot_get_form_submission_path($vid, $submitted) {
@@ -247,7 +267,7 @@ function intel_hubspot_include_library_file($file_name) {
       )
     );
     drupal_set_message($msg, 'error');
-  } 
+  }
   else {
     require_once $req_path;
     $included[$file_name] = 1;

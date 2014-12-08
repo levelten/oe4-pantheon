@@ -12,6 +12,7 @@
 */ 
 function intel_admin_settings($form, $form_state) {
   global $base_url;
+
   $apiUrl = variable_get('intel_l10iapi_url', '');
   $api_params = variable_get('intel_l10iapi_custom_params', array());
   $apiClientProps = array(
@@ -83,7 +84,19 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_l10iapi_url', ''),
     '#description' => t('The URL for the API without the protocall. Leave blank to use the default of api.getlevelten.com/api/intel.'),
     '#field_suffix' => '/',
-  ); 
+  );
+  $options = array(
+    '' => t('Standard'),
+    'property' => t('Property static'),
+    'property_dynsesinit' => t('Property static w/ dynamic session init'),
+  );
+  $form['l10iapi']['advanced']['intel_l10iapi_js_embed_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Embed style'),
+    '#options' => $options,
+    '#default_value' => variable_get('intel_l10iapi_js_embed_style', ''),
+    '#description' => t('Select variant for session init script/method.'),
+  );
   $form['l10iapi']['advanced']['intel_l10iapi_connector'] = array(
     '#type' => 'textfield',
     '#title' => t('Custom API connector'),
@@ -114,12 +127,37 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_extended_mode', 0),
     '#description' => t('Turns on extended experimental features that are still in development.'),
   );
+  $form['l10iapi']['advanced']['intel_track_phonecalls'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track phone calls'),
+    '#default_value' => variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT),
+    '#description' => t('Enables phonecall tracking features.'),
+  );
+  $form['l10iapi']['advanced']['intel_track_emailclicks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track email clicks'),
+    '#default_value' => variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT),
+    '#description' => t('Enables email click tracking features.'),
+  );
   $form['l10iapi']['advanced']['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
     '#default_value' => variable_get('intel_sync_visitordata_fullcontact', INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT),
     '#description' => t('Check to enable syncing data via FullContact API. Only available for pro accounts.'),
   );
+
+  if($lib_path = intel_get_library_path()) {
+    $file_path = $lib_path . "/realtime/index.php";
+    if (file_exists($file_path)) {
+      $form['l10iapi']['advanced']['intel_track_realtime'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Realtime tracking'),
+        '#default_value' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
+        //'#description' => t('Check to enable syncing data via FullContact API. Only available for pro accounts.'),
+      );
+    }
+  }
+
   $form['l10iapi']['advanced']['intel_l10iapi_js_ver'] = array(
     '#type' => 'textfield',
     '#title' => t('Custom l10i.js version'),
@@ -178,6 +216,34 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => $enabled,
     '#description' => t('Select any intel integration scripts you want to include on your site.'),
   );
+
+  /*
+  if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
+    $form['phone'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Phone and SMS'),
+      '#collapsible' => TRUE,
+    );
+    $phonenumbers = intel_get_phonenumbers();
+    if (empty($phonenumbers)) {
+
+      drupal_set_message(t('No phone numbers have been created.'), 'warning');
+    }
+    else {
+      $options = array();
+      foreach ($phonenumbers AS $name => $num) {
+        $options[$name] = $num['title'];
+      }
+      $form['phone']['intel_sms_send_from_default'] = array(
+        '#type' => 'select',
+        '#title' => t('Default SMS sending number'),
+        '#options' => $options,
+        '#default_value' => variable_get('intel_sms_send_from_default', ''),
+        '#description' => t('Enter the default number forforwarding number.'),
+      );
+    }
+  }
+  */
   
   $form['reports'] = array(
     '#type' => 'fieldset',
@@ -296,7 +362,7 @@ function intel_admin_scoring($form, &$form_state) {
     );    
   } 
 
-  $events = intel_get_intel_events();
+  $events = intel_get_intel_event_info();
   foreach ($events AS $i => $m) {
     if (empty($m['valued_event'])) {
       continue;
@@ -312,6 +378,7 @@ function intel_admin_scoring($form, &$form_state) {
   }
   $goals = variable_get('intel_event_goals', array());
   $goals = array_merge($goals, variable_get('intel_submission_goals', intel_get_submission_goals_default()));
+  $goals = array_merge($goals, variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default()));
   $form_state['goals'] = $goals;
   foreach ($goals AS $i => $m) {
     $value = !empty($scorings['goal_' . $i]) ? $scorings['goal_' . $i] : (isset($m['value']) ? $m['value'] : 0);
@@ -351,6 +418,18 @@ function intel_admin_scoring($form, &$form_state) {
     '#title' => t('Submission goals'),
     '#default_value' => $value,
     '#description' => t('Enter any goals that can be triggered by a form submission. Enter one goal per line as name,ga_goal_id (e.g. <em>Contact form,1</em>). Note in order for goals to track, they must also be setup properly in Google Analytics.'),
+  );
+
+  $phonecall_goals = variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default());
+  $value = '';
+  foreach ($phonecall_goals AS $g) {
+    $value .= $g['ga_id'] . '|' . $g['title'] . '|' . $g['description'] . "\n";
+  }
+  $form['advanced']['phonecall_goals'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Phone call goals'),
+    '#default_value' => $value,
+    '#description' => t('Enter any goals that can be triggered by phonecall. Enter one goal per line as name,ga_goal_id (e.g. <em>Contact call,1</em>). Note in order for goals to track, they must also be setup properly in Google Analytics.'),
   );
   
   $form['save'] = array(
@@ -434,7 +513,7 @@ function intel_admin_scoring_submit(&$form, &$form_state) {
 function intel_admin_intel_event_list_page() {
   require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
  
-  $events = intel_get_intel_events(TRUE);
+  $events = intel_get_intel_event_info();
 
   $header = array(
     t('Category'),
@@ -455,8 +534,8 @@ function intel_admin_intel_event_list_page() {
   foreach ($events AS $key => $event) {
     $ops = array();
     if (!empty($event['custom'])) {
-      $ops[] = l(t('edit'), 'admin/config/services/intel/intel_event/' . $key . '/edit', $link_options);
-      $ops[] = l(t('delete'), 'admin/config/services/intel/intel_event/' . $key . '/delete', $link_options);
+      $ops[] = l(t('edit'), 'admin/config/intel/settings/intel_event/' . $key . '/edit', $link_options);
+      $ops[] = l(t('delete'), 'admin/config/intel/settings/intel_event/' . $key . '/delete', $link_options);
     }
     else {
       $ops[] = t('NA');
@@ -499,6 +578,7 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
   if (!is_array($event)) {
     $event = array();
   }
+
   $form_state['event'] = $event;
   $add = empty($event['key']);
   $custom = (!$event || !empty($event['custom'])) ? 1 : 0;
@@ -577,8 +657,8 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
   $form['ga_event_values']['value'] = array(
     '#type' => ($custom) ? 'textfield' : 'item',
     '#title' => t('Event value'),
-    '#default_value' => !empty($event['value']) ? $event['value'] : 0,
-    '#description' => t('Input Google Analytics event label value. This value can be overridden per node using the intel events value field.'),
+    '#default_value' => !empty($event['value']) ? $event['value'] : '',
+    '#description' => t('Input Google Analytics event value. This value can be overridden per node using the intel events value field.'),
     '#size' => 12,
   );
   $form['ga_event_values']['value']['#markup'] = $form['ga_event_values']['value']['#default_value'];
@@ -587,7 +667,7 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
     '#type' => ($custom) ? 'checkbox' : 'item',
     '#title' => t('Non interaction'),
     '#default_value' => !empty($event['noninteraction']) ? $event['noninteraction'] : 0,
-    '#description' => t('If checked, the event will counted similar to a pageview for bounce tracking.'),
+    '#description' => t('If checked, the event will not be counted as a hit for bounce tracking.'),
   );
   $form['ga_event_values']['noninteraction']['#markup'] = ($form['ga_event_values']['noninteraction']['#default_value']) ? 'Yes' : 'No';
 
@@ -612,8 +692,35 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
     '#description' => t('Input a jQuery selector to bind the event to.'),
     '#size' => 64,
   );
-  $form['ga_event_values']['value']['#markup'] = $form['ga_event_values']['value']['#default_value'];
-  
+  $form['trigger']['refresh_force'] = array(
+    '#type' => ($custom) ? 'checkbox' : 'item',
+    '#title' => t('Forced event to be triggered on page refresh'),
+    '#default_value' => !empty($event['refresh_force']) ? $event['refresh_force'] : 0,
+    '#description' => t('By default, events triggered on pageshow will not trigger when a page is refreshed. Check this box to force the event to be triggered even on refresh.'),
+  );
+
+  $form['availability'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Availablity'),
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($event['type']) && empty($event['callback']),
+    '#description' => t('Hooks to enable JavaScript to customize this event. Be careful using these settings as improper use may cause JavaScript errors.'),
+  );
+  $form['availability']['enable_all_pages'] = array(
+    '#type' => ($custom) ? 'checkbox' : 'item',
+    '#title' => t('Enable on all pages'),
+    '#default_value' => !empty($event['enable_all_pages']) ? $event['enable_all_pages'] : 0,
+    '#description' => t('Check to add the event to every page on the site.'),
+  );
+  $form['availability']['enable_all_pages']['#markup'] = ($form['availability']['enable_all_pages']['#default_value']) ? 'Yes' : 'No';
+  $form['availability'] ['selectable'] = array(
+    '#type' => ($custom) ? 'checkbox' : 'item',
+    '#title' => t('Selectable on entities'),
+    '#default_value' => !empty($event['selectable']) ? $event['selectable'] : 1,
+    '#description' => t('Check to make this event an available option for the track events field on nodes and entities.'),
+  );
+  $form['availability']['selectable']['#markup'] = ($form['availability']['selectable']['#default_value']) ? 'Yes' : 'No';
+
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced settings'),
@@ -621,6 +728,7 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
     '#collapsed' => empty($event['type']) && empty($event['callback']),
     '#description' => t('Hooks to enable JavaScript to customize this event. Be careful using these settings as improper use may cause JavaScript errors.'),
   );
+
   $form['advanced']['type'] = array(
     '#type' => ($custom) ? 'textfield' : 'item',
     '#title' => t('Event type'),
@@ -635,15 +743,8 @@ function intel_admin_intel_event_form($form, &$form_state, $event = array()) {
     '#description' => t('Declares a function to execute after the intel event data has been processed but before it is sent to Google Analytics. Must be set to the name of an avaialble JavaScript function.'),
     '#size' => 64,
   );
-  $form['ga_event_values']['value']['#markup'] = $form['ga_event_values']['value']['#default_value'];
-  
-  $form['selectable'] = array(
-    '#type' => ($custom) ? 'checkbox' : 'item',
-    '#title' => t('Selectable'),
-    '#default_value' => !empty($event['selectable']) ? $event['selectable'] : 1,
-    '#description' => t('Check to make this event selectable in entity fields.'),
-  );
-  $form['selectable']['#markup'] = ($form['selectable']['#default_value']) ? 'Yes' : 'No';
+  //$form['ga_event_values']['value']['#markup'] = $form['ga_event_values']['value']['#default_value'];
+
   
   $form['save'] = array(
     '#type' => 'submit',
@@ -658,7 +759,7 @@ function intel_admin_intel_event_form_validate(&$form, &$form_state) {
   $event = $form_state['event'];
   $key = !empty($values['key']) ? $values['key'] : $event['key'];
   
-  $events = intel_get_intel_events();    
+  $events = intel_get_intel_event_info();
   
   // check unique key if new event
   if (!isset($event['key'])) {
@@ -693,7 +794,9 @@ function intel_admin_intel_event_form_submit(&$form, &$form_state) {
     'event',
     'selector',
     'callback',
+    'refresh_force',
     'selectable',
+    'enable_all_pages',
     'noninteraction',
     'valued_event',
   );
@@ -718,7 +821,7 @@ function intel_admin_intel_event_form_submit(&$form, &$form_state) {
     ));    
   }
   drupal_set_message($msg);
-  drupal_goto('admin/config/services/intel/intel_event');
+  drupal_goto('admin/config/intel/settings/intel_event');
 }
 
 function intel_admin_intel_event_delete_page($event) {
@@ -751,7 +854,7 @@ function intel_admin_intel_event_delete_form_submit($form, &$form_state) {
     '%title' => $event['title'],
   ));    
   drupal_set_message($msg);
-  drupal_goto('admin/config/services/intel/intel_event');
+  drupal_goto('admin/config/intel/settings/intel_event');
 }
 
 
@@ -767,10 +870,10 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
   require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
  
   if ($scope == 'page') {
-    $attributes = intel_get_page_attributes();    
+    $attributes = intel_get_page_attribute_info();
   }
   else {
-    $attributes = intel_get_visitor_attributes();
+    $attributes = intel_get_visitor_attribute_info();
   }
 
   $header = array(
@@ -791,7 +894,7 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
   $link_options = array();
   foreach ($attributes AS $key => $attr) {
     $ops = array();
-    $ops[] = l(t('edit'), 'admin/config/services/intel/' . $scope . '_attribute/' . $key . '/edit', $link_options);
+    $ops[] = l(t('edit'), 'admin/config/intel/settings/' . $scope . '_attribute/' . $key . '/edit', $link_options);
     $rows[] = array(
       $key,
       $attr['title'],
@@ -825,7 +928,7 @@ function intel_admin_visitor_attribute_edit_page($attribute) {
 }
 
 function intel_admin_page_attribute_add_page() {
-  drupal_set_title(t('Add vpage attribute'));
+  drupal_set_title(t('Add page attribute'));
   $form = drupal_get_form('intel_admin_attribute_form', array(), 'page');
   return drupal_render($form);
 }
@@ -840,6 +943,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
   if (!is_array($attribute)) {
     $attribute = array();
   }
+
   $form_state['attribute'] = $attribute;
   $form_state['scope'] = $scope;
   $add = (!$attribute) ? 1 : 0;
@@ -878,6 +982,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
     'flag' => t('Flag'),
     'scalar' => t('Scalar'),
     'list' => t('List'),
+    'list_t' => t('List (taxonomy)'),
     'vector' => t('Vector'),
   );
   $form['type'] = array(
@@ -889,14 +994,14 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
     '#required' => 1,
   );
   $form['type']['#markup'] = $form['type']['#default_value'];
-  
+
   $desc = !empty($attribute['options_description']) ? $attribute['options_description'] : '';
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#description' => check_plain($desc),
+    '#description' => check_markup($desc, 'full_html'),
   );
   
   if (empty($attribute['type']) || isset($attribute['static_options']) || isset($attribute['custom_options'])) {
@@ -928,17 +1033,17 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
         );
         $custom_str .= "$key|{$value['title']}";
         if (!empty($value['description'])) {
-          $custom_st .= "|" . $value['description'];
+          $custom_str .= "|" . $value['description'];
         }
-        $custom_st .= "\n";
+        $custom_str .= "\n";
       }
     }
+
     $form['options']['options'] = array(
       '#type' => 'item',
       '#title' => t('Existing options'),
       '#markup' => theme('table', array('header' => $header, 'rows' => $rows)),
-    ); 
-    
+    );
     if (empty($attribute['type']) || (isset($attribute['custom_options']) && is_array($attribute['custom_options']))) {
       $form['options']['custom_options'] = array(
         '#type' => 'textarea',
@@ -946,7 +1051,7 @@ function intel_admin_attribute_form($form, &$form_state, $attribute = array(), $
         '#default_value' => $custom_str,
         '#description' => t('Enter one option per line as key|label|description (e.g. <em>p|Profile|User profiles</em>).'),
       ); 
-    } 
+    }
   }
   
   $form['selectable'] = array(
@@ -972,10 +1077,10 @@ function intel_admin_attribute_form_validate(&$form, &$form_state) {
   
   $scope = $form_state['scope'];
   if ($scope == 'page') {
-    $attributes = intel_get_page_attributes();    
+    $attributes = intel_get_page_attribute_info();
   }
   else {
-    $attributes = intel_get_visitor_attributes();
+    $attributes = intel_get_visitor_attribute_info();
   }
   
   // check unique key if new attribute
@@ -988,10 +1093,18 @@ function intel_admin_attribute_form_validate(&$form, &$form_state) {
       form_set_error('key', $msg);   
     }
   }
+
+  if ($values['type'] == 'list_t') {
+    if (trim($values['custom_options'])) {
+      $values['custom_options'] = '';
+      $msg = t('Custom options cannot be used with type list (taxomony). Custom options have been ignored.');
+      drupal_set_message($msg, 'warning');
+    }
+  }
   
   // process custom options
   $a = explode("\n", $values['custom_options']);
-  $static_options = $attribute['static_options'];
+  $static_options = !empty($attribute['static_options']) ? $attribute['static_options'] : array();
   $custom_options = array();
   foreach ($a AS $b) {
     if (!trim($b)) {
@@ -1029,7 +1142,7 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   $add = empty($form_state['attribute']['key']) ? 1 : 0;
   $scope = $form_state['scope'];
 
-  $attribute = array();
+  $attribute = !empty($form_state['attribute']) ? $form_state['attribute'] : array();
   if ($add) { 
     $key = $values['key'];   
   }
@@ -1055,14 +1168,12 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   
   
   if ($scope == 'page') {
-    $attributes = variable_get('intel_page_attributes_custom', array());
-    $attributes[$key] = $attribute;
-    variable_set('intel_page_attributes_custom', $attributes); 
+    $attributes = variable_get('intel_page_attribute_custom_' . $key, array());
+    variable_set('intel_page_attributes_custom_' . $key, $attribute);
   }
   else {
-    $attributes = variable_get('intel_visitor_attributes_custom', array());
-    $attributes[$key] = $attribute;
-    variable_set('intel_visitor_attributes_custom', $attributes); 
+    $attributes = variable_get('intel_visitor_attribute_custom_' . $key, array());
+    variable_set('intel_visitor_attributes_custom_' . $key, $attribute);
   }
   
   if ($add) {
@@ -1079,6 +1190,289 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   }
   drupal_set_message($msg);
 }
+
+function intel_admin_phonenumber_list_page() {
+  require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
+
+  $phonenumbers = intel_get_phonenumbers();
+  $header = array(
+    t('Number'),
+    t('Title'),
+    t('Description'),
+    t('Ops'),
+  );
+  $rows = array();
+
+  $options = array();
+  $custom_default_value = '';
+  $link_options = array(
+    'query' => drupal_get_destination(),
+  );
+  $link_options = array();
+  foreach ($phonenumbers AS $key => $phonenumber) {
+    $ops = array();
+    if (!empty($phonenumber['custom'])) {
+      $ops[] = l(t('edit'), 'admin/config/intel/settings/phonenumber/' . $key . '/edit', $link_options);
+      $ops[] = l(t('delete'), 'admin/config/intel/settings/phonenumber/' . $key . '/delete', $link_options);
+    }
+    else {
+      $ops[] = t('NA');
+    }
+    $rows[] = array(
+      $phonenumber['number'],
+      $phonenumber['title'],
+      $phonenumber['description'],
+      //$attr['type'],
+      //$event['module'],
+      implode(' ', $ops),
+    );
+  }
+
+  $vars = array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No phone numbers were found. !link.',
+      array(
+        '!link' => l(t('Add a phone number'), 'admin/config/intel/settings/phonenumber/add'),
+      )
+    ),
+  );
+
+  $output = theme('table', $vars);
+
+  return $output;
+}
+
+function intel_admin_phonenumber_add_page() {
+  //drupal_set_title(t('Add visitor attribute'));
+  $form = drupal_get_form('intel_admin_phonenumber_form', array());
+  return render($form);
+}
+
+function intel_admin_phonenumber_edit_page($event) {
+  drupal_set_title(t('Edit @title event', array('@title' => $event['title'])));
+  $form = drupal_get_form('intel_admin_phonenumber_form', $event);
+  return render($form);
+}
+
+
+
+function intel_admin_phonenumber_form($form, &$form_state, $phonenumber = array()) {
+  if (!is_array($phonenumber)) {
+    $phonenumber = array();
+  }
+  $form_state['phonenumber'] = $phonenumber;
+  $add = empty($phonenumber['key']);
+  $custom = (!$phonenumber || !empty($phonenumber['custom'])) ? 1 : 0;
+
+  $form['key'] = array(
+    '#type' => ($custom && $add) ? 'textfield' : 'item',
+    '#title' => t('Key'),
+    '#default_value' => !empty($phonenumber['key']) ? $phonenumber['key'] : '',
+    '#description' => t('A unique identifier for the phone number.'),
+    '#size' => 32,
+    '#required' => 1,
+  );
+  $form['key']['#markup'] = $form['key']['#default_value'];
+
+  $form['number'] = array(
+    '#type' => ($custom) ? 'textfield' : 'item',
+    '#title' => t('Number'),
+    '#default_value' => !empty($phonenumber['number']) ? $phonenumber['number'] : '',
+    '#description' => t('Phone number in !format_link.',
+      array(
+        '!format_link' => l(t('E.164 format'), 'http://en.wikipedia.org/wiki/E.164', array('attributes' => array('target' => 'e164'))),
+      )
+    ),
+    '#size' => 32,
+    '#required' => 1,
+  );
+  $form['number']['#markup'] = $form['number']['#default_value'];
+
+  $form['number_display'] = array(
+    '#type' => ($custom) ? 'textfield' : 'item',
+    '#title' => t('Number display'),
+    '#default_value' => !empty($phonenumber['number_display']) ? $phonenumber['number_display'] : '',
+    '#description' => t('A human friendly format to display the number. Primarily used for display in tokens.'),
+    '#size' => 32,
+  );
+  $form['number_display']['#markup'] = $form['number_display']['#default_value'];
+
+  $form['title'] = array(
+    '#type' => ($custom) ? 'textfield' : 'item',
+    '#title' => t('Title'),
+    '#default_value' => !empty($phonenumber['title']) ? $phonenumber['title'] : '',
+    '#description' => t('Human friendly title to displayed to site administrators.'),
+    '#size' => 32,
+    '#required' => 0,
+  );
+  $form['title']['#markup'] = $form['title']['#default_value'];
+
+  $form['description'] = array(
+    '#type' => ($custom) ? 'textarea' : 'item',
+    '#title' => t('Description'),
+    '#default_value' => !empty($phonenumber['description']) ? $phonenumber['description'] : '',
+    '#description' => t('Description or notes for the phone number.'),
+    '#rows' => 2,
+  );
+  $form['description']['#markup'] = $form['description']['#default_value'];
+
+  $form['handling'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Call handling'),
+    '#collapsible' => FALSE,
+    '#description' => t('Options processing and routing call. Calls can be forwarded using the Forwarding number field or a TwiML response can be selected for more advanced routing options.'),
+  );
+
+  $form['handling']['handling_forwarding_number'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Forwarding number'),
+    '#default_value' => !empty($phonenumber['handling_forwarding_number']) ? $phonenumber['handling_forwarding_number'] : '',
+    '#size' => 20,
+    '#description' => t('Enter a phone number to foward the call to.'),
+  );
+
+  if (module_exists('twilio')) {
+    $options = array(
+      '' => ' - ' . t('Use standard call handling') . ' - ',
+    );
+
+    $twimls = twilio_twiml_load_multiple();
+    if (!empty($twimls) && is_array($twimls)) {
+      foreach ($twimls AS $name => $twiml) {
+        $options[$twiml->twiml_id] = t('TwiML') . ': ' . $twiml->name;
+      }
+    }
+    $form['handling']['handling_twiml'] = array(
+      '#type' => 'select',
+      '#title' => t('Handling options'),
+      '#default_value' => !empty($phonenumber['handling_twiml']) ? $phonenumber['handling_twiml'] : '',
+      '#options' => $options,
+      '#description' => t('Select '),
+    );
+  }
+
+  $form['track'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Call tracking'),
+    '#collapsible' => FALSE,
+    '#description' => t('Options for tracking inbound phone calls.'),
+  );
+
+  $values = array(
+    '' => '-' . t('None') . '-',
+    'phone_call' => t('Phone call'),
+    'phone_call!' => t('Phone call') . '!',
+  );
+  $goals = variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default());
+  foreach ($goals AS $goal) {
+    $item = 'Goal: ' . $goal['title'];
+    $values['goal_' . strtolower(drupal_clean_css_identifier($goal['title']))] = $item;
+  }
+  $form['track']['track_phonecall'] = array(
+    '#type' => 'select',
+    '#title' => t('Event'),
+    '#default_value' => !empty($phonenumber['track_phonecall']) ? $phonenumber['track_phonecall'] : '',
+    '#options' => $values,
+    '#description' => t('Select an event/goal to trigger when call received by this number.'),
+  );
+  $form['track']['track_phonecall_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Value'),
+    '#default_value' => !empty($phonenumber['track_phonecall_value']) ? $phonenumber['track_phonecall_value'] : '',
+    '#size' => 8,
+    '#description' => t('Enter a value for the event. Leave blank to use default. Note, value is only tracked for Goals and events ending in an !'),
+  );
+
+  $form['sms'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('SMS options'),
+    '#collapsible' => FALSE,
+    '#description' => t('Option for sending SMS text when receiving an incoming call.'),
+  );
+  $form['sms']['send_sms'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Send to number'),
+    '#default_value' => !empty($phonenumber['send_sms']) ? $phonenumber['send_sms'] : '',
+    '#description' => t('Enter a number if you want to send a text when the number is called.'),
+    '#size' => 20,
+  );
+
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => $add ? t('Add phone number') : t('Save phone number'),
+  );
+
+  return $form;
+}
+
+function intel_admin_phonenumber_form_validate(&$form, &$form_state) {
+  $values = $form_state['values'];
+  $phonenumber = isset($form_state['phonenumber']) ? $form_state['phonenumber'] : array();
+  $key = !empty($values['key']) ? $values['key'] : $phonenumber['key'];
+
+  $phonenumbers = intel_get_phonenumbers();
+
+  // check unique key if new event
+  if (!isset($phonenumber['key'])) {
+    if (isset($phonenumber[$values['key']])) {
+      $msg = t('Duplicate phone number key %key. Please select a unique key.',
+        array(
+          '%key' => $values['key'],
+        ));
+      form_set_error('key', $msg);
+    }
+  }
+}
+
+function intel_admin_phonenumber_form_submit(&$form, &$form_state) {
+  $values = $form_state['values'];
+  $add = empty($form_state['phonenumber']['key']) ? 1 : 0;
+
+  $phonenumber = array();
+  if ($add) {
+    $key = $values['key'];
+  }
+  else {
+    $key = $form_state['phonenumber']['key'];
+  }
+  $indexes = array(
+    'title',
+    'description',
+    'number',
+    'number_display',
+    'handling_forwarding_number',
+    'handling_twiml',
+    'track_phonecall',
+    'track_phonecall_value',
+    'send_sms',
+  );
+
+
+
+  foreach ($indexes AS $index) {
+    if (isset($values[$index])) {
+      $phonenumber[$index] = trim($values[$index]);
+    }
+  }
+
+  intel_phonenumber_save($phonenumber, $key);
+
+  if ($add) {
+    $msg = t('Phone number %title has been added.', array(
+      '%title' => $phonenumber['title'],
+    ));
+  }
+  else {
+    $msg = t('Phone number %title has been updated.', array(
+      '%title' => $phonenumber['title'],
+    ));
+  }
+  drupal_set_message($msg);
+  drupal_goto('admin/config/intel/settings/phonenumber');
+}
+
+
 
 function intel_admin_external_tracking($form, &$form_state) { 
   global $base_url, $base_path;

@@ -2,20 +2,20 @@
 /**
  * @file
  * Support for syncing visitor data accross various data sources
- * 
+ *
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_sync_visitordata($visitor, $request = array()) {  
-if (!empty($_GET['debug'])) {
-  dpm('visitor0');//
-  dpm($visitor);//
-}
+function intel_sync_visitordata($visitor, $request = array()) {
+  if (!empty($_GET['debug'])) {
+    dpm('visitor0');//
+    dpm($visitor);//
+  }
   $l10api_synced = FALSE;
   $statuses = array();
 
   // don't sync data if no pro api
-  $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
   if ($api_level != 'pro') {
     $statuses['na'] = 1;
     return $statuses;
@@ -43,11 +43,12 @@ if (!empty($_GET['debug'])) {
 }
 
 function intel_work_sync_visitor_request_queue($runtime = 15) {
+  // get existing sync requests and add them to DrupalQueue
   intel_queue_sync_visitor_requests();
 
-  $end = time() + $runtime;
+  $end = REQUEST_TIME + $runtime;
   $queue = DrupalQueue::get('intel_sync_visitor_requests');
-  while (time() < $end && ($item = $queue->claimItem())) {
+  while (REQUEST_TIME < $end && ($item = $queue->claimItem())) {
     if (!empty($_GET['debug'])) {
       dpm('syncing from queue:');//
       dpm($item);//
@@ -57,18 +58,32 @@ function intel_work_sync_visitor_request_queue($runtime = 15) {
   }
 }
 
+/**
+ * Adds visitors to DrupalQueue
+ */
 function intel_queue_sync_visitor_requests() {
+  // get existing sync requests
   $items = variable_get('intel_sync_visitor_requests', array());
+  // add them to the DrupalQueue
   if (count($items)) {
     $queue = DrupalQueue::get('intel_sync_visitor_requests');
+    $i = 0;
+    $limit = 20;
     foreach ($items AS $i => $item) {
       if ($item->run_after < REQUEST_TIME) {
         $queue->createItem($item);
+        // remove items from request variable. If sync fails they will be re-added
+        // in intel_sync_visitor_request_worker
         unset($items[$i]);
+        // limit number of visitors processed in a single cron run
+        $i++;
+        if ($i > $limit) {
+          break;
+        }
       }
     }
-    variable_set('intel_sync_visitor_requests', $items);  
-  }   
+    variable_set('intel_sync_visitor_requests', $items);
+  }
 }
 
 
@@ -81,9 +96,17 @@ function intel_ga_sync_visitordata(&$visitor) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $vtkids = array();
 
-  foreach ($visitor->identifiers['vtk'] AS $vtk) {
-    $vtkids[] = substr($vtk, 0, 20);
+  if (!empty($visitor->identifiers['vtk']) && is_array($visitor->identifiers['vtk'])) {
+    foreach ($visitor->identifiers['vtk'] AS $vtk) {
+      $vtkids[] = substr($vtk, 0, 20);
+    }
   }
+
+  // if no vtkids, return true to unset future requests
+  if (empty($vtkids)) {
+    return TRUE;
+  }
+
   $gadata = intel_fetch_analytics_visitor_meta_data($vtkids);
   if (!empty($_GET['debug'])) {
     dpm('gadata'); dpm($gadata);//
@@ -99,7 +122,7 @@ function intel_ga_sync_visitordata(&$visitor) {
       $gadata['location']['zip'] = isset($addthis_geo['zip']) ? $addthis_geo['zip'] : '';
     }
   }
-  
+
   $visitor->setVar('data', 'location', $gadata['location']);
   $visitor->setVar('data', 'environment', $gadata['environment']);
   $visitor->setVar('data', 'analytics_visits', $gadata['visits']);
@@ -115,23 +138,23 @@ function intel_calculate_distance($lat1, $lon1, $lat2, $lon2, $miles = TRUE) {
   $lon1 *= $pi80;
   $lat2 *= $pi80;
   $lon2 *= $pi80;
- 
+
   $r = 6372.797; // mean radius of Earth in km
   $dlat = $lat2 - $lat1;
   $dlon = $lon2 - $lon1;
   $a = sin($dlat / 2) * sin($dlat / 2) + cos($lat1) * cos($lat2) * sin($dlon / 2) * sin($dlon / 2);
   $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
   $km = $r * $c;
- 
+
   return ($miles ? ($km * 0.621371192) : $km);
 }
 
 function intel_sync_fullcontact_page($vtk) {
   $visitor = intel_visitor_load($vtk, 1);
   $status = intel_l10iapi_sync_visitordata($visitor);
-  
+
   $output = t('status:') . ' ' . $status;
-  
+
   return $output;
 }
 
@@ -148,7 +171,7 @@ function intel_l10iapi_sync_visitordata(&$visitor) {
     if (!empty($_GET['debug'])) {
       dpm('FullContact person:'); dpm($fc_data);//
     }
-  
+
     if (!empty($fc_data)) {
       intel_sync_fullcontact_visitordata($visitor, $fc_data);
       $visitor->setVar('ext', 'fullcontact', $fc_data);
@@ -208,7 +231,7 @@ function intel_sync_fullcontact_visitordata(&$visitor, $data) {
       else if ($v['type'] == 'gravatar') {
         $visitor->setProp('gravatar', $v, $prop_options);
       }
-      else if ($v['type'] == 'klout') {        
+      else if ($v['type'] == 'klout') {
         //intel_visitor_property_set($visitor, 'data.klout', $v, $prop_options);
         $klout = $v;
       }
@@ -227,7 +250,7 @@ function intel_sync_fullcontact_visitordata(&$visitor, $data) {
       else if ($v['type'] == 'tumblr') {
         $visitor->setProp('tumblr', $v, $prop_options);
       }
-      else if ($v['type'] == 'twitter') {        
+      else if ($v['type'] == 'twitter') {
         $visitor->setProp('twitter', $v, $prop_options);
         if ($v['bio']) {
           $bio = $v['bio'];
@@ -268,5 +291,5 @@ function intel_sync_fullcontact_visitordata(&$visitor, $data) {
     );
     $visitor->setProp('bio', $v, $prop_options);
   }
-  
+
 }

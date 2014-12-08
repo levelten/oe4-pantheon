@@ -262,13 +262,13 @@ class IntelVisitor extends Entity {
     }
     $var['_updated'] = REQUEST_TIME;
  
-    if (isset($prop_info['validate'])) {
-      $funcs = $prop_info['validate'];
+    if (isset($prop_info['process callbacks'])) {
+      $funcs = $prop_info['process callbacks'];
       if (!is_array($funcs)) { 
         $funcs = array($funcs);
       }
       foreach ($funcs AS $func) {
-        $func($var, $this);
+        $func($var, $prop_info, $this);
       }
     }
     
@@ -287,6 +287,39 @@ class IntelVisitor extends Entity {
     */
     
     $this->setVar($scope, $namespace, '', $var);
+
+    // process with special identifiers
+    if ($prop_name == 'email') {
+      if (empty($this->email)) {
+        $this->setIdentifier('email', $values['email']);
+        if (empty($this->contact_created)) {
+          $this->setContactCreated(REQUEST_TIME);
+        }
+      }
+    }
+    else if ($prop_name == 'phone') {
+      if (empty($this->email)) {
+        $this->setIdentifier('phone', $values['phone']);
+        if (empty($this->contact_created)) {
+          $this->setContactCreated(REQUEST_TIME);
+        }
+      }
+    }
+    else if ($prop_name == 'name') {
+      if (empty($this->name)) {
+        $name = '';
+        if (isset($values['full'])) {
+          $name = $values['full'];
+        }
+        else if (isset($values['first'])) {
+          $name = $values['first'];
+          if (isset($values['last'])) {
+            $name .= ' ' . $values['last'];
+          }
+        }
+        $this->setName($name);
+      }
+    }
   }
   /**
    * TODO manage aliases
@@ -307,6 +340,10 @@ class IntelVisitor extends Entity {
   public function setEid($eid) {
     $this->eid = $eid;
   }
+
+  public function setVtk($vtk) {
+    $this->vtk = $vtk;
+  }
   
   public function setContactCreated($time = null) {
     $this->contact_created = isset($time) ? $time : REQUEST_TIME;
@@ -320,8 +357,24 @@ class IntelVisitor extends Entity {
     intel_include_library_file('class.visitor.php');
     return \LevelTen\Intel\ApiVisitor::extractVtk();
   }
+
+  /**
+   * TODO build this to be more robust
+   * @param $type
+   * @param $value
+   */
+  public function filterIdentifier($type, $value) {
+    if ($type == 'email') {
+      return filter_var($value, FILTER_VALIDATE_EMAIL);
+    }
+    return $value;
+  }
   
   public function setIdentifier($type, $value, $is_primary = TRUE, $mergeDuplicate = TRUE) {
+    if (!$value = $this->filterIdentifier($type, $value)) {
+      return;
+    }
+
     if (!isset($this->identifiers[$type])) {
       $this->identifiers[$type] = array();
     }
@@ -333,10 +386,18 @@ class IntelVisitor extends Entity {
       );
       $dup = intel_visitor_load_by_identifiers($idents);
       if ($dup && ($dup->vid != $this->vid)) {
-        $this->mergeDupVisitor($dup);
+        $merge_dir = '';
+        $this_vid = $this->vid;
+        $dup_vid = $dup->vid;
+        $this->mergeDupVisitor($dup, $merge_dir);
         // if dup has different vid, delete it and make sure merged data is saved
-        if ($this->vid != $dup->vid) {
-          $dup->delete();
+        if ($merge_dir) {
+          if ($merge_dir == 'into_this') {
+            intel_visitor_delete($dup_vid);
+          }
+          else if ($merge_dir == 'into_dup') {
+            intel_visitor_delete($this_vid);
+          }
           $this->save();
         }
         if ($this->vid && !empty($this->is_new)) {
@@ -371,16 +432,41 @@ class IntelVisitor extends Entity {
     $this->identifiers[$type] = array();
   }
 
-  public function mergeDupVisitor($dup) {
+  public function mergeDupVisitor($dup, &$merge_dir = '') {
     // if this vid is not set, inherit the dup vid
+    $to_vid = 0;
+    $from_vid = 0;
+    $merge_identifiers = array();
     if (empty($this->vid)) {
       $this->vid = $dup->vid;
     }
-    $this->data = drupal_array_merge_deep($this->data, $dup->data);
-    $this->ext_data = drupal_array_merge_deep($this->ext_data, $dup->ext_data);
-    
+    // otherwise add dup vid for identifier processing
+    else {
+      // merge into first created vid
+      if ($dup->vid < $this->vid) {
+        $merge_dir = 'into_dup';
+        $to_vid = $dup->vid;
+        $from_vid = $this->vid;
+        $merge_identifiers = $this->identifiers;
+        $this->vid = $dup->vid;
+        $this->name = $dup->name;
+        $this->identifiers = $dup->identifiers;
+        $this->data = drupal_array_merge_deep($dup->data, $this->data);
+        $this->ext_data = drupal_array_merge_deep($dup->ext_data, $this->ext_data);
+
+      }
+      else {
+        $merge_dir = 'into_this';
+        $to_vid = $this->vid;
+        $from_vid = $$dup->vid;
+        $merge_identifiers = $dup->identifiers;
+        $this->data = drupal_array_merge_deep($this->data, $dup->data);
+        $this->ext_data = drupal_array_merge_deep($this->ext_data, $dup->ext_data);
+      }
+    }
+
     // add unique identifiers from dup
-    foreach ($dup->identifiers AS $type => $values) {
+    foreach ($merge_identifiers AS $type => $values) {
       foreach ($values AS $i => $value) {
         $existing_i = FALSE;
         if (!isset($this->identifiers[$type])) {
@@ -395,14 +481,38 @@ class IntelVisitor extends Entity {
       }
     }
     
-    if ($dup->created < $this->created) {
+    if (!$this->created || ($dup->created < $this->created)) {
       $this->created = $dup->created;
+    }
+    if (!$this->contact_created || ($dup->contact_created < $this->contact_created)) {
+      $this->contact_created = $dup->contact_created;
     }
     if ($dup->updated > $this->updated) {
       $this->updated = $dup->updated;
     }
+    if ($dup->last_activity > $this->last_activity) {
+      $this->last_activity = $dup->last_activity;
+    }
     if ($dup->data_updated > $this->data_updated) {
       $this->data_updated = $dup->data_updated;
+    }
+    if ($dup->ext_updated  > $this->ext_updated ) {
+      $this->ext_updated = $dup->ext_updated;
+    }
+
+    // update form submission vids
+    if ($from_vid) {
+      // update form submission vids
+      $query = db_update('intel_submission')
+        ->fields(array('vid' => $to_vid))
+        ->condition('vid', $form_vid)
+        ->execute();
+
+      // update phone call vids
+      $query = db_update('intel_phonecall')
+        ->fields(array('vid' => $to_vid))
+        ->condition('vid', $form_vid)
+        ->execute();
     }
   }
 
@@ -509,8 +619,6 @@ class IntelVisitorController extends EntityAPIControllerExportable {
   
   public function setIdType($idType) {
     if ($idType) {
-      //$this->idKey = $idKey;
-      //$this->nameKey = $idKey;
       $this->idType = $idType;
     }    
   }
@@ -525,7 +633,7 @@ class IntelVisitorController extends EntityAPIControllerExportable {
    */
   public function create(array $values = array()) {
     global $user;
-    
+
     $schema = drupal_get_schema('intel_visitor');
     foreach ($schema['fields'] AS $key => $field) {
       $values[$key] = isset($field['default']) ? $field['default'] : '';
@@ -549,7 +657,10 @@ class IntelVisitorController extends EntityAPIControllerExportable {
         $values['identifiers']['uid'][] = $user->uid;
       }
     }
+
     $entity = parent::create($values);
+    $entity->created = REQUEST_TIME;
+
     return $entity;
   }
   
@@ -575,35 +686,10 @@ class IntelVisitorController extends EntityAPIControllerExportable {
     if (empty($entity->contact_created) && !empty($entity->email)) {
       $entity->contact_created = REQUEST_TIME;
     }
+    $return = parent::save($entity);
 
-    // Invoke hook_entity_presave().
-    module_invoke_all('entity_presave', $entity, 'intel_visitor');
-    // The 'primary_keys' argument determines whether this will be an insert
-    // or an update. So if the entity already has an ID, we'll specify
-    // eid as the key.
-    $primary_keys = $entity->vid ? 'vid' : array();
-    // Write out the entity record.
-    drupal_write_record('intel_visitor', $entity, $primary_keys);
-
-    // save identifiers to intel_visitor_identifier table
     $this->saveIdentifiers($entity);
-    // We're going to invoke either hook_entity_update() or
-    // hook_entity_insert(), depending on whether or not this is a
-    // new entity.
-    $invocation = 'entity_insert';
-    // Now we need to either insert or update the fields which are
-    // attached to this entity. We use the same primary_keys logic
-    // to determine whether to update or insert, and which hook we
-    // need to invoke.
-    if (empty($primary_keys)) {
-      field_attach_insert('intel_visitor', $entity);
-    }
-    else {
-      field_attach_update('intel_visitor', $entity);
-      $invocation = 'entity_update';
-    }
-    // Invoke either hook_entity_update() or hook_entity_insert().
-    module_invoke_all($invocation, $entity, 'intel_visitor');
+
     return $entity;
   }
   
@@ -676,6 +762,13 @@ class IntelVisitorController extends EntityAPIControllerExportable {
         $identifiers[$row->type] = array();
       }
       $identifiers[$row->type][] = $row->value;
+    }
+    // add vid to identifiers if not already attached
+    if (!isset($identifiers['vid']) || array_search($entity->vid, $identifiers['vid']) === FALSE) {
+      if (!isset($identifiers['vid'])) {
+        $identifiers['vid'] = array();
+      }
+      $identifiers['vid'][] = $entity->vid;
     }
     return $identifiers;
   }
@@ -827,6 +920,129 @@ function intel_visitor_build_profile_content_elements($entity) {
   // TODO: clean this up and put into themeing functions
   
   $vdata = $entity->data;
+
+  $emailclicks = 0;
+  if (variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT)) {
+    $filter = array(
+      'conditions' => array(
+        array('c.vid', $entity->identifiers['vid'], 'IN'),
+      ),
+    );
+    $result = intel_load_filtered_emailclick_result($filter);
+    $rows = array();
+    $calls = array();
+    while ($row = $result->fetchObject()) {
+      $clicks[$row->cid] = $row;
+    }
+    uasort($clicks, function ($a, $b) {
+        return ($a->clicked < $b->clicked) ? 1 : -1;
+      }
+    );
+
+
+
+    // TODO: move mailchimp info processing to hook and process in mailchimp module
+
+    $emaildesc = $row->eid;
+    $email_info = array();
+    foreach ($clicks AS $row) {
+      $ops = array();
+      $ops[] = l(t('meta'), 'emailclick/' . $row->cid);
+      $title = 'NA';
+
+      if ($row->type == 'mailchimp') {
+        if (!isset($email_info['mailchimp'])) {
+          $email_info['mailchimp'] = array();
+        }
+        if (!isset($email_info['mailchimp'][$row->eid])) {
+          $campaigns = intel_mailchimp_api_campaigns_list_by_campaign_id($row->eid);
+          if (isset($campaigns[$row->eid])) {
+            $email_info['mailchimp'][$row->eid] = $campaigns[$row->eid];
+          }
+        }
+        if (isset($email_info['mailchimp'][$row->eid]['archive_url_long'])) {
+          $link_options = array(
+            'attributes' => array(
+              'target' => 'mailchimp',
+            ),
+          );
+          $emaildesc = l( $campaigns[$row->eid]['title'], $campaigns[$row->eid]['archive_url_long'], $link_options);
+        }
+      }
+
+      $row = array(
+        format_date($row->clicked, 'medium'),
+        $row->type,
+        $emaildesc,
+        implode(' ', $ops),
+      );
+      $rows[] = $row;
+    }
+    if (count($rows)) {
+      $tvars = array();
+      $tvars['rows'] = $rows;
+      $emailclicks = count($rows);
+      $tvars['header'] = array(
+        t('Clicked'),
+        t('Type'),
+        t('Email'),
+        t('Ops'),
+      );
+      $table = theme('table', $tvars);
+      $entity->content['emailclicks_table'] = array(
+        '#markup' => theme('intel_visitor_profile_block', array('title' => t('Email clicks'), 'markup' => $table)),
+        '#weight' => $weight++,
+      );
+    }
+  }
+
+  $phonecalls = 0;
+  if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
+    $filter = array(
+      'conditions' => array(
+        array('c.vid', $entity->identifiers['vid'], 'IN'),
+      ),
+    );
+    $result = intel_load_filtered_phonecall_result($filter);
+    $rows = array();
+    $calls = array();
+    while ($row = $result->fetchObject()) {
+      $calls[$row->cid] = $row;
+    }
+    uasort($calls, function ($a, $b) {
+        return ($a->initiated < $b->initiated) ? 1 : -1;
+      }
+    );
+    foreach ($calls AS $row) {
+      $ops = array();
+      $ops[] = l(t('meta'), 'phonecall/' . $row->cid);
+      $title = 'NA';
+      $rows[] = array(
+        format_date($row->initiated, 'medium'),
+        $row->type,
+        $row->to_num,
+        $row->from_num,
+        implode(' ', $ops),
+      );
+    }
+    if (count($rows)) {
+      $tvars = array();
+      $tvars['rows'] = $rows;
+      $phonecalls = count($rows);
+      $tvars['header'] = array(
+        t('Call date'),
+        t('Type'),
+        t('To'),
+        t('From'),
+        t('Ops'),
+      );
+      $table = theme('table', $tvars);
+      $entity->content['phonecalls_table'] = array(
+        '#markup' => theme('intel_visitor_profile_block', array('title' => t('Phone calls'), 'markup' => $table)),
+        '#weight' => $weight++,
+      );
+    }
+  }
   
   $form_submissions = 0;
   // generate form submission data
@@ -835,10 +1051,13 @@ function intel_visitor_build_profile_content_elements($entity) {
   }
   $filter = array(
     'conditions' => array(
-      array('s.vid', $entity->vid),
+      array('s.vid', $entity->identifiers['vid'], 'IN'),
     ),
   );
-  $result = intel_load_filtered_submission_result($filter);
+  $ignore_field = array(
+    'intel_submit_data' => 1
+  );
+  $result = intel_submission_load_filtered($filter);
   $rows = array();
   $wf_nodes = array();
   $items = array();
@@ -852,6 +1071,7 @@ function intel_visitor_build_profile_content_elements($entity) {
   );  
   foreach ($subs AS $row) {
     $ops = array();
+    $ops[] = l(t('meta'), 'submission/' . $row->sid);
     $title = 'NA';
     if ($row->type == 'webform') {
       if (!isset($wf_nodes[$row->fid])) {
@@ -862,6 +1082,9 @@ function intel_visitor_build_profile_content_elements($entity) {
       if (isset($d->data) && is_array($d->data)) {
         $comps = $wf_nodes[$row->fid]->webform['components'];
         foreach ($d->data AS $i => $v) {
+          if (!empty($ignore_field[$comps[$i]['form_key']])) {
+            continue;
+          }
           $items['webform-field-' . $comps[$i]['form_key']] = array(
             '#title' => $comps[$i]['name'],
             '#markup' => $v['value'][0],
@@ -953,6 +1176,21 @@ function intel_visitor_build_profile_content_elements($entity) {
     'value' => $form_submissions,
     'title' => t('form submissions'),
   );
+
+  if (variable_get('intel_track_emailclicks', INTEL_TRACK_EMAILCLICKS_DEFAULT)) {
+    $stats[] = array(
+      'value' => $emailclicks,
+      'title' => t('email clicks'),
+    );
+  }
+
+  if (variable_get('intel_track_phonecalls', INTEL_TRACK_PHONECALLS_DEFAULT)) {
+    $stats[] = array(
+      'value' => $phonecalls,
+      'title' => t('phone calls'),
+    );
+  }
+
   if (isset($vdata['klout']) && isset($vdata['klout']['score'])) {
     $stats[] = array(
       'value' => number_format($vdata['klout']['score']),

@@ -750,6 +750,9 @@ function theme_intel_visitor_referrer($step, $s = '', &$tlvisit) {
     'http://google.com/search?q=(not provided)' => 'http://google.com/search',
     'http://facebook.com' => 'http://www.facebook.com'
   );
+  if (!isset($step['referrer'])) {
+    return $output;
+  }
   if ($step['referrer']['medium'] == '(none)') {
     $tltext .= t("Source") . ': ' . $step['referrer']['source'];
     $output .= $s . t('source') . ': ' . $step['referrer']['source'] . "<br />\n";

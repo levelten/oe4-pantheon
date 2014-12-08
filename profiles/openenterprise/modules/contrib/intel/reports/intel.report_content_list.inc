@@ -6,15 +6,27 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_content_list_report_page($report_mode = '-', $filter_type = '', $filter_element = '') {
+function intel_content_list_report_page($report_mode = '-', $filter_type = '', $filter_element = '', $filter_value = '') {
   $output = '';
   $filters = array();
   $context = 'site';
   $reports = intel_reports();
+  if (isset($reports['content'][$report_mode]['page callback'])) {
+    if (isset($reports['content'][$report_mode]['file'])) {
+      include_once drupal_get_path('module', 'intel') . '/' . $reports['content'][$report_mode]['file'];
+    }
+    return $reports['content'][$report_mode]['page callback']($report_mode, $filter_type, $filter_element);
+  }
   if ($filter_type) {
     if ($filter_type == 'visitorid') {
       $filter_type = 'visitor';
       $filter_element = 'vtk:' . substr($filter_element, 0, 20);
+    }
+    if ($filter_type == 'page-attr') {
+
+    }
+    if ($filter_value) {
+      $filter_element .= ':' . $filter_value;
     }
     $filters[$filter_type] = urldecode($filter_element);
     $context = $filter_type;
@@ -72,6 +84,12 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
     $a = explode(":", $filters['page']);
     $path = $a[1];
   }
+
+  if (!empty($filters['page-attr'])) {
+    $a = explode(':', $filters['page-attr']);
+    $attr_key = $a[0];
+    $attr_info = intel_get_page_attribute_info($attr_key);
+  }
   
   $timeops = 'l30d';
   //$timeops = 'yesterday';
@@ -79,6 +97,9 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
   
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->setReportModes($report_modes);
+  if (!empty($attr_info)) {
+    $ga_data->setPageAttributeInfo($attr_info);
+  }
   $ga_data->buildFilters($filters, $context);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -102,7 +123,7 @@ function intel_content_list_report($filters = array(), $context = 'site', $repor
   } 
   
   // events data
-//$ga_data->setDebug(1);  
+//$ga_data->setDebug(1);
   $use_default = 1;
   if (($report_modes[0] == 'engagement') || ($report_modes[0] == 'social')) {
     $ga_data->setRequestSetting('details', 1);

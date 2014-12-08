@@ -6,9 +6,9 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_submission_page($sid) {
+function intel_submission_page($submission) {
   
-  $submission = intel_submission_load($sid);
+  //$submission = intel_submission_load($sid);
   $visitor = intel_visitor_load((int)$submission->vid);
   //if (!empty($submission->visitorid)) {
     //$visitor = intel_visitor_load_by_visitorid($submission->visitorid);
@@ -38,32 +38,16 @@ function intel_submission_page($sid) {
     );
   }
   
-  if ($visitor->name) {
-    $form['submitted_by'] = array(
-      '#type' => 'item',
-      '#title' => t('Submitted by'),
-      '#markup' => l($visitor->name, 'visitor/' . $visitor->vtkid),
-    );
-  }
-  elseif ($visitor->visitorid) {
-    $form['submitted_by'] = array(
-      '#type' => 'item',
-      '#title' => t('Submitted by'),
-      '#markup' => l($visitor->getLabel(), 'visitor/' . $visitor->vtkid),
-    );
-  }
-  else {
-    $form['submitted_by'] = array(
-      '#type' => 'item',
-      '#title' => t('Submitted by'),
-      '#markup' => t('(not set)'),
-    );    
-  }
+  $form['submitted_by'] = array(
+    '#type' => 'item',
+    '#title' => t('Submitted by'),
+    '#markup' => l($visitor->label(), $visitor->uri()),
+  );
   
   $form['submitted_at'] = array(
     '#type' => 'item',
     '#title' => t('Submitted at'),
-    '#markup' => date("Y-m-d H:i"),
+    '#markup' => date("Y-m-d H:i", $submission->submitted),
   ); 
 
   $url = "http://" . $submission->response_page_host . $submission->response_page_path;
@@ -94,8 +78,11 @@ function intel_submission_page($sid) {
 
   if ($submission->cta_page_path) {
     $url = "http://" . $submission->cta_page_host . $submission->cta_page_path;
-    if ($submission->form_page_id) {
+    if ($submission->cta_page_id) {
       $url = 'node/' . $submission->cta_page_id;
+    }
+    else if ($submission->cta_page_host == $_SERVER['HTTP_HOST']) {
+      $url = str_replace($GLOBALS['base_path'], '', $submission->cta_page_path);
     }
     $markup = l(url($url), $url);
   }
@@ -162,7 +149,7 @@ function intel_admin_people_submissions($filter = array()) {
     );
   }
   $options = array();
-  $result = intel_load_filtered_submission_result($filter, $options, $header, 50);
+  $result = intel_submission_load_filtered($filter, $options, $header, 50);
 
   $hs_portal_id = variable_get('hubspot_portalid', '');
   
@@ -223,7 +210,6 @@ function intel_admin_people_submissions($filter = array()) {
   $vars = array(
     'header' => $header, 
     'rows' => $rows, 
-    'attributes' => array('id' => 'kwresearch-site-keywords')
   );
   $output .= theme('table', $vars);
   //pager_default_initialize($total, 1, $element = 0);

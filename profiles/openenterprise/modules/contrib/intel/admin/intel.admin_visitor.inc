@@ -43,6 +43,27 @@ function intel_visitor_add() {
  *   for fields attached to the entity.
  */
 function intel_visitor_edit_form($form, &$form_state, $entity) {
+  /*
+
+  $wrapper = entity_metadata_wrapper('intel_visitor', $entity);
+dsm($wrapper);
+  $gid = 1;
+  $new_ref = entity_load('dwyr_franchise', array($gid));
+  $new_ref = $new_ref[$gid];
+dsm($new_ref);
+  $refs = $wrapper->og_group_ref->value();
+dsm($refs);
+  if (!$refs) {
+    $refs = array();
+  }
+  $refs[] = $new_ref;
+dsm($refs);
+  $wrapper->og_group_ref->set($refs);
+  $wrapper->save();
+  */
+
+
+
   $form['entity'] = array(
     '#type' => 'value',
     '#value' => $entity,
@@ -73,8 +94,37 @@ function intel_visitor_edit_form($form, &$form_state, $entity) {
     '#default_value' => $entity->email,
   );
 
+  $form['phone'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone number'),
+    //'#required' => TRUE,
+    '#default_value' => $entity->phone,
+  );
+
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  if (empty($entity->vtk)) {
+    $form['advanced']['vtk'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tracking visitor token'),
+      '#default_value' => $entity->vtk,
+    );
+  }
+  else {
+    $form['advanced']['vtk'] = array(
+      '#type' => 'item',
+      '#title' => t('Tracking visitor token'),
+      '#markup' => $entity->vtk,
+    );
+  }
+
+
   field_attach_form('intel_visitor', $entity, $form, $form_state);
-  $form['intel_sync_visitordata_fullcontact'] = array(
+  $form['advanced']['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
     '#default_value' => $entity->getVar('data', 'settings', 'sync_visitordata.fullcontact', INTEL_SYNC_VISITORDATA_FULLCONTACT_DEFAULT),
@@ -115,19 +165,33 @@ function intel_visitor_edit_form_validate($form, &$form_state) {
 function intel_visitor_edit_form_submit($form, &$form_state) {
   $entity = $form_state['values']['entity'];
 
-  $entity->setName($form_state['values']['name']);
   $account = user_load_by_name($form_state['values']['user_name']);
   $email = '';
+  $phone = '';
+  $vtk = '';
   if (!empty($account->uid)) {
     $entity->setIdentifier('uid', $account->uid);
     $email = $account->mail;
   }
 
-  if ($form_state['values']['email']) {
+  if (!empty($form_state['values']['email'])) {
     $email = $form_state['values']['email'];
   }
   if ($email) {
     $entity->setIdentifier('email', $email);
+  }
+
+  if (!empty($form_state['values']['phone'])) {
+    $phone = $form_state['values']['phone'];
+  }
+  if ($phone) {
+    $entity->setIdentifier('phone', $phone);
+  }
+  if (!empty($form_state['values']['vtk'])) {
+    $vtk = $form_state['values']['vtk'];
+  }
+  if ($vtk) {
+    $entity->setIdentifier('vtk', $vtk);
   }
 
   if (intel_api_access() && isset($form_state['values']['intel_sync_visitordata_fullcontact']))  {
@@ -135,6 +199,9 @@ function intel_visitor_edit_form_submit($form, &$form_state) {
   }
 
   field_attach_submit('intel_visitor', $entity, $form, $form_state);
+  if (!empty($form_state['values']['name'])) {
+    $entity->setName($form_state['values']['name']);
+  }
   $entity = intel_visitor_save($entity);
   $form_state['redirect'] = $entity->uri();
 }
@@ -263,6 +330,14 @@ function intel_admin_people_contacts() {
   $output = array();
 
   $api_level = variable_get('intel_api_level', '');
+  $api_level = intel_api_level();
+  if ($api_level != 'pro') {
+    $vars = array(
+      'message' => t('The Pro version of Intel is required to create contacts.'),
+    );
+    intel_api_access_error($vars);
+  }
+
   
   $header = array();
   $header[] = array(
@@ -301,6 +376,9 @@ function intel_admin_people_contacts() {
   $query->propertyCondition('contact_created', 0, '>');
   $query->pager(50);
   $query->tableSort($header);
+  $query->addTag('intel_admin_people_contacts');
+
+  drupal_alter('intel_admin_people_contacts_query', $query);
 
   $result = $query->execute();
 
@@ -361,6 +439,11 @@ function intel_admin_people_visitors() {
       'data' => t('Last updated'),
       'type' => 'property',
       'specifier' => 'updated',
+    ),
+    array(
+      'data' => t('Last activity'),
+      'type' => 'property',
+      'specifier' => 'last_activity',
       'sort' => 'desc',
     ),
     array(
@@ -376,10 +459,16 @@ function intel_admin_people_visitors() {
   $query->entityCondition('entity_type', 'intel_visitor');
   $query->pager(50);
   $query->tableSort($header);
+  $query->addTag('intel_admin_people_visitors');
+
+  drupal_alter('intel_admin_people_visitors_query', $query);
 
   $result = $query->execute();
 
-  $visitors = intel_visitor_load_multiple(array_keys($result['intel_visitor']));
+  $visitors = array();
+  if (isset($result['intel_visitor'])) {
+    $visitors = intel_visitor_load_multiple(array_keys($result['intel_visitor']));
+  }
 
   $rows = array();
   foreach ($visitors AS $visitor) {
@@ -388,8 +477,8 @@ function intel_admin_people_visitors() {
     if ($api_level == 'pro') {
       $row[] = $visitor->location();
     }
-    //$row[] = ((REQUEST_TIME  - $visitor->last_activity) > 172800) ? format_date($visitor->last_activity, 'short') : format_interval(REQUEST_TIME  - $visitor->last_activity) . ' ' . t('ago');
     $row[] = ((REQUEST_TIME  - $visitor->updated) > 172800) ? format_date($visitor->updated, 'short') : format_interval(REQUEST_TIME  - $visitor->updated) . ' ' . t('ago');
+    $row[] = ((REQUEST_TIME  - $visitor->last_activity) > 172800) ? format_date($visitor->last_activity, 'short') : format_interval(REQUEST_TIME  - $visitor->last_activity) . ' ' . t('ago');
     $ops = '';
     $ops .= l(t('Clickstream'), $visitor->uri() . '/clickstream');
     $row[] = $ops;

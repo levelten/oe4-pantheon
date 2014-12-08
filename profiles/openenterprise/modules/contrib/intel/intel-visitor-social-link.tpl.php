@@ -17,7 +17,7 @@
  */
 ?>
 <?php if ($link): ?>
-  <div class="social-link <?php print $class; ?>">
+  <div class="social-profile-link <?php print $class; ?>">
     <?php print $link; ?>
   </div>
 <?php endif; ?>
