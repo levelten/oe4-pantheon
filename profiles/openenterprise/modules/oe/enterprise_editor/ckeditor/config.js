@@ -25,6 +25,10 @@ var Drupal = Drupal || {};
 /**
  * Setup CKEditor configurations.
  */
+
+CKEDITOR.dtd.$removeEmpty['i'] 		= false;
+CKEDITOR.dtd.$removeEmpty['span'] 	= false;
+
 CKEDITOR.editorConfig = function(config) {
   config.height = 400;
   config.allowedContent = true;
@@ -34,11 +38,14 @@ CKEDITOR.editorConfig = function(config) {
   config.resize_minWidth = 450;
   config.protectedSource.push(/<\?[\s\S]*?\?>/g); // PHP Code
   config.protectedSource.push(/<code>[\s\S]*?<\/code>/gi); // Code tags
-  config.protectedSource.push(/\<(i|span)[^\>]*icon[^\>]*\>[^>]*\<\/(i|span)\>/g);
-  config.extraPlugins = '';
+  // config.protectedSource.push(/\<(i|span)[^\>]*icon[^\>]*\>[^>]*\<\/(i|span)\>/g);
+  config.extraPlugins = 'fontawesome';
   config.extraCss = '';
   config.bodyClass = '';
   config.bodyId = '';
+
+	config.contentsCss = '/profiles/openenterprise/libraries/ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css';
+
   config.templates_replaceContent = false;
   config.extraAllowedContent = 'i {*}(*)';
   if (Drupal.settings.enterprise_editor) {
@@ -52,6 +59,9 @@ CKEDITOR.editorConfig = function(config) {
 
   }
 };
+
+CKEDITOR.dtd.$removeEmpty['span'] = false;
+CKEDITOR.dtd.$removeEmpty['i'] = false;
 
 (function($){
 
