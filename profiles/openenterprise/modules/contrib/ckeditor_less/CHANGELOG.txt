@@ -1,3 +1,9 @@
+CKEditor LESS 7.x-1.0-beta1, 2014-07-22
+--------------------------------------
+- Fixed issue when LESS directory hasn't been generated.
+- Cleaned up for PAReview.
+
+
 CKEditor LESS 7.x-1.0-beta, 2014-07-22
 --------------------------------------
 - Initial release
