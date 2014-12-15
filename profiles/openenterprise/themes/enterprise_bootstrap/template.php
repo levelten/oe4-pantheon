@@ -15,12 +15,12 @@ function enterprise_bootstrap_process_page(&$variables) {
     && isset($variables['page']['navigation'])
     && isset($variables['page']['navigation']['system_main-menu'])
     && is_array($variables['page']['navigation']['system_main-menu'])
-  ) {
+    ) {
     enterprise_bootstrap_transform_main_menu($variables['page']['navigation']['system_main-menu']);
-  }
-    if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
-      enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
-    }
+}
+if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
+  enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+}
 }
 
 /**
@@ -46,8 +46,6 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
-  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
-  drupal_add_js(array('enterprise_bootstrap' => array('mobilemenu' => $mobile_dropdown)), array('type' => 'setting'));
 
   // Preprocess blocks on home page for striping.
   if (module_exists('block_class')) {
@@ -57,6 +55,17 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
         // Add region to block vars (we only care about content)
         $front_blocks[$key]['#block']->block_container = 'content';
       }
+    }
+  }
+
+  // Apply image styles to logo.
+  $logo_path = theme_get_setting('logo_path');
+  $logo_image_style = theme_get_setting('logo_image_style');
+
+  // Change out logo with image style version.
+  if (isset($logo_image_style) && isset($logo_path) && !empty($logo_image_style)) {
+    if ($logo_image_style !== 'default') {
+      $variables['logo'] = image_style_url($logo_image_style, $logo_path);
     }
   }
 
@@ -130,7 +139,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       if ($value == 'metatags') { $count--; }
       if ($value == 'workbench_block') { $count--; }
     }
-    
+
     // Add zebra classes to blocks.
     foreach ($variables['page']['content'] as $key => $value) {
       if ($key == 'workbench_block' || $key == 'metatags') {
@@ -152,26 +161,57 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       'every_page' => TRUE,
       'weight' => -1,
       'preprocess' => TRUE,
-    );
+      );
     drupal_add_css($blokk_path, $options);
   }
 
-  // Add Javscript files from Enterprise Bootstrap settings
+  // Add Javscript files and settings from Enterprise Bootstrap settings
+  // Mega Menu and mobile menu settings.
+  $bootstrap_megamenu = theme_get_setting('enterprise_bootstrap_megamenu');
+  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  drupal_add_js(
+    array(
+      'enterprise_bootstrap' => array(
+        'megamenu' => $bootstrap_megamenu,
+        'mobilemenu' => $mobile_dropdown
+        )
+      ),
+    array(
+      'type' => 'setting',
+      )
+    );
+
   // fitText.js
   $fittext = theme_get_setting('fittext');
   if (!empty($fittext)) {
     switch ($fittext) {
       case 1:
-        drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js', 'external');
-        break;
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js', 'external');
+      break;
       case 2:
-        drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.js', 'external');
-        break;
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.js', 'external');
+      break;
       default:
         # Do nothing.
-        break;
+      break;
     }
   }
+  // bootstrap-hover-dropdown
+  $hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
+  if (!empty($hover_dropdown)) {
+    switch ($hover_dropdown) {
+      case 1:
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/bootstrap-hover-dropdown/2.0.10/bootstrap-hover-dropdown.min.js', 'external');
+      break;
+      case 2:
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/bootstrap-hover-dropdown/2.0.10/bootstrap-hover-dropdown.js', 'external');
+      break;
+      default:
+        # Do nothing.
+      break;
+    }
+  }
+
   // equalize.js
   // $equalize = theme_get_setting('equalize');
   // if (!empty($equalize)) {
@@ -180,6 +220,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   //   }
   // }
 
+  // Add Bootstrap Javascript libraries
   $bootstrap_js = theme_get_setting('enterprise_bootstrap_js_options');
   if(!empty($bootstrap_js)) {
     $bootstrap_js = array_filter($bootstrap_js);
@@ -188,7 +229,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       'group' => JS_THEME,
       'every_page' => TRUE,
       'preprocess' => TRUE,
-    );
+      );
     foreach ($bootstrap_js as $key => $value) {
       drupal_add_js($js_path.$key.'.js', $options);
     }

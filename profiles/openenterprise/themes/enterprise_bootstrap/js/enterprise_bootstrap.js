@@ -11,7 +11,7 @@
   "use strict";
 
   Drupal.behaviors.enterprisebootstrap = {
-    attach: function(context) {
+    attach: function(context, settings) {
 
       // Add wrapper to Google Map iframes
       var iframes = $("iframe", context);
@@ -21,6 +21,14 @@
           if (url.toLowerCase().indexOf("google.com/maps") > 0) {
             $(this).wrap( "<div class='google-maps'></div>" );
           }
+        });
+      }
+
+      // Add bootstrap-dropdown-hover
+      if (jQuery.fn.dropdownHover) {
+        $(".menu .expanded.dropdown > a", context).dropdownHover({
+          delay: 500,
+          instantlyCloseOthers: true,
         });
       }
 
