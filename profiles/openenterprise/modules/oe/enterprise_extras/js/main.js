@@ -234,7 +234,7 @@
                         });
                     }
                     return top;
-                }
+                };
                 var stickyResize = function(element) {
                     var top = stickyTop();
                     top = 0;
@@ -248,7 +248,7 @@
                                 'top': top ? sticky.offset().top - top : sticky.offset().top
                             }
                         }).parent().css('min-height', sticky.parent().height());
-                }
+                };
                 $(document).on('drupalViewportOffsetChange', null, function(){
                     stickyResize(sticky);
                 });
@@ -263,7 +263,8 @@
      */
     Drupal.behaviors.themeAddThis = {
         attach: function(context, settings) {
-            if ($.browser.mozilla != undefined && $.browser.mozilla) {
+            var is_firefox = /firefox/i.test(navigator.userAgent.toLowerCase());
+            if (is_firefox !== undefined && is_firefox) {
                 $(document).ready(function () {
                     // AddThis Dialog Fix For Firefox
                     $('body').on('click', '#at3winheaderclose', function(){
