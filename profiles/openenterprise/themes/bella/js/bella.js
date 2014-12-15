@@ -53,20 +53,18 @@
 
       // Add extra pixels if we're logged in.
       if ($("body", context).hasClass("admin-menu")){
-        window.console.log("Has admin menu");
         navbarHeight += 30;
       } else {
         navbarHeight += 1;
       }
-      window.console.log(navbarHeight);
 
       // Add padding to body.
       var bodyHtml = context.querySelector("body.html");
       bodyHtml.style.paddingTop = navbarHeight+"px";
 
       // Only do the following if the navbar is fixed.
-      var navbarHasClass = $navbar.hasClass("navbar-fixed-top");
-      if (navbarHasClass) {
+      // var navbarHasClass = $navbar.hasClass("navbar-fixed-top");
+      /*if (navbarHasClass) {
         // Set up objects.
         var dropdownMenu = context.querySelector("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu");
         // Add padding and top to dropwdown to position correctly for fixed menu.
@@ -83,7 +81,7 @@
       $(window).resize(function(){
         navbarHeight = context.getElementById("navbar").offsetHeight;
         bodyHtml.style.paddingTop = navbarHeight+"px";
-      });
+      });*/
 
     }
   };
