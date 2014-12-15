@@ -105,7 +105,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
     [\'SpellChecker\',\'Scayt\',\'-\',\'Find\',\'Replace\'],
     [\'ShowBlocks\',\'Maximize\',\'Source\'],
     \'/\',
-    [\'Templates\',\'Blocks\',\'-\',\'Carousel\',\'Trifold\',\'Featurette\',\'Jumbotron\',\'-\',\'Link\',\'Unlink\',\'Anchor\',\'-\',\'Image\',\'video_filter\',\'-\',\'CreateDiv\',\'HorizontalRule\',\'SpecialChar\',\'-\',\'-\',\'NumberedList\',\'BulletedList\',\'-\'],
+    [\'Templates\',\'Blocks\',\'-\',\'Carousel\',\'Trifold\',\'Featurette\',\'Jumbotron\',\'-\',\'Link\',\'Unlink\',\'Anchor\',\'-\',\'Image\',\'video_filter\',\'-\',\'CreateDiv\',\'HorizontalRule\',\'icon\',\'SpecialChar\',\'-\',\'-\',\'NumberedList\',\'BulletedList\',\'-\'],
     \'/\',
     [\'Styles\',\'RemoveFormat\'],
     [\'Bold\',\'Italic\',\'Underline\',\'Strike\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Outdent\',\'Indent\'],
@@ -136,10 +136,12 @@ function enterprise_editor_ckeditor_profile_defaults() {
             'pre_indent' => 0,
           ),
         ),
-        'css_mode' => 'theme',
-        'css_path' => '',
+        //'css_mode' => 'theme',
+        //'css_path' => '',
+        'css_mode' => 'self',
+        'css_path' => '%h/profiles/openenterprise/modules/oe/enterprise_style/icons/css/enterprise_base-embedded.css,%h/profiles/openenterprise/themes/enterprise_bootstrap/css/style.css,%t/css/style.css',
         'css_style' => 'self',
-        'styles_path' => '%h/profiles/openenterprise/modules/oe/enterprise_editor/ckeditor/styles.js',
+        'styles_path' => '%h/' . drupal_get_path('module', 'enterprise_editor') . '/ckeditor/styles.js',
         'filebrowser' => 'none',
         'filebrowser_image' => '',
         'filebrowser_flash' => '',
@@ -165,7 +167,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'carousel' => array(
             'name' => 'carousel',
             'desc' => 'Bootstrap Carousel Plugin',
-            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_bootstrap') . '/plugins/carousel/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/carousel/',
             'buttons' => array(
               'Carousel' => array(
                 'label' => 'Carousel',
@@ -176,7 +178,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'featurette' => array(
             'name' => 'featurette',
             'desc' => 'Bootstrap Featurette Plugin',
-            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_bootstrap') . '/plugins/featurette/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/featurette/',
             'buttons' => array(
               'Featurette' => array(
                 'label' => 'Featurette',
@@ -184,10 +186,21 @@ function enterprise_editor_ckeditor_profile_defaults() {
               ),
             ),
           ),
+          'icon' => array(
+            'name' => 'icon',
+            'desc' => 'Plugin for icons',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/icon/',
+            'buttons' => array(
+              'icon' => array(
+                'label' => 'Icon',
+                'icon' => 'icons/icon.png',
+              ),
+            ),
+          ),
           'jumbotron' => array(
             'name' => 'jumbotron',
             'desc' => 'Bootstrap Jumbotron Plugin',
-            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_bootstrap') . '/plugins/jumbotron/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/jumbotron/',
             'buttons' => array(
               'Jumbotron' => array(
                 'label' => 'Jumbotron',
@@ -223,7 +236,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'trifold' => array(
             'name' => 'trifold',
             'desc' => 'Bootstrap Trifold Plugin',
-            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_bootstrap') . '/plugins/trifold/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/trifold/',
             'buttons' => array(
               'Trifold' => array(
                 'label' => 'Trifold',
