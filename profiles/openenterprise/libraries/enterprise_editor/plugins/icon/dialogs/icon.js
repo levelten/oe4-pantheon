@@ -7,6 +7,7 @@ CKEDITOR.dialog.add( 'icon', function( editor ) {
 	// Simulate "this" of a dialog for non-dialog events.
 	// @type {CKEDITOR.dialog}
 	var icon_editor_debug = false;
+
 if(window.console && icon_editor_debug){
 	console.log('editor:');
 	console.log(editor);
@@ -112,8 +113,8 @@ if(window.console && icon_editor_debug){
 				target = target.getParent();
 
 			if ( target.getName() == 'a' ) {
-				dialog.getContentElement( 'info', 'charPreview' ).getElement().setHtml( '&nbsp;' );
-				dialog.getContentElement( 'info', 'htmlPreview' ).getElement().setHtml( '&nbsp;' );
+				dialog.getContentElement( 'info', 'charPreview' ).getElement().setHtml( '&#8203;' );
+				dialog.getContentElement( 'info', 'htmlPreview' ).getElement().setHtml( '&#8203;' );
 				// target.getParent().removeClass( "cke_light_background" );
 				target.getParent().removeClass( "cke_icon_full_background" );
 
@@ -250,7 +251,7 @@ if(window.console && icon_editor_debug){
 							// Use character in case description unavailable.
 							charDesc = lang[ _tmpName ] || character;
 						}
-                        character = '<i class="icon ' + character + '" style="font-size:inherit;"></i>';
+                        character = '<i class="icon ' + character + '" style="font-size:inherit;">&zwnj;</i> ';
 if(window.console && icon_editor_debug){
 	console.log('c: ' + character);
 }
