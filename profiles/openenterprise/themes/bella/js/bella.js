@@ -13,13 +13,6 @@
   Drupal.behaviors.bellaThemeFixes = {
     attach: function(context) {
 
-      // Use fitText if loaded.
-      if(jQuery.fn.fitText) {
-        window.console.log("loaded Fittext.js");
-        $(".not-logged-in #navbar .navbar-header .name", context).fitText(2);
-        $(".logged-in #navbar .navbar-header .name", context).fitText(1.6);
-      }
-
       // Use for the following navigation updates.
       var navbar = context.getElementById("navbar");
       var $navbar = $(".navbar", context);

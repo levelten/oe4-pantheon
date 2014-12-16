@@ -167,14 +167,26 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
 
   // Add Javscript files and settings from Enterprise Bootstrap settings
   // Mega Menu and mobile menu settings.
-  $bootstrap_megamenu = theme_get_setting('enterprise_bootstrap_megamenu');
-  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  $settings = array();
+  $settings['megamenu'] = theme_get_setting('enterprise_bootstrap_megamenu');
+  $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+
+  $fittext = theme_get_setting('fittext_selector');
+  // $bootstrap_hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
+  
+  // Process FitText selectors
+  $selectors = array();
+  if (!empty($fittext)) {
+    $selector = explode("\n", $fittext);
+    foreach ($selector as $value) {
+      $selectors[] = explode('|', $value);
+    }
+    $settings['fittext'] = $selectors;
+  }
+
   drupal_add_js(
     array(
-      'enterprise_bootstrap' => array(
-        'megamenu' => $bootstrap_megamenu,
-        'mobilemenu' => $mobile_dropdown
-        )
+      'enterprise_bootstrap' => $settings,
       ),
     array(
       'type' => 'setting',

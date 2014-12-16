@@ -279,6 +279,31 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('Development - jquery.fittext.js'),
 		),
 	);
+	
+	$form['enterprise_bootstrap_js']['fittext_selectors'] = array(
+		'#type' => 'container',
+		'#title' => t('FitText Selectors'),
+		'#states' => array(
+      'invisible' => array(
+        ':input[name=fittext]' => array('value' => 0),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_description'] = array(
+		'#type' => 'markup',
+		'#markup' => '<div class="description help-block"><p>FitText will accept a compression level and selector for text you would like to update. Compression refers to how much you would like to compress the text down. Default is 1.</p>
+									<p>Add in your compression and selectors as a key value pair, <strong>one per line</strong>. For example:</p>
+									<p><pre>1.6|.not-logged-in #navbar .navbar-header .name</pre></p></div><br />',
+		
+	);
+
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_selector'] = array(
+    '#title' => t('FitText selectors'),
+    '#type' => 'textarea',
+    '#default_value' => (theme_get_setting('fittext_selector')) ? theme_get_setting('fittext_selector') : '',
+    '#description' => t('Add the compression level and selectors you would like to target with FitText.'),
+  );
+
 	$form['enterprise_bootstrap_js']['bootstrap_hover_dropdown'] = array(
 		'#type' => 'select',
 		'#title' => t('Bootstrap Hover Dropdown'),
