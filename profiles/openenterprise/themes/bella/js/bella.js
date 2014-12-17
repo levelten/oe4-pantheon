@@ -30,7 +30,6 @@
       // // Set height of header for logo positioning.
       // var brand = navbar.querySelector(".navbar-header .navbar-brand");
       // var brandHeight = brand.offsetHeight;
-      var navbarHeight = navbar.offsetHeight;
 
       // // If the branding area is smaller than the navigation, vertically align the branding (name, logo).
       // if (brandHeight < navbarHeight) {
@@ -52,6 +51,7 @@
       }
 
       // Add padding to body.
+      var navbarHeight = navbar.offsetHeight;
       var bodyHtml = context.querySelector("body.html");
       bodyHtml.style.paddingTop = navbarHeight+"px";
       // Update based on window resizing.
@@ -59,21 +59,6 @@
         navbarHeight = context.getElementById("navbar").offsetHeight;
         bodyHtml.style.paddingTop = navbarHeight+"px";
       });
-
-      // Only do the following if the navbar is fixed.
-      // var navbarHasClass = $navbar.hasClass("navbar-fixed-top");
-      /*if (navbarHasClass) {
-        // Set up objects.
-        var dropdownMenu = context.querySelector("#navbar.navbar .navbar-nav > li.expanded > .dropdown-menu");
-        // Add padding and top to dropwdown to position correctly for fixed menu.
-        dropdownMenu.style.top = navbarHeight+"px";
-
-        // Update based on window resizing.
-        $(window).resize(function(){
-          navbarHeight = context.getElementById("navbar").offsetHeight;
-          dropdownMenu.style.top = navbarHeight+"px";
-        });
-      }*/
 
     }
   };
