@@ -131,6 +131,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
 	);
+	
+	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Navigation Region Class'),
+		'#default_value' => theme_get_setting('navbar_region_class'),
+		'#description' => t('Class that wraps around the Logo and Menu.')
+	);
 	$form['enterprise_bootstrap_region_settings']['navigation']['nav_logo_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Navigation Logo Wrapper Class'),

@@ -88,9 +88,11 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['content_column_class'] = '';
   }
 
-  // Navifation region settings.
+  // Navigation region settings.
+  $variables['navbar_region_class'] = theme_get_setting('navbar_region_class');
   $variables['nav_logo_class'] = theme_get_setting('nav_logo_class');
   $variables['nav_menu_class'] = theme_get_setting('nav_menu_class');
+  
   // Title region settings.
   $variables['title_placement'] = theme_get_setting('title_placement');
   $variables['title_container'] = theme_get_setting('title_container');
