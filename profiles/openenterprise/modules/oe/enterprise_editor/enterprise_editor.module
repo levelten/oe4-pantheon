@@ -48,6 +48,11 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
       drupal_add_js($file->uri);
     }
   }
+
+  // Load Enterprise Style icon CSS and Enterprise Bootstrap CSS
+  $settings['contentsCss'][] = $base_path.drupal_get_path('module', 'enterprise_style').'/icons/css/enterprise_base-embedded.css?'.$query;
+  $settings['contentsCss'][] = $base_path.drupal_get_path('theme', 'enterprise_bootstrap').'/css/style.css?'.$query;
+
   // filter out unavailable plugins
   foreach ($plugins AS $name => $flag) {
     if (!$flag && isset($settings['loadPlugins'][$name])) {
@@ -193,6 +198,13 @@ function enterprise_editor_ckeditor_plugin() {
   }
 
   return $plugins;
+}
+
+function enterprise_editor_preprocess_html(&$variables) {
+  if (path_is_admin(current_path())) {
+    // reference your current admin theme  
+    drupal_add_css(drupal_get_path('module', 'enterprise_editor') . '/enterprise_editor.css', array('weight' => CSS_THEME));
+  }
 }
 
 /*

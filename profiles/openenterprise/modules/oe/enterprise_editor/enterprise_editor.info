@@ -8,6 +8,7 @@ dependencies[] = ckeditor
 dependencies[] = ckeditor_blocks
 dependencies[] = ckeditor_media
 dependencies[] = ctools
+dependencies[] = enterprise_style
 dependencies[] = features
 dependencies[] = filter
 dependencies[] = icon_filter

@@ -26,8 +26,8 @@ var Drupal = Drupal || {};
  * Setup CKEditor configurations.
  */
 
-CKEDITOR.dtd.$removeEmpty['i'] 		= false;
-CKEDITOR.dtd.$removeEmpty['span'] 	= false;
+CKEDITOR.dtd.$removeEmpty['i'] = false;
+CKEDITOR.dtd.$removeEmpty['span'] = false;
 
 CKEDITOR.editorConfig = function(config) {
   config.height = 400;
@@ -44,7 +44,8 @@ CKEDITOR.editorConfig = function(config) {
   config.bodyClass = '';
   config.bodyId = '';
 
-	config.contentsCss = '/profiles/openenterprise/libraries/ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css';
+  // This doesn't seem to actually be loading, but I'll leave it for now.
+	config.contentsCss = "/profiles/openenterprise/libraries/ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css";
 
   config.templates_replaceContent = false;
   config.extraAllowedContent = 'i {*}(*)';
