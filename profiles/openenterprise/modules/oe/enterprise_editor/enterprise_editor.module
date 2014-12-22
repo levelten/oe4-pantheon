@@ -77,6 +77,9 @@ function enterprise_editor_get_icons() {
   if (!empty($bundle_info) && is_array($bundle_info)) {
     foreach ($bundle_info AS $name => $v) {
       $ib =  icon_bundle_load($name);
+      if (empty($ib['settings']) || $ib['settings']['method'] !== 'embedded') {
+        break;
+      }
       if (!empty($ib['icons']) && is_array($ib['icons'])) {
         foreach ($ib['icons'] AS $key => $value) {
           $icons[] = array($key, $value);
