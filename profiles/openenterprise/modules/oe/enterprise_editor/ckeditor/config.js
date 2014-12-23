@@ -44,9 +44,6 @@ CKEDITOR.editorConfig = function(config) {
   config.bodyClass = '';
   config.bodyId = '';
 
-  // This doesn't seem to actually be loading, but I'll leave it for now.
-	config.contentsCss = "/profiles/openenterprise/libraries/ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css";
-
   config.templates_replaceContent = false;
   config.extraAllowedContent = 'i {*}(*)';
   if (Drupal.settings.enterprise_editor) {
