@@ -91,7 +91,8 @@ function enterprise_editor_get_icons() {
         continue;
       }
 
-      // Get Icon path
+      // Get Icon path.
+      // Helps differentiate between icons uploaded or supplied by a module.
       $wrapper = file_stream_wrapper_get_instance_by_uri($ib['path']);
       if ($wrapper instanceof DrupalLocalStreamWrapper) {
         $path = $wrapper->getDirectoryPath() . '/' . file_uri_target($ib['path']);
@@ -246,13 +247,14 @@ function enterprise_editor_preprocess_html(&$variables) {
   if (path_is_admin(current_path())) {
     // reference your current admin theme  
     drupal_add_css(drupal_get_path('module', 'enterprise_editor') . '/enterprise_editor.css', array('weight' => CSS_THEME));
+  }
 
-    // Load font icons in admin theme.
-    $icon_bundles = enterprise_editor_get_icons();
-    foreach ($icon_bundles['bundles'] as $bundle) {
-      if (!empty($bundle['method'])) {
-        drupal_add_css($bundle['path'].'/css/'.$bundle['file'].'.css', array('weight' => CSS_THEME));
-      }
+  // Load font icons on all pages (admin included).
+  $icon_bundles = icon_bundles();
+  foreach ($icon_bundles as $bundle) {
+    // Only enable the ones that are available.
+    if ($bundle['status']) {
+      icon_process_attached($bundle);
     }
   }
 }
