@@ -19,6 +19,7 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   static $module_path;
   static $query;
   static $plugins;
+  $icon_bundles = enterprise_editor_get_icons();
   if (!isset($base_path)) {
     $base_path = base_path();
   }
@@ -30,8 +31,8 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
     $library_path = libraries_get_path('enterprise_editor');
     $query = variable_get('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
 
-    $icons = enterprise_editor_get_icons();
-
+    // Get Icon information.
+    $icons = $icon_bundles['icons'];
 
     $js_settings = array(
       'enterprise_editor' => array(
@@ -48,6 +49,16 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
       drupal_add_js($file->uri);
     }
   }
+
+  // Add Icon API embedded icon styles into CKEditor.
+  foreach ($icon_bundles['bundles'] as $bundle) {
+    if (!empty($bundle['method'])) {
+      $settings['contentsCss'][] = $base_path.$bundle['path'].'/css/'.$bundle['file'].'.css?'.$query;
+    }
+  }
+  // Load Enterprise Bootstrap CSS
+  $settings['contentsCss'][] = $base_path.drupal_get_path('theme', 'enterprise_bootstrap').'/css/style.css?'.$query;
+
   // filter out unavailable plugins
   foreach ($plugins AS $name => $flag) {
     if (!$flag && isset($settings['loadPlugins'][$name])) {
@@ -67,14 +78,51 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
 
 function enterprise_editor_get_icons() {
   $icons = array();
-
   $bundle_info = icon_bundles();
+
   if (!empty($bundle_info) && is_array($bundle_info)) {
-    foreach ($bundle_info AS $name => $v) {
-      $ib =  icon_bundle_load($name);
+    // Cycle through available font icons.
+    foreach ($bundle_info as $bundle) {
+      $name = $bundle['name'];
+      $ib =  icon_bundles($name);
+
+      // Only add icons that have settings.
+      if (empty($ib['settings'])) {
+        continue;
+      }
+
+      // Get Icon path.
+      // Helps differentiate between icons uploaded or supplied by a module.
+      $wrapper = file_stream_wrapper_get_instance_by_uri($ib['path']);
+      if ($wrapper instanceof DrupalLocalStreamWrapper) {
+        $path = $wrapper->getDirectoryPath() . '/' . file_uri_target($ib['path']);
+      } else {
+        $path = $ib['path'];
+      }
+
+      // Build path
+      switch ($ib['settings']['method']) {
+        case 'default':
+          $file_name = $ib['settings']['filename_prefix'];
+          break;
+        
+        default:
+          $file_name = $ib['settings']['filename_prefix'] . '-' . $ib['settings']['method'];
+          break;
+      }
+
+      // Get bundle information
+      $icons['bundles'][$name] = array(
+        'name' => $ib['name'],
+        'path' =>  $path,
+        'prefix' => $ib['settings']['filename_prefix'],
+        'method' => $ib['settings']['method'],
+        'file' => $file_name,
+      );
+
       if (!empty($ib['icons']) && is_array($ib['icons'])) {
         foreach ($ib['icons'] AS $key => $value) {
-          $icons[] = array($key, $value);
+          $icons['icons'][] = array($key, $value);
         }
       }
     }
@@ -193,6 +241,22 @@ function enterprise_editor_ckeditor_plugin() {
   }
 
   return $plugins;
+}
+
+function enterprise_editor_preprocess_html(&$variables) {
+  if (path_is_admin(current_path())) {
+    // reference your current admin theme  
+    drupal_add_css(drupal_get_path('module', 'enterprise_editor') . '/enterprise_editor.css', array('weight' => CSS_THEME));
+  }
+
+  // Load font icons on all pages (admin included).
+  $icon_bundles = icon_bundles();
+  foreach ($icon_bundles as $bundle) {
+    // Only enable the ones that are available.
+    if ($bundle['status']) {
+      icon_process_attached($bundle);
+    }
+  }
 }
 
 /*
