@@ -3,6 +3,15 @@
 function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_state) {
 	$form['general']['#weight'] = -8;
 
+	$logo_options = array('default' => "Default") + image_style_options(false);
+	$form['logo']['settings']['logo_image_style'] = array(
+		'#type' => 'select',
+		'#title' => 'Logo Image Style',
+		'#description' => t('Use an image style to change the dimensions of logo to better fit the theme.'),
+		'#default_value' => theme_get_setting('logo_image_style'),
+		'#options' => $logo_options,
+	);
+
 	$form['enterprise_bootstrap'] = array(
 		'#type' => 'vertical_tabs',
 		'#prefix' => '<h2><small>Enterprise Bootstrap</small></h2>',
@@ -121,6 +130,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#title' => t('Navigation'),
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
+	);
+	
+	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Navigation Region Class'),
+		'#default_value' => theme_get_setting('navbar_region_class'),
+		'#description' => t('Class that wraps around the Logo and Menu.')
 	);
 	$form['enterprise_bootstrap_region_settings']['navigation']['nav_logo_class'] = array(
 		'#type' => 'textfield',
@@ -268,6 +284,42 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('Disabled'),
 			1 => t('Production - jquery.fittext.min.js'),
 			2 => t('Development - jquery.fittext.js'),
+		),
+	);
+	
+	$form['enterprise_bootstrap_js']['fittext_selectors'] = array(
+		'#type' => 'container',
+		'#title' => t('FitText Selectors'),
+		'#states' => array(
+      'invisible' => array(
+        ':input[name=fittext]' => array('value' => 0),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_description'] = array(
+		'#type' => 'markup',
+		'#markup' => '<div class="description help-block"><p>FitText will accept a compression level and selector for text you would like to update. Compression refers to how much you would like to compress the text down. Default is 1.</p>
+									<p>Add in your compression and selectors as a key value pair, <strong>one per line</strong>. For example:</p>
+									<p><pre>1.6|.not-logged-in #navbar .navbar-header .name</pre></p></div><br />',
+		
+	);
+
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_selector'] = array(
+    '#title' => t('FitText selectors'),
+    '#type' => 'textarea',
+    '#default_value' => (theme_get_setting('fittext_selector')) ? theme_get_setting('fittext_selector') : '',
+    '#description' => t('Add the compression level and selectors you would like to target with FitText.'),
+  );
+
+	$form['enterprise_bootstrap_js']['bootstrap_hover_dropdown'] = array(
+		'#type' => 'select',
+		'#title' => t('Bootstrap Hover Dropdown'),
+		'#description' => t('A jQuery plugin that delays the dropdown of the menu on hover. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/CWSpear/bootstrap-hover-dropdown'))),
+		'#default_value' => (theme_get_setting('bootstrap_hover_dropdown')) ? theme_get_setting('bootstrap_hover_dropdown') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production - bootstrap-hover-dropdown.min.js'),
+			2 => t('Development - bootstrap-hover-dropdown.js'),
 		),
 	);
 

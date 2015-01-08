@@ -43,5 +43,5 @@ body.cke_editable ul {
 }
 body.cke_editable ul,
 .cke_editable ul li {
-  list-style: disc;
+  list-style: none;
 }

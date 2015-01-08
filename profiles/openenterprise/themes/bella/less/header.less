@@ -7,6 +7,9 @@ header {
 .navbar-default {
 	background-color: rgba(255, 255, 255, 0.95);
 	border-bottom: 1px solid @gray-light;
+	height: auto;
+	overflow: visible;
+	z-index: 99;
 	color: @gray;
 	.navbar-nav {
 		> li {
@@ -88,6 +91,7 @@ header {
 }
 .navbar > .container .navbar-brand {
 	margin-left: 0;
+	overflow: hidden;
 }
 
 // Header - logo, name, etc
@@ -110,6 +114,7 @@ header {
 		margin: 0 !important;
 		padding: 5px 0 0;
 		text-transform: uppercase;
+		word-break: break-all;
 		&:hover {
 			color: @brand-primary;
 		}
@@ -130,7 +135,8 @@ header {
 		padding: 10px;
 		
 		img {
-			display: inline-block;
+			max-width:100%;
+			max-height:100%;
 		}
 		@media @mobile {
 			display: block;
@@ -149,8 +155,22 @@ header {
 		}
 	}
 }
+.navbar-header {
+	@media @tablet {
+		float: left;
+		width: 25%;
+	}
+	@media @normal, @wide {
+		float: left;
+		width: 18%;
+	}
+}
 .navbar-collapse {
 	overflow: auto;
+	@media @tablet {
+		float: left;
+		width: 75%;
+	}
 	@media @normal, @wide {
 		float: left;
 		width: 82%;
@@ -231,7 +251,6 @@ header {
 							> .dropdown-menu {
 								border-top: 0;
 								display: block;
-								position: fixed;
 								left: auto;
 							}
 						}
@@ -306,4 +325,27 @@ header {
 			}
 		}
 	}
+}
+
+.nav, .collapse, .dropup, .dropdown {
+  position: static;
+}  
+
+.dropdown-menu {
+  left: auto;
+  width: auto;
+}
+/* This enables hover dropdowns */
+.dropdown:hover .dropdown-menu {
+  display: block;
+  z-index: 99;
+  white-space: nowrap;
+}
+.dropdown:hover .dropdown-menu > li > a {
+  width: auto;
+  white-space: nowrap;
+}
+.nav.navbar-right .dropdown-menu {
+  left: auto;
+  right: 0;
 }

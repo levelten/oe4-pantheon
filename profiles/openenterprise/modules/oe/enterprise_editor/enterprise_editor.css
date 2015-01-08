@@ -1,0 +1,12 @@
+/**
+ * 	MP 12082014
+ *  Custom Styles for insert icon popup in CKeditor
+ */
+[aria-labelledby~="cke_dialog_title_158"] {  }
+[aria-labelledby~="cke_dialog_title_158"] .cke_dialog_contents {  }
+.cke_icon_background { background-color: transparent; }
+.cke_icon_background > a.cke_icon i.icon { color: #008eb1!important; font-size: 1.8em!important; opacity: .35!important; }
+.cke_icon_background > a.cke_icon i.icon:hover, 
+.cke_icon_full_background > a.cke_icon i.icon { opacity: 1!important; background-color: transparent!important; }
+.cke_icon_preview > i.icon { color: #008EB1!important; }
+/*.cke_icon_preview_code {  }*/
