@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Enterprise News Content feature.
- */
-
-include_once 'enterprise_news_content.features.inc';
