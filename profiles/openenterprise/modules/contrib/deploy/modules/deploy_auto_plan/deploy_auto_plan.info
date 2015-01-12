@@ -4,10 +4,11 @@ core = 7.x
 
 dependencies[] = deploy
 
+files[] = deploy_auto_plan.test
 
-; Information added by drush on 2013-12-13
-version = "7.x-2.0-alpha2+1-dev"
+; Information added by Drupal.org packaging script on 2014-09-23
+version = "7.x-2.0-alpha3"
 core = "7.x"
 project = "deploy"
-datestamp = "1386959684"
+datestamp = "1411455082"
 

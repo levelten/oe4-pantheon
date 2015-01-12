@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Entity Depedendency module functions.
+ */
+
+/**
  * Include core hook implementations.
  */
 module_load_include('inc', 'entity_dependency', 'entity_dependency.core');
@@ -17,8 +22,14 @@ module_load_include('inc', 'entity_dependency', 'entity_dependency.core');
  *   );
  * @endcode
  */
-function entity_dependency_iterator($entities) {
-  $iterator = new EntityDependencyIterator($entities);
+function entity_dependency_iterator($entities, $plugin = 'default_iterator') {
+  if (module_exists('ctools')) {
+    $class_name = ctools_plugin_load_class('entity_dependency', 'iterator', $plugin, 'handler');
+    $iterator = new $class_name($entities);
+  }
+  else {
+    $iterator = new EntityDependencyIterator($entities);
+  }
   return new EntityDependencyIteratorIterator($iterator);
 }
 
@@ -62,4 +73,56 @@ function entity_dependency_add(&$dependencies, $objects, $entity_type, $properti
       }
     }
   }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function entity_dependency_ctools_plugin_api($module, $api) {
+  if ($module == 'entity_dependency' && $api == 'iterator') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function entity_dependency_ctools_plugin_type() {
+  $plugins['iterator'] = array(
+    'cache' => TRUE,
+    'use hooks' => TRUE,
+  );
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_entity_dependency_iterator().
+ */
+function entity_dependency_entity_dependency_iterator() {
+  $plugins = array();
+
+  $plugins['default_iterator'] = array(
+    'title' => t('Default Entity Dependency Iterator'),
+    'description' => t('Iterate through entities dependencies.'),
+    'handler' => 'EntityDependencyIterator',
+    'file' => 'EntityDependencyIterator.inc',
+  );
+
+  return $plugins;
+}
+
+/**
+ * Fetches all ctools plugins defined by entity_dependency.
+ */
+function entity_dependency_get_all_ctools_plugins() {
+  ctools_include('plugins');
+  $iterators = ctools_get_plugins('entity_dependency', 'iterator');
+
+  $plugins = array();
+  foreach ($iterators as $machine_name => $plugin) {
+    $plugins[$machine_name] = $plugin['title'];
+  }
+
+  return $plugins;
 }

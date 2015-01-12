@@ -1,9 +1,17 @@
 <?php
+/**
+ * @file
+ * Deploy UI for managing deployment plans.
+ */
+// @ignore style_class_names:file
 
+/**
+ * CTools Export UI class for deployment plans.
+ */
 class deploy_ui_plan extends ctools_export_ui {
 
   /**
-   * Pseudo implementation of hook_menu_alter().
+   * Implementats CTools psuedo hook_menu_alter().
    *
    * @todo
    *   Can we do this in $plugin instead?
@@ -79,7 +87,7 @@ class deploy_ui_plan extends ctools_export_ui {
       '#default_value' => $item->fetch_only,
     );
 
-    $form['fieldset'] = array(
+    $form['deployment_process'] = array(
       '#type' => 'fieldset',
       '#title' => t('Deployment process'),
       '#description' => t('Configure how the deployment process should behave.'),
@@ -100,7 +108,7 @@ class deploy_ui_plan extends ctools_export_ui {
       );
     }
 
-    $form['fieldset']['processor_plugin'] = array(
+    $form['deployment_process']['processor_plugin'] = array(
       '#prefix' => '<label>' . t('Processor') . '</label>',
       '#type' => 'tableselect',
       '#required' => FALSE,
@@ -125,7 +133,7 @@ class deploy_ui_plan extends ctools_export_ui {
     if (!is_array($item->endpoints)) {
       $item->endpoints = unserialize($item->endpoints);
     }
-    $form['fieldset']['endpoints'] = array(
+    $form['deployment_process']['endpoints'] = array(
       '#prefix' => '<label>' . t('Endpoints') . '</label>',
       '#type' => 'tableselect',
       '#required' => FALSE,
@@ -137,6 +145,23 @@ class deploy_ui_plan extends ctools_export_ui {
       ),
       '#options' => $options,
       '#default_value' => (array)$item->endpoints,
+    );
+
+    // Dependency plugin.
+    $form['dependency_iterator'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Dependency plugin'),
+      '#description' => t('The iterator to handle the dependencies of the deployment plan'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+
+    $form['dependency_iterator']['dependency_plugin'] = array(
+      '#type' => 'select',
+      '#title' => t('Plugin'),
+      '#options' => entity_dependency_get_all_ctools_plugins(),
+      '#default_value' => $item->dependency_plugin,
+      '#required' => TRUE,
     );
   }
 
@@ -168,8 +193,14 @@ class deploy_ui_plan extends ctools_export_ui {
     else {
       $item->endpoints = array();
     }
+
+    // Dependency Iterator.
+    $item->dependency_plugin = $form_state['values']['dependency_plugin'];
   }
 
+  /**
+   * Form form configuring the aggegator.
+   */
   function edit_form_aggregator(&$form, &$form_state) {
     $item = $form_state['item'];
     if (!is_array($item->aggregator_config)) {
@@ -191,6 +222,9 @@ class deploy_ui_plan extends ctools_export_ui {
     }
   }
 
+  /**
+   * Submit handler for the aggregator configuration form.
+   */
   function edit_form_aggregator_submit(&$form, &$form_state) {
     $item = $form_state['item'];
     if (!empty($form_state['values']['aggregator_config'])) {
@@ -201,6 +235,9 @@ class deploy_ui_plan extends ctools_export_ui {
     }
   }
 
+  /**
+   * Processor configuration form.
+   */
   function edit_form_processor(&$form, &$form_state) {
     $item = $form_state['item'];
     if (!empty($item->processor_plugin)) {
@@ -226,6 +263,9 @@ class deploy_ui_plan extends ctools_export_ui {
     }
   }
 
+  /**
+   * Submit handler for the processor configuration form.
+   */
   function edit_form_processor_submit(&$form, &$form_state) {
     $item = $form_state['item'];
     if (!empty($form_state['values']['processor_config'])) {
@@ -236,6 +276,9 @@ class deploy_ui_plan extends ctools_export_ui {
     }
   }
 
+  /**
+   * Renders the deployment plan page.
+   */
   function deploy_page($js, $input, $plan) {
     $form_state = array(
       'plugin' => $this->plugin,
@@ -263,9 +306,15 @@ class deploy_ui_plan extends ctools_export_ui {
 
 }
 
+/**
+ * Form for confirming the user wants to deploy this plan.
+ */
 function deploy_ui_plan_confirm_form($form, $form_state) {
   $plan = $form_state['plan'];
-  $path = empty($_REQUEST['cancel_path']) ? 'admin/structure/deploy/plans' : $_REQUEST['cancel_path'];
+  $path = 'admin/structure/deploy/plans';
+  if (!empty($_REQUEST['cancel_path']) && !url_is_external($_REQUEST['cancel_path'])) {
+    $path = $_REQUEST['cancel_path'];
+  }
 
   if (empty($plan->processor) || $plan->fetch_only) {
     drupal_set_message(t("The plan @name can't be deployed in push fashion because it missing a processor plugin or is configured <em>fetch-only</em>.", array('@name' => $plan->name)), 'error');
