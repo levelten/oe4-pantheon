@@ -313,7 +313,7 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
 
 function enterprise_apps_install_demo(&$install_state) {
   $profile_settings = variable_get('enterprise_apps_profile_settings', array());
-drupal_set_message(json_encode($profile_settings));
+//drupal_set_message(json_encode($profile_settings));
   $app = '';
   if ($profile_settings['demo']['mode'] != 'min') {
     $app = 'enterprise_demo';
@@ -373,7 +373,7 @@ drupal_set_message(json_encode($profile_settings));
       array(),
     );
 
-drupal_set_message(json_encode($batch));
+//drupal_set_message(json_encode($batch));
 
     return $batch;
   }
