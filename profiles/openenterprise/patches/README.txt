@@ -17,6 +17,8 @@ copy to: /profiles/openenterprise/modules/contrib/strongarm
 Note: some methods of executing the patch may put the strongarm.api.php file in the repo root.
 If this happens, copy it back to the strongarm module directory.
 
+If patch fails due to expected dev/null on line 16, change the line returns to Unix style "LF"
+
 Adds alter hooks to strongarm variables on import and export.
 
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
