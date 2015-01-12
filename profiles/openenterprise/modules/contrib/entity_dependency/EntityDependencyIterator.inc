@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Entity Dependency classes.
+ */
+
+/**
  * Wrapper class around the SPL RecursiveIteratorIterator.
  */
 class EntityDependencyIteratorIterator extends RecursiveIteratorIterator {}
@@ -84,10 +89,35 @@ class EntityDependencyIterator implements RecursiveIterator {
    * @param array $parent
    *   The parent array of the current entity.
    *
-   * @see entity_dependency_iterator().
+   * @see entity_dependency_iterator()
    */
   public function __construct($entities, &$parent = NULL) {
-    $this->entities = $entities;
+    $this->entities = array();
+    foreach ($entities as $entity_arr) {
+      $entity_obj = entity_load($entity_arr['type'], array($entity_arr['id']));
+      if (empty($entity_obj)) {
+        if (isset($parent)) {
+          $error_msg = 'Failed to load %type ID %id, which is a dependency of %parent_type ID %parent_id.';
+          $error_vars = array(
+            '%type' => $entity_arr['type'],
+            '%id' => $entity_arr['id'],
+            '%parent_type' => $parent->current['type'],
+            '%parent_id' => $parent->current['id'],
+          );
+        }
+        else {
+          $error_msg = t('Failed to load requested %type ID %id.');
+          $error_vars = array(
+            '%type' => $entity_arr['type'],
+            '%id' => $entity_arr['id'],
+          );
+        }
+        watchdog('Entity Dependency', $error_msg, $error_vars, WATCHDOG_WARNING);
+      }
+      else {
+        $this->entities[] = $entity_arr;
+      }
+    }
 
     if (empty($parent)) {
       foreach ($this->entities as $key => $entity) {
@@ -112,8 +142,27 @@ class EntityDependencyIterator implements RecursiveIterator {
     // Don't check for dependencies twice.
     if (!empty($this->current['id']) && !isset($this->checked[$current['type']][$current['id']])) {
       // Load the current entity.
-      $entities = entity_load($current['type'], array($current['id']));
+      if (!empty($current['revision_id'])) {
+        $entity_info = entity_get_info($current['type']);
+        if (!empty($entity_info['entity keys']['revision'])) {
+          $conditions = array($entity_info['entity keys']['revision'] => $current['revision_id']);
+        }
+      }
+      else {
+        $conditions = array();
+      }
+      $entities = entity_load($current['type'], array($current['id']), $conditions);
       $entity = reset($entities);
+
+      // When $entity does not exist (may be the case with references
+      // to deleted taxonomy terms), skip and remove it from $this->entites.
+      if (!$entity) {
+        watchdog('entity_dependency', "Missing entity %id of type %type", array('%id' => $current['id'], '%type' => $current['type']), WATCHDOG_WARNING);
+        // We can't do anything useful with the no-existent entity,
+        // therfore we just remove it.
+        array_shift($this->entities);
+        return FALSE;
+      }
 
       $this->dependencies = module_invoke_all('entity_dependencies', $entity, $current['type']);
       //$this->belongings = module_invoke_all('entity_belongings', $entity, $this->entityType);
@@ -156,7 +205,7 @@ class EntityDependencyIterator implements RecursiveIterator {
       // isn't a part of the entities. However, we need that entity.. So we add
       // the parent as a part of the entities. And since children always should
       // go first, we add the parent last.
-      $entities[] = array('id' => $current['id'], 'type' => $current['type']);
+      $entities[] = $current;
     }
     return $entities;
   }
