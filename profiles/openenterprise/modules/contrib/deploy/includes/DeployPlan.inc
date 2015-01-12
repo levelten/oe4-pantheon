@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Definition of a deployment plan and associated exceptions.
+ */
 
 /**
  * Exception raised by malformed deployment plans.
@@ -40,7 +44,7 @@ class DeployPlan {
    * @var string
    */
   public $description = '';
- 
+
   /**
    * Whether debug mode is enabled for this plan.
    *
@@ -100,6 +104,12 @@ class DeployPlan {
    * @var array
    */
   public $endpoints = array();
+
+  /**
+   * The plugin that this plan will use to define the dependencies
+   * @var string
+   */
+  public $dependency_plugin = NULL;
 
   /**
    * Load the plan with its aggregator and processor.

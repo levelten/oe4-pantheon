@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Interface definition for deploy aggregators.
+ */
 
 /**
  * Interface for all deploy aggregators.
@@ -106,6 +110,6 @@ class DeployAggregatorBase implements DeployAggregator {
    */
   public function getIterator() {
     $entities = $this->getEntities();
-    return deploy_iterator($entities);
+    return deploy_iterator($entities, $this->plan);
   }
 }

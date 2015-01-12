@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Deploy module functions.
+ */
 
 /**
  * Include core implementations and Deploy's own implementations.
@@ -146,6 +150,7 @@ function deploy_plan_create($schema, $item) {
 function deploy_plan_load($name) {
   $plans = deploy_plan_load_all();
   if (isset($plans[$name])) {
+     drupal_alter("deploy_plan_load", $plans[$name]);
     return $plans[$name];
   }
   return FALSE;
@@ -164,6 +169,27 @@ function deploy_plan_load_all($args = array()) {
       $plan->load();
     }
     return $plans;
+  }
+}
+
+/**
+ * Loader callback for all enabled deployment plans.
+ */
+function deploy_plan_load_all_enabled($args = array()) {
+  $type = !empty($args) ? 'conditions' : 'all';
+  ctools_include('export');
+  $enabled_plans = array();
+  $all_plans = ctools_export_load_object('deploy_plans', $type, $args);
+  if (isset($all_plans)) {
+    // Load each plan's configuration into itself.
+    foreach ($all_plans as $plan) {
+      if (!empty($plan->disabled)) {
+        continue;
+      }
+      $plan->load();
+      $enabled_plans[$plan->name] = $plan;
+    }
+    return $enabled_plans;
   }
 }
 
@@ -244,7 +270,7 @@ function deploy_plan_save($data) {
   foreach ($data as $key => $value) {
     $plan->{$key} = $value;
   }
-  
+
   $returned = ctools_export_crud_save('deploy_plans', $plan);
   if (SAVED_NEW !== $returned && SAVED_UPDATED !== $returned) {
     throw new DeployPlanException('Failed to create plan.');
@@ -254,12 +280,35 @@ function deploy_plan_save($data) {
 }
 
 /**
+ * Implements hook_entity_dependency_iterator().
+ */
+function deploy_entity_dependency_iterator() {
+  $plugins = array();
+
+  $plugins['deploy_iterator'] = array(
+    'title' => t('Deploy Iterator'),
+    'description' => t('Default iterator for Deploy to return UUID entities and invoke Deploy-specific hooks.'),
+    'handler' => 'DeployIterator',
+    'file' => 'includes/DeployIterator.inc',
+  );
+
+  return $plugins;
+}
+
+/**
  * Constructs a deployment iterator, which is the core of the dependency
  * framework.
  */
-function deploy_iterator($entities) {
-  $iterator = new DeployIterator($entities);
-  return new EntityDependencyIteratorIterator($iterator);
+function deploy_iterator($entities, $plan = NULL) {
+  if (is_null($plan) || empty($plan->dependency_plugin)) {
+    $iterator = new DeployIterator($entities);
+    return new EntityDependencyIteratorIterator($iterator);
+  }
+  elseif (!empty($plan->dependency_plugin)) {
+    $class_name = ctools_plugin_load_class('entity_dependency', 'iterator', $plan->dependency_plugin, 'handler');
+    $iterator = new $class_name($entities);
+    return new EntityDependencyIteratorIterator($iterator);
+  }
 }
 
 /**
@@ -308,7 +357,7 @@ function deploy_queue_worker_deploy($entity, &$context = NULL) {
 
   if ($plan && $endpoint) {
     $entities = array(array('type' => $entity->__metadata['type'], 'id' => $entity->__metadata['id']));
-    $iterator = deploy_iterator($entities);
+    $iterator = deploy_iterator($entities, $plan);
     $endpoint->deploy($entity->__metadata['deployment_key'], $iterator, $entity->__metadata['lock_name']);
   }
 }
@@ -322,7 +371,7 @@ function deploy_queue_worker_publish($entity, &$context = NULL) {
 
   if ($plan && $endpoint) {
     $entities = array(array('type' => $entity->__metadata['type'], 'id' => $entity->__metadata['id']));
-    $iterator = deploy_iterator($entities);
+    $iterator = deploy_iterator($entities, $plan);
     $endpoint->publish($entity->__metadata['deployment_key'], $iterator, $entity->__metadata['lock_name']);
     $context['results'][$entity->__metadata['endpoint_name']] = $entity->__metadata['plan_name'];
   }
