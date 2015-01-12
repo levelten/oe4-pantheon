@@ -12,6 +12,13 @@ copy to: /profiles/openenterprise/modules/contrib/deploy
 Adds checkbox to export a file via deploy/uuid
 
 
+PATCH: strongarm-2076543-import-export-value-alter-hooks.patch
+copy to: /profiles/openenterprise/modules/contrib/strongarm
+Note: some methods of executing the patch may put the strongarm.api.php file in the repo root.
+If this happens, copy it back to the strongarm module directory.
+
+Adds alter hooks to strongarm variables on import and export.
+
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
 copy to: /profiles/openenterprise/modules/contrib/uuid
 
