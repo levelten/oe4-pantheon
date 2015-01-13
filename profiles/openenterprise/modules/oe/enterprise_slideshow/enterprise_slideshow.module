@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Slideshow feature.
+ */
+
+include_once 'enterprise_slideshow.features.inc';
