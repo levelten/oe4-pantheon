@@ -1,7 +1,7 @@
 <?php
+
 /**
- * @file
- * icon.api.php
+ * @file icon.api.php
  * Hooks and form elements provided by the Icon API module.
  */
 
@@ -13,7 +13,7 @@
 /**
  * Define render hook information.
  *
- * @return array
+ * @return $hooks
  *   An associative array containing:
  *   - render_name: A unique machine name and an associative array containing:
  *     - file: Optional, file where the preprocessing and theming hooks are
@@ -45,7 +45,7 @@ function hook_icon_render_hooks_alter(&$hooks) {
 /**
  * Define information about icon bundles.
  *
- * @return array
+ * @return $bundles
  *   An associative array containing:
  *   - bundle_name: A unique machine name and an associative array containing:
  *     - render: Required, name of the rendering hook this bundle should use.
@@ -61,8 +61,8 @@ function hook_icon_render_hooks_alter(&$hooks) {
  *       fall back to using the machine name of the extension that implements
  *       this hook.
  *     - url: Optional, URL for more information regarding the bundle.
- *     - version: Optional, supplemental information for identifying the bundle
- *       version.
+ *     - version: Optional, supplemental information for identifying the bundle's
+ *       revision iteration.
  *     - path: Optional, path to where the bundle's resource files are located.
  *       If omitted, it will fall back to using the path of the extension that
  *       implements this hook.
@@ -93,15 +93,14 @@ function hook_icon_bundles() {
       'warning' => 'Message: Warning',
     ),
     'settings' => array(
-      // Defaults to 'png' for the render hook: image.
-      'extension' => 'gif',
+      'extension' => 'gif', // Defaults to 'png' for the render hook: image.
     ),
     '#attached' => array(
       'css' => array(),
       'js' => array(),
       'library' => array(),
-      // To invoke "callback_function($arg1, $arg2, $arg3)"
-      'callback_function' => array(array('$arg1', '$arg2', '$arg3')),
+      // To invoke callback_function($arg1, $arg2, $arg3)
+      'callback_function' => array(array($arg1, $arg2, $arg3)),
     ),
   );
   return $bundles;
@@ -111,19 +110,6 @@ function hook_icon_bundles() {
  * Allow extensions to alter icon bundles before they become cached.
  */
 function hook_icon_bundles_alter(&$bundle) {
-}
-
-/**
- * Allow extensions to alter a bundle listing before it's viewed.
- *
- * @param array $build
- *   The render array passed by reference.
- * @param array $bundle
- *   The bundle array used for context.
- *
- * @see icon_bundle_list()
- */
-function hook_icon_bundle_list_alter(&$build, $bundle) {
 }
 
 /**
@@ -148,29 +134,12 @@ function hook_process_icon(&$variables) {
 }
 
 /**
- * Perform actions after a bundle has been deleted.
- *
- * This hook is invoked after a bundle has been removed from the database and
- * filesystem. This hook simply allows extensions to run additional tasks with
- * the bundle's data array as context after it has been successfully deleted.
+ * Allow extensions to run additional tasks with the bundle's data array after
+ * it was successfully deleted.
  *
  * @see icon_bundle_delete()
  */
 function hook_icon_bundle_delete($bundle) {
-  // Do something in your custom module, such as removing variables or database
-  // rows in a different table that your custom module is tracking.
-}
-
-/**
- * Perform actions after a bundle, provided in code, has been reset.
- *
- * This hook is invoked after a bundle's configuration has been removed from
- * the database. This hook simply allows extensions to run additional tasks
- * with the bundle's data array as context after it has been successfully reset.
- *
- * @see icon_bundle_delete()
- */
-function hook_icon_bundle_reset($bundle) {
   // Do something in your custom module, such as removing variables or database
   // rows in a different table that your custom module is tracking.
 }
@@ -192,10 +161,9 @@ function hook_icon_bundle_save_alter(&$bundle) {
 }
 
 /**
- * Allow extensions to be grouped with Icon API on the permissions table.
+ * Allow extensions to be grouped together with Icon API on the permissions table.
  * 
- * @return array
- *   Same type of array in hook_permission().
+ * @return The same type of array in hook_permission().
  *
  * @see icon_permission()
  * @see icon_block_icon_permission()
@@ -216,7 +184,7 @@ function hook_icon_permission() {
  * To provide archived file import support, a provider must implement
  * hook_icon_PROVIDER_import_process() and hook_icon_PROVIDER_import_validate().
  *
- * @return array
+ * @return $providers
  *   An associative array containing:
  *   - provider_name: A unique machine name and an associative array containing:
  *     - title: Optional, human readable title for the provider. If omitted, it
@@ -245,8 +213,6 @@ function hook_icon_providers() {
 }
 
 /**
- * Provider process archive import.
- *
  * Allow extensions to properly process the bundle after it has been extracted
  * to the proper location and successfully imported. This is typically the step
  * where most logic should take place to determine available icons and settings.
@@ -259,14 +225,13 @@ function hook_icon_PROVIDER_import_process(&$bundle) {
 }
 
 /**
- * Validate callback for 'hook_icon_PROVIDER_import_process'.
- *
- * Must return TRUE to claim bundle.
+ * Validate callback for provider archive import. Must return TRUE to claim
+ * bundle.
  *
  * @see icon_provider_import_form_validate()
  */
 function hook_icon_PROVIDER_import_validate($bundle) {
-  if ($bundle['condition'] === 'condition_met') {
+  if ($condition === 'condition_met') {
     return TRUE;
   }
   $provider = icon_provider_load($bundle['provider']);
@@ -285,17 +250,15 @@ function hook_icon_PROVIDER_import_validate($bundle) {
 
 /**
  * Implements theme_icon_RENDER_HOOK().
- *
  * Return an image of the requested icon.
  *
- * @param array $variables
+ * @param $variables
  *   An associative array containing:
  *   - attributes: Associative array of HTML attributes.
  *   - bundle: An associative array containing various properties.
  *   - icon: Name of the icon requested from the above bundle.
  *
- * @return string
- *   HTML markup for the requested icon.
+ * @return HTML markup for the requested icon.
  *
  * @see hook_icon_bundles()
  * @see theme_icon_image()
@@ -328,24 +291,23 @@ function theme_icon_RENDER_HOOK($variables) {
 
 /**
  * Implements the icon_selector input element.
- *
  * The icon_selector sets a tree state of TRUE, values will be inside
  * the element's value tree as "bundle" and "icon".
  * 
- * string #type
+ * @param string #type
  *   The type of element to render, must be: icon_selector.
- * string #title
+ * @param string #title
  *   Optional, the title of the fieldset.
  *   Default, "Icon".
- * boolean #collapsible
+ * @param boolean #collapsible
  *   Optional, determine whether the fieldset is collapsible.
  *   Default, TRUE.
- * boolean #collapsed
- *   Optional, determine whether the fieldset should initialize in a collapsed
- *   state. Default, FALSE.
- *  string #default_bundle
+ * @param boolean #collapsed
+ *   Optional, determine whether the fieldset should initialize in a collapsed state.
+ *   Default, FALSE.
+ * @param string #default_bundle
  *   Optional, machine name of the default bundle to initialize with.
- * string #default_icon
+ * @param string #default_icon
  *   Optional, machine name of the default icon to initialize with.
  *  
  * @see icon_block_form_alter()
