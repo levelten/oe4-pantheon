@@ -30,6 +30,7 @@ Adds a hook to alter uuid entities (content) when the content is imported.
 This is used to reverse alterations done using hook_uuid_entities_features_export_entity.
 Used with webform blocks to add uuid to block id on export then replace uuid with nid on import.
 
+
 PATCH: views_contextual_links_on_page_element-1493210-20.patch
 copy to: /profiles/openenterprise/modules/contrib/views
 issue: https://www.drupal.org/node/1493210

@@ -57,21 +57,21 @@ function contentanalysis_menu() {
   $items['admin/contentanalysis/analyze_js'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_analyze_js',
-    'access callback' => TRUE,
+    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/contentanalysis/ajax/analysis'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_modal_popup',
-    'access callback' => TRUE,
+    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/contentanalysis/ajax/analysis_only'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_modal_popup_only',
-    'access callback' => TRUE,
+    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
@@ -124,8 +124,8 @@ return 'ok';
 function contentanalysis_permission() {
   return array(
     'perform content analysis' => array(
-      'title' => t('admin content analysis'),
-      'description' => t('Perform content analysis'),
+      'title' => t('Perform content analysis'),
+      'description' => t('Enables user to analyze content and access content analysis reports.'),
     ),
   );
 }
@@ -458,7 +458,7 @@ function contentanalysis_get_analyzer_form_element($params = array(), $analyzers
 function contentanalysis_analyze_js() {
   $analysis = array();
   if ($_SESSION['contentanalysis']['code'] != $_POST['code']) {
-    watchdog('contentanalysis', 'Blocked invalid attempt ' . $_SESSION['contentanalysis']['code'] . ' != ' . $_POST['code']);
+    watchdog('contentanalysis', 'Blocked invalid attempt ' . check_plain($_SESSION['contentanalysis']['code']) . ' != ' . check_plain($_POST['code']));
     exit;
   }
   
