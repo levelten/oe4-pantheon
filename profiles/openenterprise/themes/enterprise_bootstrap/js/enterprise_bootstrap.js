@@ -43,7 +43,21 @@
         });
       }
 
-    }
-  };
-  
+      // Social Follow block - even button width
+      var $socialFollow = $(".style-social-media.social-follow", context);
+      if ($socialFollow) {
+        var $socialChildren = $socialFollow.children(".btn-social");
+        var socialFollowCount = $socialChildren.length;
+        // Add styling classes
+        $socialChildren.first().addClass("social-first");
+        $socialChildren.last().addClass("social-last");
+        // Add data attribute
+        $socialChildren.each(function() {
+           $(this).attr("data-social-count", Math.round(100/socialFollowCount));
+        });
+      }
+
+  }
+};
+
 })(jQuery, Drupal);
