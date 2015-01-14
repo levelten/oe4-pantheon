@@ -50,17 +50,19 @@
         navbarHeight += 1;
       }
 
-      // Add padding to body.
-      var navbarHeight = navbar.offsetHeight;
-      var bodyHtml = context.querySelector("body.html");
-      bodyHtml.style.paddingTop = navbarHeight+"px";
+      // Add padding to body if using fixed navbar.
+      if (navbar.classList.contains("navbar-fixed-top")) {
+        var navbarHeight = navbar.offsetHeight;
+        var bodyHtml = context.querySelector("body.html");
+        bodyHtml.style.paddingTop = navbarHeight+"px";
       // Update based on window resizing.
       $(window).resize(function(){
         navbarHeight = context.getElementById("navbar").offsetHeight;
         bodyHtml.style.paddingTop = navbarHeight+"px";
       });
-
     }
-  };
+
+  }
+};
 
 })(jQuery, Drupal);
