@@ -57,21 +57,18 @@ function contentanalysis_menu() {
   $items['admin/contentanalysis/analyze_js'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_analyze_js',
-    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/contentanalysis/ajax/analysis'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_modal_popup',
-    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/contentanalysis/ajax/analysis_only'] = array(
     'title' => '',
     'page callback' => 'contentanalysis_modal_popup_only',
-    //'access callback' => TRUE,
     'access arguments' => array('perform content analysis'),
     'type' => MENU_CALLBACK,
   );
