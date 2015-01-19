@@ -110,7 +110,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'text_summary_or_trimmed',
         'weight' => 4,
       ),
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'hidden',
         'module' => 'smart_trim',
         'settings' => array(
@@ -163,7 +163,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 7,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -222,7 +222,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'text_default',
         'weight' => 7,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'module' => 'smart_trim',
         'settings' => array(
@@ -356,13 +356,13 @@ function enterprise_blog_field_default_field_instances() {
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 17,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -374,7 +374,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 19,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -423,13 +423,13 @@ function enterprise_blog_field_default_field_instances() {
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 18,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -441,7 +441,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 17,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -544,7 +544,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 15,
       ),
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -575,7 +575,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'radioactivity_combo_formatter',
         'weight' => 9,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -612,7 +612,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'radioactivity_combo_formatter',
         'weight' => 9,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -839,7 +839,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'image',
         'weight' => 0,
       ),
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'hidden',
         'module' => 'picture',
         'settings' => array(
@@ -901,7 +901,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'image',
         'weight' => 6,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'hidden',
         'module' => 'picture',
         'settings' => array(
@@ -1001,7 +1001,7 @@ function enterprise_blog_field_default_field_instances() {
         'type' => 'image',
         'weight' => 6,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -1156,19 +1156,19 @@ function enterprise_blog_field_default_field_instances() {
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -1216,19 +1216,19 @@ function enterprise_blog_field_default_field_instances() {
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -1276,19 +1276,19 @@ function enterprise_blog_field_default_field_instances() {
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'blog_featured' => array(
+      'drupal_exit();' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',

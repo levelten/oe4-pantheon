@@ -1317,3 +1317,108 @@ function intel_user_register_form_submit(&$form, &$form_state) {
   $pushes = intel_get_page_intel_pushes();
   watchdog('intel_user_register_form_submit', print_r($pushes, 1));
 }
+
+/**
+ * Generates context data array based current page path
+ * @return mixed|string
+ */
+function intel_context() {
+  $context = &drupal_static(__FUNCTION__);
+
+  if (isset($context)) {
+    return $context;
+  }
+  $context = array();
+
+  $is_admin = path_is_admin(current_path());
+
+  if ($is_admin) {
+    $context['section'] = 'admin';
+    $context['section_title'] = t('Admin');
+  }
+
+  $router_item = menu_get_item();
+  $context['router_item'] = $router_item;
+  if (!isset($router_item['page_callback'])) {
+    return $context;
+  }
+
+  // If page is entity uri, add entity data to context
+  $entity_callbacks = array(
+    'node_page_view' => 'node',
+    'user_view_page' => 'user',
+    'bean_view_page' => 'bean',
+  );
+
+  if (!empty($entity_callbacks[$router_item['page_callback']])) {
+    $context['page_type'] = 'entity';
+    $context['entity_type'] = $entity_callbacks[$router_item['page_callback']];
+    $entity_info = entity_get_info($context['entity_type']);
+    if ($context['entity_type'] == 'bean') {
+      if (isset($router_item['page_arguments'][0]) && is_object($router_item['page_arguments'][0])) {
+        $context['entity'] = $router_item['page_arguments'][0];
+      }
+    }
+    else {
+      $context['entity'] = menu_get_object($context['entity_type']);
+    }
+
+    if (isset($entity_info['entity keys']['bundle']) && isset($context['entity']->{$entity_info['entity keys']['bundle']})) {
+      $context['entity_bundle'] = $context['entity']->{$entity_info['entity keys']['bundle']};
+    }
+    if (isset($entity_info['entity keys']['id']) && isset($context['entity']->{$entity_info['entity keys']['id']})) {
+      $context['entity_id'] = $context['entity']->{$entity_info['entity keys']['id']};
+    }
+    if (isset($entity_info['entity keys']['revision']) && isset($context['entity']->{$entity_info['entity keys']['revision']})) {
+      $context['entity_revision'] = $context['entity']->{$entity_info['entity keys']['revision']};
+    }
+
+    if (!$is_admin) {
+      if ($context['entity_type'] == 'node') {
+        $context['section'] = str_replace('enterprise_', '', $context['entity_bundle']);
+      }
+      else {
+        $context['section'] = $context['entity_type'];
+      }
+    }
+  }
+  // If page is a view, add views context
+  else if($router_item['page_callback'] == 'views_page') {
+    $view = views_get_view($router_item['page_arguments'][0]);
+    if (!empty($view->name)) {
+      $context['page_type'] = 'view';
+      $context['view'] = $view;
+      $context['view_name'] = $router_item['page_arguments'][0];
+      $context['view_display'] = $router_item['page_arguments'][1];
+      $tfilter = FALSE;
+      if (isset($view->display['default']->display_options['filters']['type'])) {
+        $tfilter = $view->display['default']->display_options['filters']['type'];
+      }
+      $display = $router_item['page_arguments'][1];
+      if (is_array($display)) {
+        $display = array_shift($display);
+      }
+      if (isset($view->display[$display]->display_options['filters']['type'])) {
+        $tfilter = $view->display[$display]->display_options['filters']['type'];
+      }
+      if ($tfilter) {
+        $tables = array(
+          'node' => 'node',
+          'user' => 'user',
+        );
+        if (!empty($tables[$tfilter['table']])) {
+          $context['entity_type'] = $tables[$tfilter['table']];
+          if (!isset($tfilter['operator']) || ($tfilter['operator'] == 'in')) {
+            $context['entity_bundle'] = array_shift($tfilter['value']);
+            $context['section'] = str_replace('enterprise_', '', $context['entity_bundle']);
+          }
+        }
+      }
+    }
+  }
+
+  // allow other modules to alter context
+  drupal_alter('intel_context', $context);
+
+  return $context;
+}

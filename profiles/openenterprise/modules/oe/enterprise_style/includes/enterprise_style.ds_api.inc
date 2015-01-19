@@ -2,6 +2,54 @@
 
 // Need to convert this module to bootstrap 3
 
+
+/**
+ * Implements hook_ds_view_modes_info().
+ */
+function enterprise_style_ds_view_modes_info() {
+  $view_modes = array();
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'featured';
+  $ds_view_mode->label = 'Featured';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $view_modes['featured'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'mini';
+  $ds_view_mode->label = 'Mini';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['mini'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'image';
+  $ds_view_mode->label = 'Image';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['image'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'text_teaser';
+  $ds_view_mode->label = 'Text teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $view_modes['text_teaser'] = $ds_view_mode;
+
+  return $view_modes;
+}
+
 /**
  * Implements hook_ds_layout_info().
  */
@@ -152,7 +200,7 @@ function enterprise_style_ds_span_column_replace(&$classes, $columns = 1) {
   foreach ($classes_array as $key => &$class) {
     if (strpos($class, 'col-md-') === 0) {
       unset($classes_array[$key]);
-      enterprise_style_span_columns($class, $columns);
+      //enterprise_style_span_columns($class, $columns);
     }
   }
   $classes = implode(' ', $classes_array);

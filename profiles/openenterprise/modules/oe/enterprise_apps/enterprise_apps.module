@@ -1377,3 +1377,82 @@ function enterprise_apps_api_property_load($options, &$message = '') {
     return FALSE;
   }
 }
+
+/**********************************************************
+ * Alter hooks to support apps info settings
+ */
+
+/* TODO migrating apps options configuration from curated app.
+  need to think through best way to do this when. Big question: with the hooks
+  we are using we don't know the context of the app. What is the best way
+  to determine that.
+function enterprise_apps_field_default_field_bases_alter(&$fields) {
+  $config_info = enterprise_apps_config_info_all();
+  foreach ($fields AS $field_name => $field) {
+    if (substr($field_name, -5) == '_tags') {
+      $a = explode('_', $field_name);
+      dsm($a);
+      array_shift($a);
+      $tax = array_pop($a);
+      $app_name = 'enterprise_' . implode('_', $a);
+      dsm($app_name);
+      dsm($config_info);
+      if (!isset($config_info[$app_name])) {
+        continue;
+      }
+    }
+  }
+  return;
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if (($settings['taxonomy_categories'] === FALSE) || ($settings['taxonomy_categories'] != 'curated_categories')) {
+        unset($fields['field_curated_categories']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if (($settings['taxonomy_tags'] === FALSE) || ($settings['taxonomy_tags'] != 'curated_tags')) {
+        unset($fields['field_curated_tags']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+}
+
+function enterprise_apps_field_default_field_instances_alter(&$fields) {
+  dsm($fields);
+  $config_info = enterprise_apps_config_info_all();
+  dsm($config_info);
+  return;
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['node-enterprise_curated-field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if ($settings['taxonomy_categories'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_categories']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_categories']['field_name'] = 'field_' . $settings['taxonomy_categories'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['node-enterprise_curated-field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if ($settings['taxonomy_tags'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_tags']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_tags']['field_name'] = 'field_' . $settings['taxonomy_tags'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+}
+*/
