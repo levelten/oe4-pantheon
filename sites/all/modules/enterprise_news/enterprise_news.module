@@ -1,0 +1,60 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise News feature.
+ */
+
+include_once 'enterprise_news.features.inc';
+
+/**
+ * Implements hook_ds_classes_alter().
+ * Provide the necessary classes for news types.
+ */
+function enterprise_news_ds_classes_alter(&$classes, $name) {
+  if ('ds_classes_regions' === $name) {
+    $classes['style-news-full'] = t('News: Full');
+    $classes['style-news-teaser'] = t('News: Teaser');
+    $classes['style-news-recent'] = t('News: Recent');
+  }
+}
+
+function enterprise_news_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_news'] = array(
+    'title' => t('News'),
+  );
+  $visibility = array(
+    'enterprise_news_view' => array(
+      'title' => t('Show on press release listing pages'),
+      'views' => array(
+        'views' => array('enterprise_news:page'),
+      ),
+    ),
+    'enterprise_news_content_type' => array(
+      'title' => t('Show on news pages'),
+      'node_type' => array(
+        'types' => array('enterprise_news'),
+      )
+    ),
+  );
+  $view = views_get_view('enterprise_news');
+  $display_desc = array();
+  foreach ($view->display AS $name => $display) {
+    $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+  }
+
+  $config['enterprise_news']['blocks'] = array(
+    // Blog categories block
+    'views:enterprise_press-recent' => array(
+      'description' => $display_desc['recent'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presents' => array('enterprise_news_content_type'),
+        'weight' => 5,
+      ),
+      'visibility_presents' => $visibility,
+    ),
+    /**/
+  );
+  return $config;
+}

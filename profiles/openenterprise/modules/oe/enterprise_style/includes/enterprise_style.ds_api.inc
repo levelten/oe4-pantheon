@@ -2,6 +2,54 @@
 
 // Need to convert this module to bootstrap 3
 
+
+/**
+ * Implements hook_ds_view_modes_info().
+ */
+function enterprise_style_ds_view_modes_info() {
+  $view_modes = array();
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'featured';
+  $ds_view_mode->label = 'Featured';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $view_modes['featured'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'mini';
+  $ds_view_mode->label = 'Mini';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['mini'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'image';
+  $ds_view_mode->label = 'Image';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['image'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'text_teaser';
+  $ds_view_mode->label = 'Text teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $view_modes['text_teaser'] = $ds_view_mode;
+
+  return $view_modes;
+}
+
 /**
  * Implements hook_ds_layout_info().
  */
@@ -63,19 +111,19 @@ function enterprise_style_ds_layout_info() {
  */
 function enterprise_style_ds_classes_alter(&$classes, $name) {
   if ('ds_classes_regions' === $name) {
-    $classes['no-grid'] = t('No Span');
-    $classes['col-md-1'] = t('Span 1');
-    $classes['col-md-2'] = t('Span 2');
-    $classes['col-md-3'] = t('Span 3');
-    $classes['col-md-4'] = t('Span 4');
-    $classes['col-md-5'] = t('Span 5');
-    $classes['col-md-6'] = t('Span 6');
-    $classes['col-md-7'] = t('Span 7');
-    $classes['col-md-8'] = t('Span 8');
-    $classes['col-md-9'] = t('Span 9');
-    $classes['col-md-10'] = t('Span 10');
-    $classes['col-md-11'] = t('Span 11');
-    $classes['col-md-12'] = t('Span 12');
+    $classes['no-grid'] = t('No Grid');
+    $classes['col-md-1'] = t('Col Md 1');
+    $classes['col-md-2'] = t('Col Md 2');
+    $classes['col-md-3'] = t('Col Md 3');
+    $classes['col-md-4'] = t('Col Md 4');
+    $classes['col-md-5'] = t('Col Md 5');
+    $classes['col-md-6'] = t('Col Md 6');
+    $classes['col-md-7'] = t('Col Md 7');
+    $classes['col-md-8'] = t('Col Md 8');
+    $classes['col-md-9'] = t('Col Md 9');
+    $classes['col-md-10'] = t('Col Md 10');
+    $classes['col-md-11'] = t('Col Md 11');
+    $classes['col-md-12'] = t('Col Md 12');
 
     $classes['row'] = t('Row');
     $classes['row-fluid'] = t('Row Fluid');
@@ -152,7 +200,7 @@ function enterprise_style_ds_span_column_replace(&$classes, $columns = 1) {
   foreach ($classes_array as $key => &$class) {
     if (strpos($class, 'col-md-') === 0) {
       unset($classes_array[$key]);
-      enterprise_style_span_columns($class, $columns);
+      //enterprise_style_span_columns($class, $columns);
     }
   }
   $classes = implode(' ', $classes_array);

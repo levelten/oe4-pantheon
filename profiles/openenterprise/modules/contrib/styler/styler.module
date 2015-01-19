@@ -35,23 +35,35 @@ function styler_admin_paths() {
   return $paths;
 }
 
+function styler_get_theme() {
+  $custom_themes = array_filter(module_invoke_all('custom_theme'), 'drupal_theme_access');
+  if (!empty($custom_themes)) {
+    $custom_theme = array_pop($custom_themes);
+    return $custom_theme;
+  }
+  if (isset($GLOBAL['theme_key'])) {
+    return $GLOBAL['theme_key'];
+  }
+  return variable_get('theme_default', 'bartik');
+}
+
 function styler_theme_styles(&$styles = array()) {
-  $theme_path = drupal_get_path('theme', STYLER_THEME);
+  $theme_path = drupal_get_path('theme', styler_get_theme());
   if (file_exists($theme_path . '/styler.inc')) {
     include $theme_path . '/styler.inc';
   }
 }
 
-/*
 function styler_access() {
-  $styles = array();
-  styler_theme_styles($styles);
-  return !empty($styles);
+  $theme_path = drupal_get_path('theme', styler_get_theme());
+  if (file_exists($theme_path . '/styler.inc')) {
+    return TRUE;
+  }
+  return FALSE;
 }
-*/
 
 function styler_theme_callback() {
-  return STYLER_THEME;
+  return styler_get_theme();
 }
 
 function styler_styles() {
@@ -91,13 +103,14 @@ function styler_style_view() {
   $nav_items = array();
   $styles = styler_styles();
   $required = array('title', 'element');
-//dsm($styles);
+dsm($styles);
   foreach ($styles as $comp_name => $component) {
+
     $block = new stdClass();
     $block->module = 'styler';
     $block->delta = $comp_name;
     $block->region = 'content';
-    $block->subject = $component['#title'];
+    $block->subject = isset($component['#title']) ? $component['#title'] : '';
     $variables = array();
     $variables['elements']['#title'] = 'titlex';
     $variables['elements']['#children'] = '';
@@ -192,19 +205,35 @@ function theme_styler_element($vars) {
     if ($vars['#tag'] != 'markup') {
       $code = theme('html_tag', array('element' => $vars));
     }
-    $highlight = isset($vars['#value_highlight']) ? $vars['#value_highlight'] : $code;
-    $highlight = htmlentities($highlight);
+
     $output .= '
           <div class="bs-example bs-example-' . $name . '">
             <div class="row col-md-12">
             ' . $code .'
             </div>
           </div>
+        ';
+    // process highlight code
+    $highlight = '';
+    if (isset($vars['#value_highlight'])) {
+      if ($vars['#value_highlight']) {
+        $highlight = $vars['#value_highlight'];
+      }
+    }
+    else {
+      $highlight = $code;
+    }
+
+    if ($highlight) {
+      $highlight = htmlentities($highlight);
+      $output .= '
           <div class="highlight">
             <pre class="prettyprint"><code class="html">' . $highlight . '</code></pre>
           </div>
         ';
+    }
   }
+
   return $output;
 }
 
@@ -479,6 +508,12 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
   $styles['featured'] = array(
     '#title' => t('Featured content'),
     '#description' => t('Components used to highlight special content.'),
+  );
+
+  // Featured content (placeholder for other hooks to implement)
+  $styles['view_modes'] = array(
+    '#title' => t('View modes'),
+    '#description' => t('Display templates for content.'),
   );
 
 

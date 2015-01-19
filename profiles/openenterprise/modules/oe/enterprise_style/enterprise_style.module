@@ -10,6 +10,9 @@ require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterpri
  * Implements hook_ctools_plugin_api().
  */
 function enterprise_style_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "ds" && $api == "ds") {
+    return array("version" => "1");
+  }
   if ($module == "breakpoints" && $api == "default_breakpoint_group") {
     return array("version" => "1");
   }
@@ -33,15 +36,6 @@ function enterprise_style_init() {
   drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/main.js');
   // core styling for custom features (should be overriden in theme)
   drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/main.css');
-}
-
-function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
-  //dsm($entity_type);
-  //dsm($fields);
-}
-
-function enterprise_style_page_alter(&$page) {
-  //dsm($page);
 }
 
 /**
@@ -453,4 +447,92 @@ function enterprise_style_preprocess_page(&$variables) {
   $variables['menu_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-menu'));
   $variables['search_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-search'));
   $variables['user_icon'] = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-users'));
+}
+
+/**
+ * Add wrapper markup for displaying block content in style guide
+ * @param $blocks - Array of block. It is recommended to submit 3 blocks.
+ * @return string
+ */
+function enterprise_style_format_styler_block_value($blocks) {
+  $output = '<div class="row">';
+  foreach ($blocks AS $block) {
+    $output .= '<div class="col-md-4">' . $block . '</div>';
+  }
+  $output .= '</div>';
+  return $output;
+}
+
+
+/**
+ * Provides a demo node for a give content type. First looks for the most
+ * recent published node of given type. If not found, then constructs a demo
+ * node.
+ *
+ * @param $vars
+ * @return bool
+ */
+function enterprise_style_get_demo_node($vars) {
+  if (!isset($vars['type'])) {
+    return FALSE;
+  }
+  $query = db_select('node', 'n')
+    ->fields('n')
+    ->condition('type', $vars['type'])
+    ->condition('status', 1)
+    ->orderBy('created', 'DESC')
+    ->range(0, 1);
+  $n = $query->execute()->fetchObject();
+
+  if (!empty($n->nid)) {
+    return node_load($n->nid);
+  }
+  else {
+    return enterprise_style_construct_demo_node($vars);
+  }
+}
+
+/**
+ * Creates a demo node from variables.
+ * @param $vars
+ * @return bool
+ */
+function enterprise_style_construct_demo_node($vars) {
+  global $user;
+
+// entity_create replaces the procedural steps in the first example of
+// creating a new object $node and setting its 'type' and uid property
+  $values = array(
+    'type' => isset($vars['type']) ? $vars['type'] : 'page',
+    'nid' => isset($vars['nid']) ? $vars['nid'] : 0,
+    'uid' => isset($vars['uid']) ? $vars['uid'] : $user->uid,
+    'created' => isset($vars['created']) ? $vars['created'] : REQUEST_TIME,
+    'status' => 1,
+    'comment' => 1,
+    'promote' => 0,
+  );
+  $entity = entity_create('node', $values);
+
+// The entity is now created, but we have not yet simplified use of it.
+// Now create an entity_metadata_wrapper around the new node entity
+// to make getting and setting values easier
+  $ewrapper = entity_metadata_wrapper('node', $entity);
+
+// Using the wrapper, we do not have to worry about telling Drupal
+// what language we are using. The Entity API handles that for us.
+  $ewrapper->title->set(isset($vars['title']) ? $vars['title'] : 'Example Title');
+
+// Setting the body is a bit different from other properties or fields
+// because the body can have both its complete value and its
+// summary
+  $my_body_content = isset($vars['body']) ? $vars['body'] : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque augue erat, tincidunt interdum scelerisque vel, tempor ut leo. Donec nec accumsan lacus, in pellentesque purus. Nullam sagittis blandit sapien id efficitur. Nam in enim justo. Fusce auctor est ac mauris ultrices luctus. Sed rhoncus eros et diam tempus, eu lobortis ante placerat. Praesent commodo libero lacus, et posuere purus cursus nec';
+  $ewrapper->body->set(
+    array(
+      'value' => $my_body_content,
+      'format' => 'full_html',
+    )
+  );
+  $ewrapper->body->summary->set($my_body_content);
+
+  return $entity;
 }

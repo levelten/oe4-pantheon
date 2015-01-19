@@ -114,13 +114,13 @@ function enterprise_blog_strongarm() {
       'content_hover' => array(
         'custom_settings' => FALSE,
       ),
-      'blog_featured' => array(
+      'featured' => array(
         'custom_settings' => TRUE,
       ),
       'blog_full' => array(
         'custom_settings' => FALSE,
       ),
-      'blog_mini' => array(
+      'mini' => array(
         'custom_settings' => TRUE,
       ),
       'blog_teaser' => array(
@@ -138,7 +138,7 @@ function enterprise_blog_strongarm() {
       'recent_news' => array(
         'custom_settings' => FALSE,
       ),
-      'blog_text' => array(
+      'text_teaser' => array(
         'custom_settings' => TRUE,
       ),
       'colorbox' => array(
