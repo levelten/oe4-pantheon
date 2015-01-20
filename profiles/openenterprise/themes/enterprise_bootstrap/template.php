@@ -147,9 +147,9 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       if ($key == 'workbench_block' || $key == 'metatags') {
         continue;
       }
+      $zebra_class = ($count % 2 == 0) ? 'block-row-even' : 'block-row-odd';
       if (!empty($value['#block']) && $value['#block'] && isset($value['#block']->css_class)) {
-        $zebra_class = ($count % 2 == 0) ? 'block-row-even' : 'block-row-odd';
-        $variables['page']['content'][$key]['classes_array'][] = $zebra_class;
+        $variables['page']['content'][$key]['#block']->css_class = $variables['page']['content'][$key]['#block']->css_class . ' ' . $zebra_class;
         $count--;
       }
     }

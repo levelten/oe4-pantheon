@@ -44,7 +44,7 @@
       }
 
       // Social Follow block - even button width
-      var $socialFollow = $(".style-social-media.social-follow", context);
+      var $socialFollow = $(".style-social-follow", context);
       if ($socialFollow) {
         var $socialChildren = $socialFollow.children(".btn-social");
         var socialFollowCount = $socialChildren.length;
