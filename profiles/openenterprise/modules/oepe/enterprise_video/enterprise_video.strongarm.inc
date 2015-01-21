@@ -113,6 +113,9 @@ function enterprise_video_strongarm() {
       'video_mini_content' => array(
         'custom_settings' => TRUE,
       ),
+      'teaser_stacked' => array(
+        'custom_settings' => TRUE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(

@@ -17,11 +17,6 @@ function enterprise_video_ds_field_settings_info() {
   $ds_fieldsetting->bundle = 'enterprise_video';
   $ds_fieldsetting->view_mode = 'default';
   $ds_fieldsetting->settings = array(
-    'comments' => array(
-      'weight' => '7',
-      'label' => 'hidden',
-      'format' => 'default',
-    ),
     'unpublished' => array(
       'weight' => '5',
       'label' => 'hidden',
@@ -148,7 +143,7 @@ function enterprise_video_ds_layout_settings_info() {
   $ds_layout->entity_type = 'node';
   $ds_layout->bundle = 'enterprise_video';
   $ds_layout->view_mode = 'default';
-  $ds_layout->layout = 'bootstrap_carousel';
+  $ds_layout->layout = 'bootstrap_1col_stacked';
   $ds_layout->settings = array(
     'regions' => array(
       'header' => array(
@@ -165,7 +160,6 @@ function enterprise_video_ds_layout_settings_info() {
       ),
       'footer' => array(
         6 => 'field_tags',
-        7 => 'comments',
       ),
     ),
     'fields' => array(
@@ -176,7 +170,6 @@ function enterprise_video_ds_layout_settings_info() {
       'body' => 'middle',
       'unpublished' => 'middle',
       'field_tags' => 'footer',
-      'comments' => 'footer',
     ),
     'classes' => array(
       'layout_class' => array(),

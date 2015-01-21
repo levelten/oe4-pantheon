@@ -28,7 +28,14 @@ function enterprise_video_views_default_views() {
   $handler->display->display_options['style_options']['alignment'] = 'vertical';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
-  $handler->display->display_options['row_plugin'] = 'node';
+  $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['load_comments'] = 0;
+  $handler->display->display_options['row_options']['alternating'] = 0;
+  $handler->display->display_options['row_options']['grouping'] = 0;
+  $handler->display->display_options['row_options']['advanced'] = 0;
+  $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
+  $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'node|created';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'teaser';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Title */
@@ -85,6 +92,9 @@ function enterprise_video_views_default_views() {
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
   /* Relationship: Content: Taxonomy terms on node */
@@ -115,7 +125,6 @@ function enterprise_video_views_default_views() {
   $handler->display->display_options['arguments']['name']['table'] = 'taxonomy_term_data';
   $handler->display->display_options['arguments']['name']['field'] = 'name';
   $handler->display->display_options['arguments']['name']['relationship'] = 'term_node_tid';
-  $handler->display->display_options['arguments']['name']['default_action'] = 'not found';
   $handler->display->display_options['arguments']['name']['title_enable'] = TRUE;
   $handler->display->display_options['arguments']['name']['title'] = 'Videos in %1';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
@@ -130,6 +139,7 @@ function enterprise_video_views_default_views() {
   );
   $handler->display->display_options['arguments']['name']['validate_options']['type'] = 'name';
   $handler->display->display_options['arguments']['name']['validate_options']['transform'] = TRUE;
+  $handler->display->display_options['arguments']['name']['validate']['fail'] = 'empty';
   $handler->display->display_options['arguments']['name']['limit'] = '0';
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
@@ -146,23 +156,24 @@ function enterprise_video_views_default_views() {
     'enterprise_video' => 'enterprise_video',
   );
 
-  /* Display: Embedded page */
-  $handler = $view->new_display('page', 'Embedded page', 'embedded_page');
+  /* Display: Grid Page */
+  $handler = $view->new_display('page', 'Grid Page', 'grid_page');
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
   $handler->display->display_options['style_options']['columns'] = '2';
   $handler->display->display_options['style_options']['wrapper_classes'] = 'row';
-  $handler->display->display_options['style_options']['column_classes'] = 'col-md-6';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-6';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['view_mode'] = 'teaser_stacked';
   $handler->display->display_options['row_options']['load_comments'] = 0;
   $handler->display->display_options['row_options']['alternating'] = 0;
   $handler->display->display_options['row_options']['grouping'] = 0;
   $handler->display->display_options['row_options']['advanced'] = 0;
   $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
   $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'node|created';
-  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'teaser';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'teaser_stacked';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['header'] = FALSE;
   /* Header: Global: Text area */
@@ -192,21 +203,10 @@ height: 100%;
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
-  $handler->display->display_options['path'] = 'videos_embedded';
+  $handler->display->display_options['path'] = 'videos_grid';
   $handler->display->display_options['menu']['weight'] = '0';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
-
-  /* Display: Main Feed */
-  $handler = $view->new_display('feed', 'Main Feed', 'feed');
-  $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['style_plugin'] = 'rss';
-  $handler->display->display_options['row_plugin'] = 'node_rss';
-  $handler->display->display_options['path'] = 'videos.xml';
-  $handler->display->display_options['displays'] = array(
-    'default' => 'default',
-    'page' => 'page',
-  );
 
   /* Display: Recent Block */
   $handler = $view->new_display('block', 'Recent Block', 'block');
@@ -215,10 +215,19 @@ height: 100%;
   $handler->display->display_options['pager']['options']['items_per_page'] = '5';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
-  $handler->display->display_options['style_options']['columns'] = '2';
+  $handler->display->display_options['style_options']['columns'] = '1';
+  $handler->display->display_options['style_options']['alignment'] = 'vertical';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
-  $handler->display->display_options['row_plugin'] = 'fields';
+  $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
+  $handler->display->display_options['row_options']['load_comments'] = 0;
+  $handler->display->display_options['row_options']['alternating'] = 0;
+  $handler->display->display_options['row_options']['grouping'] = 0;
+  $handler->display->display_options['row_options']['advanced'] = 0;
+  $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
+  $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'node|created';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'mini';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['block_description'] = 'Videos: Recent';
 
@@ -277,6 +286,17 @@ height: 100%;
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['block_description'] = 'Video: Tags';
+
+  /* Display: Main Feed */
+  $handler = $view->new_display('feed', 'Main Feed', 'feed');
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['style_plugin'] = 'rss';
+  $handler->display->display_options['row_plugin'] = 'node_rss';
+  $handler->display->display_options['path'] = 'videos.xml';
+  $handler->display->display_options['displays'] = array(
+    'default' => 'default',
+    'page' => 'page',
+  );
   $export['enterprise_video'] = $view;
 
   return $export;

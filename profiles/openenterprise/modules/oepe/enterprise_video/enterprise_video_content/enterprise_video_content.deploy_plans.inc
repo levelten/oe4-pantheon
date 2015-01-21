@@ -25,6 +25,7 @@ function enterprise_video_content_deploy_plans_default() {
   $plan->processor_plugin = '';
   $plan->processor_config = array();
   $plan->endpoints = array();
+  $plan->dependency_plugin = '';
   $export['enterprise_video_content'] = $plan;
 
   return $export;

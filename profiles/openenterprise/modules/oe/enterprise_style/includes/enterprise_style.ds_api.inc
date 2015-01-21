@@ -47,6 +47,16 @@ function enterprise_style_ds_view_modes_info() {
   );
   $view_modes['text_teaser'] = $ds_view_mode;
 
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'teaser_stacked';
+  $ds_view_mode->label = 'Teaser Stacked';
+  $ds_view_mode->entities = array(
+      'node' => 'node',
+      'user' => 'user',
+  );
+  $view_modes['teaser_stacked'] = $ds_view_mode;
+
   return $view_modes;
 }
 
