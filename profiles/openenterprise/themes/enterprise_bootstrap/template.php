@@ -46,6 +46,8 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
+  // Variables
+  $theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 
   // Preprocess blocks on home page for striping.
   if (module_exists('block_class')) {
@@ -129,35 +131,45 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     unset($variables['page']['sidebar_second']);
   }
 
-  // Add zebra striping to front page in the content area.
+  /*
+   * Zebra Striping for Front Page Blocks
+   */
   $block_striping = theme_get_setting('enterprise_bootstrap_block_striping');
   if (isset($variables['page']['content']) && drupal_is_front_page() && isset($block_striping) && $block_striping) {
     // Get the blocks in the content area.
     $children = element_children($variables['page']['content']);
     $count = (count($children));
 
-    // Don't count metatags or workbench into the count.
-    foreach ($children as $key => $value) {
-      if ($value == 'metatags') { $count--; }
-      if ($value == 'workbench_block') { $count--; }
-    }
-
+    // List of blocks that shouldn't be included in striping, add additional blocks here.
+    // Examples include metatags or workbench.
+    $stripe_exlude = array(
+      'metatags',
+      'workbench_block',
+    );
+    // Remove excluded from count.
+    $count = $count - count($stripe_exlude);
     // Add zebra classes to blocks.
     foreach ($variables['page']['content'] as $key => $value) {
-      if ($key == 'workbench_block' || $key == 'metatags') {
+      // Skip the excluded blocks.
+      if (in_array($key, $stripe_exlude)) {
         continue;
       }
+      // Determine striping class.
       $zebra_class = ($count % 2 == 0) ? 'block-row-even' : 'block-row-odd';
       if (!empty($value['#block']) && $value['#block'] && isset($value['#block']->css_class)) {
-        $variables['page']['content'][$key]['#block']->css_class = $variables['page']['content'][$key]['#block']->css_class . ' ' . $zebra_class;
+        $existing_class = $variables['page']['content'][$key]['#block']->css_class;
+        $variables['page']['content'][$key]['#block']->css_class = $existing_class . ' ' . $zebra_class;
         $count--;
-      }
+      } /*else {
+        $variables['page']['content'][$key]['classes_array'][] = $zebra_class;
+        $count--;
+      }*/
     }
   }
 
   // Option to use Blokk font.
   if(theme_get_setting('enterprise_bootstrap_blokkfont')) {
-    $blokk_path = drupal_get_path('theme', 'enterprise_bootstrap').'/fonts/blokkneue/blokkneue.css';
+    $blokk_path = $theme_path .'/fonts/blokkneue/blokkneue.css';
     $options = array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
@@ -172,14 +184,14 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   $settings = array();
   $settings['megamenu'] = theme_get_setting('enterprise_bootstrap_megamenu');
   $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
-
-  $fittext = theme_get_setting('fittext_selector');
+  $settings['mobilemenuhoverpush'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push');
+  $settings['fittext'] = theme_get_setting('fittext_selector');
   // $bootstrap_hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
   
   // Process FitText selectors
   $selectors = array();
-  if (!empty($fittext)) {
-    $selector = explode("\n", $fittext);
+  if (!empty($settings['fittext'])) {
+    $selector = explode("\n", $settings['fittext']);
     foreach ($selector as $value) {
       $selectors[] = explode('|', $value);
     }
