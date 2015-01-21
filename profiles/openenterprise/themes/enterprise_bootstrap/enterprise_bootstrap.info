@@ -54,4 +54,3 @@ settings[highlighted_placement] = 1
 settings[highlighted_container] = 0
 settings[header_container] = 0
 settings[footer_container] = 1
-

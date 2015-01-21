@@ -81,6 +81,16 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('Bootstrap Default'),
 		),
 	);
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
+		'#type' => 'select',
+		'#title' => t('Mobile Menu: Hover or Push'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
+		'#description' => t('When on mobile and using a fixed navbar, choose either the menu hover over the content, or push the content down.'),
+		'#options' => array(
+			0 => t('Hover (default)'),
+			1 => t('Push'),
+		),
+	);
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_dropdown'] = array(
 		'#type' => 'select',
 		'#title' => t('Mobile Dropdown Menu'),
