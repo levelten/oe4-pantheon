@@ -471,7 +471,7 @@ function enterprise_blog_ds_layout_settings_info() {
     ),
     'classes' => array(
       'layout_class' => array(
-        'style-blog-featured' => 'style-blog-featured',
+        'style-default-featured' => 'style-default-featured',
       ),
     ),
     'wrappers' => array(
@@ -506,7 +506,7 @@ function enterprise_blog_ds_layout_settings_info() {
     ),
     'classes' => array(
       'layout_class' => array(
-        'style-blog-mini' => 'style-blog-mini',
+        'style-default-mini' => 'style-default-mini',
       ),
     ),
     'wrappers' => array(
@@ -570,7 +570,7 @@ function enterprise_blog_ds_layout_settings_info() {
     ),
     'classes' => array(
       'layout_class' => array(
-        'style-blog-featured' => 'style-blog-featured',
+        'style-default-featured' => 'style-default-featured',
       ),
     ),
     'wrappers' => array(
@@ -626,7 +626,7 @@ function enterprise_blog_ds_layout_settings_info() {
     ),
     'classes' => array(
       'layout_class' => array(
-        'style-blog-full' => 'style-blog-full',
+        'style-default-full' => 'style-default-full',
       ),
     ),
     'wrappers' => array(
@@ -707,7 +707,7 @@ function enterprise_blog_ds_layout_settings_info() {
     ),
     'classes' => array(
       'layout_class' => array(
-        'style-blog-teaser' => 'style-blog-teaser',
+        'style-default-teaser' => 'style-default-teaser',
       ),
     ),
     'wrappers' => array(
