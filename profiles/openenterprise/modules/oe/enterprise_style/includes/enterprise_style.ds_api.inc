@@ -4,20 +4,6 @@
 
 
 /**
- * Implements hook_ds_classes_alter().
- * Provide the necessary classes for blog types.
- */
-function enterprise_style_ds_classes_alter(&$classes, $name) {
-  if ('ds_classes_regions' === $name) {
-    $classes['style-default-full'] = t('Default: Full');
-    $classes['style-default-featured'] = t('Default: Featured');
-    $classes['style-default-teaser'] = t('Default: Teaser');
-    $classes['style-default-mini'] = t('Default: Mini');
-    $classes['style-default-related'] = t('Default: Related');
-  }
-}
-
-/**
  * Implements hook_ds_view_modes_info().
  */
 function enterprise_style_ds_view_modes_info() {
@@ -135,6 +121,13 @@ function enterprise_style_ds_layout_info() {
  */
 function enterprise_style_ds_classes_alter(&$classes, $name) {
   if ('ds_classes_regions' === $name) {
+
+    $classes['style-default-full'] = t('Default: Full');
+    $classes['style-default-featured'] = t('Default: Featured');
+    $classes['style-default-teaser'] = t('Default: Teaser');
+    $classes['style-default-mini'] = t('Default: Mini');
+    $classes['style-default-related'] = t('Default: Related');
+
     $classes['no-grid'] = t('No Grid');
     $classes['col-md-1'] = t('Col Md 1');
     $classes['col-md-2'] = t('Col Md 2');
