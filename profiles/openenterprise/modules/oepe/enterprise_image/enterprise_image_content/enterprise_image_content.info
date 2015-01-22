@@ -1,0 +1,11 @@
+name = Enterprise Images Content
+description = Demo content for Enterprise Images
+core = 7.x
+package = Open Enterprise Content
+version = 7.x-3.0
+project = enterprise_image_content
+dependencies[] = ctools
+dependencies[] = deploy
+features[ctools][] = deploy:deploy_plans:1
+features[deploy_plans][] = enterprise_image_content
+features[features_api][] = api:2
