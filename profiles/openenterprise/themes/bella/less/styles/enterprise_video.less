@@ -15,19 +15,30 @@
             padding-left: 3px;
         }
     }
+
+    &.view-mode-mini {
+      h2, h3 {
+        .font-size(1.8);
+        font-weight: 700;
+        line-height: 1.5em;
+        margin-top: 0;
+        padding-bottom: 0.5em;
+        .heading-underline(40px);
+      }
+    }
 }
 
 .view-enterprise-video {
 	.views-row {
-		margin-bottom: 1.6em;
-		padding: 14px 0;
+		margin-bottom: 1em;
+		//padding: 14px 0;
 	}
 	.views-row-odd {
 		background-color: @brand-secondary;
 	}
 	&.view-display-id-page {
 		.views-row {
-			margin-bottom: 45px;
+			margin-bottom: 1em;
 			&.views-row-last {
 				margin-bottom: 0;
 			}
@@ -35,7 +46,7 @@
 	}
 	&.view-display-id-block {
 		.views-row {
-			margin-bottom: 1em;
+			margin-bottom: 0.5em;
 			&.views-row-last {
 				margin-bottom: 0;
 			}

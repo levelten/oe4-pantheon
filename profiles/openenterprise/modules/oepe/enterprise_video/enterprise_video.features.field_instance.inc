@@ -323,14 +323,10 @@ function enterprise_video_field_default_field_instances() {
         'label' => 'hidden',
         'module' => 'video_embed_field',
         'settings' => array(
-          'conditions' => array(
-            0 => array(
-              'condition' => '',
-            ),
-          ),
+          'conditions' => array(),
           'description' => 1,
           'field_delimiter' => '',
-          'field_formatter_class' => 'image',
+          'field_formatter_class' => 'thumbnail',
           'image_link' => 'node',
           'image_style' => 'large-16x9-md',
           'linked_field' => array(
@@ -355,7 +351,7 @@ function enterprise_video_field_default_field_instances() {
           'conditions' => array(),
           'description' => 1,
           'field_delimiter' => '',
-          'field_formatter_class' => '',
+          'field_formatter_class' => 'thumbnail',
           'image_link' => 'node',
           'image_style' => 'full-16x9-xs',
           'linked_field' => array(

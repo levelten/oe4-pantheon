@@ -14,7 +14,7 @@ function enterprise_video_content_deploy_plans_default() {
   $plan->disabled = FALSE; /* Edit this to true to make a default plan disabled initially */
   $plan->api_version = 1;
   $plan->name = 'enterprise_video_content';
-  $plan->title = 'Enterprise video content';
+  $plan->title = 'Enterprise Video Content';
   $plan->description = '';
   $plan->debug = 0;
   $plan->aggregator_plugin = 'DeployAggregatorManaged';
@@ -25,7 +25,7 @@ function enterprise_video_content_deploy_plans_default() {
   $plan->processor_plugin = '';
   $plan->processor_config = array();
   $plan->endpoints = array();
-  $plan->dependency_plugin = '';
+  $plan->dependency_plugin = 'deploy_iterator';
   $export['enterprise_video_content'] = $plan;
 
   return $export;
