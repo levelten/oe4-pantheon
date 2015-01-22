@@ -9,3 +9,4 @@ dependencies[] = deploy
 features[ctools][] = deploy:deploy_plans:1
 features[deploy_plans][] = enterprise_image_content
 features[features_api][] = api:2
+features[uuid_entities][] = enterprise_image_content
