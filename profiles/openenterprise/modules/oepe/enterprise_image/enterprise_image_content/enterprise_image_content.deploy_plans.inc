@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * enterprise_video_content.deploy_plans.inc
+ * enterprise_image_content.deploy_plans.inc
  */
 
 /**
  * Implements hook_deploy_plans_default().
  */
-function enterprise_video_content_deploy_plans_default() {
+function enterprise_image_content_deploy_plans_default() {
   $export = array();
 
   $plan = new DeployPlan();
   $plan->disabled = FALSE; /* Edit this to true to make a default plan disabled initially */
   $plan->api_version = 1;
-  $plan->name = 'enterprise_video_content';
-  $plan->title = 'Enterprise Video Content';
+  $plan->name = 'enterprise_image_content';
+  $plan->title = 'Enterprise Image Content';
   $plan->description = '';
   $plan->debug = 0;
   $plan->aggregator_plugin = 'DeployAggregatorManaged';
@@ -26,7 +26,7 @@ function enterprise_video_content_deploy_plans_default() {
   $plan->processor_config = array();
   $plan->endpoints = array();
   $plan->dependency_plugin = 'deploy_iterator';
-  $export['enterprise_video_content'] = $plan;
+  $export['enterprise_image_content'] = $plan;
 
   return $export;
 }
