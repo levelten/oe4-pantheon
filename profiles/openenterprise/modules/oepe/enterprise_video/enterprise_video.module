@@ -18,6 +18,7 @@ function enterprise_video_enterprise_apps_config_settings() {
     'enterprise_video' => array(),
   );
 
+  /*
   $settings['enterprise_video']['options'] = array(
     'app_slug' => 'video',
     'section_path' => 'cool-videos',
@@ -26,6 +27,7 @@ function enterprise_video_enterprise_apps_config_settings() {
     'taxonomy_categories' => 'blog_categories',
     'taxonomy_tags' => 'blog_tags',
   );
+  */
 
   $variables = array();
   $variables['disqus_nodetypes'] = array(
@@ -75,9 +77,9 @@ function enterprise_video_enterprise_apps_config_info() {
   }
 
   $config['enterprise_video']['blocks'] = array(
-    // Blog categories block
+    // Video categories block
     'views:enterprise_video-categories_block' => array(
-      'description' => $display_desc['categories'],
+      'description' => $display_desc['categories_block'],
       'default' => array(
         'regions' => array('sidebar_second'),
         'visibility_presets' => array('enterprise_video_view', 'enterprise_video_content_type'),
@@ -86,7 +88,7 @@ function enterprise_video_enterprise_apps_config_info() {
       'visibility_presets' => $visibility,
     ),
     'views:enterprise_video-tags_block' => array(
-      'description' => $display_desc['tags'],
+      'description' => $display_desc['tags_block'],
       'default' => array(
         'regions' => array('sidebar_second'),
         'visibility_presets' => array('enterprise_video_view', 'enterprise_video_content_type'),
@@ -95,7 +97,7 @@ function enterprise_video_enterprise_apps_config_info() {
       'visibility_presets' => $visibility,
     ),
     'views:enterprise_video-recent_block' => array(
-      'description' => $display_desc['recent'],
+      'description' => $display_desc['recent_block'],
       'default' => array(
         'regions' => array('sidebar_second'),
         'visibility_presets' => array('enterprise_video_view', 'enterprise_video_content_type'),
