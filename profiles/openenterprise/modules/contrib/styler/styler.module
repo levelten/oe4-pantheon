@@ -103,7 +103,6 @@ function styler_style_view() {
   $nav_items = array();
   $styles = styler_styles();
   $required = array('title', 'element');
-dsm($styles);
   foreach ($styles as $comp_name => $component) {
 
     $block = new stdClass();
