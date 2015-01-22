@@ -74,7 +74,7 @@ function enterprise_video_field_default_field_instances() {
           'trim_type' => 'chars',
         ),
         'type' => 'smart_trim_format',
-        'weight' => 15,
+        'weight' => 3,
       ),
       'teaser_stacked' => array(
         'label' => 'hidden',
@@ -148,7 +148,7 @@ function enterprise_video_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 17,
+        'weight' => 18,
       ),
       'teaser_stacked' => array(
         'label' => 'above',
@@ -236,7 +236,7 @@ function enterprise_video_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 16,
+        'weight' => 17,
       ),
       'teaser_stacked' => array(
         'label' => 'inline',
@@ -371,7 +371,7 @@ function enterprise_video_field_default_field_instances() {
           ),
         ),
         'type' => 'video_embed_field_thumbnail',
-        'weight' => 14,
+        'weight' => 0,
       ),
       'teaser_stacked' => array(
         'label' => 'hidden',
