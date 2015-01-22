@@ -57,7 +57,9 @@ function enterprise_video_enterprise_apps_config_info() {
       'views' => array(
         'views' => array(
           'enterprise_video:page',
-          'enterprise_video:embedded_page',
+          'enterprise_video:grid_page',
+          'enterprise_video:categories_page',
+          'enterprise_video:tags_page',
         ),
       ),
     ),

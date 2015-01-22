@@ -49,6 +49,7 @@ features[variable][] = luxe_register_username_description
 features[variable][] = pathauto_taxonomy_term_tags_pattern
 features[variable][] = realname_pattern
 features[views_view][] = enterprise_content
+features[views_view][] = enterprise_content_blocks
 features[views_view][] = enterprise_content_admin
 features[views_view][] = enterprise_content_taxonomy
 features[views_view][] = enterprise_user_admin

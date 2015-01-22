@@ -145,6 +145,18 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
     'views:enterprise_blog_blocks-archives' => array(
       'regions' => -1,
     ),
+
+    // enterprise video blocks placement
+    'views:enterprise_video-tags_block' => array(
+      'weight' => 2,
+    ),
+    'views:enterprise_video-recent_block' => array(
+      'weight' => 4,
+    ),
+    'views:enterprise_video-popular_block' => array(
+      'weight' => 6,
+    ),
+
     // add cta footer to blog content type
     'cta:sel_cta_sidebar' => array(
       'path' => array(
