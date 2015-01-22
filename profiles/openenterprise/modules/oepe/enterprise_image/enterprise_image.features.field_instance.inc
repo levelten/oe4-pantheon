@@ -195,7 +195,7 @@ function enterprise_image_field_default_field_instances() {
         'settings' => array(
           'colorbox_caption' => 'auto',
           'colorbox_caption_custom' => '',
-          'colorbox_gallery' => 'post',
+          'colorbox_gallery' => 'page',
           'colorbox_gallery_custom' => '',
           'colorbox_image_style' => '',
           'colorbox_multivalue_index' => NULL,
@@ -203,7 +203,7 @@ function enterprise_image_field_default_field_instances() {
           'colorbox_node_style_first' => '',
           'conditions' => array(),
           'field_delimiter' => '',
-          'field_formatter_class' => '',
+          'field_formatter_class' => 'thumbnail',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
@@ -233,7 +233,7 @@ function enterprise_image_field_default_field_instances() {
           'colorbox_node_style_first' => '',
           'conditions' => array(),
           'field_delimiter' => '',
-          'field_formatter_class' => '',
+          'field_formatter_class' => 'thumbnail',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
