@@ -26,7 +26,7 @@ function enterprise_forum_content_uuid_default_entities() {
     'vocabulary_machine_name' => 'forums',
     'weight' => -1,
   );
-  
+
   $entities['enterprise_forum_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'taxonomy_term',

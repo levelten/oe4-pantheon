@@ -116,7 +116,7 @@ function enterprise_image_views_default_views() {
   $handler->display->display_options['menu']['context_only_inline'] = 0;
 
   /* Display: Recent Block */
-  $handler = $view->new_display('block', 'Recent Block', 'block_recent');
+  $handler = $view->new_display('block', 'Recent Block', 'recent_block');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Recent Images';
   $handler->display->display_options['defaults']['use_more'] = FALSE;
@@ -158,7 +158,7 @@ function enterprise_image_views_default_views() {
   $handler->display->display_options['block_description'] = 'Images: Recent';
 
   /* Display: Similar Block */
-  $handler = $view->new_display('block', 'Similar Block', 'block_similar');
+  $handler = $view->new_display('block', 'Similar Block', 'similar_block');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Similar Images';
   $handler->display->display_options['display_description'] = 'Shows a list of similar images posts based on taxonomy';
