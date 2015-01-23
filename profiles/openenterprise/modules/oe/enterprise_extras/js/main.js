@@ -151,8 +151,9 @@
 
     /**
      * Smooth Scrolling Anchors
+     * Needs review
      */
-    Drupal.behaviors.themeSmoothAnchors = {
+    /*Drupal.behaviors.themeSmoothAnchors = {
         attach: function(context, settings) {
             var filterPath = function (string) {
                 return string
@@ -197,7 +198,7 @@
                 }
             });
         }
-    };
+    };*/
 
     /**
      * Image Circle Styling
