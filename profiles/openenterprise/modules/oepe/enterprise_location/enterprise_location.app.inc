@@ -5,7 +5,7 @@
 function enterprise_location_apps_app_info() {
   return array(
     'configure form' => 'enterprise_location_apps_app_configure_form',
-    'demo content module' => 'enterprise_locations_content',
+    'demo content module' => 'enterprise_location_content',
     //'status callback' => 'enterprise_location_app_status',
     'post install callback' => 'enterprise_location_app_post_install',
   );

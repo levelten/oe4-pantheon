@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Events content feature.
+ */
+
+include_once 'enterprise_events_content.features.inc';

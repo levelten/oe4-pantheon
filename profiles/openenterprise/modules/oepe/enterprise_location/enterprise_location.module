@@ -24,19 +24,19 @@ function enterprise_location_enterprise_base_apps_structures() {
     'title' => t('Location'),
   );
   $visibility = array(
-    'enterprise_locations_view' => array(
+    'enterprise_location_view' => array(
       'title' => t('Show on location listing pages'),
       'views' => array(
-        'views' => array('enterprise_locations:page'),
+        'views' => array('enterprise_location:page'),
       ),
     ),
-    'enterprise_locations_view_maps' => array(
+    'enterprise_location_view_maps' => array(
       'title' => t('Show on location map pages'),
       'views' => array(
-        'views' => array('enterprise_locations_maps:page'),
+        'views' => array('enterprise_location_map:page'),
       ),
     ),
-    'enterprise_locations_content_type' => array(
+    'enterprise_location_content_type' => array(
       'title' => t('Show on location details pages'),
       'node_type' => array(
         'types' => array('enterprise_location'),
@@ -44,86 +44,86 @@ function enterprise_location_enterprise_base_apps_structures() {
     ),
   );
 
-  $view = views_get_view('enterprise_locations');
+  $view = views_get_view('enterprise_location');
   $desc_block = isset($view->display['block']->display_options['display_description']) ? $view->display['block']->display_options['display_description'] : '';
   $desc_similar = isset($view->display['similar_block']->display_options['display_description']) ? $view->display['similar_block']->display_options['display_description'] : '';
   $desc_categories = isset($view->display['categories_block']->display_options['display_description']) ? $view->display['categories_block']->display_options['display_description'] : '';
   $desc_tags = isset($view->display['tags_block']->display_options['display_description']) ? $view->display['tags_block']->display_options['display_description'] : '';
-  $view = views_get_view('enterprise_locations_maps');
+  $view = views_get_view('enterprise_location_map');
   $desc_map_block = isset($view->display['block']->display_options['display_description']) ? $view->display['block']->display_options['display_description'] : '';
   $desc_map_similar = isset($view->display['similar_block']->display_options['display_description']) ? $view->display['similar_block']->display_options['display_description'] : '';
   $desc_map_categories = isset($view->display['categories_block']->display_options['display_description']) ? $view->display['categories_block']->display_options['display_description'] : '';
   $desc_map_tags = isset($view->display['tags_block']->display_options['display_description']) ? $view->display['tags_block']->display_options['display_description'] : '';
   
   $structures['enterprise_location']['blocks'] = array(
-    'views:enterprise_locations-block' => array(
+    'views:enterprise_location-block' => array(
       'description' => $desc_block,
       'defaults' => array(
         'regions' => array('sidebar_second'),
-        'visibility' => array('enterprise_locations_content_type'),
+        'visibility' => array('enterprise_location_content_type'),
       ),
       'visibility' => $visibility,
       'weight' => 1,
     ),
-    'views:enterprise_locations-similar_block' => array(
+    'views:enterprise_location-similar_block' => array(
       'description' => $desc_similar,
       'defaults' => array(
         'regions' => array('sidebar_second'),
-        'visibility' => array('enterprise_locations_content_type'),
+        'visibility' => array('enterprise_location_content_type'),
       ),
       'visibility' => $visibility,
       'weight' => 2,
     ),
-    'views:enterprise_locations-categories_block' => array(
+    'views:enterprise_location-categories_block' => array(
       'description' => $desc_categories,
       'defaults' => array(
         'regions' => array('sidebar_first'),
-        'visibility' => array('enterprise_locations_view'),
+        'visibility' => array('enterprise_location_view'),
       ),
       'visibility' => $visibility,
       'weight' => 3,
     ),
-    'views:enterprise_locations-tags_block' => array(
+    'views:enterprise_location-tags_block' => array(
       'description' => $desc_tags,
       'defaults' => array(
         'regions' => array('sidebar_first'),
-        'visibility' => array('enterprise_locations_view'),
+        'visibility' => array('enterprise_location_view'),
       ),
       'visibility' => $visibility,
       'weight' => 4,
     ),
-    'views:enterprise_locations_maps-block' => array(
+    'views:enterprise_location_map-block' => array(
       'description' => $desc_map_block,
       'defaults' => array(
         'regions' => array('sidebar_second'),
-        'visibility' => array('enterprise_locations_content_type'),
+        'visibility' => array('enterprise_location_content_type'),
       ),
       'visibility' => $visibility,
       'weight' => 1,
     ),
-    'views:enterprise_locations_maps-similar_block' => array(
+    'views:enterprise_location_map-similar_block' => array(
       'description' => $desc_map_similar,
       'defaults' => array(
         'regions' => array('sidebar_second'),
-        'visibility' => array('enterprise_locations_content_type'),
+        'visibility' => array('enterprise_location_content_type'),
       ),
       'visibility' => $visibility,
       'weight' => 2,
     ),
-    'views:enterprise_locations_maps-categories_block' => array(
+    'views:enterprise_location_map-categories_block' => array(
       'description' => $desc_map_categories,
       'defaults' => array(
         'regions' => array('sidebar_first'),
-        'visibility' => array('enterprise_locations_view_maps'),
+        'visibility' => array('enterprise_location_view_maps'),
       ),
       'visibility' => $visibility,
       'weight' => 3,
     ),
-    'views:enterprise_locations_maps-tags_block' => array(
+    'views:enterprise_location_map-tags_block' => array(
       'description' => $desc_map_tags,
       'defaults' => array(
         'regions' => array('sidebar_first'),
-        'visibility' => array('enterprise_locations_view_maps'),
+        'visibility' => array('enterprise_location_view_maps'),
       ),
       'visibility' => $visibility,
       'weight' => 4,
