@@ -82,7 +82,7 @@ function enterprise_image_enterprise_apps_config_info() {
     'views:enterprise_image-categories_block' => array(
       'description' => $display_desc['categories_block'],
       'default' => array(
-        'regions' => array('sidebar_second'),
+        'regions' => array(),
         'visibility_presets' => array(),
         'weight' => -5,
       ),
@@ -91,7 +91,7 @@ function enterprise_image_enterprise_apps_config_info() {
     'views:enterprise_image-tags_block' => array(
       'description' => $display_desc['tags_block'],
       'default' => array(
-        'regions' => array('sidebar_second'),
+        'regions' => array(),
         'visibility_presets' => array(),
         'weight' => -4,
       ),
@@ -100,7 +100,7 @@ function enterprise_image_enterprise_apps_config_info() {
     'views:enterprise_image-recent_block' => array(
       'description' => $display_desc['recent_block'],
       'default' => array(
-        'regions' => array('sidebar_second'),
+        'regions' => array(),
         'visibility_presets' => array(),
         'weight' => 5,
       ),
@@ -110,7 +110,7 @@ function enterprise_image_enterprise_apps_config_info() {
       'description' => $display_desc['rotator_block'],
       'default' => array(
         'regions' => array('sidebar_second'),
-        'visibility_presets' => array(),
+        'visibility_presets' => array('enterprise_image_view', 'enterprise_image_content_type'),
         'weight' => 5,
       ),
       'visibility_presets' => $visibility,
