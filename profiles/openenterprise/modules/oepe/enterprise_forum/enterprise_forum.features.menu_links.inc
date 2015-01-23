@@ -15,7 +15,7 @@ function enterprise_forum_menu_default_menu_links() {
     'menu_name' => 'main-menu',
     'link_path' => 'forum',
     'router_path' => 'forum',
-    'link_title' => 'Forum',
+    'link_title' => 'Forums',
     'options' => array(
       'icon' => array(
         'icon' => '',

@@ -13,6 +13,23 @@ function enterprise_forum_content_uuid_default_entities() {
   $entities['enterprise_forum_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'taxonomy_term',
+      'uri' => 'taxonomy_term/5084aafe-9f04-49e2-a522-da30cbd2f2ae',
+      'cause' => 'node/b2170edf-73e0-4606-be6b-663ebc896ea3',
+    ),
+    'description' => '',
+    'entity_type' => 'taxonomy_term',
+    'format' => 'full_html',
+    'metatags' => array(),
+    'name' => 'Analytics',
+    'url_alias' => array(),
+    'uuid' => '5084aafe-9f04-49e2-a522-da30cbd2f2ae',
+    'vocabulary_machine_name' => 'forums',
+    'weight' => -1,
+  );
+  
+  $entities['enterprise_forum_content'][] = (object) array(
+    '__metadata' => array(
+      'type' => 'taxonomy_term',
       'uri' => 'taxonomy_term/a6d3de81-ee14-4e45-a2f0-0b5c75ee0c6c',
       'cause' => 'node/8cb356c1-a4da-434d-afff-6b7fd816c710',
     ),
@@ -24,8 +41,9 @@ function enterprise_forum_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => 'a6d3de81-ee14-4e45-a2f0-0b5c75ee0c6c',
     'vocabulary_machine_name' => 'forums',
-    'weight' => 3,
+    'weight' => -1,
   );
+
   $entities['enterprise_forum_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
@@ -73,22 +91,7 @@ function enterprise_forum_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '8cb356c1-a4da-434d-afff-6b7fd816c710',
   );
-  $entities['enterprise_forum_content'][] = (object) array(
-    '__metadata' => array(
-      'type' => 'taxonomy_term',
-      'uri' => 'taxonomy_term/5084aafe-9f04-49e2-a522-da30cbd2f2ae',
-      'cause' => 'node/b2170edf-73e0-4606-be6b-663ebc896ea3',
-    ),
-    'description' => '',
-    'entity_type' => 'taxonomy_term',
-    'format' => 'full_html',
-    'metatags' => array(),
-    'name' => 'Analytics',
-    'url_alias' => array(),
-    'uuid' => '5084aafe-9f04-49e2-a522-da30cbd2f2ae',
-    'vocabulary_machine_name' => 'forums',
-    'weight' => 0,
-  );
+
   $entities['enterprise_forum_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
