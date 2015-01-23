@@ -65,22 +65,36 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
   );
   */
 
+  $i = 0;
   $menu['view:enterprise_users:page'] = array(
-    'weight' => 1,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_press'] = array(
-    'weight' => 2,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_news'] = array(
-    'weight' => 3,
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['view:enterprise_events:page'] = array(
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_faq'] = array(
-    'weight' => 4,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
+  $menu['view:enterprise_location:page'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['view:enterprise_location_map:page'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+
 
   $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
     'link_title' => t('Contact'),

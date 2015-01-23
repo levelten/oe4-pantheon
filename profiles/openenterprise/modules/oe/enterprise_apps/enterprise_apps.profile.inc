@@ -46,7 +46,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     'enterprise_events' => 0,
     'enterprise_faq' => 1,
     'enterprise_forum' => 0,
-    'enterprise_images' => 0,
+    'enterprise_image' => 0,
     'enterprise_links' => 0,
     'enterprise_location' => 0,
     'enterprise_news' => 0,
