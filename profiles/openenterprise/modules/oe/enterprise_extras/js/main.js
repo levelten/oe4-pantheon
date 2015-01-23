@@ -151,7 +151,9 @@
 
     /**
      * Smooth Scrolling Anchors
-     * Needs review
+     * Needs review:
+     * It causes page jumps on accordion components e.g. FAQ page
+     * Ahmad
      */
     /*Drupal.behaviors.themeSmoothAnchors = {
         attach: function(context, settings) {
