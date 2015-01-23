@@ -1,32 +1,46 @@
 <?php
+/**
+ * @file
+ * enterprise_forum.features.menu_links.inc
+ */
 
 /**
- * Implementation of hook_menu_default_menu_links().
+ * Implements hook_menu_default_menu_links().
  */
 function enterprise_forum_menu_default_menu_links() {
   $menu_links = array();
 
-  // Exported menu link: main-menu:forum
-  $menu_links['main-menu:forum'] = array(
+  // Exported menu link: main-menu_forum:forum
+  $menu_links['main-menu_forum:forum'] = array(
     'menu_name' => 'main-menu',
     'link_path' => 'forum',
     'router_path' => 'forum',
     'link_title' => 'Forums',
     'options' => array(
-      'attributes' => array(
-        'title' => 'Discussion boards.',
+      'icon' => array(
+        'icon' => '',
+        'position' => 'title_before',
+        'title_wrapper_element' => 'span',
+        'title_wrapper_class' => 'title',
+        'breadcrumb' => 0,
+        'title_wrapper' => 0,
       ),
+      'attributes' => array(
+        'title' => '',
+      ),
+      'identifier' => 'main-menu_forum:forum',
     ),
     'module' => 'menu',
-    'hidden' => '0',
-    'external' => '0',
-    'has_children' => '0',
-    'expanded' => '0',
-    'weight' => '0',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
   );
   // Translatables
   // Included for use with string extractors like potx.
-  t('Forums');
+  t('Forum');
 
 
   return $menu_links;

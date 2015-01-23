@@ -187,6 +187,8 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
           'about',
           'about/*',
           'team',
+          'forum',
+          'forum/*',
         ),
       ),
     ),
