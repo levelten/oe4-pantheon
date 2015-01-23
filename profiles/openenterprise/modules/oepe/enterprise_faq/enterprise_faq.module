@@ -7,6 +7,36 @@
 include_once('enterprise_faq.features.inc');
 
 /**
+ * Implements hook_enterprise_apps_on_enable()
+ */
+function enterprise_faq_enterprise_apps_app_enabled() {
+  enterprise_faq_app_theme_settings();
+  enterprise_apps_config_app('enterprise_faq');
+}
+
+/**
+ * Set the needed settings in the theme once app is installed
+ * Ex: Enable required Bootstrap Javascript files
+ */
+
+function enterprise_faq_app_theme_settings() {
+  drupal_set_message('went through');
+  global $theme_key;
+
+  $var_name = 'theme_' . $theme_key . '_settings';
+  $settings = variable_get($var_name);
+
+  if(isset($settings['enterprise_bootstrap_js_options'])) {
+
+    // Enable required Bootstrap Javascript files
+    $settings['enterprise_bootstrap_js_options']['transition'] = 'transition';
+    $settings['enterprise_bootstrap_js_options']['collapse'] = 'collapse';
+
+    variable_set($var_name, $settings);
+  }
+}
+
+/**
  * Implements hook_enterprise_apps_config_info()
  * @return array
  */
