@@ -238,7 +238,6 @@
                 var stickyResize = function(element) {
                     var top = stickyTop();
                     top = 0;
-                    console.log("top=" + top);
                     element.css({
                         left: element.parent().offset().left,
                         width: element.parent().width() + 1,
@@ -249,11 +248,13 @@
                             }
                         }).parent().css('min-height', sticky.parent().height());
                 };
-                $(document).on('drupalViewportOffsetChange', null, function(){
+                if (jQuery.fn.affix) {
+                    $(document).on('drupalViewportOffsetChange', null, function(){
+                        stickyResize(sticky);
+                    });
+                    $(window).resize(stickyResize(sticky));
                     stickyResize(sticky);
-                });
-                $(window).resize(stickyResize(sticky));
-                stickyResize(sticky);
+                }
             });
         }
     };
