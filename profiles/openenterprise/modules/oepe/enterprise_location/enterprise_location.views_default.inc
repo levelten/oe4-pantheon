@@ -399,7 +399,7 @@ function enterprise_location_views_default_views() {
   );
   $handler->display->display_options['filters']['field_geofield_distance']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['operator_id'] = 'field_geofield_distance_op';
-  $handler->display->display_options['filters']['field_geofield_distance']['expose']['label'] = 'Location';
+  $handler->display->display_options['filters']['field_geofield_distance']['expose']['label'] = 'Search';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['operator'] = 'field_geofield_distance_op';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['identifier'] = 'field_geofield_distance';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['remember_roles'] = array(
@@ -1092,11 +1092,11 @@ function enterprise_location_views_default_views() {
     'distance' => '100',
     'distance2' => 200,
     'unit' => '3959',
-    'origin' => ' ',
+    'origin' => '',
   );
   $handler->display->display_options['filters']['field_geofield_distance']['exposed'] = TRUE;
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['operator_id'] = 'field_geofield_distance_op';
-  $handler->display->display_options['filters']['field_geofield_distance']['expose']['label'] = 'Geo (field_geo) - proximity';
+  $handler->display->display_options['filters']['field_geofield_distance']['expose']['label'] = 'Search';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['operator'] = 'field_geofield_distance_op';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['identifier'] = 'field_geofield_distance';
   $handler->display->display_options['filters']['field_geofield_distance']['expose']['remember_roles'] = array(
