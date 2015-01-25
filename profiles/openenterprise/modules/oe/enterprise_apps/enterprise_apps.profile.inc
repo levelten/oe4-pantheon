@@ -331,6 +331,8 @@ function enterprise_apps_install_demo(&$install_state) {
 
     $pre_ops = array();
 
+    $apps_ops = array();
+
     // disable triggering demo auto config on install
     enterprise_apps_prevent_app_enabled_hook(TRUE);
 
@@ -356,16 +358,28 @@ function enterprise_apps_install_demo(&$install_state) {
 
     if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
       foreach ($profile_settings['apps'] AS $name) {
-        $pre_ops[] = enterprise_apps_get_batch_operation_enable_module($name);
+        $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name);
         if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
-          $pre_ops[] = enterprise_apps_get_batch_operation_enable_module($name . '_content');
+          $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name . '_content');
         }
       }
     }
 
-    // prepend pre_ops to array
-    $batch['operations'] = array_merge($pre_ops, $batch['operations']);
+    // apps ops need to be inserted just before demo content, so find demo
+    // content
+    $i = 0;
+    foreach ($batch['operations'] AS $i => $op) {
+      if (isset($op[0])
+        && $op[0] == '_enterprise_apps_enable_module_batch'
+        && is_array($op[1]) && isset($op[1][0])
+        && $op[1][0] == 'enterprise_demo_content'
+      ) {
+        break;
+      }
+    }
 
+    // insert apps_ops before enterprise_demo_content
+    array_splice($batch['operations'], $i, 0, $apps_ops);
 
     // process any custom settings from api
     $batch['operations'][] = array(
@@ -373,7 +387,8 @@ function enterprise_apps_install_demo(&$install_state) {
       array(),
     );
 
-//drupal_set_message(json_encode($batch));
+//drupal_set_message(json_encode($batch))
+//drupal_set_message(print_r($batch, 1));
 
     return $batch;
   }
