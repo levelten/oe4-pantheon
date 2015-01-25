@@ -1,6 +1,7 @@
 name = Enterprise Press
 core = 7.x
 package = Open Enterprise
+description = Public relations style press releases
 dependencies[] = ctools
 dependencies[] = ds
 dependencies[] = enterprise_fields

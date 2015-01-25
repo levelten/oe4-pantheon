@@ -2511,7 +2511,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
 <div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
 
 <div class="message col-md-7">
-<h2 class="featurette-heading">Images. <span class="text-muted">Galleries to show of your visual side.</span></h2>
+<h2 class="featurette-heading">Images. <span class="text-muted">Show off your visual galleries.</span></h2>
 
 <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
 </div>
@@ -2523,7 +2523,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
 <div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
 
 <div class="message col-md-7">
-<h2 class="featurette-heading">Links. <span class="text-muted">Share recommended web sites.</span></h2>
+<h2 class="featurette-heading">Links. <span class="text-muted">Share recommended online resources.</span></h2>
 
 <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
 </div>
@@ -2535,7 +2535,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
 <div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
 
 <div class="message col-md-7">
-<h2 class="featurette-heading">Forums.&nbsp;<span class="text-muted">&nbsp;Efficient support for customer questions.</span></h2>
+<h2 class="featurette-heading">Forums.&nbsp;<span class="text-muted">Efficient support for customer inquires.</span></h2>
 
 <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
 </div>

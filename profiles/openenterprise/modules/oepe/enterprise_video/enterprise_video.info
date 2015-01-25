@@ -1,5 +1,5 @@
 name = Enterprise Video
-description = Enables video content management
+description = Embed videos to create a vblog
 core = 7.x
 package = Open Enterprise
 version = 7.x-3.1
