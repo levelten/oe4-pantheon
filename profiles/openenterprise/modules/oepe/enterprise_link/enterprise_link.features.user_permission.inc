@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * enterprise_links.features.user_permission.inc
+ * enterprise_link.features.user_permission.inc
  */
 
 /**
  * Implements hook_user_default_permissions().
  */
 /*
-function enterprise_links_user_default_permissions() {
+function enterprise_link_user_default_permissions() {
   $permissions = array();
 
   // Exported permission: create enterprise_link content

@@ -1,17 +1,17 @@
 <?php
 /**
  * @file
- * enterprise_links.views_default.inc
+ * enterprise_link.views_default.inc
  */
 
 /**
  * Implements hook_views_default_views().
  */
-function enterprise_links_views_default_views() {
+function enterprise_link_views_default_views() {
   $export = array();
 
   $view = new view();
-  $view->name = 'enterprise_links';
+  $view->name = 'enterprise_link';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
@@ -295,10 +295,10 @@ function enterprise_links_views_default_views() {
   );
   $handler->display->display_options['arguments']['nid']['not'] = TRUE;
   $handler->display->display_options['block_description'] = 'Links: Similar Block';
-  $export['enterprise_links'] = $view;
+  $export['enterprise_link'] = $view;
 
   $view = new view();
-  $view->name = 'enterprise_links_admin';
+  $view->name = 'enterprise_link_admin';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
@@ -650,7 +650,7 @@ function enterprise_links_views_default_views() {
   $handler->display->display_options['menu']['weight'] = '-1';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['tab_options']['weight'] = '0';
-  $export['enterprise_links_admin'] = $view;
+  $export['enterprise_link_admin'] = $view;
 
   return $export;
 }

@@ -2471,6 +2471,114 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
     ),
     'uuid' => 'a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
+  
+   $entities['enterprise_demo_content'][] = (object) array(
+    '__metadata' => array(
+      'type' => 'node',
+      'uri' => 'node/414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
+      'cause' => FALSE,
+    ),
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'format' => 'full_html',
+          'summary' => '',
+          'value' => '<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Blog. <span class="text-muted">Brand publishing to attract and engage.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Videos. <span class="text-muted">Blogging beyond words.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Images. <span class="text-muted">Galleries to show of your visual side.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Links. <span class="text-muted">Share recommended web sites.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Forums.&nbsp;<span class="text-muted">&nbsp;Efficient support for customer questions.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+',
+        ),
+      ),
+    ),
+    'cid' => 0,
+    'comment' => 1,
+    'comment_count' => 0,
+    'cta' => array(
+      'selections' => array(),
+    ),
+    'ds_switch' => '',
+    'entity_type' => 'node',
+    'field_cta_category' => array(),
+    'field_intel_event_col' => array(),
+    'field_page_attribute_col' => array(),
+    'field_visitor_attribute_col' => array(),
+    'language' => 'und',
+    'last_comment_name' => NULL,
+    'last_comment_uid' => 1,
+    'log' => '',
+    'metatags' => array(),
+    'promote' => 0,
+    'status' => 1,
+    'sticky' => 0,
+    'title' => 'Resources',
+    'tnid' => 0,
+    'translate' => 0,
+    'type' => 'page',
+    'uid' => 1,
+    'url_alias' => array(
+      0 => array(
+        'alias' => 'resources',
+        'language' => 'und',
+      ),
+    ),
+    'uuid' => '414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
+  );
 
   $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(

@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * enterprise_links.features.field_base.inc
+ * enterprise_link.features.field_base.inc
  */
 
 /**
  * Implements hook_field_default_field_bases().
  */
-function enterprise_links_field_default_field_bases() {
+function enterprise_link_field_default_field_bases() {
   $field_bases = array();
 
   // Exported field_base: 'field_link'

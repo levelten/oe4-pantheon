@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * enterprise_links.ds.inc
+ * enterprise_link.ds.inc
  */
 
 /**
  * Implements hook_ds_field_settings_info().
  */
-function enterprise_links_ds_field_settings_info() {
+function enterprise_link_ds_field_settings_info() {
   $export = array();
 
   $ds_fieldsetting = new stdClass();
@@ -62,7 +62,7 @@ function enterprise_links_ds_field_settings_info() {
 /**
  * Implements hook_ds_layout_settings_info().
  */
-function enterprise_links_ds_layout_settings_info() {
+function enterprise_link_ds_layout_settings_info() {
   $export = array();
 
   $ds_layout = new stdClass();

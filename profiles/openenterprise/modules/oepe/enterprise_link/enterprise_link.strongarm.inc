@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * enterprise_links.strongarm.inc
+ * enterprise_link.strongarm.inc
  */
 
 /**
  * Implements hook_strongarm().
  */
-function enterprise_links_strongarm() {
+function enterprise_link_strongarm() {
   $export = array();
 
   $strongarm = new stdClass();

@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * enterprise_links.features.field_instance.inc
+ * enterprise_link.features.field_instance.inc
  */
 
 /**
  * Implements hook_field_default_field_instances().
  */
-function enterprise_links_field_default_field_instances() {
+function enterprise_link_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance: 'node-enterprise_link-body'

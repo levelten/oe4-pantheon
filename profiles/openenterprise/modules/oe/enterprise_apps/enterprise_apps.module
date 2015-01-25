@@ -58,6 +58,14 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $desc = array();
+  $obj = enterprise_apps_obj_load_by_ukey('menu_link:forum', $desc);
+
+  dsm($obj);
+  dsm($desc);
+
+  return 'OK';
+
   $profile = drupal_get_profile();
   dsm($profile);
 
@@ -1013,8 +1021,16 @@ function enterprise_apps_parse_ukey($ukey) {
 
     // pop first element off
     array_shift($ukeys);
-
   }
+  else if ($ukeys[0] == 'path') {
+    $desc['type'] = 'path';
+    $desc['path'] = $ukeys[1];
+  }
+  else if ($ukeys[0] == 'menu_link') {
+    $desc['type'] = 'menu_link';
+    $desc['path'] = $ukeys[1];
+  }
+
   if ($ukeys[0] == 'node') {
     $desc['type'] = 'node';
     $desc['uuid'] = $ukeys[1];
@@ -1038,6 +1054,16 @@ function enterprise_apps_obj_load_by_ukey($ukey, &$desc = array()) {
     //if (isset($desc['display_name'])) {
     //  $obj = $obj->display[$desc['display_name']];
     //}
+  }
+  if ($desc['type'] == 'path') {
+    $obj = menu_get_item($desc['path']);
+  }
+  if ($desc['type'] == 'menu_link') {
+    $query = db_select('menu_links' , 'ml')
+      ->condition('ml.link_path' , $desc['path'])
+      ->condition('ml.menu_name' , 'main-menu')
+      ->fields('ml');
+    $obj = $query->execute()->fetchObject();
   }
   if (!empty($obj)) {
     return $obj;
@@ -1076,7 +1102,7 @@ function enterprise_apps_config_menus($config_settings, $config_info) {
       $link_path = '';
       $link_module = 'menu';
 
-      $path_ukey_desc = '';
+      $path_ukey_desc = array();
       $obj = enterprise_apps_obj_load_by_ukey($path_key, $path_ukey_desc);
       // if linked to object does not exist, skip menu link add
       if (empty($obj)) {
@@ -1127,6 +1153,9 @@ if ($path_key == 'view:enterprise_users:page' || $path_key == 'app:enterprise_pr
           'link_title' => $display_title,
         );
 
+      }
+      if ($path_ukey_desc['type'] == 'menu_link' && !empty($obj->link_path)) {
+        $link_path = $obj->link_path;
       }
       if (!$link_path) {
         continue;

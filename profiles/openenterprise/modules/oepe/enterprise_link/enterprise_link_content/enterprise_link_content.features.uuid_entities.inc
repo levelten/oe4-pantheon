@@ -1,16 +1,16 @@
 <?php
 /**
  * @file
- * enterprise_links_content.features.uuid_entities.inc
+ * enterprise_link_content.features.uuid_entities.inc
  */
 
 /**
  * Implements hook_uuid_default_entities().
  */
-function enterprise_links_content_uuid_default_entities() {
+function enterprise_link_content_uuid_default_entities() {
   $entities = array();
 
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/17e0531a-9120-4e51-b8fe-832ade1eee0d',
@@ -37,7 +37,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '17e0531a-9120-4e51-b8fe-832ade1eee0d',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'user',
       'uri' => 'user/70971d97-b391-4c30-9ecd-727105ebfa04',
@@ -210,7 +210,7 @@ function enterprise_links_content_uuid_default_entities() {
     ),
     'uuid' => '70971d97-b391-4c30-9ecd-727105ebfa04',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/9ceff2dc-90b9-4a05-a9f7-346eee11cdba',
@@ -237,7 +237,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '9ceff2dc-90b9-4a05-a9f7-346eee11cdba',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'taxonomy_term',
       'uri' => 'taxonomy_term/d4959212-b456-4fdc-934c-0225cf936b2f',
@@ -258,7 +258,7 @@ function enterprise_links_content_uuid_default_entities() {
     'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/e6de1d3f-3cec-4587-9314-5906f5100bfe',
@@ -344,7 +344,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => 'e6de1d3f-3cec-4587-9314-5906f5100bfe',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/6d257610-666d-4a8d-8c85-a1cfcd8818c3',
@@ -371,7 +371,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '6d257610-666d-4a8d-8c85-a1cfcd8818c3',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'user',
       'uri' => 'user/a82a08fb-d9ee-4939-afbd-bbe20bf0917e',
@@ -461,7 +461,7 @@ function enterprise_links_content_uuid_default_entities() {
     ),
     'uuid' => 'a82a08fb-d9ee-4939-afbd-bbe20bf0917e',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/6433cb6d-a027-4929-aeb1-433f25484308',
@@ -488,7 +488,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '6433cb6d-a027-4929-aeb1-433f25484308',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/a829f0ba-2de7-4264-a2f6-822af0002639',
@@ -574,7 +574,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => 'a829f0ba-2de7-4264-a2f6-822af0002639',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/95861075-2806-4ea6-abfe-f9554c73ee53',
@@ -601,7 +601,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '95861075-2806-4ea6-abfe-f9554c73ee53',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'user',
       'uri' => 'user/146166ac-061f-4a55-9aff-73d71bd43991',
@@ -689,7 +689,7 @@ function enterprise_links_content_uuid_default_entities() {
     ),
     'uuid' => '146166ac-061f-4a55-9aff-73d71bd43991',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/c1069492-3070-47f0-ba55-f36c95118a24',
@@ -716,7 +716,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => 'c1069492-3070-47f0-ba55-f36c95118a24',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/74b91959-63d1-4b69-b68f-b7df135d91d4',
@@ -802,7 +802,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => '74b91959-63d1-4b69-b68f-b7df135d91d4',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'file',
       'uri' => 'file/f69dc4a0-5101-4a5a-afe1-07d4e019f167',
@@ -829,7 +829,7 @@ function enterprise_links_content_uuid_default_entities() {
     'url_alias' => array(),
     'uuid' => 'f69dc4a0-5101-4a5a-afe1-07d4e019f167',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'user',
       'uri' => 'user/635f232a-d770-4481-b9b9-f9e4e2a79aab',
@@ -923,7 +923,7 @@ function enterprise_links_content_uuid_default_entities() {
     ),
     'uuid' => '635f232a-d770-4481-b9b9-f9e4e2a79aab',
   );
-  $entities['enterprise_links_content'][] = (object) array(
+  $entities['enterprise_link_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'node',
       'uri' => 'node/78b2c258-4ae1-4e50-9ed0-64c83da65d3d',
