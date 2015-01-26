@@ -3,6 +3,14 @@
 function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_state) {
 	$form['general']['#weight'] = -8;
 
+	$default_settings = array();
+
+	$filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+	$info = drupal_parse_info_file($filename);
+	if (isset($info['settings'])) {
+		$default_settings = $info['settings'];
+	}
+
 	$logo_options = array('default' => "Default") + image_style_options(false);
 	$form['logo']['settings']['logo_image_style'] = array(
 		'#type' => 'select',
@@ -337,11 +345,18 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'affix' => 0,'alert' => 1,'button' => 0,'carousel' => 1,'collapse' => 1,'dropdown' => 1,
     'modal' => 0,'tooltip' => 0,'popover' => 0,'scrollspy' => 0,'tab' => 0,'transition' => 1,
   );
-  
+
+	$default = (theme_get_setting('enterprise_bootstrap_js_options')) ? theme_get_setting('enterprise_bootstrap_js_options') : $default_settings['enterprise_bootstrap_js_options'];
+	// need to create array where key => key. (not just true)
+	foreach ($default AS $key => $value) {
+		if ($value) {
+			$default[$key] = $key;
+		}
+	}
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Bootstrap Javascript'),
-		'#default_value' => (theme_get_setting('enterprise_bootstrap_js_options')) ? theme_get_setting('enterprise_bootstrap_js_options') : $bootstrap_default,
+		'#default_value' => $default,
 		'#options' => array(
 			'affix' => t('Affix'),
 			'alert' => t('Alert'),
@@ -357,7 +372,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'transition' => t('Transition'),
 		),
 	);
-
   $bootstrap_desc = array(
 		'affix' => t('The subnavigation on the right is a live demo of the affix plugin.'),
     'alert' => t('Add dismiss functionality to all alert messages with this plugin.'),

@@ -58,6 +58,10 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $s = variable_get('theme_enterprise_bootstrap_settings', array());
+  print_r($s);
+  return '';
+
   $desc = array();
   $obj = enterprise_apps_obj_load_by_ukey('menu_link:forum', $desc);
 

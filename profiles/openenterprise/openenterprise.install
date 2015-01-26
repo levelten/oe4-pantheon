@@ -178,7 +178,17 @@ function openenterprise_install_theme_settings() {
 
   theme_enable($themes_enable);
   foreach ($themes_enable AS $theme) {
+    // get settings saved in vars
     $settings = variable_get('theme_' . $theme . '_settings', array());
+
+    // get settings in info file
+    $filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+    if (file_exists($filename)) {
+      $info = drupal_parse_info_file($filename);
+      if (isset($info['settings'])) {
+        $settings = drupal_array_merge_deep($settings, $info['settings']);
+      }
+    }
     $settings['bootstrap_navbar_position'] = 'static-top';
     // turn off non block primary nav element, main-menu implemented as block
     $settings['toggle_main_menu'] = 0;
