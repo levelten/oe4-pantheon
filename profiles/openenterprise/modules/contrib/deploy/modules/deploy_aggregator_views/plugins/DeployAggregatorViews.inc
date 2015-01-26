@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Views based aggregator for deployment plan entities.
+ */
 
 /**
  * Class for a deploy aggregator that aggregates entities using a View.
@@ -14,6 +18,9 @@ class DeployAggregatorViews extends DeployAggregatorBase {
    */
   public $plan;
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct(DeployPlan $plan = NULL, Array $config = array()) {
     $defaults = array(
       'debug' => FALSE,
@@ -35,11 +42,18 @@ class DeployAggregatorViews extends DeployAggregatorBase {
     $view_results = views_get_view_result($view->name, 'default');
     $entities = array();
     foreach ($view_results as $view_result) {
-      $entities[] = array('type' => $entity_type, 'id' => $view_result->{$entity_id_field});
+      $entity_info = entity_get_info($entity_type);
+      $revision_key = $entity_info['entity keys']['revision'];
+      $entity_id = $view_result->{$entity_id_field};
+      $entity = entity_load($entity_type, array($entity_id));
+      $entities[] = array('type' => $entity_type, 'id' => $entity_id, 'revision_id' => $entity[$entity_id]->$revision_key);
     }
     return $entities;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function configForm(&$form_state) {
     $form = array();
     $options = array();

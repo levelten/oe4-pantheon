@@ -21,6 +21,7 @@ function enterprise_apps_profile_install_tasks($install_state) {
       'type' => 'form',
       'function' => 'enterprise_apps_config_features_options_form',
     );
+
     $tasks['enterprise_apps_install_demo'] = array(
       'display' => FALSE,
       'type' => 'batch',
@@ -40,9 +41,22 @@ function enterprise_apps_profile_install_tasks($install_state) {
 function enterprise_apps_config_features_options_form($form, $form_state, &$install_state) {
   drupal_set_title(t('Install applications'));
 
+  $ext_apps = array(
+    'enterprise_careers' => 0,
+    'enterprise_events' => 0,
+    'enterprise_faq' => 1,
+    'enterprise_forum' => 0,
+    'enterprise_image' => 0,
+    'enterprise_link' => 0,
+    'enterprise_location' => 0,
+    'enterprise_news' => 0,
+    'enterprise_press' => 1,
+    'enterprise_news' => 0,
+    'enterprise_video' => 0,
+  );
+
   $msg = st('Major site components such blogs and landing pages are provided in modular features called Apps.');
   $msg .= ' ' . st('After installation, you can add Apps at anytime using the Features admin.');
-  $msg .= ' ' . st('The selections below provide automated initial setup for popular combinations of Apps.');
   $form['install'] = array(
     '#type' => 'fieldset',
     //'#tree' => TRUE,
@@ -52,31 +66,65 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#collapsed' => FALSE,
   );
 
+  $msg = "<br /><hr />" . '<h4>' . st('Essential Apps') . '</h4>';
+  $msg .= ' ' . st('The selections below provide automated initial setup for popular combinations of Apps.');
+  $form['install']['demo_mode_msg'] = array(
+    '#type' => 'markup',
+    '#markup' => $msg,
+  );
+
   $options = array(
-    'min' => '<strong>' . st('Minimal') . '</strong>',
-    'attract' => '<strong>' . st('Attract') . '</strong>',
     'attract_convert' => '<strong>' . st('Attract & convert') . '</strong>',
-    'standard' => '<strong>' . st('Full suite') . '</strong>',
+    'attract' => '<strong>' . st('Attract') . '</strong>',
+    'min' => '<strong>' . st('Minimal') . '</strong>',
+    //'standard' => '<strong>' . st('Full suite') . '</strong>',
   );
   $form['install']['demo_mode'] = array(
     '#type' => 'radios',
     '#title' => '',
     '#options' => $options,
-    '#default_value' => 'standard',
+    '#default_value' => 'attract_convert',
   );
   $form['install']['demo_mode']['min']['#description'] = st('Only installs base Open Enterprise apps. The only available content type will be basic pages.');
   $form['install']['demo_mode']['attract']['#description'] = st('Installs essential apps for content marketing including; blog, social media, and webforms.');
   $form['install']['demo_mode']['attract_convert']['#description'] = st('Adds landing pages, calls-to-action and A/B testing to facilitate robust conversion workflows.');
-  $form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');
+  //$form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');
 
   if (!enterprise_apps_module_files_exist('enterprise_landingpages')) {
     $form['install']['demo_mode']['attract_convert']['#disabled'] = TRUE;
     $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
     $form['install']['demo_mode']['#default_value'] = 'attract';
   }
+  /*
   else if (!enterprise_apps_module_files_exist('enterprise_press')) {
     $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
     $form['install']['demo_mode']['#default_value'] = 'attract_convert';
+  }
+  */
+
+  system_rebuild_module_data();
+
+  $msg = '';
+  foreach ($ext_apps AS $name => $enabled) {
+    if (enterprise_apps_module_files_exist($name)) {
+      if (!$msg) {
+        $msg = "<hr />" . '<h4>' . st('Extended Apps') . '</h4>';
+        $msg .= st('Extended apps provide optional add-on features.');
+        $form['install']['extapps_msg'] = array(
+          '#type' => 'markup',
+          '#markup' => $msg,
+        );
+      }
+      $path = drupal_get_path('module', $name) . '/' . $name . '.info';
+      $info = drupal_parse_info_file($path);
+      $form['install']['extapp_' . $name] = array(
+        '#type' => 'checkbox',
+        //'#title' => str_replace('Enterprise ', '', $info['name']),
+        '#title' => $info['name'],
+        '#description' => isset($info['description']) ?  $info['description'] : '',
+        '#default_value' => $enabled,
+      );
+    }
   }
 
   /*
@@ -117,10 +165,11 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
   );
   */
 
-  $msg = st('Most Apps provide optional content to help demonstrate functionality. Use the checkbox below to enable demo content to be installed.');
+  $msg = "<br /><hr />" . '<h4>' . st('Demo content') . '</h4>';
+  $msg .= st('Most Apps provide optional content to help demonstrate functionality. Use the checkbox below to enable demo content to be installed.');
   $form['install']['demo_content_msg'] = array(
     '#type' => 'markup',
-    '#markup' => '<hr />' . $msg,
+    '#markup' => $msg,
   );
 
   $form['install']['demo_content'] = array(
@@ -226,7 +275,6 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
   $property->apikey = $property->intel_apikey = $form_state['values']['oe_apikey'];
   $property->pkey = $form_state['values']['oe_pkey'];
   openenterprise_property_save($property);
-
 }
 
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
@@ -243,10 +291,18 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
       'form_state_values' => $values,
     );
 
-    if ($values['demo_mode'] != 'min') {
+    $profile_settings['demo']['mode'] = $values['demo_mode'];
+    if ($profile_settings['demo']['mode'] != 'min') {
       $_SESSION['enterprise_apps_demo'] = 'enterprise_demo';
     }
-    $profile_settings['demo']['mode'] = $values['demo_mode'];
+
+    $profile_settings['apps'] = array();
+    foreach ($form_state['values'] AS $key => $value) {
+      if ((substr($key, 0, 7) == 'extapp_') && $value) {
+        list($x, $name) = explode('_', $key, 2);
+        $profile_settings['apps'][] = $name;
+      }
+    }
 
     if (!empty($values['demo_content'])) {
       $profile_settings['demo']['demo_content'] = 1;
@@ -256,9 +312,17 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
 }
 
 function enterprise_apps_install_demo(&$install_state) {
-  $app = $_SESSION['enterprise_apps_demo'];
+  $profile_settings = variable_get('enterprise_apps_profile_settings', array());
+//drupal_set_message(json_encode($profile_settings));
+  $app = '';
+  if ($profile_settings['demo']['mode'] != 'min') {
+    $app = 'enterprise_demo';
+  }
 
-  require_once(drupal_get_path('module', $app) . '/' . $app . '.module');
+  if ($app) {
+    require_once(drupal_get_path('module', $app) . '/' . $app . '.module');
+  }
+
   $func = $app . '_enterprise_apps_app_enabled_batch';
   if (function_exists($func)) {
 
@@ -266,6 +330,8 @@ function enterprise_apps_install_demo(&$install_state) {
     $batch = $func();
 
     $pre_ops = array();
+
+    $apps_ops = array();
 
     // disable triggering demo auto config on install
     enterprise_apps_prevent_app_enabled_hook(TRUE);
@@ -279,13 +345,6 @@ function enterprise_apps_install_demo(&$install_state) {
       ),
     );
 
-    /*
-    $pre_ops[] = array(
-      'enterprise_apps_process_profile_settings',
-      array(),
-    );
-    */
-
     // re-enable app auto config for all apps after demo
     $pre_ops[] = array(
       '_enterprise_apps_prevent_app_enabled_hook_batch',
@@ -297,11 +356,39 @@ function enterprise_apps_install_demo(&$install_state) {
     // prepend pre_ops to array
     $batch['operations'] = array_merge($pre_ops, $batch['operations']);
 
+    if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
+      foreach ($profile_settings['apps'] AS $name) {
+        $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name);
+        if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
+          $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name . '_content');
+        }
+      }
+    }
+
+    // apps ops need to be inserted just before demo content, so find demo
+    // content
+    $i = 0;
+    foreach ($batch['operations'] AS $i => $op) {
+      if (isset($op[0])
+        && $op[0] == '_enterprise_apps_enable_module_batch'
+        && is_array($op[1]) && isset($op[1][0])
+        && $op[1][0] == 'enterprise_demo_content'
+      ) {
+        break;
+      }
+    }
+
+    // insert apps_ops before enterprise_demo_content
+    array_splice($batch['operations'], $i, 0, $apps_ops);
+
     // process any custom settings from api
     $batch['operations'][] = array(
       'enterprise_apps_process_profile_settings',
       array(),
     );
+
+//drupal_set_message(json_encode($batch))
+//drupal_set_message(print_r($batch, 1));
 
     return $batch;
   }

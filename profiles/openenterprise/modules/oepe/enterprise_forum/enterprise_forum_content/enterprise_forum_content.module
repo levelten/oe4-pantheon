@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Forum Content feature.
+ */
+
+include_once 'enterprise_forum_content.features.inc';

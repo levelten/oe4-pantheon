@@ -3,12 +3,12 @@ description = "Provides an API to define dependencies between entities, and also
 core = "7.x"
 
 files[] = EntityDependencyIterator.inc
+files[] = EntityDependencyIteratorInterface.inc
 files[] = entity_dependency.test
 
-
-; Information added by drush on 2013-12-13
-version = "7.x-1.0-alpha1+7-dev"
+; Information added by Drupal.org packaging script on 2014-09-23
+version = "7.x-1.0-alpha2"
 core = "7.x"
 project = "entity_dependency"
-datestamp = "1386959684"
+datestamp = "1411455382"
 

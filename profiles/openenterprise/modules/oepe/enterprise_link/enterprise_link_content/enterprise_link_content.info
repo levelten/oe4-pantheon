@@ -1,0 +1,14 @@
+name = Enterprise Link Content
+description = Demo content for Enterprise Links
+core = 7.x
+package = Open Enterprise Content
+version = 7.x-3.0
+project = enterprise_link_content
+dependencies[] = ctools
+dependencies[] = deploy
+dependencies[] = enterprise_link
+datestamp = 1331142644
+features[ctools][] = deploy:deploy_plans:1
+features[deploy_plans][] = enterprise_link_content
+features[features_api][] = api:2
+features[uuid_entities][] = enterprise_link_content

@@ -49,7 +49,7 @@ function comment_entity_dependencies($entity, $entity_type) {
 }
 
 /**
- * Implements hook_entity_dependencies()
+ * Implements hook_entity_dependencies().
  */
 function taxonomy_entity_dependencies($entity, $entity_type) {
   if ($entity_type == 'taxonomy_term') {
@@ -63,11 +63,22 @@ function taxonomy_entity_dependencies($entity, $entity_type) {
 }
 
 /**
+ * Implements hook_entity_dependenies().
+ */
+function file_entity_dependencies($entity, $entity_type) {
+  if ($entity_type == 'file') {
+    $dependencies = array();
+    entity_dependency_add($dependencies, $entity, 'user', 'uid');
+    return $dependencies;
+  }
+}
+
+/**
  * Implements hook_entity_dependencies().
  */
 function field_entity_dependencies($entity, $entity_type) {
   $dependencies = array();
-  list(,, $bundle_name) = entity_extract_ids($entity_type, $entity);
+  list(, , $bundle_name) = entity_extract_ids($entity_type, $entity);
   $instances = field_info_instances($entity_type, $bundle_name);
 
   foreach ($instances as $field_name => $instance) {
@@ -145,18 +156,7 @@ function user_reference_field_entity_dependencies($entity_type, $entity, $field,
  */
 function entityreference_field_entity_dependencies($entity_type, $entity, $field, $instance, $langcode, $items) {
   $dependencies = array();
-
-  foreach ($items as $item) {
-    // hack start
-    // hacked code to remove uuid issue not setting $item['target_type']
-    // TODO: create perminant fix
-    if (!isset($item['target_type'])) {
-      continue;
-    }
-    // hack end
-    $info = entity_get_info($item['target_type']);
-    entity_dependency_add($dependencies, $item, $item['target_type'], $info['entity keys']['id']);
-  }
+  entity_dependency_add($dependencies, $items, $field['settings']['target_type'], 'target_id');
   return $dependencies;
 }
 

@@ -1,0 +1,11 @@
+name = "Enterprise FAQ content"
+description = "Demo content for Enterprise FAQ"
+core = "7.x"
+version = 7.x-3.0
+package = "Open Enterprise Content"
+dependencies[] = "deploy"
+dependencies[] = "enterprise_faq"
+features[deploy_plans][] = enterprise_faq_content
+features[features_api][] = api:2
+features[uuid_entities][] = enterprise_faq_content
+

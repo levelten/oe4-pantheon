@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Interface definition for deploy service.
+ */
 
 /**
  * Interface for all deploy service plugins.
@@ -13,6 +17,7 @@ interface DeployService {
    */
   public function __construct(Array $config = array());
 
+  // @ignore comment_comment_see:comment
   /**
    * Deploy all entities in the $iterator. This method should only move entities
    * over to the endpoint and create unpublished revisions (if supported). The
@@ -21,10 +26,11 @@ interface DeployService {
    *
    * @param Traverable $iterator
    *   This will usually be an object of a subclass of DeployAggregatorBase
-   * @see DeployService::publish().
+   * @see DeployService::publish()
    */
   public function deploy(Traversable $iterator);
 
+  // @ignore comment_comment_see:comment
   /**
    * Publish all entities in the $iterator. This method should only publish
    * entities on the endpoint (if supported). The 'deploy' method is
@@ -33,7 +39,7 @@ interface DeployService {
    *
    * @param Traverable $iterator
    *   This will usually be an object of a subclass of DeployAggregatorBase
-   * @see DeployService::deploy().
+   * @see DeployService::deploy()
    */
   public function publish(Traversable $iterator);
 

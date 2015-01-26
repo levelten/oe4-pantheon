@@ -45,21 +45,22 @@ dependencies[] = redirect
 dependencies[] = transliteration
 
 ;; Text Editor
-dependencies[] = video_filter
 dependencies[] = ckeditor
-dependencies[] = ckeditor_media
 dependencies[] = ckeditor_blocks
+dependencies[] = ckeditor_media
 ;dependencies[] = ckeditor_bootstrap
 dependencies[] = file_entity
 dependencies[] = insert_block
 dependencies[] = media
 dependencies[] = pathologic
 dependencies[] = picture
+dependencies[] = smart_trim
 dependencies[] = token_filter
+dependencies[] = video_filter
 
 ;; UX Enhancements
 dependencies[] = admin_menu
-dependencies[] = admin_menu_toolbar
+dependencies[] = adminimal_admin_menu
 dependencies[] = better_formats
 dependencies[] = fitvids
 dependencies[] = jquery_update
@@ -93,12 +94,11 @@ dependencies[] = email_registration
 dependencies[] = entity
 dependencies[] = entitycache
 dependencies[] = exclude_node_title
+dependencies[] = features
 dependencies[] = gridmagic
 dependencies[] = image_url_formatter
-dependencies[] = features
 dependencies[] = libraries
 dependencies[] = menu_block
-dependencies[] = picture
 dependencies[] = strongarm
 dependencies[] = token
 dependencies[] = views
@@ -126,8 +126,8 @@ dependencies[] = enterprise_style
 files[] = openenterprise.profile
 
 ;; Testing
-dependencies[] = config
-dependencies[] = enterprise_config
+; dependencies[] = config
+; dependencies[] = enterprise_config
 ; dependencies[] = devel
 
 

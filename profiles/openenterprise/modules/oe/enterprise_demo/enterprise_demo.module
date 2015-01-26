@@ -85,6 +85,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     $required_apps[] = 'enterprise_landingpages';
     $required_apps[] = 'enterprise_landingpages_content';
   }
+  /*
   if (!empty($settings['demo']['mode']) && ($settings['demo']['mode'] == 'standard')) {
     $required_apps[] = 'enterprise_seo';
     $required_apps[] = 'enterprise_faq';
@@ -93,6 +94,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     $required_apps[] = 'enterprise_press_content';
     //$required_apps[] = 'mailchimp_lists';
   }
+  */
 
   // filter out missing apps and content if demo content not enabled
   foreach ($required_apps AS $i => $app) {

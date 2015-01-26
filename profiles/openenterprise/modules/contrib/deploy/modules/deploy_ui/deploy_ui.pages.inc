@@ -1,10 +1,14 @@
 <?php
+/**
+ * @file
+ * Deploy UI page functions.
+ */
 
 /**
  * Page callback for the overview page.
  */
 function deploy_ui_overview_page() {
-  $plans = deploy_plan_load_all();
+  $plans = deploy_plan_load_all_enabled();
   $blocks = array();
 
   // Iterate over all plans.
@@ -16,20 +20,33 @@ function deploy_ui_overview_page() {
     foreach ($entity_keys as $entity_key) {
       // Get the entity info and all entities of this type.
       $entity_info = entity_get_info($entity_key['type']);
-      $entities = entity_load($entity_key['type'], array($entity_key['id']));
 
-      // Construct a usable array for the theme function.
-      foreach ($entities as $entity) {
-        $uri = entity_uri($entity_key['type'], $entity);
-        $title = check_plain(entity_label($entity_key['type'], $entity));
-        if ($uri) {
-          $title = l($title, $uri['path']);
-        }
-        $info[] = array(
-          'title' => $title,
-          'type' => $entity_info['label'],
-        );
+      if (!empty($entity_info['entity keys']['revision']) && !empty($entity_key['revision_id'])) {
+        $entity = entity_revision_load($entity_key['type'], $entity_key['revision_id']);
       }
+      else {
+        $entity = entity_load_single($entity_key['type'], $entity_key['id']);
+      }
+
+      $title = "{$entity_key['type']}:{$entity_key['id']}";
+      $label = entity_label($entity_key['type'], $entity);
+      if ($label) {
+        $title = $label;
+      }
+
+      if ($entity_info['entity keys']['revision'] && !empty($entity_key['revision_id'])) {
+        $title = t('@title (rev:@rev_id)', array('@title' => $title, '@rev_id' => $entity_key['revision_id']));
+      }
+
+      $uri = entity_uri($entity_key['type'], $entity);
+      if ($uri) {
+        $title = l($title, $uri['path'], $uri['options']);
+      }
+      // Construct a usable array for the theme function.
+      $info[] = array(
+        'title' => $title,
+        'type' => $entity_info['label'],
+      );
     }
 
     // Construct a usable array for the theme function.

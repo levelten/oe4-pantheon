@@ -11,18 +11,67 @@
 function ckeditor_less_ckeditor_settings_alter(&$settings) {
 
   if (module_exists('less')) {
-    // Build path to generated LESS file directory.
-    $file_path = variable_get('file_public_path', conf_path() . '/files');
-    $less_path = variable_get('less_dir');
-    $theme_path = drupal_get_path('theme', variable_get('theme_default', NULL));
-    $css_path = $file_path . '/less/' . $less_path . '/' . $theme_path . '/less';
 
-    // Get all CSS files from LESS folder.
-    $files = file_scan_directory($css_path, '/.*\.css$/');
+    // Build path to generated LESS file directory.
+    $stylesheets = _ckeditor_less_stylesheets();
 
     // Add CSS to CKEditor.
-    foreach ($files as $key => $value) {
-      $settings['contentsCss'][] = '/' . $files[$key]->uri;
+    foreach ($stylesheets as $key => $value) {
+      $settings['contentsCss'][] = $stylesheets[$key];
     }
   }
+}
+
+/**
+ * Helper function for retrieving available stylesheets.
+ */
+function _ckeditor_less_stylesheets() {
+
+  // Build path to generated LESS file directory.
+  $less_dir = _less_get_dir();
+
+  $file_path = variable_get('file_public_path', conf_path() . '/files');
+  $less_path = $file_path . '/less';
+  $theme_path = drupal_get_path('theme', variable_get('theme_default', NULL));
+
+  // Get list of previous LESS compilations.
+  $less_dirs = scandir($less_path);
+  foreach ($less_dirs as $key => $value) {
+    if (strlen($value) < 32) {
+      unset($less_dirs[$key]);
+    }
+  }
+
+  // Check if LESS directory exists. If not, use most recent.
+  if (!empty($less_dirs) && !in_array($less_dir, $less_dirs)) {
+    watchdog('ckeditor_less', 'You may want to consider flushing your caches.', array(), WATCHDOG_NOTICE);
+
+    // Get statistics about LESS directories.
+    $dirs = array();
+    foreach ($less_dirs as $key => $value) {
+      $dirs[$value] = stat($less_path . '/' . $value);
+      $dirs[$value]['id'] = $value;
+    }
+
+    // Sort based on modified time.
+    usort($dirs, function($a, $b) {
+      return $a['mtime'] - $b['mtime'];
+    });
+
+    // Grab the most recently modified directory.
+    $last = end($dirs);
+    $less_dir = $last['id'];
+  }
+
+  // Build CSS path.
+  $css_path = $less_path . '/' . $less_dir . '/' . $theme_path . '/less';
+
+  // Get all CSS files from LESS folder.
+  $files = file_scan_directory($css_path, '/.*\.css$/');
+  $stylesheets = array();
+  foreach ($files as $file) {
+    $stylesheets[] = '/' . $file->uri;
+  }
+
+  return $stylesheets;
 }

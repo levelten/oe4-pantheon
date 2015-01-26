@@ -1,6 +1,7 @@
 <!-- Navigation region -->
 <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
   <div class="container">
+    <div class="navbar-region <?php print $navbar_region_class; ?>">
     <div class="navbar-header <?php print $nav_logo_class; ?>">
       <?php if ($logo): ?>
       <a class="logo navbar-btn pull-left navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
@@ -36,5 +37,6 @@
         </nav>
       </div>
     <?php endif; ?>
+  </div>
   </div>
 </header>

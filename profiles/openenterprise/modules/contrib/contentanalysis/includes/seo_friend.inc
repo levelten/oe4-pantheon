@@ -1,11 +1,10 @@
 <?php
-// $Id: seo_friend.inc,v 1.1.2.2 2010/09/26 17:14:13 tomdude48 Exp $
 /**
  * @file * Admin include file. 
 */
 
 /**
- * Implementation of hook_seo_reports().
+ * Implements hook_seo_reports().
  */
 function contentanalysis_seo_reports() {
   return array(
@@ -25,25 +24,25 @@ function contentanalysis_seo_friend_report() {
   $rows = array();
   
   $sql = '
-	SELECT DISTINCT analyzer 
-	FROM {contentanalysis_status}
+	  SELECT DISTINCT analyzer
+	  FROM {contentanalysis_status}
   ';
   $result = db_query($sql);
   while($a = db_result($result)) {
-	$analyzers[$a] = $analyzers_meta[$a]['title'];
+	  $analyzers[$a] = $analyzers_meta[$a]['title'];
   }
   $header = array(
-      array('data' => 'nid', 'field' => 'n.nid'),
-      array('data' => 'status', 'field' => 'n.status'),
-      array('data' => 'node title', 'field' => 'r.title'),
+    array('data' => 'nid', 'field' => 'n.nid'),
+    array('data' => 'status', 'field' => 'n.status'),
+    array('data' => 'node title', 'field' => 'r.title'),
   );
   if(!is_array($analyzers)) {
     drupal_set_message(t('No statuses have been reported by any content analyzers. To generate reports, click the "Analyze content" button from a node edit form.'), 'warning');
-	$analyzers = array();
+	  $analyzers = array();
   }
   else {  
     foreach($analyzers AS $aid => $analyzer) {
-	  $header[] = array('data' => $analyzer, 'field' => 'as_' . $aid . '.statusi');
+      $header[] = array('data' => $analyzer, 'field' => 'as_' . $aid . '.statusi');
       $did = 'as_' . $aid;
       $a_join .= "LEFT JOIN {contentanalysis_status} AS $did ON a.aid = $did.aid AND $did.analyzer = \"$aid\"\n";
       $a_select .= ", $did.statusi AS {$aid}_statusi, $did.score AS {$aid}_score";

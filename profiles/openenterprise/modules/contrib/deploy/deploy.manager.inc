@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Deploy module functions for handling managed entities in plans.
+ */
 
 /**
  * Returns the items for a given plan.
@@ -8,9 +12,9 @@
  */
 function deploy_manager_get_entities($plan_name) {
   $entities = array();
-  $result = db_query("SELECT * FROM {deploy_manager_entities} WHERE plan_name = :plan_name", array(':plan_name' => $plan_name));
+  $result = db_query("SELECT * FROM {deploy_manager_entities} WHERE plan_name = :plan_name ORDER BY timestamp", array(':plan_name' => $plan_name));
   foreach ($result as $record) {
-    $entities[] = array('type' => $record->entity_type, 'id' => $record->entity_id);
+    $entities[] = array('type' => $record->entity_type, 'id' => $record->entity_id, 'revision_id' => $record->revision_id);
   }
   // If the plan fetched from the database is empty, try fetch default UUID
   // entities (keyed with this plan name).
@@ -67,7 +71,7 @@ function deploy_manager_plan_get_options($args = array()) {
   );
   $args = array_merge($default_args, $args);
 
-  $plans = deploy_plan_load_all($args);
+  $plans = deploy_plan_load_all_enabled($args);
   $options = array();
   foreach ($plans as $plan_name => $info) {
     $options[$plan_name] = $info->title;
@@ -96,7 +100,7 @@ function deploy_manager_add_to_plan($plan_name, $entity_type, $entity) {
         'entity_type' => $entity_type,
         'entity_id' => $entity_id,
         'revision_id' => $revision_id,
-        'timestamp' => time(),
+        'timestamp' => microtime(TRUE),
       ))
       ->execute();
   }

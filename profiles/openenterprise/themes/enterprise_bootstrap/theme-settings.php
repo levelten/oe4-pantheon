@@ -3,6 +3,23 @@
 function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_state) {
 	$form['general']['#weight'] = -8;
 
+	$default_settings = array();
+
+	$filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+	$info = drupal_parse_info_file($filename);
+	if (isset($info['settings'])) {
+		$default_settings = $info['settings'];
+	}
+
+	$logo_options = array('default' => "Default") + image_style_options(false);
+	$form['logo']['settings']['logo_image_style'] = array(
+		'#type' => 'select',
+		'#title' => 'Logo Image Style',
+		'#description' => t('Use an image style to change the dimensions of logo to better fit the theme.'),
+		'#default_value' => theme_get_setting('logo_image_style'),
+		'#options' => $logo_options,
+	);
+
 	$form['enterprise_bootstrap'] = array(
 		'#type' => 'vertical_tabs',
 		'#prefix' => '<h2><small>Enterprise Bootstrap</small></h2>',
@@ -72,6 +89,16 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('Bootstrap Default'),
 		),
 	);
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
+		'#type' => 'select',
+		'#title' => t('Mobile Menu: Hover or Push'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
+		'#description' => t('When on mobile and using a fixed navbar, choose either the menu hover over the content, or push the content down.'),
+		'#options' => array(
+			0 => t('Hover (default)'),
+			1 => t('Push'),
+		),
+	);
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_dropdown'] = array(
 		'#type' => 'select',
 		'#title' => t('Mobile Dropdown Menu'),
@@ -121,6 +148,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#title' => t('Navigation'),
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
+	);
+	
+	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Navigation Region Class'),
+		'#default_value' => theme_get_setting('navbar_region_class'),
+		'#description' => t('Class that wraps around the Logo and Menu.')
 	);
 	$form['enterprise_bootstrap_region_settings']['navigation']['nav_logo_class'] = array(
 		'#type' => 'textfield',
@@ -270,16 +304,59 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('Development - jquery.fittext.js'),
 		),
 	);
+	
+	$form['enterprise_bootstrap_js']['fittext_selectors'] = array(
+		'#type' => 'container',
+		'#title' => t('FitText Selectors'),
+		'#states' => array(
+      'invisible' => array(
+        ':input[name=fittext]' => array('value' => 0),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_description'] = array(
+		'#type' => 'markup',
+		'#markup' => '<div class="description help-block"><p>FitText will accept a compression level and selector for text you would like to update. Compression refers to how much you would like to compress the text down. Default is 1.</p>
+									<p>Add in your compression and selectors as a key value pair, <strong>one per line</strong>. For example:</p>
+									<p><pre>1.6|.not-logged-in #navbar .navbar-header .name</pre></p></div><br />',
+		
+	);
+
+	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_selector'] = array(
+    '#title' => t('FitText selectors'),
+    '#type' => 'textarea',
+    '#default_value' => (theme_get_setting('fittext_selector')) ? theme_get_setting('fittext_selector') : '',
+    '#description' => t('Add the compression level and selectors you would like to target with FitText.'),
+  );
+
+	$form['enterprise_bootstrap_js']['bootstrap_hover_dropdown'] = array(
+		'#type' => 'select',
+		'#title' => t('Bootstrap Hover Dropdown'),
+		'#description' => t('A jQuery plugin that delays the dropdown of the menu on hover. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/CWSpear/bootstrap-hover-dropdown'))),
+		'#default_value' => (theme_get_setting('bootstrap_hover_dropdown')) ? theme_get_setting('bootstrap_hover_dropdown') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production - bootstrap-hover-dropdown.min.js'),
+			2 => t('Development - bootstrap-hover-dropdown.js'),
+		),
+	);
 
 	$bootstrap_default = array(
 		'affix' => 0,'alert' => 1,'button' => 0,'carousel' => 1,'collapse' => 1,'dropdown' => 1,
     'modal' => 0,'tooltip' => 0,'popover' => 0,'scrollspy' => 0,'tab' => 0,'transition' => 1,
   );
-  
+
+	$default = (theme_get_setting('enterprise_bootstrap_js_options')) ? theme_get_setting('enterprise_bootstrap_js_options') : $default_settings['enterprise_bootstrap_js_options'];
+	// need to create array where key => key. (not just true)
+	foreach ($default AS $key => $value) {
+		if ($value) {
+			$default[$key] = $key;
+		}
+	}
 	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Bootstrap Javascript'),
-		'#default_value' => (theme_get_setting('enterprise_bootstrap_js_options')) ? theme_get_setting('enterprise_bootstrap_js_options') : $bootstrap_default,
+		'#default_value' => $default,
 		'#options' => array(
 			'affix' => t('Affix'),
 			'alert' => t('Alert'),
@@ -295,7 +372,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'transition' => t('Transition'),
 		),
 	);
-
   $bootstrap_desc = array(
 		'affix' => t('The subnavigation on the right is a live demo of the affix plugin.'),
     'alert' => t('Add dismiss functionality to all alert messages with this plugin.'),

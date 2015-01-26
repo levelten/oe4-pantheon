@@ -2,6 +2,12 @@
 
 function bella_form_system_theme_settings_alter(&$form, &$form_state) {
 
+	$form['logo']['settings']['logo_suggestion'] = array(
+  	'#markup' => '<div class="description"><p>When using the Bella theme, the ideal logo dimensions is 200x75. You will need to <a href="/admin/config/media/image-styles/add">create an image style</a> for this.</p></div>',
+  	'#attributes' => array('class' => array('description')),
+  	'#weight' => 10,
+	);
+
 	$form['colourlovers_settings'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('COLOURLovers Settings'),

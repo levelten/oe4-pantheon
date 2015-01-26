@@ -1,0 +1,7 @@
+@media screen and (min-width: 992px), screen and (min-width: 1200px) {
+  .rubik-processed .page-admin-appearance-settings .vertical-tabs .vertical-tabs-panes .column-left,
+  .rubik-processed .page-admin-appearance-settings .vertical-tabs .vertical-tabs-panes .column-right {
+    float: left;
+    width: 50%;
+  }
+}

@@ -51,36 +51,71 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
     'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
   );
 
-  $menu['node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7'] = array(
-    'link_title' => t('About us'),
+
+
+  $menu['node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86'] = array(
+    'link_title' => t('Resources'),
     'weight' => 5,
     'expanded' => 1,
   );
 
-  /*
-  $menu_def['view:enterprise_news:page'] = array(
-    //'link_title' => t('About us'),
-    'weight' => 1,
-    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  $i = 0;
+  $menu['app:enterprise_video'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
   );
-  */
 
+  $menu['app:enterprise_image'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
+  );
+
+  $menu['app:enterprise_link'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
+  );
+
+  $menu['menu_link:forum'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
+  );
+
+  $menu['node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7'] = array(
+    'link_title' => t('About us'),
+    'weight' => 6,
+    'expanded' => 1,
+  );
+
+  $i = 0;
   $menu['view:enterprise_users:page'] = array(
-    'weight' => 1,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_press'] = array(
-    'weight' => 2,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_news'] = array(
-    'weight' => 3,
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['view:enterprise_events:page'] = array(
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
   $menu['app:enterprise_faq'] = array(
-    'weight' => 4,
+    'weight' => $i++,
     'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
   );
+  $menu['view:enterprise_location:page'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+  $menu['view:enterprise_location_map:page'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7',
+  );
+
 
   $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
     'link_title' => t('Contact'),
@@ -145,6 +180,18 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
     'views:enterprise_blog_blocks-archives' => array(
       'regions' => -1,
     ),
+
+    // enterprise video blocks placement
+    'views:enterprise_video-tags_block' => array(
+      'weight' => 2,
+    ),
+    'views:enterprise_video-recent_block' => array(
+      'weight' => 4,
+    ),
+    'views:enterprise_video-popular_block' => array(
+      'weight' => 6,
+    ),
+
     // add cta footer to blog content type
     'cta:sel_cta_sidebar' => array(
       'path' => array(
@@ -161,6 +208,8 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
           'about',
           'about/*',
           'team',
+          'forum',
+          'forum/*',
         ),
       ),
     ),

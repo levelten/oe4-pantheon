@@ -151,8 +151,11 @@
 
     /**
      * Smooth Scrolling Anchors
+     * Needs review:
+     * It causes page jumps on accordion components e.g. FAQ page
+     * Ahmad
      */
-    Drupal.behaviors.themeSmoothAnchors = {
+    /*Drupal.behaviors.themeSmoothAnchors = {
         attach: function(context, settings) {
             var filterPath = function (string) {
                 return string
@@ -197,7 +200,7 @@
                 }
             });
         }
-    };
+    };*/
 
     /**
      * Image Circle Styling
@@ -234,11 +237,10 @@
                         });
                     }
                     return top;
-                }
+                };
                 var stickyResize = function(element) {
                     var top = stickyTop();
                     top = 0;
-                    console.log("top=" + top);
                     element.css({
                         left: element.parent().offset().left,
                         width: element.parent().width() + 1,
@@ -248,12 +250,14 @@
                                 'top': top ? sticky.offset().top - top : sticky.offset().top
                             }
                         }).parent().css('min-height', sticky.parent().height());
-                }
-                $(document).on('drupalViewportOffsetChange', null, function(){
+                };
+                if (jQuery.fn.affix) {
+                    $(document).on('drupalViewportOffsetChange', null, function(){
+                        stickyResize(sticky);
+                    });
+                    $(window).resize(stickyResize(sticky));
                     stickyResize(sticky);
-                });
-                $(window).resize(stickyResize(sticky));
-                stickyResize(sticky);
+                }
             });
         }
     };
@@ -263,7 +267,8 @@
      */
     Drupal.behaviors.themeAddThis = {
         attach: function(context, settings) {
-            if ($.browser.mozilla != undefined && $.browser.mozilla) {
+            var is_firefox = /firefox/i.test(navigator.userAgent.toLowerCase());
+            if (is_firefox !== undefined && is_firefox) {
                 $(document).ready(function () {
                     // AddThis Dialog Fix For Firefox
                     $('body').on('click', '#at3winheaderclose', function(){

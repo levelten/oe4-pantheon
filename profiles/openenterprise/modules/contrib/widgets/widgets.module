@@ -1314,8 +1314,11 @@ function widgets_get_context_author_uid($context = array()) {
   if (isset($context['node']->uid)) {
     $uid = $context['node']->uid; 
   }
-  elseif ((arg(0) == 'node') && is_numeric(arg(1))) {         
-    $uid = menu_get_object()->uid;
+  elseif ((arg(0) == 'node') && is_numeric(arg(1))) {
+    $obj = menu_get_object();
+    if (isset($obj->uid)) {
+      $uid = $obj->uid;
+    }
   }
   elseif (arg(0) == 'user' && is_numeric(arg(1))) {
     $uid = menu_get_object('user', 1)->uid;

@@ -3,7 +3,9 @@ api = 2
 
 ; drupal core latest release of specified core = number.x
 ;projects[core] = 7.x
-projects[drupal][version] = 7.24
+projects[drupal][version] = 7.34
+projects[drupal][download][type] = git
+projects[drupal][download][url]= git@github.com:pantheon-systems/drops-7.git
 
 ; Redirect to install.php when empty database
 ; http://drupal.org/node/728702
@@ -34,7 +36,7 @@ projects[drupal][patch][1697570] = https://www.drupal.org/files/drupal7.menu-sys
 ; http://drupal.org/node/737816
 projects[drupal][patch][737816] = https://drupal.org/files/drupal-fix_pdoexception_grant_permissions-737816-36-do-not-test.patch
 
-projects[openenterprise][type] = profile
-projects[openenterprise][download][type] = git
-projects[openenterprise][download][url] = http://git.drupal.org/project/openenterprise.git
-projects[openenterprise][download][branch] = 7.x-3.x
+;projects[openenterprise][type] = profile
+;projects[openenterprise][download][type] = git
+;projects[openenterprise][download][url] = http://git.drupal.org/project/openenterprise.git
+;projects[openenterprise][download][branch] = 7.x-3.x

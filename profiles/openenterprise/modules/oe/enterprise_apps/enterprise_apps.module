@@ -58,6 +58,18 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $s = variable_get('theme_enterprise_bootstrap_settings', array());
+  print_r($s);
+  return '';
+
+  $desc = array();
+  $obj = enterprise_apps_obj_load_by_ukey('menu_link:forum', $desc);
+
+  dsm($obj);
+  dsm($desc);
+
+  return 'OK';
+
   $profile = drupal_get_profile();
   dsm($profile);
 
@@ -1013,8 +1025,16 @@ function enterprise_apps_parse_ukey($ukey) {
 
     // pop first element off
     array_shift($ukeys);
-
   }
+  else if ($ukeys[0] == 'path') {
+    $desc['type'] = 'path';
+    $desc['path'] = $ukeys[1];
+  }
+  else if ($ukeys[0] == 'menu_link') {
+    $desc['type'] = 'menu_link';
+    $desc['path'] = $ukeys[1];
+  }
+
   if ($ukeys[0] == 'node') {
     $desc['type'] = 'node';
     $desc['uuid'] = $ukeys[1];
@@ -1038,6 +1058,16 @@ function enterprise_apps_obj_load_by_ukey($ukey, &$desc = array()) {
     //if (isset($desc['display_name'])) {
     //  $obj = $obj->display[$desc['display_name']];
     //}
+  }
+  if ($desc['type'] == 'path') {
+    $obj = menu_get_item($desc['path']);
+  }
+  if ($desc['type'] == 'menu_link') {
+    $query = db_select('menu_links' , 'ml')
+      ->condition('ml.link_path' , $desc['path'])
+      ->condition('ml.menu_name' , 'main-menu')
+      ->fields('ml');
+    $obj = $query->execute()->fetchObject();
   }
   if (!empty($obj)) {
     return $obj;
@@ -1076,7 +1106,7 @@ function enterprise_apps_config_menus($config_settings, $config_info) {
       $link_path = '';
       $link_module = 'menu';
 
-      $path_ukey_desc = '';
+      $path_ukey_desc = array();
       $obj = enterprise_apps_obj_load_by_ukey($path_key, $path_ukey_desc);
       // if linked to object does not exist, skip menu link add
       if (empty($obj)) {
@@ -1127,6 +1157,9 @@ if ($path_key == 'view:enterprise_users:page' || $path_key == 'app:enterprise_pr
           'link_title' => $display_title,
         );
 
+      }
+      if ($path_ukey_desc['type'] == 'menu_link' && !empty($obj->link_path)) {
+        $link_path = $obj->link_path;
       }
       if (!$link_path) {
         continue;
@@ -1377,3 +1410,82 @@ function enterprise_apps_api_property_load($options, &$message = '') {
     return FALSE;
   }
 }
+
+/**********************************************************
+ * Alter hooks to support apps info settings
+ */
+
+/* TODO migrating apps options configuration from curated app.
+  need to think through best way to do this when. Big question: with the hooks
+  we are using we don't know the context of the app. What is the best way
+  to determine that.
+function enterprise_apps_field_default_field_bases_alter(&$fields) {
+  $config_info = enterprise_apps_config_info_all();
+  foreach ($fields AS $field_name => $field) {
+    if (substr($field_name, -5) == '_tags') {
+      $a = explode('_', $field_name);
+      dsm($a);
+      array_shift($a);
+      $tax = array_pop($a);
+      $app_name = 'enterprise_' . implode('_', $a);
+      dsm($app_name);
+      dsm($config_info);
+      if (!isset($config_info[$app_name])) {
+        continue;
+      }
+    }
+  }
+  return;
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if (($settings['taxonomy_categories'] === FALSE) || ($settings['taxonomy_categories'] != 'curated_categories')) {
+        unset($fields['field_curated_categories']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if (($settings['taxonomy_tags'] === FALSE) || ($settings['taxonomy_tags'] != 'curated_tags')) {
+        unset($fields['field_curated_tags']);
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_bases_alter');
+    //dsm($fields);
+  }
+}
+
+function enterprise_apps_field_default_field_instances_alter(&$fields) {
+  dsm($fields);
+  $config_info = enterprise_apps_config_info_all();
+  dsm($config_info);
+  return;
+  $settings = enterprise_curated_app_settings();
+  if (isset($fields['node-enterprise_curated-field_curated_categories'])) {
+    if (isset($settings['taxonomy_categories'])) {
+      if ($settings['taxonomy_categories'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_categories']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_categories']['field_name'] = 'field_' . $settings['taxonomy_categories'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+  if (isset($fields['node-enterprise_curated-field_curated_tags'])) {
+    if (isset($settings['taxonomy_tags'])) {
+      if ($settings['taxonomy_tags'] === FALSE) {
+        unset($fields['node-enterprise_curated-field_curated_tags']);
+      }
+      else {
+        $fields['node-enterprise_curated-field_curated_tags']['field_name'] = 'field_' . $settings['taxonomy_tags'];
+      }
+    }
+    //dsm('enterprise_curated_field_default_field_instances_alter');
+    //dsm($fields);
+  }
+}
+*/

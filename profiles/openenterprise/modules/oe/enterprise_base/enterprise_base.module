@@ -78,7 +78,8 @@ function enterprise_base_taxonomy_term_uri($term) {
   );
   
   // Allow other modules to set the path.
-  drupal_alter($term->vocabulary_machine_name . '_uri', $url, $term);
+  drupal_alter('taxonomy_term_' . $term->vocabulary_machine_name . '_uri', $url, $term);
+
   return $url;
 }
 

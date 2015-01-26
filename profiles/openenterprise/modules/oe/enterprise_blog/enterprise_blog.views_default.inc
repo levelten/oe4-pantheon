@@ -65,7 +65,7 @@ function enterprise_blog_views_default_views() {
   );
 
   /* Display: Blog */
-  $handler = $view->new_display('page', 'Blog', 'page');
+  $handler = $view->new_display('page', 'Main Page', 'page');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
@@ -110,7 +110,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['menu']['context'] = 0;
 
   /* Display: Blog Feed */
-  $handler = $view->new_display('feed', 'Blog Feed', 'feed');
+  $handler = $view->new_display('feed', 'Main Feed', 'feed');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['style_plugin'] = 'rss';
@@ -125,7 +125,7 @@ function enterprise_blog_views_default_views() {
   );
 
   /* Display: Categories */
-  $handler = $view->new_display('page', 'Categories', 'categories');
+  $handler = $view->new_display('page', 'Categories Page', 'categories');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
   /* Relationship: Content: Categories (field_blog_categories) */
@@ -162,7 +162,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['path'] = 'blog/category/%';
 
   /* Display: Tags */
-  $handler = $view->new_display('page', 'Tags', 'tags');
+  $handler = $view->new_display('page', 'Tags Page', 'tags');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
   /* Relationship: Content: Tags (field_blog_tags) */
@@ -199,7 +199,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['path'] = 'blog/tag/%';
 
   /* Display: Archives */
-  $handler = $view->new_display('page', 'Archives', 'archives');
+  $handler = $view->new_display('page', 'Archives Page', 'archives');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Content: Created year + month */
@@ -216,7 +216,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['path'] = 'blog/archives/%';
 
   /* Display: Featured Blog */
-  $handler = $view->new_display('block', 'Featured Blog', 'featured');
+  $handler = $view->new_display('block', 'Featured Item', 'featured');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['pager'] = FALSE;
@@ -228,7 +228,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_featured';
+  $handler->display->display_options['row_options']['view_mode'] = 'featured';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
   /* Relationship: Content: Taxonomy terms on node */
@@ -264,7 +264,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_text';
+  $handler->display->display_options['row_options']['view_mode'] = 'text_teaser';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
   $handler->display->display_options['defaults']['arguments'] = FALSE;
@@ -803,7 +803,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_mini';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
   $handler->display->display_options['row_options']['links'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['block_description'] = 'Blog: Front';
@@ -825,7 +825,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_mini';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['block_description'] = 'Blog: Recent';
 
@@ -846,7 +846,7 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_mini';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
   $handler->display->display_options['row_options']['links'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
@@ -1009,14 +1009,14 @@ function enterprise_blog_views_default_views() {
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'ds';
-  $handler->display->display_options['row_options']['view_mode'] = 'blog_mini';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
   $handler->display->display_options['row_options']['load_comments'] = 0;
   $handler->display->display_options['row_options']['alternating'] = 0;
   $handler->display->display_options['row_options']['grouping'] = 0;
   $handler->display->display_options['row_options']['advanced'] = 1;
   $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
   $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'node|sticky';
-  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'blog_mini';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'mini';
   $handler->display->display_options['row_options']['advanced_fieldset']['advanced'] = TRUE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;

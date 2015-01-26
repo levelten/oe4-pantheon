@@ -13,6 +13,12 @@ class DeployWebTestCase extends DrupalWebTestCase {
   // Array to keep presaved variables.
   private $servers = array();
 
+  protected $manage_add_to_plan = TRUE;
+
+  protected $origin_modules = array('entity', 'ctools', 'uuid', 'deploy', 'deploy_ui', 'deploy_example');
+
+  protected $endpoint_modules = array('entity', 'ctools', 'uuid', 'services', 'rest_server', 'uuid_services', 'uuid_services_example');
+
   /**
    * Set up all sites.
    *
@@ -27,13 +33,13 @@ class DeployWebTestCase extends DrupalWebTestCase {
     }
 
     // Set up our origin site.
-    $this->setUpSite('deploy_origin', array('entity', 'ctools', 'uuid', 'deploy', 'deploy_ui', 'deploy_example'));
+    $this->setUpSite('deploy_origin', $this->origin_modules);
 
     // Switch back to original site to be able to set up a new site.
     $this->switchSite('deploy_origin', 'simpletest_original_default');
 
     // Set up one endpoint site.
-    $this->setUpSite('deploy_endpoint', array('entity', 'ctools', 'uuid', 'services', 'rest_server', 'uuid_services', 'uuid_services_example'));
+    $this->setUpSite('deploy_endpoint', $this->endpoint_modules);
 
     // This is the user that will be used to authenticate the deployment between
     // the site. We add it to $GLOBALS so we can access the user info on the
@@ -100,6 +106,15 @@ class DeployWebTestCase extends DrupalWebTestCase {
       $this->originalProfile,
       $this->originalShutdownCallbacks
     ) = $original;
+
+    $this->setUpSiteSpecifics($key);
+  }
+
+  /**
+   * Method for site specific setup.
+   */
+  protected function setUpSiteSpecifics($key) {
+    // Empty but available for classes to extend.
   }
 
   /**
@@ -211,6 +226,7 @@ class DeployWebTestCase extends DrupalWebTestCase {
     $this->cronRun();
   }
 
+  // @ignore comment_comment_see:comment
   /**
    * Code taken from TaxonomyWebTestCase::createTerm() since we can't extend
    * that test case. Some simplifications are made though.
@@ -274,8 +290,19 @@ class DeployWebTestCase extends DrupalWebTestCase {
       'field_tags' => array(LANGUAGE_NONE => array(array('tid' => $term_stage->tid))),
     ));
 
-    // Now add the node to the plan.
-    deploy_manager_add_to_plan($plan_name, 'node', $node_stage);
+    list($nid_stage, $vid_stage) = entity_extract_ids('node', $node_stage);
+
+    // If this base class should manage adding to the plan is configurable to
+    // allow for modules like deploy_auto_plan.module to use other ways and
+    // still be able to extend this class.
+    if ($this->manage_add_to_plan) {
+      // Now add the node to the plan.
+      deploy_manager_add_to_plan($plan_name, 'node', $node_stage);
+    }
+
+    // Test that the node was added to the plan with the right identifiers.
+    $count = db_query('SELECT COUNT(revision_id) FROM {deploy_manager_entities} WHERE entity_id = :nid AND revision_id = :vid', array(':nid' => $nid_stage, ':vid' => $vid_stage))->fetchField();
+    $this->assertEqual($count, 1, 'The entity was added to the deployment plan');
 
     // This will deploy the node only. But with dependencies (like the author
     // and the term).
@@ -318,6 +345,11 @@ class DeployWebTestCase extends DrupalWebTestCase {
 
     // TODO: Update more entities in the dependency chain of the node.
 
+    // Since we have a new revision ID we have to add the node again.
+    if ($this->manage_add_to_plan) {
+      deploy_manager_add_to_plan($plan_name, 'node', $node_stage);
+    }
+
     // Now deploy the node again.
     $this->deployPlan($plan_name);
 
@@ -337,6 +369,9 @@ class DeployWebTestCase extends DrupalWebTestCase {
  */
 class DeploySimpleDeploymentTestCase extends DeployWebTestCase {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
       'name' => 'Simple deployment setup',
@@ -345,6 +380,7 @@ class DeploySimpleDeploymentTestCase extends DeployWebTestCase {
     );
   }
 
+  // @ignore comment_comment_see:comment
   /**
    * Simple deployment scenario.
    *
@@ -361,6 +397,9 @@ class DeploySimpleDeploymentTestCase extends DeployWebTestCase {
  */
 class DeployQueuedDeploymentTestCase extends DeployWebTestCase {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
       'name' => 'Queued deployment setup',
@@ -369,6 +408,9 @@ class DeployQueuedDeploymentTestCase extends DeployWebTestCase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function testDeployment() {
     $this->editPlan('deploy_example_plan', array('processor_plugin' => 'DeployProcessorQueue'));
     $this->runScenario('deploy_example_plan');

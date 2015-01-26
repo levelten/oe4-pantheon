@@ -15,12 +15,12 @@ function enterprise_bootstrap_process_page(&$variables) {
     && isset($variables['page']['navigation'])
     && isset($variables['page']['navigation']['system_main-menu'])
     && is_array($variables['page']['navigation']['system_main-menu'])
-  ) {
+    ) {
     enterprise_bootstrap_transform_main_menu($variables['page']['navigation']['system_main-menu']);
-  }
-    if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
-      enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
-    }
+}
+if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
+  enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+}
 }
 
 /**
@@ -46,8 +46,8 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
-  $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
-  drupal_add_js(array('enterprise_bootstrap' => array('mobilemenu' => $mobile_dropdown)), array('type' => 'setting'));
+  // Variables
+  $theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 
   // Preprocess blocks on home page for striping.
   if (module_exists('block_class')) {
@@ -57,6 +57,17 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
         // Add region to block vars (we only care about content)
         $front_blocks[$key]['#block']->block_container = 'content';
       }
+    }
+  }
+
+  // Apply image styles to logo.
+  $logo_path = theme_get_setting('logo_path');
+  $logo_image_style = theme_get_setting('logo_image_style');
+
+  // Change out logo with image style version.
+  if (isset($logo_image_style) && isset($logo_path) && !empty($logo_image_style)) {
+    if ($logo_image_style !== 'default') {
+      $variables['logo'] = image_style_url($logo_image_style, $logo_path);
     }
   }
 
@@ -79,9 +90,11 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['content_column_class'] = '';
   }
 
-  // Navifation region settings.
+  // Navigation region settings.
+  $variables['navbar_region_class'] = theme_get_setting('navbar_region_class');
   $variables['nav_logo_class'] = theme_get_setting('nav_logo_class');
   $variables['nav_menu_class'] = theme_get_setting('nav_menu_class');
+  
   // Title region settings.
   $variables['title_placement'] = theme_get_setting('title_placement');
   $variables['title_container'] = theme_get_setting('title_container');
@@ -118,60 +131,113 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     unset($variables['page']['sidebar_second']);
   }
 
-  // Add zebra striping to front page in the content area.
+  /*
+   * Zebra Striping for Front Page Blocks
+   */
   $block_striping = theme_get_setting('enterprise_bootstrap_block_striping');
   if (isset($variables['page']['content']) && drupal_is_front_page() && isset($block_striping) && $block_striping) {
     // Get the blocks in the content area.
     $children = element_children($variables['page']['content']);
     $count = (count($children));
 
-    // Don't count metatags or workbench into the count.
-    foreach ($children as $key => $value) {
-      if ($value == 'metatags') { $count--; }
-      if ($value == 'workbench_block') { $count--; }
-    }
-    
+    // List of blocks that shouldn't be included in striping, add additional blocks here.
+    // Examples include metatags or workbench.
+    $stripe_exlude = array(
+      'metatags',
+      'workbench_block',
+    );
+    // Remove excluded from count.
+    $count = $count - count($stripe_exlude);
     // Add zebra classes to blocks.
     foreach ($variables['page']['content'] as $key => $value) {
-      if ($key == 'workbench_block' || $key == 'metatags') {
+      // Skip the excluded blocks.
+      if (in_array($key, $stripe_exlude)) {
         continue;
       }
+      // Determine striping class.
+      $zebra_class = ($count % 2 == 0) ? 'block-row-even' : 'block-row-odd';
       if (!empty($value['#block']) && $value['#block'] && isset($value['#block']->css_class)) {
-        $zebra_class = ($count % 2 == 0) ? 'block-row-even' : 'block-row-odd';
+        $existing_class = $variables['page']['content'][$key]['#block']->css_class;
+        $variables['page']['content'][$key]['#block']->css_class = $existing_class . ' ' . $zebra_class;
+        $count--;
+      } /*else {
         $variables['page']['content'][$key]['classes_array'][] = $zebra_class;
         $count--;
-      }
+      }*/
     }
   }
 
   // Option to use Blokk font.
   if(theme_get_setting('enterprise_bootstrap_blokkfont')) {
-    $blokk_path = drupal_get_path('theme', 'enterprise_bootstrap').'/fonts/blokkneue/blokkneue.css';
+    $blokk_path = $theme_path .'/fonts/blokkneue/blokkneue.css';
     $options = array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
       'weight' => -1,
       'preprocess' => TRUE,
-    );
+      );
     drupal_add_css($blokk_path, $options);
   }
 
-  // Add Javscript files from Enterprise Bootstrap settings
+  // Add Javscript files and settings from Enterprise Bootstrap settings
+  // Mega Menu and mobile menu settings.
+  $settings = array();
+  $settings['megamenu'] = theme_get_setting('enterprise_bootstrap_megamenu');
+  $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  $settings['mobilemenuhoverpush'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push');
+  $settings['fittext'] = theme_get_setting('fittext_selector');
+  // $bootstrap_hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
+  
+  // Process FitText selectors
+  $selectors = array();
+  if (!empty($settings['fittext'])) {
+    $selector = explode("\n", $settings['fittext']);
+    foreach ($selector as $value) {
+      $selectors[] = explode('|', $value);
+    }
+    $settings['fittext'] = $selectors;
+  }
+
+  drupal_add_js(
+    array(
+      'enterprise_bootstrap' => $settings,
+      ),
+    array(
+      'type' => 'setting',
+      )
+    );
+
   // fitText.js
   $fittext = theme_get_setting('fittext');
   if (!empty($fittext)) {
     switch ($fittext) {
       case 1:
-        drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js', 'external');
-        break;
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js', 'external');
+      break;
       case 2:
-        drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.js', 'external');
-        break;
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.js', 'external');
+      break;
       default:
         # Do nothing.
-        break;
+      break;
     }
   }
+  // bootstrap-hover-dropdown
+  $hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
+  if (!empty($hover_dropdown)) {
+    switch ($hover_dropdown) {
+      case 1:
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/bootstrap-hover-dropdown/2.0.10/bootstrap-hover-dropdown.min.js', 'external');
+      break;
+      case 2:
+      drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/bootstrap-hover-dropdown/2.0.10/bootstrap-hover-dropdown.js', 'external');
+      break;
+      default:
+        # Do nothing.
+      break;
+    }
+  }
+
   // equalize.js
   // $equalize = theme_get_setting('equalize');
   // if (!empty($equalize)) {
@@ -180,6 +246,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   //   }
   // }
 
+  // Add Bootstrap Javascript libraries
   $bootstrap_js = theme_get_setting('enterprise_bootstrap_js_options');
   if(!empty($bootstrap_js)) {
     $bootstrap_js = array_filter($bootstrap_js);
@@ -188,7 +255,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       'group' => JS_THEME,
       'every_page' => TRUE,
       'preprocess' => TRUE,
-    );
+      );
     foreach ($bootstrap_js as $key => $value) {
       drupal_add_js($js_path.$key.'.js', $options);
     }

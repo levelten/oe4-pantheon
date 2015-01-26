@@ -1,0 +1,22 @@
+<?php
+/**
+ * @file
+ * enterprise_forum.features.taxonomy.inc
+ */
+
+/**
+ * Implements hook_taxonomy_default_vocabularies().
+ */
+function enterprise_forum_taxonomy_default_vocabularies() {
+  return array(
+    'forums' => array(
+      'name' => 'Forums',
+      'machine_name' => 'forums',
+      'description' => 'Forum navigation vocabulary',
+      'hierarchy' => 1,
+      'module' => 'forum',
+      'weight' => -10,
+      'entity_type' => 'taxonomy_vocabulary',
+    ),
+  );
+}

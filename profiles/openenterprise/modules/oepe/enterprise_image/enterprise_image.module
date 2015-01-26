@@ -1,0 +1,121 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Images feature.
+ */
+
+include_once 'enterprise_image.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_on_enable()
+ */
+function enterprise_image_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_image');
+}
+
+function enterprise_image_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_image' => array(),
+  );
+
+  /*
+  $settings['enterprise_image']['options'] = array(
+    'app_slug' => 'image',
+    'section_path' => 'cool-images',
+    'section_path_node' => 'cool-image',
+    'multi_author' => FALSE,  // FALSE or number for path slug order
+    'taxonomy_categories' => 'blog_categories',
+    'taxonomy_tags' => 'blog_tags',
+  );
+  */
+
+  $variables = array();
+  /*
+  $variables['disqus_nodetypes'] = array(
+    'enterprise_image' => 'enterprise_image',
+  );
+  */
+
+  $settings['enterprise_image']['variables'] = $variables;
+
+  return $settings;
+}
+
+
+/**
+ * Implements hook_enterprise_apps_config_info()
+ * @return array
+ */
+function enterprise_image_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_image'] = array(
+    'title' => t('Image'),
+  );
+
+  // blocks config
+  $visibility = array(
+    'enterprise_image_view' => array(
+      'title' => t('Show on image listing pages'),
+      'views' => array(
+        'views' => array(
+          'enterprise_image:page',
+        ),
+      ),
+    ),
+    'enterprise_image_content_type' => array(
+      'title' => t('Show on image pages'),
+      'node_type' => array(
+        'types' => array('enterprise_image'),
+      )
+    ),
+  );
+  $view = views_get_view('enterprise_image');
+  $display_desc = array();
+  if (!empty($view)) {
+    foreach ($view->display AS $name => $display) {
+      $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+    }
+  }
+
+  $config['enterprise_image']['blocks'] = array(
+    // Video categories block
+    'views:enterprise_image-categories_block' => array(
+      'description' => $display_desc['categories_block'],
+      'default' => array(
+        'regions' => array(),
+        'visibility_presets' => array(),
+        'weight' => -5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_image-tags_block' => array(
+      'description' => $display_desc['tags_block'],
+      'default' => array(
+        'regions' => array(),
+        'visibility_presets' => array(),
+        'weight' => -4,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_image-recent_block' => array(
+      'description' => $display_desc['recent_block'],
+      'default' => array(
+        'regions' => array(),
+        'visibility_presets' => array(),
+        'weight' => 5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_image-rotator_block' => array(
+      'description' => $display_desc['rotator_block'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_image_view', 'enterprise_image_content_type'),
+        'weight' => 5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    /**/
+  );
+  return $config;
+}
