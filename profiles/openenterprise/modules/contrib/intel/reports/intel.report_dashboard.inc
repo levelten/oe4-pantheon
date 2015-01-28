@@ -13,7 +13,7 @@ function intel_dashboard_report_page($report_subtype = '-', $context = '-', $tim
 
   $vars = intel_init_reports_vars('dashboard', 'dashboard', $report_subtype, $context, $timeframe, $filter_type, $filter_element, $subsite);
   $vars['title'] = $title = t('Dashboard');
-  dsm($vars);
+
   $output = intel_build_report($vars);
 
   return $output;
