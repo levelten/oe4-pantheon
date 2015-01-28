@@ -109,10 +109,14 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
 
   if (!empty($settings['demo']['demo_content'])) {
     $required_apps[] = 'enterprise_demo_content';
+
   }
   else {
     $required_apps[] = 'enterprise_demo_nocontent';
   };
+
+  $required_apps[] = 'enterprise_permissions';
+  $required_apps[] = 'enterprise_permissions_content';
 
 
   /*

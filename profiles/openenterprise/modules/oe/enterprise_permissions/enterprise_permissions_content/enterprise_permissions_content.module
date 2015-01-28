@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Permissions Content feature.
+ */
+
+include_once 'enterprise_permissions_content.features.inc';

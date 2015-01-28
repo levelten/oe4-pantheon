@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Drupal needs this blank file.
+ */
+
+/**
+ * Implements hook_user_default_permissions_alter()
+ *
+ * All permissions for all apps are stored in this Feature. If a permission
+ * is provided for a module/Feature that is not enabled, a warning is generated.
+ * This function check to see if the permission is enabled and if not removes
+ * the permissions thus eliminating the warning.
+ *
+ * @param $permissions
+ */
+function enterprise_permissions_user_default_permissions_alter(&$permissions) {
+  $existing = &drupal_static(__FUNCTION__);
+  if (!isset($existing)) {
+    $existing = module_invoke_all('permission');
+  }
+
+  foreach ($permissions as $permission => $perm_item) {
+    if (!isset($existing[$permission])) {
+      unset($permissions[$permission]);
+    }
+  }
+}
