@@ -44,6 +44,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access all webform results',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'webform',
   );
@@ -85,6 +87,10 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access content overview',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'node',
   );
@@ -94,6 +100,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access contextual links',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'contextual',
   );
@@ -105,6 +112,25 @@ function enterprise_permissions_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'devel',
+  );
+
+  // Exported permission: 'access linked field list'.
+  $permissions['access linked field list'] = array(
+    'name' => 'access linked field list',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'linked_field',
+  );
+
+  // Exported permission: 'access media browser'.
+  $permissions['access media browser'] = array(
+    'name' => 'access media browser',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'media',
   );
 
   // Exported permission: 'access own authorizations'.
@@ -130,6 +156,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access own webform results',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'webform',
   );
@@ -157,6 +185,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access site reports',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'system',
   );
@@ -166,6 +196,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'access user profiles',
     'roles' => array(
       'administrator' => 'administrator',
+      'anonymous user' => 'anonymous user',
+      'authenticated user' => 'authenticated user',
     ),
     'module' => 'user',
   );
@@ -175,6 +207,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'admin intel',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -202,6 +236,9 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer any social profiles',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
     ),
     'module' => 'socialmedia',
   );
@@ -238,6 +275,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer block classes',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'block_class',
   );
@@ -251,11 +289,22 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'icon',
   );
 
+  // Exported permission: 'administer blocker'.
+  $permissions['administer blocker'] = array(
+    'name' => 'administer blocker',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'blocker',
+  );
+
   // Exported permission: 'administer blocks'.
   $permissions['administer blocks'] = array(
     'name' => 'administer blocks',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'block',
   );
@@ -310,6 +359,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer ctas',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'cta',
   );
@@ -382,6 +432,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -393,6 +444,15 @@ function enterprise_permissions_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'filter',
+  );
+
+  // Exported permission: 'administer fitvids'.
+  $permissions['administer fitvids'] = array(
+    'name' => 'administer fitvids',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'fitvids',
   );
 
   // Exported permission: 'administer google analytics'.
@@ -431,6 +491,16 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'image',
   );
 
+  // Exported permission: 'administer less'.
+  $permissions['administer less'] = array(
+    'name' => 'administer less',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'less',
+  );
+
   // Exported permission: 'administer mailchimp'.
   $permissions['administer mailchimp'] = array(
     'name' => 'administer mailchimp',
@@ -454,6 +524,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer menu',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'menu',
   );
@@ -481,6 +552,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer meta tags',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'metatag',
   );
@@ -526,6 +598,10 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer own social profiles',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'socialmedia',
   );
@@ -580,6 +656,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer redirects',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'redirect',
   );
@@ -600,15 +677,6 @@ function enterprise_permissions_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'search',
-  );
-
-  // Exported permission: 'administer seotools'.
-  $permissions['administer seotools'] = array(
-    'name' => 'administer seotools',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'seotools',
   );
 
   // Exported permission: 'administer site configuration'.
@@ -643,6 +711,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer taxonomy',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'taxonomy',
   );
@@ -662,6 +731,9 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer url aliases',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
     ),
     'module' => 'path',
   );
@@ -671,6 +743,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer users',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'user',
   );
@@ -684,11 +757,21 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'uuid',
   );
 
+  // Exported permission: 'administer video styles'.
+  $permissions['administer video styles'] = array(
+    'name' => 'administer video styles',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'video_embed_field',
+  );
+
   // Exported permission: 'administer views'.
   $permissions['administer views'] = array(
     'name' => 'administer views',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'views',
   );
@@ -698,17 +781,9 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'administer widgets sets',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'widgets',
-  );
-
-  // Exported permission: 'administer xmlsitemap'.
-  $permissions['administer xmlsitemap'] = array(
-    'name' => 'administer xmlsitemap',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'xmlsitemap',
   );
 
   // Exported permission: 'block IP addresses'.
@@ -743,6 +818,10 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'bypass thankyou form submission validation',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'enterprise_landingpages',
   );
@@ -765,33 +844,6 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'user',
   );
 
-  // Exported permission: 'config wizard admin'.
-  $permissions['config wizard admin'] = array(
-    'name' => 'config wizard admin',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'config',
-  );
-
-  // Exported permission: 'config wizard edit'.
-  $permissions['config wizard edit'] = array(
-    'name' => 'config wizard edit',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'config',
-  );
-
-  // Exported permission: 'config wizard view'.
-  $permissions['config wizard view'] = array(
-    'name' => 'config wizard view',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'config',
-  );
-
   // Exported permission: 'create any basic_block bean'.
   $permissions['create any basic_block bean'] = array(
     'name' => 'create any basic_block bean',
@@ -806,9 +858,153 @@ function enterprise_permissions_user_default_permissions() {
   $permissions['create any cta bean'] = array(
     'name' => 'create any cta bean',
     'roles' => array(
+      'administrator' => 'administrator',
       'demo' => 'demo',
     ),
     'module' => 'bean',
+  );
+
+  // Exported permission: 'create enterprise_blog content'.
+  $permissions['create enterprise_blog content'] = array(
+    'name' => 'create enterprise_blog content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_event content'.
+  $permissions['create enterprise_event content'] = array(
+    'name' => 'create enterprise_event content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_faq content'.
+  $permissions['create enterprise_faq content'] = array(
+    'name' => 'create enterprise_faq content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_image content'.
+  $permissions['create enterprise_image content'] = array(
+    'name' => 'create enterprise_image content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_landingpage content'.
+  $permissions['create enterprise_landingpage content'] = array(
+    'name' => 'create enterprise_landingpage content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_link content'.
+  $permissions['create enterprise_link content'] = array(
+    'name' => 'create enterprise_link content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_location content'.
+  $permissions['create enterprise_location content'] = array(
+    'name' => 'create enterprise_location content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_news content'.
+  $permissions['create enterprise_news content'] = array(
+    'name' => 'create enterprise_news content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_press_release content'.
+  $permissions['create enterprise_press_release content'] = array(
+    'name' => 'create enterprise_press_release content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_thankyou content'.
+  $permissions['create enterprise_thankyou content'] = array(
+    'name' => 'create enterprise_thankyou content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'create enterprise_video content'.
+  $permissions['create enterprise_video content'] = array(
+    'name' => 'create enterprise_video content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'create files'.
@@ -816,8 +1012,22 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'create files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'create page content'.
+  $permissions['create page content'] = array(
+    'name' => 'create page content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'create url aliases'.
@@ -825,8 +1035,25 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'create url aliases',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'path',
+  );
+
+  // Exported permission: 'create webform content'.
+  $permissions['create webform content'] = array(
+    'name' => 'create webform content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'customize ckeditor'.
@@ -843,6 +1070,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete all intel visitors',
     'roles' => array(
       'administrator' => 'administrator',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -861,6 +1089,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete any audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -879,6 +1108,7 @@ function enterprise_permissions_user_default_permissions() {
   $permissions['delete any cta bean'] = array(
     'name' => 'delete any cta bean',
     'roles' => array(
+      'administrator' => 'administrator',
       'demo' => 'demo',
     ),
     'module' => 'bean',
@@ -889,8 +1119,141 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete any document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete any enterprise_blog content'.
+  $permissions['delete any enterprise_blog content'] = array(
+    'name' => 'delete any enterprise_blog content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_event content'.
+  $permissions['delete any enterprise_event content'] = array(
+    'name' => 'delete any enterprise_event content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_faq content'.
+  $permissions['delete any enterprise_faq content'] = array(
+    'name' => 'delete any enterprise_faq content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_image content'.
+  $permissions['delete any enterprise_image content'] = array(
+    'name' => 'delete any enterprise_image content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_landingpage content'.
+  $permissions['delete any enterprise_landingpage content'] = array(
+    'name' => 'delete any enterprise_landingpage content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_link content'.
+  $permissions['delete any enterprise_link content'] = array(
+    'name' => 'delete any enterprise_link content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_location content'.
+  $permissions['delete any enterprise_location content'] = array(
+    'name' => 'delete any enterprise_location content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_news content'.
+  $permissions['delete any enterprise_news content'] = array(
+    'name' => 'delete any enterprise_news content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_press_release content'.
+  $permissions['delete any enterprise_press_release content'] = array(
+    'name' => 'delete any enterprise_press_release content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_thankyou content'.
+  $permissions['delete any enterprise_thankyou content'] = array(
+    'name' => 'delete any enterprise_thankyou content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete any enterprise_video content'.
+  $permissions['delete any enterprise_video content'] = array(
+    'name' => 'delete any enterprise_video content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete any image files'.
@@ -898,8 +1261,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete any image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete any page content'.
+  $permissions['delete any page content'] = array(
+    'name' => 'delete any page content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete any video files'.
@@ -907,8 +1283,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete any video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete any webform content'.
+  $permissions['delete any webform content'] = array(
+    'name' => 'delete any webform content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete own audio files'.
@@ -916,6 +1305,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete own audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -925,8 +1315,141 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete own document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete own enterprise_blog content'.
+  $permissions['delete own enterprise_blog content'] = array(
+    'name' => 'delete own enterprise_blog content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_event content'.
+  $permissions['delete own enterprise_event content'] = array(
+    'name' => 'delete own enterprise_event content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_faq content'.
+  $permissions['delete own enterprise_faq content'] = array(
+    'name' => 'delete own enterprise_faq content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_image content'.
+  $permissions['delete own enterprise_image content'] = array(
+    'name' => 'delete own enterprise_image content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_landingpage content'.
+  $permissions['delete own enterprise_landingpage content'] = array(
+    'name' => 'delete own enterprise_landingpage content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_link content'.
+  $permissions['delete own enterprise_link content'] = array(
+    'name' => 'delete own enterprise_link content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_location content'.
+  $permissions['delete own enterprise_location content'] = array(
+    'name' => 'delete own enterprise_location content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_news content'.
+  $permissions['delete own enterprise_news content'] = array(
+    'name' => 'delete own enterprise_news content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_press_release content'.
+  $permissions['delete own enterprise_press_release content'] = array(
+    'name' => 'delete own enterprise_press_release content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_thankyou content'.
+  $permissions['delete own enterprise_thankyou content'] = array(
+    'name' => 'delete own enterprise_thankyou content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own enterprise_video content'.
+  $permissions['delete own enterprise_video content'] = array(
+    'name' => 'delete own enterprise_video content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete own image files'.
@@ -934,8 +1457,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete own image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete own page content'.
+  $permissions['delete own page content'] = array(
+    'name' => 'delete own page content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete own video files'.
@@ -943,8 +1479,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete own video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'delete own webform content'.
+  $permissions['delete own webform content'] = array(
+    'name' => 'delete own webform content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'delete own webform submissions'.
@@ -961,6 +1510,9 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete revisions',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
     ),
     'module' => 'node',
   );
@@ -968,28 +1520,45 @@ function enterprise_permissions_user_default_permissions() {
   // Exported permission: 'delete terms in blog_categories'.
   $permissions['delete terms in blog_categories'] = array(
     'name' => 'delete terms in blog_categories',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
     'module' => 'taxonomy',
   );
 
   // Exported permission: 'delete terms in blog_tags'.
   $permissions['delete terms in blog_tags'] = array(
     'name' => 'delete terms in blog_tags',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'taxonomy',
+  );
+
+  // Exported permission: 'delete terms in categories'.
+  $permissions['delete terms in categories'] = array(
+    'name' => 'delete terms in categories',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
     'module' => 'taxonomy',
   );
 
   // Exported permission: 'delete terms in cta_categories'.
   $permissions['delete terms in cta_categories'] = array(
     'name' => 'delete terms in cta_categories',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'delete terms in keywords'.
-  $permissions['delete terms in keywords'] = array(
-    'name' => 'delete terms in keywords',
-    'roles' => array(),
+  // Exported permission: 'delete terms in forums'.
+  $permissions['delete terms in forums'] = array(
+    'name' => 'delete terms in forums',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
     'module' => 'taxonomy',
   );
 
@@ -998,7 +1567,6 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'delete terms in tags',
     'roles' => array(
       'administrator' => 'administrator',
-      'demo' => 'demo',
     ),
     'module' => 'taxonomy',
   );
@@ -1026,6 +1594,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download any audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1035,6 +1604,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download any document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1044,6 +1614,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download any image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1053,6 +1624,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download any video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1062,6 +1634,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download own audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1071,6 +1644,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download own document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1080,6 +1654,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download own image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1089,6 +1664,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'download own video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1098,6 +1674,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit all webform submissions',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'webform',
   );
@@ -1107,6 +1685,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit any audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1125,6 +1704,7 @@ function enterprise_permissions_user_default_permissions() {
   $permissions['edit any cta bean'] = array(
     'name' => 'edit any cta bean',
     'roles' => array(
+      'administrator' => 'administrator',
       'demo' => 'demo',
     ),
     'module' => 'bean',
@@ -1135,8 +1715,141 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit any document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'edit any enterprise_blog content'.
+  $permissions['edit any enterprise_blog content'] = array(
+    'name' => 'edit any enterprise_blog content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_event content'.
+  $permissions['edit any enterprise_event content'] = array(
+    'name' => 'edit any enterprise_event content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_faq content'.
+  $permissions['edit any enterprise_faq content'] = array(
+    'name' => 'edit any enterprise_faq content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_image content'.
+  $permissions['edit any enterprise_image content'] = array(
+    'name' => 'edit any enterprise_image content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_landingpage content'.
+  $permissions['edit any enterprise_landingpage content'] = array(
+    'name' => 'edit any enterprise_landingpage content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_link content'.
+  $permissions['edit any enterprise_link content'] = array(
+    'name' => 'edit any enterprise_link content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_location content'.
+  $permissions['edit any enterprise_location content'] = array(
+    'name' => 'edit any enterprise_location content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_news content'.
+  $permissions['edit any enterprise_news content'] = array(
+    'name' => 'edit any enterprise_news content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_press_release content'.
+  $permissions['edit any enterprise_press_release content'] = array(
+    'name' => 'edit any enterprise_press_release content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_thankyou content'.
+  $permissions['edit any enterprise_thankyou content'] = array(
+    'name' => 'edit any enterprise_thankyou content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit any enterprise_video content'.
+  $permissions['edit any enterprise_video content'] = array(
+    'name' => 'edit any enterprise_video content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'edit any image files'.
@@ -1144,8 +1857,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit any image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'edit any page content'.
+  $permissions['edit any page content'] = array(
+    'name' => 'edit any page content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'edit any video files'.
@@ -1153,8 +1879,21 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit any video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'edit any webform content'.
+  $permissions['edit any webform content'] = array(
+    'name' => 'edit any webform content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'edit bean view mode'.
@@ -1171,6 +1910,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit meta tags',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'metatag',
   );
@@ -1180,6 +1920,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit own audio files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1198,8 +1939,152 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit own document files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'edit own enterprise_blog content'.
+  $permissions['edit own enterprise_blog content'] = array(
+    'name' => 'edit own enterprise_blog content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_event content'.
+  $permissions['edit own enterprise_event content'] = array(
+    'name' => 'edit own enterprise_event content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_faq content'.
+  $permissions['edit own enterprise_faq content'] = array(
+    'name' => 'edit own enterprise_faq content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_image content'.
+  $permissions['edit own enterprise_image content'] = array(
+    'name' => 'edit own enterprise_image content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_landingpage content'.
+  $permissions['edit own enterprise_landingpage content'] = array(
+    'name' => 'edit own enterprise_landingpage content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_link content'.
+  $permissions['edit own enterprise_link content'] = array(
+    'name' => 'edit own enterprise_link content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_location content'.
+  $permissions['edit own enterprise_location content'] = array(
+    'name' => 'edit own enterprise_location content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_news content'.
+  $permissions['edit own enterprise_news content'] = array(
+    'name' => 'edit own enterprise_news content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_press_release content'.
+  $permissions['edit own enterprise_press_release content'] = array(
+    'name' => 'edit own enterprise_press_release content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_thankyou content'.
+  $permissions['edit own enterprise_thankyou content'] = array(
+    'name' => 'edit own enterprise_thankyou content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'edit own enterprise_video content'.
+  $permissions['edit own enterprise_video content'] = array(
+    'name' => 'edit own enterprise_video content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'edit own image files'.
@@ -1207,17 +2092,22 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit own image files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
 
-  // Exported permission: 'edit own sms number'.
-  $permissions['edit own sms number'] = array(
-    'name' => 'edit own sms number',
+  // Exported permission: 'edit own page content'.
+  $permissions['edit own page content'] = array(
+    'name' => 'edit own page content',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
-    'module' => 'twilio',
+    'module' => 'node',
   );
 
   // Exported permission: 'edit own video files'.
@@ -1225,8 +2115,22 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'edit own video files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
+  );
+
+  // Exported permission: 'edit own webform content'.
+  $permissions['edit own webform content'] = array(
+    'name' => 'edit own webform content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'node',
   );
 
   // Exported permission: 'edit own webform submissions'.
@@ -1250,28 +2154,50 @@ function enterprise_permissions_user_default_permissions() {
   // Exported permission: 'edit terms in blog_categories'.
   $permissions['edit terms in blog_categories'] = array(
     'name' => 'edit terms in blog_categories',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
     'module' => 'taxonomy',
   );
 
   // Exported permission: 'edit terms in blog_tags'.
   $permissions['edit terms in blog_tags'] = array(
     'name' => 'edit terms in blog_tags',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'taxonomy',
+  );
+
+  // Exported permission: 'edit terms in categories'.
+  $permissions['edit terms in categories'] = array(
+    'name' => 'edit terms in categories',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
     'module' => 'taxonomy',
   );
 
   // Exported permission: 'edit terms in cta_categories'.
   $permissions['edit terms in cta_categories'] = array(
     'name' => 'edit terms in cta_categories',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'edit terms in keywords'.
-  $permissions['edit terms in keywords'] = array(
-    'name' => 'edit terms in keywords',
-    'roles' => array(),
+  // Exported permission: 'edit terms in forums'.
+  $permissions['edit terms in forums'] = array(
+    'name' => 'edit terms in forums',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
     'module' => 'taxonomy',
   );
 
@@ -1285,21 +2211,16 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'enterprise config access accounts'.
-  $permissions['enterprise config access accounts'] = array(
-    'name' => 'enterprise config access accounts',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'enterprise_config',
-  );
-
   // Exported permission: 'entityconnect add button'.
   $permissions['entityconnect add button'] = array(
     'name' => 'entityconnect add button',
     'roles' => array(
       'administrator' => 'administrator',
+      'authenticated user' => 'authenticated user',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'entityconnect',
   );
@@ -1309,7 +2230,9 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'entityconnect edit button',
     'roles' => array(
       'administrator' => 'administrator',
+      'authenticated user' => 'authenticated user',
       'demo' => 'demo',
+      'writer' => 'writer',
     ),
     'module' => 'entityconnect',
   );
@@ -1319,6 +2242,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'exclude any node title',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'exclude_node_title',
   );
@@ -1328,6 +2252,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'exclude own node title',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'exclude_node_title',
   );
@@ -1359,22 +2284,113 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'features',
   );
 
-  // Exported permission: 'kwresearch admin page keywords'.
-  $permissions['kwresearch admin page keywords'] = array(
-    'name' => 'kwresearch admin page keywords',
+  // Exported permission: 'geocoder_service_all_handlers'.
+  $permissions['geocoder_service_all_handlers'] = array(
+    'name' => 'geocoder_service_all_handlers',
     'roles' => array(
       'administrator' => 'administrator',
     ),
-    'module' => 'kwresearch',
+    'module' => 'geocoder',
   );
 
-  // Exported permission: 'kwresearch admin site keywords'.
-  $permissions['kwresearch admin site keywords'] = array(
-    'name' => 'kwresearch admin site keywords',
+  // Exported permission: 'geocoder_service_handler_exif'.
+  $permissions['geocoder_service_handler_exif'] = array(
+    'name' => 'geocoder_service_handler_exif',
     'roles' => array(
       'administrator' => 'administrator',
     ),
-    'module' => 'kwresearch',
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_google'.
+  $permissions['geocoder_service_handler_google'] = array(
+    'name' => 'geocoder_service_handler_google',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_gpx'.
+  $permissions['geocoder_service_handler_gpx'] = array(
+    'name' => 'geocoder_service_handler_gpx',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_json'.
+  $permissions['geocoder_service_handler_json'] = array(
+    'name' => 'geocoder_service_handler_json',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_kml'.
+  $permissions['geocoder_service_handler_kml'] = array(
+    'name' => 'geocoder_service_handler_kml',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_latlon'.
+  $permissions['geocoder_service_handler_latlon'] = array(
+    'name' => 'geocoder_service_handler_latlon',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_mapquest_nominatim'.
+  $permissions['geocoder_service_handler_mapquest_nominatim'] = array(
+    'name' => 'geocoder_service_handler_mapquest_nominatim',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_wkt'.
+  $permissions['geocoder_service_handler_wkt'] = array(
+    'name' => 'geocoder_service_handler_wkt',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_yahoo'.
+  $permissions['geocoder_service_handler_yahoo'] = array(
+    'name' => 'geocoder_service_handler_yahoo',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'geocoder_service_handler_yandex'.
+  $permissions['geocoder_service_handler_yandex'] = array(
+    'name' => 'geocoder_service_handler_yandex',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'geocoder',
+  );
+
+  // Exported permission: 'manage blocker blocks'.
+  $permissions['manage blocker blocks'] = array(
+    'name' => 'manage blocker blocks',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'blocker_ui',
   );
 
   // Exported permission: 'manage features'.
@@ -1422,13 +2438,13 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'googleanalytics',
   );
 
-  // Exported permission: 'perform content analysis'.
-  $permissions['perform content analysis'] = array(
-    'name' => 'perform content analysis',
+  // Exported permission: 'pagepeeker configuration'.
+  $permissions['pagepeeker configuration'] = array(
+    'name' => 'pagepeeker configuration',
     'roles' => array(
       'administrator' => 'administrator',
     ),
-    'module' => 'contentanalysis',
+    'module' => 'pagepeeker',
   );
 
   // Exported permission: 'post comments'.
@@ -1441,11 +2457,23 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'comment',
   );
 
+  // Exported permission: 'rename features'.
+  $permissions['rename features'] = array(
+    'name' => 'rename features',
+    'roles' => array(
+      'administrator' => 'administrator',
+    ),
+    'module' => 'features',
+  );
+
   // Exported permission: 'revert revisions'.
   $permissions['revert revisions'] = array(
     'name' => 'revert revisions',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
     ),
     'module' => 'node',
   );
@@ -1455,6 +2483,10 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'save draft',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'save_draft',
   );
@@ -1464,6 +2496,10 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'schedule (un)publishing of nodes',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'scheduler',
   );
@@ -1597,6 +2633,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'update all intel visitors',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1615,6 +2653,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'use advanced search',
     'roles' => array(
       'administrator' => 'administrator',
+      'authenticated user' => 'authenticated user',
+      'demo' => 'demo',
     ),
     'module' => 'search',
   );
@@ -1628,15 +2668,6 @@ function enterprise_permissions_user_default_permissions() {
       'authenticated user' => 'authenticated user',
     ),
     'module' => 'exclude_node_title',
-  );
-
-  // Exported permission: 'use slugs'.
-  $permissions['use slugs'] = array(
-    'name' => 'use slugs',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'slug',
   );
 
   // Exported permission: 'use text format advanced_html'.
@@ -1683,6 +2714,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'view all intel emailclicks',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1692,6 +2725,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'view all intel phonecalls',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1702,6 +2737,8 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1712,6 +2749,7 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1722,6 +2760,7 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'intel',
   );
@@ -1730,6 +2769,7 @@ function enterprise_permissions_user_default_permissions() {
   $permissions['view any cta bean'] = array(
     'name' => 'view any cta bean',
     'roles' => array(
+      'administrator' => 'administrator',
       'demo' => 'demo',
     ),
     'module' => 'bean',
@@ -1765,11 +2805,22 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'file_entity',
   );
 
+  // Exported permission: 'view icons'.
+  $permissions['view icons'] = array(
+    'name' => 'view icons',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+    ),
+    'module' => 'icon',
+  );
+
   // Exported permission: 'view own files'.
   $permissions['view own files'] = array(
     'name' => 'view own files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1780,6 +2831,9 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'intel',
   );
@@ -1789,6 +2843,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'view own private files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1808,6 +2863,7 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'view private files',
     'roles' => array(
       'administrator' => 'administrator',
+      'demo' => 'demo',
     ),
     'module' => 'file_entity',
   );
@@ -1822,11 +2878,24 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'node',
   );
 
+  // Exported permission: 'view scheduled content'.
+  $permissions['view scheduled content'] = array(
+    'name' => 'view scheduled content',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'scheduler',
+  );
+
   // Exported permission: 'view the administration theme'.
   $permissions['view the administration theme'] = array(
     'name' => 'view the administration theme',
     'roles' => array(
       'administrator' => 'administrator',
+      'authenticated user' => 'authenticated user',
       'demo' => 'demo',
     ),
     'module' => 'system',
