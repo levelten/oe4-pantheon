@@ -107,22 +107,6 @@
     };
 
     /**
-     * fitVids (Responsive Videos)
-     */
-    Drupal.behaviors.fitVids = {
-        attach: function (context) {
-            // select video filter videos
-            $('.video-filter', context).parent().once('fitVids', function(){
-                $(this).fitVids();
-            });
-            // select video embed field vides
-            $('.embedded-video', context).once('fitVids', function(){
-                $(this).fitVids();
-            });
-        }
-    };
-
-    /**
      * Equal Heights
      */
     Drupal.behaviors.themeEqualHeights = {
