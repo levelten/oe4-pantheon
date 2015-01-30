@@ -186,7 +186,6 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
   $settings['mobilemenuhoverpush'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push');
   $settings['fittext'] = theme_get_setting('fittext_selector');
-  // $bootstrap_hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
   
   // Process FitText selectors
   $selectors = array();
@@ -231,6 +230,23 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       break;
       case 2:
       drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/bootstrap-hover-dropdown/2.0.10/bootstrap-hover-dropdown.js', 'external');
+      break;
+      default:
+        # Do nothing.
+      break;
+    }
+  }
+  // Responsive Tabs
+  $responsive_tabs = theme_get_setting('responsive_tabs');
+  if (!empty($responsive_tabs)) {
+    switch ($responsive_tabs) {
+      case 1:
+      drupal_add_js($theme_path  . '/js/responsivetabs/jquery.responsiveTabs.min.js');
+      drupal_add_css($theme_path . '/css/responsive-tabs.css');
+      break;
+      case 2:
+      drupal_add_js($theme_path  . '/js/responsivetabs/jquery.responsiveTabs.js');
+      drupal_add_css($theme_path . '/css/responsive-tabs.css');
       break;
       default:
         # Do nothing.

@@ -126,6 +126,30 @@ function enterprise_events_strongarm() {
       'upcoming_events' => array(
         'custom_settings' => TRUE,
       ),
+      'mini' => array(
+        'custom_settings' => TRUE,
+      ),
+      'search_index' => array(
+        'custom_settings' => FALSE,
+      ),
+      'search_result' => array(
+        'custom_settings' => FALSE,
+      ),
+      'colorbox' => array(
+        'custom_settings' => FALSE,
+      ),
+      'featured' => array(
+        'custom_settings' => FALSE,
+      ),
+      'image' => array(
+        'custom_settings' => FALSE,
+      ),
+      'text_teaser' => array(
+        'custom_settings' => FALSE,
+      ),
+      'teaser_stacked' => array(
+        'custom_settings' => FALSE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
@@ -133,10 +157,13 @@ function enterprise_events_strongarm() {
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '5',
+          'weight' => '7',
         ),
         'redirect' => array(
-          'weight' => '6',
+          'weight' => '8',
+        ),
+        'metatags' => array(
+          'weight' => '10',
         ),
       ),
       'display' => array(),

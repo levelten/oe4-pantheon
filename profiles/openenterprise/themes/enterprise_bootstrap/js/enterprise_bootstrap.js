@@ -29,7 +29,7 @@ var Drupal = Drupal || {};
       /*
       * Use fitText if loaded.
       */
-      if(jQuery.fn.fitText) {
+      if($.fn.fitText) {
         // Apply fitText to selectors if available.
         var fitTextSelectors = (settings.enterprise_bootstrap.fittext) ? settings.enterprise_bootstrap.fittext : false;
         if (fitTextSelectors) {
@@ -42,11 +42,28 @@ var Drupal = Drupal || {};
       /*
       * Add bootstrap-dropdown-hover
       */
-      if (jQuery.fn.dropdownHover) {
+      if ($.fn.dropdownHover) {
         $(".menu .expanded.dropdown > a", context).dropdownHover({
           delay: 500,
           instantlyCloseOthers: true,
         });
+      }
+
+      /**
+      * Responsive Tabs
+      */
+      if ($.fn.responsiveTabs) {
+        Drupal.behaviors.responsiveTabs = {
+          attach: function(context) {
+            // Make tabs responsive.
+            $('ul.nav-tabs, ul.tabs.primary, ul.tabs.secondary, ul.quicktabs-tabs, ul.horizontal-tabs-list', context).responsiveTabs({
+              activeClass: 'active',
+              activeSelectors: '.active, .selected, .active-trail',
+              icon: '<i aria-hidden="true" class="icon fontello oeicon-down-open"></i>',
+              text: 'More'
+            });
+          }
+        };
       }
 
       /*
