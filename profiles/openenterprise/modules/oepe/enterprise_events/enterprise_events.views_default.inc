@@ -31,14 +31,17 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
-  $handler->display->display_options['style_plugin'] = 'default';
-  $handler->display->display_options['style_options']['grouping'] = array(
-    0 => array(
-      'field' => 'field_event_datetime',
-      'rendered' => 1,
-    ),
-  );
-  $handler->display->display_options['row_plugin'] = 'fields';
+  $handler->display->display_options['style_plugin'] = 'responsive_grid';
+  $handler->display->display_options['style_options']['columns'] = '1';
+  $handler->display->display_options['style_options']['alignment'] = 'vertical';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-12';
+  $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['load_comments'] = 0;
+  $handler->display->display_options['row_options']['grouping'] = 0;
+  $handler->display->display_options['row_options']['advanced'] = 0;
+  $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
+  $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'field_data_field_event_datetime|field_event_datetime_value';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'teaser';
   /* Field: Day */
   $handler->display->display_options['fields']['field_event_datetime']['id'] = 'field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime']['table'] = 'field_data_field_event_datetime';
@@ -61,7 +64,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['title']['label'] = '';
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-  /* Field: Content: Date */
+  /* Field: Content: Date/Time */
   $handler->display->display_options['fields']['field_event_datetime_1']['id'] = 'field_event_datetime_1';
   $handler->display->display_options['fields']['field_event_datetime_1']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime_1']['field'] = 'field_event_datetime';
@@ -86,7 +89,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['body']['settings'] = array(
     'trim_length' => '400',
   );
-  /* Sort criterion: Content: Date -  start date (field_event_datetime) */
+  /* Sort criterion: Content: Date/Time -  start date (field_event_datetime) */
   $handler->display->display_options['sorts']['field_event_datetime_value']['id'] = 'field_event_datetime_value';
   $handler->display->display_options['sorts']['field_event_datetime_value']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['sorts']['field_event_datetime_value']['field'] = 'field_event_datetime_value';
@@ -109,7 +112,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['filters']['type']['value'] = array(
     'enterprise_event' => 'enterprise_event',
   );
-  /* Filter criterion: Content: Date -  start date (field_event_datetime) */
+  /* Filter criterion: Content: Date/Time -  start date (field_event_datetime) */
   $handler->display->display_options['filters']['field_event_datetime_value']['id'] = 'field_event_datetime_value';
   $handler->display->display_options['filters']['field_event_datetime_value']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['filters']['field_event_datetime_value']['field'] = 'field_event_datetime_value';
@@ -136,10 +139,26 @@ function enterprise_events_views_default_views() {
   );
 
   /* Display: Upcomming Block */
-  $handler = $view->new_display('block', 'Upcomming Block', 'block');
+  $handler = $view->new_display('block', 'Upcomming Block', 'block_upcoming');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Upcoming Events';
   $handler->display->display_options['display_description'] = 'Shows a list of upcoming events';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'responsive_grid';
+  $handler->display->display_options['style_options']['columns'] = '1';
+  $handler->display->display_options['style_options']['alignment'] = 'vertical';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-12';
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['row_plugin'] = 'ds';
+  $handler->display->display_options['row_options']['view_mode'] = 'mini';
+  $handler->display->display_options['row_options']['load_comments'] = 0;
+  $handler->display->display_options['row_options']['grouping'] = 0;
+  $handler->display->display_options['row_options']['advanced'] = 0;
+  $handler->display->display_options['row_options']['delta_fieldset']['delta_fields'] = array();
+  $handler->display->display_options['row_options']['grouping_fieldset']['group_field'] = 'field_data_field_event_datetime|field_event_datetime_value';
+  $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'mini';
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Day */
   $handler->display->display_options['fields']['field_event_datetime']['id'] = 'field_event_datetime';
@@ -163,7 +182,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['title']['label'] = '';
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-  /* Field: Content: Date */
+  /* Field: Content: Date/Time */
   $handler->display->display_options['fields']['field_event_datetime_1']['id'] = 'field_event_datetime_1';
   $handler->display->display_options['fields']['field_event_datetime_1']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime_1']['field'] = 'field_event_datetime';
@@ -208,7 +227,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['title']['label'] = '';
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-  /* Field: Content: Date */
+  /* Field: Content: Date/Time */
   $handler->display->display_options['fields']['field_event_datetime_1']['id'] = 'field_event_datetime_1';
   $handler->display->display_options['fields']['field_event_datetime_1']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime_1']['field'] = 'field_event_datetime';
@@ -568,7 +587,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
   $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
-  /* Field: Content: Date */
+  /* Field: Content: Date/Time */
   $handler->display->display_options['fields']['field_event_datetime']['id'] = 'field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime']['table'] = 'field_data_field_event_datetime';
   $handler->display->display_options['fields']['field_event_datetime']['field'] = 'field_event_datetime';
@@ -819,7 +838,7 @@ function enterprise_events_views_default_views() {
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
   $handler->display->display_options['block_description'] = 'Upcoming Events';
 
-  /* Display: Feed */
+  /* Display: Main Feed */
   $handler = $view->new_display('feed', 'Main Feed', 'feed');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Upcoming Events';

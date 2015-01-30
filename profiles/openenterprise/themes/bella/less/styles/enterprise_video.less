@@ -30,8 +30,13 @@
 
 .view-enterprise-video {
 	.views-row {
-		margin-bottom: 1em;
-		//padding: 14px 0;
+      margin-bottom: 14px;
+      padding: 14px 0;
+      border-bottom:1px solid @gray-lighter;
+
+      &.last {
+        border-bottom: none;
+      }
 	}
 	.views-row-odd {
 		background-color: @brand-secondary;

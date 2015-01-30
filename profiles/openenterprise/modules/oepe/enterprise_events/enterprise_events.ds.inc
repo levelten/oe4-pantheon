@@ -38,7 +38,7 @@ function enterprise_events_ds_field_settings_info() {
   $ds_fieldsetting->view_mode = 'full';
   $ds_fieldsetting->settings = array(
     'date_time' => array(
-      'weight' => '2',
+      'weight' => '1',
       'label' => 'hidden',
       'format' => 'default',
       'formatter_settings' => array(
@@ -46,9 +46,24 @@ function enterprise_events_ds_field_settings_info() {
         'title_wrapper' => '',
         'ctools' => 'a:3:{s:4:"conf";a:9:{s:5:"label";s:6:"hidden";s:9:"formatter";s:12:"date_default";s:11:"delta_limit";i:0;s:12:"delta_offset";s:1:"0";s:14:"delta_reversed";b:0;s:18:"formatter_settings";a:5:{s:11:"format_type";s:4:"long";s:15:"multiple_number";s:0:"";s:13:"multiple_from";s:0:"";s:11:"multiple_to";s:0:"";s:6:"fromto";s:4:"both";}s:7:"context";s:25:"argument_entity_id:node_1";s:14:"override_title";i:0;s:19:"override_title_text";s:0:"";}s:4:"type";s:12:"entity_field";s:7:"subtype";s:25:"node:field_event_datetime";}',
         'load_terms' => 0,
+        'ft' => array(
+          'func' => 'theme_ds_field_expert',
+          'lb-el' => 'h3',
+        ),
         'field_delimiter' => '',
         'field_formatter_class' => '',
         'conditions' => array(),
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
       ),
     ),
     'social_media_share_buttons' => array(
@@ -57,17 +72,48 @@ function enterprise_events_ds_field_settings_info() {
       'format' => 'default',
     ),
     'ical_feed' => array(
-      'weight' => '8',
-      'label' => 'hidden',
-      'format' => 'default',
-    ),
-    'title_microdata' => array(
-      'weight' => '1',
+      'weight' => '7',
       'label' => 'hidden',
       'format' => 'default',
     ),
   );
   $export['node|enterprise_event|full'] = $ds_fieldsetting;
+
+  $ds_fieldsetting = new stdClass();
+  $ds_fieldsetting->api_version = 1;
+  $ds_fieldsetting->id = 'node|enterprise_event|mini';
+  $ds_fieldsetting->entity_type = 'node';
+  $ds_fieldsetting->bundle = 'enterprise_event';
+  $ds_fieldsetting->view_mode = 'mini';
+  $ds_fieldsetting->settings = array(
+    'title' => array(
+      'weight' => '0',
+      'label' => 'hidden',
+      'format' => 'default',
+      'formatter_settings' => array(
+        'link' => '1',
+        'wrapper' => 'strong',
+        'class' => '',
+        'exclude node title settings' => '1',
+        'ft' => array(),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'conditions' => array(),
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+      ),
+    ),
+  );
+  $export['node|enterprise_event|mini'] = $ds_fieldsetting;
 
   $ds_fieldsetting = new stdClass();
   $ds_fieldsetting->api_version = 1;
@@ -82,15 +128,28 @@ function enterprise_events_ds_field_settings_info() {
       'format' => 'default',
       'formatter_settings' => array(
         'link' => '1',
-        'wrapper' => 'h2',
+        'wrapper' => 'h3',
         'class' => '',
+        'exclude node title settings' => '0',
+        'ft' => array(),
         'field_delimiter' => '',
         'field_formatter_class' => '',
         'conditions' => array(),
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
       ),
     ),
-    'title_microdata' => array(
-      'weight' => '2',
+    'node_link' => array(
+      'weight' => '5',
       'label' => 'hidden',
       'format' => 'default',
     ),
@@ -208,6 +267,8 @@ function enterprise_events_ds_layout_settings_info() {
     'layout_wrapper' => 'div',
     'layout_attributes' => '',
     'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
   );
   $export['node|enterprise_event|default'] = $ds_layout;
 
@@ -224,21 +285,19 @@ function enterprise_events_ds_layout_settings_info() {
         0 => 'social_media_share_buttons',
       ),
       'middle' => array(
-        1 => 'title_microdata',
-        2 => 'date_time',
-        3 => 'body',
-        4 => 'field_event_register_link',
+        1 => 'date_time',
+        2 => 'body',
+        3 => 'field_event_register_link',
       ),
       'event_details' => array(
-        5 => 'field_event_geocode',
-        6 => 'field_event_address',
-        7 => 'field_event_datetime',
-        8 => 'ical_feed',
+        4 => 'field_event_geocode',
+        5 => 'field_event_address',
+        6 => 'field_event_datetime',
+        7 => 'ical_feed',
       ),
     ),
     'fields' => array(
       'social_media_share_buttons' => 'sticky',
-      'title_microdata' => 'middle',
       'date_time' => 'middle',
       'body' => 'middle',
       'field_event_register_link' => 'middle',
@@ -261,10 +320,45 @@ function enterprise_events_ds_layout_settings_info() {
     'layout_wrapper' => 'div',
     'layout_attributes' => '',
     'layout_attributes_merge' => 1,
-    'hide_page_title' => '0',
-    'page_option_title' => '',
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
   );
   $export['node|enterprise_event|full'] = $ds_layout;
+
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
+  $ds_layout->id = 'node|enterprise_event|mini';
+  $ds_layout->entity_type = 'node';
+  $ds_layout->bundle = 'enterprise_event';
+  $ds_layout->view_mode = 'mini';
+  $ds_layout->layout = 'bootstrap_1col_stacked';
+  $ds_layout->settings = array(
+    'regions' => array(
+      'header' => array(
+        0 => 'title',
+        1 => 'field_event_datetime',
+      ),
+    ),
+    'fields' => array(
+      'title' => 'header',
+      'field_event_datetime' => 'header',
+    ),
+    'classes' => array(
+      'layout_class' => array(),
+    ),
+    'wrappers' => array(
+      'header' => 'div',
+      'sticky' => 'div',
+      'middle' => 'div',
+      'footer' => 'div',
+    ),
+    'layout_wrapper' => 'div',
+    'layout_attributes' => '',
+    'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
+  );
+  $export['node|enterprise_event|mini'] = $ds_layout;
 
   $ds_layout = new stdClass();
   $ds_layout->api_version = 1;
@@ -276,19 +370,23 @@ function enterprise_events_ds_layout_settings_info() {
   $ds_layout->settings = array(
     'regions' => array(
       'left' => array(
-        0 => 'field_event_datetime',
+        0 => 'field_event_geocode',
       ),
       'right' => array(
         1 => 'title',
-        2 => 'title_microdata',
-        3 => 'body',
+        2 => 'field_event_datetime',
+        3 => 'field_event_address',
+        4 => 'body',
+        5 => 'node_link',
       ),
     ),
     'fields' => array(
-      'field_event_datetime' => 'left',
+      'field_event_geocode' => 'left',
       'title' => 'right',
-      'title_microdata' => 'right',
+      'field_event_datetime' => 'right',
+      'field_event_address' => 'right',
       'body' => 'right',
+      'node_link' => 'right',
     ),
     'classes' => array(
       'layout_class' => array(
@@ -304,6 +402,8 @@ function enterprise_events_ds_layout_settings_info() {
     'layout_wrapper' => 'div',
     'layout_attributes' => '',
     'layout_attributes_merge' => 1,
+    'layout_link_attribute' => '',
+    'layout_link_custom' => '',
   );
   $export['node|enterprise_event|teaser'] = $ds_layout;
 

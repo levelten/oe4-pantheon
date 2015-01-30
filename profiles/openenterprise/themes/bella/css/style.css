@@ -345,7 +345,8 @@ h6,
 .h3,
 .h4,
 .h5,
-.h6 {
+.h6,
+.node-enterprise-event.style-event-full .field-name-field-event-datetime {
   font-family: "BLOKKNeue-Regular", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 700;
   line-height: 1.1;
@@ -395,7 +396,8 @@ h3 .small {
 }
 h4,
 h5,
-h6 {
+h6,
+.node-enterprise-event.style-event-full .field-name-field-event-datetime {
   margin-top: 12px;
   margin-bottom: 12px;
 }
@@ -420,7 +422,8 @@ h3,
   font-size: 24px;
 }
 h4,
-.h4 {
+.h4,
+.node-enterprise-event.style-event-full .field-name-field-event-datetime {
   font-size: 19px;
 }
 h5,
@@ -6855,13 +6858,13 @@ img {
     display: none;
   }
 }
-.style-blog-full .ds-middle .field-name-field-image {
+.style-default-full .ds-middle .field-name-field-image {
   padding-bottom: 1em;
 }
-.style-blog-featured .field-name-title h2 {
+.style-default-featured .field-name-title h2 {
   margin-top: 0;
 }
-.style-blog-teaser .field-name-title h3 {
+.style-default-teaser .field-name-title h3 {
   margin-top: 0;
 }
 .style-about-author .field-name-field-description {
@@ -7395,9 +7398,6 @@ fieldset.panel-default .panel-body {
 .carousel.slide .carousel-control {
   z-index: 1;
 }
-.main-container-inner {
-  overflow: auto;
-}
 .view-enterprise-blog.view-display-id-page .views-row {
   margin-bottom: 2em;
 }
@@ -7588,25 +7588,25 @@ fieldset.panel-default .panel-body {
 .style-background.brand-accent {
   background-color: #ffffff;
 }
-.node-enterprise-blog.style-blog-teaser .ds-left,
-.node-enterprise-blog.style-blog-featured .ds-left {
+.node-enterprise-blog.style-default-teaser .ds-left,
+.node-enterprise-blog.style-default-featured .ds-left {
   padding-right: 25px;
 }
-.node-enterprise-blog.style-blog-teaser .field-name-title h3,
-.node-enterprise-blog.style-blog-featured .field-name-title h3 {
+.node-enterprise-blog.style-default-teaser .field-name-title h3,
+.node-enterprise-blog.style-default-featured .field-name-title h3 {
   margin: 0;
 }
-.node-enterprise-blog.style-blog-teaser .field-name-submit-info,
-.node-enterprise-blog.style-blog-featured .field-name-submit-info {
+.node-enterprise-blog.style-default-teaser .field-name-submit-info,
+.node-enterprise-blog.style-default-featured .field-name-submit-info {
   font-style: italic;
   margin-bottom: 1em;
 }
-.node-enterprise-blog.style-blog-teaser .field-name-body,
-.node-enterprise-blog.style-blog-featured .field-name-body {
+.node-enterprise-blog.style-default-teaser .field-name-body,
+.node-enterprise-blog.style-default-featured .field-name-body {
   font-weight: 300;
 }
-.node-enterprise-blog.style-blog-teaser .field-name-body .more-link,
-.node-enterprise-blog.style-blog-featured .field-name-body .more-link {
+.node-enterprise-blog.style-default-teaser .field-name-body .more-link,
+.node-enterprise-blog.style-default-featured .field-name-body .more-link {
   padding-left: 3px;
 }
 .view-enterprise-blog .views-row {
@@ -7685,7 +7685,12 @@ fieldset.panel-default .panel-body {
   border-bottom: 2px solid #d7d7d8;
 }
 .view-enterprise-video .views-row {
-  margin-bottom: 1em;
+  margin-bottom: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.view-enterprise-video .views-row.last {
+  border-bottom: none;
 }
 .view-enterprise-video .views-row-odd {
   background-color: #f5f5f5;
@@ -7759,7 +7764,8 @@ fieldset.panel-default .panel-body {
   border-bottom: 2px solid #d7d7d8;
 }
 .view-enterprise-image .views-row {
-  margin-bottom: 1em;
+  margin-bottom: 14px;
+  padding: 14px 0;
 }
 .view-enterprise-image .views-row-odd {
   background-color: #f5f5f5;
@@ -7795,6 +7801,100 @@ fieldset.panel-default .panel-body {
   position: absolute;
   width: 40px;
   border-bottom: 2px solid #d7d7d8;
+}
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 1;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+  background-color: #e99002;
+}
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single[href]:hover,
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single[href]:focus {
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single:empty {
+  display: none;
+}
+.btn .node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single {
+  position: relative;
+  top: -1px;
+}
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single[href]:hover,
+.node-enterprise-event.style-event-full .field-name-field-event-datetime .date-display-single[href]:focus {
+  background-color: #b67102;
+}
+.node-enterprise-event.style-default-teaser .ds-left,
+.node-enterprise-event.style-default-featured .ds-left,
+.node-enterprise-event.style-event-teaser .ds-left {
+  padding-right: 25px;
+}
+.node-enterprise-event.style-default-teaser .field-name-title h3,
+.node-enterprise-event.style-default-featured .field-name-title h3,
+.node-enterprise-event.style-event-teaser .field-name-title h3 {
+  margin: 0 0 10px 0;
+}
+.node-enterprise-event.style-default-teaser .field-name-submit-info,
+.node-enterprise-event.style-default-featured .field-name-submit-info,
+.node-enterprise-event.style-event-teaser .field-name-submit-info {
+  font-style: italic;
+  margin-bottom: 1em;
+}
+.node-enterprise-event.style-default-teaser .field-name-body,
+.node-enterprise-event.style-default-featured .field-name-body,
+.node-enterprise-event.style-event-teaser .field-name-body {
+  font-weight: 300;
+}
+.node-enterprise-event.style-default-teaser .field-name-body .more-link,
+.node-enterprise-event.style-default-featured .field-name-body .more-link,
+.node-enterprise-event.style-event-teaser .field-name-body .more-link {
+  padding-left: 3px;
+}
+.node-enterprise-event.style-default-teaser .well,
+.node-enterprise-event.style-default-featured .well,
+.node-enterprise-event.style-event-teaser .well {
+  margin-bottom: 0;
+  margin: 10px 0;
+}
+.view-enterprise-events .views-row {
+  margin-bottom: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.view-enterprise-events .views-row.last {
+  border-bottom: none;
+}
+.view-enterprise-events .views-row-odd {
+  background-color: #f5f5f5;
+}
+.view-enterprise-events.view-display-id-page .views-row {
+  margin-bottom: 45px;
+}
+.view-enterprise-events.view-display-id-page .views-row.views-row-last {
+  margin-bottom: 0;
+}
+.view-enterprise-events.view-display-id-block_upcoming .views-row {
+  margin-bottom: 1em;
+}
+.view-enterprise-events.view-display-id-block_upcoming .views-row.views-row-last {
+  margin-bottom: 0;
+}
+.view-enterprise-events.view-display-id-block_upcoming h2,
+.view-enterprise-events.view-display-id-block_upcoming h3 {
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.5em;
+  margin-top: 0;
+  padding-bottom: 0.5em;
 }
 body.admin-menu.navbar-is-fixed-top {
   margin-top: 0 !important;
@@ -7974,9 +8074,6 @@ blockquote.pullquote:before {
   line-height: 0em;
   position: absolute;
   top: 30px;
-}
-header {
-  overflow: auto;
 }
 .navbar-default {
   background-color: rgba(255, 255, 255, 0.95);
