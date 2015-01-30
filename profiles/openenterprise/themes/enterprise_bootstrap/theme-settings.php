@@ -390,8 +390,9 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_js']['bootstrap_plugins'] = array(
 		'#type' => 'fieldset', 
 		'#title' => t('Bootstrap Plugins'), 
-		'#collapsible' => TRUE, 
+		'#collapsible' => TRUE,
 		'#collapsed' => TRUE,
+		'#weight' => -1,
 	);
 	$form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
