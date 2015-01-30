@@ -84,23 +84,6 @@
     };
 
     /**
-     * AddThis Firefox Fix
-     */
-    Drupal.behaviors.themeAddThis = {
-        attach: function(context, settings) {
-            var is_firefox = /firefox/i.test(navigator.userAgent.toLowerCase());
-            if (is_firefox !== undefined && is_firefox) {
-                $(document).ready(function () {
-                    // AddThis Dialog Fix For Firefox
-                    $('body').on('click', '#at3winheaderclose', function(){
-                        $('> #at3win', $('body')).css('opacity', 0).hide();
-                    });
-                });
-            }
-        }
-    };
-
-    /**
      * Responsive Tabs
      */
     if ($.fn.responsiveTabs) {
