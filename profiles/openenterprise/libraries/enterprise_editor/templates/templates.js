@@ -136,13 +136,13 @@ CKEDITOR.addTemplates('default', {
       title: 'Section - Left Image (no wrap)',
       image: 'section-left-no-wrap.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the left of the content. Content does not wrap around the image.',
-      html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_img(null, 'image-left-style') + '</div><div class="no-wrap-right">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
+      html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_img(null, 'image-left-style') + '</div><div class="overflow-hidden">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
     },
     {
       title: 'Section - Right Image (no wrap)',
       image: 'section-right-no-wrap.png?' + OE.settings.enterprise_editor.query,
       description: 'A section of content containing a heading with title. An image floats to the right of the content. Content does not wrap around the image.',
-      html: cke_tpl_section( '<div class="no-wrap-left">' + cke_tpl_header() + cke_tpl_text(3) + '</div><div class="no-wrap-right">' + cke_tpl_img(null, 'image-right-style') + '</div>' )
+      html: cke_tpl_section( '<div class="no-wrap-right">' + cke_tpl_img(null, 'image-right-style') + '</div><div class="overflow-hidden">' + cke_tpl_header() + cke_tpl_text(3) + '</div>' )
     },
     {
       title: 'Row',
