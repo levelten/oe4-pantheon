@@ -6989,6 +6989,10 @@ section.section-style .no-wrap-right {
   float: right;
   padding-left: 0.5em;
 }
+section.section-style .overflow-hidden {
+  float: none;
+  overflow: hidden;
+}
 section.section-style header {
   overflow: auto;
 }
