@@ -22,7 +22,8 @@ function kwresearch_contentanalysis_analyzer_info() {
 }
 
 /**
- * Implements hook_analyzer_form_elements() via custom define callback().
+ * Implements hook_analyzer_form_elements() via custom define callback
+().
  *
  * hook to add any analyzier specific form elements to the content analyzer form.
  * callback is defined in hook_contentanalysis_analyzers ['form elements callback']
@@ -92,13 +93,15 @@ function kwresearch_analyzer_form_elements($form_state, $analysis = '', $node = 
       'page_keywords_data' => $page_kw,
       'site_priority_options' => $site_priority_options,
       'page_priority_options' => $page_priority_options,
+      'post_token' => drupal_get_token('kwresearch'),
     )), array('type' => 'setting', 'scope' => JS_DEFAULT));
   //return $form;
 
 }
 
 /**
- * Implements hook_analyzer() via custom define callback().
+ * Implements hook_analyzer() via custom define callback
+().
  */
 function kwresearch_analyzer($context, $analysis, $params) {
   require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'kwresearch') . "/includes/stats_report.inc";

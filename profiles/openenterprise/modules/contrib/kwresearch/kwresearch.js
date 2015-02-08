@@ -279,7 +279,6 @@ var kwresearch = kwresearch || {};
 		    window.location = Drupal.settings.kwresearch.analyze_path + keyword;
 		    return false;
 		  }
-		  //alert(keyword);
 		  $('#edit-kwresearch-keyword').val(keyword);
 		  contentanalysis.contentanalysis_show_analyzer_tab(document.getElementById('contentanalysis-analyzer-tab-kwresearch'));
 		  $$.kwresearch_analyze();
@@ -290,7 +289,8 @@ var kwresearch = kwresearch || {};
 		  var data = { 
 		    'kwresearch_keyword': keyword,
 		    'priority': -1,
-		    'form': Drupal.settings.kwresearch.form
+		    'form': Drupal.settings.kwresearch.form,
+			'token': Drupal.settings.kwresearch.post_token
 		  };
 		  if (priority != null) {
 		    data.priority = priority;
@@ -367,7 +367,8 @@ var kwresearch = kwresearch || {};
 		  var data = { 
 		    'kwresearch_keyword': keyword,
 		    'kid': kid,
-		    'form': Drupal.settings.kwresearch.form
+		    'form': Drupal.settings.kwresearch.form,
+			'token' : Drupal.settings.kwresearch.post_token
 		  };
 
 		  $.ajax({
@@ -406,7 +407,8 @@ var kwresearch = kwresearch || {};
 		  var data = { 
 		    'kwresearch_keyword': keyword,
 		    'priority': 0,
-		    'nid': Drupal.settings.contentanalysis.nid
+		    'nid': Drupal.settings.contentanalysis.nid,
+			'token' : Drupal.settings.kwresearch.post_token
 		  };
 		  if (priority != null) {
 		    data.priority = priority;
@@ -496,14 +498,13 @@ var kwresearch = kwresearch || {};
 		},
 
 		kwresearch_analyze: function() {
-		  // if TinyMCE is used, turn off and on to save body text to textarea
-
-		  var data = { 
+		  var data = {
 		    'kwresearch_keyword': '',
 		    'kwresearch_include_misspellings': 0,
 		    'kwresearch_include_plurals': 0,
 		    'kwresearch_adult_filter':$('#edit-kwresearch-adult-filter:selected').val(),
-		    'kwresearch_nid': -1
+		    'kwresearch_nid': -1,
+			'kwresearch_token' : Drupal.settings.kwresearch.post_token
 		  };
 		  data.kwresearch_keyword = $('#edit-kwresearch-keyword').val();
 		  if ($('#edit-kwresearch-include-misspellings:checked').val() != null) {
@@ -552,6 +553,7 @@ var kwresearch = kwresearch || {};
 		  var data = { 
 		    'keywords': $('#edit-taxonomy-tags-' + vid + '-wrapper input').val(),
 		    'vid': vid,
+			'token' : Drupal.settings.kwresearch.post_token
 		  };
 		 
 		  $.ajax({

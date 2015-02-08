@@ -75,6 +75,7 @@ function kwresearch_keyword_stats_report_page($keyword = NULL) {
       'enable_site_keyword_tool' => user_access('kwresearch admin site keywords'),
       'site_keywords_data' => isset($site_kw) ? $site_kw : NULL,
       'site_priority_options' => $site_priority_options,
+      'post_token' => drupal_get_token('kwresearch'),
     )), array('type' => 'setting', 'scope' => JS_DEFAULT));
 
   return $output;

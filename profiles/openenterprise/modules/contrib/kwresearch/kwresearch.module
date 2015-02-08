@@ -852,6 +852,15 @@ function kwresearch_get_priority_options() {
  */
 function kwresearch_toggle_site_keyword_js() {
   global $user;
+  $output = array(
+    'data' => array(),
+  );
+
+  // check if valid request containing Drupal generated token
+  if (empty($_POST['token']) || !drupal_valid_token($_POST['token'], 'kwresearch')) {
+    drupal_access_denied();
+    drupal_exit();
+  }
 
   $keyword = check_plain($_POST['kwresearch_keyword']);
   $priority = check_plain($_POST['priority']);
@@ -875,7 +884,7 @@ function kwresearch_toggle_site_keyword_js() {
   }
 
   $site_priority_options = kwresearch_get_priority_options();
-  $output = array();
+
   $output['data'] = array(
     'kid' => (int) $keyword_obj->kid,
     'keyword' => $keyword,
@@ -893,6 +902,12 @@ function kwresearch_toggle_site_keyword_js() {
  * AJAX handler to delete a site keyword from db
  */
 function kwresearch_delete_site_keyword_js() {
+
+  // check if valid request containing Drupal generated token
+  if (empty($_POST['token']) || !drupal_valid_token($_POST['token'], 'kwresearch')) {
+    drupal_access_denied();
+    drupal_exit();
+  }
 
   $keyword = check_plain($_POST['kwresearch_keyword']);
   $kid = check_plain($_POST['kid']);
@@ -914,6 +929,13 @@ function kwresearch_delete_site_keyword_js() {
  * AJAX handler to create, delete and set priorities for page keywords
  */
 function kwresearch_toggle_page_keyword_js() {
+
+  // check if valid request containing Drupal generated token
+  if (empty($_POST['token']) || !drupal_valid_token($_POST['token'], 'kwresearch')) {
+    drupal_access_denied();
+    drupal_exit();
+  }
+
   $keyword = strtolower(check_plain($_POST['kwresearch_keyword']));
   $pid = '';
   if(!empty($_POST['nid'])) {
@@ -948,6 +970,16 @@ function kwresearch_toggle_page_keyword_js() {
  * AJAX handler to generate keyword stats report for content analysis display
  */
 function kwresearch_analyze_js() {
+  // check if valid request containing Drupal generated token
+  if (empty($_POST['kwresearch_token']) || !drupal_valid_token($_POST['kwresearch_token'], 'kwresearch')) {
+    drupal_access_denied();
+    drupal_exit();
+  }
+
+  $output = array(
+    'report' => array()
+  );
+
   require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'kwresearch') . "/includes/stats_report.inc";
 
   $analysis['inputs'] = array(
@@ -967,7 +999,7 @@ function kwresearch_analyze_js() {
   if (!empty($msgs)) {
     $analysis['messages'] = $msgs;
   }
-  $output = array();
+
   $output['report']['data'] = $analysis;
   $output['report']['output'] = theme_keyword_stats_report($analysis);
 
@@ -1153,6 +1185,7 @@ function kwresearch_form_alter(&$form, $form_state, $form_id) {
         'tax_report_vocabs' => array(drupal_clean_css_identifier($sync_vocab)),
         'base_path' => base_path(),
         'path_to_module' => base_path() . drupal_get_path('module', 'kwresearch'),
+        'post_token' => drupal_get_token('kwresearch'),
       )
     );
     foreach ($form AS $id => $field) {
@@ -1168,7 +1201,7 @@ function kwresearch_form_alter(&$form, $form_state, $form_id) {
           }
           $page_keywords = kwresearch_load_page_keywords_by_page($form['nid']['#value']);
           foreach ($page_keywords as $keyword_obj) {
-            if (!$terms[$keyword_obj->keyword]) {
+            if (empty($terms[$keyword_obj->keyword])) {
               $form[$id][$node->language]['#default_value'] .= (($form[$id][$node->language]['#default_value']) ? ', ' : '') . $keyword_obj->keyword;
             }
           }          
@@ -1268,6 +1301,7 @@ function kwresearch_form_alter(&$form, $form_state, $form_id) {
         'tax_report_vocabs' => $report_vocabs,
         'base_path' => base_path(),
         'path_to_module' => base_path() . drupal_get_path('module', 'kwresearch'),
+        'post_token' => drupal_get_token('kwresearch'),
       )), array('type' => 'setting', 'scope' => JS_DEFAULT));
   }
 }
