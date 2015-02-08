@@ -96,7 +96,7 @@ function kwresearch_stats_report_form($form, $form_state, $analysis, $ajax = FAL
   $form['kwresearch_keyword'] = array(
     '#type' => 'textfield',
     '#title' => t('Keyword'),
-    '#default_value' => ($analysis && $analysis['inputs']['keyword']) ? $analysis['inputs']['keyword'] : '',
+    '#default_value' => !empty($analysis['inputs']['keyword']) ? $analysis['inputs']['keyword'] : '',
   );
   
   if (!$ajax) {
@@ -301,13 +301,13 @@ function theme_keyword_stats_report($analysis) {
       $links = '<span class="kwresearch-more-tools">';
       foreach ($links_options as $k => $v) {
         if ($v) {
-          $links .= (($links) ? '' : '') . kwresearch_format_report_links_value($values, $keyword, $k);
+          $links .= kwresearch_format_report_links_value($values, $keyword, $k);
         }
       }
       $links .= '</span>';
 
       $row[] = $links;
-      if ($analysis['inputs']['operations']) {
+      if (isset($analysis['inputs']['operations'])) {
         $ops = l(t('stats'), 'admin/structure/kwresearch/keyword_report/' . $keyword);
         //$ops .= ' | ' . l(t('edit'),'admin/structure/kwresearch/keyword_list/edit/' . $values['kid'], array('query' => 'destination=admin/structure/kwresearch/keyword_report/' . $keyword));
 
