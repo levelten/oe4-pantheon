@@ -914,21 +914,19 @@ function kwresearch_delete_site_keyword_js() {
  * AJAX handler to create, delete and set priorities for page keywords
  */
 function kwresearch_toggle_page_keyword_js() {
-watchdog('kwresearch_toggle_page_keyword_js', print_r($_POST, 1));
   $keyword = strtolower(check_plain($_POST['kwresearch_keyword']));
-  $nid = check_plain($_POST['nid']);
-  $path = check_plain($_POST['path']);
   $pid = '';
-  if(!empty($_POST['pid'])) {
+  if(!empty($_POST['nid'])) {
     $pid = check_plain($_POST['nid']);
   }
   else if(!empty($_POST['path'])) {
     $pid = check_plain($_POST['path']);
   }
 
+  $page_keyword_obj = new stdClass();
+  $page_keyword_obj->priority = check_plain($_POST['priority']);
+
   if ($pid) {
-    $page_keyword_obj = new stdClass();
-    $page_keyword_obj->priority = check_plain($_POST['priority']);
     if ($pid != -1) {
       kwresearch_save_page_keyword($pid, $keyword, NULL, $page_keyword_obj);
     }
@@ -936,8 +934,6 @@ watchdog('kwresearch_toggle_page_keyword_js', print_r($_POST, 1));
       $_SESSION['kwresearch']['node_add']['page_keywords'][$keyword] = $page_keyword_obj;
     }
   }
-
-
 
   $output = array();
   $output['data'] = array(
