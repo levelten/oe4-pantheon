@@ -6,7 +6,6 @@
 // TODO is there a better way of doing this? Can a libraries file called from
 // .info?
 function enterprise_extras_init() {
-  drupal_add_js(libraries_get_path('jquery.fitvids') . '/jquery.fitvids.js');
-  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/main.js');
-  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/main.css');
+  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/enterprise_extras.js');
+  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/enterprise_extras.css');
 }

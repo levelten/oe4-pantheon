@@ -293,7 +293,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#title' => t('Javascript'),
 		'#description' => t('Which Javascript libraries or scripts to include.'),
 	);
-	$form['enterprise_bootstrap_js']['fittext'] = array(
+	$form['enterprise_bootstrap_js']['fittext_fieldset'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('FitText'), 
+		'#collapsible' => TRUE, 
+		'#collapsed' => TRUE,
+	);
+	$form['enterprise_bootstrap_js']['fittext_fieldset']['fittext'] = array(
 		'#type' => 'select',
 		'#title' => t('FitText.js'),
 		'#description' => t('A jQuery plugin for inflating web type. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/davatron5000/FitText.js'))),
@@ -303,41 +309,69 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Production - jquery.fittext.min.js'),
 			2 => t('Development - jquery.fittext.js'),
 		),
+		'#group' => 'fittext_fieldset',
 	);
 	
-	$form['enterprise_bootstrap_js']['fittext_selectors'] = array(
+	$form['enterprise_bootstrap_js']['fittext_fieldset']['fittext_selectors'] = array(
 		'#type' => 'container',
 		'#title' => t('FitText Selectors'),
+		'#group' => 'fittext_fieldset',
 		'#states' => array(
       'invisible' => array(
         ':input[name=fittext]' => array('value' => 0),
       ),
     ),
 	);
-	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_description'] = array(
+	$form['enterprise_bootstrap_js']['fittext_fieldset']['fittext_selectors']['fittext_description'] = array(
 		'#type' => 'markup',
+		'#group' => 'fittext_fieldset',
 		'#markup' => '<div class="description help-block"><p>FitText will accept a compression level and selector for text you would like to update. Compression refers to how much you would like to compress the text down. Default is 1.</p>
 									<p>Add in your compression and selectors as a key value pair, <strong>one per line</strong>. For example:</p>
 									<p><pre>1.6|.not-logged-in #navbar .navbar-header .name</pre></p></div><br />',
 		
 	);
 
-	$form['enterprise_bootstrap_js']['fittext_selectors']['fittext_selector'] = array(
+	$form['enterprise_bootstrap_js']['fittext_fieldset']['fittext_selectors']['fittext_selector'] = array(
     '#title' => t('FitText selectors'),
     '#type' => 'textarea',
+    '#group' => 'fittext_fieldset',
     '#default_value' => (theme_get_setting('fittext_selector')) ? theme_get_setting('fittext_selector') : '',
     '#description' => t('Add the compression level and selectors you would like to target with FitText.'),
   );
 
-	$form['enterprise_bootstrap_js']['bootstrap_hover_dropdown'] = array(
+	$form['enterprise_bootstrap_js']['bootstrap_hover_fieldset'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Bootstrap Hover Dropdown'), 
+		'#collapsible' => TRUE, 
+		'#collapsed' => TRUE,
+	);
+	$form['enterprise_bootstrap_js']['bootstrap_hover_fieldset']['bootstrap_hover_dropdown'] = array(
 		'#type' => 'select',
 		'#title' => t('Bootstrap Hover Dropdown'),
 		'#description' => t('A jQuery plugin that delays the dropdown of the menu on hover. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/CWSpear/bootstrap-hover-dropdown'))),
 		'#default_value' => (theme_get_setting('bootstrap_hover_dropdown')) ? theme_get_setting('bootstrap_hover_dropdown') : 0,
 		'#options' => array(
 			0 => t('Disabled'),
-			1 => t('Production - bootstrap-hover-dropdown.min.js'),
-			2 => t('Development - bootstrap-hover-dropdown.js'),
+			1 => t('Production (bootstrap-hover-dropdown.min.js)'),
+			2 => t('Development (bootstrap-hover-dropdown.js)'),
+		),
+	);
+
+	$form['enterprise_bootstrap_js']['responsive_tabs_fieldset'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Responsive Tabs'), 
+		'#collapsible' => TRUE, 
+		'#collapsed' => TRUE,
+	);
+	$form['enterprise_bootstrap_js']['responsive_tabs_fieldset']['responsive_tabs'] = array(
+		'#type' => 'select',
+		'#title' => t('Responsive Tabs'),
+		'#description' => t('Responsive Tabs is a jQuery plugin that provides responsive tab functionality. The tabs transform to an accordion when it reaches a CSS breakpoint. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/jellekralt/Responsive-Tabs'))),
+		'#default_value' => (theme_get_setting('responsive_tabs')) ? theme_get_setting('responsive_tabs') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (jquery.responsiveTabs.min.js)'),
+			2 => t('Development (jquery.responsiveTabs.js)'),
 		),
 	);
 
@@ -353,9 +387,17 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			$default[$key] = $key;
 		}
 	}
-	$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'] = array(
+	$form['enterprise_bootstrap_js']['bootstrap_plugins'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Bootstrap Plugins'), 
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+		'#weight' => -1,
+	);
+	$form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options'] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Bootstrap Javascript'),
+		'#title' => t('Bootstrap Plugins'),
+		'#group' => 'bootstrap_plugins',
 		'#default_value' => $default,
 		'#options' => array(
 			'affix' => t('Affix'),
@@ -387,8 +429,8 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     'transition' => t('Transition.js is a basic helper for transitionEnd events as well as a CSS transition emulator. It\'s used by the other plugins to check for CSS transition support and to catch hanging transitions.'),
   );
 	// Add descriptions
-  foreach ($form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options']['#options'] as $key => $value) {
-		$form['enterprise_bootstrap_js']['enterprise_bootstrap_js_options'][$key]['#description'] = $bootstrap_desc[$key];
+  foreach ($form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options']['#options'] as $key => $value) {
+		$form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options'][$key]['#description'] = $bootstrap_desc[$key];
 	}
 
 } // end settings_alter
