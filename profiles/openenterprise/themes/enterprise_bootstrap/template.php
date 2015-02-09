@@ -87,7 +87,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['content_column_class'] = ($sidebar_column_width) ? '  class="col-sm-9"' : ' class="col-sm-8"';
   }
   else {
-    $variables['content_column_class'] = '';
+    $variables['content_column_class'] = 'col-sm-12';
   }
 
   // Navigation region settings.
