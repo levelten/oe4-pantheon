@@ -7903,26 +7903,6 @@ fieldset.panel-default .panel-body {
 body.admin-menu.navbar-is-fixed-top {
   margin-top: 0 !important;
 }
-ul li {
-  list-style-type: none;
-}
-ul li:before {
-  color: #ea9b3e;
-  content: "\25AA";
-  padding-right: 10px;
-}
-ol {
-  counter-reset: numItem;
-}
-ol li {
-  list-style-type: none;
-}
-ol li:before {
-  color: #ea9b3e;
-  counter-increment: numItem;
-  content: counter(numItem) ".";
-  padding-right: 10px;
-}
 .btn-default,
 .btn-info {
   background-color: transparent;
@@ -8098,6 +8078,26 @@ blockquote.pullquote:before {
   line-height: 0em;
   position: absolute;
   top: 30px;
+}
+.ckeditor-processed ul li {
+  list-style-type: none;
+}
+.ckeditor-processed ul li:before {
+  color: #ea9b3e;
+  content: "\25AA";
+  padding-right: 10px;
+}
+.ckeditor-processed ol {
+  counter-reset: numItem;
+}
+.ckeditor-processed ol li {
+  list-style-type: none;
+}
+.ckeditor-processed ol li:before {
+  color: #ea9b3e;
+  counter-increment: numItem;
+  content: counter(numItem) ".";
+  padding-right: 10px;
 }
 .navbar-default {
   background-color: rgba(255, 255, 255, 0.95);

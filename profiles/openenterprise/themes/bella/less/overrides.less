@@ -2,29 +2,6 @@ body.admin-menu.navbar-is-fixed-top {
 	margin-top: 0 !important;
 }
 
-ul {
-  li {
-    list-style-type: none;
-    &:before {
-      color: @brand-primary;
-      content: "\25AA";
-      padding-right: 10px;
-    }
-  }
-}
-ol {
-  counter-reset: numItem;
-  li {
-    list-style-type: none;
-    &:before {
-      color: @brand-primary;
-      counter-increment: numItem;
-      content: counter(numItem) ".";
-      padding-right: 10px;
-    }
-  }
-}
-
 .btn-default, .btn-info {
 	background-color: transparent;
 	border-color: @brand-primary;
@@ -219,4 +196,30 @@ blockquote {
 			top: 30px;
 		}
 	}
+}
+
+
+.ckeditor-processed {
+  ul {
+    li {
+      list-style-type: none;
+      &:before {
+        color: @brand-primary;
+        content: "\25AA";
+        padding-right: 10px;
+      }
+    }
+  }
+  ol {
+    counter-reset: numItem;
+    li {
+      list-style-type: none;
+      &:before {
+        color: @brand-primary;
+        counter-increment: numItem;
+        content: counter(numItem) ".";
+        padding-right: 10px;
+      }
+    }
+  }
 }
