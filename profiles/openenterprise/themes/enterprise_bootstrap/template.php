@@ -471,7 +471,6 @@ function enterprise_bootstrap_task_list($variables) {
  * Overrides theme_menu_local_action().
  */
 function enterprise_bootstrap_menu_local_action($variables) {
-  dpm($variables);
   $link = $variables['element']['#link'];
 
   $options = isset($link['localized_options']) ? $link['localized_options'] : array();
