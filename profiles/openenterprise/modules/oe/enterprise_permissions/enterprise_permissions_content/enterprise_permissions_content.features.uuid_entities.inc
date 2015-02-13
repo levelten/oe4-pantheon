@@ -46,7 +46,7 @@ function enterprise_permissions_content_uuid_default_entities() {
     'realname' => 'Demo Tester',
     'roles' => array(
       2 => 'authenticated user',
-      7 => 'demo',
+      4 => 'demo',
     ),
     'signature' => '',
     'signature_format' => 'full_html',
@@ -96,12 +96,12 @@ function enterprise_permissions_content_uuid_default_entities() {
     'mail' => 'writer-tester@example.com',
     'metatags' => array(),
     'name' => 'writer-tester',
-    'pass' => '$S$DkKwqiLOWmsAmrKNdY0J.xSql3P7JxNVl4p01r7Qr3IveZcvl5gZ',
+    'pass' => '$S$DuxiCvJvgDh0CAfxrG3fJnbV6SeruZNcNHRYKZf9UnhVvF3xW3LU',
     'picture' => NULL,
     'realname' => 'Writer Tester',
     'roles' => array(
       2 => 'authenticated user',
-      4 => 'writer',
+      7 => 'writer',
     ),
     'signature' => '',
     'signature_format' => 'full_html',
@@ -151,7 +151,7 @@ function enterprise_permissions_content_uuid_default_entities() {
     'mail' => 'editor-tester@example.com',
     'metatags' => array(),
     'name' => 'editor-tester',
-    'pass' => '$S$DR0brshnsaXr96.U0St8uGon4VoircZhd0MEe4n/RQnaUKGosrHV',
+    'pass' => '$S$DJ4nUmPaGIljpsSfsmwEaA9mESDza764FB7lV.entQ787uAYnogX',
     'picture' => NULL,
     'realname' => 'Editor Tester',
     'roles' => array(
@@ -206,7 +206,7 @@ function enterprise_permissions_content_uuid_default_entities() {
     'mail' => 'manager-tester@example.com',
     'metatags' => array(),
     'name' => 'manager-tester',
-    'pass' => '$S$DR0brshnsaXr96.U0St8uGon4VoircZhd0MEe4n/RQnaUKGosrHV',
+    'pass' => '$S$DkqncvWtIn1assm5Nb5Fp6hjMnYWs86w93lGs8arPJr2ZxnF4uxH',
     'picture' => NULL,
     'realname' => 'Manager Tester',
     'roles' => array(
@@ -228,61 +228,6 @@ function enterprise_permissions_content_uuid_default_entities() {
       ),
     ),
     'uuid' => 'd78d13ed-9343-4c88-8a86-17ae2b13cc4b',
-  );
-  
-  $entities['enterprise_permissions_content'][] = (object) array(
-    '__metadata' => array(
-      'type' => 'user',
-      'uri' => 'user/e633084e-1b82-497b-8b90-414c443a3e42',
-      'cause' => FALSE,
-    ),
-    'entity_type' => 'user',
-    'field_description' => array(),
-    'field_firstname' => array(
-      'und' => array(
-        0 => array(
-          'format' => NULL,
-          'value' => 'Administrator',
-        ),
-      ),
-    ),
-    'field_lastname' => array(
-      'und' => array(
-        0 => array(
-          'format' => NULL,
-          'value' => 'Tester',
-        ),
-      ),
-    ),
-    'field_picture' => array(),
-    'field_title' => array(),
-    'init' => 'administrator-tester@example.com',
-    'language' => '',
-    'mail' => 'administrator-tester@example.com',
-    'metatags' => array(),
-    'name' => 'administrator-tester',
-    'pass' => '$S$DR0brshnsaXr96.U0St8uGon4VoircZhd0MEe4n/RQnaUKGosrHV',
-    'picture' => NULL,
-    'realname' => 'Administrator Tester',
-    'roles' => array(
-      2 => 'authenticated user',
-      3 => 'administrator',
-    ),
-    'signature' => '',
-    'signature_format' => 'full_html',
-    'socialmedia' => array(
-      'profiles' => array(),
-    ),
-    'status' => 1,
-    'theme' => '',
-    'timezone' => 'America/Chicago',
-    'url_alias' => array(
-      0 => array(
-        'alias' => 'users/administrator-tester',
-        'language' => 'und',
-      ),
-    ),
-    'uuid' => 'e633084e-1b82-497b-8b90-414c443a3e42',
   );
   
   return $entities;

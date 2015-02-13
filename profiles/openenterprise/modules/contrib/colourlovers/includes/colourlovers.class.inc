@@ -351,7 +351,7 @@ class COLOURlovers {
         'Content-Type' => 'application/x-www-form-urlencoded'
       ),
       'method' => 'POST',
-      'data' => http_build_query(array_merge($values, array(
+      'data' => drupal_http_build_query(array_merge($values, array(
         'format' => 'json'
       ))),
     ))) {
