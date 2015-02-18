@@ -1,0 +1,12 @@
+name = Enterprise Theme
+description = A companion module for Enterprise Bootstrap and related themes.
+core = 7.x
+package = Open Enterprise
+version = 7.x-1.0
+project = enterprise_theme
+dependencies[] = ctools
+dependencies[] = less
+dependencies[] = strongarm
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[variable][] = less_engine
