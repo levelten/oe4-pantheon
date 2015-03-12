@@ -2676,6 +2676,9 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'filter',
   );
@@ -2694,7 +2697,8 @@ function enterprise_permissions_user_default_permissions() {
     'name' => 'use text format filtered_html',
     'roles' => array(
       'administrator' => 'administrator',
-      'demo' => 'demo',
+      'anonymous user' => 'anonymous user',
+      'authenticated user' => 'authenticated user',
     ),
     'module' => 'filter',
   );
@@ -2705,6 +2709,9 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'filter',
   );
