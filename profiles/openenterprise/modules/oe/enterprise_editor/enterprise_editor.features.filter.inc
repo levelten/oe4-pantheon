@@ -10,16 +10,6 @@
 function enterprise_editor_filter_default_formats() {
   $formats = array();
 
-  // Exported format: Advanced HTML.
-  $formats['advanced_html'] = array(
-    'format' => 'advanced_html',
-    'name' => 'Advanced HTML',
-    'cache' => 1,
-    'status' => 1,
-    'weight' => -8,
-    'filters' => array(),
-  );
-
   // Exported format: Filtered HTML.
   $formats['filtered_html'] = array(
     'format' => 'filtered_html',
@@ -146,6 +136,19 @@ function enterprise_editor_filter_default_formats() {
         ),
       ),
     ),
+  );
+
+  $formats['advanced_html'] = $formats['full_html'];
+
+  // Exported format: Advanced HTML.
+  // Advanced HTML should = Full HTML (turns off WYSIWYG editor)
+  $formats['advanced_html'] = array(
+    'format' => 'advanced_html',
+    'name' => 'Advanced HTML',
+    'cache' => 1,
+    'status' => 1,
+    'weight' => -8,
+    'filters' => $formats['full_html']['filters'],
   );
 
   return $formats;
