@@ -1,0 +1,18 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Enable enterprise_theme and revert LESS engine settings.
+ */
+function enterprise_style_update_7000() {
+  // Check if Enterprise Theme is enabled.
+  if (!module_exists('enterprise_theme')) {
+    module_enable(array('enterprise_theme'), TRUE);
+  }
+
+  // Revert feature.
+  features_revert(array('enterprise_theme' => array('variable')));
+  
+}

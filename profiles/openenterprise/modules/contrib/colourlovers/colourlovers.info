@@ -3,9 +3,9 @@ description = Provides integration between Drupal and COLOURlovers website.
 package = Other
 core = 7.x
 configure = admin/appearance/colourlovers
-; Information added by Drupal.org packaging script on 2014-08-08
+; Information added by Drupal.org packaging script on 2015-02-13
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "colourlovers"
-datestamp = "1407510531"
+datestamp = "1423815194"
 

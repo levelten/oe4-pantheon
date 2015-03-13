@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Theme feature.
+ */
+
+include_once 'enterprise_theme.features.inc';

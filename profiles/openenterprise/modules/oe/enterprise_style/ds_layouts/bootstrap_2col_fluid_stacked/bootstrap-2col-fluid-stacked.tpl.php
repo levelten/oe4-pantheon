@@ -45,7 +45,7 @@ if ($right) {
     <?php endif; ?>
 
     <?php if ($left || $right): ?>
-    <div>
+    <div class="row">
       <?php if ($left): ?>
         <?php if (!$right) { enterprise_style_ds_span_column_replace($left_classes, 1); } ?>
         <section class="ds-left clearfix <?php print $left_classes; ?>">

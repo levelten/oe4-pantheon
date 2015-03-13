@@ -33,9 +33,9 @@ function enterprise_style_init() {
   // add js library for auto sizing of videos
   drupal_add_js(libraries_get_path('jquery.fitvids') . '/jquery.fitvids.js');
   // js for custom OE JS features
-  //drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/main.js');
+  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/enterprise_extras.js');
   // core styling for custom features (should be overriden in theme)
-  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/main.css');
+  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/enterprise_extras.css');
 }
 
 /**

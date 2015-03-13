@@ -197,3 +197,29 @@ blockquote {
 		}
 	}
 }
+
+
+.ckeditor-processed {
+  ul {
+    li {
+      list-style-type: none;
+      &:before {
+        color: @brand-primary;
+        content: "\25AA";
+        padding-right: 10px;
+      }
+    }
+  }
+  ol {
+    counter-reset: numItem;
+    li {
+      list-style-type: none;
+      &:before {
+        color: @brand-primary;
+        counter-increment: numItem;
+        content: counter(numItem) ".";
+        padding-right: 10px;
+      }
+    }
+  }
+}
