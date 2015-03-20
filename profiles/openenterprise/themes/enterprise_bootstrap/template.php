@@ -312,7 +312,7 @@ function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
 }
 function enterprise_bootstrap_menu_tree__primary_nav(&$variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
-  if ($enterprise_mega !== 0) {
+  if ($enterprise_mega > 0) {
     return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
   } else {
     return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
