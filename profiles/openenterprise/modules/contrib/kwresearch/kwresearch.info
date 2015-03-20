@@ -2,4 +2,4 @@ name = "Keyword Research"
 description = "Provides keyword research tools and faciliates adding keywords to nodes."
 package = SEO
 core = 7.x
-configure = admin/config/search/kwresearch
+configure = admin/config/content/kwresearch

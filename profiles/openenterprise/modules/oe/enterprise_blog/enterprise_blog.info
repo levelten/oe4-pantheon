@@ -6,7 +6,6 @@ version = 7.x-2.13
 project = enterprise_blog
 dependencies[] = ds
 dependencies[] = enterprise_base
-dependencies[] = enterprise_demo
 dependencies[] = enterprise_fields
 dependencies[] = enterprise_intel
 dependencies[] = enterprise_style

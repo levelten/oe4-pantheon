@@ -17,6 +17,7 @@ dependencies[] = options
 dependencies[] = path
 dependencies[] = taxonomy
 dependencies[] = field
+dependencies[] = field_ui
 dependencies[] = file
 
 ; Contrib
