@@ -83,10 +83,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#type' => 'select',
 		'#title' => t('Mega Menu'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_megamenu'),
-		'#description' => t('Choose either the default Bootstrap or Enterprise Bootstrap mega menu.'),
+		'#description' => t('Choose a Bootstrap mega menu.'),
 		'#options' => array(
 			1 => t('Enterprise Mega Menu'),
 			0 => t('Bootstrap Default'),
+			2 => t('YAMM'),
 		),
 	);
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_menu_hover_push'] = array(

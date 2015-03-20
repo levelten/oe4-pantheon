@@ -131,6 +131,11 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     unset($variables['page']['sidebar_second']);
   }
 
+  // Megamenu setting for YAMM
+  if (theme_get_setting('enterprise_bootstrap_megamenu') == 2) {
+    $variables['nav_mega_menu'] = 'yamm';
+  }
+
   /*
    * Zebra Striping for Front Page Blocks
    */
@@ -299,7 +304,15 @@ function enterprise_bootstrap_preprocess_block(&$variables) {
  */
 function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
-  if ($enterprise_mega) {
+  if ($enterprise_mega > 0) {
+    return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+  } else {
+    return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+  }
+}
+function enterprise_bootstrap_menu_tree__primary_nav(&$variables) {
+  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  if ($enterprise_mega !== 0) {
     return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
   } else {
     return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
@@ -312,6 +325,7 @@ function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
 function enterprise_bootstrap_menu_link(array $variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
   $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
+  $hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
   
   if (!$enterprise_mega) {
     // Default Bootstrap menu
@@ -331,6 +345,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
         // Generate as standard dropdown.
         $element['#title'] .= ' <span class="caret"></span>';
         $element['#attributes']['class'][] = 'dropdown';
+        $element['#attributes']['class'][] = 'mega-menu';
         $element['#localized_options']['html'] = TRUE;
 
         if ($mobile_dropdown) {
@@ -400,13 +415,20 @@ function enterprise_bootstrap_menu_link(array $variables) {
       // Generate as standard dropdown.
       $element['#title'] .= ' <span class="caret"></span>';
       $element['#attributes']['class'][] = 'dropdown';
+      $element['#attributes']['class'][] = 'mega-menu';
       $element['#localized_options']['html'] = TRUE;
 
       // Set dropdown trigger element to # to prevent inadvertant page loading
       // when a submenu link is clicked.
-      $element['#localized_options']['attributes']['data-target'] = '#';
-      $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
-      $element['#localized_options']['attributes']['data-hover'] = 'dropdown';
+      if ($hover_dropdown) {
+        $element['#localized_options']['attributes']['data-target'] = '#';
+        $element['#localized_options']['attributes']['class'][] = 'dropdown-hover';
+        $element['#localized_options']['attributes']['data-hover'] = 'dropdown';
+      } else {
+        $element['#localized_options']['attributes']['data-target'] = '#';
+        $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
+        $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
+      }
     }
     else {
       unset($element['#below']['#theme_wrappers']);
