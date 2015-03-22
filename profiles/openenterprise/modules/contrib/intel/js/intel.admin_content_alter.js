@@ -13,8 +13,7 @@
           protocol = ('https:' == document.location.protocol) ? 'https://' : 'http://',
           imgsrc = protocol + cms_hostpath + module_path + "/images/ajax_loader_row.gif",
           url = protocol + cms_hostpath + "intel/admin_content_alter_js", //?callback=?";
-          query = getUrlVars(),
-          intelStatusCode = false; // Testing for 500
+          query = getUrlVars();
 
       // If standard admin form
       if (jQuery("#node-admin-content", context).length > 0) {
@@ -61,31 +60,32 @@
           }
         });
       })
-      .fail(function() {
+      .fail(function(jqxhr, textStatus, error) {
         // Remove gif if fails.
+        window.console.log("Status code: " + jqxhr.status + " " + error);
         $("#node-admin-content tr", context).each ( function( index ) {
           $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
         });
       })
       .success(function(data) {
         // Fill in Intel data if succeeds
-        $("#node-admin-content tr", context).each ( function( index ) {
-          var href = $(this).find("td:eq(1) a").attr("href");
-          if (typeof href != 'undefined') {
-            if (typeof data.rows[href] != 'undefined') {
-              $(this).find("td:eq(" + colIndex + ")").replaceWith(data.rows[href]);
+        if (data) {
+          $("#node-admin-content tr", context).each ( function( index ) {
+            var href = $(this).find("td:eq(1) a").attr("href");
+            if (typeof href != 'undefined') {
+              if (typeof data.rows[href] != 'undefined') {
+                $(this).find("td:eq(" + colIndex + ")").replaceWith(data.rows[href]);
+              } else {
+                $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
+              }
             }
-            else {
-              $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
-            }
-          }
-        });
+          });
+        } else {
+          $("#node-admin-content tr", context).each ( function( index ) {
+            $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
+          });
+        }
       });
-
-      // Status code test failed.
-      if (!intelStatusCode) {
-        window.console.log("Status code failed.");
-      }
 
     }
   };
