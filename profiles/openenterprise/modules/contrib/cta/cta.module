@@ -708,26 +708,40 @@ function cta_block_view($delta = '') {
     $block['set'] = 'block';
   }
   else if ($preset_vocab){
-    // check if CTA category exists for node
+    // check if CTA category (via taxonomy ref field) exists for node
     if ((arg(0) == 'node') && (is_numeric(arg(1)))) {
-      $node = node_load(arg(1));
+      $node = menu_get_object();
+      $fields_info = field_info_instances('node', $node->type);
       // check cta set with taxonomy
-      foreach ($node AS $e => $field) {
-        if ((substr($e, 0, 6) == 'field_') && isset($field[$node->language][0]['taxonomy_term'])) {
-          if ($field[$node->language][0]['taxonomy_term']->vocabulary_machine_name == $preset_vocab) {
-            $path = "@" . drupal_html_class($field[$node->language][0]['taxonomy_term']->name);
-            $selection = cta_selection_load($path, $selector, TRUE, TRUE);
-            if (isset($selection['bean']->title)) {
-              $block['subject'] = $selection['bean']->title;
-              $block['content'] = $selection['bean']->view($selection['bean']->view_mode);
-              $block['set'] = 'bean';
+      foreach ($fields_info AS $field_name => $field_info) {
+        // check if field is taxonomy ref by checking if keyed by tid
+        if (isset($node->{$field_name}[$node->language][0]['tid'])) {
+          // get field_info to get associated vocabulary
+          $field_info_field = field_info_field($field_name);
+          $vocab_name = $field_info_field['settings']['allowed_values'][0]['vocabulary'];
+          if ($preset_vocab== $field_info_field['settings']['allowed_values'][0]['vocabulary']) {
+            if (!empty($node->{$field_name}[$node->language][0]['tid'])) {
+              // load the term from tid
+              $term = taxonomy_term_load($node->{$field_name}[$node->language][0]['tid']);
+              // if term exists, use it to select ctas
+              if (!empty($term->name)) {
+                $path = "@" . drupal_html_class($term->name);
+                $selection = cta_selection_load($path, $selector, TRUE, TRUE);
+                if (isset($selection['bean']->title)) {
+                  $block['subject'] = $selection['bean']->title;
+                  $block['content'] = $selection['bean']->view($selection['bean']->view_mode);
+                  $block['set'] = 'bean';
+                }
+                else {
+                  if (isset($selection['block'])) {
+                    $block['subject'] = $selection['block']['subject'];
+                    $block['content'] = $selection['block']['content'];
+                    $block['set'] = 'block';
+                  }
+                }
+              }
             }
-            else if (isset($selection['block'])) {
-              $block['subject'] = $selection['block']['subject'];
-              $block['content'] = $selection['block']['content'];
-              $block['set'] = 'block';
-            }
-          } 
+          }
         }
       }
       //dsm($node);

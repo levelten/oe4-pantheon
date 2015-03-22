@@ -217,7 +217,7 @@ function enterprise_style_ds_span_column_replace(&$classes, $columns = 1) {
   foreach ($classes_array as $key => &$class) {
     if (strpos($class, 'col-md-') === 0) {
       unset($classes_array[$key]);
-      //enterprise_style_span_columns($class, $columns);
+      enterprise_style_ds_span_columns($class, $columns);
     }
   }
   $classes = implode(' ', $classes_array);
