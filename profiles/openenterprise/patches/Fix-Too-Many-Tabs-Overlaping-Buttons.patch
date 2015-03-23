@@ -1,0 +1,29 @@
+From 9c41c2f2a348ad2a1d8e0ef6427ea3770e7c5292 Mon Sep 17 00:00:00 2001
+From: Ahmad Kharbat <ahmadk@getlevelten.com>
+Date: Thu, 19 Mar 2015 00:29:10 -0500
+Subject: [PATCH] PID-90502220 Fix Missing file upload button on TEST
+
+---
+ profiles/openenterprise/themes/rubik/style.css | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/profiles/openenterprise/themes/rubik/style.css b/profiles/openenterprise/themes/rubik/style.css
+index 6ce926c..6b6936a 100755
+--- a/profiles/openenterprise/themes/rubik/style.css
++++ b/profiles/openenterprise/themes/rubik/style.css
+@@ -186,9 +186,10 @@ table th {
+  * Tabs ===============================================================
+  */
+ .tabs {
+-  position:absolute;
++  /*position:absolute; had to change in order to avoid many tabs overlapping with other page elements.. Ahmad  */
++  position:static;
+   right:0px;
+-  }
++}
+ 
+ .primary-tabs {
+   float:left;
+-- 
+1.8.4.msysgit.0
+

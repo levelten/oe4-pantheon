@@ -186,9 +186,10 @@ table th {
  * Tabs ===============================================================
  */
 .tabs {
-  position:absolute;
+  /*position:absolute; had to change in order to avoid many tabs overlapping with other page elements.. Ahmad  */
+  position:static;
   right:0px;
-  }
+}
 
 .primary-tabs {
   float:left;
