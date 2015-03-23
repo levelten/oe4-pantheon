@@ -6,6 +6,10 @@ They can be applied manually by coping each patch to the location listed in thei
 or using Drush make.
 
 
+PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
+Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
+in current version of CKeditor.
+
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 issue: https://www.drupal.org/node/2054397
 copy to: /profiles/openenterprise/modules/contrib/deploy

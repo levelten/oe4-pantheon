@@ -1,0 +1,31 @@
+From e0a1c90da9f1832c1fefd459b5561a88b41fea55 Mon Sep 17 00:00:00 2001
+From: Robert Phillips <rob@imagexmedia.com>
+Date: Wed, 18 Mar 2015 11:04:28 -0400
+Subject: [PATCH] PID-90507304: Allow meta support in CKeditor 4.3.1
+
+---
+ profiles/openenterprise/libraries/ckeditor/ckeditor.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/profiles/openenterprise/libraries/ckeditor/ckeditor.js b/profiles/openenterprise/libraries/ckeditor/ckeditor.js
+index 7aa6c2c..b78e7d7 100755
+--- a/profiles/openenterprise/libraries/ckeditor/ckeditor.js
++++ b/profiles/openenterprise/libraries/ckeditor/ckeditor.js
+@@ -1,4 +1,4 @@
+-﻿/*
++/*
+ Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
+ For licensing, see LICENSE.html or http://ckeditor.com/license
+ */
+@@ -276,7 +276,7 @@ e)delete e["data-cke-bogus"];else{for(e=b.next;e&&d(e);)e=e.next;var k=c(b);!e&&
+ a.attributes["data-cke-bookmark"]}function h(a){return a&&(a.type==CKEDITOR.NODE_ELEMENT&&a.name in t||a.type==CKEDITOR.NODE_DOCUMENT_FRAGMENT)}function g(a,b){var c=a.children[a.children.length-1];a.children.push(b);b.parent=a;if(c){c.next=b;b.previous=c}}function n(a){a=a.attributes;a.contenteditable!="false"&&(a["data-cke-editable"]=a.contenteditable?"true":1);a.contenteditable="false"}function i(a){a=a.attributes;switch(a["data-cke-editable"]){case "true":a.contenteditable="true";break;case "1":delete a.contenteditable}}
+ function j(a){return a.replace(I,function(a,b,c){return"<"+b+c.replace(E,function(a,b){if(!/^on/.test(b)&&c.indexOf("data-cke-saved-"+b)==-1){a=a.slice(1);return" data-cke-saved-"+a+" data-cke-"+CKEDITOR.rnd+"-"+a}return a})+">"})}function o(a,b){return a.replace(b,function(a,b,c){a.indexOf("<textarea")===0&&(a=b+u(c).replace(/</g,"&lt;").replace(/>/g,"&gt;")+"</textarea>");return"<cke:encoded>"+encodeURIComponent(a)+"</cke:encoded>"})}function q(a){return a.replace(Q,function(a,b){return decodeURIComponent(b)})}
+ function s(a){return a.replace(/<\!--(?!{cke_protected})[\s\S]+?--\>/g,function(a){return"<\!--"+m+"{C}"+encodeURIComponent(a).replace(/--/g,"%2D%2D")+"--\>"})}function u(a){return a.replace(/<\!--\{cke_protected\}\{C\}([\s\S]+?)--\>/g,function(a,b){return decodeURIComponent(b)})}function f(a,b){var c=b._.dataStore;return a.replace(/<\!--\{cke_protected\}([\s\S]+?)--\>/g,function(a,b){return decodeURIComponent(b)}).replace(/\{cke_protected_(\d+)\}/g,function(a,b){return c&&c[b]||""})}function p(a,
+-b){for(var c=[],d=b.config.protectedSource,e=b._.dataStore||(b._.dataStore={id:1}),f=/<\!--\{cke_temp(comment)?\}(\d*?)--\>/g,d=[/<script[\s\S]*?<\/script>/gi,/<noscript[\s\S]*?<\/noscript>/gi].concat(d),a=a.replace(/<\!--[\s\S]*?--\>/g,function(a){return"<\!--{cke_tempcomment}"+(c.push(a)-1)+"--\>"}),k=0;k<d.length;k++)a=a.replace(d[k],function(a){a=a.replace(f,function(a,b,d){return c[d]});return/cke_temp(comment)?/.test(a)?a:"<\!--{cke_temp}"+(c.push(a)-1)+"--\>"});a=a.replace(f,function(a,b,d){return"<\!--"+
++b){for(var c=[],d=b.config.protectedSource,e=b._.dataStore||(b._.dataStore={id:1}),f=/<\!--\{cke_temp(comment)?\}(\d*?)--\>/g,d=[/<script[\s\S]*?<\/script>/gi,/<noscript[\s\S]*?<\/noscript>/gi,/<meta[\s\S]*?\/?>/gi].concat(d),a=a.replace(/<\!--[\s\S]*?--\>/g,function(a){return"<\!--{cke_tempcomment}"+(c.push(a)-1)+"--\>"}),k=0;k<d.length;k++)a=a.replace(d[k],function(a){a=a.replace(f,function(a,b,d){return c[d]});return/cke_temp(comment)?/.test(a)?a:"<\!--{cke_temp}"+(c.push(a)-1)+"--\>"});a=a.replace(f,function(a,b,d){return"<\!--"+
+ m+(b?"{C}":"")+encodeURIComponent(c[d]).replace(/--/g,"%2D%2D")+"--\>"});return a.replace(/(['"]).*?\1/g,function(a){return a.replace(/<\!--\{cke_protected\}([\s\S]+?)--\>/g,function(a,b){e[e.id]=decodeURIComponent(b);return"{cke_protected_"+e.id++ +"}"})})}CKEDITOR.htmlDataProcessor=function(b){var c,d,k=this;this.editor=b;this.dataFilter=c=new CKEDITOR.htmlParser.filter;this.htmlFilter=d=new CKEDITOR.htmlParser.filter;this.writer=new CKEDITOR.htmlParser.basicWriter;c.addRules(x);c.addRules(r,{applyToAll:true});
+ c.addRules(a(b,"data"),{applyToAll:true});d.addRules(L);d.addRules(A,{applyToAll:true});d.addRules(a(b,"html"),{applyToAll:true});b.on("toHtml",function(a){var a=a.data,c=a.dataValue,c=p(c,b),c=o(c,M),c=j(c),c=o(c,z),c=c.replace(v,"$1cke:$2"),c=c.replace(H,"<cke:$1$2></cke:$1>"),c=CKEDITOR.env.opera?c:c.replace(/(<pre\b[^>]*>)(\r\n|\n)/g,"$1$2$2"),d=a.context||b.editable().getName(),f;if(CKEDITOR.env.ie&&CKEDITOR.env.version<9&&d=="pre"){d="div";c="<pre>"+c+"</pre>";f=1}d=b.document.createElement(d);
+ d.setHtml("a"+c);c=d.getHtml().substr(1);c=c.replace(RegExp(" data-cke-"+CKEDITOR.rnd+"-","ig")," ");f&&(c=c.replace(/^<pre>|<\/pre>$/gi,""));c=c.replace(w,"$1$2");c=q(c);c=u(c);a.dataValue=CKEDITOR.htmlParser.fragment.fromHtml(c,a.context,a.fixForBody===false?false:e(a.enterMode,b.config.autoParagraph))},null,null,5);b.on("toHtml",function(a){a.data.filter.applyTo(a.data.dataValue,true,a.data.dontFilter,a.data.enterMode)&&b.fire("dataFiltered")},null,null,6);b.on("toHtml",function(a){a.data.dataValue.filterChildren(k.dataFilter,
+-- 
+1.8.4.msysgit.0
+
