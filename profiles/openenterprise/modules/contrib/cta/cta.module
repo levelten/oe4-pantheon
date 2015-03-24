@@ -684,9 +684,16 @@ function cta_block_info() {
 
 function cta_block_view($delta = '') {
   $selector = substr($delta, 4);
-  //$selector = $delta;
 
-  $selection = cta_selection_load($_GET['q'], $selector, TRUE, TRUE);
+  $path = $_GET['q'];
+  // check if path is for a node and remove and revisioning path elements
+  // this is to assure block is visible on Workbench drafts
+  $patha = explode('/', $path);
+  if (count($patha) >= 2 && $patha[0] == 'node' && is_numeric($patha[1])) {
+    $path = $patha[0] . '/' . $patha[1];
+  }
+
+  $selection = cta_selection_load($path, $selector, TRUE, TRUE);
 
   $selector_obj = cta_selector_load($selector);
   $preset_vocab = isset($selector_obj['data']['preset_vocabulary']) ? $selector_obj['data']['preset_vocabulary'] : '';
@@ -719,14 +726,54 @@ function cta_block_view($delta = '') {
           // get field_info to get associated vocabulary
           $field_info_field = field_info_field($field_name);
           $vocab_name = $field_info_field['settings']['allowed_values'][0]['vocabulary'];
-          if ($preset_vocab== $field_info_field['settings']['allowed_values'][0]['vocabulary']) {
+          if ($preset_vocab == $field_info_field['settings']['allowed_values'][0]['vocabulary']) {
             if (!empty($node->{$field_name}[$node->language][0]['tid'])) {
-              // load the term from tid
-              $term = taxonomy_term_load($node->{$field_name}[$node->language][0]['tid']);
+              $tid = $node->{$field_name}[$node->language][0]['tid'];
+              $term = taxonomy_term_load($tid);
               // if term exists, use it to select ctas
               if (!empty($term->name)) {
                 $path = "@" . drupal_html_class($term->name);
                 $selection = cta_selection_load($path, $selector, TRUE, TRUE);
+                // if selection not found, try parent terms
+                if (empty($selection)) {
+                  // get vocabulary obj to obtain vid
+                  $vocab = taxonomy_vocabulary_machine_name_load($vocab_name);
+                  // get vocabulary tree
+                  $tree = taxonomy_get_tree($vocab->vid);
+
+                  $continue = 1;
+                  while ($continue) {
+                    // don't continue unless parent term does not have selection
+                    // but has its own parent term.
+                    $continue = 0;
+                    // iterate through tree to find term that matches tid
+                    foreach ($tree as $i => $ti) {
+                      // check if tree item matches tid
+                      if ($ti->tid == $tid) {
+                        // if tree object has parents, check for default
+                        // selection on parent term
+                        if(!empty($ti->parents[0])) {
+                          $term = taxonomy_term_load($ti->parents[0]);
+                          if (!empty($term->name)) {
+                            $path = "@" . drupal_html_class($term->name);
+                            $selection = cta_selection_load($path, $selector, TRUE, TRUE);
+                            // if selection found, break
+                            if (!empty($selection)) {
+                              break;
+                            }
+                          }
+                          // loop again to check if parent term has selection
+                          $tid = $ti->parents[0];
+                          $continue = 1;
+                        }
+                        // if term has no selection or parents, exit loop and
+                        // don't continue
+                        break;
+                      }
+                    }
+                  }
+                }
+
                 if (isset($selection['bean']->title)) {
                   $block['subject'] = $selection['bean']->title;
                   $block['content'] = $selection['bean']->view($selection['bean']->view_mode);
