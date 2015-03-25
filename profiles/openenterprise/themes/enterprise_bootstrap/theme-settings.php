@@ -31,6 +31,9 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#group' => 'enterprise_bootstrap',
 		'#title' => t('Display'),
 		'#description' => t('Full width, block striping, etc.'),
+		'#attributes' => array(
+	    'class' => array('columns'),
+	  ),
 	);
 	$form['enterprise_bootstrap_config']['column_left'] = array(
 	  '#type' => 'container',
@@ -90,6 +93,20 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			2 => t('YAMM'),
 		),
 	);
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mega_columns'] = array(
+		'#type' => 'select',
+		'#title' => t('Mega Menu Columns'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mega_columns'),
+		'#description' => t('Number of columns in your megamenu'),
+		'#options' => array(
+			'col_md_4' => t('3'),
+			'col_md_3' => t('4'),
+			'col_md_2' => t('6'),
+			'col_md_1' => t('12'),
+			'col_table' => t('Table (even width)'),
+			'col_custom' => t('None (custom)'),
+		),
+	);
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
 		'#type' => 'select',
 		'#title' => t('Mobile Menu: Hover or Push'),
@@ -110,7 +127,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
@@ -120,7 +137,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_blokkfont'] = array(
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_blokkfont'] = array(
 		'#type' => 'select',
 		'#title' => t('Blokk Font'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
