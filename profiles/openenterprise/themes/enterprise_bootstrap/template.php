@@ -399,6 +399,14 @@ function enterprise_bootstrap_menu_link(array $variables) {
   $element = $variables['element'];
   $sub_menu = '';
 
+  // Add class for when Icon Menu is being used.
+  if (!empty($element['#localized_options']['icon']['icon'])) {
+    $element['#attributes']['class'][] = 'has-icon';
+  }
+
+  // Add Menu link ID for specific styling cases.
+  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
   if ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 2 && isset($element['#mega']) && $element['#mega'])) {
     $output = '';
 
@@ -414,11 +422,6 @@ function enterprise_bootstrap_menu_link(array $variables) {
     if (isset($element['#localized_options']['mega_block']['name']) && !empty($element['#localized_options']['mega_block']['name'])) {
       $mega_block_pieces = explode('|', $element['#localized_options']['mega_block']['name']);
       $mega_block_class = $mega_block_pieces[1];
-    }
-
-    // Add class for when Icons are being used.
-    if (isset($element['#localized_options']['icon'])) {
-      $element['#attributes']['class'][] = 'has-icon';
     }
 
     // Append classes if Mega Block is being used.
@@ -475,7 +478,6 @@ function enterprise_bootstrap_menu_link(array $variables) {
       $element['#title'] .= ' <span class="caret"></span>';
       $element['#attributes']['class'][] = 'dropdown';
       $element['#attributes']['class'][] = 'mega-menu';
-      $element['#attributes']['class'][] = 'menu-link-'.$element['#original_link']['mlid'];
       $element['#localized_options']['html'] = TRUE;
 
       // Set dropdown trigger element to # to prevent inadvertant page loading
