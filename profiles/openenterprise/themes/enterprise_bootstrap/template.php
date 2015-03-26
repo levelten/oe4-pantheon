@@ -31,13 +31,10 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
     $mega = FALSE;
     foreach(element_children($menu_array[$level1]['#below']) as $level2) {
       if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
-        $mega = TRUE;
-        continue;
+        $menu_array[$level1]['#below'][$level2]['#mega'] = TRUE;
+      } else {
+        $menu_array[$level1]['#below'][$level2]['#mega'] = FALSE;
       }
-      $primary_nav = &$variables['primary_nav'];
-    }
-    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
-      $menu_array[$level1]['#below'][$level2]['#mega'] = $mega;
     }
   }
 }
