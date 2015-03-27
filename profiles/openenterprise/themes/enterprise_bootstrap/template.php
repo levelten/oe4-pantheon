@@ -17,10 +17,10 @@ function enterprise_bootstrap_process_page(&$variables) {
     && is_array($variables['page']['navigation']['system_main-menu'])
     ) {
     enterprise_bootstrap_transform_main_menu($variables['page']['navigation']['system_main-menu']);
-}
-if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
-  enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
-}
+  }
+  if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
+    enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+  }
 }
 
 /**
@@ -28,7 +28,6 @@ if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
  */
 function enterprise_bootstrap_transform_main_menu(&$menu_array) {
   foreach(element_children($menu_array) as $level1) {
-    $mega = FALSE;
     foreach(element_children($menu_array[$level1]['#below']) as $level2) {
       if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
         $menu_array[$level1]['#below'][$level2]['#mega'] = TRUE;
@@ -406,6 +405,11 @@ function enterprise_bootstrap_menu_link(array $variables) {
 
   // Add Menu link ID for specific styling cases.
   $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
+  // Last chance to turn into a mega menu.
+  if (!empty($element['#original_link']['options']['enterprise_mega']) && $element['#original_link']['options']['enterprise_mega']) {
+    $element['#mega'] = 1;
+  }
 
   if ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 2 && isset($element['#mega']) && $element['#mega'])) {
     $output = '';
