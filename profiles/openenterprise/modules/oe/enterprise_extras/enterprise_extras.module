@@ -9,3 +9,62 @@ function enterprise_extras_init() {
   drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/enterprise_extras.js');
   drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/enterprise_extras.css');
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds mega menu configuration options to the menu edit menu form.
+ *
+ * @see menu_edit_item()
+ */
+function enterprise_extras_form_menu_edit_item_alter(&$form, $form_state) {
+  $item = $form['original_item']['#value'];
+  _enterprise_extras_menu_form_alter($form, $item, $form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds menu attribute options to the node's edit menu item form.
+ *
+ * @see _menu_attributes_form_alter()
+ */
+function enterprise_extras_form_node_form_alter(&$form, $form_state) {
+  if (isset($form['menu']['link']) && isset($form['#node']->menu)) {
+    $item = $form['#node']->menu;
+    _enterprise_extras_menu_form_alter($form['menu']['link'], $item, $form);
+  }
+}
+
+/**
+ * Add the mega menu configuration to a menu item edit form.
+ *
+ * @param array $form
+ *   The menu item edit form passed by reference.
+ * @param array $item
+ *   The optional existing menu item for context.
+ * @param array $complete_form
+ *   The entire form from menu callback.
+ */
+function _enterprise_extras_menu_form_alter(array &$form, array $item = array(), array &$complete_form = array()) {
+  $access = user_access('administer menu');
+
+  // Unset the previous value so that the new values get saved.
+  if (isset($form['options']['#value']['enterprise_mega'])) {
+    unset($form['options']['#value']['enterprise_mega']);
+  }
+  // Determine proper parent names for states.
+  $parents = 'options[enterprise_mega]';
+  if (isset($complete_form['menu']['link']) && isset($complete_form['#node']->menu)) {
+    $parents = 'menu[options][enterprise_mega]';
+  }
+
+  $form['options']['enterprise_mega'] = array(
+  	'#access' => $access,
+		'#type' =>  'checkbox',
+		'#title' => t('Mega Menu'),
+		'#description' => t('Force this menu item to be a mega menu despite if it has children or not.'),
+		'#default_value' => (!empty($item['options']['enterprise_mega'])) ? $item['options']['enterprise_mega'] : FALSE,
+  );
+
+}
