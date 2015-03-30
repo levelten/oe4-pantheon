@@ -77,11 +77,11 @@ function field_delimiter_field_attach_view_alter(&$output, $context) {
 
     $element = &$output[$field_name];
 
-    $info = field_formatter_settings_get_instance_display_settings($element['#entity_type'], $field_name, $element['#bundle'], $context['view_mode']);
+    $info = field_formatter_settings_get_instance_display_settings($element['#entity_type'], $field_name, $element['#bundle'], $element['#view_mode']);
 
     if (!empty($info['field_delimiter'])) {
       foreach ($element['#items'] as $delta => $item ) {
-        if ($delta +1 < count($element['#items'])) {
+        if ($delta + 1 < count($element['#items'])) {
           $element[$delta]['#suffix'] = filter_xss($info['field_delimiter'], array('br', 'hr', 'span', 'img', 'wbr'));
         }
       }
