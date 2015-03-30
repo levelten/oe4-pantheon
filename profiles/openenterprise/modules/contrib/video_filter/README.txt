@@ -22,6 +22,9 @@ processed after that filter.
 To enable WYSIWYG support, go to the WYSIWYG settings for each input format and
 enable the Video Filter button.
 
+To enable CKEditor (standalone) support, please see plugin instructions in:
+editors/ckeditor/README.txt
+
 ========= Usage =========
 
 Single video: [video:url]
