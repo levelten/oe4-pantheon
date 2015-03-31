@@ -367,8 +367,13 @@ class Bean extends Entity {
     $this->changed = REQUEST_TIME;
 
     $this->plugin->submit($this);
+
     $return = parent::save();
     bean_reset(TRUE, TRUE);
+
+    if (module_exists('block')) {
+      bean_cache_clear_block($this);
+    }
 
     return $return;
   }
@@ -494,8 +499,21 @@ class BeanEntityAPIController extends EntityAPIControllerExportable {
     parent::delete($ids, $transaction);
   }
 
+  /**
+   * Overridden to add Rules integration back in.
+   */
+  public function invoke($hook, $entity) {
+    parent::invoke($hook, $entity);
+
+    // Invoke rules.
+    if (module_exists('rules')) {
+      rules_invoke_event($this->entityType . '_' . $hook, $entity);
+    }
+  }
+
   protected function saveRevision($entity) {
     global $user;
+
     $org_uid = $entity->uid;
     $entity->uid = $user->uid;
     $return = parent::saveRevision($entity);
