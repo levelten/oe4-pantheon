@@ -284,9 +284,14 @@ function theme_video_filter_flash($variables) {
 
   $classes = video_filter_get_classes($video);
 
+  $attributes = '';
+  if ($video['attributes']) {
+    $attributes = drupal_attributes($video['attributes']);
+  }
+
   $output .= '<object class="' . implode(' ', $classes) . '" type="application/x-shockwave-flash" ';
 
-  $output .= 'width="' . $video['width'] . '" height="' . $video['height'] . '" data="' . $video['source'] . '">' . "\n";
+  $output .= 'width="' . $video['width'] . '" height="' . $video['height'] . '" data="' . $video['source'] . '" ' . $attributes . '>' . "\n";
 
   $defaults = array(
     'movie' => $video['source'],
@@ -312,10 +317,13 @@ function theme_video_filter_flash($variables) {
  */
 function theme_video_filter_iframe($variables) {
   $video = $variables['video'];
-
   $classes = video_filter_get_classes($video);
+  $attributes = '';
+  if ($video['attributes']) {
+    $attributes = drupal_attributes($video['attributes']);
+  }
 
-  $output = '<iframe src="' . $video['source'] . '" width="' . $video['width'] . '" height="' . $video['height'] . '" class="' . implode(' ', $classes) . '" frameborder="0"></iframe>';
+  $output = '<iframe src="' . $video['source'] . '" width="' . $video['width'] . '" height="' . $video['height'] . '" class="' . implode(' ', $classes) . '" frameborder="0"' . $attributes . '></iframe>';
 
   return $output;
 }
@@ -432,7 +440,8 @@ function video_filter_dashboard_page($editor) {
       break;
   }
 
-  print theme('video_filter_dashboard', array('form' => render(drupal_get_form('_video_filter_form'))));
+  $form = drupal_get_form('_video_filter_form');
+  print theme('video_filter_dashboard', array('form' => render($form)));
   exit();
 }
 
@@ -525,27 +534,24 @@ function _video_filter_form() {
 }
 
 /**
-* Implementation of hook_ckeditor_plugin().
-*/
+ * Implements hook_ckeditor_plugin().
+ */
 function video_filter_ckeditor_plugin() {
-  return array('video_filter' => array(
+  $plugins = array();
+  $plugins['video_filter'] = array(
     'name' => 'video_filter',
-    'desc' => t('Plugin for inserting video tags with video_filter.'),
-    'path' => drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
+    'desc' => t('Plugin to directly embed videos with the video filter module.'),
+    'path' => base_path() . drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
     'buttons' => array(
       'video_filter' => array(
-        'icon' => 'video_filter.png',
         'label' => t('Video filter'),
+        'icon' => 'video_filter.png',
       ),
     ),
-    'url' => 'http://drupal.org/project/video_filter',
-    'load' => TRUE,
-  ));
+  );
+  return $plugins;
 }
 
-/**
-* Implementation of hook_wysiwyg_plugin().
-*/
 function video_filter_wysiwyg_plugin($editor, $version) {
   _video_filter_add_settings('wysiwyg_' . $editor);
 

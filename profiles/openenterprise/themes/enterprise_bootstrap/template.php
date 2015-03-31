@@ -17,10 +17,10 @@ function enterprise_bootstrap_process_page(&$variables) {
     && is_array($variables['page']['navigation']['system_main-menu'])
     ) {
     enterprise_bootstrap_transform_main_menu($variables['page']['navigation']['system_main-menu']);
-}
-if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
-  enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
-}
+  }
+  if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
+    enterprise_bootstrap_transform_main_menu($variables['primary_nav']);
+  }
 }
 
 /**
@@ -28,16 +28,12 @@ if (isset($variables['primary_nav']) && is_array($variables['primary_nav'])) {
  */
 function enterprise_bootstrap_transform_main_menu(&$menu_array) {
   foreach(element_children($menu_array) as $level1) {
-    $mega = FALSE;
     foreach(element_children($menu_array[$level1]['#below']) as $level2) {
       if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
-        $mega = TRUE;
-        continue;
+        $menu_array[$level1]['#below'][$level2]['#mega'] = TRUE;
+      } else {
+        $menu_array[$level1]['#below'][$level2]['#mega'] = FALSE;
       }
-      $primary_nav = &$variables['primary_nav'];
-    }
-    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
-      $menu_array[$level1]['#below'][$level2]['#mega'] = $mega;
     }
   }
 }
@@ -312,7 +308,7 @@ function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
 }
 function enterprise_bootstrap_menu_tree__primary_nav(&$variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
-  if ($enterprise_mega !== 0) {
+  if ($enterprise_mega > 0) {
     return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
   } else {
     return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
@@ -324,9 +320,40 @@ function enterprise_bootstrap_menu_tree__primary_nav(&$variables) {
  */
 function enterprise_bootstrap_menu_link(array $variables) {
   $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  $mega_columns = theme_get_setting('enterprise_bootstrap_mega_columns');
   $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
   $hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
-  
+
+  // Set up Mega Menu classes.
+  switch ($mega_columns) {
+    case 'col_md_4':
+    case 'col_md_3':
+    case 'col_md_2':
+    case 'col_md_1':
+      // Use Bootstrap classes
+      $mega_item_class = drupal_clean_css_identifier($mega_columns);
+      $mega_wrapper_class = 'row';
+      break;
+    
+    case 'col_table':
+      // Use display:table-cell hack
+      $mega_item_class = 'mega-table-cell';
+      $mega_wrapper_class = 'mega-table-wrapper';
+      break;
+
+    case 'col_custom':
+      // Provide blank classes for mega menu
+      $mega_item_class = 'mega-custom-item';
+      $mega_wrapper_class = 'mega-custom-wrapper';
+      break;
+
+    default:
+      // By default, just make it 4 columns.
+      $mega_item_class = 'col-md-3';
+      $mega_wrapper_class = 'row';
+      break;
+  }
+
   if (!$enterprise_mega) {
     // Default Bootstrap menu
     $element = $variables['element'];
@@ -346,6 +373,8 @@ function enterprise_bootstrap_menu_link(array $variables) {
         $element['#title'] .= ' <span class="caret"></span>';
         $element['#attributes']['class'][] = 'dropdown';
         $element['#attributes']['class'][] = 'mega-menu';
+        // Add Menu link ID for specific styling cases.
+        $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
         $element['#localized_options']['html'] = TRUE;
 
         if ($mobile_dropdown) {
@@ -369,21 +398,57 @@ function enterprise_bootstrap_menu_link(array $variables) {
   $element = $variables['element'];
   $sub_menu = '';
 
+  // Add class for when Icon Menu is being used.
+  if (!empty($element['#localized_options']['icon']['icon'])) {
+    $element['#attributes']['class'][] = 'has-icon';
+  }
+
+  // Add Menu link ID for specific styling cases.
+  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
+  // Last chance to turn into a mega menu.
+  if (!empty($element['#original_link']['options']['enterprise_mega']) && $element['#original_link']['options']['enterprise_mega']) {
+    $element['#mega'] = 1;
+  }
+
   if ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 2 && isset($element['#mega']) && $element['#mega'])) {
     $output = '';
+
+    // Set up mega menu structure.
     if (in_array('first', $element['#attributes']['class'])) {
-      $output .= '<li><div class="mega-content"><div class="row">';
+      $output .= '<li><div class="mega-content"><div class="'.$mega_wrapper_class.'">';
     }
-    // Add conditions for when using Mega Block
+    
+    // Add conditions for Mega Block.
     $mega_block_class = '';
+
+    // If a class is added to a Mega Block menu item, extract it.
     if (isset($element['#localized_options']['mega_block']['name']) && !empty($element['#localized_options']['mega_block']['name'])) {
       $mega_block_pieces = explode('|', $element['#localized_options']['mega_block']['name']);
       $mega_block_class = $mega_block_pieces[1];
     }
-    $output .= ($element['#href'] !== '<block>') ? '<ul class="col-sm-3 list-unstyled">' : '<ul class="col-sm-3 list-unstyled mega-block mega-block-'.$mega_block_class.'">';
-    $output .= '<li' . drupal_attributes($element['#attributes']) . '>';
-    $output .= ($element['#href'] !== '<block>') ? '<p><strong>' . l($element['#title'], $element['#href'], $element['#localized_options']) . '</strong></p>' : l($element['#title'], $element['#href'], $element['#localized_options']);
-    $output .= "</li>\n";
+
+    // Append classes if Mega Block is being used.
+    if ($element['#href'] == '<block>') {
+      $output .= '<ul class="'.$mega_item_class.' mega-block mega-block-'.$mega_block_class.'">';
+      $output .= '<li' . drupal_attributes($element['#attributes']) . '>';
+      $output .= l($element['#title'], $element['#href'], $element['#localized_options']);
+      $output .= "</li>\n";
+    } else {
+      // Add standard mega menu classes.
+      $output .= '<ul class="'.$mega_item_class.' list-unstyled">';
+      $output .= '<li' . drupal_attributes($element['#attributes']) . '>';
+      // If this link has children (meaning it's the title link)
+      if (!empty($element['#below'])) {
+        $output .= '<strong>' . l($element['#title'], $element['#href'], $element['#localized_options']) . '</strong>';
+      } else {
+        $output .= l($element['#title'], $element['#href'], $element['#localized_options']);
+      }
+      // Close link.
+      $output .= "</li>\n";
+    }
+
+    // Check if the link has children.
     if ($element['#below']) {
       unset($element['#below']['#theme_wrappers']);
       $output .= drupal_render($element['#below']);
@@ -397,20 +462,21 @@ function enterprise_bootstrap_menu_link(array $variables) {
 
   if ($element['#below']) {
     if ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 1)) {
-      // See if the children of this link is a mega menu or not.
-      // The values don't make sense. Just go with it.
-      $non_mega = TRUE;
+      
+      // Determine if the children of this link are expanded.
+      $mega_children = TRUE;
       foreach ($element['#below'] as $key => $value) {
         if (isset($value['#mega']) && $value['#mega'] == TRUE) {
-          $non_mega = FALSE;
+          $mega_children = FALSE;
           break;
         }
       }
-      $non_mega_class = ($non_mega) ? 'non-mega' : '';
+      // Add a non-mega class for theming.
+      $mega_children_class = ($mega_children) ? 'non-mega' : '';
 
       // Add our own wrapper.
       unset($element['#below']['#theme_wrappers']);
-      $sub_menu = '<ul class="dropdown-menu"><div class="container '.$non_mega_class.'">' . drupal_render($element['#below']) . '</div></ul>';
+      $sub_menu = '<ul class="dropdown-menu"><div class="container '.$mega_children_class.'">' . drupal_render($element['#below']) . '</div></ul>';
 
       // Generate as standard dropdown.
       $element['#title'] .= ' <span class="caret"></span>';
