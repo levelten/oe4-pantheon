@@ -611,27 +611,6 @@ function views_preprocess_page(&$variables) {
 }
 
 /**
-* Implements hook_preprocess_HOOK() for page.tpl.php.
-*/
-function views_preprocess_page(&$variables) {
-  // If the page contains a view as its main content, contextual links may have
-  // been attached to the page as a whole; for example, by views_page_alter().
-  // This allows them to be associated with the page and rendered by default
-  // next to the page title (which we want). However, it also causes the
-  // Contextual Links module to treat the wrapper for the entire page (i.e.,
-  // the <body> tag) as the HTML element that these contextual links are
-  // associated with. This we don't want; for better visual highlighting, we
-  // prefer a smaller region to be chosen. The region we prefer differs from
-  // theme to theme and depends on the details of the theme's markup in
-  // page.tpl.php, so we can only find it using JavaScript. We therefore remove
-  // the "contextual-links-region" class from the <body> tag here and add
-  // JavaScript that will insert it back in the correct place.
-  if (!empty($variables['page']['#views_contextual_links_info'])) {
-    $variables['classes_array'] = array_diff($variables['classes_array'], array('contextual-links-region'));
-  }
-}
-
-/**
  * Implements hook_contextual_links_view_alter().
  */
 function views_contextual_links_view_alter(&$element, $items) {
