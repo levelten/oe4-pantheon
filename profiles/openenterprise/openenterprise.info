@@ -123,6 +123,7 @@ dependencies[] = enterprise_editor
 ; dependencies[] = enterprise_intel
 dependencies[] = enterprise_page
 dependencies[] = enterprise_style
+dependencies[] = enterprise_theme
 
 files[] = openenterprise.profile
 
