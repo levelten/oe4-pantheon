@@ -40,7 +40,7 @@ Adds alter hooks to strongarm variables on import and export.
 
 
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
-MODULE: UUID
+MODULE: uuid
 copy to: /profiles/openenterprise/modules/contrib/uuid
 
 Adds a hook to alter uuid entities (content) when the content is imported.
