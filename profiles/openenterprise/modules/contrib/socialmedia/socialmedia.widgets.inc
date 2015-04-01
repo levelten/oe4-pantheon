@@ -1084,7 +1084,10 @@ function socialmedia_widgets_set_profile_default() {
   );
   $i=1;
   foreach ($elements['basic']['elements'] AS $key => $element) {
-    $element += widgets_element_definition_load($key);
+    $widget_definition = widgets_element_definition_load($key);
+    if ($widget_definition) { 
+      $element += $widget_definition;
+    }
     $element['weight'] = isset($element['weight']) ? $element['weight'] : $i++;
     $set['elements'][] = $element;
   }
@@ -1196,7 +1199,10 @@ function socialmedia_widgets_set_share_default() {
   );
   $i=1;
   foreach ($elements['basic']['elements'] AS $key => $element) {
-    $element += widgets_element_definition_load($key);
+    $widget_definition = widgets_element_definition_load($key);
+    if ($widget_definition) {
+      $element += $widget_definition;
+    }
     $element['weight'] = $i++;
     $set['elements'][] = $element;
   }

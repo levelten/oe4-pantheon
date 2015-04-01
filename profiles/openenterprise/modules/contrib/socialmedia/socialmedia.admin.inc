@@ -22,7 +22,7 @@ function socialmedia_admin_settings() {
     '#description' => t('Select which social media platforms you want to enable on your site.'),
   ); 
   
-  $platforms = socialmedia_socialmedia_platform_info();
+  $platforms = socialmedia_platform_definitions();
   $options = array();
   $extra = array();
   foreach ($platforms AS $platform_name => $platform) {
@@ -518,7 +518,10 @@ function socialmedia_admin_profile_widgets_form_submit($form, $form_state) {
       foreach ($elements AS $key => $v) {
         if ($v) {
           $element = $defs[$group]['elements'][$key];
-          $element += widgets_element_definition_load($key);
+          $widget_definition = widgets_element_definition_load($key);
+          if ($widget_definition) {
+            $element += $widget_definition;
+          } 
           $element['weight'] = $i++;
           $set['elements'][] = $element;
         }
