@@ -482,6 +482,9 @@ function widgets_set_load($name = NULL, $wsid = NULL, $include = NULL) {
   // Restrict to the specific type of flag. This bitwise operation basically
   // states "if the storage is X, then allow".
   if (isset($set) && (!isset($include) || ($set['storage'] & (int) $include))) {
+    if (arg(0) != 'admin') {
+      drupal_alter('widgets_set_view', $set);
+    }
     return $set;
   }
 
