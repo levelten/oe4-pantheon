@@ -80,14 +80,14 @@ function _enterprise_extras_menu_form_alter(array &$form, array $item = array(),
 		'#type' =>  'checkbox',
 		'#title' => t('Mega Menu'),
 		'#description' => t('Force this menu item to be a mega menu despite if it has children or not.'),
-		'#default_value' => (!empty($item['options']['enterprise_mega'])) ? $item['options']['enterprise_mega'] : FALSE,
+		'#default_value' => (!empty($item['options']['enterprise_extras']['enterprise_mega'])) ? $item['options']['enterprise_extras']['enterprise_mega'] : FALSE,
   );
   $form['options']['enterprise_extras']['disable_icon_menu_block'] = array(
     '#access' => $access,
     '#type' =>  'checkbox',
     '#title' => t('Disable Icon for Menu Block'),
     '#description' => t('Icon API Menu will add icons to the menu all the time. Settings this will give the theme a chance to remove it.'),
-    '#default_value' => (!empty($item['options']['disable_icon_menu_block'])) ? $item['options']['disable_icon_menu_block'] : FALSE,
+    '#default_value' => (!empty($item['options']['enterprise_extras']['disable_icon_menu_block'])) ? $item['options']['enterprise_extras']['disable_icon_menu_block'] : FALSE,
   );
 
 }

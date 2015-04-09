@@ -255,6 +255,22 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     }
   }
 
+  // Gridline
+  $gridline = theme_get_setting('gridline');
+  if (!empty($gridline)) {
+    switch ($gridline) {
+      case 1:
+      drupal_add_js($theme_path  . '/js/gridline/gridline.min.js');
+      break;
+      case 2:
+      drupal_add_js($theme_path  . '/js/gridline/gridline.js');
+      break;
+      default:
+        # Do nothing.
+      break;
+    }
+  }
+
   // equalize.js
   // $equalize = theme_get_setting('equalize');
   // if (!empty($equalize)) {
@@ -362,10 +378,10 @@ function enterprise_bootstrap_menu_link(array $variables) {
     $element['#attributes']['class'][] = 'has-icon';
   }
 
-
   // Add Menu link ID for specific styling cases.
   $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
 
+  // Check if using mega menu or is a menu block.
   if (!$enterprise_mega || $is_menu_block) {
     // Default Bootstrap menu
 
@@ -410,7 +426,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
 
   // Last chance to turn into a mega menu.
   if (!empty($element['#original_link']['options']['enterprise_extras']['enterprise_mega']) && $element['#original_link']['options']['enterprise_extras']['enterprise_mega']) {
-    $element['#mega'] = 1;
+    $element['#mega'] = TRUE;
   }
 
   if ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 2 && isset($element['#mega']) && $element['#mega'])) {

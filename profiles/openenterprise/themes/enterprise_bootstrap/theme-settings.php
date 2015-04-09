@@ -393,6 +393,24 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+	$form['enterprise_bootstrap_js']['gridline_fieldset'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Gridline'), 
+		'#collapsible' => TRUE, 
+		'#collapsed' => TRUE,
+	);
+	$form['enterprise_bootstrap_js']['gridline_fieldset']['gridline'] = array(
+		'#type' => 'select',
+		'#title' => t('Gridline.js'),
+		'#description' => t('A simple and light-weight JavaScript allows for more control over grid systems in any Twitter Bootstrap 3 project. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/tmaiaroto/gridline'))),
+		'#default_value' => (theme_get_setting('gridline')) ? theme_get_setting('gridline') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (gridline.min.js)'),
+			2 => t('Development (gridline.js)'),
+		),
+	);
+
 	$bootstrap_default = array(
 		'affix' => 0,'alert' => 1,'button' => 0,'carousel' => 1,'collapse' => 1,'dropdown' => 1,
     'modal' => 0,'tooltip' => 0,'popover' => 0,'scrollspy' => 0,'tab' => 0,'transition' => 1,
