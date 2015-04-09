@@ -299,20 +299,10 @@ function enterprise_bootstrap_preprocess_block(&$variables) {
  * Bootstrap theme wrapper function for the primary menu links.
  */
 function enterprise_bootstrap_menu_tree__main_menu(&$variables) {
-  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
-  if ($enterprise_mega > 0) {
-    return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
-  } else {
-    return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
-  }
+  return _enterprise_bootstrap_menu_wrapper($variables);
 }
 function enterprise_bootstrap_menu_tree__primary_nav(&$variables) {
-  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
-  if ($enterprise_mega > 0) {
-    return '<div class="mega"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
-  } else {
-    return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
-  }
+  return _enterprise_bootstrap_menu_wrapper($variables);
 }
 
 /**
@@ -323,6 +313,14 @@ function enterprise_bootstrap_menu_link(array $variables) {
   $mega_columns = theme_get_setting('enterprise_bootstrap_mega_columns');
   $mobile_dropdown = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
   $hover_dropdown = theme_get_setting('bootstrap_hover_dropdown');
+
+  // Menu item reference.
+  $element = $variables['element'];
+  $sub_menu = '';
+
+  // Get menu item information.
+  $is_menu_block = (!empty($element['#bid']) && $element['#bid']['module'] == 'menu_block') ? TRUE : FALSE;
+  $disable_icon_menu_block = (!empty($element['#localized_options']['enterprise_extras']['disable_icon_menu_block']) && $element['#localized_options']['enterprise_extras']['disable_icon_menu_block']) ? TRUE : FALSE;
 
   // Set up Mega Menu classes.
   switch ($mega_columns) {
@@ -354,10 +352,22 @@ function enterprise_bootstrap_menu_link(array $variables) {
       break;
   }
 
-  if (!$enterprise_mega) {
+  // Remove Icon on Menu Blocks when requested.
+  if ($disable_icon_menu_block && $is_menu_block) {
+    unset($element['#localized_options']['icon']);
+  }
+
+  // Add class for when Icon Menu is being used.
+  if (!empty($element['#localized_options']['icon']['icon'])) {
+    $element['#attributes']['class'][] = 'has-icon';
+  }
+
+
+  // Add Menu link ID for specific styling cases.
+  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
+  if (!$enterprise_mega || $is_menu_block) {
     // Default Bootstrap menu
-    $element = $variables['element'];
-    $sub_menu = '';
 
     if ($element['#below']) {
       // Prevent dropdown functions from being added to management menu so it
@@ -391,23 +401,15 @@ function enterprise_bootstrap_menu_link(array $variables) {
     if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
       $element['#attributes']['class'][] = 'active';
     }
+    // Clean out any duplicate classes.
+    $element['#attributes']['class'] = array_unique($element['#attributes']['class']);
+
     $output = l($element['#title'], $element['#href'], $element['#localized_options']);
     return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
   } // end default Bootstrap
 
-  $element = $variables['element'];
-  $sub_menu = '';
-
-  // Add class for when Icon Menu is being used.
-  if (!empty($element['#localized_options']['icon']['icon'])) {
-    $element['#attributes']['class'][] = 'has-icon';
-  }
-
-  // Add Menu link ID for specific styling cases.
-  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
-
   // Last chance to turn into a mega menu.
-  if (!empty($element['#original_link']['options']['enterprise_mega']) && $element['#original_link']['options']['enterprise_mega']) {
+  if (!empty($element['#original_link']['options']['enterprise_extras']['enterprise_mega']) && $element['#original_link']['options']['enterprise_extras']['enterprise_mega']) {
     $element['#mega'] = 1;
   }
 
@@ -506,6 +508,10 @@ function enterprise_bootstrap_menu_link(array $variables) {
   if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
     $element['#attributes']['class'][] = 'active';
   }
+
+  // Clean out any duplicate classes.
+  $element['#attributes']['class'] = array_unique($element['#attributes']['class']);
+
   $output = l($element['#title'], $element['#href'], $element['#localized_options']);
   return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
 }
@@ -597,4 +603,54 @@ function enterprise_bootstrap_menu_local_action($variables) {
   $output .= "</li>\n";
 
   return $output;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function enterprise_bootstrap_theme_registry_alter(&$theme_registry) {
+  array_unshift($theme_registry['menu_tree']['preprocess functions'], 'enterprise_bootstrap_menu_tree_alter');
+}
+
+/**
+ * Helper function for adding the tree context to the variables.
+ *
+ * A faux "hook_menu_tree_alter()" if you will.
+ */
+function enterprise_bootstrap_menu_tree_alter(&$variables) {
+  // Save the original tree render array so it can be
+  // used in future theme preprocessors.
+  $variables['#tree'] = $variables['tree'];
+}
+
+function _enterprise_bootstrap_menu_wrapper($variables) {
+  $enterprise_mega = theme_get_setting('enterprise_bootstrap_megamenu');
+  // Enterprise Megamenu options
+  // 0 => t('Bootstrap Default'),
+  // 1 => t('Enterprise Mega Menu'),
+  // 2 => t('YAMM'),
+  
+  // Extract additional data.
+  foreach ($variables['#tree'] as $element) {
+    if (is_array($element) && !empty($element['#bid']) && $element['#bid']['module'] == 'menu_block') {
+      $enterprise_mega = 'mega';
+      break;
+    }
+  }
+  switch ($enterprise_mega) {
+    case '0':
+      return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+      break;
+    case '1':
+    case '2':
+      return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+      break;
+    case 'mega':
+      return '<div class="default-bootstrap"><ul class="menu nav">' . $variables['tree'] . '</ul></div>';
+      break;
+
+    default:
+      return '<div class="default-bootstrap"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+      break;
+  }
 }

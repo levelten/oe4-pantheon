@@ -88,8 +88,8 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#default_value' => theme_get_setting('enterprise_bootstrap_megamenu'),
 		'#description' => t('Choose a Bootstrap mega menu.'),
 		'#options' => array(
-			1 => t('Enterprise Mega Menu'),
 			0 => t('Bootstrap Default'),
+			1 => t('Enterprise Mega Menu'),
 			2 => t('YAMM'),
 		),
 	);

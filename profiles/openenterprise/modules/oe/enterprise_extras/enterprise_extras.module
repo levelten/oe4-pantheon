@@ -49,22 +49,45 @@ function enterprise_extras_form_node_form_alter(&$form, $form_state) {
 function _enterprise_extras_menu_form_alter(array &$form, array $item = array(), array &$complete_form = array()) {
   $access = user_access('administer menu');
 
+  // Options we'll be setting on each menu item.
+  $options = array(
+    'enterprise_mega',
+    'disable_icon_menu_block',
+  );
+
   // Unset the previous value so that the new values get saved.
-  if (isset($form['options']['#value']['enterprise_mega'])) {
-    unset($form['options']['#value']['enterprise_mega']);
-  }
-  // Determine proper parent names for states.
-  $parents = 'options[enterprise_mega]';
-  if (isset($complete_form['menu']['link']) && isset($complete_form['#node']->menu)) {
-    $parents = 'menu[options][enterprise_mega]';
+  foreach ($options as $option) {
+    if (isset($form['options']['#value'][$option])) {
+      unset($form['options']['#value'][$option]);
+    }
+
+    // Determine proper parent names for states.
+    $parents = 'options['.$option.']';
+    if (isset($complete_form['menu']['link']) && isset($complete_form['#node']->menu)) {
+      $parents = 'menu[options]['.$option.']';
+    }
   }
 
-  $form['options']['enterprise_mega'] = array(
+  $form['options']['enterprise_extras'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t('Enterprise Extras Settings'),
+    '#description' => t('A set of options built into OE extras to handle specific scenarios.'),
+    '#collapsible' => TRUE, 
+    '#collapsed' => FALSE,
+  );
+  $form['options']['enterprise_extras']['enterprise_mega'] = array(
   	'#access' => $access,
 		'#type' =>  'checkbox',
 		'#title' => t('Mega Menu'),
 		'#description' => t('Force this menu item to be a mega menu despite if it has children or not.'),
 		'#default_value' => (!empty($item['options']['enterprise_mega'])) ? $item['options']['enterprise_mega'] : FALSE,
+  );
+  $form['options']['enterprise_extras']['disable_icon_menu_block'] = array(
+    '#access' => $access,
+    '#type' =>  'checkbox',
+    '#title' => t('Disable Icon for Menu Block'),
+    '#description' => t('Icon API Menu will add icons to the menu all the time. Settings this will give the theme a chance to remove it.'),
+    '#default_value' => (!empty($item['options']['disable_icon_menu_block'])) ? $item['options']['disable_icon_menu_block'] : FALSE,
   );
 
 }
