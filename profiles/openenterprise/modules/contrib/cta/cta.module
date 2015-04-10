@@ -718,6 +718,7 @@ function cta_block_view($delta = '') {
     // check if CTA category (via taxonomy ref field) exists for node
     if ((arg(0) == 'node') && (is_numeric(arg(1)))) {
       $node = menu_get_object();
+      if (!empty($node)) {
       $fields_info = field_info_instances('node', $node->type);
       // check cta set with taxonomy
       foreach ($fields_info AS $field_name => $field_info) {
@@ -793,6 +794,7 @@ function cta_block_view($delta = '') {
       }
       //dsm($node);
     }
+  }
   }
 
   if (!$block['set']) {
@@ -1110,7 +1112,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
   if (count($meta['selectors'])) {
     $meta['list_visibility'] = 1;
   }
-  if (module_exists('intel')) {
+  if (module_exists('intel') && !empty($meta['data']['ga_event'])) {
     $meta['data']['ga_event']['conversion']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['selector'] = trim($meta['data']['ga_event']['custom']['selector']);
