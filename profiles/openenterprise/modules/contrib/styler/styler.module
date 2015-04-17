@@ -13,14 +13,27 @@ define('STYLER_THEME', variable_get('theme_default', 'bartik'));
 function styler_menu() {
   $items = array();
   $items['admin/appearance/style-guide'] = array(
-    'title' => 'Style Guide',
+    'title' => t('Style Guide'),
     'description' => 'View a theme supported style guide.',
     'page callback' => 'styler_style_view',
     'access callback' => 'user_access',
-    'access arguments' => array('admin intel'),
+    'access arguments' => array('view styler'),
     'theme callback' => 'styler_theme_callback',
   );
   return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function styler_permission() {
+  return array(
+    'view styler' => array(
+      'title' => t('View style guide'),
+      'description' => t('View style guide info and markup for the site.'),
+      'restrict access' => TRUE,
+    ),
+  );
 }
 
 /**
@@ -207,7 +220,7 @@ function theme_styler_element($vars) {
 
     $output .= '
           <div class="bs-example bs-example-' . $name . '">
-            <div class="row col-md-12">
+            <div class="col-md-12">
             ' . $code .'
             </div>
           </div>
