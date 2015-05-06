@@ -347,33 +347,44 @@ function socialmedia_googleplus_parser($values, $scope = 'site') {
   $profile = array('url' => '', 'username' => '', 'userid' => '');
   $str = $values['url'];
 
+  $patterns = array(
+    '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i',
+    '/(http[s?]:\/\/?)plus.google.com\/([0-9]+)/i',
+    '/(http[s?]:\/\/?)plus.google.com\/[a-z]\/([^\n]*)/i',
+  );
 
-  // check +name format
-  $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?(\+)(\w+)+/i';
-  if (preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
+  // Check for google.com/+UserName pattern.
+  if (preg_match($patterns[0], $str, $matches, PREG_OFFSET_CAPTURE)) {
     $a = explode('plus.google.com/', $str);
     $profile['url'] = 'plus.google.com/' . $a[1];
     $b = explode('/', $a[1]);
-    // check if + format name is used
     if (substr($b[0], 0, 1) == '+') {
       $profile['userid'] = $b[0];
       $values['username'] = substr($b[0], 1);
     }
   }
-  else {
-    // check numeric id format.
-    $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?([0-9]*)/i';
-    if (!preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
-      if (!isset($matches[3][0])) {
-        form_set_error('input_googleplus_url', t('Google+ URL invalid.'));
-      }
-      return FALSE;
-    }
+
+  // Check for google.com/123456789 pattern.
+  else if (preg_match($patterns[1], $str, $matches, PREG_OFFSET_CAPTURE)) {
     $a = explode('plus.google.com/', $str);
     $profile['url'] = 'plus.google.com/' . $a[1];
-    $profile['userid'] = $matches[3][0];
+    $userid = trim(str_replace(array('http://','https://','plus.google.com'), '', $str), '/');
+    $profile['userid'] = $userid;
   }
 
+  // Check for google.com/*/* pattern.
+  else if (preg_match($patterns[2], $str, $matches, PREG_OFFSET_CAPTURE)) {
+    $a = explode('plus.google.com/', $str);
+    $profile['url'] = 'plus.google.com/' . $a[1];
+    $userid = trim(str_replace(array('http://','https://','plus.google.com'), '', $str), '/');
+    $profile['userid'] = $userid;
+  }
+
+  // Throw error if Google+ URL didn't match any valid pattern.
+  else {
+    form_set_error('input_googleplus_url', t('Google+ URL invalid.'));
+    return FALSE;
+  }
 
   if (isset($values['username']) && trim($values['username'])) {
     $profile['username'] = $values['username'];
