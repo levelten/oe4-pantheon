@@ -12,82 +12,50 @@ function enterprise_extras_init() {
 
 /**
  * Implements hook_form_FORM_ID_alter().
- *
- * Adds mega menu configuration options to the menu edit menu form.
- *
- * @see menu_edit_item()
  */
-function enterprise_extras_form_menu_edit_item_alter(&$form, $form_state) {
-  $item = $form['original_item']['#value'];
-  _enterprise_extras_menu_form_alter($form, $item, $form);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Adds menu attribute options to the node's edit menu item form.
- *
- * @see _menu_attributes_form_alter()
- */
-function enterprise_extras_form_node_form_alter(&$form, $form_state) {
-  if (isset($form['menu']['link']) && isset($form['#node']->menu)) {
-    $item = $form['#node']->menu;
-    _enterprise_extras_menu_form_alter($form['menu']['link'], $item, $form);
-  }
-}
-
-/**
- * Add the mega menu configuration to a menu item edit form.
- *
- * @param array $form
- *   The menu item edit form passed by reference.
- * @param array $item
- *   The optional existing menu item for context.
- * @param array $complete_form
- *   The entire form from menu callback.
- */
-function _enterprise_extras_menu_form_alter(array &$form, array $item = array(), array &$complete_form = array()) {
+function enterprise_extras_form_menu_edit_item_alter(&$form, $form_state, $form_id) {
   $access = user_access('administer menu');
 
-  // Options we'll be setting on each menu item.
-  $options = array(
-    'enterprise_mega',
-    'disable_icon_menu_block',
-  );
-
-  // Unset the previous value so that the new values get saved.
-  foreach ($options as $option) {
-    if (isset($form['options']['#value'][$option])) {
-      unset($form['options']['#value'][$option]);
-    }
-
-    // Determine proper parent names for states.
-    $parents = 'options['.$option.']';
-    if (isset($complete_form['menu']['link']) && isset($complete_form['#node']->menu)) {
-      $parents = 'menu[options]['.$option.']';
-    }
-  }
-
-  $form['options']['enterprise_extras'] = array(
-    '#type' => 'fieldset', 
-    '#title' => t('Enterprise Extras Settings'),
-    '#description' => t('A set of options built into OE extras to handle specific scenarios.'),
-    '#collapsible' => TRUE, 
+  $form['enterprise_extras'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enterprise Extras'),
+    '#description' => t('Options that can assist in theming.'),
+    '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['options']['enterprise_extras']['enterprise_mega'] = array(
-  	'#access' => $access,
-		'#type' =>  'checkbox',
-		'#title' => t('Mega Menu'),
-		'#description' => t('Force this menu item to be a mega menu despite if it has children or not.'),
-		'#default_value' => (!empty($item['options']['enterprise_extras']['enterprise_mega'])) ? $item['options']['enterprise_extras']['enterprise_mega'] : FALSE,
+  $form['enterprise_extras']['enterprise_mega'] = array(
+    '#access' => $access,
+    '#type' =>  'checkbox',
+    '#title' => t('Mega Menu'),
+    '#description' => t('Force this menu item to be a mega menu despite if it has children or not.'),
+    '#default_value' => array_key_exists('enterprise_mega', $form['options']['#value']) ? $form['options']['#value']['enterprise_mega'] : 0,
+    '#group' => 'enterprise_extras',
   );
-  $form['options']['enterprise_extras']['disable_icon_menu_block'] = array(
+  $form['enterprise_extras']['disable_icon_menu_block'] = array(
     '#access' => $access,
     '#type' =>  'checkbox',
     '#title' => t('Disable Icon for Menu Block'),
     '#description' => t('Icon API Menu will add icons to the menu all the time. Settings this will give the theme a chance to remove it.'),
-    '#default_value' => (!empty($item['options']['enterprise_extras']['disable_icon_menu_block'])) ? $item['options']['enterprise_extras']['disable_icon_menu_block'] : FALSE,
+    '#default_value' => array_key_exists('disable_icon_menu_block', $form['options']['#value']) ? $form['options']['#value']['disable_icon_menu_block'] : 0,
+    '#group' => 'enterprise_extras',
   );
+}
 
+
+/**
+ * Implements hook_menu_link_alter().
+ */
+function enterprise_extras_menu_link_alter(&$item) {
+  
+  if (isset($item['enterprise_mega']) && $item['enterprise_mega']) {
+    $item['options']['enterprise_mega'] = $item['enterprise_mega'];
+  } elseif (isset($item['enterprise_mega']) && $item['enterprise_mega'] == 0) {
+    unset($item['options']['enterprise_mega']);
+  }
+
+  if (isset($item['disable_icon_menu_block']) && $item['disable_icon_menu_block']) {
+    $item['options']['disable_icon_menu_block'] = $item['disable_icon_menu_block'];
+  } elseif (isset($item['disable_icon_menu_block']) && $item['disable_icon_menu_block'] == 0) {
+    unset($item['options']['disable_icon_menu_block']);
+  }
 }
