@@ -74,8 +74,24 @@
  */
 ?>
 
-  
-  <?php include 'includes/navigation.inc'; ?>
+<div class="page-wrapper">
+  <?php
+  // Determine which megamenu to use.
+  switch ($nav_mega_menu) {
+    case 'enterprise-megamenu':
+      include 'includes/navigation_enterprise.inc';
+      break;
+
+    case 'yamm':
+      include 'includes/navigation_yamm.inc';
+      break;
+
+    default:
+      include 'includes/navigation_bootstrap.inc';
+      break;
+  }
+  ?>
+
   <?php if(!$title_placement): include 'includes/title.inc'; endif; ?>
   <?php include 'includes/header.inc'; ?>
   <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
@@ -99,4 +115,5 @@
     </div>
   </div>
 
-<?php include 'includes/footer.inc'; ?>
+  <?php include 'includes/footer.inc'; ?>
+</div>

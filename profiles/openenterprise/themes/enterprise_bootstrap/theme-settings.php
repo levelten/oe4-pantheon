@@ -82,51 +82,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Wide'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_megamenu'] = array(
-		'#type' => 'select',
-		'#title' => t('Mega Menu'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_megamenu'),
-		'#description' => t('Choose a Bootstrap mega menu.'),
-		'#options' => array(
-			0 => t('Bootstrap Default'),
-			1 => t('Enterprise Mega Menu'),
-			2 => t('YAMM'),
-		),
-	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mega_columns'] = array(
-		'#type' => 'select',
-		'#title' => t('Mega Menu Columns'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_mega_columns'),
-		'#description' => t('Number of columns in your megamenu'),
-		'#options' => array(
-			'col_md_4' => t('3'),
-			'col_md_3' => t('4'),
-			'col_md_2' => t('6'),
-			'col_md_1' => t('12'),
-			'col_table' => t('Table (even width)'),
-			'col_custom' => t('None (custom)'),
-		),
-	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
-		'#type' => 'select',
-		'#title' => t('Mobile Menu: Hover or Push'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
-		'#description' => t('When on mobile and using a fixed navbar, choose either the menu hover over the content, or push the content down.'),
-		'#options' => array(
-			0 => t('Hover (default)'),
-			1 => t('Push'),
-		),
-	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_mobile_dropdown'] = array(
-		'#type' => 'select',
-		'#title' => t('Mobile Dropdown Menu'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
-		'#description' => t('Allow secondary dropdown menus on mobile. For example, dropdowns inside of dropdowns.'),
-		'#options' => array(
-			0 => t('No (default)'),
-			1 => t('Yes'),
-		),
-	);
+	
 	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
@@ -167,7 +123,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
 	);
-	
 	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Navigation Region Class'),
@@ -205,16 +160,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Inside content area'),
 		),
 	);
-	// We might not actually need this. Keep in for historical purposes.
-	// $form['enterprise_bootstrap_region_settings']['title']['title_container'] = array(
-	// 	'#type' => 'select',
-	// 	'#title' => t('Title Container'),
-	// 	'#default_value' => theme_get_setting('title_container'),
-	// 	'#options' => array(
-	// 		'container' => t('Boxed'),
-	// 		'wide' => t('Wide'),
-	// 	),
-	// );
 	$form['enterprise_bootstrap_region_settings']['title']['title_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Title Class'),
@@ -468,5 +413,167 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
   foreach ($form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options']['#options'] as $key => $value) {
 		$form['enterprise_bootstrap_js']['bootstrap_plugins']['enterprise_bootstrap_js_options'][$key]['#description'] = $bootstrap_desc[$key];
 	}
+
+	/********************* Enterprise Bootstrap Megamenu Settings ***********************/
+	$form['enterprise_bootstrap_megamenu_config'] = array(
+		'#type' => 'fieldset',
+		'#group' => 'enterprise_bootstrap',
+		'#title' => t('Mega Menu'),
+		'#description' => t('Configurable megamenu when using the Enterprise Bootstrap page template.'),
+		'#attributes' => array(
+	    'class' => array('columns'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_top'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('columns'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_middle'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('columns'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left'] = array(
+	  '#type' => 'container',
+	  '#group' => 'section_middle',
+	  '#attributes' => array(
+	    'class' => array('column-left'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_right'] = array(
+	  '#type' => 'container',
+	  '#group' => 'section_middle',
+	  '#attributes' => array(
+	    'class' => array('column-right'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_bottom'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('columns'),
+	  ),
+	);
+
+	$form['enterprise_bootstrap_megamenu_config']['section_top']['enterprise_bootstrap_megamenu'] = array(
+		'#type' => 'select',
+		'#title' => t('Mega Menu'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_megamenu'),
+		'#description' => t('Choose a Bootstrap mega menu.'),
+		'#options' => array(
+			'bootstrap' => t('Bootstrap Default'),
+			'enterprise' => t('Enterprise Megamenu'),
+			'yamm' => t('Yamm Megamenu'),
+		),
+	);
+
+	$form['enterprise_bootstrap_megamenu_config']['section_right']['enterprise_bootstrap_mega_columns'] = array(
+		'#type' => 'select',
+		'#title' => t('Mega Menu Columns'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mega_columns'),
+		'#description' => t('Number of columns in your megamenu'),
+		'#options' => array(
+			'col-md-12' => t('1 column'),
+			'col-md-6'  => t('2 columns'),
+			'col-md-4'  => t('3 columns'),
+			'col-md-3'  => t('4 columns'),
+			'col-md-2'  => t('6 columns'),
+			'col-table' => t('Table (even width)'),
+			'col-custom'=> t('None (custom)'),
+		),
+		'#states' => array(
+      'invisible' => array(
+        ':input[name=enterprise_bootstrap_megamenu]' => array('value' => 'bootstrap'),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['enterprise_bootstrap_dropdown'] = array(
+		'#type' => 'select',
+		'#title' => t('Dropdown: Toggle or Hover'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_dropdown'),
+		'#description' => t('Hover over a navigation link to open the menu, or tap to open. Toggle is better for mobile.'),
+		'#options' => array(
+			0 => t('Hover (default)'),
+			1 => t('Toggle'),
+		),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
+		'#type' => 'select',
+		'#title' => t('Mobile Menu: Hover or Push'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
+		'#description' => t('When on mobile and using a fixed navbar, the dropdown menu can either hover over the content, or push the content down.'),
+		'#options' => array(
+			0 => t('Hover over content'),
+			1 => t('Push down content'),
+		),
+	);
+
+	//  We don't use this anymore, but we can keep this in as a reminder.
+	// $form['enterprise_bootstrap_megamenu_config']['column_right']['enterprise_bootstrap_mobile_dropdown'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('Mobile Dropdown Menu'),
+	// 	'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
+	// 	'#description' => t('Allow secondary dropdown menus on mobile. For example, dropdowns inside of dropdowns.'),
+	// 	'#options' => array(
+	// 		0 => t('No (default)'),
+	// 		1 => t('Yes'),
+	// 	),
+	// );
+
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset'] = array(
+	  '#type' => 'fieldset',
+	  '#group' => 'section_bottom',
+	  '#title' => t('Enterprise Megamenu Options'),
+	  '#collapsible' => FALSE,
+	  '#collapsed' => FALSE,
+	  '#states' => array(
+      'visible' => array(
+        ':input[name=enterprise_bootstrap_megamenu]' => array('value' => 'enterprise'),
+      ),
+    ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset']['megamenu_left'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('column-left'),
+	  ),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset']['megamenu_right'] = array(
+	  '#type' => 'container',
+	  '#attributes' => array(
+	    'class' => array('column-right'),
+	  ),
+	);
+
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset']['megamenu_left']['nav_wrapper'] = array(
+		'#type' => 'select',
+		'#title' => t('Nav Wrapper'),
+		'#default_value' => ($nav_wrapper = theme_get_setting('nav_wrapper')) ? $nav_wrapper : 'container-fluid',
+		'#options' => array(
+			'container' => t('Boxed'),
+			'container-fluid' => t('Fluid'),
+		),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset']['megamenu_left']['nav_inner'] = array(
+		'#type' => 'select',
+		'#title' => t('Nav Inner'),
+		'#default_value' => ($nav_inner = theme_get_setting('nav_inner')) ? $nav_inner : 'container',
+		'#options' => array(
+			'container' => t('Boxed'),
+			'container-fluid' => t('Fluid'),
+		),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['megamenu_fieldset']['megamenu_right']['sticky_menu'] = array(
+		'#type' => 'select',
+		'#title' => t('Sticky Navbar'),
+		'#description' => t('Snap navbar to the top of the page after scrolling.'),
+		'#default_value' => ($sticky_menu = theme_get_setting('sticky_menu')) ? $sticky_menu : 0,
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+	);
 
 } // end settings_alter

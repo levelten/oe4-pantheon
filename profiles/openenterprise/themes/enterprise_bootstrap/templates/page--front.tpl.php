@@ -74,7 +74,23 @@
  */
 ?>
 
-  <?php include 'includes/navigation.inc'; ?>
+<div class="page-wrapper">
+  <?php
+  // Determine which megamenu to use.
+  switch ($nav_mega_menu) {
+    case 'enterprise-megamenu':
+       include 'includes/navigation_enterprise.inc';
+       break;
+
+     case 'yamm':
+       include 'includes/navigation_yamm.inc';
+       break;
+     
+     default:
+       include 'includes/navigation_bootstrap.inc';
+       break;
+   }
+   ?>
 
   <!-- Main Container -->
   <div class="main-container <?php print $full_width_container; ?>">
@@ -99,4 +115,5 @@
   </div>
   <!-- End Main Container -->
 
-<?php include 'includes/footer.inc'; ?>
+  <?php include 'includes/footer.inc'; ?>
+</div>

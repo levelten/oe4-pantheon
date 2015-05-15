@@ -13,6 +13,25 @@ var Drupal = Drupal || {};
   Drupal.behaviors.enterprisebootstrap = {
     attach: function(context, settings) {
 
+      // Add margin for height of navbar.
+      // Account for admin menu or existing margin.
+      var $body = $("body", context),
+      $header = $("#navbar", context),
+      $mainContainer = $(".page-wrapper", context);
+      // Only run for fixed navbar.
+      if ($body.hasClass("navbar-is-fixed-top")) {
+
+        // Get appropriate heights.
+        var mainContainerMargin = $header.outerHeight();
+        if ($body.hasClass("admin-menu")) {
+          mainContainerMargin += 20;
+        }
+
+        // Account for potential existing styles.
+        var style = ($mainContainer.attr("style") === undefined) ? "" : $mainContainer.attr("style");
+        $mainContainer.attr("style", style + "padding-top:"+mainContainerMargin+"px;");
+      }
+
       /*
       * Add wrapper to Google Map iframes.
       */
@@ -67,6 +86,31 @@ var Drupal = Drupal || {};
       }
 
       /*
+      * Sticky Menu
+      */
+      if (settings.enterprise_bootstrap.sticky_menu) {
+        var $navbar = $("#navbar", context),
+            $navbarWrapper = $("#navbar-wrapper", context);
+        var navbarTop = $navbar.outerHeight(),
+            hasFixedTop = ($navbar.hasClass('navbar-fixed-top'));
+
+        // Using Affix library.
+        if (!$.fn.affix) {
+          $navbarWrapper.affix({
+            offset: { top: $navbarWrapper.offset().top }
+          });
+        } else {
+          $(window).scroll(function() {
+            if ($(window).scrollTop() >= navbarTop && !hasFixedTop) {
+              $navbarWrapper.addClass("navbar-fixed-top");
+            } else {
+              $navbarWrapper.removeClass("navbar-fixed-top");
+            }
+          });
+        }
+      }
+
+      /*
       * Mobile menu - hover vs push down
       */
       var mobileMenuHoverPush = (settings.enterprise_bootstrap.mobilemenuhoverpush) ? settings.enterprise_bootstrap.mobilemenuhoverpush : false,
@@ -108,7 +152,7 @@ var Drupal = Drupal || {};
       };
 
       // Switch mobile navbar if Push is enabled, and navbar is set to Fixed Top.
-      if ($navbar.hasClass("navbar-fixed-top") && mobileMenuHoverPush) {
+      if ($navbar.hasClass("navbar-fixed-top") && mobileMenuHoverPush && isMobile()) {
         fixedToStatic();
         mobileMenuPush();
         // Run if page has been resized.

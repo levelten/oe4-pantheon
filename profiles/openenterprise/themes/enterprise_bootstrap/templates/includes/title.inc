@@ -28,7 +28,7 @@
 			</div>
 		<?php endif; ?>
 	<?php else: ?>
-		<?php if (!empty($title)): ?>
+    <?php if (!empty($title_prefix) || !empty($title) || !empty($title_suffix)): ?>
 			<div class="page-title <?php print $title_class; ?>">
 				<div class="page-title-container">
 					<div class="page-title-inner <?php print $title_row; ?>">

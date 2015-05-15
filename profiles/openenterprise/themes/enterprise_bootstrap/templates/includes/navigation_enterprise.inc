@@ -1,6 +1,8 @@
-<!-- Navigation region -->
+<!-- Navigation Enterprise region -->
+<div id="navbar-wrapper" class="<?php print $nav_wrapper; ?>">
 <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
-  <div class="container">
+  <?php include 'header_top.inc'; ?>
+  <div class="<?php print $nav_inner; ?>">
     <div class="navbar-region <?php print $navbar_region_class; ?>">
     <div class="navbar-header <?php print $nav_logo_class; ?>">
       <?php if ($logo): ?>
@@ -23,7 +25,7 @@
     </div>
 
     <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
-      <div class="navbar-collapse collapse <?php print $nav_menu_class; ?>">
+      <div <?php print drupal_attributes($nav_menu_class); ?>>
         <nav class="navbar-menu" role="navigation">
           <?php if (!empty($primary_nav)): ?>
             <?php print render($primary_nav); ?>
@@ -39,4 +41,6 @@
     <?php endif; ?>
   </div>
   </div>
+  <?php include 'header_bottom.inc'; ?>
 </header>
+</div>

@@ -1,3 +1,14 @@
+#navbar-wrapper {
+  &.affix, &.affix-top, &.affix-bottom {
+    z-index: 20; // Needs to be higher than carousel indicators.
+  }
+}
+
+.header-top, .header-bottom {
+  background-color: @brand-primary;
+  color: @brand-accent;
+}
+
 .mega {
   .nav, .collapse, .dropup, .dropdown {
     position: static;
@@ -62,5 +73,23 @@
   width: 100%;
   .mega-table-cell {
     display: table-cell;
+  }
+}
+
+#navbar-wrapper {
+  position: relative;
+  .enterprise {
+    .navbar-menu {
+      position: static !important;
+    }
+    .navbar-nav {
+      > li.dropdown {
+        position: static;
+        > ul.dropdown-menu {
+          left: 0;
+          width: 100%;
+        }
+      }
+    }
   }
 }
