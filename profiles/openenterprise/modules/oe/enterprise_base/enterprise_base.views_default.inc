@@ -134,7 +134,7 @@ function enterprise_base_views_default_views() {
   $handler->display->display_options['filters']['promote']['table'] = 'node';
   $handler->display->display_options['filters']['promote']['field'] = 'promote';
   $handler->display->display_options['filters']['promote']['value'] = '1';
-  $handler->display->display_options['path'] = 'node';
+  $handler->display->display_options['path'] = 'nodes';
 
   /* Display: Categories page */
   $handler = $view->new_display('page', 'Categories page', 'categories_page');
