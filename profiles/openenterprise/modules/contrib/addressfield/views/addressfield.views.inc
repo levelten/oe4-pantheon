@@ -27,14 +27,18 @@ function addressfield_field_views_data($field) {
   $implemented = array(
     'country' => 'addressfield_views_handler_field_country',
     'administrative_area' => 'views_handler_field',
+    'sub_administrative_area' => 'views_handler_field',
+    'dependent_locality' => 'views_handler_field',
     'locality' => 'views_handler_field',
     'postal_code' => 'views_handler_field',
     'thoroughfare' => 'views_handler_field',
     'premise' => 'views_handler_field',
+    'sub_premise' => 'views_handler_field',
     'organisation_name' => 'views_handler_field',
     'name_line' => 'views_handler_field',
     'first_name' => 'views_handler_field',
     'last_name' => 'views_handler_field',
+    'data' => 'views_handler_field_serialized',
   );
 
   // Get the translated field information.
@@ -79,56 +83,6 @@ function addressfield_field_views_data($field) {
               '@property-label' => $property_label,
             ));
 
-            $column['title'] = $title;
-            $column['title short'] = $title;
-          }
-        }
-      }
-    }
-  }
-  // Only expose these components as Views' field handlers.
-  $implemented = array(
-    'country',
-    'administrative_area',
-    'locality',
-    'name_line',
-    'first_name',
-    'last_name',
-    'organisation_name',
-    'postal_code',
-    'thoroughfare',
-    'premise',
-  );
-  // Get the translated field information.
-  $properties = addressfield_data_property_info();
-  // Iterate over addressfield defined tables.
-  foreach ($data as &$table) {
-    // Make sure the parent Views' field (addressfield) is defined.
-    if (isset($table[$field['field_name']]['field'])) {
-      // Use the parent field definition as a template for component columns.
-      $field_def = $table[$field['field_name']]['field'];
-      // Define the valid columns.
-      $valid_columns = array();
-      foreach ($implemented as $implement) {
-        $valid_columns[] = $field['field_name'] . '_' . $implement;
-      }
-      // Iterate over the addressfield components.
-      foreach ($table as $column_name => &$column) {
-        if (empty($column['field']) && in_array($column_name, $valid_columns)) {
-          // Assign the default component definition.
-          $column['field'] = $field_def;
-          $column['field']['real field'] = $column_name;
-          $column['field']['handler'] = 'views_handler_field';
-          // Assign human-friendly field labels for addressfield components.
-          $field_labels = field_views_field_label($field['field_name']);
-          $field_label = array_shift($field_labels);
-          $property = str_replace($field_def['field_name'] . '_', '', $column_name);
-          if (!empty($properties[$property])) {
-            $property_label = $properties[$property]['label'];
-            $title = t('@field-label - @property-label', array(
-              '@field-label' => $field_label,
-              '@property-label' => $property_label,
-            ));
             $column['title'] = $title;
             $column['title short'] = $title;
           }

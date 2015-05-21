@@ -6,10 +6,11 @@ configure = admin/config/media/icon
 
 files[] = icon.install
 files[] = icon.module
+files[] = icon.admin.inc
 
-; Information added by Drupal.org packaging script on 2014-03-18
-version = "7.x-1.0-beta5+4-dev"
+; Information added by Drupal.org packaging script on 2014-02-17
+version = "7.x-1.0-beta5"
 core = "7.x"
 project = "icon"
-datestamp = "1395144556"
+datestamp = "1392643705"
 
