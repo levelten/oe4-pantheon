@@ -1,0 +1,11 @@
+--- common.orig.inc 2015-05-11 09:46:30.000000000 -0400
++++ common.inc  2015-05-11 09:44:34.000000000 -0400
+@@ -6001,7 +6001,7 @@
+  */
+ function drupal_render(&$elements) {
+   // Early-return nothing if user does not have access.
+-  if (empty($elements) || (isset($elements['#access']) && !$elements['#access'])) {
++  if (empty($elements) || !is_array($elements) || (isset($elements['#access']) && !$elements['#access'])) {
+     return '';
+   }
+

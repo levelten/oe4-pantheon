@@ -24,7 +24,7 @@ Adds checkbox to export a file via deploy/uuid
 
 PATCH: Fix-Too-Many-Tabs-Overlaping-Buttons.patch
 MODULE: rubik
-Issue in Rubik of too many tabs will obscure buttons. 
+Issue in Rubik of too many tabs will obscure buttons.
 
 This fixes the styleing.
 
@@ -46,3 +46,15 @@ copy to: /profiles/openenterprise/modules/contrib/uuid
 Adds a hook to alter uuid entities (content) when the content is imported.
 This is used to reverse alterations done using hook_uuid_entities_features_export_entity.
 Used with webform blocks to add uuid to block id on export then replace uuid with nid on import.
+
+PATCH: drupal-render-invalid-elements-array-fix.patch
+FILE: includes/common.inc
+NOTES: Fixes the following Drupal core PHP warnings:
+- Warning: Cannot use a scalar value as an array in drupal_render() (line 6110 of /home/dwyer/mra/public_html/includes/common.inc).
+- Warning: Illegal string offset '#printed' in drupal_render() (line 6110 of /home/dwyer/mre/public_html/includes/common.inc).
+- Warning: Illegal string offset '#children' in drupal_render() (line 6103 of /home/dwyer/mre/public_html/includes/common.inc).
+
+PATCH: drupal-Casting-null-array-1711256-7.patch
+FILE: includes/common.inc
+NOTES: Fixes the following Drupal core PHP warning:
+- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of /Users/robert/Sites/DYR/includes/common.inc).
