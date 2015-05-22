@@ -92,19 +92,16 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
    */
   $enterprise_megamenu = theme_get_setting('enterprise_bootstrap_megamenu');
   $variables['navbar_region_class'] = '';
+  $variables['nav_logo_class'] = array();
   $variables['nav_menu_class'] = array();
 
   switch ($enterprise_megamenu) {
-    case '0':
     case 'bootstrap':
       $variables['nav_mega_menu'] = 'default-bootstrap';
       break;
-    case '1':
     case 'enterprise':
       $variables['nav_mega_menu'] = 'enterprise-megamenu';
       break;
-
-    case '2':
     case 'yamm':
       $variables['nav_mega_menu'] = 'yamm';
       break;
@@ -131,13 +128,24 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
 
   // Navigation region settings.
   $variables['navbar_region_class'] .= theme_get_setting('navbar_region_class');
-  $variables['nav_logo_class'] = theme_get_setting('nav_logo_class');
+  
+  // Add nav_logo classes from theme settings.
+  $variables['nav_logo_class']['class'][] = 'navbar-header';
+  $nav_logo_class = explode(' ', trim(theme_get_setting('nav_logo_class')));
+  foreach ($nav_logo_class as $value) {
+    $variables['nav_logo_class']['class'][] = $value;
+  }
+  // Clean out duplicate classes.
+  array_unique($variables['nav_logo_class']['class']);
 
   // Building attributes for Nav Menu (wrapper around ul.nav)
-  $variables['nav_menu_class']['class'][] = 'navbar-collapse';
-  $variables['nav_menu_class']['class'][] = 'collapse';
-  $variables['nav_menu_class']['class'][] = trim(theme_get_setting('nav_menu_class'));
   $variables['nav_menu_class']['class'][] = $enterprise_megamenu;
+  $nav_menu_class = explode(' ', trim(theme_get_setting('nav_menu_class')));
+  foreach ($nav_menu_class as $value) {
+    $variables['nav_menu_class']['class'][] = $value;
+  }
+  // Clean out duplicate classes.
+  array_unique($variables['nav_menu_class']['class']);
 
   // Title region settings.
   $variables['title_placement'] = theme_get_setting('title_placement');

@@ -1,6 +1,6 @@
 <?php $help = element_children($page['help']); ?>
-<?php $tab_check = !empty($tabs['#primary']) || !empty($tabs['#secondary']) || element_children($tabs); ?>
-<?php if (!empty($messages) || !empty($tab_check) || !empty($help) || !empty($action_links)): ?>
+<?php $tab_check = element_children($tabs); ?>
+<?php if (!empty($messages) || !empty($tabs) ||  !empty($tab_check) || !empty($help) || !empty($action_links)): ?>
 	<?php if($is_front): ?>
 		<!-- Information -->
 		<div class="information <?php print $full_width_anti_container; ?>">
