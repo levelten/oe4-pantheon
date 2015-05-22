@@ -498,10 +498,6 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
     'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
   );
   
-  // Remove Icon on Menu Blocks when requested.
-  if ($menu_data['disable_icon_menu_block'] && $menu_data['menu_block']) {
-    unset($element['#localized_options']['icon']);
-  }
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
@@ -729,6 +725,77 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
   }
 }
 
+/*
+ * Implements theme_menu_link__main_block().
+ */
+function enterprise_bootstrap_menu_link__menu_block(array $variables) {
+// Default Bootstrap menu
+  $element = $variables['element'];
+  $sub_menu = '';
+
+  // We'll store a lot of info about this menu link in here.
+  $menu_data = array(
+    'mlid' => $element['#original_link']['mlid'],
+    'theme_hook' => $variables['theme_hook_original'],
+    'depth' => (!empty($element['#original_link']['depth'])) ? intval($element['#original_link']['depth']) : NULL,
+    'expanded' => (!empty($element['#original_link']['expanded'])) ? $element['#original_link']['expanded'] : 0,
+    'dropdown' => theme_get_setting('enterprise_bootstrap_dropdown'),
+    'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
+    'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
+  );
+  
+  // Remove Icon on Menu Blocks when requested.
+  if ($menu_data['disable_icon_menu_block']) {
+    unset($element['#localized_options']['icon']);
+  }
+  // Add class for when Icon Menu is being used.
+  if (!empty($element['#localized_options']['icon']['icon'])) {
+    $element['#attributes']['class'][] = 'has-icon';
+  }
+  // Add Menu link ID for specific styling cases.
+  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
+  
+  // Handle all other menus.
+  if ($element['#below'] && $menu_data['expanded']) {
+    // Prevent dropdown functions from being added to management menu so it
+    // does not affect the navbar module.
+    if (($element['#original_link']['menu_name'] == 'management') && (module_exists('navbar'))) {
+      $sub_menu = drupal_render($element['#below']);
+    }
+    elseif ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 1)) {
+      // Add our own wrapper.
+      unset($element['#below']['#theme_wrappers']);
+      $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
+
+      // Generate as standard dropdown.
+      $element['#attributes']['class'][] = 'dropdown';
+      $element['#localized_options']['html'] = TRUE;
+
+      // Set dropdown trigger element to # to prevent inadvertant page loading
+      // when a submenu link is clicked.
+      if ($menu_data['dropdown']) {
+        $element['#attributes']['class'][] = 'hover';
+          $element['#localized_options']['attributes']['data-target'] = '#';
+          $element['#localized_options']['attributes']['class'][] = 'dropdown-hover';
+          $element['#localized_options']['attributes']['data-hover'] = 'dropdown';
+        } else {
+          $element['#title'] .= ' <span class="caret"></span>';
+          $element['#localized_options']['attributes']['data-target'] = '#';
+          $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
+          $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
+        }
+    }
+  }
+  // On primary navigation menu, class 'active' is not set on active menu item.
+  // @see https://drupal.org/node/1896674
+  if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
+    $element['#attributes']['class'][] = 'active';
+  }
+  $output = l($element['#title'], $element['#href'], $element['#localized_options']);
+  return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
+}
+
 /**
  * Overrides theme_menu_link().
  */
@@ -739,26 +806,16 @@ function enterprise_bootstrap_menu_link(array $variables) {
 
   // We'll store a lot of info about this menu link in here.
   $menu_data = array(
-    'title' => $element['#original_link']['link_title'],
     'mlid' => $element['#original_link']['mlid'],
     'theme_hook' => $variables['theme_hook_original'],
     'depth' => (!empty($element['#original_link']['depth'])) ? intval($element['#original_link']['depth']) : NULL,
     'expanded' => (!empty($element['#original_link']['expanded'])) ? $element['#original_link']['expanded'] : 0,
-    'enterprise_mega' => theme_get_setting('enterprise_bootstrap_megamenu'),
-    'mega' => (!empty($element['#mega'])) ? $element['#mega'] : FALSE,
-    'mega_block' => (!empty($element['#localized_options']['mega_block']['name'])) ? $element['#localized_options']['mega_block']['name'] : NULL,
     'menu_block' => (is_array($element['#theme']) && in_array('menu_link__menu_block', $element['#theme'])) ? TRUE : FALSE,
-    'mega_columns' => theme_get_setting('enterprise_bootstrap_mega_columns'),
     'dropdown' => theme_get_setting('enterprise_bootstrap_dropdown'),
     'mobile_dropdown' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
     'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
-    'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
   );
   
-  // Remove Icon on Menu Blocks when requested.
-  if ($menu_data['disable_icon_menu_block'] && $menu_data['menu_block']) {
-    unset($element['#localized_options']['icon']);
-  }
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
