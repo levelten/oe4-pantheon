@@ -13,4 +13,24 @@ function bean_uuid_entity_info_alter(&$entity_info) {
   $entity_info['bean']['uuid'] = TRUE;
   $entity_info['bean']['entity keys']['uuid'] = 'uuid';
   $entity_info['bean']['entity keys']['revision uuid'] = 'vuuid';
+  $entity_info['bean']['uri callback'] = 'bean_uuid_uri';
+  $entity_info['bean']['label callback'] = 'bean_uuid_label';
 }
+
+function bean_uuid_uri($entity) {
+  return array('path' => 'block/' . $entity->bid);
+}
+
+function bean_uuid_label($entity) {
+  return $entity->title;
+}
+
+// drupal_alter('uuid_entities_features_export_entity', $entity, $entity_type);
+function bean_uuid_uuid_entities_features_export_entity_alter(&$entity, $entity_type) {
+  if ($entity_type == 'bean') {
+    if (!isset($entity->revision)) {
+      $entity->revision = 1;
+    }
+  }
+}
+
