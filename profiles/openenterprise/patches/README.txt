@@ -2,8 +2,7 @@ This document describes the patches used in Open Enterprise.
 
 Each patch used in the profile should be placed under profiles/openenterprise/patches.
 
-They can be applied manually by coping each patch to the location listed in their descrption
-or using Drush make.
+They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
@@ -11,9 +10,11 @@ LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
 in current version of CKeditor.
 
+
 PATCH: bean_uuid_fix_import_export.patch
 MODULE: bean > bean_uuid
 Fixes issue with breaking Deploy import/export b/c of missing bean entity info data.
+
 
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 MODULE: deploy
@@ -22,11 +23,13 @@ copy to: /profiles/openenterprise/modules/contrib/deploy
 
 Adds checkbox to export a file via deploy/uuid
 
+
 PATCH: Fix-Too-Many-Tabs-Overlaping-Buttons.patch
 MODULE: rubik
-Issue in Rubik of too many tabs will obscure buttons. 
+Issue in Rubik of too many tabs will obscure buttons.
 
 This fixes the styleing.
+
 
 PATCH: strongarm-2076543-import-export-value-alter-hooks.patch
 MODULE: strongarm
@@ -46,3 +49,17 @@ copy to: /profiles/openenterprise/modules/contrib/uuid
 Adds a hook to alter uuid entities (content) when the content is imported.
 This is used to reverse alterations done using hook_uuid_entities_features_export_entity.
 Used with webform blocks to add uuid to block id on export then replace uuid with nid on import.
+
+
+PATCH: drupal-render-invalid-elements-array-fix.patch
+FILE: includes/common.inc
+NOTES: Fixes the following Drupal core PHP warnings:
+- Warning: Cannot use a scalar value as an array in drupal_render() (line 6110 of /home/dwyer/mra/public_html/includes/common.inc).
+- Warning: Illegal string offset '#printed' in drupal_render() (line 6110 of /home/dwyer/mre/public_html/includes/common.inc).
+- Warning: Illegal string offset '#children' in drupal_render() (line 6103 of /home/dwyer/mre/public_html/includes/common.inc).
+
+
+PATCH: drupal-Casting-null-array-1711256-7.patch
+FILE: includes/common.inc
+NOTES: Fixes the following Drupal core PHP warning:
+- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of /Users/robert/Sites/DYR/includes/common.inc).
