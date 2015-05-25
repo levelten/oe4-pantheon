@@ -172,12 +172,16 @@ function _enterprise_apps_prevent_app_enabled_hook_batch($value = null, &$contex
 }
 
 function enterprise_apps_module_files_exist($module) {
+  $filename = drupal_get_filename('module', $module);
+  if ($filename) {
+    return $filename;
+  }
   $query = db_select('system', 's')
     ->fields('s')
     ->condition('name', $module);
   $data = $query->execute()->fetchObject();
   if (!empty($data->filename)) {
-    return $data;
+    return $data->filename;
   }
   return FALSE;
 }
