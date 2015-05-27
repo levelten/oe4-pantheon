@@ -6531,7 +6531,7 @@ function element_children(&$elements, $sort = FALSE) {
   // Filter out properties from the element, leaving only children.
   $children = array();
   $sortable = FALSE;
-  foreach ($elements as $key => $value) {
+  foreach ((array) $elements as $key => $value) {
     if ($key === '' || $key[0] !== '#') {
       $children[$key] = $value;
       if (is_array($value) && isset($value['#weight'])) {
