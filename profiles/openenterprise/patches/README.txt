@@ -5,20 +5,20 @@ Each patch used in the profile should be placed under profiles/openenterprise/pa
 They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
+PATCH: bean_uuid_fix_import_export.patch
+MODULE: bean > bean_uuid
+Fixes issue with breaking Deploy import/export b/c of missing bean entity info data.
+
+
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
 LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
 in current version of CKeditor.
 
 
-PATCH: bean_uuid_fix_import_export.patch
-MODULE: bean > bean_uuid
-Fixes issue with breaking Deploy import/export b/c of missing bean entity info data.
-
-
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 MODULE: deploy
-issue: https://www.drupal.org/node/2054397
+REF: https://www.drupal.org/node/2054397
 copy to: /profiles/openenterprise/modules/contrib/deploy
 
 Adds checkbox to export a file via deploy/uuid
@@ -42,6 +42,21 @@ If patch fails due to expected dev/null on line 16, change the line returns to U
 Adds alter hooks to strongarm variables on import and export.
 
 
+PATCH: token-current_page_object_token-919760-9.patch
+MODULE: token
+REF: drupal.org/node/919760
+copy to: /profiles/openenterprise/modules/contrib/token
+
+Enables token pattern to get node from current page [current-page:node:nid]. Used in brand network disto.
+
+
+PATCH: webform_tag_get_queries.patch
+MODULE: webform
+REF: drupal.org/node/2022901
+copy to: /profiles/openenterprise/modules/webform
+Enables tagging of queries in webform_get_submissions(). Used in brand network disto to personalize webforms emails.
+
+
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
 MODULE: uuid
 copy to: /profiles/openenterprise/modules/contrib/uuid
@@ -52,7 +67,7 @@ Used with webform blocks to add uuid to block id on export then replace uuid wit
 
 
 PATCH: drupal-render-invalid-elements-array-fix.patch
-FILE: includes/common.inc
+CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warnings:
 - Warning: Cannot use a scalar value as an array in drupal_render() (line 6110 of /home/dwyer/mra/public_html/includes/common.inc).
 - Warning: Illegal string offset '#printed' in drupal_render() (line 6110 of /home/dwyer/mre/public_html/includes/common.inc).
@@ -60,6 +75,6 @@ NOTES: Fixes the following Drupal core PHP warnings:
 
 
 PATCH: drupal-Casting-null-array-1711256-7.patch
-FILE: includes/common.inc
+CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warning:
 - Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of /Users/robert/Sites/DYR/includes/common.inc).
