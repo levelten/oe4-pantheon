@@ -898,7 +898,7 @@ function _enterprise_bootstrap_menu_wrapper($variables) {
         break;
 
       case 'enterprise':
-        return '<div class="mega-content"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
+        return '<div class="mega-content">' . $variables['tree'] . '</div>';
         break;
 
       case 'yamm':
