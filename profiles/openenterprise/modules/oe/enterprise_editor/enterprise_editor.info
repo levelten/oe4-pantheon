@@ -4,6 +4,7 @@ core = 7.x
 package = Open Enterprise
 version = 7.x-2.0
 project = enterprise_editor
+configure = admin/config/content/enterprise_editor
 dependencies[] = ckeditor
 dependencies[] = ckeditor_blocks
 dependencies[] = ckeditor_media

@@ -3,6 +3,79 @@
  * @file
  */
 
+
+/**
+ * Implements hook_permission().
+ */
+function enterprise_editor_permission() {
+  return array(
+    'administer enterprise_editor settings' => array(
+      'title' => t('Administer Enterprise Editor module'),
+      'description' => t('Perform administration tasks for the Enterprise Editor module.'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function enterprise_editor_menu() {
+  $items = array();
+
+  $items['admin/config/content/enterprise_editor'] = array(
+    'title' => 'Enterprise Editor',
+    'description' => 'Administrative interface for the Enterprise Editor module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('enterprise_editor_admin'),
+    'access arguments' => array('administer enterprise_editor settings'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback/form for admin interface.
+ */
+function enterprise_editor_admin() {
+  $form = array();
+
+  $form['enterprise_editor_ckeditor_css'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('CKEditor CSS'),
+    '#description' => t("Various CSS files that are added to CKEditor via this module."),
+    '#collapsible' => FALSE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['enterprise_editor_ckeditor_css']['enterprise_editor_icon_css'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Icon API CSS'),
+    '#default_value' => variable_get('enterprise_editor_icon_css', 1),
+    '#description' => t("Icon API embedded icon styles into CKEditor."),
+    '#required' => FALSE,
+  );
+
+  $form['enterprise_editor_ckeditor_css']['enterprise_editor_bootstrap_css'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enterprise Bootstrap CSS'),
+    '#default_value' => variable_get('enterprise_editor_bootstrap_css', 1),
+    '#description' => t("Enterprise Bootstrap CSS. Can conflict with themes using the LESS module, disable if it's an issue."),
+    '#required' => FALSE,
+  );
+
+  $form['enterprise_editor_ckeditor_css']['enterprise_editor_ckeditor_css'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('CKEditor CSS'),
+    '#default_value' => variable_get('enterprise_editor_ckeditor_css', 1),
+    '#description' => t("Added styling for Bootstrap based themes in CKEditor."),
+    '#required' => FALSE,
+  );
+
+  return system_settings_form($form);
+}
+
 /**
  * Implements hook_ctools_plugin_api().
  */
@@ -51,13 +124,18 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   }
 
   // Add Icon API embedded icon styles into CKEditor.
-  foreach ($icon_bundles['bundles'] as $bundle) {
-    if (!empty($bundle['method'])) {
-      $settings['contentsCss'][] = $base_path.$bundle['path'].'/css/'.$bundle['file'].'.css?'.$query;
+  if (variable_get('enterprise_editor_icon_css', 1)) {
+    foreach ($icon_bundles['bundles'] as $bundle) {
+      if (!empty($bundle['method'])) {
+        $settings['contentsCss'][] = $base_path.$bundle['path'].'/css/'.$bundle['file'].'.css?'.$query;
+      }
     }
   }
+
   // Load Enterprise Bootstrap CSS
-  $settings['contentsCss'][] = $base_path.drupal_get_path('theme', 'enterprise_bootstrap').'/css/style.css?'.$query;
+  if (variable_get('enterprise_editor_bootstrap_css', 1)) {
+    $settings['contentsCss'][] = $base_path.drupal_get_path('theme', 'enterprise_bootstrap').'/css/style.css?'.$query;
+  }
 
   // filter out unavailable plugins
   foreach ($plugins AS $name => $flag) {
@@ -69,7 +147,9 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   // Change the ckeditor config path.
   $settings['customConfig'] = $base_path . $module_path . '/ckeditor/config.js?' . $query;
   // Add additional styling for Bootstrap based themes.
-  $settings['contentsCss'][] = $base_path . $module_path . '/ckeditor/ckeditor.css?' . $query;
+  if (variable_get('enterprise_editor_ckeditor_css', 1)) {
+    $settings['contentsCss'][] = $base_path . $module_path . '/ckeditor/ckeditor.css?' . $query;
+  }
 
   if (!empty($settings['stylesCombo_stylesSet'])) {
     unset($settings['stylesCombo_stylesSet']);
