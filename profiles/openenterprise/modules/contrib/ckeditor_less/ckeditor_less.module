@@ -16,8 +16,12 @@ function ckeditor_less_ckeditor_settings_alter(&$settings) {
     $stylesheets = _ckeditor_less_stylesheets();
 
     // Add CSS to CKEditor.
-    foreach ($stylesheets as $key => $value) {
-      $settings['contentsCss'][] = $stylesheets[$key];
+    if (is_array($stylesheets)) {
+      foreach ($stylesheets as $key => $value) {
+        $settings['contentsCss'][] = $stylesheets[$key];
+      }
+    } elseif (is_string($stylesheets)) {
+      $settings['contentsCss'][100] = '/'.$stylesheets;
     }
   }
 }
@@ -64,14 +68,16 @@ function _ckeditor_less_stylesheets() {
   }
 
   // Build CSS path.
-  $css_path = $less_path . '/' . $less_dir . '/' . $theme_path . '/less';
+  $css_path = $less_path . '/' . $less_dir;
+  return $css_path;
 
   // Get all CSS files from LESS folder.
-  $files = file_scan_directory($css_path, '/.*\.css$/');
-  $stylesheets = array();
-  foreach ($files as $file) {
-    $stylesheets[] = '/' . $file->uri;
-  }
+  // $files = file_scan_directory($css_path, '/.*\.css$/');
 
-  return $stylesheets;
+  // $stylesheets = array();
+  // foreach ($files as $file) {
+  //   $stylesheets[] = '/' . $file->uri;
+  // }
+
+  // return $stylesheets;
 }
