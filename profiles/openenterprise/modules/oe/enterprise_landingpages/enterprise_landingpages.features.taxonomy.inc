@@ -17,7 +17,6 @@ function enterprise_landingpages_taxonomy_default_vocabularies() {
       'module' => 'taxonomy',
       'weight' => 0,
       'entity_type' => 'taxonomy_vocabulary',
-      'slug' => '',
     ),
   );
 }
