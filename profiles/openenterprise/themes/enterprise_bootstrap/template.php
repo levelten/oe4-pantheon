@@ -107,7 +107,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
       break;
 
     default:
-      $variables['nav_mega_menu'] = 'enterprise-megamenu';
+      $variables['nav_mega_menu'] = 'default-bootstrap';
       break;
   }
 

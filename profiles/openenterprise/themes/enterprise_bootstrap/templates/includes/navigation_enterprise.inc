@@ -5,7 +5,7 @@
     <div class="<?php print $nav_inner; ?>">
       <div class="navbar-region <?php print $navbar_region_class; ?>">
         <!-- Navbar Logo Region -->
-        <div <?php print drupal_attributes($nav_logo_class); ?>>
+        <div id="navbar-logo" <?php print drupal_attributes($nav_logo_class); ?>>
           <?php if ($logo): ?>
           <a class="logo navbar-btn pull-left navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
             <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
@@ -26,7 +26,7 @@
         </div>
         <!-- Navbar Menu Region -->
         <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
-          <div <?php print drupal_attributes($nav_menu_class); ?>>
+          <div id="navbar-menu" <?php print drupal_attributes($nav_menu_class); ?>>
             <div class="container-fluid">
               <nav class="navbar-menu navbar-collapse collapse" role="navigation">
                 <?php if (!empty($primary_nav)): ?>
