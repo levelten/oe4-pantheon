@@ -24,8 +24,8 @@ function enterprise_press_views_default_views() {
   $handler = $view->new_display('page', 'Main page', 'page');
   $handler->display->display_options['path'] = 'press-releases';
   $handler->display->display_options['menu']['type'] = 'normal';
-  $handler->display->display_options['menu']['title'] = 'Press releases';
-  $handler->display->display_options['menu']['weight'] = '0';
+  $handler->display->display_options['menu']['title'] = 'Press Releases';
+  $handler->display->display_options['menu']['weight'] = 1;
   $handler->display->display_options['menu']['name'] = 'main-menu';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
