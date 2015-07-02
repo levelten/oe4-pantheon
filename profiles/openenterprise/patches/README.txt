@@ -59,8 +59,8 @@ NOTES: Fixes the following Drupal core PHP warnings:
 - Warning: Illegal string offset '#printed' in drupal_render() (line 6110 of /home/dwyer/mre/public_html/includes/common.inc).
 - Warning: Illegal string offset '#children' in drupal_render() (line 6103 of /home/dwyer/mre/public_html/includes/common.inc).
 
-
+----* Patch is current: 7/2/15 *----
 PATCH: drupal-Casting-null-array-1711256-7.patch
 CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warning:
-- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of /Users/robert/Sites/DYR/includes/common.inc).
+- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of includes/common.inc).
