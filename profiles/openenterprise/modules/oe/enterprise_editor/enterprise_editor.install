@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Implements hook_uninstall()
+ */
+function enterprise_editor_uninstall() {
+  $variables = array(
+    'enterprise_editor_icon_css',
+    'enterprise_editor_bootstrap_css',
+    'enterprise_editor_ckeditor_css',
+  );
+  foreach($variables as $variable) {
+    variable_del($variable);
+  }
+}

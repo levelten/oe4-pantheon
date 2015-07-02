@@ -5,4 +5,4 @@ package     = User interface
 
 ; Module dependencies
 dependencies[] = ckeditor (>=7.x-1.14)
-dependencies[] = less
+dependencies[] = less (>=7.x-4.0)

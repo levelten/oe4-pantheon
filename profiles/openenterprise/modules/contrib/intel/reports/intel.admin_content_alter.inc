@@ -9,6 +9,7 @@
 function intel_admin_content_alter_js($content_type = '') {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   intel_include_library_file('ga/class.ga_model.php');
   intel_include_library_file("reports/class.report_view.php");
   $filters = array();

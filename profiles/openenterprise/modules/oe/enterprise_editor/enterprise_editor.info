@@ -19,6 +19,7 @@ dependencies[] = picture
 dependencies[] = strongarm
 dependencies[] = token_filter
 dependencies[] = video_filter
+configure = admin/config/content/enterprise_editor
 features[ckeditor_profile][] = Basic
 features[ckeditor_profile][] = CKEditor Global Profile
 features[ckeditor_profile][] = Full

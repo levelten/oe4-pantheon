@@ -2,4 +2,4 @@ name = Block Gate
 description = Enables OR functionality between block visibility options
 core = 7.x
 dependencies[] = block
-
+dependencies[] = block_views

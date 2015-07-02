@@ -18,14 +18,6 @@ function enterprise_forum_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_tags',
-      'foreign keys' => array(
-        'tid' => array(
-          'columns' => array(
-            'tid' => 'tid',
-          ),
-          'table' => 'taxonomy_term_data',
-        ),
-      ),
       'indexes' => array(
         'tid' => array(
           0 => 'tid',
@@ -93,14 +85,6 @@ function enterprise_forum_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'taxonomy_forums',
-      'foreign keys' => array(
-        'tid' => array(
-          'columns' => array(
-            'tid' => 'tid',
-          ),
-          'table' => 'taxonomy_term_data',
-        ),
-      ),
       'indexes' => array(
         'tid' => array(
           0 => 'tid',

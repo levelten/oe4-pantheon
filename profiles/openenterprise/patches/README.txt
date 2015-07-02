@@ -5,32 +5,23 @@ Each patch used in the profile should be placed under profiles/openenterprise/pa
 They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
+----* Patch is current: 7/2/15 *----
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
 LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
 in current version of CKeditor.
 
 
-PATCH: bean_uuid_fix_import_export.patch
-MODULE: bean > bean_uuid
-Fixes issue with breaking Deploy import/export b/c of missing bean entity info data.
-
-
+----* Patch is current: 7/2/15 *----
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 MODULE: deploy
-issue: https://www.drupal.org/node/2054397
+REF: https://www.drupal.org/node/2054397
 copy to: /profiles/openenterprise/modules/contrib/deploy
 
 Adds checkbox to export a file via deploy/uuid
 
 
-PATCH: Fix-Too-Many-Tabs-Overlaping-Buttons.patch
-MODULE: rubik
-Issue in Rubik of too many tabs will obscure buttons.
-
-This fixes the styleing.
-
-
+----* Patch is current: 7/2/15 *----
 PATCH: strongarm-2076543-import-export-value-alter-hooks.patch
 MODULE: strongarm
 copy to: /profiles/openenterprise/modules/contrib/strongarm
@@ -42,6 +33,16 @@ If patch fails due to expected dev/null on line 16, change the line returns to U
 Adds alter hooks to strongarm variables on import and export.
 
 
+----* Patch is current: 7/2/15 *----
+PATCH: token-current_page_object_token-919760-9.patch
+MODULE: token
+REF: drupal.org/node/919760
+copy to: /profiles/openenterprise/modules/contrib/token
+
+Enables token pattern to get node from current page [current-page:node:nid]. Used in brand network disto.
+
+
+----* Patch is current: 7/2/15 *----
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
 MODULE: uuid
 copy to: /profiles/openenterprise/modules/contrib/uuid
@@ -50,16 +51,16 @@ Adds a hook to alter uuid entities (content) when the content is imported.
 This is used to reverse alterations done using hook_uuid_entities_features_export_entity.
 Used with webform blocks to add uuid to block id on export then replace uuid with nid on import.
 
-
+----* Patch is current: 7/2/15 *----
 PATCH: drupal-render-invalid-elements-array-fix.patch
-FILE: includes/common.inc
+CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warnings:
 - Warning: Cannot use a scalar value as an array in drupal_render() (line 6110 of /home/dwyer/mra/public_html/includes/common.inc).
 - Warning: Illegal string offset '#printed' in drupal_render() (line 6110 of /home/dwyer/mre/public_html/includes/common.inc).
 - Warning: Illegal string offset '#children' in drupal_render() (line 6103 of /home/dwyer/mre/public_html/includes/common.inc).
 
-
+----* Patch is current: 7/2/15 *----
 PATCH: drupal-Casting-null-array-1711256-7.patch
-FILE: includes/common.inc
+CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warning:
-- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of /Users/robert/Sites/DYR/includes/common.inc).
+- Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of includes/common.inc).
