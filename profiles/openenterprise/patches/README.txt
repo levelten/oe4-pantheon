@@ -42,6 +42,7 @@ copy to: /profiles/openenterprise/modules/contrib/token
 Enables token pattern to get node from current page [current-page:node:nid]. Used in brand network disto.
 
 
+----* Patch is current: 7/2/15 *----
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
 MODULE: uuid
 copy to: /profiles/openenterprise/modules/contrib/uuid
