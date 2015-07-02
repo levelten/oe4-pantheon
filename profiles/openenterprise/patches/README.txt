@@ -12,6 +12,7 @@ Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that t
 in current version of CKeditor.
 
 
+----* Patch currently applied 7/2/15 *----
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 MODULE: deploy
 REF: https://www.drupal.org/node/2054397
