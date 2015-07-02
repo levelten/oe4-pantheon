@@ -21,13 +21,6 @@ copy to: /profiles/openenterprise/modules/contrib/deploy
 Adds checkbox to export a file via deploy/uuid
 
 
-PATCH: Fix-Too-Many-Tabs-Overlaping-Buttons.patch
-MODULE: rubik
-Issue in Rubik of too many tabs will obscure buttons.
-
-This fixes the styleing.
-
-
 PATCH: strongarm-2076543-import-export-value-alter-hooks.patch
 MODULE: strongarm
 copy to: /profiles/openenterprise/modules/contrib/strongarm
