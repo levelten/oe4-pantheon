@@ -697,7 +697,7 @@ function token_tokens($type, $tokens, array $data = array(), array $options = ar
             $item = menu_get_item();
 
             // Find the correct index from the load function.
-            $index = array_search($entity_type . '_load', $item['load_functions']);
+            $index = $item['load_functions'] ? array_search($entity_type . '_load', $item['load_functions']) : FALSE;
             if ($index !== FALSE && $item['access']) {
               // That's where the object resides. Not always in arg(1).
               $object = $item['map'][$index];

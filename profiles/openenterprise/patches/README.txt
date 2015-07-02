@@ -33,6 +33,7 @@ If patch fails due to expected dev/null on line 16, change the line returns to U
 Adds alter hooks to strongarm variables on import and export.
 
 
+----* Patch is current: 7/2/15 *----
 PATCH: token-current_page_object_token-919760-9.patch
 MODULE: token
 REF: drupal.org/node/919760

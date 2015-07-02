@@ -1,5 +1,5 @@
 diff --git a/token.tokens.inc b/token.tokens.inc
-index e0c0b5e..cf5b8cb 100644
+index e0c0b5e..88619cc 100644
 --- a/token.tokens.inc
 +++ b/token.tokens.inc
 @@ -270,6 +270,13 @@ function token_token_info() {
@@ -30,7 +30,7 @@ index e0c0b5e..cf5b8cb 100644
 +            $item = menu_get_item();
 +
 +            // Find the correct index from the load function.
-+            $index = array_search($entity_type . '_load', $item['load_functions']);
++            $index = $item['load_functions'] ? array_search($entity_type . '_load', $item['load_functions']) : FALSE;
 +            if ($index !== FALSE && $item['access']) {
 +              // That's where the object resides. Not always in arg(1).
 +              $object = $item['map'][$index];
