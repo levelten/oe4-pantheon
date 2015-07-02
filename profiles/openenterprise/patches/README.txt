@@ -5,11 +5,6 @@ Each patch used in the profile should be placed under profiles/openenterprise/pa
 They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
-PATCH: bean_uuid_fix_import_export.patch
-MODULE: bean > bean_uuid
-Fixes issue with breaking Deploy import/export b/c of missing bean entity info data.
-
-
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
 LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
