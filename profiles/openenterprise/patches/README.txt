@@ -42,13 +42,6 @@ copy to: /profiles/openenterprise/modules/contrib/token
 Enables token pattern to get node from current page [current-page:node:nid]. Used in brand network disto.
 
 
-PATCH: webform_tag_get_queries.patch
-MODULE: webform
-REF: drupal.org/node/2022901
-copy to: /profiles/openenterprise/modules/webform
-Enables tagging of queries in webform_get_submissions(). Used in brand network disto to personalize webforms emails.
-
-
 PATCH: uuid-add-features-import-alter-hook-2406051.patch
 MODULE: uuid
 copy to: /profiles/openenterprise/modules/contrib/uuid
