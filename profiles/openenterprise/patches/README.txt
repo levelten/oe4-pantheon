@@ -5,14 +5,14 @@ Each patch used in the profile should be placed under profiles/openenterprise/pa
 They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
-----* Patch currently applied 7/2/15 *----
+----* Patch is current: 7/2/15 *----
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
 LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
 in current version of CKeditor.
 
 
-----* Patch currently applied 7/2/15 *----
+----* Patch is current: 7/2/15 *----
 PATCH: deploy-managed-ui-file-support-2054397-2_0.patch
 MODULE: deploy
 REF: https://www.drupal.org/node/2054397
@@ -21,6 +21,7 @@ copy to: /profiles/openenterprise/modules/contrib/deploy
 Adds checkbox to export a file via deploy/uuid
 
 
+----* Patch is current: 7/2/15 *----
 PATCH: strongarm-2076543-import-export-value-alter-hooks.patch
 MODULE: strongarm
 copy to: /profiles/openenterprise/modules/contrib/strongarm
