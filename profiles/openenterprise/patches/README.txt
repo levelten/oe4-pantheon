@@ -51,7 +51,7 @@ Adds a hook to alter uuid entities (content) when the content is imported.
 This is used to reverse alterations done using hook_uuid_entities_features_export_entity.
 Used with webform blocks to add uuid to block id on export then replace uuid with nid on import.
 
-
+----* Patch is current: 7/2/15 *----
 PATCH: drupal-render-invalid-elements-array-fix.patch
 CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warnings:

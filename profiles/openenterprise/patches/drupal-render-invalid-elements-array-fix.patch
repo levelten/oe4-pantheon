@@ -1,6 +1,17 @@
---- common.orig.inc 2015-05-11 09:46:30.000000000 -0400
-+++ common.inc  2015-05-11 09:44:34.000000000 -0400
-@@ -6001,7 +6001,7 @@
+From f1a17213cbbe7dedc6fb716f024e4c03ab93e3ec Mon Sep 17 00:00:00 2001
+From: Kyle Taylor <kylet@getlevelten.com>
+Date: Thu, 2 Jul 2015 16:04:15 -0500
+Subject: [PATCH] patch drupal core
+
+---
+ includes/common.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/includes/common.inc b/includes/common.inc
+index 5f053f7..6f23f4d 100755
+--- a/includes/common.inc
++++ b/includes/common.inc
+@@ -5945,7 +5945,7 @@ function drupal_render_page($page) {
   */
  function drupal_render(&$elements) {
    // Early-return nothing if user does not have access.
@@ -8,4 +19,7 @@
 +  if (empty($elements) || !is_array($elements) || (isset($elements['#access']) && !$elements['#access'])) {
      return '';
    }
+ 
+-- 
+2.3.2 (Apple Git-55)
 
