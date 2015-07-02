@@ -5,6 +5,7 @@ Each patch used in the profile should be placed under profiles/openenterprise/pa
 They can be applied manually by coping each patch to the location listed in their descrption or using Drush make.
 
 
+----* Patch currently applied 7/2/15 *----
 PATCH: Allow-meta-support-in-CKeditor-4.3.1.patch
 LIBRARY: ckeditor
 Enables meta tag schema markup support in 4.3.1 version of CKeditor. Note that this is fixed
