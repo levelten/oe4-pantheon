@@ -56,10 +56,10 @@ function intel_webform_page_alter(&$page) {
  * @param $settings
  */
 function intel_webform_intel_page_settings_js_alter(&$settings) {
-  if (is_array($settings['intel']['track_forms'])) {
+  if (is_array($settings['intel']['config']['trackForms'])) {
     $forms = intel_webform_track_forms();
     foreach ($forms AS $form) {
-      $settings['intel']['track_forms'][] = $form;
+      $settings['intel']['config']['trackForms'][] = $form;
     }
     //dsm($forms);
     //if (!intel_webform_disable_track_forms() ) {
@@ -335,6 +335,16 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
 
     $track['form_title'] = $wf_node->title;
     $track['submission_path'] = $submission->details_url;
+    $track['system_path'] = "node/{$wfsubmission->nid}";
+    $track['oa'] = array(
+      'rc' => 'form',
+      'rl' => $track['system_path'],
+      'rid' => $submission->fid,
+      'rt' => 'node',
+      'rt2' => 'webform',
+      //'fsid' => $submission->fsid,
+    );
+
     $wf_node = node_load($wfsubmission->nid);
     if (isset($wf_node->webform['intel'])) {
       $form_settings = $wf_node->webform['intel'];
@@ -350,8 +360,8 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
       }
     }
     // if component exists, set submit context
-    if (($data_cid >= 0) && isset($wfsubmission->data[$data_cid][0])) {
-      $submit_context = json_decode($wfsubmission->data[$data_cid][0]);
+    if (($data_cid >= 0) && isset($wfsubmission->data[$data_cid]['value'][0])) {
+      $submit_context = json_decode($wfsubmission->data[$data_cid]['value'][0], true);
     }
   }
 }

@@ -64,5 +64,80 @@ function alchemy_schema() {
       'path' => array(array('path', 18)),
     ),
   );
+  /* functionality centralized to intel
+  $schema['alchemy_term'] = array(
+    'description' => ('Stores top terms for pages'),
+    'fields' => array(
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Entity type',
+      ), //entity_type
+      'entity_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the analysis.',
+      ), //entity_id
+      'path' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'The system of ',
+      ), //entity_type
+      'alias' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Entity type',
+      ), //entity_type
+      'analysis' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of term, e.g. keyword, entity, concept',
+      ), //analyzer
+      'type' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of entity, e.g city, company, ect',
+      ), //analyzer
+      'term' => array(
+        'type' => 'varchar',
+        'length' => '128',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'the keyword phrase',
+      ), //url
+      'relevance' => array(
+        'type' => 'float',
+        'description' => 'relevance score',
+      ), //score
+    ),
+    'indexes' => array(
+      'entity' => array('entity_type', 'entity_id'),
+      'path' => array(array('path', 18)),
+      'alias' => array(array('alias', 18)),
+    ),
+  );
+  */
   return $schema;
 }
+
+/**
+ * Adds alchemy_term table
+ */
+/*
+function alchemy_update_7001() {
+  $schema = alchemy_schema();
+  // create visitor identifier table
+  db_create_table('alchemy_term', $schema['alchemy_term']);
+}
+*/

@@ -52,6 +52,10 @@ function contentoptimizer_contentanalysis_analyzer_info() {
   return $analyzers;  
 }
 
+/**
+ * Implements hook_insight_analyzer_info();
+ * @return mixed
+ */
 function contentoptimizer_insight_analyzer_info() {
   
   $analyzers['seo'] = array(
@@ -473,7 +477,6 @@ function contentoptimizer_get_keyword($aid) {
  *   SEO analysis
  */
 function contentoptimizer_analyzer($context, $analysis, $params) {
-//dsm($context);
   $settings = $context['analyzers']['seo']['settings'];
   $a = contentoptimizer_contentanalysis_analyzer_info();
   $form = contentoptimizer_settings_form_elements($settings, $a['seo']);
@@ -926,6 +929,38 @@ function contentoptimizer_analyzer($context, $analysis, $params) {
 	    }
     }
   }
+  // add stats data for insight reports
+  /*
+  $analysis['#data'] = array(
+    'stats' => $stats,
+  );
+  */
+
+  // save data for intel stats
+
+  if (!empty($context['nid']) && module_exists('intel')) {
+    $intel_attr = (object)array(
+      'entity_type' => 'node',
+      'entity_id' => $context['nid'],
+    );
+    $intel_attr->attr_key = 'cw';
+    $intel_attr->value = $stats['body']['word_count'];
+    intel_entity_attr_save($intel_attr);
+
+    $intel_attr->attr_key = 'ctw';
+    $intel_attr->value = $stats['page_title']['word_count'];
+    intel_entity_attr_save($intel_attr);
+
+    $intel_attr->attr_key = 'ctc';
+    $intel_attr->value = $stats['page_title']['char_count'];
+    intel_entity_attr_save($intel_attr);
+  }
+  /* functionality centralized to intel
+  contentanalysis_stat_save($context['aid'], 'seo', 'body_word_count', $stats['body']['word_count']);
+  contentanalysis_stat_save($context['aid'], 'seo', 'title_word_count', $stats['page_title']['word_count']);
+  contentanalysis_stat_save($context['aid'], 'seo', 'title_char_count', $stats['page_title']['char_count']);
+  */
+
   return $analysis;
 }
 
@@ -1009,3 +1044,194 @@ function contentoptimizer_format_stats($stats) {
   
   return $ret;
 }
+
+/**
+ * Implements hook_intel_page_attribute_info()
+ * @return array
+ */
+function contentoptimizer_intel_page_attribute_info() {
+  $attributes = array();
+  $attributes['cw'] = array(
+    'title' => t('Word count'),
+    'title_plural' => t('Word counts'),
+    'description' => t('Number of words in the node body.'),
+    'type' => 'scalar',
+    'options_description' => t('Auto generated from readability module.'),
+    'options info callback' => 'contentoptimizer_page_attribute_cw_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+    'index_grouping' => array(
+      0,
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      1000,
+      1200,
+      1400,
+      1600,
+      1800,
+      2000,
+    ),
+  );
+  $attributes['ctw'] = array(
+    'title' => t('Title word count'),
+    'title_plural' => t('Title word counts'),
+    'description' => t('Number of words in the meta page title.'),
+    'type' => 'scalar',
+    'options_description' => t('Auto generated from readability module.'),
+    'options info callback' => 'contentoptimizer_page_attribute_ctw_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+  );
+  $attributes['ctc'] = array(
+    'title' => t('Title character count'),
+    'title_plural' => t('Title character counts'),
+    'description' => t('Number of characters in the meta page title.'),
+    'type' => 'scalar',
+    'options_description' => t('Auto generated from readability module.'),
+    'options info callback' => 'contentoptimizer_page_attribute_ctc_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+    'index_grouping' => array(
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      120,
+      140,
+      160,
+      180,
+      200,
+    ),
+  );
+
+  return $attributes;
+}
+
+function contentoptimizer_page_attribute_cw_option_info($option_id, $data_options) {
+
+  $group = explode('-', $option_id);
+  if (count($group) == 1) {
+    $attr_info = intel_get_page_attribute_info('cw');
+    intel_include_library_file('ga/class.ga_model.php');
+    $option_id = \LevelTen\Intel\GAModel::getIndexGroup($attr_info, $option_id);
+    $group = explode('-', $option_id);
+  }
+
+  $data = array(
+    'title' => $option_id . ' ' . t('words'),
+    'filter_value' => $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    if (count($group) == 2) {
+      $data['page_count'] = intel_entity_attr_entity_count('cw', (int)$group[0], (int)$group[1]);
+    }
+    else {
+      $data['page_count'] = intel_entity_attr_entity_count('cw', (int)$group[0]);
+    }
+  }
+  return $data;
+}
+
+function contentoptimizer_page_attribute_ctw_option_info($option_id, $data_options) {
+
+  $group = explode('-', $option_id);
+
+  $data = array(
+    'title' => $option_id . ' ' . t('words'),
+  );
+
+  if (!empty($data_options['page_count'])) {
+    if (count($group) == 2) {
+      $data['page_count'] = intel_entity_attr_entity_count('ctw', (int)$group[0], (int)$group[1]);
+    }
+    else {
+      $data['page_count'] = intel_entity_attr_entity_count('ctw', (int)$group[0]);
+    }
+  }
+  return $data;
+}
+
+function contentoptimizer_page_attribute_ctc_option_info($option_id, $data_options) {
+
+  $group = explode('-', $option_id);
+  if (count($group) == 1) {
+    $attr_info = intel_get_page_attribute_info('ctc');
+    intel_include_library_file('ga/class.ga_model.php');
+    $option_id = \LevelTen\Intel\GAModel::getIndexGroup($attr_info, $option_id);
+    $group = explode('-', $option_id);
+  }
+
+  $data = array(
+    'title' => $option_id . ' ' . t('chars'),
+    'filter_value' => $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    if (count($group) == 2) {
+      $data['page_count'] = intel_entity_attr_entity_count('ctc', (int)$group[0], (int)$group[1]);
+    }
+    else {
+      $data['page_count'] = intel_entity_attr_entity_count('ctc', (int)$group[0]);
+    }
+  }
+  return $data;
+}
+
+/**
+ * Implements hook_intel_entity_intel_attributes_alter()
+ * @param $attrs
+ * @param null $entity
+ * @param null $entity_type
+ */
+//function contentoptimizer_intel_entity_intel_attributes_alter(&$attrs, $entity = null, $entity_type = null) {
+//  if ($entity_type != 'node') {
+//    return;
+//  }
+//  $context = array(
+//    'nid' => $entity->nid,
+//  );
+//  $aid = contentanalysis_get_aid($context);
+//
+//  if (empty($aid)) {
+//    return;
+//  }
+//
+//  $a = array(
+//    'body_word_count' => 'cw',
+//    'title_word_count' => 'ctw',
+//    'title_char_count' => 'ctc',
+//  );
+//
+//  foreach ($a AS $stat_name => $attr_key) {
+//    if ($value = contentanalysis_stat_load($aid, 'seo', $stat_name)) {
+//      $attrs['page'][$attr_key] = $value;
+//    }
+//  }
+//}

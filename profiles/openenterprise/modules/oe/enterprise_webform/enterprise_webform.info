@@ -20,6 +20,7 @@ features[variable][] = comment_form_location_webform
 features[variable][] = comment_preview_webform
 features[variable][] = comment_subject_field_webform
 features[variable][] = comment_webform
+features[variable][] = intel_entity_settings_node__webform
 features[variable][] = menu_options_webform
 features[variable][] = menu_parent_webform
 features[variable][] = node_options_webform

@@ -24,7 +24,7 @@ class TableChart extends Chart {
   }
   
   function getDefaultOptions($type = '') {
-    if ($type == 'entrances_pageview_value_indicators') {
+    if ($type == 'entrances_pageview_value_indicators' || $type == 'entrances_pageview_value_indicators_deltas') {
       $options = array(
         'allowHtml' => 1,
         'pageSize' => $this->rowCount,
@@ -32,6 +32,9 @@ class TableChart extends Chart {
         'sortAscending' => 0,
         'showRowNumber' => 1,
       );
+      if ($type == 'entrances_pageview_value_indicators_deltas') {
+        $options['sortColumn'] = 6;
+      }
     }
     else {
       $options = array(
@@ -60,7 +63,28 @@ class TableChart extends Chart {
   
   function getDefaultColumns($type = '') {
     $header = array();
-    if ($type == 'entrances_pageview_value_indicators') {
+
+    if ($type == 'events_value') {
+      $header[] = array(
+        'label' => 'Categories',
+        'type' => 'string',
+      );
+      $header[] = array(
+        'label' => 'Events',
+        'type' => 'number',
+        'pattern' => '#,###',
+      );
+      $header[] = array(
+        'label' => 'Value',
+        'type' => 'number',
+        'pattern' => '#,###.##',
+      );
+      $header[] = array(
+        'label' => 'Reports',
+        'type' => 'string',
+      );
+    }
+    else if (strpos($type, 'value_indicators') !== FALSE) {
       $header[] = array(
         'label' => 'Items',
         'type' => 'string',
@@ -75,6 +99,20 @@ class TableChart extends Chart {
         'type' => 'number',
         'pattern' => '#,###',
       );
+      if (strpos($type, 'vevents') !== FALSE) {
+        $header[] = array(
+          'label' => 'V.&nbsp;Evts',
+          'type' => 'number',
+          'pattern' => '#,###',
+        );
+      }
+      if (strpos($type, 'goals') !== FALSE) {
+        $header[] = array(
+          'label' => 'Goals',
+          'type' => 'number',
+          'pattern' => '#,###',
+        );
+      }
       $header[] = array(
         'label' => 'Value',
         'type' => 'number',
@@ -119,16 +157,29 @@ class TableChart extends Chart {
     $this->curRowCount = (count($this->settings['rows']));
   }
   
-  function addRowItem($value, $format = '') {
-    $this->workingRow[] = $this->formatRowItem($value, $format);
+  function addRowItem($value, $value_formatted = '', $format = '') {
+    $this->workingRow[] = $this->formatRowItem($value, $value_formatted, $format);
   }
   
-  function formatRowItem($value, $format = '') {
+  function formatRowItem($value, $value_formatted = '', $format = '') {
+    if (substr($format, 0, 1) == '+') {
+      $value_formatted .= ($value >= 0) ? '+' : '';
+      $format = substr($format, 1);
+    }
+    if ($format == '#,###') {
+      $value_formatted .= number_format($value);
+    }
+    else if ($format == '#,###.##') {
+      $value_formatted .= number_format($value, 2);
+    }
+    else if ($format == '#,###.#') {
+      $value_formatted .= number_format($value, 1);
+    }
     $item = array(
       'v' => $value,
     );
-    if ($format) {
-      $item['f'] = $format;
+    if ($value_formatted) {
+      $item['f'] = $value_formatted;
     }
     return $item;    
   }

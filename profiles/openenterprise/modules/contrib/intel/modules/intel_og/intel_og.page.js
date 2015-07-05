@@ -1,25 +1,22 @@
 var _l10iq = _l10iq || [];
 
-function l10iOGTracker() {
-  this.init = function init() {
+function L10iDrupalOg(_ioq, config) {
     _l10iq.push(['_log', "l10iOG.init()"]);
-    _l10iq.registerCallback('saveFormSubmitAlter', this.saveFormSubmitAlterCallback, this);
-  }
+    _l10iq.push(['addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this]);
+
 
   // attach gid to form submissions
-  this.saveFormSubmitAlterCallback = function saveFormSubmitCallback(json_params, json_data, $obj, event) {
-    var og =  _l10iq.push(['_getVar', 'page', 'analytics', 'og']);
+  this.formSubmitAlterCallback = function (formSubmit, data, $obj, event) {
+    var og =  this.getGroup();
 
-    if (og != undefined && (og.length > 0)) {
-        json_data['value']['og'] = og;
+    if (og) {
+        formSubmit['og'] = og;
     }
-  }
+  };
+};
 
-}
+L10iDrupalOg.prototype.getGroup = function () {
+    return _l10iq.push(['get', 'pa.og']);
+};
 
-var l10iOG = new l10iOGTracker();
-jQuery(document).ready(function() {
-  _l10iq.push(['_onReady', l10iOG.init, l10iOG]);
-});
-
-
+_l10iq.push(['providePlugin', 'drupalOg', L10iDrupalOg, {}]);

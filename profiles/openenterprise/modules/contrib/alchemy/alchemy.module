@@ -11,7 +11,8 @@ define('ALCHEMY_DEBUG', FALSE); // set to true for debug mode, false for product
 
 
 /**
- * Implements hook_menu().().
+ * Implements hook_menu().
+().
  */
 function alchemy_menu() {
   $items = array();
@@ -363,3 +364,275 @@ function alchemy_get_types($defaults = FALSE) {
   }
   return $types;
 }
+
+/* this functionality was centralized to intel
+function alchemy_term_save($term) {
+  $page_specified = 0;
+  $key = array(
+    'analysis' => $term->analysis,
+    'term' => $term->term,
+    'type' => !empty($term->type) ? $term->type : '',
+  );
+  $fields = array(
+    'relevance' => $term->relevance
+  );
+  if (!empty($term->entity_id)) {
+    $key['entity_id'] = $term->entity_id;
+    $key['entity_type'] = $term->entity_type;
+    $page_specified = 1;
+  }
+  if (!empty($term->path)) {
+    if ($page_specified) {
+      $fields['path'] = $term->path;
+    }
+    else {
+      $key['path'] = $term->path;
+      $page_specified = 1;
+    }
+  }
+  if (!empty($term->alias)) {
+    if ($page_specified) {
+      $fields['alias'] = $term->alias;
+    }
+    else {
+      $key['alias'] = $term->alias;
+      $page_specified = 1;
+    }
+  }
+  if ($page_specified) {
+    $query = db_merge('alchemy_term')
+      ->key($key)
+      ->fields($fields);
+    $query->execute();
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function alchemy_term_load_by_params($entity_type = null, $entity_id = null, $path = null, $alias = null, $analysis = null, $term = null, $type = null) {
+  $query = db_select('alchemy_term', 't')
+    ->fields('t');
+  if (isset($entity_type) && isset($entity_id)) {
+    $query->condition('entity_id', $entity_id);
+    $query->condition('entity_type', $entity_type);
+  }
+  if (isset($path)) {
+    $query->condition('path', $path);
+  }
+  if (isset($alias)) {
+    $query->condition('alias', $alias);
+  }
+  if (isset($analysis)) {
+    $query->condition('analysis', $analysis);
+  }
+  if (isset($term)) {
+    $query->condition('term', $term);
+  }
+  if (isset($type)) {
+    $query->condition('type', $type);
+  }
+
+  $result = $query->execute();
+  $terms = array();
+  while($terms[] = $result->fetchObject());
+  // remove FALSE as last push
+  array_pop($terms);
+  return $terms;
+}
+
+function alchemy_term_analysis_count_load($analysis = null, $term = null, $value0 = null, $value1 = null, $op0 = null, $op1 = null) {
+  $query = db_select('alchemy_term', 't')
+    ->fields('t', array('relevance'));
+
+  if (isset($analysis)) {
+    $query->condition('analysis', $analysis);
+  }
+  if (isset($term)) {
+    $query->condition('term', $term);
+  }
+  if (isset($value0)) {
+    if (!isset($value1)) {
+      if (!isset($op0)) {
+        $op0 = '=';
+      }
+      $query->condition('relevance', $value0, $op0);
+    }
+    else {
+      if (!isset($op0)) {
+        $op0 = '>=';
+      }
+      if (!isset($op1)) {
+        $op1 = '<';
+      }
+      $query->condition('relevance', $value0, $op0);
+      $query->condition('relevance', $value1, $op1);
+    }
+  }
+
+
+  return $query->execute()->rowCount();
+}
+
+function alchemy_term_delete_by_params($entity_type = null, $entity_id = null, $path = null, $alias = null, $analysis = null, $term = null, $type = '') {
+  $query = db_delete('alchemy_term');
+  if (isset($entity_type) && isset($entity_id)) {
+    $query->condition('entity_id', $entity_id);
+    $query->condition('entity_type', $entity_type);
+  }
+  if (isset($path)) {
+    $query->condition('path', $path);
+  }
+  if (isset($alias)) {
+    $query->condition('alias', $alias);
+  }
+  if (isset($analysis)) {
+    $query->condition('analysis', $analysis);
+  }
+  if (isset($term)) {
+    $query->condition('term', $term);
+  }
+  if (isset($type)) {
+    $query->condition('type', $type);
+  }
+
+  $result = $query->execute();
+}
+*/
+
+/**
+ * Implements hook_intel_page_attribute_info()
+ * @return array
+ */
+function alchemy_intel_page_attribute_info() {
+  $attributes = array();
+  $attributes['cka'] = array(
+    'title' => t('Content keywords'),
+    //'title_plural' => t('Content keywords'),
+    'description' => t('Keywords extracted from content via Alchemy'),
+    'type' => 'list',
+    'encode' => 1,
+    'options_description' => t('Auto generated via Alchemy API.'),
+    'options info callback' => 'alchemy_page_attribute_cka_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+  );
+  $attributes['cca'] = array(
+    'title' => t('Content concepts'),
+    //'title_plural' => t('Title word counts'),
+    'description' => t('Concepts extracted from content via Alchemy.'),
+    'type' => 'list',
+    'encode' => 1,
+    'options_description' => t('Auto generated via Alchemy API.'),
+    'options info callback' => 'alchemy_page_attribute_cca_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+  );
+  $attributes['cea'] = array(
+    'title' => t('Content entities'),
+    //'title_plural' => t('Title character counts'),
+    'description' => t('Entities extracted from content via Alchemy'),
+    'type' => 'list',
+    'encode' => 1,
+    'options_description' => t('Auto generated via Alchemy API.'),
+    'options info callback' => 'alchemy_page_attribute_cea_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+  );
+
+  return $attributes;
+}
+
+function alchemy_page_attribute_cka_option_info($option_id, $data_options) {
+  $id = intel_index_decode($option_id);
+  $vs = intel_value_str_load($id);
+  $data = array(
+    'title' => isset($vs->value_str) ? $vs->value_str : $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    $data['page_count'] = intel_entity_attr_entity_count('cka', $id, null, null, null, 'vsid');
+  }
+  return $data;
+}
+
+function alchemy_page_attribute_cca_option_info($option_id, $data_options) {
+  $id = intel_index_decode($option_id);
+  $vs = intel_value_str_load($id);
+  $data = array(
+    'title' => isset($vs->value_str) ? $vs->value_str : $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    $data['page_count'] = intel_entity_attr_entity_count('cca', $id, null, null, null, 'vsid');
+  }
+  return $data;
+}
+
+function alchemy_page_attribute_cea_option_info($option_id, $data_options) {
+
+  $id = intel_index_decode($option_id);
+  $vs = intel_value_str_load($id);
+  $data = array(
+    'title' => isset($vs->value_str) ? $vs->value_str : $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    $data['page_count'] = intel_entity_attr_entity_count('cea', $id, null, null, null, 'vsid');
+  }
+  return $data;
+}
+
+/**
+ * Implements hook_intel_entity_intel_attributes_alter()
+ * @param $attrs
+ * @param null $entity
+ * @param null $entity_type
+ */
+
+//function alchemy_intel_entity_intel_attributes_alter(&$attrs, $entity = null, $entity_type = null) {
+//  if ($entity_type != 'node') {
+//    return;
+//  }
+//  $context = array(
+//    'nid' => $entity->nid,
+//  );
+//  $aid = contentanalysis_get_aid($context);
+//
+//  if (empty($aid)) {
+//    return;
+//  }
+//
+//  $a = array(
+//    'keyword' => 'cka',
+//    'concept' => 'cca',
+//    'entity' => 'cea',
+//  );
+//
+//  foreach ($a AS $analysis => $attr_key) {
+//    $terms = alchemy_term_load_by_params('contentanalysis', $aid, null, null, $analysis);
+//
+//    if (!empty($terms)) {
+//      foreach ($terms AS $term) {
+//        $k = (($analysis == 'entity') ? $term->type . ':' : '') . $term->term;
+//        $attrs['page'][$attr_key][$k] = '';
+//      }
+//    }
+//    /*
+//    if ($value = contentanalysis_stat_load($aid, 'seo', $stat_name)) {
+//      $attrs['page'][$attr_key] = $value;
+//    }
+//    */
+//  }
+//}

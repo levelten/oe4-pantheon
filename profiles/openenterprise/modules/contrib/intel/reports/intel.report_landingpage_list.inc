@@ -78,7 +78,7 @@ function intel_landingpage_list_report($vars) {
     'max_results' => 1000,
   );  
   
-  $ret = google_analytics_api_report_data($request, $cache_options);
+  $ret = intel_ga_api_data($request, $cache_options);
 //dsm($request); dsm($ret);
   foreach ($ret->results AS $row) {
     $tdata[$row['pagePath']] = $row['pageviews'];
@@ -89,7 +89,7 @@ function intel_landingpage_list_report($vars) {
   $request['sort_metric'] = '';
   $request['filters'] = 'ga:exitPagePath=~^/download/drupal-site-success(#.*)?$'; 
   
-  $ret = google_analytics_api_report_data($request, $cache_options);
+  $ret = intel_ga_api_data($request, $cache_options);
 //dsm($request); dsm($ret);
   foreach ($ret->results AS $row) {
     $tdata['(exits)'] = $row['exits'];

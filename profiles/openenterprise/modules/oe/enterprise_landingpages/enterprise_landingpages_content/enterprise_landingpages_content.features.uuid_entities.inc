@@ -287,7 +287,13 @@ function enterprise_landingpages_content_uuid_default_entities() {
     'ds_switch' => '',
     'entity_type' => 'node',
     'field_file' => array(),
-    'field_track_submission' => array(),
+    'field_track_submission' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'goal_tofu-conversion',
+        ),
+      ),
+    ),
     'field_track_submission_value' => array(),
     'language' => 'und',
     'last_comment_name' => NULL,
@@ -345,7 +351,13 @@ function enterprise_landingpages_content_uuid_default_entities() {
     'ds_switch' => '',
     'entity_type' => 'node',
     'field_file' => array(),
-    'field_track_submission' => array(),
+    'field_track_submission' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'goal_tofu-conversion',
+        ),
+      ),
+    ),
     'field_track_submission_value' => array(),
     'language' => 'und',
     'last_comment_name' => NULL,
@@ -402,7 +414,13 @@ function enterprise_landingpages_content_uuid_default_entities() {
     'ds_switch' => '',
     'entity_type' => 'node',
     'field_file' => array(),
-    'field_track_submission' => array(),
+    'field_track_submission' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'goal_mofu-conversion',
+        ),
+      ),
+    ),
     'field_track_submission_value' => array(),
     'language' => 'und',
     'last_comment_name' => NULL,
@@ -522,7 +540,7 @@ function enterprise_landingpages_content_uuid_default_entities() {
             'conditional_component' => '',
             'conditional_operator' => '=',
             'conditional_values' => '',
-			'intel_field_map' => 'name:first',
+			      'intel_field_map' => 'name:first',
           ),
           'mandatory' => 1,
           'weight' => 0,
@@ -550,7 +568,7 @@ function enterprise_landingpages_content_uuid_default_entities() {
             'conditional_component' => '',
             'conditional_operator' => '=',
             'conditional_values' => '',
-			'intel_field_map' => 'name:last',
+			      'intel_field_map' => 'name:last',
           ),
           'mandatory' => 1,
           'weight' => 1,
@@ -575,7 +593,7 @@ function enterprise_landingpages_content_uuid_default_entities() {
             'conditional_component' => '',
             'conditional_operator' => '=',
             'conditional_values' => '',
-			'intel_field_map' => 'email:email',
+			      'intel_field_map' => 'email:email',
           ),
           'mandatory' => 1,
           'weight' => 2,

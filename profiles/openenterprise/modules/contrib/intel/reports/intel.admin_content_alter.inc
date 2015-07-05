@@ -9,7 +9,6 @@
 function intel_admin_content_alter_js($content_type = '') {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
-  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   intel_include_library_file('ga/class.ga_model.php');
   intel_include_library_file("reports/class.report_view.php");
   $filters = array();
@@ -43,7 +42,7 @@ function intel_admin_content_alter_js($content_type = '') {
   $ga_data->loadFeedData('pageviews'); 
   
   $ga_data->setRequestDefaultParam('max_results', 1000);
-  $ga_data->loadFeedData('entrances_valuedevents');
+  $ga_data->loadFeedData('entrances_events_valued');
   
   $data = $ga_data->data;
   
@@ -72,7 +71,7 @@ function intel_admin_content_alter_js($content_type = '') {
     $title = $report_view->formatValueScoreTitle($d['score'] * $days_included, $start, $end_date);
     $value_str = '';
     $score = $report_view->renderValueScore(array('value' => $d['score'], 'type' => 'value_per_page_per_day', 'title' => $title), $value_str);
-    $score_link = l($score, 'node/' . $node_meta->nid . '/analytics', array('html' => 1));
+    $score_link = l($score, 'node/' . $node_meta->nid . '/intel', array('html' => 1));
     $pageviews = (!empty($d['pageview']['pageviews'])) ? number_format($d['pageview']['pageviews']) : '-';
     $entrances = (!empty($d['entrance']['entrances'])) ? number_format($d['entrance']['entrances']) : '-';
     $rows[$path] = '<td class="intel-value">' . $score_link . '</td><td class="intel-entrances">' . $entrances . '</td><td class="intel-pageviews">' . $pageviews . '</td>';

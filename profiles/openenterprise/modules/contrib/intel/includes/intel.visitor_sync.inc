@@ -50,31 +50,33 @@ function intel_sync_visitordata($visitor, $request = array()) {
 function intel_queue_sync_visitor_requests() {
   // get existing sync requests
   $items = variable_get('intel_sync_visitor_requests', array());
-
-  if (!count($items)) {
-    return;
-  }
+  $msg = t('requests') . '0: ' . count($items);
 
   // add them to the DrupalQueue
-  $queue = DrupalQueue::get('intel_sync_visitor_requests');
-  $i = 0;
-  $limit = 20;
-  foreach ($items AS $i => $item) {
-    if ($item->run_after < REQUEST_TIME) {
-      if($queue->createItem($item)) {
+  if (count($items)) {
+    $msg .= "<br>\n" . t('adding') . ': ';
+    $queue = DrupalQueue::get('intel_sync_visitor_requests');
+    $c = 0;
+    $limit = 20;
+    foreach ($items AS $i => $item) {
+      if ($item->run_after < REQUEST_TIME) {
+        if (isset($item->vtk)) {
+          $msg .= ($c ? ', ' : '') . substr($item->vtk, 0, 10);
+        }
+        $queue->createItem($item);
         // remove items from request variable. If sync fails they will be re-added
         // in intel_sync_visitor_request_worker
         unset($items[$i]);
         // limit number of visitors processed in a single cron run
-        $i++;
-        if ($i > $limit) {
+        if ($c++ >= $limit) {
           break;
         }
       }
     }
+    variable_set('intel_sync_visitor_requests', $items);
   }
-
-  variable_set('intel_sync_visitor_requests', $items);
+  $msg .= "<br>\n" . t('requests') . '1: ' . count($items);
+  watchdog('intel_queue_sync_visitor', $msg);
 }
 
 // alternate way to work sync_visitor_request queue

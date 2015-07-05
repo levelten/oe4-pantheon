@@ -69,7 +69,7 @@ function cta_menu() {
     'access arguments' => array('administer ctas'),
     'file' => 'cta.admin.inc',
   );
-
+  
   // select CTA paths
   $items['admin/structure/cta/select/%/%'] = array(
     'title' => 'Select CTA',
@@ -81,7 +81,7 @@ function cta_menu() {
     'context' => MENU_CONTEXT_INLINE,
     'file' => 'cta.admin.inc',
   );
-
+  
   /*
   $items['admin/structure/cta/select/%/%/cta'] = array(
     'title' => 'Select CTA',
@@ -117,7 +117,7 @@ function cta_menu() {
     'file' => 'cta.admin.inc',
   );
   */
-
+  
   $items['admin/structure/cta/select/bean/%/%/%'] = array(
     'title' => 'Select CTA',
     'description' => 'Select CTA.',
@@ -127,7 +127,7 @@ function cta_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'cta.admin.inc',
   );
-
+  
   $items['admin/structure/cta/select/block/%/%/%/%'] = array(
     'title' => 'Select CTA',
     'description' => 'Select CTA.',
@@ -137,7 +137,7 @@ function cta_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'cta.admin.inc',
   );
-
+  
   $items['admin/content/cta'] = array(
     'title' => 'CTAs',
     'description' => 'Calls to action used on your site.',
@@ -146,7 +146,7 @@ function cta_menu() {
     'file' => 'cta.admin.inc',
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
-
+  
   $items['cta/render'] = array(
     'title' => 'CTA render',
     'description' => 'Select CTA.',
@@ -154,7 +154,7 @@ function cta_menu() {
     'access arguments' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
+  
   if (module_exists('intel')) {
     $items['admin/config/services/intel/modules/cta'] = array(
       'title' => 'CTA',
@@ -165,7 +165,7 @@ function cta_menu() {
       'access arguments' => array('admin intel'),
       'type' => MENU_LOCAL_TASK,
       'file' => 'cta.admin.inc',
-    );
+    ); 
   }
 
   $items['cta/util'] = array(
@@ -205,7 +205,7 @@ function cta_menu_local_tasks_alter(&$data, $router_item, $root_path) {
         'destination' => drupal_get_destination(),
       ),
     );
-
+    
 //dsm($item);
     if ($item['access']) {
       $data['actions']['output'][] = array(
@@ -240,8 +240,8 @@ function cta_permission() {
 function cta_util() {
 
   $sel = cta_selection_load_all('node/21');
-  dsm($sel);
-  //$bean = bean_load_delta('Website-Redesign-Success-ebook-s');
+dsm($sel);
+    //$bean = bean_load_delta('Website-Redesign-Success-ebook-s');
   //$out = $bean->view($bean->view_mode);
   //dsm($out);
   return 'OK';
@@ -469,7 +469,7 @@ function cta_block_meta_save($meta, $module, $delta) {
   }
   if (is_array($meta['data'])) {
     $meta['data'] = serialize($meta['data']);
-  }
+  }  
   $fields = array(
     'list_visibility' => $meta['list_visibility'],
     'data' => $meta['data'],
@@ -498,12 +498,12 @@ function cta_block_meta_delete($module, $delta) {
     ->condition('module', $module)
     ->condition('delta', $delta);
   $query->execute();
-
+  
   $query = db_delete('cta_block_selector')
     ->condition('module', $module)
     ->condition('delta', $delta);
   $query->execute();
-
+  
   $query = db_delete('cta_selection')
     ->condition('block_module', $module)
     ->condition('block_delta', $delta);
@@ -540,7 +540,7 @@ function cta_bean_metas() {
     $meta['list_visibility'] = $row->list_visibility;
     $meta['data'] = unserialize($row->data);
     $meta['custom_path'] = $row->custom_path;
-    $meta['custom_selector'] = $row->custom_selector;
+    $meta['custom_selector'] = $row->custom_selector;      
     $query = db_select('cta_bean_selector', 'm')
       ->fields('m')
       ->condition('delta', $meta['delta']);
@@ -608,7 +608,7 @@ function cta_bean_meta_load_by_path_selector($path, $selector) {
   }
   else {
     return FALSE;
-  }
+  }  
 }
 
 function cta_bean_meta_save($meta, $delta) {
@@ -648,11 +648,11 @@ function cta_bean_meta_delete($delta) {
   $query = db_delete('cta_bean')
     ->condition('delta', $delta);
   $query->execute();
-
+  
   $query = db_delete('cta_bean_selector')
     ->condition('delta', $delta);
   $query->execute();
-
+  
   $query = db_delete('cta_selection')
     ->condition('bean_delta', $delta);
   $query->execute();
@@ -660,13 +660,13 @@ function cta_bean_meta_delete($delta) {
 
 function cta_block_info() {
   $blocks = array();
-
+  
   $cta_selectors = cta_selectors();
   if (is_array($cta_selectors)) {
     foreach ($cta_selectors AS $set) {
       $description = $set['description'];
       if (!$description) {
-        $description = t('CTA: @name',
+        $description = t('CTA: @name', 
           array(
             '@name' => $set['name'],
           )
@@ -684,16 +684,9 @@ function cta_block_info() {
 
 function cta_block_view($delta = '') {
   $selector = substr($delta, 4);
+  //$selector = $delta;
 
-  $path = $_GET['q'];
-  // check if path is for a node and remove and revisioning path elements
-  // this is to assure block is visible on Workbench drafts
-  $patha = explode('/', $path);
-  if (count($patha) >= 2 && $patha[0] == 'node' && is_numeric($patha[1])) {
-    $path = $patha[0] . '/' . $patha[1];
-  }
-
-  $selection = cta_selection_load($path, $selector, TRUE, TRUE);
+  $selection = cta_selection_load($_GET['q'], $selector, TRUE, TRUE);
 
   $selector_obj = cta_selector_load($selector);
   $preset_vocab = isset($selector_obj['data']['preset_vocabulary']) ? $selector_obj['data']['preset_vocabulary'] : '';
@@ -716,9 +709,8 @@ function cta_block_view($delta = '') {
   }
   else if ($preset_vocab){
     // check if CTA category (via taxonomy ref field) exists for node
-    if ((arg(0) == 'node') && (is_numeric(arg(1)))) {
-      $node = menu_get_object();
-      if (!empty($node)) {
+    $node = menu_get_object();
+    if (!empty($node->nid)) {
       $fields_info = field_info_instances('node', $node->type);
       // check cta set with taxonomy
       foreach ($fields_info AS $field_name => $field_info) {
@@ -727,54 +719,14 @@ function cta_block_view($delta = '') {
           // get field_info to get associated vocabulary
           $field_info_field = field_info_field($field_name);
           $vocab_name = $field_info_field['settings']['allowed_values'][0]['vocabulary'];
-          if ($preset_vocab == $field_info_field['settings']['allowed_values'][0]['vocabulary']) {
+          if ($preset_vocab== $field_info_field['settings']['allowed_values'][0]['vocabulary']) {
             if (!empty($node->{$field_name}[$node->language][0]['tid'])) {
-              $tid = $node->{$field_name}[$node->language][0]['tid'];
-              $term = taxonomy_term_load($tid);
+              // load the term from tid
+              $term = taxonomy_term_load($node->{$field_name}[$node->language][0]['tid']);
               // if term exists, use it to select ctas
               if (!empty($term->name)) {
                 $path = "@" . drupal_html_class($term->name);
                 $selection = cta_selection_load($path, $selector, TRUE, TRUE);
-                // if selection not found, try parent terms
-                if (empty($selection)) {
-                  // get vocabulary obj to obtain vid
-                  $vocab = taxonomy_vocabulary_machine_name_load($vocab_name);
-                  // get vocabulary tree
-                  $tree = taxonomy_get_tree($vocab->vid);
-
-                  $continue = 1;
-                  while ($continue) {
-                    // don't continue unless parent term does not have selection
-                    // but has its own parent term.
-                    $continue = 0;
-                    // iterate through tree to find term that matches tid
-                    foreach ($tree as $i => $ti) {
-                      // check if tree item matches tid
-                      if ($ti->tid == $tid) {
-                        // if tree object has parents, check for default
-                        // selection on parent term
-                        if(!empty($ti->parents[0])) {
-                          $term = taxonomy_term_load($ti->parents[0]);
-                          if (!empty($term->name)) {
-                            $path = "@" . drupal_html_class($term->name);
-                            $selection = cta_selection_load($path, $selector, TRUE, TRUE);
-                            // if selection found, break
-                            if (!empty($selection)) {
-                              break;
-                            }
-                          }
-                          // loop again to check if parent term has selection
-                          $tid = $ti->parents[0];
-                          $continue = 1;
-                        }
-                        // if term has no selection or parents, exit loop and
-                        // don't continue
-                        break;
-                      }
-                    }
-                  }
-                }
-
                 if (isset($selection['bean']->title)) {
                   $block['subject'] = $selection['bean']->title;
                   $block['content'] = $selection['bean']->view($selection['bean']->view_mode);
@@ -795,7 +747,6 @@ function cta_block_view($delta = '') {
       //dsm($node);
     }
   }
-  }
 
   if (!$block['set']) {
     // if no selection, load default
@@ -810,14 +761,14 @@ function cta_block_view($delta = '') {
       $block['content'] = $selection['block']['content'];
       $block['set'] = 'block';
     }
-  }
+  } 
   if (!$block['set'] && user_access('select ctas')) {
     $block['content'] = t('No CTA selected');
   }
   if (empty($block['content']) && user_access('select ctas')) {
     $block['content'] = t('No block content was avaiable for CTA');
   }
-
+   
   // convert content to array to add contextual links
   if (!is_array($block['content'])) {
     $block['content'] = array(
@@ -832,7 +783,7 @@ function cta_block_view($delta = '') {
   }
 
   $block = cta_process_ga_events($block, $selection);
-
+  
   // add contextual link to select CTA
   $contextual_links = array(
     'admin/structure/cta/select',
@@ -877,6 +828,14 @@ function cta_process_ga_events($block, $selection) {
   if (empty($ga['track'])) {
     return $block;
   }
+
+  $evtDef = array(
+    'selector' => $selection['selector'],
+    'onSelector' => 'a',
+  );
+  if (!empty($defs['click']['event'])) {
+    $evtDef['onEvent'] = $defs['click']['event'];
+  }
   $defs['click']['method'] = '_addIntelEvent';
   $defs['click']['category'] = t('CTA click!');
   $defs['click']['noninteraction'] = FALSE;
@@ -900,71 +859,78 @@ function cta_process_ga_events($block, $selection) {
       $action = "Custom: $title ($selector)";
     }
     if (empty($defs['click']['action'])) {
-      $defs['display']['action'] = $defs['click']['action'] = $action;
+      $evtDef['eventAction'] = $defs['display']['action'] = $defs['click']['action'] = $action;
     }
     if (empty($defs['click']['label'])) {
-      $defs['display']['label'] = $defs['click']['label'] = 'block/' . $selection['bean']->delta;
+      $evtDef['eventLabel'] = $defs['display']['label'] = $defs['click']['label'] = 'block/' . $selection['bean']->delta;
     }
 
     $postfix = variable_get('cta_intel_selector_postfix_override_bean', '');
     if (!$postfix) {
       $postfix = ' .content';
     }
-    $defs['click']['selector'] = '#block-cta-sel-' . drupal_clean_css_identifier($selection['selector']) . $postfix;
-    $defs['click']['selector_filter'] = ':first';
-    $defs['click']['cid'] = $selection['bean']->delta;
+    $evtDef['selector'] = $defs['click']['selector'] = '#block-cta-sel-' . drupal_clean_css_identifier($selection['selector']) . $postfix;
+    $evtDef['selectorFilter'] = $defs['click']['selector_filter'] = ':first';
+    $evtDef['cid'] = $defs['click']['cid'] = $selection['bean']->delta;
   }
   else if ($block['set'] == 'block') {
     // check if block contains custom settings
     if (isset($block['content']['cta']['ga_event'])) {
       $cg = $block['content']['cta']['ga_event'];
       if (empty($defs['click']['action'])) {
-        $defs['display']['action'] = $defs['click']['action'] = $cg['click']['action'];
+        $evtDef['eventAction'] = $defs['display']['action'] = $defs['click']['action'] = $cg['click']['action'];
       }
       if (empty($defs['click']['label'])) {
-        $defs['display']['label'] = $defs['click']['label'] = $cg['click']['label'];
-      }
+        $evtDef['eventLabel'] = $defs['display']['label'] = $defs['click']['label'] = $cg['click']['label'];
+      }      
     }
     // use default data
     else {
       $bi = call_user_func($selection['block_module'] . "_block_info", $selection['block_delta']);
       $block_info = $bi[$selection['block_delta']];
       if (empty($defs['click']['action'])) {
-        $defs['display']['action'] = $defs['click']['action'] = $bi[$selection['block_delta']]['info'];
+        $evtDef['eventAction'] = $defs['display']['action'] = $defs['click']['action'] = $bi[$selection['block_delta']]['info'];
       }
       if (empty($defs['click']['label'])) {
-        $defs['display']['label'] = $defs['click']['label'] = 'admin/structure/block/manage/' . $selection['block_module'] . '/' . $selection['block_delta'] . '/configure';
+        $evtDef['eventLabel'] = $defs['display']['label'] = $defs['click']['label'] = 'admin/structure/block/manage/' . $selection['block_module'] . '/' . $selection['block_delta'] . '/configure';
       }
-    }
+    } 
     $postfix = variable_get('cta_intel_selector_postfix_override_block', '');
     if (!$postfix) {
       $postfix = ' .content';
     }
-    $defs['click']['selector'] = '#block-cta-sel-' . drupal_clean_css_identifier($selection['selector']) . $postfix;
-    $defs['click']['selector_filter'] = ':first';
-    $defs['click']['cid'] = $selection['block_module'] . ':' . $selection['block_delta'];
+    $evtDef['selector'] = $defs['click']['selector'] = '#block-cta-sel-' . drupal_clean_css_identifier($selection['selector']) . $postfix;
+    $evtDef['selectorFilter'] = $defs['click']['selector_filter'] = ':first';
+    $evtDef['cid'] = $defs['click']['cid'] = $selection['block_module'] . ':' . $selection['block_delta'];
   }
 
   $ga_events = array();
+  $ga_ctas = array();
   // add ga_events if either track_x null or true. I.e. only don't set if track_x explicity set to 0.
-  if ((!isset($ga['track_click']) || !empty($ga['track_click'])) && isset($defs['click'])) {
-    $ga_events[] = $defs['click'];
-  }
   if ((!isset($ga['track_display']) || !empty($ga['track_display'])) && isset($defs['display'])) {
     $ga_events[] = $defs['display'];
+    $evtDef['trackView'] = 1;
   }
+  if ((!isset($ga['track_click']) || !empty($ga['track_click'])) && isset($defs['click'])) {
+    $ga_events[] = $defs['click'];
+    $ga_ctas[] = $evtDef;
+  }
+
 //dsm($ga_events);
   if (count($ga_events)) {
     $js = array(
       'intel' => array(
-        'pushes' => $ga_events,
+        'pushes' => array(
+          //'addIntelEvent' => $ga_events,
+          'trackCta' => $ga_ctas,
+        ),
       ),
     );
     $block['content']['#attached'] = array(
-      'js' => array(array(
-        'data' => $js,
-        'type' => 'setting'
-      ),
+        'js' => array(array(
+          'data' => $js,
+          'type' => 'setting'
+        ),
       )
     );
   }
@@ -973,7 +939,7 @@ function cta_process_ga_events($block, $selection) {
 }
 
 //function cta_render($type, $delta, $module) {
-function cta_render($module, $delta) {
+function cta_render($module, $delta) { 
 
   $block = module_invoke($module, 'block_view', $delta);
   if (!is_array($block['content'])) {
@@ -983,17 +949,17 @@ function cta_render($module, $delta) {
   }
   $output = render($block);
 
-  /*
-  $block = block_load($module, $delta);
-  $render = _block_get_renderable_array(_block_render_blocks(array($block)));
-  foreach ($render AS $key => $v) {
-    if (isset($v['#contextual_links'])) {
-      unset($render[$key]['#contextual_links']);
-    }
+/*
+$block = block_load($module, $delta);
+$render = _block_get_renderable_array(_block_render_blocks(array($block)));
+foreach ($render AS $key => $v) {
+  if (isset($v['#contextual_links'])) {
+    unset($render[$key]['#contextual_links']);
   }
-  $output = render($render);
-  */
-
+}
+$output = render($render);  
+*/
+  
   print $output;
   exit;
   dsm($block);
@@ -1002,7 +968,7 @@ function cta_render($module, $delta) {
 }
 
 function cta_temp($selector, $q) {
-
+  
 }
 
 function cta_selection_save($path, $selector, $bean_delta = '', $block_module = '', $block_delta = '', $data = array()) {
@@ -1019,7 +985,7 @@ function cta_selection_save($path, $selector, $bean_delta = '', $block_module = 
   $query = db_merge('cta_selection')
     ->key($key)
     ->fields($fields);
-
+    
   $query->execute();
 }
 
@@ -1080,11 +1046,11 @@ function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
   if ($form['module']['#value'] == 'cta') {
     return;
   }
-
+  
   $meta = cta_block_meta_load($form['module']['#value'], $form['delta']['#value']);
   $f = cta_settings_form_fields($meta);
   $form = array_merge($form, $f);
-
+  
   $form['#submit'][] = 'cta_block_admin_configure_submit';
 }
 
@@ -1104,7 +1070,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
     $meta['selectors'] = array();
     foreach ($selectors AS $selector => $enabled) {
       if ($enabled) {
-        $meta['selectors'][] = $selector;
+       $meta['selectors'][] = $selector;
       }
     }
   }
@@ -1112,7 +1078,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
   if (count($meta['selectors'])) {
     $meta['list_visibility'] = 1;
   }
-  if (module_exists('intel') && !empty($meta['data']['ga_event'])) {
+  if (module_exists('intel')) {
     $meta['data']['ga_event']['conversion']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['selector'] = trim($meta['data']['ga_event']['custom']['selector']);
@@ -1128,7 +1094,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
 
 function cta_settings_form_fields($meta) {
   $is_custom = FALSE;
-
+  
   // if custom CTA, set flag and embed custom cta data
   $form_state['cta_meta'] = $meta;
   $form['cta'] = array(
@@ -1166,9 +1132,9 @@ function cta_settings_form_fields($meta) {
         $options[$name] = $s['description'];
       }
     }
-
+  
     $defaults = drupal_map_assoc($meta['selectors']);
-
+    
     if (!empty($_GET['cta_selector'])) {
       $defaults = array($_GET['cta_selector']);
     }
@@ -1178,9 +1144,9 @@ function cta_settings_form_fields($meta) {
       '#description' => $description,
       '#options' => $options,
       '#default_value' => isset($defaults) ? $defaults : array(),
-    );
+    );     
   }
-
+  
   // add ga event tracking if intel module is installed
   if (module_exists('intel')) {
     drupal_add_js(drupal_get_path('module', 'cta') . "/cta.cta_edit.js");
@@ -1201,7 +1167,7 @@ function cta_settings_form_fields($meta) {
       $form['cta']['data']['ga_event']['options_start'] = array(
         '#type' => 'markup',
         '#markup' => '<div class="cta-data-ga-event-track-options-group">',
-      );
+    );
       $form['cta']['data']['ga_event']['track_display'] = array(
         '#type' => 'checkbox',
         '#title' => t('Track impressions'),
@@ -1283,12 +1249,12 @@ function cta_settings_form_fields($meta) {
       );
     }
   }
-
+  
   // hide field set if there are no fields to display
   if (!isset($form['cta']['cta_selectors']) && !isset($form['cta']['cta_selectors'])) {
     unset($form['cta']['#type']);
   }
-
+  
   return $form;
 }
 
@@ -1298,7 +1264,7 @@ function cta_form_bean_form_alter(&$form, &$form_state, $form_id) {
   $meta = cta_bean_meta_load($form['bean']['#value']->delta);
   $f = cta_settings_form_fields($meta);
   $form = array_merge($form, $f);
-
+  
   if (module_exists('enterprise_base')) {
     drupal_add_js(drupal_get_path('module', 'enterprise_base') . '/js/enterprise_base.edit_form.js');
     $form['cta']['#attributes']['class'][] = 'display_sidebar';
@@ -1371,14 +1337,14 @@ function cta_entity_save($entity, $type) {
     // if custom CTA, save selection
     if (isset($entity->cta['is_custom'])) {
       cta_selection_save($entity->cta['custom_path'], $entity->cta['custom_selector'], $entity->delta);
-    }
+    }  
   }
 }
 
 function cta_entity_delete($entity, $type) {
   if (($type == 'bean') && ($entity->type == 'cta')) {
-    cta_bean_meta_delete($entity->delta);
-  }
+    cta_bean_meta_delete($entity->delta);   
+  } 
 }
 
 /**
@@ -1405,9 +1371,9 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
     $lang = !empty($bean->language) ? $bean->language : LANGUAGE_NONE;
     $link_options = array('html' => TRUE);
     if (isset($bean->field_landingpage) && !empty($bean->field_landingpage[$lang][0]['target_id'])) {
-      $nid = $bean->field_landingpage[$lang][0]['target_id'];
+      $nid = $bean->field_landingpage[$lang][0]['target_id'];      
       $body = l($bean->content['field_body'][0]['#markup'], 'node/' . $nid, $link_options);
-
+      
     }
     else if (isset($bean->field_redirect_url) && !empty($bean->field_redirect_url[$lang][0]['url'])) {
       $link = $bean->field_redirect_url[$lang][0];
@@ -1444,7 +1410,7 @@ function cta_strip_page(&$page) {
   $b = block_load($module, $delta);
   $render_arr = _block_get_renderable_array(_block_render_blocks(array($b)));
   $page[$region] = $render_arr;
-
+  
   if ($lpath = libraries_get_path('jquery.qtip')) {
     drupal_add_js($lpath . '/jquery.qtip.js');
     drupal_add_css($lpath . '/jquery.qtip.css');
@@ -1455,7 +1421,7 @@ function cta_strip_page(&$page) {
 }
 
 function cta_load_page(&$page) {
-  if (!empty($_GET['cta_show_all_selector'])) {
+    if (!empty($_GET['cta_show_all_selector'])) {
     $selector_name = $_GET['cta_show_all_selector'];
     $block = block_load('cta', 'cta_' . $_GET['cta_show_all_selector']);
 //dsm($block);
@@ -1468,10 +1434,10 @@ function cta_load_page(&$page) {
       $b = block_load($block['module'], $block['delta']);
       $render_arr = _block_get_renderable_array(_block_render_blocks(array($b)));
       $page[$region] = array_merge($page[$region], $render_arr);
-
+      
 //dsm($render_arr);
     }
-
+    
     foreach ($page[$region] AS $i => $v) {
       if (isset($v['#contextual_links'])) {
         unset($page[$region][$i]['#contextual_links']);

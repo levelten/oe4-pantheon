@@ -5,7 +5,7 @@
  */
 Drupal.behaviors.intel_disqus = {
   attach: function (context) {
-	_l10iq.push(['_registerCallback', 'saveCommentSubmitPostSubmit', this.saveCommentSubmitPostCallbackSubmit, this]);
+	_l10iq.push(['addCallback', 'saveCommentSubmitPostSubmit', this.saveCommentSubmitPostCallbackSubmit, this]);
   },
 
   saveCommentSubmitPostCallbackSubmit: function (data) {
@@ -17,7 +17,7 @@ Drupal.behaviors.intel_disqus = {
       commentid: data.commentid
     };
     var url = ('https:' == document.location.protocol) ? 'https://' : 'http://';
-    url += Drupal.settings.intel.cms_hostpath + "intel_disqus/comment_submit_js";
+    url += Drupal.settings.intel.config.cmsHostpath + "intel_disqus/comment_submit_js";
     jQuery.ajax({
       dataType: 'json',
       url: url, 

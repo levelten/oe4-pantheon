@@ -498,6 +498,86 @@ function intel_schema() {
     ),
   );
 
+  $schema['intel_entity_attr'] = array(
+    'description' => ('General storage for entity attributes not stored elsewhere.'),
+    'fields' => array(
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Entity type',
+      ), //entity_type
+      'entity_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the analysis.',
+      ), //entity_id
+      'path' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'The system of ',
+      ), //path
+      'alias' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Path alias of resource',
+      ), //alias
+      'attr_key' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The page attribute key',
+      ), //attr_key
+      'vsid' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+          'description' => 'Value string id.',
+      ), //vsid
+      'value_num' => array(
+        'type' => 'float',
+        'not null' => FALSE,
+        'description' => 'Value stored as a number',
+      ), //value_num
+    ),
+    'indexes' => array(
+      'entity' => array('entity_type', 'entity_id'),
+      'path' => array(array('path', 18)),
+      'alias' => array(array('alias', 18)),
+      'attr_key' => array(array('attr_key', 4)),
+      'vsid' => array('vsid'),
+    ),
+  );
+
+  $schema['intel_value_str'] = array(
+    'description' => 'Stores indexed value strings.',
+    'fields' => array(
+      'vsid' => array(
+        'description' => 'internal id',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'value_str' => array(
+        'description' => 'the value string term',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('vsid'),
+    'indexes' => array(
+      'value_str' => array(array('value_str', 16)),
+    ),
+  );
+
   return $schema;
 }
 
@@ -632,5 +712,19 @@ function intel_update_7003() {
     $schema = intel_schema();
     // create visitor identifier table
     db_create_table('intel_emailclick', $schema['intel_emailclick']);
+  }
+}
+
+/**
+ * Adds entity_attr and value_str table to support storage of add-on attributes
+ */
+function intel_update_7004() {
+  if (!db_table_exists('intel_entity_attr')) {
+    $schema = intel_schema();
+    db_create_table('intel_entity_attr', $schema['intel_entity_attr']);
+  }
+  if (!db_table_exists('intel_value_str')) {
+    $schema = intel_schema();
+    db_create_table('intel_value_str', $schema['intel_value_str']);
   }
 }

@@ -20,16 +20,15 @@ function intel_admin_content_cta_alter_js($cta_type = '') {
     'start_date' => strtotime("-31 days"),
     'end_date' => strtotime("Yesterday"),
     'max_results' => 1000,
-    'filter' => 'ga:eventCategory=~^cta *', // TODO this filter seems not to be working
+    'filters' => 'ga:eventCategory=~^cta',
   );
 
-//dsm($request);  
-  $data = google_analytics_api_report_data($request);
-//dsm($data);
+  $data = intel_ga_api_data($request);
 
   $ctas = array();
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $r) {
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $r) {
       $ctaid = '/' . $r['eventLabel'];
       if (!isset($ctas[$ctaid])) {
         $ctas[$ctaid] = array(
@@ -51,18 +50,17 @@ function intel_admin_content_cta_alter_js($cta_type = '') {
       if (substr($cat, -1) == '!') {
         $cat = substr($cat, 0, -1);
       }
-//dsm($cat);
       if ($cat == 'cta impression') {
-        $ctas[$ctaid]['impressions']['total'] = $r['totalEvents'];
-        $ctas[$ctaid]['impressions']['unique'] = $r['uniqueEvents'];
+        $ctas[$ctaid]['impressions']['total'] += $r['totalEvents'];
+        $ctas[$ctaid]['impressions']['unique'] += $r['uniqueEvents'];
       }
       if ($cat == 'cta click') {
-        $ctas[$ctaid]['clicks']['total'] = $r['totalEvents'];
-        $ctas[$ctaid]['clicks']['unique'] = $r['uniqueEvents'];
+        $ctas[$ctaid]['clicks']['total'] += $r['totalEvents'];
+        $ctas[$ctaid]['clicks']['unique'] += $r['uniqueEvents'];
       }
       if ($cat == 'cta conversion') {
-        $ctas[$ctaid]['conversions']['total'] = $r['totalEvents'];
-        $ctas[$ctaid]['conversions']['unique'] = $r['uniqueEvents'];
+        $ctas[$ctaid]['conversions']['total'] += $r['totalEvents'];
+        $ctas[$ctaid]['conversions']['unique'] += $r['uniqueEvents'];
       }
       //$rows['/' . $r['eventLabel']] = '<td class="insight-pageviews">' . number_format($r['pageviews']) . '</td><td class="insight-entrances">' . number_format($r['entrances']) . '</td><td class="insight-goal-value">' . number_format($r['goalValueAll']) . '</td>';
     }

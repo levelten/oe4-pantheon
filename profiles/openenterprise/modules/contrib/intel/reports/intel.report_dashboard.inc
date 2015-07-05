@@ -13,7 +13,6 @@ function intel_dashboard_report_page($report_subtype = '-', $context = '-', $tim
 
   $vars = intel_init_reports_vars('dashboard', 'dashboard', $report_subtype, $context, $timeframe, $filter_type, $filter_element, $subsite);
   $vars['title'] = $title = t('Dashboard');
-
   $output = intel_build_report($vars);
 
   return $output;
@@ -63,15 +62,21 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
 }
 */
 
-function intel_dashboard_report($filters = array(), $context = 'site', $sub_index = '-') {
+//function intel_dashboard_report($filters = array(), $context = 'site', $sub_index = '-') {
+function intel_dashboard_report($vars) {
+  intel_include_library_file('ga/class.ga_model.php');
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
+
+  $filters = $vars['filters'];
+  $context = $vars['context'];
+  $context_mode = $vars['context_mode'];
+
+  $report_mode = !empty($vars['report_info']['key']) ? $vars['report_info']['key'] : 'default.top.combined';
+  $report_modes = explode('.', $report_mode);
   intel_include_library_file('ga/class.ga_model.php');
   
-  if ($context == '-') {
-    $context = 'site';
-  }
-  if ($sub_index == '-') {
-    $sub_index = '.default';
-  }
+  $sub_index = !empty($vars['report_info']['key']) ? $vars['report_info']['key'] : '.default';
+
   $report_modes = explode('.', $sub_index);
 
   $cache_options = array();
@@ -84,20 +89,25 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
     $path = $a[1];
   }
   
-  $a = explode('-', $report_modes[0]);
   $cur_month = 1;
+  $report_time = REQUEST_TIME;
+  if ($vars['timeframe'] != 'l30d') {
+    $report_time = $vars['end_date'];
+    $cur_month = 0;
+  }
+  $a = explode('-', $report_modes[0]);
   if ((count($a) == 2) ) {
     $target_yr = $a[0];
     $target_mo = $a[1];
     $cur_month = 0;
   }
   else {
-    $target_yr = (int)date('Y');
+    $target_yr = (int)date('Y', $report_time);
     if (!empty($a[0])) {
       $target_mo = $a[0];
     }
     else {
-      $target_mo = (int)date('m');
+      $target_mo = (int)date('m', $report_time);
     }
   }
 
@@ -145,22 +155,24 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
     $last_month_data->setPageAttributeInfo($filter_info['page-attr']);
   }
 
-  $last_month_data->buildFilters($filters, $context);
+
+
+  $last_month_data->buildFilters($filters, $vars['subsite']);
   $last_month_data->setDateRange($lastmonth_start_date, $lastmonth_end_date);
   $last_month_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
   
-  $last_month_data->setRequestSetting('indexBy', '');
+  $last_month_data->setRequestSetting('indexBy', 'date');
   $last_month_data->setRequestSetting('details', 0);
-  $last_month_data->setRequestDefaultParam('max_results', 31); 
+  $last_month_data->setRequestDefaultParam('max_results', $lastmonth_number_of_days);
 
-
-  $last_month_data->loadFeedData('entrances'); 
+  //$last_month_data->setDebug(1);
+  $last_month_data->loadFeedData('entrances');
 
   $last_month_data->setRequestSetting('details', 1);
-  $last_month_data->setRequestDefaultParam('max_results', 10); 
-  $last_month_data->loadFeedData('entrances_valuedevents'); 
+  $last_month_data->setRequestDefaultParam('max_results', 10 * $lastmonth_number_of_days);
+  $last_month_data->loadFeedData('entrances_events_valued');
+  //$last_month_data->setDebug(0);
 
-  
   // get this month's data
   $ga_data = new LevelTen\Intel\GAModel();
   if (isset($filter_info['page-attr'])) {
@@ -172,15 +184,15 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
 
   $ga_data->setRequestSetting('indexBy', 'date');
   $ga_data->setRequestSetting('details', 0);
-  $ga_data->setRequestDefaultParam('max_results', 31); 
+  $ga_data->setRequestDefaultParam('max_results', $number_of_days);
 //$last_month_data->setDebug(1);
   $ga_data->loadFeedData('entrances'); 
 //$last_month_data->setDebug(0);  
   $ga_data->setRequestSetting('details', 1);
-  $ga_data->setRequestDefaultParam('max_results', 10 * 31); 
-  $ga_data->loadFeedData('entrances_valuedevents');
+  $ga_data->setRequestDefaultParam('max_results', 10 * $number_of_days);
+  $ga_data->loadFeedData('entrances_events_valued');
   
-  $ga_data->setRequestDefaultParam('max_results', 5 * 31);
+  $ga_data->setRequestDefaultParam('max_results', 5 * $number_of_days);
   $submission_goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
 
   $i = 0;
@@ -223,7 +235,7 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
 
   $d = $ga_data->data;
 
-  $d['lastmonth'] = isset($last_month_data->data['site']) ? $last_month_data->data['site'] : array();
+  $d['lastmonth'] = isset($last_month_data->data['date']) ? $last_month_data->data : array();
   $d['lastmonth']['daterange'] = array(
     'start' => $lastmonth_start_date,
     'end' => $lastmonth_end_date,
@@ -231,33 +243,38 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   );
   
   $request = array(
-    'dimensions' => array('ga:date', 'ga:customVarValue5', 'ga:medium', 'ga:socialNetwork'),
+    //'dimensions' => array('ga:date', 'ga:customVarValue5', 'ga:medium', 'ga:socialNetwork'),
+    'dimensions' => array('ga:date', 'ga:dimension5', 'ga:medium', 'ga:socialNetwork'),
     'metrics' => array('ga:entrances'),
     'sort_metric' => '',
     'start_date' => $start_date,
     'end_date' => $end_date,
-    'filters' => 'ga:customVarValue3=@&k&',
+    //'filters' => 'ga:dimension3=@&k&',
+    'filters' => 'ga:dimension3=@&k&',
     'segment' => '',
     'max_results' => 1000,
   );
 
   $request = array(
-    'dimensions' => array('ga:date', 'ga:customVarValue5', 'ga:medium', 'ga:socialNetwork'),
+    'dimensions' => array('ga:date', 'ga:dimension5', 'ga:medium', 'ga:socialNetwork'),
     'metrics' => array('ga:entrances'),
     'sort_metric' => '-ga:date',
     'start_date' => $start_date,
     'end_date' => $end_date,
-    'filters' => '', //ga:customVarValue3=@&k&',
-    'segment' => 'dynamic::ga:eventCategory=~^Form,ga:customVarValue3=@&k&',
+    'filters' => '', //ga:dimension3=@&k&',
+    //'segment' => 'dynamic::ga:eventCategory=~^Form,ga:dimension3=@&k&',
+    'segment' => 'dynamic::ga:eventCategory=~^Form,ga:dimension3=@&k&',
     'max_results' => 1000,
   );  
   
-  $data = google_analytics_api_report_data($request, $cache_options);
+  $data = intel_ga_api_data($request, $cache_options);
   $visitors = array();
   if (!empty($data->results)) {
-    foreach ($data->results AS $row) {    
+    // check if v2 or v3 API format
+    $rows = intel_get_ga_feed_rows($data);
+    foreach ($rows AS $row) {
       $cat = $ga_data->initFeedIndex($row, 'trafficcategory'); 
-      $visitors[$row['customVarValue5']] = $cat;
+      $visitors[$row['dimension5']] = $cat;
     }
   }
 
@@ -311,7 +328,7 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   drupal_alter('intel_visitor_select_query', $query, $context, $query_alter_vars);
 
   $row = $query->execute()->fetchObject();
-  $d['lastmonth']['_all']['lead'] = array(
+  $d['lastmonth']['date']['_all']['lead'] = array(
     'leads' => $row->leads_created,
   );
   
@@ -375,7 +392,7 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   drupal_alter('intel_node_select_query', $query, $context, $query_alter_vars);
 
   $row = $query->execute()->fetchObject();
-  $d['lastmonth']['_all']['post'] = array(
+  $d['lastmonth']['date']['_all']['post'] = array(
     'published' => $row->published_nodes,
   );
   //dsm($row);  
@@ -387,8 +404,9 @@ function intel_dashboard_report($filters = array(), $context = 'site', $sub_inde
   $ga_data->setDataIndexCallback('category', '_intel_determine_category_index');
   
   // get recent post entrance stats
-  $regex = $ga_data->formatGtRegexFilter('ga:customVarValue1', $start_date, 'pt');
-$ga_data->setDebug(0); 
+  //$regex = $ga_data->formatGtRegexFilter('ga:dimension1', $start_date, 'pt');
+  $regex = 'ga:dimension1=@pd=' . date('Ym', $start_date);
+$ga_data->setDebug(0);
   $ga_data->setCustomFilter($regex . ';ga:entrances>0');
   $ga_data->setRequestDefaultParam('max_results', 10 * $count); 
   $request = $ga_data->loadFeedData('entrances', 'content');
@@ -396,13 +414,13 @@ $ga_data->setDebug(0);
   $ga_data->setCustomFilter($regex . ';ga:pagePath=@/');
   //$ga_data->setCustomFilter($page_filter);
   $ga_data->setRequestDefaultParam('max_results', 40 * $count); 
-  $request = $ga_data->loadFeedData('entrances_valuedevents', 'content');    
+  $request = $ga_data->loadFeedData('entrances_events_valued', 'content');
 $ga_data->setDebug(0);  
   //$ga_data->setCustomFilter('', 'segment');
   $ga_data->setCustomFilter($regex . ';ga:pagePath=@/');
   //$ga_data->setCustomFilter($page_filter);
   $ga_data->setRequestDefaultParam('max_results', 40 * $count); 
-  $request = $ga_data->loadFeedData('pageviews_valuedevents', 'content');  
+  $request = $ga_data->loadFeedData('pageviews_events_valued', 'content');
 //dsm($ga_data->data['content']);   
   $d['content'] = !empty($ga_data->data['content']) ? $ga_data->data['content'] : array();
 $ga_data->setDebug(0); 
@@ -418,7 +436,7 @@ $ga_data->setDebug(0);
   $entrance_filter = 'ga:landingPagePath=~/blog/';
   $page_filter = 'ga:pagePath=~/blog/';
   
-  $regex = $ga_data->formatGtRegexFilter('ga:customVarValue1', $start_date, 'pt');
+  $regex = $ga_data->formatGtRegexFilter('ga:dimension1', $start_date, 'pt');
 
   $ga_data->setCustomFilter($entrance_filter);
   $ga_data->setRequestDefaultParam('max_results', 10 * $count); 
@@ -426,17 +444,17 @@ $ga_data->setDebug(0);
  
   $ga_data->setCustomFilter($entrance_filter);
   $ga_data->setRequestDefaultParam('max_results', 40 * $count); 
-  $request = $ga_data->loadFeedData('entrances_valuedevents', 'content');    
+  $request = $ga_data->loadFeedData('entrances_events_valued', 'content');
   
   $ga_data->setCustomFilter($page_filter);
   $ga_data->setRequestDefaultParam('max_results', 40 * $count); 
-  $request = $ga_data->loadFeedData('pageviews_valuedevents', 'content');
+  $request = $ga_data->loadFeedData('pageviews_events_valued', 'content');
 dsm($ga_data->data['content']);  
   
   //$d['content'] = $ga_data->data['content'];
   */
 
-//dsm($d);
+
   
   if (!empty($path)) {
     $created = intel_get_node_created($path);
@@ -481,6 +499,8 @@ dsm($ga_data->data['content']);
   */
   // order date data cronologically
   ksort($d['date']);
+
+//dsm($d);
 
   $targets = intel_get_targets();
   if (isset($filters['page-attr'])) {

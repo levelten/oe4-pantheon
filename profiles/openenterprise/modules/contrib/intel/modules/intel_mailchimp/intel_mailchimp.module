@@ -319,20 +319,16 @@ function intel_mailchimp_intel_sync_visitordata(&$visitor) {
 
   $default_list_id = variable_get('intel_mailchimp_default_list_id', '');
   $sync_ids = array();
-  
-  // Check if visitor is empty else cron errors out.
-  if (!empty($visitor)) {
-    // check for linked ids that already exists
-    $mc_data = $visitor->getVar('ext', 'mailchimp');
-    if (isset($mc_data['ids'])) {
-      // key ids by list id
-      foreach ($mc_data['ids'] AS $id) {
-        $sync_ids[$id['list_id']] = $id;
-      }
+  // check for linked ids that already exists
+  $mc_data = $visitor->getVar('ext', 'mailchimp');
+  if (isset($mc_data['ids'])) {
+    // key ids by list id
+    foreach ($mc_data['ids'] AS $id) {
+      $sync_ids[$id['list_id']] = $id;
     }
   }
 
-  if (empty($sync_ids) && (!$default_list_id || empty($visitor) || !$visitor->email)) {
+  if (empty($sync_ids) && (!$default_list_id || !$visitor->email)) {
     return TRUE;
   }
 

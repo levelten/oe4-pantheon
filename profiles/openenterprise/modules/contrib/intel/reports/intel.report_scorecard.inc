@@ -15,12 +15,17 @@
  *
  * @return string
  */
-function intel_scorecard_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+function intel_scorecard_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
-  $vars = intel_init_reports_vars('scorecard', 'scorecard', $report_params, $report_subtype, $entity_type, $entity);
+  $vars = array();
+  if (!empty($entity_type) && $entity_type != '-') {
+    $vars['entity_type'] = $entity_type;
+    $vars['entity'] = $entity;
+  }
+  $vars = intel_init_reports_vars('scorecard', 'scorecard', $report_params, $report_subtype, $report_subfilter, $vars);
   $vars['title'] = $title = t('Scorecard');
 
   $output = intel_build_report($vars);
@@ -60,7 +65,7 @@ function intel_scorecard_report($vars) {
   $ga_data->setRequestSetting('details', 0);
   // note: add +1 to number of days incase timeframe is not an exact day, e.g. l30dfn
   $ga_data->setRequestDefaultParam('max_results', ($number_of_days+1));
-  
+
   $ga_data->loadFeedData('pageviews');
 
   $ga_data->loadFeedData('entrances');
@@ -72,10 +77,10 @@ function intel_scorecard_report($vars) {
   $ga_data->setRequestSetting('details', 1);
   $ga_data->setRequestDefaultParam('max_results', 10 *  ($number_of_days+1));
 
-  $ga_data->loadFeedData('pageviews_valuedevents');
+  $ga_data->loadFeedData('pageviews_events_valued');
 
   if ($context == 'page' || $context == 'page-attr') {
-    $ga_data->loadFeedData('entrances_valuedevents');
+    $ga_data->loadFeedData('entrances_events_valued');
   }
 
   //$ga_data->setRequestSetting('details', 1);
@@ -125,7 +130,7 @@ function intel_scorecard_report($vars) {
     $request = $ga_data->loadFeedData('entrances', 'content'); 
     
     $ga_data->setRequestDefaultParam('max_results', 200);
-    $request = $ga_data->loadFeedData('pageviews_valuedevents', 'content'); 
+    $request = $ga_data->loadFeedData('pageviews_events_valued', 'content');
   }
   $ga_data->setRequestDefaultParam('max_results', 100);
   $request = $ga_data->loadFeedData('entrances', 'trafficsources'); 
@@ -152,6 +157,27 @@ function intel_scorecard_report($vars) {
     $d['date'][$index]['score'] = intel_score_item($de, 1, $score_components, '', $method);
     $d['date'][$index]['score_components'] = $score_components;  
   }
+  $d['date']['_links'] = array(
+    'events' => array(),
+    'goals' => array(),
+    'events_pageview' => array(),
+    'goals_pageview' => array(),
+  );
+  if ($vars['context'] == 'page' || $vars['context'] == 'page-attr') {
+    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_valued'));
+    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_goal'));
+    $d['date']['_links']['events_pageview'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'pageview_valued'));
+  }
+  else {
+    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'valued'));
+    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'goal'));
+  }
+
+  //$params = $vars['report_params'];
+  //$params['_filter_add'] = 'pa-i:t';
+  //$d['date']['_links']['i.t'][] = l(t('more'), intel_build_report_path('content', $params));
+//dsm($d['date']['_links']);
+
   if (isset($d['content'])) {
     foreach ($d['content'] AS $index => $de) {
       $score_components = array();
@@ -161,7 +187,15 @@ function intel_scorecard_report($vars) {
       $d['content'][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'page');
 
       $d['content'][$index]['score_components'] = $score_components;  
-    }    
+    }
+    $d['content']['_links'] = array(
+      'default' => array(),
+      'i.t' => array(),
+    );
+    $d['content']['_links']['default'][] = l(t('more'), intel_build_report_path('content', $vars['report_params']));
+    $params = $vars['report_params'];
+    $params['_filter_add'] = 'pa-i:t';
+    $d['content']['_links']['i.t'][] = l(t('more'), intel_build_report_path('content', $params));
   }
   if (isset($d['trafficsources'])) {
     $sub_indexes = $ga_data->getTrafficsourcesSubIndexes();
@@ -171,7 +205,9 @@ function intel_scorecard_report($vars) {
         //$d['trafficsources'][$sub_index][$index]['score'] = intel_score_visit_aggregation($de, 1, $score_components);
         $d['trafficsources'][$sub_index][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'entrance');
         $d['trafficsources'][$sub_index][$index]['score_components'] = $score_components;  
-      } 
+      }
+      $d['trafficsources'][$sub_index]['_links'] = array();
+      $d['trafficsources'][$sub_index]['_links'][] = l(t('more'), intel_build_report_path('trafficsource', $vars['report_params'], $sub_index));
     }   
   }
   // order date data cronologically
@@ -214,6 +250,7 @@ function theme_intel_content_scorecard($vars) {
   $report_view->setParam('context', $vars['context']);
   $report_view->setParam('context_mode', $vars['context_mode']);
   $report_view->setParam('analysis_days', $vars['analysis_days']);
+  $report_view->setParam('ga_property_slug', intel_get_ga_property_slug());
   $report_view->setPageMetaCallback('intel_get_page_meta_callback');
   $report_view->setTargets(intel_get_targets());
   $report_view->setGoals($vars['goals']);
@@ -1135,10 +1172,10 @@ function intel_content_scorecard_node($node, $mode = 'entrance') {
   $ga_data->loadFeedData('entrances', 'date', 0, 30); 
   
   if ($context == 'page') { 
-    $ga_data->loadFeedData('page_valuedevents', 'date', 1, 10 * 30);  
+    $ga_data->loadFeedData('page_events_valued', 'date', 1, 10 * 30);
   }
   
-  $ga_data->loadFeedData('session_valuedevents', 'date', 1, 10 * 30); 
+  $ga_data->loadFeedData('session_events_valued', 'date', 1, 10 * 30);
   
   $ga_data->setDebug(1);
   $submission_goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
@@ -1159,7 +1196,7 @@ function intel_content_scorecard_node($node, $mode = 'entrance') {
     
     $request = $ga_data->loadFeedData('entrances', 'content', 0, 50); 
     
-    $request = $ga_data->loadFeedData('session_valuedevents', 'content', 0, 100); 
+    $request = $ga_data->loadFeedData('session_events_valued', 'content', 0, 100);
   }
   //$ga_data->setDebug(1);
   $request = $ga_data->loadFeedData('entrances', 'trafficsources', 0, 100); 

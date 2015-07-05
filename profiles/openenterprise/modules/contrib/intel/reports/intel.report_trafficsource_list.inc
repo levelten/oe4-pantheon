@@ -6,70 +6,55 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_trafficsource_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+function intel_trafficsource_list_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
-  $vars = intel_init_reports_vars('trafficsource_list', 'trafficsource', $report_params, $report_subtype, $entity_type, $entity);
+  $vars = array();
+  if (!empty($entity_type) && $entity_type != '-') {
+    $vars['entity_type'] = $entity_type;
+    $vars['entity'] = $entity;
+  }
+  $vars = intel_init_reports_vars('trafficsource_list', 'trafficsource', $report_params, $report_subtype, $report_subfilter, $vars);
 
   $output = intel_build_report($vars);
-
   return $output;
 }
 
-//function intel_trafficsource_list_report($filters = array(), $context = 'site', $sub_index = '-') {
+//function intel_trafficsource_list_report($vars['filters'] = array(), $vars['context'] = 'site', $sub_index = '-') {
 function intel_trafficsource_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php');
 
-  $filters = $vars['filters'];
-  $sub_index = $vars['report_subtype'];
-  $context = $vars['context'];
-  $context_mode = $vars['context_mode'];
-
-  $report_mode = $vars['report_info']['key'];
-  $report_modes = explode('.', $report_mode);
-  $indexBy = $report_modes[0];
-  $indexByLabel = $vars['report_info']['title'];
-//dsm($indexBy);
-
-  $cache_options = array();
-  $row_count = 100;
-  $feed_rows = 2 * $row_count;
-  
-  $output = '';
-
-  /*
-  if (!empty($filters['page'])) {
-    $a = explode(":", $filters['page']);
-    $path = $a[1];
+  if (empty($vars['report_subtype'])) {
+    $vars['report_subtype'] = 'trafficcategory';
   }
-  */
 
-  $timeops = 'l30d';
-  //$timeops = 'yesterday';
-  list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
+  $indexBy = $vars['indexBy'] = $vars['report_modes'][0];
+  $vars['indexByLabel'] = $vars['report_info']['title'];
+
+  $output = '';
 
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->setContext($vars['context']);
   $ga_data->setContextMode($vars['context_mode']);
-  $ga_data->setReportModes($report_modes);
+  $ga_data->setReportModes($vars['report_modes']);
   $ga_data->setAttributeInfoAll($vars['attribute_info']);
-  $ga_data->buildFilters($filters, $vars['subsite']);
-  $ga_data->setDateRange($start_date, $end_date);
-  $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
+  $ga_data->buildFilters($vars['filters'], $vars['subsite']);
+  $ga_data->setDateRange($vars['start_date'], $vars['end_date']);
+  $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $vars['cache_options']));
 //$ga_data->setDebug(1);
   $ga_data->setRequestSetting('indexBy', $indexBy);
   $ga_data->setRequestSetting('details', 0);
-  
+
   if ($indexBy == 'trafficcategory') {
-    $ga_data->setRequestDefaultParam('max_results', 10 * $feed_rows);
+    $ga_data->setRequestDefaultParam('max_results', 10 * $vars['feed_rows']);
   }
   else {
-    $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
+    $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
   }
   $ga_data->loadFeedData('entrances'); 
-  $ga_data->loadFeedData('entrances_valuedevents');  
+  $ga_data->loadFeedData('entrances_events_valued');
 
   $d = $ga_data->data;
 
@@ -101,63 +86,103 @@ function intel_trafficsource_list_report($vars) {
       if ($indexBy == 'referralHostpath') {
         $val = str_replace('/', '|', $val);
       }
+      $filter = 'ts-' . $indexBy . ':' . rawurlencode($val);
+      $link_keys = array();
+      $link_keys[] = array(
+        'type' => 'scorecard',
+      );
+      $link_keys[] = array(
+        'type' => 'content',
+      );
+      $link_keys[] = array(
+        'type' => 'visitor',
+      );
+      if ($vars['report_subtype'] == 'source') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'medium',
+        );
+      }
+      elseif ($vars['report_subtype'] == 'medium') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'source',
+        );
+      }
+      elseif ($vars['report_subtype'] == 'searchengine') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'keyword',
+        );
+      }
+      elseif ($vars['report_subtype'] == 'searchkeyword') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'source',
+        );
+      }
+      elseif ($vars['report_subtype'] == 'referralhostname') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'referralhostpath',
+        );
+      }
+      elseif ($vars['report_subtype'] == 'socialnetwork') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'referralhostpath',
+        );
+      }
+      $d[$indexBy][$index]['links'] = intel_build_report_links($link_keys, $filter, $vars['report_params']);
+
+      /*
       $params = $vars['report_params'];
-      $params['ft'] = 'trafficsource';
-      $params['f'] = $indexBy . ':' . urlencode($val);
+      $params['_filter_add'] = $filter;
+      $d[$indexBy][$index]['links'][] = l(t('+'), intel_build_report_path('scorecard', $params));
+
+      $params = $vars['report_params'];
+      $params['_filter_only'] = $filter;
+
 
       $d[$indexBy][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
       $d[$indexBy][$index]['links'][] = l(t('content'), intel_build_report_path('content', $params));
       $d[$indexBy][$index]['links'][] = l(t('visitors'), intel_build_report_path('visitor', $params));
+      if ($vars['report_subtype'] == 'source') {
+        $link_keys[] = array(
+          'type' => 'trafficsource',
+          'subtype' => 'medium',
+        );
+        $d[$indexBy][$index]['links'][] = l(t('mediums'), intel_build_report_path('trafficsource', $vars['report_params'], 'medium', $filter));
+      }
+      elseif ($vars['report_subtype'] == 'medium') {
+        $d[$indexBy][$index]['links'][] = l(t('sources'), intel_build_report_path('trafficsource', $vars['report_params'], 'source', $filter));
+      }
+      elseif ($vars['report_subtype'] == 'searchengine') {
+        $d[$indexBy][$index]['links'][] = l(t('keywords'), intel_build_report_path('trafficsource', $vars['report_params'], 'keyword', $filter));
+      }
+      elseif ($vars['report_subtype'] == 'searchkeyword') {
+        $d[$indexBy][$index]['links'][] = l(t('source'), intel_build_report_path('trafficsource', $vars['report_params'], 'source', $filter));
+      }
+      elseif ($vars['report_subtype'] == 'referralhostname') {
+        $d[$indexBy][$index]['links'][] = l(t('pages'), intel_build_report_path('trafficsource', $vars['report_params'], 'referralhostpath', $filter));
+      }
+      elseif ($vars['report_subtype'] == 'socialnetwork') {
+        $d[$indexBy][$index]['links'][] = l(t('pages'), intel_build_report_path('trafficsource', $vars['report_params'], 'referralhostpath', $filter));
+      }
+
+      intel_build_report_links($link_keys, $filter, $vars['report_params']);
+      */
     }
-  }    
+  }
 
   // order date data cronologically
   //ksort($d['content']);
   
 //dsm($d);
   
-  $vars = array(
-    'data' => $d,
-    'row_count' => $row_count,
-    'number_of_days' => $number_of_days,
-    'start_date' => $start_date,
-    'end_date' => $end_date,
-    'targets' => intel_get_targets(),
-    'analysis_days' => $number_of_days,
-    'context' => $context,
-    'context_mode' => $context_mode,
-    'indexBy' => $indexBy,
-    'indexByLabel' => $indexByLabel,
-    'report_modes' => $report_modes,
-  );
-  $output .= theme_intel_trafficsource_list_report($vars);
+  $vars['data'] = $d;
+  $output .= theme_intel_report($vars);
 
-  $output .= t("Timeframe: %start_date - %end_date %refresh", array(
-    '%start_date' => date("Y-m-d H:i", $start_date),
-    '%end_date' => date("Y-m-d H:i", $end_date),
-    '%refresh' => (!empty($cache_options['refresh'])) ? '(refresh)' : '',
-  ));  
-  
-  return $output;  
+  return $output;
 }
 
-function theme_intel_trafficsource_list_report($vars) {
-  intel_include_library_file("reports/class.trafficsource_report_view.php");
-  
-  $output = '';
-
-  $report_view = new LevelTen\Intel\TrafficsourceReportView();
-  $report_view->setData($vars['data']);
-  $report_view->setTableRowCount($vars['row_count']);
-  $report_view->setModes($vars['report_modes']);
-  $report_view->setParam('context', $vars['context']);
-  $report_view->setParam('context_mode', $vars['context_mode']);
-  $report_view->setParam('indexBy', $vars['indexBy']);
-  $report_view->setParam('indexByLabel', $vars['indexByLabel']);
-  $report_view->setDateRange($vars['start_date'], $vars['end_date']);
-  $report_view->setTargets(intel_get_targets());
-  \LevelTen\Intel\ReportPageHeader::setAddScriptCallback('intel_report_add_js_callback');
-  $output .= $report_view->renderReport();
-  
-  return $output; 
-}

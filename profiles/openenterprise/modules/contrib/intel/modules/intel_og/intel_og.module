@@ -350,7 +350,7 @@ function intel_og_artifact_load_by_vars($vars) {
 }
 
 /**
- * Implements hook_intel_page_intel_pushes
+ * Implements hook_intel_page_intel_pushes()
  *
  */
 function intel_og_intel_page_intel_pushes() {
@@ -360,6 +360,7 @@ function intel_og_intel_page_intel_pushes() {
     return;
   }
 
+  /*
   $l10i_var_action = array(
     'method' => '_setIntelVar',
     'scope' => 'page',
@@ -368,6 +369,8 @@ function intel_og_intel_page_intel_pushes() {
     'value' => $og_context['gid'],
   );
   intel_add_page_intel_push($l10i_var_action);
+  */
+  intel_add_page_intel_push(array('set', "pa.og", $og_context['gid']));
   drupal_add_js(drupal_get_path('module', 'intel_og') . '/intel_og.page.js');
   $time = REQUEST_TIME;
   $params = session_get_cookie_params();

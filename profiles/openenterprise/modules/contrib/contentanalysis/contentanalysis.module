@@ -268,7 +268,7 @@ function contentanalysis_analysis_form($form_state, $analysis = array(), $node =
   }
   // generate code to secure form
   if ((!isset($_SESSION['contentanalysis']) || !isset($_SESSION['contentanalysis']['code'])) || !($code = $_SESSION['contentanalysis']['code'])) {
-    $code = drupal_get_token('contentanalysis');
+    $code = md5(rand());
     $_SESSION['contentanalysis']['code'] = $code;
   }
   $report_style = variable_get('contentanalysis_node_report_display', 'both');
@@ -298,7 +298,7 @@ function contentanalysis_analysis_form($form_state, $analysis = array(), $node =
         'code' => $code,
         'display_dialog' => $display_dialog,
         'display_inline' => $display_inline,
-      )),
+      )), 
     'setting');
     $js_added = TRUE;
   }
@@ -457,7 +457,6 @@ function contentanalysis_analyze_js() {
   $analysis = array();
   if ($_SESSION['contentanalysis']['code'] != $_POST['code']) {
     watchdog('contentanalysis', 'Blocked invalid attempt ' . check_plain($_SESSION['contentanalysis']['code']) . ' != ' . check_plain($_POST['code']));
-    drupal_access_denied();
     drupal_exit();
   }
   

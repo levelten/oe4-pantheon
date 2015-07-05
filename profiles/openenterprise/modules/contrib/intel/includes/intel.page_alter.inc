@@ -12,6 +12,47 @@ function intel_page_alter(&$page) {
 
   $api_level = intel_api_level();
 
+  $parsed_url = intel_parse_cms_url();
+
+  $config = array(
+    'debug' => intel_debug_mode(),
+    // cmsHostpath, modulePath & apiPath are not standard io settings. They are used
+    // exclusivly by intel module js.
+    'cmsHostpath' => $parsed_url['hostpath'],
+    'modulePath' => drupal_get_path('module', 'intel'),
+    'libPath' => intel_get_library_path(),
+    //'cms_hostpath' => $parsed_url['hostpath'],
+    //'module_path' => drupal_get_path('module', 'intel'),
+    'systemPath' => $_GET['q'],
+    'systemHost' => $parsed_url['host'],
+    'systemBasepath' => $parsed_url['base_path'],
+    'srl' => $_GET['q'],
+    //'lib_path' => intel_get_library_path(),
+    'pageTitle' => '(not set)',
+    'trackAnalytics' => 1, // this is set in intel_js_alter if ga script exists
+    'trackAdhocCtas' => ($api_level == 'pro') ? 'track-cta' : '',
+    'trackAdhocEvents' => 'track-event',
+    'trackForms' => array(),
+    'trackRealtime' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
+    'isLandingpage' => 0,
+    'scorings' => intel_get_scorings('js_setting'),
+    'storage' => array(
+      'page' => array(
+	      'analytics' => array(),
+	    ),
+      'session' => array(
+	      'analytics' => array(),
+	    ),
+      'visitor' => array(
+	      'analytics' => array(),
+	    ),
+    ),
+  );
+
+  if ($a = variable_get('intel_domain_name', '')) {
+    $config['cookieDomain'] = $a;
+  }
+
   $path_is_admin = path_is_admin(current_path());
   
   $ga_va = array();
@@ -21,14 +62,14 @@ function intel_page_alter(&$page) {
     }
   }  
 
-  $is_landingpage = 0;
-  
   $entity = '';
   $entity_type = '';
   $intel_events = intel_get_intel_event_info();
   $page_events = array();
   $page_attrs = array();
   $visitor_attrs = array();
+
+  intel_add_page_intel_push(array('set', "p.systemPath", $_GET['q']));
 
   // if entity not provided, lookup based on menu path
   if (arg(0) == 'node') {
@@ -40,22 +81,24 @@ function intel_page_alter(&$page) {
     $entity_type = 'user';
   }
 
-  $page_title = isset($entity->title) ? $entity->title : drupal_get_title();
+  $config['pageTitle'] = isset($entity->title) ? $entity->title : drupal_get_title();
 
   if ($entity_type && !empty($entity)) {
-    $attrs = intel_get_entity_intel_attributes($entity, $entity_type);
+    $attrs = intel_get_entity_intel_attributes($entity, $entity_type, 1);
     $page_attrs = $attrs['page'];
     $visitor_attrs = $attrs['visitor'];
+    $page_events = $attrs['events'];
   }
 
   if ($path_is_admin) {
     $intent = 'a';
   }
 
-  if (isset($page_attrs['i']) && $page_attrs['i'] == 'l') {
-    $is_landingpage = 1;
+  // check if page intent is landing page
+  if (isset($page_attrs['i']) && isset($page_attrs['i']['l'])) {
+    $config['isLandingpage'] = 1;
     if ($api_level == 'pro') {
-      $page_events['landing_page_view'] = $intel_events['landing_page_view'];
+      //$page_events['landing_page_view'] = $intel_events['landing_page_view'];
     }
   }
 
@@ -77,39 +120,48 @@ function intel_page_alter(&$page) {
     }
   }
 
-  $l10i_var_action = array(
-    'method' => '_setIntelVar',
-    'scope' => 'page',
-    'namespace' => 'analytics',
-  );
+  $page_attrs_info = intel_get_page_attribute_info();
   foreach ($page_attrs AS $key => $value) {
+    if (isset($page_attrs_info[$key]['storage']) && is_array($page_attrs_info[$key]['storage'])) {
+      foreach ($page_attrs_info[$key]['storage'] AS $namespace => $sv) {
+        if (!isset($config['storage']['page'][$namespace])) {
+          $config['storage']['page'][$namespace] = array();
+        }
+        $config['storage']['page'][$namespace][$key] = $sv;
+      }
+      // special exception for published age since it needs to be calculated in JS.
+      if ($key == 'pd') {
+        $config['storage']['page']['analytics']['pda'] = $page_attrs_info['pda']['storage']['analytics'];
+      }
+    }
     if (is_array($value)) {
       foreach ($value AS $key2 => $value2) {
-        $l10i_var_action['keys'] = "$key.$key2";
-        $l10i_var_action['value'] = $value2;
-        intel_add_page_intel_push($l10i_var_action);
+        intel_add_page_intel_push(array('set', "pa.$key.$key2", $value2));
       }
     }
     else {
-      $l10i_var_action['keys'] = $key;
-      $l10i_var_action['value'] = $value;
-      intel_add_page_intel_push($l10i_var_action);      
+      intel_add_page_intel_push(array('set', "pa.$key", $value));
     }
   }
-  
-  $l10i_var_action['scope'] = 'visitor';
+
+  $visitor_attrs_info = intel_get_visitor_attribute_info();
   foreach ($visitor_attrs AS $key => $value) {
+    if (isset($visitor_attrs_info[$key]['storage'])) {
+      foreach ($visitor_attrs_info[$key]['storage'] AS $namespace => $sv) {
+        if (!isset($config['storage']['visitor'][$namespace])) {
+          $config['storage']['visitor'][$namespace] = array();
+        }
+        $config['storage']['visitor'][$namespace][$key] = $sv;
+      }
+    }
+
     if (is_array($value)) {
       foreach ($value AS $key2 => $value2) {
-        $l10i_var_action['keys'] = "$key.$key2";
-        $l10i_var_action['value'] = $value2;
-        intel_add_page_intel_push($l10i_var_action);
+        intel_add_page_intel_push(array('set', "va.$key.$key2", $value2));
       }
     }
     else {
-      $l10i_var_action['keys'] = $key;
-      $l10i_var_action['value'] = $value;
-      intel_add_page_intel_push($l10i_var_action);      
+      intel_add_page_intel_push(array('set', "va.$key", $value));
     }
   }
 
@@ -119,13 +171,17 @@ function intel_page_alter(&$page) {
 
   foreach ($page_events AS $key => $value) {
     $l10i_event_action = $value;
-    $l10i_event_action['method'] = '_addIntelEvent';
+    //$l10i_event_action['method'] = '_addIntelEvent';
+    //$l10i_event_action['method'] = 'event';
+
     if (!empty($l10i_event_action['valued_event'])) {
       $l10i_event_action['category'] .= '!';
     }
+
     $l10i_event_action = intel_filter_event_for_push($l10i_event_action);
-    intel_add_page_intel_push($l10i_event_action);
+    intel_add_page_intel_push(array('event', $l10i_event_action));
   }
+
 
   //intel_check_user_login($page);
 
@@ -134,7 +190,7 @@ function intel_page_alter(&$page) {
   // check form processing
   // this is a hack to exclude webform's submission redirect page
   $track_forms = array();
-  if (isset($node->type) && ($node->type == 'webform')) {
+  if ($entity_type == 'node' && isset($entity->type) && ($entity->type == 'webform')) {
     // check if page is a webform submit validation
     if (!empty($_POST['form_id']) && (substr($_POST['form_id'], 0, 20) == 'webform_client_form_')) {
       $track_forms = 0;
@@ -148,10 +204,10 @@ function intel_page_alter(&$page) {
   // call hook for modules to add page pushes
   module_invoke_all('intel_page_intel_pushes');
 
-
   $pushes = intel_get_flush_page_intel_pushes();
 
   // add page title and system path to any IntelEvent that is missing values
+  /*
   foreach ($pushes AS $i => $push) {
     if ($push['method'] == '_addIntelEvent') {
       if (empty($push['action'])) {
@@ -162,34 +218,36 @@ function intel_page_alter(&$page) {
       }
     }
   }
+  */
+
+  if (isset($pushes['event']) && is_array($pushes['event'])) {
+    foreach ($pushes['event'] AS $i => $push) {
+      if (empty($push['action']) && empty($push['eventAction']) ) {
+        $pushes['event'][$i]['eventAction'] = $config['pageTitle'];
+      }
+      if (empty($push['label']) && empty($push['eventLabel'])) {
+        $pushes['event'][$i]['eventLabel'] = $_GET['q'];
+      }
+    }
+  }
+
   //watchdog('intel_page_alter_pushes', print_r($pushes, 1));
 
   $parsed_url = intel_parse_cms_url();
   $js = array(
     'intel' => array(
-      'debug' => intel_debug_mode(),
-      'cms_hostpath' => $parsed_url['hostpath'],
-      'module_path' => drupal_get_path('module', 'intel'),
-      'system_path' => $_GET['q'],
-      'lib_path' => intel_get_library_path(),
-      'page_title' => $page_title,
-      'track_analytics' => 0, // this is set in intel_js_alter if ga script exists
-      'track_adhoc_ctas' => ($api_level == 'pro') ? 'track-cta' : '',
-      'track_adhoc_events' => 'track-event',
-      'track_forms' => $track_forms,
-      'track_realtime' => variable_get('intel_track_realtime', INTEL_TRACK_REALTIME_DEFAULT),
-      'is_landingpage' => $is_landingpage,
+      'config' => $config,
       'pushes' => $pushes,
-      'scorings' => intel_get_scorings('js_setting'),
     ),
-    'disqus' => array(
-      'callback_onnewcomment' => 'l10iDisqus.trackComment',
-    ),
+    //'disqus' => array(
+    //  'callback_onnewcomment' => 'l10iDisqus.trackComment',
+    //),
   );
+
   if ($ga_domain = variable_get('intel_domain_name', '')) {
-    $js['intel']['ga']['_setDomainName'] = $ga_domain;
+    $js['intel']['config']['ga']['_setDomainName'] = $ga_domain;
   }
-  
+
   // Get page status code for visibility filtering.
   $id = variable_get('googleanalytics_account', '');
   $status = drupal_get_http_header('Status');
@@ -200,15 +258,16 @@ function intel_page_alter(&$page) {
   $track = 1;
   if (!(_googleanalytics_visibility_pages() || in_array($status, $trackable_status_codes)) && _googleanalytics_visibility_user($user)) {
     $track = 0;
-    $js['intel']['track_analytics'] = 0;
-  } 
+    // TODO: Intel GA tracking should track google_analytics module settings
+    //$js['intel']['config']['track_analytics'] = 0;
+  }
   if (path_is_admin(current_path())) {
     $track = 0;  
   }
-  if (!$track) {    
-    $js['intel']['track_forms'] = 0;
-    $js['intel']['track_adhoc_ctas'] = 0;
-    $js['intel']['track_adhoc_events'] = 0;
+  if (!$track) {
+    $js['intel']['config']['track_forms'] = 0;
+    $js['intel']['config']['track_adhoc_ctas'] = 0;
+    $js['intel']['config']['track_adhoc_events'] = 0;
   }
   else {
     $scripts = intel_intel_scripts();
@@ -235,7 +294,8 @@ function intel_page_alter(&$page) {
   */
   
   $script = intel_get_js_embed('l10i', 'local');
-  drupal_add_js($script, array('type' => 'inline', 'scope' => 'header', 'weight' => -1, 'group' => JS_LIBRARY));
+  //drupal_add_js($script, array('type' => 'inline', 'scope' => 'header', 'weight' => -1, 'group' => JS_LIBRARY));
+  drupal_add_js($script, array('type' => 'inline', 'scope' => 'header', 'weight' => 0));
 
   /**
    * check admin alter enhancements
@@ -255,10 +315,11 @@ function intel_page_alter(&$page) {
   drupal_add_js($js, 'setting');
 }
 
-function intel_get_entity_intel_attributes($entity = '', $entity_type = '') {
+function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $include_events = 0) {
   global $user;
   $visitor_attrs = array();
   $page_attrs = array();
+  $page_events = array();
 
   // if entity not found, return empty attributes
   if (!$entity || !$entity_type) {
@@ -267,26 +328,144 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '') {
       'visitor' => $visitor_attrs,
     );
   }
+//dsm($entity);
+  $entity_info = entity_get_info($entity_type);
+  $entity_attrs = array();
+
+  $page_attr_info = intel_get_page_attribute_info();
+
+  // resource type = entity_type
+  $page_attrs['rt'] = $entity_type;
+  // resource sub type = entity bundle
+  if (isset($entity_info['entity keys']['bundle']) && isset($entity->{$entity_info['entity keys']['bundle']})) {
+    $page_attrs['rt2'] = $entity->{$entity_info['entity keys']['bundle']};
+    $page_attrs['rt2'] = str_replace('enterprise_', '', $page_attrs['rt2']); // trim enterprise namespace in Open Enterprise
+  }
+  // resource id = entity_id
+  if (isset($entity_info['entity keys']['id']) && isset($entity->{$entity_info['entity keys']['id']})) {
+    $page_attrs['rk'] = $entity->{$entity_info['entity keys']['id']};
+    $entity_attrs = intel_entity_attr_load_by_params($entity_type, $page_attrs['rk']);
+
+    if (is_array($entity_attrs)) {
+      foreach ($entity_attrs AS $ea) {
+        if (!isset($page_attr_info[$ea->attr_key])) {
+          continue;
+        }
+
+        if ($page_attr_info[$ea->attr_key]['type'] == 'list' || $page_attr_info[$ea->attr_key]['type'] == 'vector') {
+          $value_str = intel_index_encode($ea->attr_key);
+          if (!isset($page_attrs[$ea->attr_key])) {
+            $page_attrs[$ea->attr_key] = array();
+          }
+          if (!empty($page_attr_info[$ea->attr_key]['encode']) && isset($ea->vsid)) {
+            $index = intel_index_encode($ea->vsid);
+          }
+          else {
+            $index = isset($ea->value_str) ? $ea->value_str : $ea->value;
+          }
+          if ($page_attr_info[$ea->attr_key]['type'] == 'vector') {
+            $page_attrs[$ea->attr_key][$index] = !empty($ea->value_num) ? $ea->value_num : 0;
+          }
+          else {
+            $page_attrs[$ea->attr_key][$index] = '';
+          }
+        }
+        else {
+          $page_attrs[$ea->attr_key] = $ea->value;
+          if (!empty($page_attr_info[$ea->attr_key]['encode']) && isset($ea->vsid)) {
+            $page_attrs[$ea->attr_key] = intel_index_encode($ea->vsid);
+          }
+        }
+      }
+    }
+
+    // create an empty entity_attr in case some attr needs to be saved
+    $entity_attr = (object)array(
+      'entity_type' => $page_attrs['rt'],
+      'entity_id' => $page_attrs['rk'],
+    );
+  }
+  // resource vid = entity vid
+  if (isset($entity_info['entity keys']['revision']) && isset($entity->{$entity_info['entity keys']['revision']})) {
+    //$page_attrs['rvi'] = $entity->{$entity_info['entity keys']['revision']};
+  }
+
+  // resource table = entity label
+  if (isset($entity_info['entity keys']['label']) && isset($entity->{$entity_info['entity keys']['label']})) {
+    //$page_attrs['rtl'] = $entity->{$entity_info['entity keys']['label']};
+  }
+  // resource language
+  if (isset($entity_info['entity keys']['language']) && isset($entity->{$entity_info['entity keys']['language']}) && ($entity->{$entity_info['entity keys']['language']} != LANGUAGE_NONE)) {
+    $page_attrs['lang'] = $entity->{$entity_info['entity keys']['language']};
+  }
+
+  // ? not sure if this is needed or enhances performance
+  if (isset($entity->created)) {
+    $val = date('YmdHiw', $entity->created);
+    if (!empty($page_attrs['pd']) && $page_attrs['pd'] != $val) {
+      $page_attrs['pd'] = $val;
+      if (isset($entity_attr)) {
+        $entity_attr->attr_key = 'pd';
+        $entity_attr->value = $val;
+        intel_entity_attr_save($entity_attr);
+      }
+    }
+    /*
+    $page_attrs['pd'] = $entity->created;
+    $val = (int)date('w', $entity->created);
+
+    // day of week
+    if (!isset($page_attrs['pdw']) || ($page_attrs['pdw'] == $val)) {
+      $page_attrs['pdw'] = $val;
+      if (isset($entity_attr)) {
+        $entity_attr->attr_key = 'pdw';
+        $entity_attr->value = $val;
+        intel_entity_attr_save($entity_attr);
+      }
+    }
+
+    // hour of day
+    $val = (int)date('Hi', $entity->created);
+    if (!isset($page_attrs['pdt']) || ($page_attrs['pdt'] == $val)) {
+      $page_attrs['pdt'] = $val;
+      if (isset($entity_attr)) {
+        $entity_attr->attr_key = 'pdt';
+        $entity_attr->value = $val;
+        intel_entity_attr_save($entity_attr);
+      }
+    }
+    */
+  }
+
+  $uri = entity_uri($entity_type, $entity);
+  if (!empty($uri['path'])) {
+    $page_attrs['rl'] = $uri['path'];
+    //$page_attrs['url'] = url($page_attrs['rl']);
+  }
+  //dsm($page_attrs);
+
+
+
+
+//dsm($entity->uri);
 
   if ($entity_type == 'node') {
     $entity_bundle = $entity->type;
     $page_title = $entity->title;
 
-    $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
-
-    $page_attrs['pt'] = $entity->created;
-    $page_attrs['et'] = 'n';
-    $page_attrs['ct'] = str_replace('enterprise_', '', $entity->type); // trim enterprise namespace in Open Enterprise
     $path_entity = 1;
   }
   elseif ($entity_type == 'user') {
     $entity_bundle = 'user';
 
-    $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
-
-    $page_attrs['pt'] = $entity->created;
-    $page_attrs['et'] = 'u';
+    //$page_attrs['pt'] = $entity->created;
+    //$page_attrs['et'] = 'user';
     $path_entity = 1;
+  }
+
+  $page_entity_settings = array();
+  if (!empty($entity_type) && !empty($entity_bundle)) {
+    $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
   }
 
   $lang = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
@@ -380,21 +559,34 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '') {
   }
 
   // set attached intel events if intel_event_col field exists
-  if (!empty($entity->field_intel_event_col[$lang]) && is_array($entity->field_intel_event_col[$lang])) {
-    foreach ($entity->field_intel_event_col[$lang] AS $i => $e) {
-      $collection = field_collection_item_load($e['value']);
-      $key = $collection->field_intel_event[$lang][0]['value'];
-      $page_events[$key] = $intel_events[$key];
-      if(!empty($collection->field_intel_event_value[$lang][0]['value'])) {
-        $page_events[$key]['value'] = $collection->field_intel_event_value[$lang][0]['value'];
+  // TODO get page events working
+
+  if ($include_events) {
+    if (!empty($entity->field_intel_event_col[$lang]) && is_array($entity->field_intel_event_col[$lang])) {
+      $intel_event_info = intel_get_intel_event_info();
+      foreach ($entity->field_intel_event_col[$lang] AS $i => $e) {
+        $collection = field_collection_item_load($e['value']);
+        $key = $collection->field_intel_event[$lang][0]['value'];
+        $page_events[$key] = $intel_event_info[$key];
+
+        if(!empty($collection->field_intel_event_value[$lang][0]['value'])) {
+          $page_events[$key]['value'] = $collection->field_intel_event_value[$lang][0]['value'];
+        }
+
       }
     }
   }
 
-  return array(
+  $attrs = array(
     'page' => $page_attrs,
     'visitor' => $visitor_attrs,
+    'events' => $page_events,
   );
+
+  // allow modules to add/alter attributes
+  drupal_alter('intel_entity_intel_attributes', $attrs, $entity, $entity_type);
+
+  return $attrs;
 }
 
 function intel_add_page_intel_push($push, $index = '') {
@@ -415,10 +607,33 @@ function intel_page_intel_pushes($action = 'get', $push = array(), $index = '') 
     $_SESSION['intel_page_pushes'] = array();
   }
   if ($action == 'add') {
-    if (!$index) {
-      $index = 'i' . count($_SESSION['intel_page_pushes']);
+    // if push is assoc array containing method key, use that key
+    if (!empty($push['method'])) {
+      $method = $push['method'];
+      unset($push['method']);
     }
-    $_SESSION['intel_page_pushes'][$index] = $push;
+    else {
+      $method = array_shift($push);
+    }
+
+    if (!isset($_SESSION['intel_page_pushes'][$method])) {
+      $_SESSION['intel_page_pushes'][$method] = array();
+    }
+
+    if ($method == 'set') {
+      $index = $push[0];
+      $value = $push[1];
+    }
+    else if ($method == 'event') {
+      $index = count($_SESSION['intel_page_pushes'][$method]);
+      $value = $push[0];
+    }
+    else {
+      $index = count($_SESSION['intel_page_pushes'][$method]);
+      $value = $push;
+    }
+
+    $_SESSION['intel_page_pushes'][$method][$index] = $value;
   }
   $ret = $_SESSION['intel_page_pushes'];
   if ($action == 'get_flush') {
@@ -450,6 +665,7 @@ function _intel_ga_event_sanitize_events($ga_events) {
  * @param $event
  */
 function intel_filter_event_for_push($event) {
+  /*
   if (isset($event['valued_event'])) {
     unset($event['valued_event']);
   }
@@ -473,6 +689,65 @@ function intel_filter_event_for_push($event) {
   }
   if (isset($event['key'])) {
     unset($event['key']);
+  }
+  */
+
+  // translate from classic format to UA format
+  $trans = array(
+    'category' => 'eventCategory',
+    'action' => 'eventAction',
+    'label' => 'eventLabel',
+    'value' => 'eventValue',
+    'selector' => 1,
+    'selector_filter' => 'selectorFilter',
+    'event' => 'onEvent',
+    'noninteraction' => 'nonInteraction',
+    'callback' => 'triggerCallback',
+    'refresh_force' => 'refreshForce',
+    'method' => 1,
+    'eventCategory' => 1,
+    'eventAction' => 1,
+    'eventValue' => 1,
+    'nonInteraction' => 1,
+    'onEvent' => 1,
+    'onSelector' => 1,
+    'selectorFilter' => 1,
+    'refreshForce' => 1,
+  );
+  foreach ($event as $k => $v) {
+    if (isset($trans[$k])) {
+      $t = $trans[$k];
+
+      if (empty($v)) {
+        if ($k == 'value') {
+          if ($v !== 0 && $v !== "0") {
+            unset($event[$k]);
+            continue;
+          }
+        }
+        else {
+          unset($event[$k]);
+          continue;
+        }
+
+      }
+
+      if (is_string($t)) {
+        $event[$t] = $v;
+        unset($event[$k]);
+      }
+
+
+
+    }
+    else {
+      unset($event[$k]);
+    }
+
+  }
+
+  if (isset($event['triggerCallback']) && !$event['triggerCallback']) {
+    unset($event['triggerCallback']);
   }
 
   return $event;
@@ -672,11 +947,17 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
       $script .= 'var _l10iss = {"apiUrl": "' . $api_hostpath . '/", "apiLevel": "' . $api_level . '"};' . $terminator;
     }
     $l10iq_pushes = array();
-    $l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
+    //$l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
+    $params = array();
+    $params['name'] = $l10i_ga_tracker_prefix;
     if ($l10i_domain_name) {
-      $l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
+      $params['cookieDomain'] =  $l10i_domain_name;
+      //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
     }
-    $l10iq_pushes[] = array('_setOptions', (object) array());
+    $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
+
+    //$l10iq_pushes[] = array('_setOptions', (object) array());
+    $l10iq_pushes[] = array('set', (object) array());
 
     // trigger alter to enable other modules to add pushes
     drupal_alter('intel_l10iq_pushes', $l10iq_pushes);
@@ -704,12 +985,26 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
           }
           $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
 
+          $script .= "d=q=c='';t=new Date().getTime();" . $terminator;
+          $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
+          $script .= "(function(i,s,o,g,r,a,m){" . $terminator;
+          $script .= "i['OEIntelObject']=r;" . $terminator;
+          $script .= "i[r]=i[r] || function() {" . $terminator;
+          $script .= "(i[r].q=i[r].q||[]).push(arguments)" . $terminator;
+          $script .= "}," . $terminator;
+          $script .= "i[r].l=1*new Date();" . $terminator;
+          $script .= "a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" . $terminator;
+          //$script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','_l10iq');" . $terminator;
+          $script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','io');" . $terminator;
+
+          /*
           $script .= "(function() {" . $terminator;
           $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
           $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
           $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
           $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
           $script .= "})();" . $terminator;
+          */
         }
         else { // standard mode
           $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : '';
@@ -742,7 +1037,6 @@ function intel_js_alter(&$javascript) {
       }
     }
   }
-
   // search through javascript settings for main intel and google analytics settings
   $i = 0;
   $intel_i = -1;
@@ -751,7 +1045,8 @@ function intel_js_alter(&$javascript) {
     if (substr($javascript[$i]['data'], 0, 10) == 'var _l10iq') {
       $intel_i = $i;
     }
-    if (substr($javascript[$i]['data'], 0, 8) == 'var _gaq') {
+    //if (substr($javascript[$i]['data'], 0, 8) == 'var _gaq') {
+    if (substr($javascript[$i]['data'], 0, 8) == '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]') {
       $ga_i = $i;
     }
     // if we have found both intel & ga js, exit loop
@@ -765,11 +1060,30 @@ function intel_js_alter(&$javascript) {
     $options = drupal_array_merge_deep_array($options);
     // if google_analtyics script is added, turn on track_analtyics flag
     if ($ga_i >= 0) {
-      $options['track_analytics'] = 1;
+      $options['config']['track_analytics'] = 1;
+      //$javascript[$intel_i]['weight'] = $javascript[$ga_i]['weight'] + 1;
     }
-    $json = drupal_json_encode($options);
 
-    $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["_setOptions",{}]);', '_l10iq.push(["_setOptions",' . $json . ']);', $javascript[$intel_i]['data']);
+    // embed new UA style calls using new format
+    $pushstr = '';
+    /*
+    foreach ($options['pushes'] AS $method => $args) {
+      // only move newer style calls withough leading _
+      if (substr($method, 0 , 1) != '_') {
+        $pushstr .= "oei('$method', " . json_encode($args) . ");\n";
+        unset($options['pushes'][$method]);
+      }
+    }
+    */
+    //$json = drupal_json_encode($options);
+    $str = '_l10iq.push(["set", "config", ' . drupal_json_encode($options['config']) . ']);' . "\n";
+    if (isset($options['pushes']) && is_array($options['pushes'])) {
+      foreach ($options['pushes'] as $cm => $push) {
+        $str .= '_l10iq.push(["' . $cm . '",' . drupal_json_encode($push) . ']);' . "\n";
+      }
+    }
+    $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["set",{}]);', $str, $javascript[$intel_i]['data']) . $pushstr;
+    //$javascript[$intel_i]['data'] = str_replace('_l10iq.push(["set",{}]);', '_l10iq.push(["set",' . $json . ']);', $javascript[$intel_i]['data']) . $pushstr;
   }
 
   if ($debug && ($ga_i >= 0)) {
@@ -794,6 +1108,8 @@ function intel_check_form_submission($page) {
   if ($api_level != 'pro') {
     return;
   }
+
+$debug = 1;
 
   // check for webform submission
   $track = array(
@@ -833,7 +1149,7 @@ function intel_check_form_submission($page) {
   $submission0 = intel_submission_load_by_vars($vars);
 
   // TODO check this data for a while to assure uniqueness of fsids, then exit if previous submission exists.
-  if (!empty($submission0->sid) && empty($_GET['debug'])) {
+  if (!empty($submission0->sid) && empty($_GET['debug']) && empty($debug)) {
     // form submission already created
     $vars = array(
       '!submission0' => print_r($submission0, 1),
@@ -872,7 +1188,7 @@ function intel_check_form_submission($page) {
   }
   $api_data = $visitor->getApiVisitor();
 
-  if (!empty($_GET['debug'])) {
+  if (!empty($_GET['debug']) || !empty($debug)) {
     dpm('$visitor=');//
     dpm($visitor);//
 
@@ -911,40 +1227,44 @@ function intel_check_form_submission($page) {
   
   // update visitor attributes in analytics cookies
   // TODO check if this should be done here
+  // va cookie is no longer supported in classic analytics
+  // TODO: change to work with l10i_va cookie
   $va = $visitor->apiVisitor->extractCookieVa();
   if (isset($va)) {
     $visitor->setVar('data', 'analytics', '', $va);
   }
-  
+dsm('$submit_context');
+dsm($submit_context);
   $submission->vid = $visitor->vid;
   // check if api vtk was loaded succesfully
   if (!empty($visitor->apiVisitor->vtk)) {
-    $fsi = $visitor->getVar('api_session', 'form_submit', '_updated'); 
-    if (empty($fsi)) {
-      $fsi = $visitor->apiVisitor->getFlag('lfs');  // _updated is a better key for cross site forms
-    }
+
 
     // if submit context not set by form_check hook, fetch it from api
     if (empty($submit_context)) {
-      $submit_context = $visitor->getVar('api_session', 'form_submit', $fsi);
+      $fsi = $visitor->getVar('api_session', 'formSubmit', '_updated');
+      if (empty($fsi)) {
+        $fsi = $visitor->apiVisitor->getFlag('lfs');  // _updated is a better key for cross site forms
+      }
+      $submit_context = $visitor->getVar('api_session', 'formSubmit', $fsi);
     }
     if (!empty($submit_context)) {
-      $referrer = !empty($submit_context['system_path']) ? $submit_context['system_path'] : $submit_context['location'];
+      $referrer = !empty($submit_context['systemPath']) ? $submit_context['systemPath'] : $submit_context['location'];
       // strip query string
       $a = explode("?", $referrer);
       $referrer = $a[0];
-      $urlc = parse_url($submit_context['location']);
-      $submission->form_page_host = $urlc['host'];
-      $submission->form_page_path = $urlc['path'];
+      $lp_urlc = parse_url($submit_context['location']);
+      $submission->form_page_host = $lp_urlc['host'];
+      $submission->form_page_path = $lp_urlc['path'];
 
-      if (!empty($submit_context['system_path'])) {
-        $a = explode('/', $submit_context['system_path']);
+      if (!empty($submit_context['systemPath'])) {
+        $a = explode('/', $submit_context['systemPath']);
         $lp_node = node_load($a[1]);
         $submission->form_page_id = !empty($lp_node->nid) ? $lp_node->nid : 0;
         intel_execute_response_redirect_if_set($lp_node, $node, $link_query);
       }
 
-      if (!empty($submit_context['is_landingpage'])) {
+      if (!empty($submit_context['isLandingpage'])) {
         $category = t('Landing page conversion') . '!';
         $track_conversion_value = (isset($scorings['landing_page_conversion'])) ? $scorings['landing_page_conversion'] : 0;      
 
@@ -961,32 +1281,40 @@ function intel_check_form_submission($page) {
           $track_conversion_value = $node->field_track_submission_value[$node->language][0]['value'];
         }
 
-        if ($category) {     
+        if ($category) {
           $call = array(
-            'method' => '_addIntelEvent',
-            'event' => 'pageshow',
-            'selector' => 'body',
-            'category' => $category,
-            'action' => !empty($submit_context['page_title']) ? $submit_context['page_title'] : (!empty($lp_node->title) ? $lp_node->title : ''),
-            'label' => $referrer,
-            'value' => $track_conversion_value,
-            'noninteraction' => FALSE,
-            'location' => !empty($submit_context['location']) ? $submit_context['location'] : (!empty($lp_node->nid) ? url("node/{$lp_node->title}") : ''),
+            'eventCategory' => $category,
+            'eventAction' => !empty($submit_context['pageTitle']) ? $submit_context['pageTitle'] : (!empty($lp_node->title) ? $lp_node->title : ''),
+            'eventLabel' => $referrer,
+            'eventValue' => $track_conversion_value,
+            'nonInteraction' => FALSE,
           );
-          intel_add_page_intel_push($call);
+          if (!empty($submit_context['location'])) {
+            $call['location'] = $submit_context['location'];
+            if (!empty($submit_context['pageTitle'])) {
+              $call['title'] = $submit_context['pageTitle'];
+            }
+            if (!empty($submit_context['customVars'])) {
+              $call['customVars'] = $submit_context['customVars'];
+            }
+          }
+          intel_add_page_intel_push(array('event', $call));
         }
       }
       //unset($visitor->session_data['form_submit'][$fsi]);
       
       // check if CTA was used to get there
-      $cta_clicks = $visitor->getVar('api_session', 'cta_click');
+      $cta_clicks = $visitor->getVar('api_session', 'ctaClick');
+      $count = 0;
       if (!empty($cta_clicks) && is_array($cta_clicks)) {
         foreach ($cta_clicks AS $index => $click) {
           // filter "meta" elements
           if (substr($index, 0, 1) == '_') {
             continue;
           }
-          if ($referrer = $click['href']) {
+          $href_urlc = intel_parse_url($click['href'], $submit_context['location']);
+//dsm("$referrer == {$href_urlc['system_path']} || ({$lp_urlc['host']} == {$href_urlc['host']} && {$lp_urlc['path']} == {$href_urlc['path']})");
+          if ($referrer == $href_urlc['system_path'] || ($lp_urlc['host'] == $href_urlc['host'] && $lp_urlc['path'] == $href_urlc['path'])) {
             $cta_context = $click;
             $value = (isset($scorings['cta_conversion'])) ? $scorings['cta_conversion'] : 0;
             if (substr($click['label'], 0, 6) == 'block/') {
@@ -999,17 +1327,23 @@ function intel_check_form_submission($page) {
               }
             }
             $call = array(
-              'method' => '_addIntelEvent',
-              'event' => 'pageshow',
-              'selector' => 'body',
-              'category' => t('CTA conversion!'),
-              'action' => $click['action'],
-              'label' => $click['label'],
-              'value' => $value,
-              'noninteraction' => FALSE,
-              'location' => $click['location'],
-            );    
-            intel_add_page_intel_push($call);
+              'eventCategory' => t('CTA conversion!'),
+              'eventAction' => $click['eventAction'],
+              'eventLabel' => $click['eventLabel'],
+              'eventValue' => $value,
+              'nonInteraction' => FALSE,
+            );
+            if (!empty($click['location'])) {
+              $call['location'] = $click['location'];
+              if (!empty($click['pageTitle'])) {
+                $call['title'] = $click['pageTitle'];
+              }
+              if (!empty($click['customVars'])) {
+                $call['customVars'] = $click['customVars'];
+              }
+            }
+            intel_add_page_intel_push(array('event', $call));
+
             $urlc = parse_url($click['location']);
             $submission->cta_page_host = $urlc['host'];
             $submission->cta_page_path = $urlc['path'];
@@ -1017,6 +1351,10 @@ function intel_check_form_submission($page) {
             if (($a[0] == 'node') && !empty($a[1]) && is_numeric($a[1])) {
               $submission->cta_page_id = $a[1];
             }
+            break;
+          }
+          // only check last 20 CTA clicks
+          if ($count++ > 20) {
             break;
           }
         }
@@ -1040,7 +1378,7 @@ function intel_check_form_submission($page) {
   }
 
   $intel_events = intel_get_intel_event_info();
-if (!empty($_GET['debug'])) {
+if (!empty($_GET['debug']) || !empty($debug)) {
   dpm('$scorings'); dpm($scorings);//
   dpm('$intel_events'); dpm($intel_events);//
   dpm('$track'); dpm($track);//
@@ -1098,29 +1436,31 @@ if (!empty($_GET['debug'])) {
 
   // create form submission intel event
   $call = array(
-    'method' => '_addIntelEvent',
-    'event' => 'pageshow',
-    'selector' => 'body',
-    'category' => $category,
-    'action' => $track['form_title'],
-    'label' => $track['submission_path'],
-    'value' => $track['value'],
-    'noninteraction' => FALSE,
-    'location' => !empty($submit_context['location']) ? $submit_context['location'] : (!empty($lp_node->nid) ? url("node/{$lp_node->nid}") : ''),
+    'eventCategory' => $category,
+    'eventAction' => $track['form_title'],
+    'eventLabel' => !empty($track['system_path']) ? $track['system_path'] : $track['submission_path'],
+    'eventValue' => $track['value'],
+    'nonInteraction' => FALSE,
   );
-  intel_add_page_intel_push($call);
+  if (!empty($submit_context['location'])) {
+    $call['location'] = $submit_context['location'];
+    if (!empty($submit_context['pageTitle'])) {
+      $call['title'] = $submit_context['pageTitle'];
+    }
+    if (!empty($submit_context['customVars'])) {
+      $call['customVars'] = $submit_context['customVars'];
+    }
+  }
+  if (!empty($track['oa'])) {
+    //$call['oa'] = $track['oa'];
+  }
+
+  intel_add_page_intel_push(array('event', $call));
 //dpm('page_intel_push=');dpm($call);//
 
   // add known attribute to visitor
   if (!empty($visitor->contact_created)) {
-    $call = array(
-      'method' => '_setIntelVar',
-      'scope' => 'visitor',
-      'namespace' => 'analytics',
-      'keys' => 'k',
-      'value' => '',
-    );
-    intel_add_page_intel_push($call);
+    intel_add_page_intel_push(array('set', "va.k", ''));
   }
 
   if (module_exists('rules')) {
@@ -1139,7 +1479,7 @@ if (!empty($_GET['debug'])) {
     //watchdog('intel', "form submission on form submission. <br>\n visitor=!visitor <br>\n<br>\nsubmission=!submission <br>\n<br>\nsubmit_context=!submit_context <br>\n<br>\nget=!get <br>\n<br>\ncookie=!cookie", $vars, WATCHDOG_DEBUG);
   }
   
-  if (!empty($_GET['debug'])) {
+  if (!empty($_GET['debug']) || !empty($debug)) {
     dpm('$submit_context='); dpm($submit_context);//
     dpm('$visitor='); dpm($visitor);//
     dpm('$submission='); dpm($submission);//
@@ -1265,17 +1605,14 @@ function intel_user_login(&$edit, &$account) {
 
 
   $call = array(
-    'method' => '_addIntelEvent',
-    'event' => 'pageshow',
-    'selector' => 'body',
-    'category' => 'User login',
-    'action' => 'User login form',
-    'label' => 'user/' . $account->uid,
-    'value' => 0,
-    'noninteraction' => FALSE,
+    'eventCategory' => 'User login',
+    'eventAction' => 'User login form',
+    'eventLabel' => 'user/' . $account->uid,
+    'eventValue' => 0,
+    'nonInteraction' => FALSE,
     'location' => 'user',
   );
-  intel_add_page_intel_push($call);
+  intel_add_page_intel_push(array('event', $call));
 
 //$pushes = intel_get_page_intel_pushes();
 //watchdog('intel_user_login', print_r($pushes, 1));
@@ -1303,122 +1640,14 @@ function intel_form_user_register_form_alter(&$form, &$form_state) {
 function intel_user_register_form_submit(&$form, &$form_state) {
   // create form submission intel event
   $call = array(
-    'method' => '_addIntelEvent',
-    'event' => 'pageshow',
-    'selector' => 'body',
-    'category' => 'User registration',
-    'action' => 'User registration form',
-    'label' => 'user',
-    'value' => 0,
-    'noninteraction' => FALSE,
+    'eventCategory' => 'User registration',
+    'eventAction' => 'User registration form',
+    'eventLabel' => 'user',
+    'eventValue' => 0,
+    'nonInteraction' => FALSE,
     'location' => 'user',
   );
-  intel_add_page_intel_push($call);
+  intel_add_page_intel_push(array('event', $call));
   $pushes = intel_get_page_intel_pushes();
   watchdog('intel_user_register_form_submit', print_r($pushes, 1));
-}
-
-/**
- * Generates context data array based current page path
- * @return mixed|string
- */
-function intel_context() {
-  $context = &drupal_static(__FUNCTION__);
-
-  if (isset($context)) {
-    return $context;
-  }
-  $context = array();
-
-  $is_admin = path_is_admin(current_path());
-
-  if ($is_admin) {
-    $context['section'] = 'admin';
-    $context['section_title'] = t('Admin');
-  }
-
-  $router_item = menu_get_item();
-  $context['router_item'] = $router_item;
-  if (!isset($router_item['page_callback'])) {
-    return $context;
-  }
-
-  // If page is entity uri, add entity data to context
-  $entity_callbacks = array(
-    'node_page_view' => 'node',
-    'user_view_page' => 'user',
-    'bean_view_page' => 'bean',
-  );
-
-  if (!empty($entity_callbacks[$router_item['page_callback']])) {
-    $context['page_type'] = 'entity';
-    $context['entity_type'] = $entity_callbacks[$router_item['page_callback']];
-    $entity_info = entity_get_info($context['entity_type']);
-    if ($context['entity_type'] == 'bean') {
-      if (isset($router_item['page_arguments'][0]) && is_object($router_item['page_arguments'][0])) {
-        $context['entity'] = $router_item['page_arguments'][0];
-      }
-    }
-    else {
-      $context['entity'] = menu_get_object($context['entity_type']);
-    }
-
-    if (isset($entity_info['entity keys']['bundle']) && isset($context['entity']->{$entity_info['entity keys']['bundle']})) {
-      $context['entity_bundle'] = $context['entity']->{$entity_info['entity keys']['bundle']};
-    }
-    if (isset($entity_info['entity keys']['id']) && isset($context['entity']->{$entity_info['entity keys']['id']})) {
-      $context['entity_id'] = $context['entity']->{$entity_info['entity keys']['id']};
-    }
-    if (isset($entity_info['entity keys']['revision']) && isset($context['entity']->{$entity_info['entity keys']['revision']})) {
-      $context['entity_revision'] = $context['entity']->{$entity_info['entity keys']['revision']};
-    }
-
-    if (!$is_admin) {
-      if ($context['entity_type'] == 'node') {
-        $context['section'] = str_replace('enterprise_', '', $context['entity_bundle']);
-      }
-      else {
-        $context['section'] = $context['entity_type'];
-      }
-    }
-  }
-  // If page is a view, add views context
-  else if($router_item['page_callback'] == 'views_page') {
-    $view = views_get_view($router_item['page_arguments'][0]);
-    if (!empty($view->name)) {
-      $context['page_type'] = 'view';
-      $context['view'] = $view;
-      $context['view_name'] = $router_item['page_arguments'][0];
-      $context['view_display'] = $router_item['page_arguments'][1];
-      $tfilter = FALSE;
-      if (isset($view->display['default']->display_options['filters']['type'])) {
-        $tfilter = $view->display['default']->display_options['filters']['type'];
-      }
-      $display = $router_item['page_arguments'][1];
-      if (is_array($display)) {
-        $display = array_shift($display);
-      }
-      if (isset($view->display[$display]->display_options['filters']['type'])) {
-        $tfilter = $view->display[$display]->display_options['filters']['type'];
-      }
-      if ($tfilter) {
-        $tables = array(
-          'node' => 'node',
-          'user' => 'user',
-        );
-        if (!empty($tables[$tfilter['table']])) {
-          $context['entity_type'] = $tables[$tfilter['table']];
-          if (!isset($tfilter['operator']) || ($tfilter['operator'] == 'in')) {
-            $context['entity_bundle'] = array_shift($tfilter['value']);
-            $context['section'] = str_replace('enterprise_', '', $context['entity_bundle']);
-          }
-        }
-      }
-    }
-  }
-
-  // allow other modules to alter context
-  drupal_alter('intel_context', $context);
-
-  return $context;
 }

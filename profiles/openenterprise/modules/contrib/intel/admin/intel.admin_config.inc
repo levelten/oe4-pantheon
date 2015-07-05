@@ -882,6 +882,7 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
     t('Title'),
     t('Description'),
     t('Type'),
+    t('Storage'),
     t('Module'), 
     t('Ops'),  
   ); 
@@ -896,11 +897,16 @@ function intel_admin_attribute_list_page($scope = 'visitor') {
   foreach ($attributes AS $key => $attr) {
     $ops = array();
     $ops[] = l(t('edit'), 'admin/config/intel/settings/' . $scope . '_attribute/' . $key . '/edit', $link_options);
+    $storage = ($scope == 'visitor') ? 'dimension3' : 'dimension1';
+    if (isset($attr['storage']['analytics']['struc'])) {
+      $storage = $attr['storage']['analytics']['struc'] . $attr['storage']['analytics']['index'];
+    }
     $rows[] = array(
       $key,
       $attr['title'],
       $attr['description'],
       $attr['type'],
+      $storage,
       $attr['module'],
       implode(' ', $ops),
     );

@@ -28,7 +28,7 @@
       var href = $(this).find("td:eq(0) a").attr("href");
       if (typeof href != 'undefined') {
 	    var imgsrc = ('https:' == document.location.protocol) ? 'https://' : 'http://';
-        imgsrc += Drupal.settings.intel.cms_hostpath + Drupal.settings.intel.module_path + "/images/ajax_loader_row.gif";
+        imgsrc += Drupal.settings.intel.config.cmsHostpath + Drupal.settings.intel.config.modulePath + "/images/ajax_loader_row.gif";
         $(this).find("td:eq(" + (colIndex-1) + ")").after('<td data-path="' + href + '" colspan="5" style="text-align:center;"><img src="' + imgsrc + '"></td>');        
       }
     }
@@ -37,7 +37,7 @@
     //var query = (window.location.href.indexOf('?') > 0) ? window.location.href.substring(window.location.href.indexOf('?'), window.location.href.length) : '';
     //query = query.replace("render=overlay", "");  // remove overlay shenanigans
       var url = ('https:' == document.location.protocol) ? 'https://' : 'http://';
-	  url += Drupal.settings.intel.cms_hostpath + "intel/admin_content_cta_alter_js"; //?callback=?";
+	  url += Drupal.settings.intel.config.cmsHostpath + "intel/admin_content_cta_alter_js"; //?callback=?";
       jQuery.getJSON(url).success(function(data) { 
         $(".block-page-content tr").each ( function( index ) {
           var href = $(this).find("td:eq(0) a").attr("href");

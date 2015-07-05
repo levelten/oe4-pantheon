@@ -91,6 +91,7 @@ class ScorecardReportView extends ReportView {
   function renderMainChart() {
     $output = '';
     $data = $this->data;
+
     $context = $this->params['context'];
     $context_mode = $this->params['context_mode'];
     $main_chart = new ComboChart('objectives');
@@ -540,11 +541,15 @@ class ScorecardReportView extends ReportView {
     $output .= '<h3>Goals &amp; valued events</h3>';
     $output .= '<div class="pane-left">';
     $output .= $pie_chart1->renderOutput();
+
     $output .= '</div><div class="pane-spacer">&nbsp;</div>';
     $output .= '<div class="pane-right">';
     if ($context == 'page' || $context == 'page-attr') {
       $output .= '<h3>Valued events (onpage)</h3>';
       $output .= $events_2_table->renderOutput();
+      if (!empty($this->data['date']['_links']['events_pageview'])) {
+        $output .= '<div>' . implode('|', $this->data['date']['_links']['events_pageview']) . '</div>';
+      }
     }
     else {
       $output .= $pie_chart2->renderOutput();
@@ -554,10 +559,16 @@ class ScorecardReportView extends ReportView {
     $output .= '<div class="pane-left" style="clear: left;">';
     $output .= '<h3>Goals' . (($context == 'page'  || $context == 'page-attr') ? ' (entrance)': '') . '</h3>';
     $output .= $goals_table->renderOutput();
+    if (!empty($this->data['date']['_links']['goals'])) {
+      $output .= '<div>' . implode('|', $this->data['date']['_links']['goals']) . '</div>';
+    }
     $output .= '</div><div class="pane-spacer">&nbsp;</div>';
     $output .= '<div class="pane-right">';
     $output .= '<h3>Valued events' . (($context == 'page' || $context == 'page-attr') ? ' (entrance)': '') . '</h3>';
     $output .= $events_table->renderOutput();
+    if (!empty($this->data['date']['_links']['events'])) {
+      $output .= '<div>' . implode('|', $this->data['date']['_links']['events']) . '</div>';
+    }
     $output .= '</div>';    
     $output .= '</div>';
     
@@ -576,16 +587,16 @@ class ScorecardReportView extends ReportView {
     $all_pages->addColumn('string', 'Page');
     $all_pages->addColumn('number', 'Entrances');
     $all_pages->addColumn('number', 'Pageviews');
+    $all_pages->addColumn('number', 'V. Evts');
     $all_pages->addColumn('number', 'Goals');
-    $all_pages->addColumn('number', 'V. events');
     $all_pages->addColumn('number', 'Value');
     
     $attr_pages = new TableChart('blank');
     $attr_pages->addColumn('string', 'Page');
     $attr_pages->addColumn('number', 'Entrances');
     $attr_pages->addColumn('number', 'Pageviews');
+    $attr_pages->addColumn('number', 'V. Evts');
     $attr_pages->addColumn('number', 'Goals');
-    $attr_pages->addColumn('number', 'V. events');
     $attr_pages->addColumn('number', 'Value');
 
     $value_str = '';
@@ -623,9 +634,9 @@ class ScorecardReportView extends ReportView {
         $l = render::link($pathstr, 'http://' . $d['i'], array('attributes' => array('target' => '_blank')));
         $all_pages->addRowItem($l);        
         $all_pages->addRowItem($entrances);    
-        $all_pages->addRowItem($pageviews); 
-        $all_pages->addRowItem($goals); 
+        $all_pages->addRowItem($pageviews);
         $all_pages->addRowItem($events);
+        $all_pages->addRowItem($goals);
         $all_pages->addRowItem($value);
         $all_pages->addRow(); 
       }
@@ -635,9 +646,9 @@ class ScorecardReportView extends ReportView {
         $l = render::link($pathstr, 'http://' . $d['i'], array('attributes' => array('target' => '_blank')));
         $attr_pages->addRowItem($l);        
         $attr_pages->addRowItem($entrances);    
-        $attr_pages->addRowItem($pageviews); 
-        $attr_pages->addRowItem($goals); 
+        $attr_pages->addRowItem($pageviews);
         $attr_pages->addRowItem($events);
+        $attr_pages->addRowItem($goals);
         $attr_pages->addRowItem($value);
         $attr_pages->addRow(); 
       }
@@ -652,10 +663,15 @@ class ScorecardReportView extends ReportView {
     $output .= '<h3>Content</h3>';
     $output .= '<h3>All pages</h3>';
     $output .= $all_pages->renderOutput();
+    if (!empty($this->data['content']['_links']['default'])) {
+      $output .= '<div>' . implode('|', $this->data['content']['_links']['default']) . '</div>';
+    }
     $output .= '<h3>Attraction pages</h3>';
     $output .= $attr_pages->renderOutput();
-    $output .= '</div>';
-    
+    if (!empty($this->data['content']['_links']['i.t'])) {
+      $output .= '<div>' . implode('|', $this->data['content']['_links']['i.t']) . '</div>';
+    }
+
     return '<div id="intel-report">' . $output . '</div>';
   }
   
@@ -746,7 +762,7 @@ class ScorecardReportView extends ReportView {
     }
     */
 
-    usort($data['trafficsources']['trafficcategory'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['trafficcategory'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['trafficcategory'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -766,7 +782,7 @@ class ScorecardReportView extends ReportView {
       }
     }
 
-    usort($data['trafficsources']['medium'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['medium'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['medium'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -781,7 +797,7 @@ class ScorecardReportView extends ReportView {
       }
     } 
     
-    usort($data['trafficsources']['source'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['source'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['source'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -796,7 +812,7 @@ class ScorecardReportView extends ReportView {
       }
     }
 
-    usort($data['trafficsources']['referralHostpath'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['referralHostpath'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['referralHostpath'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -813,7 +829,7 @@ class ScorecardReportView extends ReportView {
       }
     } 
     
-    usort($data['trafficsources']['socialNetwork'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['socialNetwork'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['socialNetwork'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -828,7 +844,7 @@ class ScorecardReportView extends ReportView {
       }
     }
 
-    usort($data['trafficsources']['searchKeyword'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['searchKeyword'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['searchKeyword'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -843,7 +859,7 @@ class ScorecardReportView extends ReportView {
       }
     } 
     
-    usort($data['trafficsources']['campaign'], array($this, 'usort_by_score_then_entrances'));
+    @uasort($data['trafficsources']['campaign'], array($this, 'usort_by_score_then_entrances'));
     $i = 1;
     foreach($data['trafficsources']['campaign'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; }
@@ -858,24 +874,51 @@ class ScorecardReportView extends ReportView {
       }
     }
 
-    
     $output = '<div id="trafficsources-section" class="report-section">';
     $output .= "<h3>Traffic sources</h3>";
-    $output .= '<div class="pane-left">' . $pie_chart->renderOutput() .  '</div>';
+    $output .= '<div class="pane-left">' . $pie_chart->renderOutput() . '</div>';
     $output .= '<div class="pane-spacer">&nbsp;</div>';
-    $output .= '<div class="pane-right"><h3>Mediums</h3>' . $mediums->renderOutput()  . '</div>'; 
+    $output .= '<div class="pane-right"><h3>Mediums</h3>' . $mediums->renderOutput();
+    if (!empty($data['trafficsources']['medium']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['medium']['_links']) . '</div>';
+    }
+    $output .= '</div>';
     
-    $output .= '<div class="pane-left" style="clear: left;"><h3>Categories</h3>' . $categories->renderOutput() .  '</div>';
+    $output .= '<div class="pane-left" style="clear: left;"><h3>Categories</h3>' . $categories->renderOutput();
+    if (!empty($data['trafficsources']['trafficcategory']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['trafficcategory']['_links']) . '</div>';
+    }
+    $output .= '</div>';
     $output .= '<div class="pane-spacer">&nbsp;</div>';
-    $output .= '<div class="pane-right"><h3>Sources</h3>' . $sources->renderOutput()  . '</div>'; 
+    $output .= '<div class="pane-right"><h3>Sources</h3>' . $sources->renderOutput();
+    if (!empty($data['trafficsources']['source']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['source']['_links']) . '</div>';
+    }
+    $output .= '</div>';
     
-    $output .= '<div class="pane-left" style="clear: left;"><h3>Referral links</h3>' . $referrals->renderOutput() .  '</div>';
+    $output .= '<div class="pane-left" style="clear: left;"><h3>Referral links</h3>' . $referrals->renderOutput();
+    if (!empty($data['trafficsources']['referralHostpath']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['referralHostpath']['_links']) . '</div>';
+    }
+    $output .= '</div>';
     $output .= '<div class="pane-spacer">&nbsp;</div>';
-    $output .= '<div class="pane-right"><h3>Social networks</h3>' . $socials->renderOutput()  . '</div>';
+    $output .= '<div class="pane-right"><h3>Social networks</h3>' . $socials->renderOutput();
+    if (!empty($data['trafficsources']['socialNetwork']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['socialNetwork']['_links']) . '</div>';
+    }
+    $output .= '</div>';
 
-    $output .= '<div class="pane-left" style="clear: left;"><h3>Search keywords</h3>' . $keywords->renderOutput() .  '</div>';
+    $output .= '<div class="pane-left" style="clear: left;"><h3>Search keywords</h3>' . $keywords->renderOutput();
+    if (!empty($data['trafficsources']['searchKeyword']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['searchKeyword']['_links']) . '</div>';
+    }
+    $output .= '</div>';
     $output .= '<div class="pane-spacer">&nbsp;</div>';
-    $output .= '<div class="pane-right"><h3>Campaigns</h3>' . $campaigns->renderOutput()  . '</div>'; 
+    $output .= '<div class="pane-right"><h3>Campaigns</h3>' . $campaigns->renderOutput();
+    if (!empty($data['trafficsources']['campaign']['_links'])) {
+      $output .= '<div>' . implode('|', $data['trafficsources']['campaign']['_links']) . '</div>';
+    }
+    $output .= '</div>';
       
     $output .= '</div>';  
     

@@ -1,14 +1,13 @@
 var _l10iq = _l10iq || [];
-var _l10iq = _l10iq || [];
 
-function l10iDisqusTracker() {
-  this.apiUrl = 'https://disqus.com/api/3.0/';
-  
-  this.init = function init() {
-    _l10iq.push(['_log', "l10iDisqusTracker.init()"]);
-  };
-  
-  this.trackComment = function trackComment(comment) {
+function L10iDisqus(_ioq) {
+    var ioq = _ioq;
+    var io = _ioq.io;
+    this.apiUrl = 'https://disqus.com/api/3.0/';
+
+    io('log', "l10iDisqusTracker.init()");
+
+  this.trackComment = function (comment) {
     var action = "Disqus", ga_event, json_data, json_params, timestamp;
     if (comment.text.length > 40) {
       action = action + ": " + comment.text.substring(0, 35) + '...';
@@ -17,13 +16,14 @@ function l10iDisqusTracker() {
       action = action + ": " + comment.text;
     }
     ga_event = {
-	  'category': "Comment!",
-	  'action': action,
-      'label': window.location.pathname.substring(1) + "#comment-" + comment.id,
-      'value': (typeof _l10iq.settings.scorings.disqus_comment !== 'undefined') ? Number(_l10iq.settings.scorings.disqus_comment) : 0,
-  	  'noninteraction': false			
+	  'eventCategory': "Comment!",
+	  'eventAction': action,
+      'eventLabel': window.location.pathname.substring(1) + "#comment-" + comment.id,
+      'eventValue': (typeof _l10iq.settings.scorings.disqus_comment !== 'undefined') ? Number(_l10iq.settings.scorings.disqus_comment) : 0,
+  	  'nonInteraction': false
     };
-    _l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
+    //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
+      _l10iq.push(['event', ga_event]);
 
     timestamp = _l10iq.push(['_getTime']);
     comment = {
@@ -32,7 +32,7 @@ function l10iDisqusTracker() {
       'type': 'disqus',
       'submitted': timestamp,
       'location': _l10iq.location,
-      'system_path' : (_l10iq.settings.system_path != undefined) ? _l10iq.settings.system_path : ''      
+      'systemPath' : _l10iq.push(['get', 'config.systemPath', ''])
     };
     
     json_data = {
@@ -43,18 +43,15 @@ function l10iDisqusTracker() {
     json_params = {
       'keys': timestamp,
       'type': 'session',
-      'namespace': 'comment_submit'
+      'namespace': 'commentSubmit'
     }; 
-    _l10iq.push(['_triggerCallbacks', 'saveCommentSubmitAlter', [json_params, json_data, {}, {}]]);
-    _l10iq.push(['_getJSON', 'var/merge', json_params, json_data, 'l10iDisqus.submitComment']);
+    _l10iq.push(['triggerCallbacks', 'saveCommentSubmitAlter', json_params, json_data, {}, {}]);
+    _l10iq.push(['getJSON', 'var/merge', json_params, json_data, 'l10iDisqus.submitComment']);
   };
   
   this.submitComment = function submitComment(data) {
-    _l10iq.push(['_triggerCallbacks', 'saveCommentSubmitPostSubmit', [data['return']]]);
+    _l10iq.push(['triggerCallbacks', 'saveCommentSubmitPostSubmit', data['return']]);
   };
 }
 
-var l10iDisqus = new l10iDisqusTracker();
-jQuery(document).ready(function() {
-	_l10iq.push(['_onReady', l10iDisqus.init, l10iDisqus]);
-});
+_l10iq.push(['providePlugin', 'disqus', L10iDisqus, {}]);

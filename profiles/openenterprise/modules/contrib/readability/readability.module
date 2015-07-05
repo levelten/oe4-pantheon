@@ -213,6 +213,103 @@ function readability_analyzer($context, $analysis, $params) {
 	    'report' => 'readability',
 	  );
   }
+
+  if (!empty($context['nid']) && module_exists('intel')) {
+    $intel_attr = (object)array(
+      'entity_type' => 'node',
+      'entity_id' => $context['nid'],
+    );
+    $intel_attr->attr_key = 'cr';
+    $intel_attr->value = round($stats['average']);
+    intel_entity_attr_save($intel_attr);
+  }
+  //contentanalysis_stat_save($context['aid'], 'readability', 'average', round($stats['average'], 1));
   
   return $analysis;
 }
+
+/**
+ * Implements hook_intel_page_attribute_info()
+ * @return array
+ */
+function readability_intel_page_attribute_info() {
+  $attributes = array();
+  $attributes['cr'] = array(
+    'title' => t('Readability'),
+    //'title_plural' => t('Readability'),
+    'description' => t('The grade level of the readability of the content.'),
+    //'type' => 'scalar',
+    'type' => 'item',
+    'options_description' => t('Auto generated from readability module.'),
+    'options info callback' => 'readability_page_attribute_rd_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 11,
+      ),
+    ),
+    //'index_grouping' => array(),
+    //'index_grouping_round' => 1,
+  );
+  //for ($i = 0.5; $i <= 20; $i += 1) {
+  //  $attributes['cr']['index_grouping'][] = $i;
+  //}
+
+  return $attributes;
+}
+
+function readability_page_attribute_rd_option_info($option_id, $data_options) {
+  //$group = explode('-', $option_id);
+
+  $option_id = round($option_id);
+
+  $data = array(
+    'title' => $option_id . 'th' . ' ' . t('grade'),
+  );
+  /*
+  $ts = array(
+    13 => 'College Freshman',
+    14 => 'College Sophmore',
+    15 => 'College Junior',
+    15 => 'College Senior',
+  );
+  if ($option_id <= 12) {
+    $data['title'] = $option_id . 'th ' . t('grade');
+  }
+  else if(isset($ts[$option_id])) {
+    $data['title'] = $ts[$option_id];
+  }
+  */
+
+  if (!empty($data_options['page_count'])) {
+    //$value0 = $option_id - .5;
+    //$value1 = $option_id + .5;
+    //$data['page_count'] = intel_entity_attr_entity_count('cr', (float)$group[0], (float)$group[1]);
+    $data['page_count'] = intel_entity_attr_entity_count('cr', $option_id);
+  }
+  return $data;
+}
+
+/**
+ * Implements hook_intel_entity_intel_attributes_alter()
+ * @param $attrs
+ * @param null $entity
+ * @param null $entity_type
+ */
+//function readability_intel_entity_intel_attributes_alter(&$attrs, $entity = null, $entity_type = null) {
+//  if ($entity_type != 'node') {
+//    return;
+//  }
+//  $context = array(
+//    'nid' => $entity->nid,
+//  );
+//  $aid = contentanalysis_get_aid($context);
+//
+//  if (empty($aid)) {
+//    return;
+//  }
+//
+//  if ($value = contentanalysis_stat_load($aid, 'readability', 'average')) {
+//    $attrs['page']['cr'] = round($value);
+//  }
+//}

@@ -114,7 +114,6 @@ if (class_exists('RulesEventHandlerBase')) {
      */
     public function __construct($event_name, $info) {
       parent::__construct($event_name, $info);
-      dsm($this);
     }
 
     /**

@@ -19,6 +19,7 @@ class IntelVisitor extends Entity {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'intel_visitor');
+
     /*
     if (empty($this->vtk) && !empty($this->vtkid)) {
       $this->vtk = $this->vtkid . $this->vtkc;
@@ -29,7 +30,7 @@ class IntelVisitor extends Entity {
     }
     */
 
-    $this->apiLevel = variable_get('intel_api_level', '');
+    $this->apiLevel = intel_api_level();
 
     $apiClientProps = $this->getApiClientProps();
     
@@ -453,7 +454,6 @@ class IntelVisitor extends Entity {
         $this->identifiers = $dup->identifiers;
         $this->data = drupal_array_merge_deep($dup->data, $this->data);
         $this->ext_data = drupal_array_merge_deep($dup->ext_data, $this->ext_data);
-
       }
       else {
         $merge_dir = 'into_this';
@@ -505,13 +505,13 @@ class IntelVisitor extends Entity {
       // update form submission vids
       $query = db_update('intel_submission')
         ->fields(array('vid' => $to_vid))
-        ->condition('vid', $form_vid)
+        ->condition('vid', $from_vid)
         ->execute();
 
       // update phone call vids
       $query = db_update('intel_phonecall')
         ->fields(array('vid' => $to_vid))
-        ->condition('vid', $form_vid)
+        ->condition('vid', $from_vid)
         ->execute();
     }
   }
@@ -643,20 +643,28 @@ class IntelVisitorController extends EntityAPIControllerExportable {
     $values['ext_data'] = array();
     $values['identifiers'] = array();
     
-    if (isset($values['id']) && ($values['id'] == 'user')) {
-      intel_include_library_file('class.visitor.php');
-      $vtk = \LevelTen\Intel\ApiVisitor::extractVtk();  
-      if ($vtk) { 
-        $values['vtk'] = $vtk;             
+    if (isset($values['id'])) {
+      $vtk = '';
+      if ($values['id'] == 'user') {
+        intel_include_library_file('class.visitor.php');
+        $vtk = \LevelTen\Intel\ApiVisitor::extractVtk();
+
+        if ($user->uid) {
+          $values['uid'] = $user->uid;
+          $values['identifiers']['uid'] = array();
+          $values['identifiers']['uid'][] = $user->uid;
+        }
+      }
+      else if (is_string($values['id']) && strlen($values['id']) >= 20) {
+        $vtk = $values['id'];
+      }
+      if ($vtk) {
+        $values['vtk'] = $vtk;
         $values['identifiers']['vtk'] = array();
         $values['identifiers']['vtk'][] = $vtk;
       }
-      if ($user->uid) {
-        $values['uid'] = $user->uid;
-        $values['identifiers']['uid'] = array();
-        $values['identifiers']['uid'][] = $user->uid;
-      }
     }
+
 
     $entity = parent::create($values);
     $entity->created = REQUEST_TIME;
@@ -931,21 +939,22 @@ function intel_visitor_build_profile_content_elements($entity) {
     $result = intel_load_filtered_emailclick_result($filter);
     $rows = array();
     $calls = array();
+    $clicks = array();
     while ($row = $result->fetchObject()) {
       $clicks[$row->cid] = $row;
     }
-    uasort($clicks, function ($a, $b) {
-        return ($a->clicked < $b->clicked) ? 1 : -1;
-      }
-    );
-
-
+    if (!empty($clicks)) {
+      uasort($clicks, function ($a, $b) {
+          return ($a->clicked < $b->clicked) ? 1 : -1;
+        }
+      );
+    }
 
     // TODO: move mailchimp info processing to hook and process in mailchimp module
 
-    $emaildesc = $row->eid;
     $email_info = array();
     foreach ($clicks AS $row) {
+      $emaildesc = $row->eid;
       $ops = array();
       $ops[] = l(t('meta'), 'emailclick/' . $row->cid);
       $title = 'NA';
@@ -1144,7 +1153,7 @@ function intel_visitor_build_profile_content_elements($entity) {
 
   $stats = array(); 
   if (!empty($vdata['analytics_visits'])) {
-    $visits = $vdata['analytics_visits']['_all'];
+    $visits = $vdata['analytics_visits']['_totals'];
     if (!empty($visits['score'])) {
       $stats[] = array(
         'value' => number_format($visits['score'], 2),
@@ -1154,7 +1163,7 @@ function intel_visitor_build_profile_content_elements($entity) {
     }
     if (isset($visits['entrance']['entrances'])) {
       $stats[] = array(
-        'value' => number_format($visits['visitCount']),
+        'value' => number_format($visits['entrance']['entrances']),
         'title' => t('visits'),
         'class' => 'visits',
       );
@@ -1166,8 +1175,9 @@ function intel_visitor_build_profile_content_elements($entity) {
       );
     }
     if (isset($visits['entrance']['timeOnSite'])) {
+      $value = ($visits['entrance']['timeOnSite'] > 3600) ? Date('G:m:s', $visits['entrance']['timeOnSite']) : Date('m:s', $visits['entrance']['timeOnSite']);
       $stats[] = array(
-        'value' => Date('m:s', $visits['entrance']['timeOnSite']),
+        'value' => $value,
         'title' => t('time on site'),
       );
     }

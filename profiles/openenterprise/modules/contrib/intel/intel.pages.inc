@@ -297,7 +297,7 @@ function template_preprocess_intel_visitor_visits_table(&$variables) {
         $medium . ' / ' . $source,
         $visit['entrance']['pageviews'],
         number_format($visit['score'], 2),
-        l(t('view'), $variables['entity']->uri . '/clickstream', array('query' => array('visit-count' => $i))),
+        l(t('view'), $variables['entity']->uri() . '/clickstream', array('query' => array('visit-count' => $i))),
       );
     }
     if (count($rows)) {

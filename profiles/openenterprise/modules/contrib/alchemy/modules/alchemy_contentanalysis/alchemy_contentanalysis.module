@@ -5,7 +5,8 @@
  */
 
 /**
- * Implements hook_menu().().
+ * Implements hook_menu().
+().
  */
 function alchemy_contentanalysis_menu() {
   $items = array();
@@ -60,7 +61,8 @@ function alchemy_contentanalysis_get_types($defaults = FALSE) {
 }
 
 /**
- * Implements hook_analyzer_form_elements() via custom define callback().
+ * Implements hook_analyzer_form_elements() via custom define callback
+().
  *
  * hook to add any analyzier specific form elements to the content analyzer form.
  * callback is defined in hook_contentanalysis_analyzers ['form elements callback']
@@ -131,9 +133,15 @@ function alchemy_contentanalysis_analyzer($context, $analysis, $params) {
   $types = explode(',', $context['inputs']['analyzer_options']['alchemy']['types']);
   $usecache = (int) $context['inputs']['analyzer_options']['alchemy']['usecache'];
 
+  if (module_exists('intel')) {
+    $intel_attr = (object) array(
+      'entity_type' => 'node',
+      'entity_id' => $context['nid'],
+    );
+  }
+
   $weight = -10;
   // keywords
-
   if (in_array('keywords', $types)) {
 
     $keywords = alchemy_get_elements($text, 'keywords', 'normalized', $nid, (ALCHEMY_DEBUG || $usecache));
@@ -143,12 +151,38 @@ function alchemy_contentanalysis_analyzer($context, $analysis, $params) {
       array('data' => t('Term')),
       array('data' => t('Relevance')),
     );
+    $term = (object) array(
+      'entity_type' => 'contentanalysis',
+      'entity_id' => $context['aid'],
+    );
+
     if (is_array($keywords)) {
+      $term->analysis = 'keyword';
+      $term_chars = 0;
+      //alchemy_term_delete_by_params('contentanalysis', $context['aid'], null, null, 'keyword');
+
+      // if intel installed, change the attr key
+      if (isset($intel_attr)) {
+        $intel_attr->attr_key = 'cka';
+        intel_entity_attr_delete_by_params($intel_attr->entity_type, $intel_attr->entity_id, null, null, $intel_attr->attr_key);
+      }
+
       foreach ($keywords as $v) {
         $rows[] = array(
           "<span class=\"kwresearch_keyword\">" . $v['term'] . "</span>",
           number_format($v['relevance'] * 100, 1) . "%",
         );
+        $term_chars += strlen($v['term']);
+        if ($v['relevance'] > .70 && $term_chars < 128) {
+          //$term->term = strtolower($v['term']);
+          //$term->relevance = $v['relevance'];
+          //alchemy_term_save($term);
+          if (isset($intel_attr)) {
+            $intel_attr->value_str = strtolower($v['term']);
+            $intel_attr->value_num = $v['relevance'];
+            intel_entity_attr_save($intel_attr);
+          }
+        }
       }
     }
 
@@ -177,11 +211,33 @@ function alchemy_contentanalysis_analyzer($context, $analysis, $params) {
       array('data' => t('Relevance')),
     );
     if (is_array($keywords)) {
+      $term->analysis = 'concept';
+      $term_chars = 0;
+      //alchemy_term_delete_by_params('contentanalysis', $context['aid'], null, null, 'concept');
+
+      // if intel installed, change the attr key
+      if (isset($intel_attr)) {
+        $intel_attr->attr_key = 'cca';
+        intel_entity_attr_delete_by_params($intel_attr->entity_type, $intel_attr->entity_id, null, null, $intel_attr->attr_key);
+      }
+
       foreach ($keywords as $v) {
         $rows[] = array(
           "<span class=\"kwresearch_keyword\">" . $v['term'] . "</span>",
           number_format($v['relevance'] * 100, 1) . "%",
         );
+
+        $term_chars += strlen($v['term']);
+        if ($v['relevance'] > .70 && $term_chars < 128) {
+          //$term->term = strtolower($v['term']);
+          //$term->relevance = $v['relevance'];
+          //alchemy_term_save($term);
+          if (isset($intel_attr)) {
+            $intel_attr->value_str = strtolower($v['term']);
+            $intel_attr->value_num = $v['relevance'];
+            intel_entity_attr_save($intel_attr);
+          }
+        }
       }
     }
 
@@ -212,6 +268,16 @@ function alchemy_contentanalysis_analyzer($context, $analysis, $params) {
       array('data' => t('Count')),
     );
     if (is_array($keywords)) {
+      $term->analysis = 'entity';
+      $term_chars = 0;
+      //alchemy_term_delete_by_params('contentanalysis', $context['aid'], null, null, 'entity');
+
+      // if intel installed, change the attr key
+      if (isset($intel_attr)) {
+        $intel_attr->attr_key = 'cea';
+        intel_entity_attr_delete_by_params($intel_attr->entity_type, $intel_attr->entity_id, null, null, $intel_attr->attr_key);
+      }
+
       foreach ($keywords as $v) {
         $rows[] = array(
           "<span class=\"kwresearch_keyword\">" . $v['term'] . "</span>",
@@ -219,6 +285,19 @@ function alchemy_contentanalysis_analyzer($context, $analysis, $params) {
           number_format($v['relevance'] * 100, 1) . "%",
           $v['count'],
         );
+
+        $term_chars += strlen($v['type'] . ':' . $v['term']);
+        if ($v['relevance'] > .70 && $term_chars < 128) {
+          //$term->term = $v['term'];
+          //$term->type = $v['type'];
+          //$term->relevance = $v['relevance'];
+          //alchemy_term_save($term);
+          if (isset($intel_attr)) {
+            $intel_attr->value_str = $v['type'] . ':' . $v['term'];
+            $intel_attr->value_num = $v['relevance'];
+            intel_entity_attr_save($intel_attr);
+          }
+        }
       }
     }
 

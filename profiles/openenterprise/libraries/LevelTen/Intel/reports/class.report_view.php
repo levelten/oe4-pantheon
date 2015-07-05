@@ -18,6 +18,7 @@ class ReportView {
   protected $modes = array();
   protected $context = '';
   protected $context_mode = '';
+  protected $dataSourceKey = '';
   protected $params = array();
   protected $dateRange = array();
   protected $chartColors = array(
@@ -69,6 +70,13 @@ class ReportView {
   function setParam($key, $value) {
     $this->params[$key] = $value;
   }
+
+  function getParam($key, $default = null) {
+    if (isset($this->params[$key])) {
+      return $this->params[$key];
+    }
+    return $default;
+  }
   
   function setTargets($targets) {
     $this->targets = $targets;
@@ -86,7 +94,7 @@ class ReportView {
     $this->goals[$key] = $value;
   }
   
-  function setDateRange($startDate, $endDate) {
+  function setDateRange($startDate, $endDate, $days = null) {
     $this->dateRange['start'] = $startDate;
     $this->dateRange['end'] = $endDate;
     $this->dateRange['days'] = round(($endDate - $startDate)/60/60/24);  
@@ -108,7 +116,13 @@ class ReportView {
   }
   
   function usort_by_score_then_entrances($a, $b) {
+    if (!isset($a['score']) || !isset($a['score'])) {
+      return 0;
+    }
     if ($a['score'] == $b['score']) {
+      if (!isset($a['entrance']['entrances']) || !isset($b['entrance']['entrances'])) {
+        return 0;
+      }
       return ($a['entrance']['entrances'] < $b['entrance']['entrances']) ? 1 : -1; 
     }
     return ($a['score'] < $b['score']) ? 1 : -1; 
@@ -269,61 +283,98 @@ class ReportView {
     $value = $vars['value'];
     $type = $vars['type'];
     $title_attr = (!empty($vars['title'])) ? ' title="' . $vars['title'] . '"' : '';
-    $number_of_days = 1;
-    if (!empty($vars['number_of_days'])) {
-      $number_of_days = $vars['number_of_days'];
-    }  
+    $days = 1;
+    $entrances = 1;
+    $pages = 1;
+    $visits = 1;
+    $target_div = 1;
+    if (!empty($vars['days'])) {
+      $days = $vars['days'];
+    }
+    if (!empty($vars['entrances'])) {
+      $entrances = $vars['entrances'];
+    }
+    if (!empty($vars['pages'])) {
+      $pages = $vars['pages'];
+    }
+    if (!empty($vars['target_div'])) {
+      $target_div = $vars['target_div'];
+    }
+
     if (!isset($targets)) {
       $targets = $this->targets;
     }
-  
-    $value_str = number_format($value / $number_of_days, 2);
     
     $value_status = 'error';
-    if ($type == 'value_per_day') {      
-      if ($value >= $targets['value_per_visit_warning']) {
+    if ($type == 'value_per_day') {
+      $value_str = number_format($value / $days, 2);
+      if (($value / $days) >= ($targets['value_per_day_warning'] / $target_div)) {
         $value_status = 'warning';
       }
-      if ($value >= $targets['value_per_visit']) {
+      if (($value / $days) >= ($targets['value_per_day'] / $target_div)) {
         $value_status = 'complete';
       }   
     }
     
     // page scoring
-    if ($type == 'value_per_page_per_day') {      
-      if (($value / $number_of_days) >= $targets['value_per_page_per_day_warning']) {
+    if ($type == 'value_per_page_per_day') {
+      $value_str = number_format($value / $pages / $days, 2);
+      if (($value / $pages / $days) >= ($targets['value_per_page_per_day_warning'] / $target_div)) {
         $value_status = 'warning';
       }
-      if (($value / $number_of_days) >= $targets['value_per_page_per_day']) {
+      if (($value / $pages / $days) >= ($targets['value_per_page_per_day'] / $target_div)) {
         $value_status = 'complete';
       }   
     }
     
-    if ($type == 'value_per_page_per_entrance') {      
-      if ($value >= $targets['value_per_page_per_entrance_warning']) {
+    if ($type == 'value_per_page_per_entrance') {
+      $value_str = number_format($value / $pages / $entrances, 2);
+      if (($value / $pages / $entrances) >= ($targets['value_per_page_per_entrance_warning'] / $target_div)) {
         $value_status = 'warning';
       }
-      if ($value >= $targets['value_per_page_per_entrance']) {
+      if (($value / $pages / $entrances) >= ($targets['value_per_page_per_entrance'] / $target_div)) {
         $value_status = 'complete';
       }   
-    }
-    
-    if ($type == 'entrances_per_page_per_day') {      
-      if (($value / $number_of_days) >= $targets['entrances_per_page_per_day_warning']) {
-        $value_status = 'warning';
-      }
-      if (($value / $number_of_days) >= $targets['entrances_per_page_per_day']) {
-        $value_status = 'complete';
-      } 
-      $decimal = ($number_of_days == 1) ? 0 : 1;
-      $value_str = number_format($value / $number_of_days, $decimal); 
     }
 
-    if ($type == 'value_per_visit') {      
-      if (($value) >= $targets['value_per_visit_warning']) {
+    if ($type == 'entrances_per_day') {
+      $decimal = ($days == 1 && $pages == 1) ? 0 : 1;
+      $value_str = number_format($value / $days, $decimal);
+      if (($value / $pages / $days) >= ($targets['entrances_per_day_warning'] / $target_div)) {
         $value_status = 'warning';
       }
-      if (($value) >= $targets['value_per_visit']) {
+      if (($value / $pages / $days) >= ($targets['entrances_per_day'] / $target_div)) {
+        $value_status = 'complete';
+      }
+    }
+    
+    if ($type == 'entrances_per_page_per_day') {
+      $decimal = ($days == 1 && $pages == 1) ? 0 : 1;
+      $value_str = number_format($value / $pages / $days, $decimal);
+      if (($value / $pages / $days) >= ($targets['entrances_per_page_per_day_warning'] / $target_div)) {
+        $value_status = 'warning';
+      }
+      if (($value / $pages / $days) >= ($targets['entrances_per_page_per_day'] / $target_div)) {
+        $value_status = 'complete';
+      }
+    }
+
+    if ($type == 'value_per_entrance') {
+      $value_str = number_format($value / $entrances, 2);
+      if (($value / $entrances) >= (($targets['value_per_day_warning'] / $targets['entrances_per_day_warning']) / $target_div)) {
+        $value_status = 'warning';
+      }
+      if (($value / $entrances) >= (($targets['value_per_day'] / $targets['entrances_per_day']) / $target_div)) {
+        $value_status = 'complete';
+      }
+    }
+
+    if ($type == 'value_per_visit') {
+      $value_str = number_format($value / $visits, 2);
+      if (($value) >= ($targets['value_per_visit_warning'] / $target_div)) {
+        $value_status = 'warning';
+      }
+      if (($value) >= ($targets['value_per_visit'] / $target_div)) {
         $value_status = 'complete';
       } 
     }
