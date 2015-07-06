@@ -7,8 +7,8 @@ function L10iDisqus(_ioq) {
 
     io('log', "l10iDisqusTracker.init()");
 
-  this.trackComment = function (comment) {
-    var action = "Disqus", ga_event, json_data, json_params, timestamp;
+  this.triggerComment = function (comment) {
+    var action = "Disqus", ga_event, json_data, json_params, timestamp, commentSubmit;
     if (comment.text.length > 40) {
       action = action + ": " + comment.text.substring(0, 35) + '...';
     }
@@ -19,24 +19,20 @@ function L10iDisqus(_ioq) {
 	  'eventCategory': "Comment!",
 	  'eventAction': action,
       'eventLabel': window.location.pathname.substring(1) + "#comment-" + comment.id,
-      'eventValue': (typeof _l10iq.settings.scorings.disqus_comment !== 'undefined') ? Number(_l10iq.settings.scorings.disqus_comment) : 0,
+      'eventValue': io('get', 'config.scorings.disqus_comment', 0),
   	  'nonInteraction': false
     };
-    //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
-      _l10iq.push(['event', ga_event]);
+    io('event', ga_event);
 
-    timestamp = _l10iq.push(['_getTime']);
-    comment = {
-      'id': comment.id,
-      'text': comment.text,
-      'type': 'disqus',
-      'submitted': timestamp,
-      'location': _l10iq.location,
-      'systemPath' : _l10iq.push(['get', 'config.systemPath', ''])
-    };
-    
+    timestamp = io('getTime');
+    commentSubmit = io('mergeVarEventContext', ga_event);
+    commentSubmit.id = comment.id;
+    commentSubmit.text = comment.text;
+    commentSubmit.type = 'disqus';
+    commentSubmit.submitted = timestamp;
+
     json_data = {
-      'value': comment,
+      'value': commentSubmit,
       'valuemeta': {'_updated': timestamp},
       'return': {commentid: comment.id, keys: timestamp, type: 'disqus'}
     };
@@ -44,13 +40,14 @@ function L10iDisqus(_ioq) {
       'keys': timestamp,
       'type': 'session',
       'namespace': 'commentSubmit'
-    }; 
-    _l10iq.push(['triggerCallbacks', 'saveCommentSubmitAlter', json_params, json_data, {}, {}]);
-    _l10iq.push(['getJSON', 'var/merge', json_params, json_data, 'l10iDisqus.submitComment']);
+    };
+
+    io('triggerCallbacks', 'saveCommentSubmitAlter', json_params, json_data, {}, {});
+    io('getJSON', 'var/merge', json_params, json_data, function (data) { io('disqus:submitComment', data); });
   };
   
   this.submitComment = function submitComment(data) {
-    _l10iq.push(['triggerCallbacks', 'saveCommentSubmitPostSubmit', data['return']]);
+    io('triggerCallbacks', 'saveCommentSubmitPostSubmit', data['return']);
   };
 }
 

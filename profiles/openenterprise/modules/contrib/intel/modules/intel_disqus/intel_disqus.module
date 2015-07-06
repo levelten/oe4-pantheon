@@ -251,6 +251,10 @@ function intel_disqus_comment_submit_js() {
 
   $response = array(
     'status' => 1,
+    'submit_context' => $submit_context,
+    'submission' => $submission,
+    'visitor' => $visitor,
+    'track' => $track,
   );
   intel_json_output($response);
 }

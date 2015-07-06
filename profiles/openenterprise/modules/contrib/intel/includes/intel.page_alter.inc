@@ -239,9 +239,12 @@ function intel_page_alter(&$page) {
       'config' => $config,
       'pushes' => $pushes,
     ),
-    //'disqus' => array(
-    //  'callback_onnewcomment' => 'l10iDisqus.trackComment',
-    //),
+    // TODO: move this to intel_disqus
+    'disqus' => array(
+      'callbacks' => array(
+        'onNewComment' => array('_ioq.plugins.disqus.triggerComment'),
+      ),
+    ),
   );
 
   if ($ga_domain = variable_get('intel_domain_name', '')) {
@@ -1109,7 +1112,7 @@ function intel_check_form_submission($page) {
     return;
   }
 
-$debug = 1;
+//$debug = 1;
 
   // check for webform submission
   $track = array(

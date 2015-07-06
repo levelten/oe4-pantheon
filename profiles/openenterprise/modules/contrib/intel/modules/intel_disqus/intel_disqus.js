@@ -13,17 +13,18 @@ Drupal.behaviors.intel_disqus = {
       return;
     }
     var data = {
-      vtk: _l10iq.vtk,
+      vtk: _ioq.vtk,
       commentid: data.commentid
     };
     var url = ('https:' == document.location.protocol) ? 'https://' : 'http://';
     url += Drupal.settings.intel.config.cmsHostpath + "intel_disqus/comment_submit_js";
-    jQuery.ajax({
-      dataType: 'json',
-      url: url, 
-      data: data,
-      type: 'GET'
-    });
+      var params = {
+          dataType: 'json',
+          url: url,
+          data: data,
+          type: 'GET'
+      };
+    jQuery.ajax(params);
   }
 };
 

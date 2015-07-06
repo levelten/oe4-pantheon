@@ -6,7 +6,9 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-function l10iYouTubeTracker() {
+function L10iYouTube(_ioq) {
+    var ioq = _ioq;
+    var io = _ioq.io;
     this.playerState = {};
     this.players = {};
     this.domReady = false;
@@ -30,13 +32,14 @@ function l10iYouTubeTracker() {
     };
 
     this.trackPlayer = function (player, videoId) {
-        player.addEventListener('onReady', l10iYouTube.onPlayerReady);
-        player.addEventListener('onStateChange', l10iYouTube.onPlayerStateChange);
-        l10iYouTube.players[videoId] = player;
-        l10iYouTube.playerState[videoId] = {
+        player.addEventListener('onReady', function (event) { io('youtube:onPlayerReady', event); });
+        player.addEventListener('onStateChange', function (event) { io('youtube:onPlayerStateChange', event); });
+        this.players[videoId] = player;
+        this.playerState[videoId] = {
             state: -1,
             paused: true
         };
+
     };
 
     this.trackYouTube = function () {
@@ -59,12 +62,13 @@ function l10iYouTubeTracker() {
                         width: width
                         /*
                         events: {
-                            'onReady': l10iYouTube.onPlayerReady,
-                            'onStateChange': l10iYouTube.onPlayerStateChange
+                            'onReady': this.onPlayerReady,
+                            'onStateChange': this.onPlayerStateChange
                         }
                         */
                     });
-                    l10iYouTube.trackPlayer(player, matches[1]);
+                    io('youtube:trackPlayer', player, matches[1]);
+                    //ths.trackPlayer(player, matches[1]);
                 }
             }
         });
@@ -85,7 +89,7 @@ function l10iYouTubeTracker() {
         var title = (videoData.author) ? videoData.author : '(not set)';
         title += ': ' + ((videoData.title) ? videoData.title : '(not set)');
 
-        var player = l10iYouTube.players[id];
+        var player = this.players[id];
         var ga_event = {
             'eventCategory': "Video event",
             'eventAction': "YouTube: " + title,
@@ -93,47 +97,54 @@ function l10iYouTubeTracker() {
             'eventValue': 0,
             'nonInteraction': false
         };
+        ga_event.oa = {
+            rs: 'youtube',
+            rc: 'video',
+            rk: id,
+            domi: id
+        };
         var positionPer = Math.round(100 * player.getCurrentTime() / player.getDuration());
         if (event.data == YT.PlayerState.PLAYING){
             ga_event.eventCategory = 'Video play';
-            var value = (typeof _l10iq.settings.scorings.youtube_video_play !== 'undefined') ? Number(_l10iq.settings.scorings.youtube_video_play) : 0;
+            var value = io('get', 'config.scorings.youtube_video_play', 0);
             if (value > 0) {
                 ga_event.eventCategory += '!';
             }
+            ga_event.eid = 'videoPlay';
             //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
-            _l10iq.push(['event', ga_event]);
-            l10iYouTube.playerState[id].paused = false;
+            io('event', ga_event);
+            this.playerState[id].paused = false;
         }
-        else if (event.data == YT.PlayerState.ENDED  && !l10iYouTube.playerState[id].paused){
+        else if (event.data == YT.PlayerState.ENDED  && !this.playerState[id].paused){
             ga_event.eventCategory = 'Video watched';
             ga_event.eventValue = 100;
-            _l10iq.push(['event', ga_event]);
+            ga_event.eid = 'videoWatched';
+            io('event', ga_event);
             //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
         }
-        else if (event.data == YT.PlayerState.PAUSED && !l10iYouTube.playerState[id].paused){
+        else if (event.data == YT.PlayerState.PAUSED && !this.playerState[id].paused){
             ga_event.eventCategory = 'Video stop';
-            _l10iq.push(['event', ga_event]);
+            ga_event.eid = 'videoStop';
+            io('event', ga_event);
             //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event, '']);
 
             // copy object for Video watched
             var ga_event2 = jQuery.extend({}, ga_event);
             ga_event2.eventCategory = 'Video watched';
             ga_event2.eventValue = positionPer;
-            _l10iq.push(['event', ga_event2]);
+            ga_event2.eid = 'videoWatched';
+            io('event', ga_event2);
             //_l10iq.push(['_trackIntelEvent', jQuery(this), ga_event2, '']);
-            l10iYouTube.playerState[id].paused = true;
+            this.playerState[id].paused = true;
         }
     };
     _l10iq.push(['addCallback', 'domReady', this.init, this]);
 }
 
-var l10iYouTube = new l10iYouTubeTracker();
-
-//jQuery(document).ready(function() {
-//    _l10iq.push(['_onReady', l10iYouTube.init, l10iYouTube]);
-//});
+_l10iq.push(['providePlugin', 'youtube', L10iYouTube, {}]);
 
 // function called by YouTube API when ready
 function onYouTubeIframeAPIReady() {
-    l10iYouTube.apiInit();
+    io('youtube:apiInit');
+    //this.apiInit();
 }
