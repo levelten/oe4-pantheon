@@ -5,7 +5,6 @@ version = "7.x-3.x"
 
 ; Core
 dependencies[] = block
-dependencies[] = comment
 dependencies[] = contextual
 dependencies[] = dblog
 dependencies[] = help
