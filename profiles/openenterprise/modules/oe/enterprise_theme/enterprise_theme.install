@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ */
+
+ /**
+  * Enable RespondJS for media query fix in IE8.
+  */
+ function enterprise_theme_update_7000() {
+   // Check if RespondJS is enabled.
+   if (!module_exists('respondjs')) {
+     module_enable(array('respondjs'), TRUE);
+   }
+ }
