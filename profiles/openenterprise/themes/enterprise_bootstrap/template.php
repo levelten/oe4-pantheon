@@ -237,6 +237,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   $settings['megamenu'] = theme_get_setting('enterprise_bootstrap_megamenu');
   $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
   $settings['mobilemenuhoverpush'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push');
+  $settings['mobilemenuhoverpushwidth'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width');
   $settings['fittext'] = theme_get_setting('fittext_selector');
   $settings['sticky_menu'] = theme_get_setting('sticky_menu');
   

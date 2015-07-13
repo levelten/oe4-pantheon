@@ -499,7 +499,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Toggle'),
 		),
 	);
-	$form['enterprise_bootstrap_megamenu_config']['section_left']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Mobile Menu - Hover Push'), 
+		'#collapsible' => FALSE, 
+		'#collapsed' => FALSE,
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
 		'#type' => 'select',
 		'#title' => t('Mobile Menu: Hover or Push'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
@@ -508,6 +514,22 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('Hover over content'),
 			1 => t('Push down content'),
 		),
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push']['enterprise_bootstrap_mobile_menu_hover_push_width'] = array(
+		'#type' => 'select',
+		'#title' => t('Activation Width'),
+		'#description' => t('The mobile width this will activate.'),
+		'#default_value' => (!empty(theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width'))) ? theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width') : 568,
+		'#options' => array(
+			480 => t('480px (iPhone 4)'),
+			568 => t('568px (iPhone 5)'),
+			667 => t('667px (iPhone 6)'),
+		),
+		'#states' => array(
+      'visible' => array(
+        ':input[name=enterprise_bootstrap_mobile_menu_hover_push]' => array('value' => '1'),
+      ),
+    ),
 	);
 
 	//  We don't use this anymore, but we can keep this in as a reminder.
