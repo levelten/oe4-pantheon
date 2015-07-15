@@ -101,7 +101,14 @@ function intel_init_reports_vars($report_name, $report_type, $report_params = '-
   elseif ($vars['entity_type'] == 'og_group') {
     $vars['filter_type'] = 'page-attr';
     // TODO use entity_info to determine id
-    $vars['filter'] = 'og:' . $vars['entity']->id;
+    if (!is_object($vars['entity']) && is_numeric($vars['entity'])) {
+      $vars['entity_id'] = $vars['entity'];
+      $vars['entity_type'] = variable_get('intel_og_default_group_type', 'node');
+      $vars['entity'] = entity_load($vars['entity_type'], array($vars['entity_id']));
+      $vars['entity'] = $vars['entity'][$vars['entity_id']];
+    }
+    $report_params .= (($report_params) ? '&' : '') . 'f0=pa-og:' . $vars['entity_id'];
+    //$vars['filter'] = 'og:' . $vars['entity']->id;
     //$vars['og_entity'] = intel_visitor_load($filter_element->vtk);
   }
 
@@ -406,6 +413,7 @@ function intel_build_report_params_arg($params) {
   $str = '';
   $filter_add = '';
   $filter_del = '';
+  $ignore = array();
   if (isset($params['_filter_add'])) {
     $filter_add = $params['_filter_add'];
     unset($params['_filter_add']);
@@ -757,6 +765,12 @@ function intel_reports_filter_types() {
 }
 
 function intel_report_filters_form($form, &$form_state, $filters = array(), $vars = array()) {
+  $access = user_access('view all intel reports');
+  // TODO: this is a hack, work out more elegant way of handeling permissions
+  if (!$access) {
+    drupal_add_css('.intel-static-filter, .intel-related-links {display: none;} #intel-report a.intel-more {display: none;}', array('group' => CSS_THEME, 'type' => 'inline'));
+  }
+
   $dynamic_filters = array();
   $context = (!empty($vars['context'])) ? $vars['context'] : '';
   $form['filters'] = array(

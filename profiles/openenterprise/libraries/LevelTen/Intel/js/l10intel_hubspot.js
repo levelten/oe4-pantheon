@@ -1,17 +1,21 @@
 var _l10iq = _l10iq || [];
 
-function l10iHubSpotTracker() {  
+function L10iHubSpot(_ioq) {
+  var ioq = _ioq;
+  var io = _ioq.io;
+
   this.init = function init() {
-    _l10iq.push(['_log', "l10iHubSpotTracker.init()"]);
-    
-    _l10iq.push(['addCallback', 'saveCtaClickAlter', this.saveCtaClickAlterCallback, this]);
-    _l10iq.push(['addCallback', 'saveFormSubmitAlter', this.saveFormSubmitAlterCallback, this]);
-    _l10iq.push(['addCallback', 'saveCommentSubmitAlter', this.saveCommentSubmitAlterCallback, this]);
+    io('log', "l10iHubSpotTracker.init()");
+
+    io('addCallback', 'ctaClickAlter', this.ctaClickAlterCallback, this);
+    io('addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this);
+    io('addCallback', 'commentSubmitAlter', this.commentSubmitAlterCallback, this);
     
     // add vtk to hidden field on HubSpot forms
-    jQuery(".hs-form input[name='l10i_vtk']").val(_l10iq.vtk);
+      // don't do this here as form has likely not loaded yet
+    //jQuery(".hs-form input[name='l10i_vtk']").val(io('get', 'vtk'));
     
-    var rf = _l10iq.push(['_getCookie', 'hsrecentfields']);
+    var rf = io('getCookie', 'hsrecentfields');
 
     if (rf) {
       rf = decodeURIComponent(rf);
@@ -42,47 +46,44 @@ function l10iHubSpotTracker() {
         }
       }
       if (count > 0) {
-          _l10iq.push(['set', 'visitor.hubspot', data);
-    	  //_l10iq.push(['_saveVar', 'visitor', 'hubspot']);
+          io('set', 'visitor.hubspot', data);
       }
       
-      _l10iq.push(['set', 'ext.hubspot.hs_context', rf['hs_context']]);
-      _l10iq.push(['saveVar', 'ext', 'hubspot']);
+      io('set', 'ext.hubspot.hs_context', rf['hs_context']);
+      io('saveVar', 'ext', 'hubspot');
+    }
+  };
+
+  this.ctaClickAlterCallback = function (click, data, $obj, event) {
+    click['hubspotutk'] = io('getCookie', 'hubspotutk');
+
+    var href = $obj.attr('cta_dest_link') || '';  // used for HubSpot CTAs
+    if (href) {
+        click['href'] = href;
     }
   };
   
-  this.saveCtaClickAlterCallback = function (json_params, json_data, $obj, event) {
-    json_data['value']['hubspotutk'] = _l10iq.getCookie('hubspotutk');
-    var href = $obj.attr('cta_dest_link');  // used for HubSpot CTAs
-    if (typeof href != 'undefined') {
-      json_data['value']['href'] = href;
-    }
-  };
-  
-  this.saveFormSubmitAlterCallback = function saveFormSubmitCallback(json_params, json_data, $obj, event) {
-	  json_data['value']['hubspotutk'] = _l10iq.getCookie('hubspotutk');
+  this.formSubmitAlterCallback = function (submit, data, $obj, event) {
+      submit['hubspotutk'] = io('getCookie', 'hubspotutk');
 	  // check if a HubSpot form
 	  if (!$obj.hasClass('hs-form')) {
 		return;
 	  }
 	  // add vtk to hidden field on HubSpot forms
-	  jQuery(".hs-form input[name='l10i_vtk']").val(_l10iq.vtk);
-	    
-	  json_data['value']['type'] = 'hubspot';
+	  jQuery(".hs-form input[name='l10i_vtk']").val(io('get', 'vtk'));
+
+      submit['type'] = 'hubspot';
 	  var id = $obj.attr('id');
-	  json_data['value']['fid'] = id.replace('hsForm_', '');
+      submit['fid'] = id.replace('hsForm_', '');
   };
   
-  this.saveCommentSubmitAlterCallback = function saveCommentSubmitCallback(json_params, json_data, $obj, event) {
-	  json_data['value']['hubspotutk'] = _l10iq.getCookie('hubspotutk');
+  this.commentSubmitAlterCallback = function (submit, data, $obj, event) {
+      submit['hubspotutk'] = io('getCookie', 'hubspotutk');
   };
 
-    _l10iq.push(['addCallback', 'domReady', this.init, this]);
+  _l10iq.push(['addCallback', 'domReady', this.init, this]);
 }
 
-var l10iHubSpot = new l10iHubSpotTracker();
-//jQuery(document).ready(function() {
-//	_l10iq.push(['_onReady', l10iHubSpot.init, l10iHubSpot]);
-//});
+_l10iq.push(['providePlugin', 'hubspot', L10iHubSpot, {}]);
 
 

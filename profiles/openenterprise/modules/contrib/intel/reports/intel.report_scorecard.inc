@@ -16,6 +16,8 @@
  * @return string
  */
 function intel_scorecard_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
+//$args = func_get_args();
+//dsm($args);
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
@@ -35,7 +37,7 @@ function intel_scorecard_report_page($report_params = '-', $report_subtype = '-'
 
 //function intel_scorecard_report($filters = array(), $context = '-', $sub_index = '-', $mode = '') {
 function intel_scorecard_report($vars) {
-
+//dsm($vars);
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
@@ -66,7 +68,9 @@ function intel_scorecard_report($vars) {
   // note: add +1 to number of days incase timeframe is not an exact day, e.g. l30dfn
   $ga_data->setRequestDefaultParam('max_results', ($number_of_days+1));
 
+  //$ga_data->setDebug(1);
   $ga_data->loadFeedData('pageviews');
+  $ga_data->setDebug(0);
 
   $ga_data->loadFeedData('entrances');
 
@@ -163,14 +167,21 @@ function intel_scorecard_report($vars) {
     'events_pageview' => array(),
     'goals_pageview' => array(),
   );
+  $more_link_options = array(
+    'attributes' => array(
+      'class' => array(
+        'intel-more'
+      ),
+    ),
+  );
   if ($vars['context'] == 'page' || $vars['context'] == 'page-attr') {
-    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_valued'));
-    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_goal'));
-    $d['date']['_links']['events_pageview'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'pageview_valued'));
+    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_valued'), $more_link_options);
+    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'entrance_goal'), $more_link_options);
+    $d['date']['_links']['events_pageview'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'pageview_valued'), $more_link_options);
   }
   else {
-    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'valued'));
-    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'goal'));
+    $d['date']['_links']['events'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'valued'), $more_link_options);
+    $d['date']['_links']['goals'][] = l(t('more'), intel_build_report_path('event', $vars['report_params'], 'goal'), $more_link_options);
   }
 
   //$params = $vars['report_params'];
@@ -192,10 +203,10 @@ function intel_scorecard_report($vars) {
       'default' => array(),
       'i.t' => array(),
     );
-    $d['content']['_links']['default'][] = l(t('more'), intel_build_report_path('content', $vars['report_params']));
+    $d['content']['_links']['default'][] = l(t('more'), intel_build_report_path('content', $vars['report_params']), $more_link_options);
     $params = $vars['report_params'];
     $params['_filter_add'] = 'pa-i:t';
-    $d['content']['_links']['i.t'][] = l(t('more'), intel_build_report_path('content', $params));
+    $d['content']['_links']['i.t'][] = l(t('more'), intel_build_report_path('content', $params), $more_link_options);
   }
   if (isset($d['trafficsources'])) {
     $sub_indexes = $ga_data->getTrafficsourcesSubIndexes();
@@ -207,7 +218,7 @@ function intel_scorecard_report($vars) {
         $d['trafficsources'][$sub_index][$index]['score_components'] = $score_components;  
       }
       $d['trafficsources'][$sub_index]['_links'] = array();
-      $d['trafficsources'][$sub_index]['_links'][] = l(t('more'), intel_build_report_path('trafficsource', $vars['report_params'], $sub_index));
+      $d['trafficsources'][$sub_index]['_links'][] = l(t('more'), intel_build_report_path('trafficsource', $vars['report_params'], $sub_index), $more_link_options);
     }   
   }
   // order date data cronologically

@@ -63,7 +63,7 @@ function intel_page_attribute_list_report($vars) {
 
   $ga_data->setRequestSetting('indexBy', $indexBy);
   $ga_data->setRequestSetting('context', $vars['context']);
-  $ga_data->setDebug(1);
+  //$ga_data->setDebug(1);
   // build pagepath map
   $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
   $ga_data->loadFeedData('entrances_pagepathmap');
@@ -123,7 +123,7 @@ $ga_data->setDebug(0);
     }
   }
 
-  dsm($d);
+  //dsm($d);
 
   foreach ($d[$indexBy] AS $index => $de) {
     $score_components = array();

@@ -248,7 +248,7 @@ function intel_page_alter(&$page) {
   );
 
   if ($ga_domain = variable_get('intel_domain_name', '')) {
-    $js['intel']['config']['ga']['_setDomainName'] = $ga_domain;
+    $js['intel']['config']['cookieDomain'] = $ga_domain;
   }
 
   // Get page status code for visibility filtering.
@@ -405,13 +405,15 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   // ? not sure if this is needed or enhances performance
   if (isset($entity->created)) {
     $val = date('YmdHiw', $entity->created);
-    if (!empty($page_attrs['pd']) && $page_attrs['pd'] != $val) {
+    if (empty($page_attrs['pd']) || ($page_attrs['pd'] != $val)) {
       $page_attrs['pd'] = $val;
+      /*
       if (isset($entity_attr)) {
         $entity_attr->attr_key = 'pd';
         $entity_attr->value = $val;
         intel_entity_attr_save($entity_attr);
       }
+      */
     }
     /*
     $page_attrs['pd'] = $entity->created;
@@ -860,6 +862,8 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
   }
   $api_level = intel_api_level();
 
+  $io_name = 'io';
+
   $debug = intel_debug_mode();
   if ($debug) {
     $terminator = "\n";
@@ -945,7 +949,7 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
 
     $sv = (variable_get('intel_debug_mode', 0)) ? '' : '.min';
     //$script .= "// LevelTen Intelligence" . $terminator;
-    $script .= "var _l10iq = _l10iq || [];" . $terminator;
+    //$script .= "var _l10iq = _l10iq || [];" . $terminator;
     if ($api_local) {
       $script .= 'var _l10iss = {"apiUrl": "' . $api_hostpath . '/", "apiLevel": "' . $api_level . '"};' . $terminator;
     }
@@ -960,14 +964,13 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
     $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
 
     //$l10iq_pushes[] = array('_setOptions', (object) array());
-    $l10iq_pushes[] = array('set', (object) array());
+    //$l10iq_pushes[] = array('set', (object) array());
 
     // trigger alter to enable other modules to add pushes
     drupal_alter('intel_l10iq_pushes', $l10iq_pushes);
-    foreach ($l10iq_pushes AS $p) {
-      $script .= "_l10iq.push(" . json_encode($p) . ");" . $terminator;
-    }
-
+    //foreach ($l10iq_pushes AS $p) {
+    //  $script .= "_l10iq.push(" . json_encode($p) . ");" . $terminator;
+    //}
     if ($version == 'simple') {
       $script .= '</script>' . $terminator;
       $script .= '<script src="http://' . $api_hostpath . '/js/' . $api_js_ver . '/l10i' . $sv . '.js"></script>' . $terminator;
@@ -982,12 +985,28 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
           $q_script = '';
           if (($api_level == 'pro') || ($api_level == 'basic')) {
             $l10ijs_propdir = '/p/' . $l10i_ga_account;
-            if ($js_embed_style == 'property_dynsesinit') {
-              $q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t;}";
+            //if ($js_embed_style != 'property') {
+            if ($api_level == 'pro') {
+              $q_script = "if(c.indexOf('l10i_s=')==-1){s='?t='+t}";
+              //$q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t}";
             }
           }
           $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
 
+
+          $script .= "(function(w,d,o,u,b,i,r,a,s,c,t){" . $terminator;
+          $script .= "w['OEIntelObject']=r;" . $terminator;
+          $script .= "w[r]=w[r]||function() {" . $terminator;
+          $script .= "(w[r].q=w[r].q||[]).push(arguments)" . $terminator;
+          $script .= "}," . $terminator;
+          $script .= "t=1*new Date();" . $terminator;
+          $script .= "a='l10i_bt=';s='';" . $terminator;
+          $script .= "d.cookie=a+t;c=d.cookie;" . $terminator;
+          //$script .= "console.log(w[r]);" . $terminator;
+          $script .= "if(c&&c.indexOf(a)!=-1){u+=i;$q_script}u+=b+s;" . $terminator;
+          $script .= "a=d.createElement(o),b=d.getElementsByTagName(o)[0];a.async=1;a.src=u;b.parentNode.insertBefore(a,b)" . $terminator;
+          $script .= "})(window,document,'script','//$api_hostpath','$l10ijs_path','$l10ijs_propdir','$io_name');" . $terminator;
+          /*
           $script .= "d=q=c='';t=new Date().getTime();" . $terminator;
           $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
           $script .= "(function(i,s,o,g,r,a,m){" . $terminator;
@@ -999,6 +1018,7 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
           $script .= "a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" . $terminator;
           //$script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','_l10iq');" . $terminator;
           $script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','io');" . $terminator;
+          */
 
           /*
           $script .= "(function() {" . $terminator;
@@ -1016,6 +1036,11 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
           $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
           $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
           $script .= "})();" . $terminator;
+        }
+        foreach ($l10iq_pushes AS $p) {
+          $p = substr(json_encode($p),1);
+          $p = substr($p, 0 ,-1);
+          $script .= "$io_name(" . $p . ");" . $terminator;
         }
       }
     }
@@ -1048,8 +1073,11 @@ function intel_js_alter(&$javascript) {
     if (substr($javascript[$i]['data'], 0, 10) == 'var _l10iq') {
       $intel_i = $i;
     }
+    else if (substr($javascript[$i]['data'], 0, 32) == '(function(w,d,o,u,b,i,r,a,s,c,t)') {
+      $intel_i = $i;
+    }
     //if (substr($javascript[$i]['data'], 0, 8) == 'var _gaq') {
-    if (substr($javascript[$i]['data'], 0, 8) == '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]') {
+    if (substr($javascript[$i]['data'], 0, 51) == '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]') {
       $ga_i = $i;
     }
     // if we have found both intel & ga js, exit loop
@@ -1062,8 +1090,8 @@ function intel_js_alter(&$javascript) {
   if ($intel_i >= 0) {
     $options = drupal_array_merge_deep_array($options);
     // if google_analtyics script is added, turn on track_analtyics flag
-    if ($ga_i >= 0) {
-      $options['config']['track_analytics'] = 1;
+    if ($ga_i == -1) {
+      $options['config']['trackAnalytics'] = 0;
       //$javascript[$intel_i]['weight'] = $javascript[$ga_i]['weight'] + 1;
     }
 
@@ -1079,13 +1107,17 @@ function intel_js_alter(&$javascript) {
     }
     */
     //$json = drupal_json_encode($options);
-    $str = '_l10iq.push(["set", "config", ' . drupal_json_encode($options['config']) . ']);' . "\n";
+    $io_name = 'io';
+    $pushstr = $io_name . '("set", "config", ' . drupal_json_encode($options['config']) . ');' . "\n";
+    //$str = '_l10iq.push(["set", "config", ' . drupal_json_encode($options['config']) . ']);' . "\n";
     if (isset($options['pushes']) && is_array($options['pushes'])) {
       foreach ($options['pushes'] as $cm => $push) {
-        $str .= '_l10iq.push(["' . $cm . '",' . drupal_json_encode($push) . ']);' . "\n";
+        $pushstr .= $io_name . '("' . $cm . '",' . drupal_json_encode($push) . ');' . "\n";
+        //$str .= '_l10iq.push(["' . $cm . '",' . drupal_json_encode($push) . ']);' . "\n";
       }
     }
-    $javascript[$intel_i]['data'] = str_replace('_l10iq.push(["set",{}]);', $str, $javascript[$intel_i]['data']) . $pushstr;
+    $javascript[$intel_i]['data'] .= $pushstr;
+    //$javascript[$intel_i]['data'] = str_replace('_l10iq.push(["set",{}]);', $str, $javascript[$intel_i]['data']) . $pushstr;
     //$javascript[$intel_i]['data'] = str_replace('_l10iq.push(["set",{}]);', '_l10iq.push(["set",' . $json . ']);', $javascript[$intel_i]['data']) . $pushstr;
   }
 
@@ -1093,7 +1125,10 @@ function intel_js_alter(&$javascript) {
     if (variable_get('intel_debug_ga_debug', 0)) {
       $javascript[$ga_i]['data'] = str_replace('/ga.js', '/u/ga_debug.js', $javascript[$ga_i]['data']);
     }
-    $script = " if ((typeof _l10im == 'object') && (typeof _l10im.markTime == 'function')) { _gaq.push(function() { _l10im.markTime('ga._trackPageview'); }); }";
+    $hitCallback = "if((typeof window._l10im=='object')&&(typeof window._l10im.markTime=='function')){_l10im.markTime('ga._trackPageview')}";
+    $javascript[$ga_i]['data'] = str_replace('ga("send", "pageview")', 'ga("send", "pageview", {hitCallback: function () {' . $hitCallback . '}})', $javascript[$ga_i]['data']);
+    $script = " if ((typeof _l10im=='object')&&(typeof _l10im.markTime=='function')){ga(function() { _l10im.markTime('ga.ready')})}";
+    //$script = " if ((typeof _l10im == 'object') && (typeof _l10im.markTime == 'function')) { _gaq.push(function() { _l10im.markTime('ga._trackPageview'); }); }";
     $javascript[$ga_i]['data'] .= $script;
   }
 
@@ -1120,6 +1155,7 @@ function intel_check_form_submission($page) {
     'value' => '', 
     'submission_path' => '',
     'form_title' => '',
+    'oa' => array(),
   );
   // any url query elements that should be added to a redirect url
   $link_query = array();
@@ -1127,6 +1163,7 @@ function intel_check_form_submission($page) {
   $submission = intel_submission_construct();
   $form_settings = array();
   $submit_context = array();
+  $cta_context = array();
   // an array of fields to pass to intel's autofill form feature
   $autofill= array();
   $submission_data = array();
@@ -1236,8 +1273,7 @@ function intel_check_form_submission($page) {
   if (isset($va)) {
     $visitor->setVar('data', 'analytics', '', $va);
   }
-dsm('$submit_context');
-dsm($submit_context);
+
   $submission->vid = $visitor->vid;
   // check if api vtk was loaded succesfully
   if (!empty($visitor->apiVisitor->vtk)) {
@@ -1264,7 +1300,15 @@ dsm($submit_context);
         $a = explode('/', $submit_context['systemPath']);
         $lp_node = node_load($a[1]);
         $submission->form_page_id = !empty($lp_node->nid) ? $lp_node->nid : 0;
-        intel_execute_response_redirect_if_set($lp_node, $node, $link_query);
+        $hook_context = array(
+          'type' => 'form_submission',
+          'form_settings' => $form_settings,
+          'submit_context' => $submit_context,
+          'cta_context' => $cta_context,
+          'track' => $track,
+          'submission' => $submission,
+        );
+        intel_execute_response_redirect_if_set($lp_node, $node, $link_query, $hook_context);
       }
 
       if (!empty($submit_context['isLandingpage'])) {
@@ -1375,7 +1419,15 @@ dsm($submit_context);
       $a = explode('/', $loc_comps['system_path']);
       if (($a[0] == 'node') && is_numeric($a[1])) {
         $lp_node = node_load($a[1]);
-        intel_execute_response_redirect_if_set($lp_node, $node, $link_query);
+        $hook_context = array(
+          'type' => 'form_submission',
+          'form_settings' => $form_settings,
+          'submit_context' => $submit_context,
+          'cta_context' => $cta_context,
+          'track' => $track,
+          'submission' => $submission,
+        );
+        intel_execute_response_redirect_if_set($lp_node, $node, $link_query, $hook_context);
       }
     }
   }
@@ -1445,6 +1497,7 @@ if (!empty($_GET['debug']) || !empty($debug)) {
     'eventValue' => $track['value'],
     'nonInteraction' => FALSE,
   );
+  /*
   if (!empty($submit_context['location'])) {
     $call['location'] = $submit_context['location'];
     if (!empty($submit_context['pageTitle'])) {
@@ -1454,9 +1507,11 @@ if (!empty($_GET['debug']) || !empty($debug)) {
       $call['customVars'] = $submit_context['customVars'];
     }
   }
+  */
   if (!empty($track['oa'])) {
-    //$call['oa'] = $track['oa'];
+    $call['oa'] = $track['oa'];
   }
+
 
   intel_add_page_intel_push(array('event', $call));
 //dpm('page_intel_push=');dpm($call);//
@@ -1495,7 +1550,7 @@ if (!empty($_GET['debug']) || !empty($debug)) {
  * @param $menu_object - the object returned from get_menu_object, i.e. the
  * current node
  */
-function intel_execute_response_redirect_if_set($lp_node, $menu_object = null, $link_query = array()) {
+function intel_execute_response_redirect_if_set($lp_node, $menu_object = null, $link_query = array(), $hook_context = array()) {
   // check if redirect set
   if (isset($lp_node->language)) {
     $sys_path = '';
@@ -1508,12 +1563,18 @@ function intel_execute_response_redirect_if_set($lp_node, $menu_object = null, $
       $url = trim($lp_node->field_redirect_url[$lp_node->language][0]['url']);
       $sys_path = drupal_get_normal_path($url);
     }
+
     // if url set and sys_path does not equal q, (on same page) do redirect.
     if ($url && ($sys_path != $_GET['q'])) {
       // cache cookies in Drupal session in case varnish or other caching is filtering
       // cookies
       intel_session_cookie_merge();
       $options = array('query' => $link_query);
+
+      // allow modules to alter redirect
+      $hook_context['lp_node'] = $lp_node;
+      $hook_context['node'] = $menu_object;
+      drupal_alter('intel_form_submission_redirect', $url, $options, $hook_context);
       drupal_goto($url, $options);
       exit;
     }

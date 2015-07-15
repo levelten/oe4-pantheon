@@ -164,7 +164,7 @@ function intel_get_content_report_ga_data($vars = array()) {
   $ga_data->setRequestSetting('indexBy', 'content');
   $ga_data->setRequestSetting('details', 0);
 
-  $ga_data->setDebug(1);
+  //$ga_data->setDebug(1);
   // base pageview/entrance data
   if ($vars['context'] != 'entrance' && ($vars['report_modes'][0] != 'social') && ($vars['report_modes'][0] != 'seo')) {
     $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);

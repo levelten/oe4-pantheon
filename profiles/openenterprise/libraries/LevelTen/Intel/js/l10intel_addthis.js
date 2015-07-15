@@ -9,14 +9,16 @@ function L10iAddthis(_ioq, config) {
         var waits, i;
 
         io('log', 'L10iAddthis.init()');
-
         if ((typeof addthis != 'object') || (typeof addthis.addEventListener != 'function')) {
+
             if (this.waits < 5) {
                 this.waits++;
                 var delay = (this.waits >= 2) ? 2500 : 1000;
-                setTimeout(function () {
-                    io('addthis:init');
-                }, delay);
+                with (this) {
+                    setTimeout(function () {
+                        init();
+                    }, delay);
+                }
             }
             return;
         }
@@ -25,7 +27,8 @@ function L10iAddthis(_ioq, config) {
             addthis.addEventListener('addthis.menu.share', this.onSocialShare);
             addthis.addEventListener('addthis.menu.follow', this.onSocialFollow);
             addthis.addEventListener('addthis.user.clickback', this.onSocialShareClickback);
-            this.onReady({});
+            io('addCallback', 'domReady', this.onReady, this);
+            //this.onReady({});
         }
     };
 
@@ -41,6 +44,7 @@ function L10iAddthis(_ioq, config) {
         if (addthis.user == undefined || (typeof addthis.user.ready != 'function')) {
             return;
         }
+
         addthis.user.ready(function (data) {
             var i, services = {}, count, val;
             // verify we have proper user.services object
@@ -63,23 +67,27 @@ function L10iAddthis(_ioq, config) {
             }
 
             var geo = addthis.user.location();
-            count = 0;
             val = {};
-            if (ioq.isArray(geo) && geo['country'] !== 'undefined') {
+            if (ioq.isObject(geo) && geo['country'] !== 'undefined') {
                 var e = ['country', 'dma', 'lat', 'lon', 'msa', 'region', 'zip'];
                 for (i = 0; i < e.length; i++) {
                     if (geo[e[i]] == undefined) {
                         continue;
                     }
                     val[e[i]] = geo[e[i]];
-                    count++;
                 }
-                if (count) {
+                if (val.lat && val.lon) {
+                    val.lat = parseFloat(val.lat);
+                    val.lon = parseFloat(val.lon);
                     io('set', 'v:addthis.geo', val);
+                    if (ioq.hasSchema('GeoCoord')) {
+                        var gs = ioq.new('GeoCoord', val);
+                        ioq.set('s:geo', gs, {_source: 'addthis'});
+                    }
                 }
             }
-            var last_set = _l10iq.push(['_getFlag', 'session', 'addthis']);
-            var timestamp = _l10iq.push(['_getTime']);
+            var last_set = io('getFlag', 'session', 'addthis');
+            var timestamp = io('getTime');
             if ((count > 0) && ((last_set == undefined) || ((timestamp - last_set) > (60 * 60 * 24)))) {
                 io('setFlag', 'session', 'addthis', timestamp, true);
             }

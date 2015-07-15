@@ -28,7 +28,7 @@ function intel_visitor_clickstream_report_page($report_params = '-', $report_sub
 //function intel_visitor_clickstream_report($vars) {
 
 function intel_visitor_clickstream_report($vars) {
-
+//dsm($vars);
   $visitor = $vars['entity'];
   if (!empty($visitor->vtk)) {
     $vtkid = substr($visitor->vtk, 0 , 20);
@@ -48,12 +48,14 @@ function intel_visitor_clickstream_report($vars) {
   
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates("-90 days", "Now");
   $vtk_segment = 'sessions::condition::ga:dimension5==' . implode(',ga:dimension5==', $vtkids);
+  //$vtk_filter = 'ga:dimension5==' . implode(',ga:dimension5==', $vtkids);
   $request = array(
     'dimensions' => array('ga:hostname', 'ga:pagePath', 'ga:pageTitle', 'ga:visitLength', 'ga:dimension5', 'ga:visitCount', 'ga:dimension4'),
     'metrics' => array('ga:entrances', 'ga:pageviews', 'ga:bounces', 'ga:timeOnSite', 'ga:timeOnPage', 'ga:goalValueAll'),
     'sort_metric' => 'ga:dimension4',
     'start_date' => $start_date,
     'end_date' => $end_date,
+    //'filters' => $vtk_filter,
     'segment' => $vtk_segment,
     //'segment' => 'dynamic::ga:customVarValue5==' . $vtkid,
     //'segment' => 'dynamic::ga:customVarValue5==1337759660',

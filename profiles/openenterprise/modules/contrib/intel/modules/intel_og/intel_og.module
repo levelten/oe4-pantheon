@@ -30,7 +30,9 @@ function intel_og_menu() {
   $items['group/%/%/admin/intel/analytics'] = array(
     'title' => 'Analytics',
     'page callback' => 'intel_scorecard_report_page',
-    'page arguments' => array('-', 'page-attr', 'og', 2),
+    'page arguments' => array('-', '-', '-', 'og_group', 2),
+    //'page arguments' => array('-', 'page-attr', 'og', 2),
+    //'page arguments' => array('-', '-', '-', 'node', 1),
     'access callback' => 'og_ui_user_access_group',
     'access arguments' => array('view referenced reports', 1, 2),
     'file path' => drupal_get_path('module', 'intel'),
@@ -47,7 +49,8 @@ function intel_og_menu() {
   $items['group/%/%/admin/intel/analytics/dashboard'] = array(
     'title' => 'Dashboard',
     'page callback' => 'intel_dashboard_report_page',
-    'page arguments' => array('-', 'page-attr', 'og', 2),
+    'page arguments' => array('-', '-', '-', 'og_group', 2),
+    //'page arguments' => array('-', 'page-attr', 'og', 2),
     'access callback' => 'og_ui_user_access_group',
     'access arguments' => array('view referenced reports', 1, 2),
     'type' => MENU_LOCAL_TASK,
@@ -97,10 +100,16 @@ function intel_og_menu() {
  */
 function intel_og_menu_alter(&$items) {
   foreach ($items as $router_path => $item) {
+    if (strpos($router_path, 'node/%node/intel') !== FALSE) {
+      $items[$router_path]['access callback'] = '_intel_og_permission_access_content_report';
+      $items[$router_path]['access arguments'] = array(1);
+    }
+    /*
     if (strpos($router_path, 'node/%node/analytics') !== FALSE) {
       $items[$router_path]['access callback'] = '_intel_og_permission_access_content_report';
       $items[$router_path]['access arguments'] = array(1);
     }
+    */
   }
 }
 
@@ -389,9 +398,34 @@ function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
   $entity = $entity[$og_context['gid']];
 
   if (isset($entity->field_ga_code)) {
-    $wrapper = entity_metadata_wrapper('dwyr_franchise', $entity);
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
     $ga_codes = $wrapper->field_ga_code->value();
 
+    $params = array();
+
+    if (!empty($ga_codes)) {
+      // insert the second tracking code after the first so that the main tracking
+      // code remains the default
+      foreach ($l10iq_pushes AS $i => $push) {
+        if ($push[0] == 'ga.create') {
+          if (is_array($ga_codes)) {
+            $j = 0;
+            foreach ($ga_codes AS $ga_code) {
+              $params['name'] = 'l10i_og' . $j;
+              array_splice($l10iq_pushes, $i+$j+1, 0, array(array('ga.create', $ga_code, 'auto', $params)));
+              $j++;
+            }
+          }
+          else {
+            $params['name'] = 'l10i_og';
+            array_splice($l10iq_pushes, $i+1, 0, array(array('ga.create', $ga_codes, 'auto', $params)));
+          }
+          return;
+        }
+      }
+    }
+
+    /*
     if (!empty($ga_codes)) {
       // insert the second tracking code after the first so that the main tracking
       // code remains the default
@@ -411,6 +445,7 @@ function intel_og_intel_l10iq_pushes_alter(&$l10iq_pushes) {
         }
       }
     }
+    */
   }
 }
 
@@ -567,6 +602,8 @@ function intel_og_intel_form_submission_data(&$visitor, &$submission, &$track, $
     // be saved after submission and sid is created
     $submission->og_gid = $gid;
     $visitor->og_gid = $gid;
+    $track['oa']['og'] = $gid;
+    //intel_add_page_intel_push(array('set', "pa.og", $gid));
   }
 }
 
@@ -634,7 +671,7 @@ function intel_og_intel_visitor_save($visitor) {
 
     // if the group_ref field is not set to unlimted and we are at the max number
     // of values, delete one of the values
-    if (($field_info['cardinality'] != -1) && ($field_info['cardinality'] <= count($visitorl->og_group_ref[$lang]))) {
+    if (($field_info['cardinality'] != -1) && !empty($visitorl->og_group_ref[$lang]) && ($field_info['cardinality'] <= count($visitorl->og_group_ref[$lang]))) {
       $og_mem_replace = og_group('dwyr_franchise', $visitorl->og_group_ref[$lang][0]['target_id'], $og_values);
 //dsm($og_mem_replace);
       og_membership_delete($og_mem_replace->id);
@@ -669,8 +706,8 @@ function intel_og_intel_visitor_select_query_alter($query, $context, $vars = arr
     'report_dashboard_new_contacts_count_last_month' => 1,
   );
   if (!empty($valid_contexts[$context])) {
-    if (isset($vars['report']['filters']['page-attr']) && (substr($vars['report']['filters']['page-attr'], 0, 3) == 'og:')) {
-      $gid = (int)substr($vars['report']['filters']['page-attr'], 3);
+    if (isset($vars['report']['filters']['page-attr'][0]) && (substr($vars['report']['filters']['page-attr'][0], 0, 3) == 'og:')) {
+      $gid = (int)substr($vars['report']['filters']['page-attr'][0], 3);
       intel_og_add_group_visitor_query_join($query, $gid, $vars);
     }
   }
@@ -687,8 +724,8 @@ function intel_og_intel_node_select_query_alter($query, $context, $vars = array(
     'report_dashboard_new_nodes_count_last_month' => 1,
   );
   if (!empty($valid_contexts[$context])) {
-    if (isset($vars['report']['filters']['page-attr']) && (substr($vars['report']['filters']['page-attr'], 0, 3) == 'og:')) {
-      $gid = (int)substr($vars['report']['filters']['page-attr'], 3);
+    if (isset($vars['report']['filters']['page-attr'][0]) && (substr($vars['report']['filters']['page-attr'][0], 0, 3) == 'og:')) {
+      $gid = (int)substr($vars['report']['filters']['page-attr'][0], 3);
       intel_og_add_group_node_query_join($query, $gid, $vars);
     }
     //dsm(" " . $query);
@@ -801,7 +838,7 @@ function intel_og_add_group_visitor_query_join($query, $gid, $vars = array()) {
   // else use artifacts table
   else {
     $join_on =  "%alias.artifact_type = 'visitor'
-      AND %alias.aid = s.sid
+      AND %alias.aid = v.vid
       AND %alias.gid = :gid";
     $join_vars = array(
       ':gid' => $gid,

@@ -318,6 +318,7 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
   require_once './' . drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
   $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
   $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
+
   if (isset($wfsubmission->submitted)) {
     $link_query = array('sid' => $_GET['sid']);
     $wf_node = node_load($wfsubmission->nid);
@@ -336,14 +337,11 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
     $track['form_title'] = $wf_node->title;
     $track['submission_path'] = $submission->details_url;
     $track['system_path'] = "node/{$wfsubmission->nid}";
-    $track['oa'] = array(
-      'rc' => 'form',
-      'rl' => $track['system_path'],
-      'rid' => $submission->fid,
-      'rt' => 'node',
-      'rt2' => 'webform',
-      //'fsid' => $submission->fsid,
-    );
+    $track['oa']['rc'] = 'form';
+    $track['oa']['rl'] = $track['system_path'];
+    $track['oa']['rid'] = $submission->fid;
+    $track['oa']['rt'] = 'node';
+    $track['oa']['rt2'] = 'webform';
 
     $wf_node = node_load($wfsubmission->nid);
     if (isset($wf_node->webform['intel'])) {
@@ -351,17 +349,24 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
     }
     // check if intel_submit_data component exists
     $data_cid = -1;
+    $og_cid = -1;
     if (!empty($wf_node->webform['components']) && is_array($wf_node->webform['components'])) {
       foreach ($wf_node->webform['components'] AS $cid => $component) {
         if ($component['form_key'] == 'intel_submit_data') {
           $data_cid = $cid;
-          break;
+        }
+        if ($component['form_key'] == 'og_group_ref') {
+          $og_cid = $cid;
         }
       }
     }
     // if component exists, set submit context
     if (($data_cid >= 0) && isset($wfsubmission->data[$data_cid]['value'][0])) {
       $submit_context = json_decode($wfsubmission->data[$data_cid]['value'][0], true);
+    }
+    // if component exists, set submit context
+    if (($og_cid >= 0) && isset($wfsubmission->data[$og_cid]['value'][0])) {
+      $submission->og_gid = $track['oa']['og'] = $wfsubmission->data[$og_cid]['value'][0];
     }
   }
 }

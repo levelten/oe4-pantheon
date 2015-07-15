@@ -1,12 +1,12 @@
 var _l10iq = _l10iq || [];
 
-function l10iMailChimpTracker() {  
-  var io;
+function L10iMailChimp(_ioq) {
+    var ioq = _ioq;
+    var io = _ioq.io;
 
-  this.init = function init(pub) {
+  this.init = function init() {
 	var e, action, timestamp, emailclick, listname, listid, userid, campaignid, campaignname;
-    _l10iq.push(['_log', "l10iMailChimpTracker.init()"]);
-      io = pub.io;
+    io('log', "l10iMailChimpTracker.init()");
 
     var query = window.location.search;
     if (!query) {
@@ -55,7 +55,7 @@ function l10iMailChimpTracker() {
         'eventCategory': "Email click!",
         'eventAction': 'MailChimp: ' + campaignname + ' (' + listname + ')',
         'eventLabel': 'MailChimp:' + listid + ':' + campaignid,
-        'eventValue': (typeof _l10iq.settings.scorings.email_click !== 'undefined') ? Number(_l10iq.settings.scorings.email_click) : 0,
+        'eventValue': io('get', 'config.scorings.email_click', 0),
         'nonInteraction': false
     };
     _l10iq.push(['event', ga_event]);
@@ -93,21 +93,19 @@ function l10iMailChimpTracker() {
       'type': 'session',
       'namespace': 'emailClick'
     };
-    _l10iq.push(['triggerCallbacks', 'emailClickAlter', json_params, json_data, {}, {}]);
+    io('triggerCallbacks', 'emailClickAlter', json_params, json_data, {}, {});
     // TODO: should we save this data?
     //_l10iq.push(['_getJSON', 'var/merge', json_params, json_data, 'l10iMailChimp.emailClick']);
-    l10iMailChimp.emailClick({"return": json_data.return});
+    io('mailchimp:emailClick', {"return": json_data.return});
   };
 
   this.emailClick = function emailClick(data) {
-    _l10iq.push(['triggerCallbacks', 'emailClick', data['return']]);
+    io('triggerCallbacks', 'emailClick', data['return']);
   };
 
-    _l10iq.push(['addCallback', 'domReady', this.init, this]);
+  this.init();
 }
 
-var l10iMailChimp = new l10iMailChimpTracker();
-//jQuery(document).ready(function() {
-//	_l10iq.push(['_onReady', l10iMailChimp.init, l10iMailChimp]);
-//});
+_l10iq.push(['providePlugin', 'mailchimp', L10iMailChimp, {}]);
+
 

@@ -1,11 +1,10 @@
 var _l10iq = _l10iq || [];
 
 function L10iDrupalWebform(_ioq) {
-    _l10iq.push(['log', "l10iWebformTracker.init()"]);
-    _l10iq.push(['addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this]);
+    var ioq = _ioq;
+    var io = _ioq.io;
 
     this.formSubmitAlterCallback = function (form_submit, data, $obj) {
-
         // check if a webform
         var id = $obj.attr('id');
 
@@ -16,6 +15,9 @@ function L10iDrupalWebform(_ioq) {
             form_submit['eventLabel'] = 'node/' + e[3];
         }
     };
+
+    _l10iq.push(['log', "l10iWebformTracker.init()"]);
+    _l10iq.push(['addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this]);
 }
 
 _l10iq.push(['providePlugin', 'drupalWebform', L10iDrupalWebform, {}]);

@@ -5,6 +5,6 @@ dependencies[] = contentanalysis
 files[] = contentoptimizer.install
 files[] = contentoptimizer.module
 files[] = contentoptimizer.css
-scripts[] = contentoptimizer.js
+
 configure = admin/config/content/contentanalysis/analyzers
 core = 7.x

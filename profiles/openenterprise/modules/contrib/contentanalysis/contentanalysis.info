@@ -7,7 +7,6 @@ files[] = contentanalysis.admin.inc
 files[] = contentanalysis.install
 files[] = contentanalysis.module
 files[] = contentanalysis.css
-scripts[] = contentanalysis.js
 
 core = 7.x
 

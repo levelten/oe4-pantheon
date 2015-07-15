@@ -728,3 +728,14 @@ function intel_update_7004() {
     db_create_table('intel_value_str', $schema['intel_value_str']);
   }
 }
+
+/**
+ * Enable google_analytics_reports_api module
+ */
+function intel_update_7005() {
+  $modules = array(
+    'google_analytics_reports_api',
+    'google_analytics_reports_views',
+  );
+  module_enable($modules);
+}

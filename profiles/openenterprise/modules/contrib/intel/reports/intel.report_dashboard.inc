@@ -6,15 +6,31 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_dashboard_report_page($report_subtype = '-', $context = '-', $timeframe = '-', $filter_type = '-', $filter_element = '-', $subsite = '-') {
+//function intel_dashboard_report_page($report_subtype = '-', $context = '-', $timeframe = '-', $filter_type = '-', $filter_element = '-', $subsite = '-') {
+function intel_dashboard_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
+  //$args = func_get_args();
+  //dsm($args);
+
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
+  $vars = array();
+  if (!empty($entity_type) && $entity_type != '-') {
+    $vars['entity_type'] = $entity_type;
+    $vars['entity'] = $entity;
+  }
+  $vars = intel_init_reports_vars('dashboard', 'dashboard', $report_params, $report_subtype, $report_subfilter, $vars);
+  $vars['title'] = $title = t('Dashboard');
+
+  $output = intel_build_report($vars);
+
+  /*
   $vars = intel_init_reports_vars('dashboard', 'dashboard', $report_subtype, $context, $timeframe, $filter_type, $filter_element, $subsite);
   $vars['title'] = $title = t('Dashboard');
   $output = intel_build_report($vars);
 
+  */
   return $output;
 }
 /*
@@ -64,6 +80,7 @@ function intel_dashboard_report_page($sub_index = '-', $filter_type = '', $filte
 
 //function intel_dashboard_report($filters = array(), $context = 'site', $sub_index = '-') {
 function intel_dashboard_report($vars) {
+  //dsm($vars);
   intel_include_library_file('ga/class.ga_model.php');
   require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc";
 
@@ -143,20 +160,17 @@ function intel_dashboard_report($vars) {
 
   $filter_info = array();
   if (!empty($filters)) {
-    if (isset($filters['page-attr'])) {
-      $a = explode(':', $filters['page-attr']);
+    if (isset($filters['page-attr'][0])) {
+      $a = explode(':', $filters['page-attr'][0]);
       $filter_info['page-attr'] = intel_get_page_attribute_info($a[0]);
     }
   }
   
   // get last month's data  
   $last_month_data = new LevelTen\Intel\GAModel();
-  if (isset($filter_info['page-attr'])) {
-    $last_month_data->setPageAttributeInfo($filter_info['page-attr']);
-  }
-
-
-
+  $last_month_data->setContext($vars['context']);
+  $last_month_data->setContextMode($vars['context_mode']);
+  $last_month_data->setAttributeInfoAll($vars['attribute_info']);
   $last_month_data->buildFilters($filters, $vars['subsite']);
   $last_month_data->setDateRange($lastmonth_start_date, $lastmonth_end_date);
   $last_month_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -175,9 +189,9 @@ function intel_dashboard_report($vars) {
 
   // get this month's data
   $ga_data = new LevelTen\Intel\GAModel();
-  if (isset($filter_info['page-attr'])) {
-    $ga_data->setPageAttributeInfo($filter_info['page-attr']);
-  }
+  $ga_data->setContext($vars['context']);
+  $ga_data->setContextMode($vars['context_mode']);
+  $ga_data->setAttributeInfoAll($vars['attribute_info']);
   $ga_data->buildFilters($filters, $context);
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -405,7 +419,7 @@ function intel_dashboard_report($vars) {
   
   // get recent post entrance stats
   //$regex = $ga_data->formatGtRegexFilter('ga:dimension1', $start_date, 'pt');
-  $regex = 'ga:dimension1=@pd=' . date('Ym', $start_date);
+  $regex = 'ga:dimension1=@&pd=' . date('Ym', $start_date);
 $ga_data->setDebug(0);
   $ga_data->setCustomFilter($regex . ';ga:entrances>0');
   $ga_data->setRequestDefaultParam('max_results', 10 * $count); 

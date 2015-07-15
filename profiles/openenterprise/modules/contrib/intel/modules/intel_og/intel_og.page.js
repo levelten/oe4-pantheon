@@ -1,8 +1,7 @@
 var _l10iq = _l10iq || [];
 
 function L10iDrupalOg(_ioq, config) {
-    _l10iq.push(['_log', "l10iOG.init()"]);
-    _l10iq.push(['addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this]);
+
 
 
   // attach gid to form submissions
@@ -13,6 +12,9 @@ function L10iDrupalOg(_ioq, config) {
         formSubmit['og'] = og;
     }
   };
+
+    _l10iq.push(['_log', "l10iOG.init()"]);
+    _l10iq.push(['addCallback', 'formSubmitAlter', this.formSubmitAlterCallback, this]);
 };
 
 L10iDrupalOg.prototype.getGroup = function () {

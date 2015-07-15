@@ -739,6 +739,15 @@ function intel_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['intel/util/clear_test_visitors'] = array(
+    'title' => 'Utility: Clear test visitors',
+    'description' => 'Analyze and optimize node content.',
+    'page callback' => 'intel_util_clear_test_visitors',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['intel/util'] = array(
     'title' => 'SEO Tools Util',
     'description' => 'Analyze and optimize node content.',
@@ -1167,12 +1176,12 @@ function intel_util($ignore = '', $delete = 0) {
   dsm($node);
   return '';
   $loc = 'http://dwyr-rbw.localhost/contact-us?fid=332';
-  $hrefs = [
+  $hrefs = array(
     'node/99',
     '/node/99',
     '/contact-us',
     '/contact-us?fid=332',
-  ];
+  );
   foreach ($hrefs as $href) {
     dsm($href);
     $urlc = intel_parse_url($href, $loc);
@@ -1718,6 +1727,23 @@ function intel_visitor_delete($vid) {
  */
 function intel_visitor_delete_multiple($vids = array()) {
   return entity_get_controller('intel_visitor')->delete_mutliple($vids);
+}
+
+function intel_util_clear_test_visitors() {
+  $query = db_select('intel_visitor_identifier', 'i')
+    ->fields('i')
+    ->condition('type', 'email')
+    ->condition('value', '%@example.com', 'LIKE');
+
+  $visitors = $query->execute()->fetchAll();
+  $vids = array();
+  if (is_array($visitors)) {
+    foreach ($visitors as $obj) {
+      $vids[] = $obj->vid;
+      intel_visitor_delete($obj->vid);
+    }
+  }
+  return t('deleted: ') . implode(', ', $vids);
 }
 
 // check if person is queried by pid or vtk
@@ -2547,6 +2573,20 @@ function intel_intel_intel_script() {
     'title' => t('YouTube'),
     'description' => t('Tracks YouTube video play events.'),
     'path' => libraries_get_path('LevelTen') . '/Intel/js/l10intel_youtube.js',
+    'enabled' => 0,
+    'selectable' => 1,
+  );
+  $scripts['dyn'] = array(
+    'title' => t('Dynamics'),
+    'description' => t('Dynamic content support. (under development)'),
+    'path' => libraries_get_path('LevelTen') . '/Intel/js/l10intel_dyn.js',
+    'enabled' => 0,
+    'selectable' => 1,
+  );
+  $scripts['geo'] = array(
+    'title' => t('Geo'),
+    'description' => t('Geo location data support. (under development)'),
+    'path' => libraries_get_path('LevelTen') . '/Intel/js/l10intel_geo.js',
     'enabled' => 0,
     'selectable' => 1,
   );

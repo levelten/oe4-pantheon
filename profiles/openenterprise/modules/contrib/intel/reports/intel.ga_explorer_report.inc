@@ -125,13 +125,13 @@ function intel_ga_explorer_report() {
         '#markup' => '<br><h3>Request</h3>' . implode("<br>\n", $items),
       );
       $options = array('refresh' => TRUE);
-      $data = intel_ga_api_data($req, $options);
+      $data = google_analytics_reports_api_report_data($req, $options);
       dsm($data);//
 
       $header = array();
       $rows = array();
-      if (!empty($data->results) && is_array($data->results)) {
-        foreach ($data->results AS $r) {
+      if (!empty($data->results->rows) && is_array($data->results->rows)) {
+        foreach ($data->results->rows AS $r) {
           $row = array();
           if (!count($header)) {
             foreach ($r AS $k => $e) {
@@ -243,31 +243,31 @@ function intel_ga_explorer_presets() {
     'title' => t('Pageviews > content list > pa filter'),
     'dimensions' => array('ga:pagePath'),
     'metrics' => array('ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnPage', 'ga:exits', 'ga:goalValueAll', 'ga:goalCompletionsAll', 'ga:pageValue'),
-    //'filters' => 'ga:dimension1=@&a=6&'
+    //'filters' => 'ga:customVarValue1=@&a=6&'
   );
 
   // goalValue provides in seg completed goals numbers, ? on any goal
   // estimate pageValueAll
   $presets['pageviews_pa_list'] = array(
     'title' => t('Pageviews > pa  list'),
-    'dimensions' => array('ga:dimension1'),
+    'dimensions' => array('ga:customVarValue1'),
     'metrics' => array('ga:pageviews', 'ga:uniquePageviews', 'ga:timeOnPage', 'ga:exits', 'ga:goalValueAll', 'ga:goalCompletionsAll', 'ga:pageValue'),
-    //'filters' => 'ga:dimension1=@&a='
+    //'filters' => 'ga:customVarValue1=@&a='
   );
 
   $presets['pageviews_pa_list2'] = array(
     'title' => t('Pageviews > pa  list2'),
-    'dimensions' => array('ga:dimension1', 'ga:goalCompletionLocation'),
+    'dimensions' => array('ga:customVarValue1', 'ga:goalCompletionLocation'),
     'metrics' => array('ga:pageviews', 'ga:uniquePageviews', 'ga:pageviewsPerSession', 'ga:timeOnPage', 'ga:exits', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalValuePerSession'),
-    //'filters' => 'ga:dimension1=@&a=6&'
+    //'filters' => 'ga:customVarValue1=@&a=6&'
   );
 
   // - cannot sum pageValue for totals
   $presets['pageviews_pa_list'] = array(
     'title' => t('Pageviews > pa  list'),
-    'dimensions' => array('ga:dimension1'),
+    'dimensions' => array('ga:customVarValue1'),
     'metrics' => array('ga:pageviews', 'ga:uniquePageviews', 'ga:pageviewsPerSession', 'ga:timeOnPage', 'ga:exits', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalCompletionsAll'),
-    //'filters' => 'ga:dimension1=@&a=6&'
+    //'filters' => 'ga:customVarValue1=@&a=6&'
   );
 
 
@@ -290,10 +290,10 @@ function intel_ga_explorer_presets() {
 
   $presets['pageviews_pageattr_list'] = array(
     'title' => t('Pageviews (Page Attr list)'),
-    'dimensions' => array('ga:dimension1'),
+    'dimensions' => array('ga:customVarValue1'),
     'metrics' => array('ga:pageviews', 'ga:pageviewsPerSession', 'ga:timeOnPage', 'ga:exits', 'ga:goalValueAll', 'ga:goalCompletionsAll'),
-    //'segment' => 'dynamic::ga:dimension1=@&a=6&',
-    //'filters' => 'ga:dimension1=@&og=53&',
+    //'segment' => 'dynamic::ga:customVarValue1=@&a=6&',
+    //'filters' => 'ga:customVarValue1=@&og=53&',
   );
 
   $presets['entrances'] = array(
@@ -304,48 +304,48 @@ function intel_ga_explorer_presets() {
 
 
   // ?goalValueAll = ga:entrances x ga:pageValue
-  // filter: ga:dimension1=@&og=53&;entrances>0
+  // filter: ga:customVarValue1=@&og=53&;entrances>0
   /*
   $presets['entrances_pageattr_list'] = array(
     'title' => t('Entrances (Page Attr list)'),
-    'dimensions' => array('ga:landingPagePath', 'ga:dimension1'),
+    'dimensions' => array('ga:landingPagePath', 'ga:customVarValue1'),
     'metrics' => array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerSession', 'ga:timeOnSite', 'ga:bounces', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalCompletionsAll'),
     //'filters' => 'ga:entrances>0',
-    'filters' => 'ga:dimension1=@&og=53&;ga:entrances>0',
+    'filters' => 'ga:customVarValue1=@&og=53&;ga:entrances>0',
   );
   */
 
 
 
-  // this works, but as soon as you add ga:dimension1 it breaks. Adding ga:dimension1 makes pageviews revert to hit mode
+  // this works, but as soon as you add ga:customVarValue1 it breaks. Adding ga:customVarValue1 makes pageviews revert to hit mode
   $presets['entrances_pa_list'] = array(
     'title' => t('Entrances  > pa  list'),
     'dimensions' => array('ga:landingPagePath'),
-    //'dimensions' => array('ga:landingPagePath', 'ga:dimension1'),
+    //'dimensions' => array('ga:landingPagePath', 'ga:customVarValue1'),
     'metrics' => array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerSession', 'ga:timeOnSite', 'ga:bounces', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalCompletionsAll'),
-    //'segment' => 'sessions::sequence::^ga:dimension1=@&a=',
-    //'filters' => 'ga:dimension1=@&a=6&;ga:entrances>0',
+    //'segment' => 'sessions::sequence::^ga:customVarValue1=@&a=',
+    //'filters' => 'ga:customVarValue1=@&a=6&;ga:entrances>0',
   );
 
 
 
 
   // ?goalValueAll = ga:entrances x ga:pageValue
-  // filter: ga:dimension1=@&og=53&;entrances>0
+  // filter: ga:customVarValue1=@&og=53&;entrances>0
   $presets['entrances_scorecard_date_pageattr'] = array(
     'title' => t('Entrances Scorecard Date (filter: Page Attr)'),
     'dimensions' => array('ga:date'),
     'metrics' => array('ga:entrances', 'ga:newVisits', 'ga:pageviewsPerSession', 'ga:timeOnSite', 'ga:bounces', 'ga:pageValue', 'ga:goalValueAll', 'ga:goalCompletionsAll'),
     //'filters' => 'ga:entrances>0',
-    'filters' => 'ga:dimension1=@&og=53&;ga:entrances>0',
+    'filters' => 'ga:customVarValue1=@&og=53&;ga:entrances>0',
   );
 
 
   $presets['clickstream'] = array(
     'title' => t('Clickstream'),
-    'dimensions' => array('ga:dimension5', 'ga:sessionCount', 'ga:dimension4'),
+    'dimensions' => array('ga:customVarValue5', 'ga:sessionCount', 'ga:customVarValue4'),
     'metrics' => array('ga:entrances', 'ga:pageviews', 'ga:goalValueAll', 'ga:goalCompletionsAll', 'ga:uniquePageviews', 'ga:pageValue'),
-    'sort_metric' => 'ga:dimension5,ga:dimension4',
+    'sort_metric' => 'ga:customVarValue5,ga:customVarValue4',
   );
 
   return $presets;

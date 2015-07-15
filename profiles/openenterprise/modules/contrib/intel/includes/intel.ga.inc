@@ -367,7 +367,7 @@ function intel_get_page_attribute_info_default() {
       )
     ),
   );
-  $attributes['rid'] = array(
+  $attributes['rk'] = array(
     'title' => t('Entity id'),
     'title_plural' => t('Entity ids'),
     'description' => t('The standard id for the entity, e.g. node id.'),
@@ -820,7 +820,6 @@ function intel_page_attribute_content_type_option_info($option_id, $data_options
   );
   $types = node_type_get_types();
   //print_r($types);
-  dsm($types);
   $type = '';
   if (isset($types[$option_id])) {
     $data['title'] = $types[$option_id]->name;
@@ -2038,6 +2037,7 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
 
   $visitor['visits'] = array(
     '_all' => array(
+      'score' => 0,
       'entrance' => array(
         'entrances' => 0,
         'pageviews' => 0,

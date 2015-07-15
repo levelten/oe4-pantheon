@@ -145,6 +145,6 @@ _l10iq.push(['providePlugin', 'youtube', L10iYouTube, {}]);
 
 // function called by YouTube API when ready
 function onYouTubeIframeAPIReady() {
-    io('youtube:apiInit');
+    _l10iq.push(['youtube:apiInit']);
     //this.apiInit();
 }

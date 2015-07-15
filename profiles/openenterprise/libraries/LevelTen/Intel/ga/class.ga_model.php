@@ -193,7 +193,6 @@ class GAModel {
           if (isset($this->attributeInfo['page'][$attr_key]['storage']['analytics']['struc'])) {
             $gaField = $this->attributeInfo['page'][$attr_key]['storage']['analytics']['struc'] . $this->attributeInfo['page'][$attr_key]['storage']['analytics']['index'];
           }
-          dsm($gaField);
           if ($this->attributeInfo['page'][$attr_key]['type'] == 'flag') {
             $f = 'ga:' . $gaField . '=@&' . $attr_key . '&';
           }
