@@ -6,6 +6,7 @@ version = "7.x-3.x"
 ; Core
 dependencies[] = block
 dependencies[] = contextual
+dependencies[] = comment
 dependencies[] = dblog
 dependencies[] = help
 dependencies[] = image
