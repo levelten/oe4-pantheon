@@ -80,7 +80,7 @@ function L10iAddthis(_ioq, config) {
                     val.lat = parseFloat(val.lat);
                     val.lon = parseFloat(val.lon);
                     io('set', 'v:addthis.geo', val);
-                    if (ioq.hasSchema('GeoCoord')) {
+                    if (ioq.isFunction(ioq.hasSchema) && ioq.hasSchema('GeoCoord')) {
                         var gs = ioq.new('GeoCoord', val);
                         ioq.set('s:geo', gs, {_source: 'addthis'});
                     }
