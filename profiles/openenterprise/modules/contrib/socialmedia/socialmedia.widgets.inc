@@ -745,13 +745,17 @@ function _socialmedia_widgets_get_facebook_locales() {
   $cache = cache_get('socialmedia_facebook_locales');
   if (empty($cache->data)) {
     $result = drupal_http_request("https://www.facebook.com/translations/FacebookLocales.xml");
-    $xml = simplexml_load_string($result->data);
-    foreach ($xml->locale as $line) {
-      $representation = (array) $line->codes->code->standard->representation;
-      $name = (array) $line->englishName;
-      $key = $representation[0];
-      $value = $name[0];
-      $fb_locale[$key] = $value;
+    if (isset($result->data)) {
+      $xml = simplexml_load_string($result->data);
+      if (!empty($xml->locale) && is_array($xml->locale)) {
+        foreach ($xml->locale as $line) {
+          $representation = (array) $line->codes->code->standard->representation;
+          $name = (array) $line->englishName;
+          $key = $representation[0];
+          $value = $name[0];
+          $fb_locale[$key] = $value;
+        }
+      }
     }
     cache_set('socialmedia_facebook_locales', serialize($fb_locale), 'cache');
   }
