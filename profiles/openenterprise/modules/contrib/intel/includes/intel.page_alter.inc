@@ -1147,7 +1147,7 @@ function intel_check_form_submission($page) {
     return;
   }
 
-//$debug = 1;
+$debug = 1;
 
   // check for webform submission
   $track = array(
@@ -1434,6 +1434,7 @@ function intel_check_form_submission($page) {
 
   $intel_events = intel_get_intel_event_info();
 if (!empty($_GET['debug']) || !empty($debug)) {
+  dpm('$node'); dpm($node);//
   dpm('$scorings'); dpm($scorings);//
   dpm('$intel_events'); dpm($intel_events);//
   dpm('$track'); dpm($track);//
