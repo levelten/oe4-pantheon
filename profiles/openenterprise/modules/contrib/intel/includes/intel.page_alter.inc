@@ -1001,7 +1001,7 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
           $script .= "}," . $terminator;
           $script .= "t=1*new Date();" . $terminator;
           $script .= "a='l10i_bt=';s='';" . $terminator;
-          $script .= "d.cookie=a+t;c=d.cookie;" . $terminator;
+          $script .= "d.cookie=a+t+';path=/';c=d.cookie;" . $terminator;
           //$script .= "console.log(w[r]);" . $terminator;
           $script .= "if(c&&c.indexOf(a)!=-1){u+=i;$q_script}u+=b+s;" . $terminator;
           $script .= "a=d.createElement(o),b=d.getElementsByTagName(o)[0];a.async=1;a.src=u;b.parentNode.insertBefore(a,b)" . $terminator;
