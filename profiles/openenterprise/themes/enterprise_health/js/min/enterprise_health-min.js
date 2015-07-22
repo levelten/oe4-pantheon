@@ -1,0 +1,1 @@
+var Drupal=Drupal||{};!function($,e){"use strict";e.behaviors.enterprise_healthTeamHover={attach:function(e){var r=$(".front .team",e);$("a",r).hover(function(){$(this).parent().children("img").fadeTo(0,.6)},function(){$(this).parent().children("img").fadeTo(0,1)})}}}(jQuery,Drupal);
