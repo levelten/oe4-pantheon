@@ -1,0 +1,46 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Landing Pages Content feature.
+ */
+
+include_once 'enterprise_conversion_content.features.inc';
+
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_conversion_content_enterprise_apps_app_enabled() {
+  //cta_block_setting_features_revert('enterprise_conversion_content');
+  enterprise_apps_config_app('enterprise_conversion_content');
+}
+
+function enterprise_conversion_content_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_conversion_content' => array(
+      'cta_selectors' => array(),
+      'nodes' => array(),
+    ),
+  );
+
+  $sel['cta_sidebar'] = array(
+    'presets' => array(
+      'default' => array('bean_delta' => 'Website-Redesign-Success-ebook-s'),
+      'online-marketing' => array('bean_delta' => 'Essential-Guide-to-Internet-Mark'),
+    ),
+  );
+  $sel['cta_footer'] = array(
+    'presets' => array(
+      'default' => array('bean_delta' => 'Website-Redesign-Success-ebook-f'),
+      'online-marketing' => array('bean_delta' => 'Essential-Guide-to-Internet-Ma-0'),
+    ),
+  );
+  $settings['enterprise_conversion_content']['cta_selectors'] = $sel;
+
+  /*
+  $node[''] = array(
+
+  );
+  */
+  return $settings;
+}
