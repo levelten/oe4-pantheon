@@ -62,6 +62,15 @@ function enterprise_thankyoupage_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'enterprise_conversion_settings_node__enterprise_thankyou';
+  $strongarm->value = array(
+    'thankyou' => 1,
+  );
+  $export['enterprise_conversion_settings_node__enterprise_thankyou'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'field_bundle_settings_node__enterprise_thankyou';
   $strongarm->value = array(
     'view_modes' => array(

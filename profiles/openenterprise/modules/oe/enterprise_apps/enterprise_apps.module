@@ -58,40 +58,8 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
-  $s = variable_get('theme_enterprise_bootstrap_settings', array());
-  print_r($s);
-  return '';
-
-  $desc = array();
-  $obj = enterprise_apps_obj_load_by_ukey('menu_link:forum', $desc);
-
-  dsm($obj);
-  dsm($desc);
-
-  return 'OK';
-
-  $profile = drupal_get_profile();
-  dsm($profile);
-
-  $options = array(
-    'pkey' => '168596',
-    'apikey' => 'e67e82b2bd029a000f9302d32674118b',
-    'apiUrl' => 'getcm2.localhost:8082/api/v1',
-  );
-  $message = '';
-  try {
-    $property = openenterprise_api_property_load($options, $message);
-  }
-  catch (Exception $e) {
-    dsm($e);
-    return;
-  }
-  dsm($property);
-
-  return '';
-
-  $p = enterprise_editor_available_plugins();
-  dsm($p);
+  $a = module_exists('enterprise_base');
+  dsm($a);
 
   return '';
 }

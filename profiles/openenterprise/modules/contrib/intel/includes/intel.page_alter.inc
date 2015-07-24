@@ -1147,7 +1147,7 @@ function intel_check_form_submission($page) {
     return;
   }
 
-$debug = 1;
+//$debug = 1;
 
   // check for webform submission
   $track = array(
@@ -1364,7 +1364,7 @@ $debug = 1;
           if ($referrer == $href_urlc['system_path'] || ($lp_urlc['host'] == $href_urlc['host'] && $lp_urlc['path'] == $href_urlc['path'])) {
             $cta_context = $click;
             $value = (isset($scorings['cta_conversion'])) ? $scorings['cta_conversion'] : 0;
-            if (substr($click['label'], 0, 6) == 'block/') {
+            if (!empty($click['eventLabel']) && substr($click['eventLabel'], 0, 6) == 'block/') {
               // TODO make work with both blocks and beans
               $delta = substr($click['label'], 6);
               $submission->cta_id = $delta;
@@ -1394,9 +1394,11 @@ $debug = 1;
             $urlc = parse_url($click['location']);
             $submission->cta_page_host = $urlc['host'];
             $submission->cta_page_path = $urlc['path'];
-            $a = explode('/', $click['system_path']);
-            if (($a[0] == 'node') && !empty($a[1]) && is_numeric($a[1])) {
-              $submission->cta_page_id = $a[1];
+            if (!empty($click['systemPath'])) {
+              $a = explode('/', $click['systemPath']);
+              if (($a[0] == 'node') && !empty($a[1]) && is_numeric($a[1])) {
+                $submission->cta_page_id = $a[1];
+              }
             }
             break;
           }

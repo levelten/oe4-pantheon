@@ -406,3 +406,16 @@ function openenterprise_install_custom_modules() {
     module_enable($extras, TRUE);
   }
 }
+
+/**
+ * Enable enterprise_conversion and enterprise_landingpage modules if needed
+ */
+function openenterprise_update_7001() {
+  if (module_exists('enterprise_landingpages')) {
+    $modules = array(
+      'enterprise_landingpage',
+      'enterprise_conversion',
+    );
+    module_enable($modules);
+  }
+}
