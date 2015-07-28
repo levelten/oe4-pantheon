@@ -1,60 +1,90 @@
+@footer-grey: #939598;
+@footer-darker-grey: #636363;
+
 footer {
-	&, h2, h3 {
-		color: white;
-	}
-	.footer {
-		border: 0;
-		margin-top: 0;
-	}
-	.footer-top {
-		background-color: @brand-primary;
-		border-top: 10px solid darken(@brand-primary, 10%);
-		.block {
-			.block-inner-title {
-				border-bottom: 1px solid @brand-accent-2;
-				color: @brand-accent-2;
-				text-align: center;
-				margin-bottom: 1em;
-				.block-title {
-					color: @brand-accent-2;
-					.font-size(2.4);
-					letter-spacing: -0.25px;
-					margin: 0.25em 0 0.5em;
-				}
-				.icon {
-					.font-size(3);
-					line-height: 0em;
-				}
-			}
-		}
-	}
-	.footer-bottom {
-		background-color: darken(@brand-primary, 10%);
-		padding: 1em 0;
-	}
-	#block-widgets-s-facebook-like-box {
-		padding: 0;
-		.block-inner-content {
-			background-color: white;
-		}
-	}
-	#block-widgets-s-enterprise-social-follow {
-		.btn-social {
-			background-color: white;
-			border: 0;
-			color: @brand-primary;
-			display: block;
-			float: none;
-			.font-size(1.4);
-			margin-bottom: 0.5em;
-			padding: 5px 0 0;
-			.rounded(100%);
-			text-align: center;
-			height: 30px;
-			width: 30px;
-			&:hover {
-				background-color: darken(white, 10%);
-			}
-		}
-	}
+  &, h2, h3 {
+    color: white;
+  }
+
+  p {
+    font-size: 1.1em;
+
+    a {
+      color: #fff;
+
+      &:hover {
+        color: darken(#fff, 20%);
+      }
+    }
+  }
+  &.footer {
+    border: 0;
+    margin-top: 0;
+  }
+  .footer-top {
+    background-color: @footer-grey;
+    border-top: 25px solid lighten(@footer-grey, 10%);
+    padding: 2em 0;
+    .block {
+      >.icon {
+        font-size: 4em;
+        text-align: center;
+        color: @footer-darker-grey;
+        display: block !important;
+      }
+      .block-inner-title {
+        border-bottom: 1px solid @brand-accent-2;
+        color: @brand-accent-2;
+        text-align: center;
+        margin-bottom: 1em;
+        .block-title {
+          color: @brand-accent-2;
+          .font-size(2.4);
+          letter-spacing: -0.25px;
+          margin: 0 0 0.5em 0;
+        }
+        .icon {
+          .font-size(3);
+          line-height: 0em;
+        }
+      }
+    }
+  }
+
+  .block-title {
+    text-transform: uppercase;
+    font-size: 1.5em;
+    text-align: center;
+    border-bottom: 1px solid lighten(@footer-grey, 30%);
+    padding-bottom: .5em;
+  }
+  .footer-bottom {
+    background-color: @footer-darker-grey;
+    padding: 1em 0;
+  }
+  #block-widgets-s-facebook-like-box {
+    padding: 0;
+    .block-inner-content {
+      background-color: white;
+    }
+  }
+  #block-widgets-s-enterprise-social-follow {
+    .btn-social {
+      background-color: white;
+      border: 0;
+      color: @brand-primary;
+      display: block;
+      float: none;
+      .font-size(1.4);
+      margin-bottom: 0.5em;
+      padding: 5px 0 0;
+      .rounded(100%);
+      text-align: center;
+      height: 30px;
+      width: 30px;
+      &:hover {
+        background-color: darken(white, 10%);
+      }
+    }
+  }
 }

@@ -31,6 +31,8 @@ stylesheets[all][] = css/style.css
 ;; Scripts
 ;;;;;;;;;;;;;;;;;;;;;
 
+scripts[] = 'js/enterprise_health.js'
+
 ;scripts[] = '../enterprise_bootstrap/bootstrap/js/affix.js'
 ;scripts[] = '../enterprise_bootstrap/bootstrap/js/alert.js'
 ;scripts[] = '../enterprise_bootstrap/bootstrap/js/button.js'
