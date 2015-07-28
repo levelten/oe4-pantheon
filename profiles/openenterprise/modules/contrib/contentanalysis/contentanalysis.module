@@ -81,34 +81,6 @@ function contentanalysis_menu() {
 
 function contentanalysis_util() {
 
-return 'ok'; 
-	$node = node_load(2);
- $options = array(
-    'entity_type' => 'node',
-    'entity' => $node,
-    'view_mode' => 'full',
-    'display_mode' => 'full',
-    'token data' => array(
-      'node' => $node,
-    ),
- );
- $metatags = array(
-    'title' => array(
-     'value' => '[node:title] YES [site:name]',
-    ),
-    'keywords' => array(
-     'value' => 'echo, foxtrot',
-    ),
-    'description' => array(
-     'value' => 'YES [node:summary]',
-    ),
- );
-
- $ret = metatag_metatags_view('global', array());
-//dsm($ret);
- $ret = metatag_metatags_view('node:article', $metatags, $options);
-//dsm($ret);
-
   return 'ok';
 }
 
@@ -174,8 +146,9 @@ function contentanalysis_modal_popup_only() {
  */
 function contentanalysis_page_analyzer() {
   drupal_add_css(drupal_get_path('module', 'contentanalysis') . '/contentanalysis.admin.css');
-  
-  $output = render(drupal_get_form('contentanalysis_page_analyzer_form', array()));  
+
+  $form = drupal_get_form('contentanalysis_page_analyzer_form', array());
+  $output = render($form);
   
   return $output;
 }
@@ -1135,7 +1108,7 @@ function contentanalysis_build_analysis_content($analysis) {
   $ignore_keys = array('content', 'context', 'stats', 'tests', 'messages');
   // create status messages table
   foreach ($analysis AS $aid => $analysisi) {
-    if (substr($aid, 0, 1)=='#' || !is_array($analysisi)) { 
+    if (substr($aid, 0, 1) == '#' || !is_array($analysisi)) {
       continue; 
     }
 
@@ -1169,7 +1142,7 @@ function contentanalysis_build_analysis_content($analysis) {
   $con = '';
   foreach ($analysis AS $aid => $analysisi) {
     $ti = 0;
-    if (substr($aid, 0, 1)=='#' || !is_array($analysisi)) {
+    if (substr($aid, 0, 1) == '#' || !is_array($analysisi)) {
       continue;
     }
     $analysis[$aid]['output'] = '<div id="contentanalysis-report-' . $aid . '" class="contentanalysis-report">';
@@ -1632,16 +1605,19 @@ function contentanalysis_get_aid($context, $save = 0) {
 //watchdog('ca 1465', print_r($context, 1));
   $aid = NULL;
   $where = '';
-  if (($context['source'] == 'node-edit-form') && (is_null($context['nid']))) {
+  if (isset($context['source'])
+    && ($context['source'] == 'node-edit-form')
+    && (is_null($context['nid']))
+  ) {
     return $aid;
   }
   $query = db_select('contentanalysis', 'ca')
     ->fields('ca');
-  if ($context['aid'] > 0) {
+  if (isset($context['aid']) && $context['aid'] > 0) {
     $query->condition('aid', $context['aid']);
     $where = TRUE;
-  } 
-  elseif ($context['nid'] > 0) {
+  }
+  elseif (isset($context['nid']) && $context['nid'] > 0) {
   	$query->condition('nid', $context['nid']);
   	$where = TRUE;
   } 
@@ -1655,7 +1631,6 @@ function contentanalysis_get_aid($context, $save = 0) {
   } 
 
   if ($where && $save) { // by pass db save if analyzing content direct submission
-//watchdog('ca 1491', " " . $query);
     $result = $query->execute()->fetchObject();
     $fields = array(
       'last_analysis' => time(),
@@ -1675,7 +1650,6 @@ function contentanalysis_get_aid($context, $save = 0) {
       $context['last_analysis'] = REQUEST_TIME;
       $query = db_insert('contentanalysis')
         ->fields($fields);
-//watchdog('ca 1505', " " . $query);        
       $aid = $query->execute();
     }
   }

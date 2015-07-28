@@ -10,7 +10,7 @@ require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
 
 define('INTEL_L10IAPI_URL', 'api.getlevelten.com/v1/intel');
 define('INTEL_L10IAPI_JS_VER', '0.2.0');
-define('INTEL_L10IAPI_VER_MIN', '0.2.0');
+define('INTEL_L10IAPI_VER_MIN', '2.0.0');
 define('INTEL_PAGE_INTENT_DEFAULT', 'i');
 define('INTEL_TRACK_PAGE_UID_DEFAULT', 'a');
 define('INTEL_TRACK_PAGE_TERMS_DEFAULT', 0);

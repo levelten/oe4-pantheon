@@ -464,13 +464,16 @@ class GAModel {
 
     // set $feedRows to point to rows array in response based on GA API version
     // we need to alter the data in the feed and thus need the data by reference
-    if (is_array($feed->results)) {  // v2
-      $feedRows = &$feed->results;
-      $feedTotals = &$feed->totals;
-    }
-    else { // v3
-      $feedRows = &$feed->results->rows;
-      $feedTotals = &$feed->results->totalsForAllResults;
+    $feedRows = array();
+    if (isset($feed->results)) {
+      if (is_array($feed->results)) {  // v2
+        $feedRows = &$feed->results;
+        $feedTotals = &$feed->totals;
+      }
+      else if (isset($feed->results->rows)) { // v3
+        $feedRows = &$feed->results->rows;
+        $feedTotals = &$feed->results->totalsForAllResults;
+      }
     }
 
     // if max_results not returned, disable advancedSort

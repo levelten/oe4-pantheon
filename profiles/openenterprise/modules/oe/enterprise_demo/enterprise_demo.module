@@ -69,6 +69,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     'enterprise_intel',
     'enterprise_social',
     'enterprise_social_content',
+    'enterprise_seo',
     'enterprise_user',
     'enterprise_user_content',
     'enterprise_comments',
