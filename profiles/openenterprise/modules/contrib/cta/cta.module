@@ -1078,7 +1078,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
   if (count($meta['selectors'])) {
     $meta['list_visibility'] = 1;
   }
-  if (module_exists('intel')) {
+  if (module_exists('intel') && isset($meta['data']['ga_event'])) {
     $meta['data']['ga_event']['conversion']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['action'] = trim($meta['data']['ga_event']['custom']['action']);
     $meta['data']['ga_event']['click']['selector'] = trim($meta['data']['ga_event']['custom']['selector']);
