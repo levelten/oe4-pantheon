@@ -70,7 +70,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
             'name' => 'picture_ckeditor',
             'desc' => 'Support responsive images with the Picture module.',
             'buttons' => FALSE,
-            'path' => '%base_path%profiles/openenterprise/modules/contrib/picture/plugins/',
+            'path' => '%base_path%' . drupal_get_path('module', 'picture') . '/plugins/',
             'default' => 't',
           ),
         ),
@@ -139,7 +139,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
         'css_mode' => 'self',
         'css_path' => '%tcss/style.css',
         'css_style' => 'self',
-        'styles_path' => '%h/profiles/openenterprise/modules/oe/enterprise_editor/ckeditor/styles.js',
+        'styles_path' => '%h/' . drupal_get_path('module', 'enterprise_editor') . '/ckeditor/styles.js',
         'filebrowser' => 'none',
         'filebrowser_image' => '',
         'filebrowser_flash' => '',
@@ -154,7 +154,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'blocks' => array(
             'name' => 'blocks',
             'desc' => 'Plugin for adding Drupal blocks withing CKEditor',
-            'path' => '%base_path%profiles/openenterprise/modules/contrib/ckeditor_blocks/plugins/blocks/',
+            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_blocks') . '/plugins/blocks/',
             'buttons' => array(
               'Blocks' => array(
                 'label' => 'Block',
@@ -165,7 +165,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'carousel' => array(
             'name' => 'carousel',
             'desc' => 'Bootstrap Carousel Plugin',
-            'path' => '%base_path%profiles/openenterprise/libraries/enterprise_editor/plugins/carousel/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/carousel/',
             'buttons' => array(
               'Carousel' => array(
                 'label' => 'Carousel',
@@ -176,7 +176,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'featurette' => array(
             'name' => 'featurette',
             'desc' => 'Bootstrap Featurette Plugin',
-            'path' => '%base_path%profiles/openenterprise/libraries/enterprise_editor/plugins/featurette/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/featurette/',
             'buttons' => array(
               'Featurette' => array(
                 'label' => 'Featurette',
@@ -187,7 +187,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'icon' => array(
             'name' => 'icon',
             'desc' => 'Plugin for icons',
-            'path' => '%base_path%profiles/openenterprise/libraries/enterprise_editor/plugins/icon/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/icon/',
             'buttons' => array(
               'icon' => array(
                 'label' => 'Icon',
@@ -198,7 +198,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'jumbotron' => array(
             'name' => 'jumbotron',
             'desc' => 'Bootstrap Jumbotron Plugin',
-            'path' => '%base_path%profiles/openenterprise/libraries/enterprise_editor/plugins/jumbotron/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/jumbotron/',
             'buttons' => array(
               'Jumbotron' => array(
                 'label' => 'Jumbotron',
@@ -221,24 +221,35 @@ function enterprise_editor_ckeditor_profile_defaults() {
           'mediaBrowser' => array(
             'name' => 'mediaBrowser',
             'desc' => 'Media Browser for File Upload/Browsing',
-            'path' => '%base_path%profiles/openenterprise/modules/contrib/ckeditor_media/plugins/mediaBrowser/',
+            'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_media') . '/plugins/mediaBrowser/',
             'buttons' => FALSE,
           ),
           'picture_ckeditor' => array(
             'name' => 'picture_ckeditor',
             'desc' => 'Support responsive images with the Picture module.',
             'buttons' => FALSE,
-            'path' => '%base_path%profiles/openenterprise/modules/contrib/picture/ckeditor/plugins/',
+            'path' => '%base_path%' . drupal_get_path('module', 'picture') . '/ckeditor/plugins/',
             'default' => 't',
           ),
           'trifold' => array(
             'name' => 'trifold',
             'desc' => 'Bootstrap Trifold Plugin',
-            'path' => '%base_path%profiles/openenterprise/libraries/enterprise_editor/plugins/trifold/',
+            'path' => '%base_path%' . libraries_get_path('enterprise_editor') . '/plugins/trifold/',
             'buttons' => array(
               'Trifold' => array(
                 'label' => 'Trifold',
                 'icon' => 'icons/trifold.png',
+              ),
+            ),
+          ),
+          'video_filter' => array(
+            'name' => 'video_filter',
+            'desc' => 'Plugin to directly embed videos with the video filter module.',
+            'path' => '%base_path%' . drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
+            'buttons' => array(
+              'video_filter' => array(
+                'label' => 'Video filter',
+                'icon' => 'video_filter.png',
               ),
             ),
           ),
