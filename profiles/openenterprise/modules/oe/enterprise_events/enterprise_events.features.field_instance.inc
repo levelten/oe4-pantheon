@@ -60,7 +60,7 @@ function enterprise_events_field_default_field_instances() {
           ),
         ),
         'type' => 'text_default',
-        'weight' => 2,
+        'weight' => 1,
       ),
       'ical' => array(
         'label' => 'above',
@@ -118,9 +118,11 @@ function enterprise_events_field_default_field_instances() {
           'more_text' => 'Read more',
           'summary_handler' => 'trim',
           'trim_length' => 100,
+          'trim_link' => FALSE,
           'trim_options' => array(
             'text' => 'text',
           ),
+          'trim_preserve_tags' => '',
           'trim_suffix' => '...',
           'trim_type' => 'chars',
         ),
@@ -134,14 +136,16 @@ function enterprise_events_field_default_field_instances() {
         'weight' => 14,
       ),
     ),
+    'ds_extras_field_template' => '',
     'enterprise_edit_form_display' => '',
     'entity_type' => 'node',
     'field_name' => 'body',
-    'label' => 'Body',
+    'label' => 'Description',
     'required' => 0,
     'settings' => array(
       'better_formats' => array(
         'allowed_formats' => array(
+          'advanced_html' => 0,
           'ds_code' => 'ds_code',
           'filtered_html' => 'filtered_html',
           'full_html' => 'full_html',
@@ -151,6 +155,9 @@ function enterprise_events_field_default_field_instances() {
         'default_order_toggle' => 0,
         'default_order_wrapper' => array(
           'formats' => array(
+            'advanced_html' => array(
+              'weight' => -8,
+            ),
             'ds_code' => array(
               'weight' => 12,
             ),
@@ -178,7 +185,7 @@ function enterprise_events_field_default_field_instances() {
         'summary_rows' => 5,
       ),
       'type' => 'text_textarea_with_summary',
-      'weight' => 2,
+      'weight' => 1,
     ),
   );
 
@@ -232,9 +239,9 @@ function enterprise_events_field_default_field_instances() {
         'settings' => array(
           'conditions' => array(),
           'field_delimiter' => '',
-          'field_formatter_class' => '',
+          'field_formatter_class' => 'well',
           'format_handlers' => array(
-            0 => 'address',
+            'address' => 'address',
           ),
           'linked_field' => array(
             'advanced' => array(
@@ -250,7 +257,7 @@ function enterprise_events_field_default_field_instances() {
           'use_widget_handlers' => 1,
         ),
         'type' => 'addressfield_default',
-        'weight' => 5,
+        'weight' => 7,
       ),
       'ical' => array(
         'label' => 'above',
@@ -336,6 +343,7 @@ function enterprise_events_field_default_field_instances() {
       'module' => 'addressfield',
       'settings' => array(
         'available_countries' => array(),
+        'default_country' => 'site_default',
         'format_handlers' => array(
           'address' => 'address',
           'organisation' => 'organisation',
@@ -399,15 +407,15 @@ function enterprise_events_field_default_field_instances() {
               'text' => '',
               'title' => '',
             ),
-            'destination' => '',
-            'linked' => 0,
+            'destination' => 'node/[node:nid]/ical.ics',
+            'linked' => 1,
           ),
           'multiple_from' => '',
           'multiple_number' => '',
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 6,
+        'weight' => 5,
       ),
       'ical' => array(
         'label' => 'above',
@@ -527,7 +535,7 @@ function enterprise_events_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_popup',
-      'weight' => 1,
+      'weight' => 2,
     ),
   );
 
@@ -666,7 +674,7 @@ function enterprise_events_field_default_field_instances() {
           ),
         ),
         'type' => 'geofield_leaflet',
-        'weight' => 4,
+        'weight' => 6,
       ),
       'ical' => array(
         'label' => 'above',
@@ -799,69 +807,6 @@ function enterprise_events_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_event-field_event_register'
-  $field_instances['node-enterprise_event-field_event_register'] = array(
-    'bundle' => 'enterprise_event',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'hidden',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 5,
-      ),
-      'full' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 24,
-      ),
-      'ical' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 4,
-      ),
-      'mini' => array(
-        'label' => 'hidden',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 5,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 22,
-      ),
-      'upcoming_events' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_event_register',
-    'label' => 'Register',
-    'required' => 0,
-    'settings' => array(
-      'text_processing' => 1,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'rows' => 5,
-      ),
-      'type' => 'text_textarea',
-      'weight' => 6,
-    ),
-  );
-
   // Exported field_instance: 'node-enterprise_event-field_event_register_link'
   $field_instances['node-enterprise_event-field_event_register_link'] = array(
     'bundle' => 'enterprise_event',
@@ -960,11 +905,12 @@ function enterprise_events_field_default_field_instances() {
       'module' => 'link',
       'settings' => array(),
       'type' => 'link_field',
-      'weight' => 5,
+      'weight' => 4,
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_event-field_event_special_instructions'
+  // Exported field_instance:
+  // 'node-enterprise_event-field_event_special_instructions'
   $field_instances['node-enterprise_event-field_event_special_instructions'] = array(
     'bundle' => 'enterprise_event',
     'default_value' => NULL,
@@ -979,9 +925,25 @@ function enterprise_events_field_default_field_instances() {
       ),
       'full' => array(
         'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 23,
+        'module' => 'text',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
+        'type' => 'text_default',
+        'weight' => 4,
       ),
       'ical' => array(
         'label' => 'above',
@@ -1023,19 +985,18 @@ function enterprise_events_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 4,
+      'weight' => 6,
     ),
   );
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Body');
   t('Date/Time');
+  t('Description');
   t('Enter any special instructions here such as more explicite time and date and difficult directions');
   t('Enter the start and end dates and times for this event.');
   t('Geocode');
   t('Location');
-  t('Register');
   t('Register link');
   t('Special Instructions');
 
