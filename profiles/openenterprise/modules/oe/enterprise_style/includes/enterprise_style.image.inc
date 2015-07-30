@@ -206,12 +206,16 @@ function enterprise_style_default_picture_mapping() {
       $mappings = array();
       foreach($image_settings['resolutions'] as $resolution_name => $resolution) {
         $mappings['custom.user.' . $resolution_name] = array(
-          '1x' => $size_name . '-' . $ratio_name . '-' . $resolution_name
+          '1x' => array(
+            'mapping_type' => 'image_style',
+            'image_style' => $size_name . '-' . $ratio_name . '-' . $resolution_name,
+          )
         );
       }
       $picture_mapping = new stdClass();
-      $picture_mapping->disabled = TRUE;
-      $picture_mapping->api_version = 1;
+      $picture_mapping->disabled = FALSE;
+      $picture_mapping->api_version = 2;
+      $picture_mapping->label = $size_name . '-' . $ratio_name;
       $picture_mapping->machine_name = $size_name . '-' . $ratio_name;
       $picture_mapping->breakpoint_group = $size_name . '-' . $ratio_name;
       $picture_mapping->mapping = $mappings;

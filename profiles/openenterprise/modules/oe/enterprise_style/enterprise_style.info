@@ -7,6 +7,7 @@ project = enterprise_style
 dependencies[] = colorbox
 dependencies[] = colorbox_node
 dependencies[] = ds_bootstrap_layouts
+dependencies[] = features
 dependencies[] = fontello
 dependencies[] = icon
 dependencies[] = icon_block
@@ -18,7 +19,5 @@ dependencies[] = libraries
 dependencies[] = styler
 dependencies[] = views_bootstrap
 libraries[] = jquery.fitvids
-
+features[features_api][] = api:2
 files[] = plugins/list/enterprise_style_plugin_style_list.inc
-
-
