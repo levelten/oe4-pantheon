@@ -55,11 +55,13 @@ function template_preprocess_views_view_responsive_grid(&$vars) {
     }
     $preset = gridmagic_get_row_preset_info($options['gridmagic_row_preset']);
     $gridmagic_attrs = gridmagic_get_element_attributes($preset, 0, $item_count);
-    if (!empty($options['column_classes'])) {
-      $options['column_classes'] .= ' ' . implode(' ', $gridmagic_attrs['class']);
-    }
-    else {
-      $options['column_classes'] = implode(' ', $gridmagic_attrs['class']);
+    if (!emtpy($gridmagic_attrs['class']) && is_array($gridmagic_attrs['class'])) {
+      if (!empty($options['column_classes'])) {
+        $options['column_classes'] .= ' ' . implode(' ', $gridmagic_attrs['class']);
+      }
+      else {
+        $options['column_classes'] = implode(' ', $gridmagic_attrs['class']);
+      }
     }
   }
 
