@@ -157,7 +157,18 @@ function enterprise_blog_strongarm() {
           'weight' => '7',
         ),
       ),
-      'display' => array(),
+      'display' => array(
+        'disqus' => array(
+          'mini' => array(
+            'weight' => '1002',
+            'visible' => FALSE,
+          ),
+          'teaser' => array(
+            'weight' => '1002',
+            'visible' => FALSE,
+          ),
+        ),
+      ),
     ),
   );
   $export['field_bundle_settings_node__enterprise_blog'] = $strongarm;
