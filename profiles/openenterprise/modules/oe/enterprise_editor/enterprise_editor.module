@@ -5,10 +5,6 @@
  */
 
 include_once 'enterprise_editor.features.inc';
-/**
- * @file
- */
-
 
 /**
  * Implements hook_permission().
