@@ -42,7 +42,7 @@
           '      <div class="carousel-caption">' +
           '       <h3>Header 1</h3>' +
           '       <p>Text 1</p>' +
-          '       <a href="#" class="btn btn-large btn-info">Read More</a>' +
+          '       <a href="#" class="btn btn-large btn-default">Read More</a>' +
           '      </div>' +
           '    </div>' +
           '    <div class="item">' +
@@ -50,7 +50,7 @@
           '      <div class="carousel-caption">' +
           '       <h3>Header 2</h3>' +
           '       <p>Text 2</p>' +
-          '       <a href="#" class="btn btn-large btn-info">Read More</a>' +
+          '       <a href="#" class="btn btn-large btn-default">Read More</a>' +
           '      </div>' +
           '    </div>' +
           '    <div class="item">' +
@@ -58,7 +58,7 @@
           '      <div class="carousel-caption">' +
           '       <h3>Header 3</h3>' +
           '       <p>Text 3</p>' +
-          '       <a href="#" class="btn btn-large btn-info">Read More</a>' +
+          '       <a href="#" class="btn btn-large btn-default">Read More</a>' +
           '      </div>' +
           '    </div>' +
           '  </div>' +
@@ -138,7 +138,7 @@
                   '      <div class="carousel-caption">' +
                   '       <h3>Header ' + i + '</h3>' +
                   '       <p>Text ' + i + '</p>' +
-                  '       <a href="#" class="btn btn-large btn-info">Read More</a>' +
+                  '       <a href="#" class="btn btn-large btn-default">Read More</a>' +
                   '      </div>');
                 this.parts.inner.append(this.parts['slide' + i]);
                 this.initEditable('caption' + i, {selector: 'div.carousel-inner div.item:nth-child(' + i + ') div.carousel-caption'});
