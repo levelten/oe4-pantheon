@@ -541,7 +541,8 @@ function video_filter_ckeditor_plugin() {
   $plugins['video_filter'] = array(
     'name' => 'video_filter',
     'desc' => t('Plugin to directly embed videos with the video filter module.'),
-    'path' => base_path() . drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
+    'path' => drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
+    'default' => 't',
     'buttons' => array(
       'video_filter' => array(
         'label' => t('Video filter'),
