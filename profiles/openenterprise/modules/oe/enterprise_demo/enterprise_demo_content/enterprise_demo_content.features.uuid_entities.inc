@@ -679,7 +679,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 <div class="carousel-inner">
 <div class="item active"><img alt="Slide1" src="/sites/default/files/example_banner5.png" />
 <div class="carousel-caption">
-<p><a class="btn btn-large btn-info" href="#">Read More</a></p>
+<p><a class="btn btn-large btn-default" href="#">Read More</a></p>
 </div>
 </div>
 
@@ -687,7 +687,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 <div class="carousel-caption">
 <p>&nbsp;</p>
 
-<p><a class="btn btn-large btn-info" href="#">Read More</a></p>
+<p><a class="btn btn-large btn-default" href="#">Read More</a></p>
 </div>
 </div>
 
@@ -695,7 +695,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 <div class="carousel-caption">
 <p>&nbsp;</p>
 
-<p><a class="btn btn-large btn-info" href="#">Read More</a></p>
+<p><a class="btn btn-large btn-default" href="#">Read More</a></p>
 </div>
 </div>
 </div>
@@ -709,7 +709,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 
 <p>Increase the total number of potential customers who visit your website each month.</p>
 
-<p><a class="btn btn-large btn-info" href="/services/attract-visitors"><span class="glyphicon glyphicon-circle-arrow-right"></span> Attract Visitors</a></p>
+<p><a class="btn btn-large btn-default" href="/services/attract-visitors"><span class="glyphicon glyphicon-circle-arrow-right"></span> Attract Visitors</a></p>
 </div>
 
 <div class="col-md-3">
@@ -719,7 +719,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 
 <p>Capture more information about your visitors so that you can convert them to qualified leads.</p>
 
-<p><a class="btn btn-large btn-info" href="/services/convert-leads"><span class="glyphicon glyphicon-circle-arrow-right"></span> Convert Leads</a></p>
+<p><a class="btn btn-large btn-default" href="/services/convert-leads"><span class="glyphicon glyphicon-circle-arrow-right"></span> Convert Leads</a></p>
 </div>
 
 <div class="col-md-3">
@@ -729,7 +729,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 
 <p>Respond first with real-time notifications, increasing your opportunity to win business.</p>
 
-<p><a class="btn btn-large btn-info" href="/services/close-sales"><span class="glyphicon glyphicon-circle-arrow-right"></span> Close Sales</a></p>
+<p><a class="btn btn-large btn-default" href="/services/close-sales"><span class="glyphicon glyphicon-circle-arrow-right"></span> Close Sales</a></p>
 </div>
 
 <div class="col-md-3">
@@ -739,7 +739,7 @@ $entities['enterprise_demo_content'][] = (object) array(
 
 <p><span style="font-size: 15px; line-height: 21.428571701049805px; background-color: rgb(255, 255, 255);">Gain deeper insight into engagement, conversion and interest to get more from your marketing efforts.</span></p>
 
-<p><a class="btn btn-large btn-info" href="/services/improve-process"><span class="glyphicon glyphicon-circle-arrow-right"></span> Improve Process</a></p>
+<p><a class="btn btn-large btn-default" href="/services/improve-process"><span class="glyphicon glyphicon-circle-arrow-right"></span> Improve Process</a></p>
 </div>
 </section>
 
@@ -966,7 +966,7 @@ Social Media integration so users can engage with your brand and share your cont
 
 <p><span style="font-size: 15px; line-height: 21.428571701049805px; background-color: rgb(255, 255, 255);">Open Enterprise allows you to easily create calls to action across the entire website or on a per-page basis. Additionally, our workflow tools make it simple to tie together the workflow process from CTA to Landing Page to Offer and Thank You Page .</span></p>
 
-<p><a class="btn btn-large btn-info" href="/offer/website-redesign">How It Works</a></p>
+<p><a class="btn btn-large btn-default" href="/offer/website-redesign">How It Works</a></p>
 </div>
 </section>
 ',
@@ -1070,7 +1070,7 @@ Open Enterprise with Intelligence™ tracks conversions, leads and sales through
 
 <p><span style="font-size: 15px; line-height: 21.428571701049805px; background-color: rgb(255, 255, 255);">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras accumsan ultrices magna eget mollis. Nullam volutpat vestibulum turpis at pretium. Proin ultricies laoreet rhoncus.</span></p>
 
-<p><a class="btn btn-large btn-info" href="#">Download Now</a></p>
+<p><a class="btn btn-large btn-default" href="#">Download Now</a></p>
 </div>
 </section>
 ',
@@ -1173,7 +1173,7 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
 
 <p><span style="font-size: 15px; line-height: 21.428571701049805px; background-color: rgb(255, 255, 255);">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras accumsan ultrices magna eget mollis. Nullam volutpat vestibulum turpis at pretium. Proin ultricies laoreet rhoncus.</span></p>
 
-<p><a class="btn btn-large btn-info" href="#">Download Now</a></p>
+<p><a class="btn btn-large btn-default" href="#">Download Now</a></p>
 </div>
 </section>
 ',
