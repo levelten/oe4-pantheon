@@ -17,16 +17,6 @@
       var navbar = context.getElementById("navbar");
       var $navbar = $(".navbar", context);
 
-      // Equal width nav items.
-      var navbarNav = navbar.querySelector(".navbar-nav");
-      var navbarChildren = navbarNav.children;
-      navbarNav.style.width = "100%";
-      var navbarChildWidth = 100/navbarChildren.length+"%";
-
-      Array.prototype.forEach.call(navbarChildren,function(el){
-        el.style.width = navbarChildWidth;
-      });
-      
       // // Set height of header for logo positioning.
       // var brand = navbar.querySelector(".navbar-header .navbar-brand");
       // var brandHeight = brand.offsetHeight;
