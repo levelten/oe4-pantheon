@@ -76,7 +76,7 @@ index a0487c8..fb2cf5f 100644
 +  $plugins['video_filter'] = array(
 +    'name' => 'video_filter',
 +    'desc' => t('Plugin to directly embed videos with the video filter module.'),
-+    'path' => base_path() . drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
++    'path' => drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
 +    'buttons' => array(
 +      'video_filter' => array(
 +        'label' => t('Video filter'),
