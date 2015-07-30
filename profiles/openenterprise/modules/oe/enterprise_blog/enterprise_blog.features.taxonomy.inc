@@ -17,7 +17,6 @@ function enterprise_blog_taxonomy_default_vocabularies() {
       'module' => 'taxonomy',
       'weight' => 0,
       'entity_type' => 'taxonomy_vocabulary',
-      'slug' => '',
     ),
     'blog_tags' => array(
       'name' => 'Blog Tags',
@@ -27,7 +26,6 @@ function enterprise_blog_taxonomy_default_vocabularies() {
       'module' => 'taxonomy',
       'weight' => 0,
       'entity_type' => 'taxonomy_vocabulary',
-      'slug' => '',
     ),
   );
 }
