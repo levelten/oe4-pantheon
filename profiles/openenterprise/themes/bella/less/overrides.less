@@ -2,19 +2,6 @@ body.admin-menu.navbar-is-fixed-top {
 	margin-top: 0 !important;
 }
 
-.btn-default, .btn-info {
-	background-color: transparent;
-	border-color: @brand-primary;
-	color: @brand-primary;
-	font-weight: 300;
-	text-transform: uppercase;
-	&:hover {
-		background-color: @brand-primary;
-		border-color: @brand-primary;
-		color: white;
-	}
-}
-
 .trifold {
 	.btn-default {
 		margin-top: 1em;
@@ -128,58 +115,58 @@ ul.tags {
 	}
 }
 .field-name-body {
-  ul, ol {
-    padding-left: 20px;
-  }
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
-    }
-  }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+	ul, ol {
+		padding-left: 20px;
+	}
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
 }
 iframe {
-  ul, ol {
-    padding-left: 20px;
-  }
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
-    }
-  }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+	ul, ol {
+		padding-left: 20px;
+	}
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
 }
 
 blockquote {
@@ -200,26 +187,156 @@ blockquote {
 
 
 .ckeditor-processed {
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
+}
+
+// Button/Background Color overrides
+.btn { font-family: @font-family-base; }
+
+
+.btn-default, .btn {
+	background-color: transparent;
+	border-color: @brand-primary;
+	color: @brand-primary;
+	font-weight: 300;
+	text-transform: uppercase;
+	&:hover {
+		background-color: @brand-primary;
+		border-color: @brand-primary;
+		color: white;
+	}
+}
+
+// Cool LESS loop stuff
+@colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
+@names  : primary, secondary, accent, success, info, warning, danger;
+@length : length(@colors);
+
+.brand-variation(@names; @colors; @index) when (@index > 0) {
+    .brand-variation(@names; @colors; (@index - 1)); // decrement.
+
+    @name  : extract(@names, @index);
+    @color : extract(@colors, @index);
+
+    .btn-@{name} {
+    	border-color: @color;
+    	background-color: @color;
+    	color: white;
+    	&:hover, &:focus {
+    		background-color: darken(@color, 10%);
+    		border-color: darken(@color, 10%);
+    	}
+    }
+    .bg-@{name} {
+    	background-color: @color;
+    	&, a {
+    		color: white;
+    	}
     }
   }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+
+  .brand-variation(@names; @colors; @length);
+
+// Override for other buttons/backgrounds
+.btn-secondary, .bg-secondary {
+	color: @gray;
+}
+.btn-accent, .bg-accent {
+	color: @brand-primary;
+}
+.btn-link {
+	background: transparent;
+	border: 0;
+	color: @brand-link;
+	&:hover, &:focus {
+		background-color: transparent;
+		color: @brand-link;
+	}
+}
+
+// CTAs
+.cta-btn {
+	&.btn-secondary {
+		h2, h3, h4 {
+			color: @gray;
+		}
+		&:hover, &:focus {
+			h2, h3, h4 {
+				color: white;
+			}	
+		}
+	}
+	&.btn-accent {
+		border: 1px solid @brand-primary;
+		h2, h3, h4 {
+			color: @brand-primary;
+		}
+		&:hover, &:focus, &:active {
+			background-color: @brand-primary;
+			&, h2, h3, h4 {
+				color: white;
+			}	
+		}
+	}
+}
+
+.cta-rectangle {
+	.btn-cta {
+		color: @brand-primary;
+		&:hover, &:focus, &:active {
+			background-color: white;
+			color: @brand-primary;
+		}
+	}
+	.icon {
+		color: @brand-primary;
+	}
+	&:hover, &:focus, &:active {
+		&, h2, h3, h4, p {
+			text-decoration: none;
+		}
+		.btn {
+			color: @brand-primary;
+		}
+	}
+	&.cta-secondary {
+		&, h2, h3, h4 {
+			color: @brand-primary;
+		}
+		.icon {
+			color: white;
+		}
+		&:hover, &:focus, &:active {
+			&, h2, h3, h4, .btn-cta {
+				color: white;
+			}
+			.btn-cta {
+				&:hover, &:focus, &:active {
+					background-color: @brand-primary;
+					color: white;
+				}
+			}
+		}
+	}
 }

@@ -225,6 +225,7 @@ header {
 			&.expanded {
 				@media @tablet {
 					> .dropdown-menu {
+						padding: 0;
 						li {
 							border-bottom: 1px solid lighten(@gray, 45%);
 							.box-sizing();
@@ -237,13 +238,14 @@ header {
 								background-color: @gray-lighter;
 							}
 						}
-						padding: 0;
 						a {
+							display: block;
 							font-weight: 300;
 							padding: 5px 20px;
 							&:hover {
 								color: @text-color;
 								background-color: transparent;
+								text-decoration: none;
 							}
 						}
 					}
@@ -329,24 +331,38 @@ header {
 }
 
 .nav, .collapse, .dropup, .dropdown {
-  position: static;
+	position: static;
 }  
 
 .dropdown-menu {
-  left: auto;
-  width: auto;
+	left: auto;
+	width: auto;
 }
 /* This enables hover dropdowns */
 .dropdown:hover .dropdown-menu {
-  display: block;
-  z-index: 99;
-  white-space: nowrap;
+	display: block;
+	z-index: 99;
+	white-space: nowrap;
 }
 .dropdown:hover .dropdown-menu > li > a {
-  width: auto;
-  white-space: nowrap;
+	width: auto;
+	white-space: nowrap;
 }
 .nav.navbar-right .dropdown-menu {
-  left: auto;
-  right: 0;
+	left: auto;
+	right: 0;
+}
+
+// Autospacing on nav items
+#navbar-menu .default-bootstrap {
+	.navbar-nav {
+		@media @normal {
+			display: table;
+			width: 100%;
+			> li {
+				display: table-cell;
+				float: none;
+			}
+		}
+	}
 }
