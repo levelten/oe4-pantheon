@@ -70,6 +70,9 @@
 			text-align: left;
 			width: 25%;
 			top: 10%;
+
+		  	@media @tablet, @mobile { display:none; }
+
 			h3 {
 				color: @brand-primary;
 				font-weight: 300;
@@ -77,6 +80,12 @@
 				margin-bottom: 0.75em;
 				text-transform: uppercase;
 				text-shadow: none;
+
+			  	@media @tablet, @mobile {
+				  text-align: left;
+				  margin-top:0.5em;
+				  margin-bottom:0.5em;
+				}
 			}
 			p {
 				color: @gray;
@@ -89,6 +98,10 @@
 				font-weight: 500;
 				margin-top: 1em;
 				padding: 10px 15px;
+
+			  	@media @tablet, @mobile {
+				  margin-top: 0;
+				}
 			}
 			@media @tablet-max {
 				left: 0;
@@ -119,6 +132,8 @@
 		}
 		li {
 			border-color: @brand-primary;
+
+		  	&:before {content: '';} // Ahmad: Disables ol numbers that appear on slider
 			&.active {
 				background-color: @brand-primary;
 			}

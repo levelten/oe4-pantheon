@@ -1,10 +1,14 @@
 .node-enterprise-event {
     &.style-event-full {
+	  .field {
+		margin:10px 0px;
+	  }
       .field-name-field-event-datetime {
-        &:extend(h4);
-        .date-display-single {
-          .label;
-          .label-warning;
+        &:extend(h3);
+        .date-display-single a {
+          .btn;
+          .btn-warning;
+		  color:@brand-accent;
         }
       }
     }

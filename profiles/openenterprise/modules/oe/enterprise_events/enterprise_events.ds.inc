@@ -37,42 +37,13 @@ function enterprise_events_ds_field_settings_info() {
   $ds_fieldsetting->bundle = 'enterprise_event';
   $ds_fieldsetting->view_mode = 'full';
   $ds_fieldsetting->settings = array(
-    'date_time' => array(
-      'weight' => '1',
-      'label' => 'hidden',
-      'format' => 'default',
-      'formatter_settings' => array(
-        'show_title' => 0,
-        'title_wrapper' => '',
-        'ctools' => 'a:3:{s:4:"conf";a:9:{s:5:"label";s:6:"hidden";s:9:"formatter";s:12:"date_default";s:11:"delta_limit";i:0;s:12:"delta_offset";s:1:"0";s:14:"delta_reversed";b:0;s:18:"formatter_settings";a:5:{s:11:"format_type";s:4:"long";s:15:"multiple_number";s:0:"";s:13:"multiple_from";s:0:"";s:11:"multiple_to";s:0:"";s:6:"fromto";s:4:"both";}s:7:"context";s:25:"argument_entity_id:node_1";s:14:"override_title";i:0;s:19:"override_title_text";s:0:"";}s:4:"type";s:12:"entity_field";s:7:"subtype";s:25:"node:field_event_datetime";}',
-        'load_terms' => 0,
-        'ft' => array(
-          'func' => 'theme_ds_field_expert',
-          'lb-el' => 'h3',
-        ),
-        'field_delimiter' => '',
-        'field_formatter_class' => '',
-        'conditions' => array(),
-        'linked_field' => array(
-          'linked' => 0,
-          'destination' => '',
-          'advanced' => array(
-            'title' => '',
-            'target' => '',
-            'class' => '',
-            'rel' => '',
-            'text' => '',
-          ),
-        ),
-      ),
-    ),
     'social_media_share_buttons' => array(
       'weight' => '0',
       'label' => 'hidden',
       'format' => 'default',
     ),
     'ical_feed' => array(
-      'weight' => '7',
+      'weight' => '8',
       'label' => 'hidden',
       'format' => 'default',
     ),
@@ -278,33 +249,35 @@ function enterprise_events_ds_layout_settings_info() {
   $ds_layout->entity_type = 'node';
   $ds_layout->bundle = 'enterprise_event';
   $ds_layout->view_mode = 'full';
-  $ds_layout->layout = 'bootstrap_1col_stacked';
+  $ds_layout->layout = 'bootstrap_2col_fluid_stacked';
   $ds_layout->settings = array(
     'regions' => array(
-      'sticky' => array(
+      'header' => array(
         0 => 'social_media_share_buttons',
       ),
-      'middle' => array(
-        1 => 'date_time',
-        2 => 'body',
+      'left' => array(
+        1 => 'body',
+        2 => 'field_event_register',
         3 => 'field_event_register_link',
+        4 => 'field_event_special_instructions',
       ),
-      'event_details' => array(
-        4 => 'field_event_geocode',
-        5 => 'field_event_address',
-        6 => 'field_event_datetime',
-        7 => 'ical_feed',
+      'right' => array(
+        5 => 'field_event_datetime',
+        6 => 'field_event_geocode',
+        7 => 'field_event_address',
+        8 => 'ical_feed',
       ),
     ),
     'fields' => array(
-      'social_media_share_buttons' => 'sticky',
-      'date_time' => 'middle',
-      'body' => 'middle',
-      'field_event_register_link' => 'middle',
-      'field_event_geocode' => 'event_details',
-      'field_event_address' => 'event_details',
-      'field_event_datetime' => 'event_details',
-      'ical_feed' => 'event_details',
+      'social_media_share_buttons' => 'header',
+      'body' => 'left',
+      'field_event_register' => 'left',
+      'field_event_register_link' => 'left',
+      'field_event_special_instructions' => 'left',
+      'field_event_datetime' => 'right',
+      'field_event_geocode' => 'right',
+      'field_event_address' => 'right',
+      'ical_feed' => 'right',
     ),
     'classes' => array(
       'layout_class' => array(
@@ -313,8 +286,8 @@ function enterprise_events_ds_layout_settings_info() {
     ),
     'wrappers' => array(
       'header' => 'div',
-      'sticky' => 'div',
-      'middle' => 'div',
+      'left' => 'div',
+      'right' => 'div',
       'footer' => 'div',
     ),
     'layout_wrapper' => 'div',
