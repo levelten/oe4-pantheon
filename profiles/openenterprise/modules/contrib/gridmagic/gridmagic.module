@@ -27,7 +27,7 @@ function gridmagic_menu() {
 
   $items = array();
 
-  $items['admin/structure/block/gridmagic'] = array(
+  $items['admin/config/user-interface/gridmagic'] = array(
     'title' => 'Grid Magic',
     'description' => 'Administrative interface for Grid Magic',
     'page callback' => 'drupal_get_form',
