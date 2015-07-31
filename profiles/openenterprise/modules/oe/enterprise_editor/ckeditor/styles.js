@@ -32,6 +32,8 @@ CKEDITOR.stylesSet.add('default', [
 
   { name : 'Primary', element : 'p', attributes : { class : 'text-primary bg-primary' } },
   { name : 'Success', element : 'p', attributes : { class : 'text-success bg-success' } },
+  { name : 'Secondary', element : 'p', attributes : { class : 'text-secondary bg-secondary' } },
+  { name : 'Accent', element : 'p', attributes : { class : 'text-accent bg-accent' } },
   { name : 'Info', element : 'p', attributes : { class : 'text-info bg-info' } },
   { name : 'Warning', element : 'p', attributes : { class : 'text-warning bg-warning' } },
   { name : 'Danger', element : 'p', attributes : { class : 'text-danger bg-danger' } },
