@@ -98,6 +98,22 @@ function styler_style_view() {
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler_bootstrap.js');
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler.js');
 
+  // Add default bootstrap javascript plugins
+
+  $bootstrap_js = array('scrollspy' => 'scrollspy' , 'affix' => 'scrollspy');
+  $theme_name = 'enterprise_bootstrap';
+  $themes = list_themes();
+
+  if(isset($themes[$theme_name])) {
+    $js_path = drupal_get_path('theme', $theme_name).'/bootstrap/js/';
+    $options = array(
+        'group' => JS_THEME,
+        'preprocess' => TRUE,
+    );
+    foreach ($bootstrap_js as $key => $value) {
+      drupal_add_js($js_path.$key.'.js', $options);
+    }
+  }
 
   $prettify_path = libraries_get_path('prettify');
   if ($prettify_path ) {
