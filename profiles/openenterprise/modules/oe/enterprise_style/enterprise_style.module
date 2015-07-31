@@ -9,20 +9,6 @@ require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterpri
 require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterprise_style.image.inc";
 
 /**
- * Adding js and css for core features
- * TODO is there a better way of doing this? Can a libraries file called from
- * .info?
-*/
-function enterprise_style_init() {
-  // add js library for auto sizing of videos
-  drupal_add_js(libraries_get_path('jquery.fitvids') . '/jquery.fitvids.js');
-  // js for custom OE JS features
-  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/enterprise_extras.js');
-  // core styling for custom features (should be overriden in theme)
-  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/enterprise_extras.css');
-}
-
-/**
 * Implements hook_theme().
 */
 function enterprise_style_theme() {
