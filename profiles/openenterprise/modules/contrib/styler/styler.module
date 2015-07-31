@@ -89,6 +89,10 @@ function styler_styles() {
 }
 
 function styler_style_view() {
+
+  // Ahmad: I had to disable admin menu on the style guide because it messes up the scroll bar
+  module_invoke('admin_menu', 'suppress');
+
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler_bootstrap.css');
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler.css');
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler_bootstrap.js');
@@ -104,7 +108,7 @@ function styler_style_view() {
   $build = array(
     'styles' => array(
       'pre' => array(
-        '#markup' => '<div class="col-md-9">',
+        '#markup' => '<div class="col-md-9 style-guide-sections">',
       ),
     ),
     'nav' => array(
@@ -162,7 +166,7 @@ function styler_style_view() {
   }
   $build['styles']['post']['#markup'] = '</div>';
 
-  $build['nav']['nav']['#markup'] = theme_bootstrap_nav_docs($nav_items);
+  $build['nav']['nav']['#markup'] = '<div id="style-guide-index"><nav>' . theme_bootstrap_nav_docs($nav_items) . '</nav></div>';
   $build['nav']['post']['#markup'] = '</div>';
   return $build;
 }

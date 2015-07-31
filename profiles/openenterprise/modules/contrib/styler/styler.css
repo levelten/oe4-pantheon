@@ -28,7 +28,10 @@
   color: #d44950;
 }
 
+#style-guide-index li .nav {display:none;}
+#style-guide-index li.active .nav {display:block;}
+
 body {
-  position: static;
+  position: relative;
 }
 
