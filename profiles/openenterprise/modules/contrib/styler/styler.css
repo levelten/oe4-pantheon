@@ -28,6 +28,9 @@
   color: #d44950;
 }
 
+h1#type { margin-top: 0;}
+
+#style-guide-index {position:relative;}
 #style-guide-index li .nav {display:none;}
 #style-guide-index li.active .nav {display:block;}
 

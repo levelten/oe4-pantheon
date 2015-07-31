@@ -188,7 +188,7 @@ function styler_style_view() {
 }
 
 function theme_bootstrap_nav_docs($nav_items, $level = 0) {
-  $output = '<ul class="nav' . (($level == 0) ? ' bs-docs-sidebar' : '') . '">';
+  $output = '<ul data-spy="affix" class="nav' . (($level == 0) ? ' bs-docs-sidebar' : '') . '">';
   foreach ($nav_items AS $key => $value) {
     $text = '';
     $url = '';
