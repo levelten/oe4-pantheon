@@ -232,7 +232,29 @@ function enterprise_blog_styler_style() {
         'class' => 'style-article-teaser clearfix',
       ),
       '#value' => $markup,
-      '#value_highlight' => '',
+      '#value_highlight' => '<div class="row">
+    <section class="ds-left clearfix  col-md-6">
+        <div class="field thumbnail">
+            <div class="field-items">
+                <div class="field-item even">
+                    <a href="...">
+                    <img src="..." width="470" height="336" alt="..."></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="ds-right clearfix  col-md-6">
+        <div class="field field-name-title">
+            <h3><a href="...">5 Tips to Increase Your Conversion Rates</a></h3></div>
+        <div class="field field-name-submit-info">
+            <div class="submit_info">July 31, 2015 by
+                <a href="..." title="View user profile." class="username">Brent Bice</a>
+            </div>
+        </div>
+        <div class="field field-name-body">Lorem ipsum dolor sit amet...
+        <a href="..." class="more-link">Read more</a></div>
+    </section>
+</div>',
     ),
   );
 
@@ -247,7 +269,68 @@ function enterprise_blog_styler_style() {
         'class' => 'style-article-mini clearfix',
       ),
       '#value' => enterprise_style_format_styler_block_value($blocks),
-      '#value_highlight' => '',
+      '#value_highlight' => '<article class="style-article-mini clearfix">
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="ds-1col node view-mode-mini style-default-mini clearfix">
+                <div class="field field-type-image image thumbnail">
+                    <div class="field-items">
+                        <div class="field-item even">
+                            <a href="...">
+                                <img  src="..." width="839" height="372" alt="...">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="field field-name-title">
+                    <h4>
+                        <a href="...">5 Tips to Increase Your Conversion Rates</a>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="ds-1col node view-mode-mini style-default-mini clearfix">
+                <div class="field field-type-image image thumbnail">
+                    <div class="field-items">
+                        <div class="field-item even">
+                            <a href="...">
+                                <img src="..." width="839" height="372" alt="...">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="field field-name-title">
+                    <h4>
+                        <a href="...">5 Tips to Increase Your Conversion Rates</a>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="ds-1col node view-mode-mini style-default-mini clearfix">
+                <div class="field field-type-image image thumbnail">
+                    <div class="field-items">
+                        <div class="field-item even">
+                            <a href="...">
+                                <img src="..." width="839" height="372" alt="..." />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="field field-name-title">
+                    <h4>
+                        <a href="...">5 Tips to Increase Your Conversion Rates</a>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</article>',
     ),
   );
 
