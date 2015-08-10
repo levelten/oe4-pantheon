@@ -34,7 +34,7 @@ var Drupal = Drupal || {};
         }
 
         // Account for potential existing styles.
-        if ($body.hasClass("navbar-is-static-top") && isMobile() || $body.hasClass("navbar-is-fixed-top") && !isMobile()) {
+        if ($body.hasClass("navbar-is-static-top") && isMobile() || $body.hasClass("navbar-is-fixed-top") && $body.hasClass("logged-in") && !isMobile()) {
           var style = ($mainContainer.attr("style") === undefined) ? "" : $mainContainer.attr("style");
           $mainContainer.attr("style", style + "padding-top:"+mainContainerMargin+"px;");
         }
