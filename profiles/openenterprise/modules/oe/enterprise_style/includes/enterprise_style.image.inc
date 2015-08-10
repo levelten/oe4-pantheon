@@ -107,7 +107,7 @@ function enterprise_style_image_default_styles() {
             ),
           ),
         );
-        // if no ratio, i.e. no croping
+        // if no ratio, i.e. no cropping
         if (!$ratio) {
           $styles[$key]['label'] = ucfirst($size_name) . '-' . t('original ratio') . '-' . $resolution_name;
           $styles[$key]['effects'][0]['name'] = 'image_scale';

@@ -28,7 +28,7 @@ function enterprise_style_default_picture_mapping() {
       $picture_mapping = new PictureMapping();
       $picture_mapping->disabled = FALSE;
       $picture_mapping->api_version = 2;
-      $picture_mapping->label = ucfirst($size_name) . ' (' . $ratio_name . ')';
+      $picture_mapping->label = ($ratio_name != '0') ? ucfirst($size_name) . ' (' . $ratio_name . ')' : ucfirst($size_name) . ' (No Crop)';
       $picture_mapping->machine_name = $size_name . '-' . $ratio_name;
       $picture_mapping->breakpoint_group = $size_name . '-' . $ratio_name;
       $picture_mapping->mapping = $mappings;
