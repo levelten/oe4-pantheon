@@ -1646,7 +1646,7 @@ Example 3:
 <div class="cta cta-rectangle">
   <h3>Build a Smarter Website</h3>
   <p>...</p>
-  <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon-download"></i></button>
+  <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
 </div>
 
 Example 2:
@@ -1657,7 +1657,7 @@ Example 2:
   </div>
   <div class="col-md-7">
     <p>....</p>
-    <button class="btn btn-primary">Get it now!<i class="icon glyphicon-download"></i></button>
+    <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
   </div>
 </div>',
     ),
