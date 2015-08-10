@@ -1,8 +1,5 @@
 <?php
 
-// Need to convert this module to bootstrap 3
-
-
 /**
  * Implements hook_ds_view_modes_info().
  */
@@ -27,7 +24,7 @@ function enterprise_style_ds_view_modes_info() {
     'user' => 'user',
   );
   $view_modes['mini'] = $ds_view_mode;
-
+  
   $ds_view_mode = new stdClass();
   $ds_view_mode->api_version = 1;
   $ds_view_mode->view_mode = 'image';
@@ -52,8 +49,8 @@ function enterprise_style_ds_view_modes_info() {
   $ds_view_mode->view_mode = 'teaser_stacked';
   $ds_view_mode->label = 'Teaser Stacked';
   $ds_view_mode->entities = array(
-      'node' => 'node',
-      'user' => 'user',
+    'node' => 'node',
+    'user' => 'user',
   );
   $view_modes['teaser_stacked'] = $ds_view_mode;
 
