@@ -100,6 +100,11 @@ function enterprise_style_theme() {
     ),
   );
 
+  $themes['comparison_table'] = array(
+    'template' => 'templates/comparison-table',
+    'variables' => array(),
+  );
+
 /*
   // views override
   $themes['views_view_summary'] = array(
@@ -413,6 +418,21 @@ function enterprise_style_styler_style() {
       '#tag' => 'markup',
       '#value' => theme('date_stacked', $vars),
     ),
+  );
+
+  // Featured content (placeholder for other hooks to implement)
+  $styles['other_components'] = array(
+      '#title' => t('Other components'),
+      '#description' => t('Components  used for other purposes.'),
+  );
+
+  $styles['other_components']['comparison_table'] = array(
+      '#title' => t('Comparison Table'),
+      'element' => array(
+          '#tag' => 'markup',
+          '#value' => theme('comparison_table'),
+          '#value_highlightx' => theme('comparison_table'),
+      ),
   );
 
   return $styles;
