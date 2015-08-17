@@ -90,9 +90,6 @@ function styler_styles() {
 
 function styler_style_view() {
 
-  // Ahmad: I had to disable admin menu on the style guide because it messes up the scroll bar
-  module_invoke('admin_menu', 'suppress');
-
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler_bootstrap.css');
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler.css');
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler_bootstrap.js');
