@@ -289,6 +289,29 @@ function enterprise_style_ds_fields_info($entity_type) {
     'function' => 'enterprise_style_ds_field_date_stacked',
     'properties' => array(),
   );
+  for ($i = 1; $i < 4; $i++) {
+    $node['enterprise_custom_' . $i] = array(
+      'title' => t('Custom') . ' ' . $i,
+      'field_type' => DS_FIELD_TYPE_FUNCTION,
+      'ui_limit' => array('*|*'),
+      'function' => 'enterprise_style_ds_field_custom',
+      'properties' => array(
+        'settings' => array(
+          'custom_markup' => array(
+            'title' => t('Custom markup'),
+            'type' => 'textfield',
+            'description' => t('Input custom markup to display in this field.'),
+          ),
+        ),
+        'default' => array(
+          'custom_markup' => '',
+        ),
+      ),
+
+    );
+  }
+
+
   return array('node' => $node, 'user' => $user);
 
   /*
@@ -404,6 +427,37 @@ function enterprise_style_ds_field_comment_count($variables) {
     return theme('item_list', array('items' => $items, 'attributes' => array('class' => array('meta-info'))));
   }
 }
+
+/**
+ * Implements hook_ds_field_settings_form().
+ */
+function enterprise_style_ds_field_settings_form($field) {
+  return ds_ds_field_settings_form($field);
+}
+
+/**
+ * Implements hook_ds_field_format_summary().
+ */
+function enterprise_style_ds_field_format_summary($field) {
+  $summary = ds_ds_field_format_summary($field);
+  $summary = ($summary != '') ? $summary : t('None');
+  return $summary;
+}
+
+/**
+ * Field callback for meta_info
+ *
+ * @param type $variables
+ * @return type
+ */
+function enterprise_style_ds_field_custom($variables) {
+  $output = '';
+  if (!empty($variables['formatter_settings']['custom_markup'])) {
+    $output = $variables['formatter_settings']['custom_markup'];
+  }
+  return $output;
+}
+
 
 /**
  * Field callback for date_stacked

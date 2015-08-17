@@ -402,6 +402,14 @@ var kwresearch = kwresearch || {};
 		    nv = $$.kwresearch_remove_phrase_from_list(keyword, v);
 		  }
 		  $('#edit-' + Drupal.settings.kwresearch.sync_vocab_field).val(nv);
+
+          // check seo keyword field. If empty, add keyword to field
+          if ($('#edit-seo-keyword').length) {
+            v = $('#edit-seo-keyword').val();
+            if (!v) {
+              $('#edit-seo-keyword').val(keyword);
+            }
+          }
 		  
 		  // do ajax call to store in database
 		  var data = { 

@@ -753,8 +753,7 @@ function intel_menu() {
     'description' => 'Analyze and optimize node content.',
     'page callback' => 'intel_util',
     'access callback' => 'user_access',
-    'access callback' => TRUE,
-    //'access arguments' => array('admin intel'),
+    'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
 
