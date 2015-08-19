@@ -119,14 +119,16 @@ ul.tags {
 		padding-left: 20px;
 	}
 	ul {
-		li {
-			list-style-type: none;
-			&:before {
-				color: @brand-primary;
-				content: "\25AA";
-				padding-right: 10px;
-				position: absolute;
-				left: 20px;
+		&.list-colored {
+			li {
+				list-style-type: none;
+				&:before {
+					color: @brand-primary;
+					content: "\25AA";
+					padding-right: 10px;
+					position: absolute;
+					left: 20px;
+				}
 			}
 		}
 	}
@@ -323,7 +325,7 @@ blockquote {
 		}
 	}
 	&.cta-secondary {
-	  	p {line-height:20.5px;}
+		p {line-height:20.5px;}
 
 		&, h2, h3, h4 {
 			color: @brand-primary;
