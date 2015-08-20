@@ -297,7 +297,7 @@ var kwresearch = kwresearch || {};
 		    $('.kwresearch_actions').hide();
 		  }
 		  else if (add == 1) {
-		    data.priority = 0;  
+		    data.priority = 50;
 		  }  
 
 		  $.ajax({

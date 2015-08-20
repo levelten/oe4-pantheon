@@ -238,12 +238,8 @@ function cta_permission() {
  * Testing function
  */
 function cta_util() {
-
-  $sel = cta_selection_load_all('node/21');
-dsm($sel);
-    //$bean = bean_load_delta('Website-Redesign-Success-ebook-s');
-  //$out = $bean->view($bean->view_mode);
-  //dsm($out);
+  $meta = cta_block_meta_load('module', 2);
+  dsm($meta);
   return 'OK';
 }
 
@@ -1044,33 +1040,68 @@ function cta_selection_load($path, $selector, $load_object = FALSE, $load_meta =
 function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
   // do not add settings fields to CTA selector blocks
   if ($form['module']['#value'] == 'cta') {
-    return;
+    //return;
   }
-  
+
+  if (empty($form['regions']['#type']) || ($form['regions']['#type'] != 'vertical_tabs')) {
+    $form['display_title'] = array(
+      '#type' => 'item',
+      '#title' => 'Display settings',
+      '#weight' => 1,
+    );
+
+    $form['regions'] = array(
+      '#type' => 'vertical_tabs',
+      '#weight' => 2,
+      '#attached' => array(
+        'js' => array('modules/block/block.js')
+      ),
+      'regions' => $form['regions'] ,
+    );
+  }
+
   $meta = cta_block_meta_load($form['module']['#value'], $form['delta']['#value']);
-  $f = cta_settings_form_fields($meta);
-  $form = array_merge($form, $f);
-  
+  if ($form['module']['#value'] != 'cta') {
+    $f = cta_settings_form_fields($meta);
+
+    $f['cta']['#type'] = 'fieldset';
+    $f['cta']['#group'] = 'Display';
+
+    $form['regions'] = array_merge($form['regions'], $f);
+  }
+
+  $f = cta_popup_settings_form_fields($meta);
+  $f['cta_popup']['#group'] = 'Display';
+  $form['regions'] = array_merge($form['regions'], $f);
+
   $form['#submit'][] = 'cta_block_admin_configure_submit';
+
+  //dsm($form);
 }
 
 function cta_block_admin_configure_submit($form, &$form_state) {
-  if (!isset($form_state['values']['cta'])) {
+
+  if (!isset($form_state['values']['cta']) && !isset($form_state['values']['cta_popup'])) {
     return;
   }
-  $meta = $form_state['values']['cta'];
+
+  $meta = !empty($form_state['values']['cta']) ? $form_state['values']['cta'] : array();
   $meta += array(
     'list_visibility' => 2,
     'selectors' => array(),
     'data' => array(),
   );
 
+  if (!empty($form_state['values']['cta_popup']) && $form_state['values']['cta_popup']['data']['popup']['enable']) {
+    $meta['data']['popup'] = $form_state['values']['cta_popup']['data']['popup'];
+  }
+
   if (is_array($meta['selectors']) && ($meta['selectors'] !== array_keys($meta['selectors']))) {
     $selectors = $meta['selectors'];
     $meta['selectors'] = array();
     foreach ($selectors AS $selector => $enabled) {
       if ($enabled) {
-       $meta['selectors'][] = $selector;
+        $meta['selectors'][] = $selector;
       }
     }
   }
@@ -1146,7 +1177,7 @@ function cta_settings_form_fields($meta) {
       '#default_value' => isset($defaults) ? $defaults : array(),
     );     
   }
-  
+
   // add ga event tracking if intel module is installed
   if (module_exists('intel')) {
     drupal_add_js(drupal_get_path('module', 'cta') . "/cta.cta_edit.js");
@@ -1254,11 +1285,77 @@ function cta_settings_form_fields($meta) {
   if (!isset($form['cta']['cta_selectors']) && !isset($form['cta']['cta_selectors'])) {
     unset($form['cta']['#type']);
   }
-  
+
   return $form;
 }
 
+function cta_popup_settings_form_fields($meta) {
+  $is_custom = FALSE;
 
+  // if custom CTA, set flag and embed custom cta data
+  $form_state['cta_meta'] = $meta;
+  $form['cta_popup'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Popup settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => 10,
+    '#tree' => TRUE,
+    'data' => array(
+      'popup' => array()
+    )
+  );
+  if ((arg(0) == 'admin') && (arg(2) == 'cta') && (arg(3) == 'select')) {
+    $is_custom = TRUE;
+
+  }
+  // add relevant selector selections
+  else {
+
+  }
+
+  $form['cta_popup']['data']['popup']['enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display this block as a popup'),
+    '#return_value' => 1,
+    //'#description' => $description,
+    '#default_value' => (isset($meta['data']['popup']['enable'])) ? $meta['data']['popup']['enable'] : 0,
+  );
+  $options = array(
+    '' => t(' - default -'),
+    'modal-middle modal-center' => t('Middle Center'),
+    'modal-top modal-center' => t('Top center'),
+    'modal-top modal-right' => t('Top right'),
+    'modal-middle modal-right' => t('Middle right'),
+    'modal-bottom modal-right' => t('Bottom right'),
+    'modal-bottom modal-center' => t('Bottom center'),
+    'modal-bottom modal-left' => t('Bottom left'),
+    'modal-middle modal-left' => t('Middle left'),
+    'modal-top modal-left' => t('Top left'),
+  );
+  $form['cta_popup']['data']['popup']['position'] = array(
+    '#type' => 'select',
+    '#title' => t('Popup position'),
+    '#options' => $options,
+    //'#description' => $description,
+    '#default_value' => (isset($meta['data']['popup']['position'])) ? $meta['data']['popup']['position'] : 0,
+  );
+  $form['cta_popup']['data']['popup']['trigger'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Trigger'),
+    '#collapsible' => FALSE,
+    //'#collapsed' => (!empty($meta['data']['ga_event']['track_click'])  || !empty($meta['data']['ga_event']['track_display'])) ? FALSE : TRUE,
+  );
+  $form['cta_popup']['data']['popup']['trigger']['delay'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Time delay (1000s of seconds)'),
+    //'#description' => $description,
+    '#default_value' => (isset($meta['data']['popup']['trigger']['delay'])) ? $meta['data']['popup']['trigger']['delay'] : '',
+    '#size' => 10,
+  );
+
+  return $form;
+}
 
 function cta_form_bean_form_alter(&$form, &$form_state, $form_id) {
   $meta = cta_bean_meta_load($form['bean']['#value']->delta);
@@ -1299,7 +1396,7 @@ function cta_entity_update($entity, $type) {
 }
 
 function cta_entity_save($entity, $type) {
-  if (($type == 'bean') && ($entity->type == 'cta')) {
+  if (($type == 'bean') && (!empty($entity->cta))) {
 
     $entity->cta += array(
       'list_visibility' => 1,
@@ -1671,6 +1768,82 @@ function cta_entity_dependencies($entity, $entity_type) {
       }
       return $dependencies;
     }
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ *
+ */
+function cta_theme($existing, $type, $theme, $path) {
+  $themes = array(
+    'cta_modal' => array(
+      'variables' => array(
+        'site_name' => NULL,
+        'render_string' => '<span>' . t("No content found") . "</span>"
+      ),
+      'template' => 'cta_modal'
+    ),
+  );
+  return $themes;
+}
+
+function cta_preprocess_block(&$vars){
+  $block = &$vars['block'];
+  $meta = cta_block_meta_load($block->module, $block->delta);
+
+  drupal_add_js(drupal_get_path('module', 'cta') . '/cta.js');
+  drupal_add_css(drupal_get_path('module', 'cta') . '/cta.css');
+
+  drupal_add_js('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js', 'external');
+  drupal_add_css('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css', 'external');
+
+  if (!empty($meta) && !empty($meta['data']['popup']['enable'])) {
+
+
+    $js = array(
+      'trigger' => array(),
+    );
+    if (!empty($meta['data']['popup']['trigger']['delay'])) {
+      $js['trigger']['delay'] = $meta['data']['popup']['trigger']['delay'];
+    }
+    else {
+      $js['trigger']['delay'] = 1;
+    }
+    $js_set = array(
+      'cta' => array(
+        'modal' => array(
+          $vars['block_html_id'] => $js,
+        )
+      ),
+    );
+
+    drupal_add_js($js_set, 'setting');
+
+    $vars['theme_hook_suggestions'][] = 'cta_modal';
+
+    $vars['classes_array'][] = 'modal fade';
+    if (!empty($meta['data']['popup']['position']) ) {
+      $vars['classes_array'][] = $meta['data']['popup']['position'];
+    }
+
+    $vars['attributes_array']['role'] = 'dialog';
+    $vars['attributes_array']['tabindex'] = '-1';
+
+    $vars['header_classes_array'] = array(
+      'modal-header'
+    );
+    $vars['header_attributes_array'] = array();
+
+    $vars['body_classes_array'] = array(
+      'modal-body'
+    );
+    $vars['body_attributes_array'] = array();
+
+    $vars['header_classes'] = implode(' ', $vars['header_classes_array']);
+    $vars['header_attributes'] = drupal_attributes($vars['header_attributes_array']);
+    $vars['body_classes'] = implode(' ', $vars['body_classes_array']);
+    $vars['body_attributes'] = drupal_attributes($vars['body_attributes_array']);
   }
 }
 

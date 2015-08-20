@@ -473,8 +473,8 @@ function cta_get_select_cta_list_beans($selector, $path, $selection, $link_optio
   
   // list beans
   $query = db_select('bean', 'b')
-    ->fields('b')
-    ->condition('type', 'cta');
+    ->fields('b');
+    //->condition('type', 'cta');
     //->extend('TableSort')
     //->orderByHeader($header);
 //dsm($selector);  

@@ -1,0 +1,266 @@
+<?php
+// $Id: linkintel.install,v 1.1.2.13 2011/01/05 20:42:59 tomdude48 Exp $
+
+
+/**
+ * @file
+ * Install hooks for Keyword Research.
+ */
+
+/**
+ * Implements hook_install().().
+ */
+function linkintel_install() {
+
+}
+
+/**
+ * Implements hook_uninstall().().
+ */
+function linkintel_uninstall() {
+
+}
+
+/**
+ * Implements hook_schema().
+ */
+function linkintel_schema() {
+
+  $schema['linkintel_link'] = array(
+    'description' => 'Creates database table to store site link data.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The id for the link.',  
+      ), //lid
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the node the link is from.',  
+      ), //nid
+      'path' => array(
+        'type' => 'varchar',
+        'length' => '1023',
+        'not null' => FALSE,
+        'description' => 'path to page the link is from.',  
+      ), //path
+      'options' => array(
+        'type' => 'text',
+        'description' => 'link query and fragment data as a serialized array',  
+      ), 
+      'external' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'if the link is going to an external page',  
+      ), //external   
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the user.',  
+      ), //uid
+      'autogen' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'if the link was auto generated',  
+      ), //autogen 
+      'mode' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'description' => 'how the link is embeded, 0 = in code, 1 = keyword autolink, 2 = sidebar',  
+      ), //autogen 
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'the rid the link is associated.',  
+      ), //nid
+      'kid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the keyword.',  
+      ), //kid
+      'text' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'the anchor text of the link',  
+      ), //text
+      'nofollow' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'if the link has a rel=nofollow attribute',  
+      ), //autogen
+      'attributes' => array(
+        'type' => 'text',
+        'description' => 'link attributes as a serialized array',  
+      ), //attributes 
+      'from_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the node the link is from',  
+      ), //to_nid
+      'from_path' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'description' => 'the path of the page the link is from',  
+      ), //to_path
+      'from_external' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'if the link is from an external link',  
+      ), //to_external 
+      'from_options' => array(
+        'type' => 'text',
+        'description' => 'link query and fragment data as a serialized array',  
+      ), 
+    ),
+    'primary key' => array('lid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'path' => array('path'),
+      'from_nid' => array('from_nid'),
+      'from_path' => array('from_path'),
+      'kid' => array('kid'),
+      'text' => array('text'),
+    ),
+  );
+  
+  $schema['linkintel_request'] = array(
+    'description' => 'Creates database table to store link request data.',
+    'fields' => array(
+      'kid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The id for the keyword.',  
+      ), 
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The id for the node the link is from.',  
+      ), 
+      'path' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'description' => 'path to page the link is from.',  
+      ),
+      'priority' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        //'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 50,
+        'description' => 'orders precidence for linking keywords',
+      ), //priority 
+      'options' => array(
+        'type' => 'text',
+        'description' => 'link query and fragment data as a serialized array',  
+      ), 
+      'external' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'if the link is from an external page',  
+      ),    
+      'allow_variants' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'description' => 'allow matching on keyword variants',  
+      ), 
+      'attributes' => array(
+        'type' => 'text',
+        'description' => 'link attributes as a serialized array',  
+      ), 
+    ),
+    'primary key' => array('kid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'path' => array('path'),      
+    ),
+  ); 
+  
+  $schema['linkintel_page'] = array(
+    'description' => 'Creates database table to store page settings.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The id for the node the link is from.',  
+      ),
+      'path' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'description' => 'path to page the link is from.',  
+      ),
+      'priority' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 50,
+        'description' => 'importance of request to the page',  
+      ),
+      'type_priority' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'description' => 'importance of request to the content type',  
+      ),
+      'autogen_enabled' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'description' => 'if the links should be autogenerated',  
+      ),
+      'maxlinks' => array(
+        'type' => 'int',
+        'size' => 'small',
+        'not null' => FALSE,
+        'description' => 'parameter to limit links on a page',  
+      ),
+      'last_autogen' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'last time autogen was run on the page',  
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'path' => array('path'),
+    ),
+  );
+
+  return $schema;
+}
+/**
+ * adding priority field to link intel
+ */
+
+function linkintel_update_7001() {
+  $field = array(
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => TRUE,
+    'default' => 50,
+    'description' => 'orders precidence for linking keywords',
+    'initial' => 50,    
+  );
+  db_add_field('linkintel_request', 'priority', $field);  
+}
+

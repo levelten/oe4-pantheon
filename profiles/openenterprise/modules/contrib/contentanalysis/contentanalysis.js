@@ -139,7 +139,6 @@ var contentanalysis = contentanalysis || {};
 		  if(analyzer_override) {
 		    data.action = 'refresh';
 		  }
-            console.log(!!$('.node-form').html());
 
 		  if ($('#contentanalysis-page-analyzer-form').html()) {
 		    data.source = 'admin-form';
@@ -163,11 +162,7 @@ var contentanalysis = contentanalysis || {};
 		    }
 		    // Turn off CKEditor if any.
 		    var ckeditor = false;
-              console.log($('#cke_edit-body-und-0-value').length);
-              console.log(!!$('#cke_edit-body-und-0-value').html());
 		    if ($('#cke_edit-body-und-0-value').html()) {
-                console.log('cke exists');
-                console.log($('#switch_edit-body-und-0-value').length);
 		      //$('#wysiwyg-toggle-edit-body-und-0-value').click();
               $('#switch_edit-body-und-0-value').click();
 		      ckeditor = true;
