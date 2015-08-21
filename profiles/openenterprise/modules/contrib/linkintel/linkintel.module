@@ -1,0 +1,1099 @@
+<?php
+
+/**
+ * @file
+ */
+
+require_once './' . drupal_get_path('module', 'linkintel') . "/includes/define.inc";
+
+/**
+ * Implements hook_menu()
+ */
+function linkintel_menu() {
+  $items = array();
+  $items['linkintel/report/quick'] = array(
+    'title' => 'Link Intel bulk update',
+    'page callback' => 'linkintel_report_quick',
+    'access callback' => TRUE,
+    'access arguments' => array('access wordstream reports'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['linkintel/bulk_update'] = array(
+    'title' => 'Link Intel bulk update',
+    'page callback' => 'linkintel_bulk_update',
+    'access callback' => TRUE,
+    'access arguments' => array('access wordstream reports'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/content/linkintel'] = array(
+    'title' => t('Link Intelligence'),
+    'description' => t('Domain configurations for Link Intelligence'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('linkintel_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer page titles'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'linkintel.admin.inc',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Testing function
+ */
+function linkintel_util() {
+  $node = node_load(7);
+  linkintel_save_autogen_links($node);
+  //$subject = linkintel_parse_autogen_links_on_node($node);
+  dsm($subject);
+  return 'OK';
+
+  linkintel_save_autogen_links($node);
+  return 'OK';
+  
+  $requests = linkintel_requests_load();
+  dsm($requests);
+  return 'OK';
+  
+  $node = node_load(3);
+  linkintel_save_coded_links($node);
+  return 'OK';
+  
+  /*
+  $sql = '
+    DELETE FROM {linkintel_keyword}
+    WHERE page_count = 0
+      AND (priority IS NULL || priority = 0) 
+  ';
+  db_query($sql);
+  */
+  $query = db_delete('linkintel_keyword')
+    ->condition('page_count', 0)
+  ;
+  return " " . $query;
+}
+
+/**
+ * Implements hook_permission()
+ */
+function linkintel_permission() {
+  return array(
+    'linkintel admin site keywords' => array(
+      'title' => t('linkintel admin site keywords'),
+      'description' => t('TODO Add a description for \'linkintel admin site keywords\''),
+    ),
+    'linkintel admin page keywords' => array(
+      'title' => t('linkintel admin page keywords'),
+      'description' => t('TODO Add a description for \'linkintel admin page keywords\''),
+    ),
+  );
+}
+
+function linkintel_bulk_update($count = 10, $expiretime = 2592000) {
+  // start with pages that have not been processed
+  $query = db_select('node', 'n')
+    ->fields('n');
+  $l_alias = $query->leftJoin('linkintel_page', 'l', '%alias.nid = n.nid');
+  $query->addField($l_alias, 'nid', 'lipage_nid');
+  $query->condition('l.nid', NULL);
+  //$query->condition('n.nid', 3148);
+  $query->range(0, $count);
+  $query->orderBy('n.nid', 'DESC');
+//dsm(" $query");
+  $nodes = $query->execute()->fetchAll();
+
+//return 'ok';
+  $processed = array();
+  foreach($nodes AS $n) {    
+    $page = linkintel_parse_page_links($n->nid);
+    $processed[] = "$n->type ($n->nid): " . l($n->title, "node/$page->nid");
+  }
+  if (count($processed) >= $count) {
+    return theme('item_list', array('items' => $processed));
+  }
+  // process expired updates  
+  $expire = time() - $expiretime;
+  
+  $query = db_select('node', 'n')
+    ->fields('n');
+  $l_alias = $query->leftJoin('linkintel_page', 'l', '%alias.nid = n.nid');
+  $query->addField($l_alias, 'nid', 'lipage_nid');
+  $query->condition('last_autogen', $expire, '<=');
+  //$query->condition('n.nid', 3148);
+  $query->range(0, $count);
+  $query->orderBy('n.nid', 'DESC');  
+//dsm(" $query");
+  $nodes = $query->execute()->fetchAll();
+
+//return 'ok';
+  $processed = array();
+  foreach($nodes AS $n) {    
+    $page = linkintel_parse_page_links($n->nid);
+    $processed[] = "$n->type ($n->nid): " . l($n->title, "node/$page->nid");
+  }
+  return theme('item_list', array('items' => $processed));
+}
+
+function linkintel_parse_page_links($pid) {
+  $nid = $pid;
+  $node = node_load($nid);
+  
+  $page = new stdClass;
+  $page->nid = $node->nid;
+  linkintel_save_coded_links($node);
+  // TODO hard coded to only process content types. Make this configuarable in admin
+  if (($node->type == 'enterprise_blog') || ($node->type == 'enterprise_wiki')) {
+    linkintel_save_autogen_links($node);
+    $page->autogen_enabled = 1;
+  }   
+
+  $subject = check_markup($node->body[$node->language][0]['value'], $node->body[$node->language][0]['format']);
+  $subject_stripped = strip_tags($subject);
+  $subject_wordcount = str_word_count($subject_stripped);
+  $page->maxlinks = round($subject_wordcount/75);
+  $page->last_autogen = REQUEST_TIME;
+  linkintel_page_save($page); 
+  return $page; 
+}
+
+function linkintel_report_quick() {
+  $query = db_select('linkintel_request', 'r')
+    ->fields('r')
+    ->groupBy('path');
+  $n_alias = $query->innerJoin('node', 'n', '%alias.nid = r.nid');
+  $query->addField('n', 'title', 'title');
+  $requests = $query->execute()->fetchAll();
+
+  $output = '';
+  foreach($requests AS $request) {
+    $sql = "
+      SELECT l.*, COUNT(l.kid) AS link_count, k.keyword
+      FROM {linkintel_link} l
+      INNER JOIN {kwresearch_keyword} k ON l.kid = k.kid
+      WHERE path = :path
+      GROUP BY l.kid
+    ";
+
+    $links = db_query($sql, array(':path' => $request->path))->fetchAll();
+    $header = array(
+      l($request->title, $request->path),
+      'link count',
+    );
+    $rows = array();
+    foreach($links AS $link) {
+      $rows[] = array(
+        $link->keyword,
+        $link->link_count,
+      );
+    }
+    $vars = array(
+     'header' => $header,
+     'rows' => $rows,
+    );
+    $output .= theme('table', $vars);   
+    $output .= '<br />'; 
+  }
+  return $output;
+}
+    
+
+
+//function linkintel_form_alter(&$form, &$form_state, $form_id) {
+//dsm($form_id);
+//dsm('hi');
+
+//}
+
+function linkintel_form_kwresearch_site_keywords_edit_form_alter(&$form, &$form_state) {
+//dsm($form);
+//dsm($form_state);
+  // move save and save update buttons to a higher weight so linkintel fieldset is above them
+  $form['save']['#weight'] = 1;
+  $form['save_update']['#weight'] = 1;
+  
+  if (isset($form['kid']['#value']) && $form['kid']['#value']) {
+    $request = linkintel_request_load($form['kid']['#value']);
+  }
+//dsm($request);
+  $collapsed = (isset($_GET['link_request_url'])) ? FALSE : TRUE;
+  $form['linkintel'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Link request'),
+    '#description' => t('Set a target url to link this keyword to when found in content.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => $collapsed,
+  );
+  $form['linkintel']['linkintel_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#description' => t('The URL of the page to link to. For external links us http:// or https://.'),
+    '#default_value' => (isset($_GET['link_request_url'])) ? $_GET['link_request_url'] : ((isset($request->path)) ? $request->path : ''),
+  );
+  $options = kwresearch_get_priority_options();
+  $form['linkintel']['linkintel_priority'] = array(
+    '#type' => 'select',
+    '#title' => t('Priority'),
+    '#options' => $options,
+    '#default_value' => (isset($request->priority) && $request->priority) ? $request->priority : 50,
+    '#description' => t('Use to set how the linking precedence when analysing a page.'),
+  );
+  $form['linkintel']['linkintel_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL title'),
+    '#description' => t('The title attribute for the link.'),
+    '#default_value' => (isset($_GET['link_request_title'])) ? $_GET['link_request_title'] : ((isset($request->attributes->title)) ? $request->attributes->title : ''),
+  );
+  $select = array(
+    '' => t('Same tab'),
+    '_blank' => t('Open new tab/window'),
+  );
+  $form['linkintel']['linkintel_target'] = array(
+    '#type' => 'select',
+    '#title' => t('Target'),
+    '#options' => $select,
+    '#description' => t('Select if the link should open in a new window/tab or not. Default seting opens internal links in same window and exteral links in a new window.'),
+    '#default_value' => (isset($request->attributes->target)) ? $request->attributes->target : 0,
+  );
+  $form['linkintel']['linkintel_nofollow'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Rel nofollow'),
+    //'#options' => $select,
+    '#description' => t('Check if you want to add the rel="nofollow" attribute.'),
+    '#default_value' => (isset($request->attributes->rel)) ? $request->link->rel : 0,
+  );
+  $form['linkintel']['linkintel_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Class'),
+    '#description' => t('Enter a class name if you want to apply a class attribute on the link.'),
+    '#default_value' => (isset($request->attributes->class)) ? $request->attributes->class : '',
+  );
+  $form['#validate'][] = 'linkintel_form_alter_kwresearch_site_keywords_edit_form_validate';
+  $form['#submit'][] = 'linkintel_form_alter_kwresearch_site_keywords_edit_form_submit';
+}
+
+function linkintel_form_alter_kwresearch_site_keywords_edit_form_validate($form, &$form_state) {
+  if (!empty($values['linkintel_path']) && !drupal_valid_path($form_state['values']['linkintel_path'])) {
+    form_set_error('linkintel_path', t("The path '@path' is either invalid or you do not have access to it.", array('@path' => $form_state['values']['linkintel_path'])));
+  }
+  if (!empty($form_state['values']['linkintel_class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($form_state['values']['linkintel_class']))) {
+    form_set_error('linkintel_class', t('Class is not valid.'));
+  }
+}
+
+function linkintel_form_alter_kwresearch_site_keywords_edit_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  if (!empty($values['linkintel_path'])) {
+    $target = new stdClass;
+    $target->attributes = array();
+    
+    $target->kid = $values['kid'];
+    $target->path = linkintel_reduce_path($values['linkintel_path']);
+    $target->priority = linkintel_reduce_path($values['linkintel_priority']);
+    
+    if ($values['linkintel_title']) {
+      $target->attributes['title'] = $values['linkintel_title'];
+    }
+    if ($values['linkintel_target']) {
+      $target->attributes['target'] = $values['linkintel_target'];
+    }
+    if ($values['linkintel_nofollow']) {
+      $target->attributes['rel'] = 'nofollow';
+    }
+    if ($values['linkintel_class']) {
+      $target->attributes['class'] = $values['linkintel_class'];
+    }
+  //dsm($target);
+    linkintel_request_save($target);
+  }
+}
+
+function linkintel_form_kwresearch_site_keywords_import_form_alter(&$form, &$form_state) {
+  $form['advanced']['add_fields']['#options']['link_path'] = t('Link request path');
+  $form['advanced']['add_fields']['#default_value'][] = 'link_path';
+  $form['advanced']['add_fields']['#options']['link_priority'] = t('Link request priority');
+  $form['advanced']['add_fields']['#default_value'][] = 'link_priority';
+  
+  $form['#validate'][] = 'linkintel_form_kwresearch_site_keywords_import_form_alter_validate';
+  $form['#submit'][] = 'linkintel_form_kwresearch_site_keywords_import_form_alter_submit';
+}
+
+function linkintel_form_kwresearch_site_keywords_import_form_alter_validate($form, &$form_state) {
+
+}
+
+function linkintel_form_kwresearch_site_keywords_import_form_alter_submit($form, &$form_state) {
+
+}
+
+function linkintel_request_load($key) {
+  // fetch keyword data first
+  $keyword = kwresearch_load_site_keyword($key);
+  $keyword->keyword_priority = $keyword->priority;
+  unset($keyword->priority); 
+
+  // attach kwlink data to link attribute
+  $query = db_select('linkintel_request', 't')
+    ->fields('t')
+    ->condition('kid', $keyword->kid);
+  $request = $query->execute()->fetchObject();
+  if (!empty($request)) {
+    $request->attributes = unserialize($request->attributes);
+    // merge request and keyword data
+    $request = (object) array_merge((array) $request, (array) $keyword);
+  }
+  return $request;
+}
+
+function linkintel_requests_load($orderby = 'priority') {
+  // attach kwlink data to link attribute
+  $query = db_select('linkintel_request', 'r')
+    ->fields('r');
+  $k_alias = $query->leftJoin('kwresearch_keyword', 'k', '%alias.kid = r.kid');
+  $query->addField($k_alias, 'keyword', 'keyword');  
+  $query->addField($k_alias, 'word_count', 'word_count');
+  $query->addField($k_alias, 'priority', 'priority');  
+  $query->orderBy('r.priority', 'DESC'); 
+  $query->orderBy('k.word_count', 'DESC');
+  $query->orderBy('k.priority', 'DESC');    
+  $requests = $query->execute()->fetchAll();
+  return $requests;
+}
+
+function linkintel_request_save($request) {
+//dsm($request);
+  // validate link to path
+  $link = linkintel_construct_pathnid_obj($request->path);
+  if(!linkintel_parse_link_path($link, $msgs, 'filter', '[request]')) {
+    return FALSE;
+  } 
+  $key = array(
+    'kid' => $request->kid,   
+  );
+  $fields = array(
+    'nid' => $link->nid,
+    'path' => $link->path,
+    'priority' => !empty($request->priority) ? $request->priority : 50,
+    'attributes' => serialize($request->attributes),
+    'external' => $link->external,
+  );
+  $query = db_merge('linkintel_request')
+    ->key($key)
+    ->fields($fields);
+    
+  $query->execute();    
+}
+
+function linkintel_save_coded_links($node) {
+  //linkintel_delete_links_by_page($node->nid, $mode = 0);
+  $links = linkintel_load_links_by_page("node/$node->nid");
+//dsm($links);
+  // build array of lid arrays keyed on url
+  $lids = array();
+  foreach($links AS $link) {
+    if($link->mode == 0 || $link->mode >= 10) {
+      $lids[$link->path][] = $link->lid;
+    }
+  }
+
+  // run body through input filters to see if any add links
+  $body = check_markup($node->body[$node->language][0]['value'], $node->body[$node->language][0]['format']);
+//dsm($body);
+  // get the links after text filters have been applied
+  $links_filtered = linkintel_extract_links($body);
+  // get links coded directly in markup
+  $links_coded = linkintel_extract_links($node->body[$node->language][0]['value']);
+  if(is_array($links_filtered)) {
+    foreach($links_filtered AS $link) {      
+      $filtered = 1;
+      if(is_array($links_coded)) {
+        foreach($links_coded AS $lc) {
+          if($lc == $link) {
+            $filtered = 0;
+            break;
+          }
+        }
+      }
+      if($filtered) {
+        $link->autogen = 2;
+        $link->mode = 10;
+      }
+      else {
+        $link->autogen = 0;
+        $link->mode = 0;        
+      }
+      
+      $link->path = linkintel_reduce_path($link->path);
+      
+      $link->from_nid = $node->nid;
+      $link->from_path = 'node/' . $node->nid;
+      // if link already exists in db, update instead of insert
+      if(isset($lids[$link->path]) && is_array($lids[$link->path]) && count($lids[$link->path])) {
+        $link->lid = array_pop($lids[$link->path]);
+      }
+//dsm('save link');
+//dsm($link);
+      linkintel_save_link($link);
+    }
+  }
+  // delete links no longer in code
+  foreach($lids AS $lid) {
+    if(count($lid)) {
+      foreach($lid AS $l) {
+        linkintel_delete_link($l);
+      }
+    }
+  }
+}
+/**
+ * used to analize paths to see if they are a variant of a system path
+ * @param unknown_type $path
+ */
+function linkintel_reduce_path($path) {
+  $domains = variable_get('linkintel_internal_domains', array());
+  if (!in_array($_SERVER['HTTP_HOST'], $domains)) {
+    $domains[] = $_SERVER['HTTP_HOST'];
+  }
+  $path0 = $path;
+  foreach ($domains AS $domain) {
+    $alias_abs = "http://$domain";
+    $alias_abssec =  "https://$domain";
+    $base_path = $GLOBALS['base_path'];
+    if (strpos($path, $alias_abs) === 0) {
+      $path = str_replace($alias_abs, '', $path);
+    }
+    if (strpos($path, $alias_abssec) === 0) {
+      $path = str_replace($alias_abssec, '', $path);
+    }
+  }
+  if (strpos($path, $base_path) === 0) {
+    $path = substr($path, strlen($base_path));
+  }
+  // if path is just domain or base path, restore original path
+  if (strlen($path) == 0) {
+    $path = $path0;
+  }
+//dsm("path: " . $path);
+//dsm("normal path: " . drupal_get_normal_path($path));  
+  return $path;
+}
+
+function linkintel_extract_links($body) {
+  $links = array();
+  if(empty($body)) {
+    return $links;
+  }
+  if (!class_exists('DOMDocument')) {
+    drupal_set_message(t('This module requires the DOMDocument package found in PHP 5.'), 'warning');
+    return ($links); 
+  }# Check for DOMDocument class
+  $doc = new DOMDocument();
+  $doc->loadHTML($body);
+
+  if (($tags = $doc->getElementsByTagName('a'))) {
+    foreach ($tags as $tag) {   
+      if($tag->hasAttribute('href')) {
+        $link = new stdClass();
+        $link->path = $tag->getAttribute('href');
+        $link->text = $tag->nodeValue;
+        $attributes = linkintel_get_link_attributes();
+        foreach($attributes AS $k => $l) {
+          if($v = $tag->getAttribute($k)) {
+            $link->attributes[$k] = $v;
+          }
+        }
+        $links[] = $link;
+      }
+    }
+  }
+  return $links; 
+}
+
+function linkintel_save_autogen_links($node) {
+  $subject = check_markup($node->body[$node->language][0]['value'], $node->body[$node->language][0]['format']);
+  $subject_stripped = strip_tags($subject);
+  $subject_wordcount = str_word_count($subject_stripped);
+  $maxlinks = round($subject_wordcount/75);
+  // load the coded links from the node
+  $links_coded = linkintel_load_links_by_page("node/$node->nid", 'from', 'coded');
+  $coded_paths = array();
+  $coded_kws = array();
+  foreach($links_coded AS $link) {
+    $coded_paths[$link->path][] = $link->lid;
+    $coded_kws[strtolower($link->text)] = $link->lid;
+  } 
+  $links_autogened = linkintel_load_links_by_page("node/$node->nid", 'from', 'autogen');
+  // build array of lid arrays keyed on url
+  $lids = array();
+  foreach($links_autogened AS $link) {
+    $lids[$link->path][] = $link->lid;
+  }
+//dsm($coded_paths);
+//dsm($coded_kws);
+//dsm($links_coded);
+//dsm("wordcount=$subject_wordcount, maxlinks=$maxlinks");
+//dsm($node);
+  
+  if (count($links_coded) < $maxlinks) {
+    // Get disallowed html tags and explode it to array.
+    $disallowed_tags = variable_get('linkintel_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6> <img> <a> <script>');
+    $disallowed_tags = preg_split('/\s+|<|>/', $disallowed_tags, -1, PREG_SPLIT_NO_EMPTY);
+    if (!empty($disallowed_tags)) {
+      foreach ($disallowed_tags as $ancestor) {
+        $not[] = 'and not(ancestor::' . $ancestor . ')';
+      }
+      $not = implode(' ', $not);
+    }
+    else {
+      $not = '';
+    }
+  
+    $dom = new DOMDocument();
+    $subject = str_replace('&amp;', '&#38;#38;', preg_replace('/&(?![a-z])/u', '&amp;', $subject));
+    // Comment <iframe> tag because it can cause error.
+    $subject = str_replace(array('<iframe', '</iframe>'), array('<!--linkintel<iframe', '</iframe>linkintel-->'), $subject);
+    libxml_use_internal_errors(TRUE);
+    $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
+    $xpath = new DOMXPath($dom);
+  
+  
+    $links_auto = array();
+    $requests = linkintel_requests_load();
+    foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $n) {
+      $replaced = $n->wholeText;
+      foreach ($requests as $i => $request) {
+        $search_word = $request->keyword;
+        $search_word = '/((\b)|(?<=\W))(' . preg_quote($request->keyword, '/') . ')(?!(<\/a>)|(".*>)|[\'"&’^])\b/ui';
+        preg_match($search_word, $replaced, $matches);
+        
+        if (count($matches)) {
+
+          // skip if path is already linked to
+          if (isset($coded_paths[$request->path])) {
+            continue;
+          }
+          $text = $matches[0];
+          // skip if keyword is already linked
+          if (isset($coded_kws[strtolower($text)])) {
+            continue;
+          }
+          // check link is not right next to another 
+  //dsm($replaced);
+  //dsm($matches);
+
+          
+          $link = $request;
+          $link->text = $matches[0];
+          $link->autogen = 1;
+          $link->mode = 1;
+          $link->from_path = "node/$node->nid";
+          if (!is_array($link->attributes)) {
+            $link->attributes = unserialize($link->attributes);
+          }
+          if (!is_array($link->options)) {
+            $link->options = unserialize($link->options);
+          }
+          if(isset($lids[$request->path])) {
+            $link->lid = array_pop($lids[$link->path]);
+          }
+          linkintel_save_link($link);
+   
+          // remove request to prevent double links
+          unset($requests[$i]);
+          // remove link text to prevent any other link from using the text 
+          $replaced = preg_replace($search_word, '', $replaced, 1, $count);
+          $coded_paths[$link->path][] = $link->lid;
+          $coded_kws[strtolower($link->text)] = $link->lid;
+          
+          if ((count($links_auto) + count($links_coded)) >= $maxlinks) {
+            break;
+          }
+        }
+      }
+      if ((count($links_auto) + count($links_coded)) >= $maxlinks) {
+        break;
+      }
+    }
+  }
+  // delete links no longer in code
+  foreach($lids AS $lid) {
+    if(count($lid)) {
+      foreach($lid AS $l) {
+        linkintel_delete_link($l);
+      }
+    }
+  }
+  return TRUE;  
+}
+
+function linkintel_node_view($node, $view_mode) {
+  // TODO hard coded to only process content types. Make this configuarable in admin
+  if (!(($node->type == 'enterprise_blog') || ($node->type == 'enterprise_wiki'))) {
+    return;
+  }
+  if ($view_mode != 'teaser' && !empty($node->content['body'][0]['#markup'])) {
+    $links = linkintel_load_links_by_page("node/$node->nid", 'from', 'autogen');
+    if (!count($links)) {
+      return;
+    }
+    $node->content['body'][0]['#markup'] = linkintel_parse_autogen_links($node->content['body'][0]['#markup'], $links);   
+  }
+}
+
+function linkintel_parse_autogen_links_on_node($node) {
+  $links = linkintel_load_links_by_page("node/$node->nid", 'from', 'autogen');
+  $body = $node->body[$node->language][0]['value'];
+  if (!count($links)) {
+    return $body;
+  }
+  return linkintel_parse_autogen_links($body, $links);
+}
+
+function linkintel_get_target_domain() {
+  $t = variable_get('linkintel_target_domain', '');
+  if (!$t) {
+    $t = $_SERVER[HTTP_HOST];
+  }
+  return $t;
+}
+
+function linkintel_parse_autogen_links($subject, $links) {
+  if (empty($subject)) {
+    return '';
+  }
+  // Get disallowed html tags and explode it to array.
+  $target_domain = linkintel_get_target_domain();
+  $disallowed_tags = variable_get('linkintel_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6> <img> <a> <script>');
+  $disallowed_tags = preg_split('/\s+|<|>/', $disallowed_tags, -1, PREG_SPLIT_NO_EMPTY);
+  if (!empty($disallowed_tags)) {
+    foreach ($disallowed_tags as $ancestor) {
+      $not[] = 'and not(ancestor::' . $ancestor . ')';
+    }
+    $not = implode(' ', $not);
+  }
+  else {
+    $not = '';
+  } 
+  
+  $dom = new DOMDocument();
+  $subject = str_replace('&amp;', '&#38;#38;', preg_replace('/&(?![a-z])/u', '&amp;', $subject));
+  // Comment <iframe> tag because it can cause error.
+  $subject = str_replace(array('<iframe', '</iframe>'), array('<!--linkintel<iframe', '</iframe>linkintel-->'), $subject);
+  libxml_use_internal_errors(TRUE);
+
+  $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
+  $xpath = new DOMXPath($dom);
+
+//dsm($links);
+  $searches = array();
+  $replaces = array();
+  foreach($links AS $link) {
+    $searches[$link->text] = '/((\b)|(?<=\W))(' . preg_quote($link->text, '/') . ')(?!(<\/a>)|(".*>)|[\'"&’^])\b/u';
+    $options = array();
+    if (is_array($link->attributes)) {
+      $options['attributes'] = $link->attributes;
+    }
+    $replaces[$link->text] = l($link->text, 'http://' . $target_domain . url($link->path), $options);
+  }
+//dsm($searches);
+  foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $n) {
+    $replaced = $n->wholeText;
+    foreach ($searches as $i => $search) {
+      $replaced = preg_replace($search, $replaces[$i], $replaced, 1, $count);
+      if ($count) {
+        unset($searches[$i]);// .= 'X!X%HR';
+      }
+//dsm($search);
+//dsm($replaced);
+    }
+    $new_node = $dom->createDocumentFragment();
+    $new_node->appendXML($replaced);
+    $n->parentNode->replaceChild($new_node, $n);
+  } 
+  $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
+  return str_replace(array('<!--linkintel<iframe', '</iframe>linkintel-->'), array('<iframe', '</iframe>'), $subject);
+}
+
+function linkintel_construct_pathnid_obj($pid) {
+  if(is_object($pid)) {
+    $obj = $pid;
+    if(isset($obj->nid) && !isset($obj->path)) {
+      $obj->path = 'node/' . $obj->nid; 
+    }
+    if(!isset($obj->path) && isset($obj->nid)) {
+      list($n, $nid, $e) = explode('/', $pid);
+      if(($n == 'node') && (is_numeric($nid))) {
+        $obj->nid = $nid;
+      }      
+    }
+  }
+  else {
+    $obj = new stdClass();
+    if(is_numeric($pid) && ((int)$pid > 0)) {
+      $obj->nid = (int)$pid;
+      $obj->path = 'node/' . $pid;
+    }
+    else {
+      $obj->path = $pid;
+      $obj->nid = NULL;
+      $e = explode('/', $pid);
+      if(($e[0] == 'node') && (is_numeric($e[1]))) {
+        $obj->nid = $e[1];
+      }
+    }
+  }
+  return $obj;
+}
+
+function linkintel_load_links_by_page($pid, $tofrom = 'from', $mode = 'all') {
+    $query = db_select('linkintel_link', 'l')
+      ->fields('l');
+    $k_alias = $query->leftJoin('kwresearch_keyword', 'k', '%alias.kid = l.kid');
+    $query->addField($k_alias, 'keyword', 'keyword');
+    //$query->addField($k_alias, 'keyword_stem', 'keyword_stem');
+    if ($tofrom == 'to') {
+      $query->condition('path', $pid);
+    }
+    else {
+      $query->condition('from_path', $pid);
+    }
+    if ($mode != 'all') {
+      if ($mode == 'autogen') {
+        $query->condition('mode', 1);
+      }
+      if ($mode == 'codedstrict') {
+        $query->condition('mode', 0);
+      }
+      if ($mode == 'filtered') {
+        $query->condition('mode', 10);
+      }
+      if ($mode == 'coded') {
+        $query->condition('mode', 1, '<>');
+      }
+    }
+//dsm(" $query");
+    $result = $query->execute();
+
+    $links = array();
+    while($row = $result->fetchObject()) {
+      $row->options = unserialize($row->options);
+//dsm($row->attributes);
+      $row->attributes = unserialize($row->attributes);
+      $links[] = $row;
+    } 
+    return $links;
+}
+
+function linkintel_save_link($link, $inherit = FALSE) {
+  // validate link to path
+  $to_link = linkintel_construct_pathnid_obj($link->path);
+  $from_link = linkintel_construct_pathnid_obj($link->from_path);
+  if(!linkintel_parse_link_path($to_link, $msgs, 'filter', '[to path]')) {
+    watchdog('linkintel: broken link', t('There is a broken link to @path on @page.', array('@path' => $to_link->path, '@page' => $from_link->path)));
+drupal_set_message(t('There is a broken link to @path on @page.', array('@path' => $to_link->path, '@page' => $from_link->path)), 'warning');
+    return FALSE;
+  } 
+  
+  // validate from path
+  $from_link = linkintel_construct_pathnid_obj($link->from_path);
+  if(!linkintel_parse_link_path($from_link, $msgs2, 'filter', $from_link->path)) {
+    return FALSE;
+  } 
+ 
+  $fields = array(
+    'nid' => $to_link->nid,
+    'path' => substr($to_link->path, 0, 1023), 
+    'external' => $to_link->external, 
+    'autogen' => $link->autogen, 
+    'mode' => $link->mode, 
+    'text' => $link->text, 
+    'nofollow' => 0,
+    'from_nid' => $from_link->nid, 
+    'from_path' => $from_link->path,
+    'from_external' => $from_link->external, 
+  );
+  
+  if (isset($link->nid)) {
+    $fields['nid'] = $link->nid;
+  }
+
+  if (isset($from_link->options)) {
+    $fields['options'] = serialize($link->options);
+    $fields['from_options'] = serialize($link->options);
+  }
+  if (isset($link->attributes)) {
+    $fields['attributes'] = serialize($link->attributes);
+  }
+  if($inherit) {
+    // get saved request obj
+    $link0 = linkintel_load_link($link); 
+    // inherit any missing values
+    if(is_object($link0)) {
+      foreach($link0 AS $k => $v) {
+        if($k == 'attributes') {
+          continue;
+        }
+        if(!isset($link->$k)) {
+          $link->$k = $v;
+        }
+      }
+      if(is_array($link0->attributes)) {
+        if(!is_array($link->attributes)) {
+          $fields['attributes'] = array();
+        }
+        foreach($link0->attributes AS $k => $v) {
+          if(!isset($link->attributes[$k])) {
+            $fields['attributes'][$k] = $v;
+          }     
+        }
+      }    
+    }
+  }
+  if(!isset($link->nofollow)) {
+    $fields['nofollow'] = (isset($link->attributes['rel']) && ($link->attributes['rel'] == 'nofollow')) ? 1 : 0;
+  }
+  if(!isset($link->uid)) {
+    $fields['uid'] = $GLOBALS['user']->uid;
+  } 
+  // page keyword does not exists, create it
+  if (isset($link->kid) && $link->kid) {
+    $fields['kid'] = $link->kid;
+  }
+  else {    
+    $k = kwresearch_load_site_keyword(strtolower($link->text), TRUE);
+    if (isset($k->kid)) {
+      $fields['kid'] = $k->kid;
+    }
+  }
+
+  if(!isset($link->lid) || (!$link->lid)) {
+    $query = db_insert('linkintel_link')
+      ->fields($fields);
+    $lid = $query->execute();
+  }
+  else {
+    $query = db_update('linkintel_link')
+      ->fields($fields)
+      ->condition('lid', $link->lid);
+    $query->execute();
+    $lid = $link->lid;    
+  } 
+  return $lid;
+}
+
+function linkintel_delete_link($link) {
+  if (is_object($link)) {
+    $lid = $link->lid;
+  }
+  else {
+    $lid = $link;
+  }
+  $query = db_delete('linkintel_link')
+    ->condition('lid', $lid);
+  $query->execute();
+  return TRUE;
+}
+
+function linkintel_node_insert($node) {
+  linkintel_node_update_or_insert($node);
+}
+
+function linkintel_node_update($node) {
+  linkintel_node_update_or_insert($node);
+}
+
+function linkintel_node_update_or_insert(&$node) {
+return;
+  static $linkintel_links_processed;
+  if(!$linkintel_links_processed) {
+    linkintel_save_coded_links($node);
+    $linkintel_links_processed = TRUE;
+  }
+  // TODO hard coded to only process content types. Make this configuarable in admin
+  if (!(($node->type == 'enterprise_blog') || ($node->type == 'enterprise_wiki'))) {
+    return;
+  }   
+  static $linkintel_autogen_processed;
+  if(!$linkintel_autogen_processed) {
+    linkintel_save_autogen_links($node);
+    $linkintel_autogen_processed = TRUE;
+  }
+}
+
+function linkintel_page_save($page) {
+  // validate link to path
+  $p = linkintel_construct_pathnid_obj($page->nid);
+
+
+  $fields = (array) $page;
+  $fields['nid'] = $p->nid;
+  $fields['path'] = $p->path;
+  
+  if(!isset($page->priority)) {
+    $fields['priority'] = 50;
+  }
+  if(!isset($page->type_priority)) {
+    $fields['type_priority'] = 50;
+  }
+  if(!isset($page->autogen_enabled)) {
+    $fields['autogen_enabled'] = 0;
+  }
+  if(!isset($page->maxlinks)) {
+    $fields['maxlinks'] = 6;
+  }
+  $key = array(
+    'path' => $p->path,
+  );
+
+  $query = db_merge('linkintel_page')
+    ->key($key)
+    ->fields($fields);
+  $query->execute();
+  $path = $p->path;    
+  return $path;
+}
+
+/**
+ * Parses and validates paths using Drupal menu item parsing
+ * @param $link - 
+ * @param $msgs
+ * @param $report - [form] - if used to validate a form
+ * @param $form_path_element - specifies form element id of path element (only used if $report = 'form')
+ */
+function linkintel_parse_link_path(&$link, &$msgs = array(), $report = 0, $form_path_element = 'path', $from_path = '[unkown]') {
+  $item = array();
+  if(is_object($link)) {
+    $item['link_path'] = $link->path;
+  }
+  else {
+    $item['link_path'] = $link;
+    $link = new stdClass();
+  }
+  linkintel_parse_menu_item($item, $msgs, $from_path);
+  foreach($item AS $k => $v) {
+    if($k == 'link_path') {
+      $link->path = $v;
+    }
+    else {
+      $link->$k = $v;
+    }
+  }
+//dsm($msgs);
+  if($report == 'form') {
+    if(is_array($msgs)) {
+      foreach($msgs AS $msg) {
+        if($msg['element'] == 'link_path') {
+          $msg['element'] == $form_path_element;
+        }
+        if($msg['status'] == 'error') {
+          form_set_error($msg['element'], $msg['message']);
+        }
+        else {
+          drupal_set_message($msg['message'], $msg['status']);
+        }
+      }
+    }
+  }
+  else if($report == 'messages' || $report == 'filter') {
+    if(is_array($msgs)) {
+      foreach($msgs AS $msg) {
+        form_set_error($msg['element'], $msg['message']);
+        if(($msg['status'] == 'error') && ($report = 'filter')) {          
+          return FALSE;
+        }
+      }
+    }     
+  }
+  return $link;
+}
+
+function linkintel_parse_menu_item(&$item, &$msgs = array(), $from_path = 'unknown') {
+  if(!is_array($item)) {
+    $item = array(
+      'link_path' => $item,
+    );
+  }
+  // remove base_path if found
+  $regex = '/^' . str_replace('/', '\/', base_path()) . '/';
+  $item['link_path'] = preg_replace($regex, '', $item['link_path']);
+
+  $item['external'] = 0;
+  $normal_path = drupal_get_normal_path($item['link_path']);
+  if ($item['link_path'] != $normal_path) {
+    $msgs[] = array(
+      'message' => t('Link Intelligence stores system paths only, but will use the URL alias in links. %link_path has been stored as %normal_path', 
+        array(
+          '%link_path' => $item['link_path'], 
+          '%normal_path' => $normal_path
+        )
+      ),
+      'status' => 'status',
+    );
+    $item['link_path'] = $normal_path;
+  }
+  // check for valid alternate link paths
+  $alt_is_valid = 0;
+  // check if file path
+  if (!url_is_external($item['link_path'])) {
+    $parsed_link = parse_url($item['link_path']);
+    // check if path is a file path
+    $file_paths = array(
+      variable_get('file_public_path', conf_path() . '/files'),
+      'files/',
+      '/files/',
+    );
+    if ($private = variable_get('file_private_path', '')) {
+      $file_paths[] = $private;
+    }
+    foreach ($file_paths AS $fp) {
+      if (strpos($parsed_link['path'], $fp) === 0) {
+        $item['link_path'] = $parsed_link['path'];
+        $alt_is_valid = 1;
+        break;
+      }      
+    }
+    // check if anchor link
+    if (substr($item['link_path'], 0, 1) == '#') {
+      $alt_is_valid = 1;
+    }
+    
+
+    // check regular menu item
+    if (!$alt_is_valid) {
+      if (isset($parsed_link['query'])) {
+        $item['options']['query'] = $parsed_link['query'];
+      }
+      else {
+        // Use unset() rather than setting to empty string
+        // to avoid redundant serialized data being stored.
+        unset($item['options']['query']);
+      }
+      if (isset($parsed_link['fragment'])) {
+        $item['options']['fragment'] = $parsed_link['fragment'];
+      }
+      else {
+        unset($item['options']['fragment']);
+      }
+      if ($item['link_path'] != $parsed_link['path']) {
+        $item['link_path'] = $parsed_link['path'];
+      }
+      $e = explode('/', $normal_path);
+      if(($e[0] == 'node') && (is_numeric($e[1]))) {
+        $item['nid'] = (int)$e[1];
+      }
+    }
+  }
+  else {
+    $item['external'] = 1; 
+  }
+  if (!trim($item['link_path']) || (!$alt_is_valid && !drupal_valid_path($item['link_path']))) {
+    $msgs[] = array(
+      'message' => t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $item['link_path'])),
+      'status' => 'error',
+      'element' => 'link_path',
+    );
+    return FALSE;
+  }
+  return $item;
+}

@@ -53,6 +53,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     'enterprise_press' => 1,
     'enterprise_news' => 0,
     'enterprise_video' => 0,
+    'enterprise_work' => 0,
   );
 
   $msg = st('Major site components such blogs and landing pages are provided in modular features called Apps.');
