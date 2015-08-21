@@ -1795,12 +1795,13 @@ function cta_preprocess_block(&$vars){
   drupal_add_js(drupal_get_path('module', 'cta') . '/cta.js');
   drupal_add_css(drupal_get_path('module', 'cta') . '/cta.css');
 
-  drupal_add_js('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js', 'external');
-  drupal_add_css('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css', 'external');
+  //drupal_add_css(libraries_get_path('jquery-ui') . '/jquery-ui.min.css');
+  //drupal_add_js(libraries_get_path('jquery-ui') . '/jquery-ui.min.js');
+
+  //drupal_add_css(libraries_get_path('jsPanel-bootstrap') . '/source/jsPanel.css');
+  //drupal_add_js(libraries_get_path('jsPanel-bootstrap') . '/source/jquery.jspanel.bs-1.4.0.min.js', array('type' => 'file', 'scope' => 'footer'));
 
   if (!empty($meta) && !empty($meta['data']['popup']['enable'])) {
-
-
     $js = array(
       'trigger' => array(),
     );
@@ -1829,6 +1830,8 @@ function cta_preprocess_block(&$vars){
 
     $vars['attributes_array']['role'] = 'dialog';
     $vars['attributes_array']['tabindex'] = '-1';
+
+    //$vars['attributes_array']['data-role'] = 'popup';
 
     $vars['header_classes_array'] = array(
       'modal-header'

@@ -36,3 +36,4 @@ features[variable][] = menu_parent_enterprise_thankyou
 features[variable][] = node_options_enterprise_thankyou
 features[variable][] = node_preview_enterprise_thankyou
 features[variable][] = node_submitted_enterprise_thankyou
+features[variable][] = pathauto_node_enterprise_thankyou_pattern
