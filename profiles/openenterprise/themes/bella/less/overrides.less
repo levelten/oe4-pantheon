@@ -264,7 +264,7 @@ blockquote {
 
 // Override for other buttons/backgrounds
 .btn-secondary, .bg-secondary {
-	color: @gray;
+	color: @brand-accent;
 }
 .btn-accent, .bg-accent {
 	color: @brand-primary;
@@ -276,67 +276,5 @@ blockquote {
 	&:hover, &:focus {
 		background-color: transparent;
 		color: @brand-link;
-	}
-}
-
-// CTAs
-.cta-btn {
-	&.btn-secondary {
-		h2, h3, h4 {
-			color: @gray;
-		}
-		&:hover, &:focus {
-			h2, h3, h4 {
-				color: white;
-			}
-		}
-	}
-	&.btn-accent {
-		border: 1px solid @brand-primary;
-		h2, h3, h4 {
-			color: @brand-primary;
-		}
-		&:hover, &:focus, &:active {
-			background-color: @brand-primary;
-			&, h2, h3, h4 {
-				color: white;
-			}	
-		}
-	}
-}
-
-.cta, .cta-rectangle {
-	.btn-cta {
-		color: @brand-primary;
-		&:hover, &:focus, &:active {
-			background-color: white;
-			color: @brand-primary;
-		}
-	}
-	.icon {
-		color: @brand-primary;
-	}
-	&:hover, &:focus, &:active {
-		&, h2, h3, h4, p {
-			text-decoration: none;
-		}
-		.btn {
-			color: @brand-primary;
-		}
-	}
-	&.cta-secondary {
-		p {line-height:20.5px;}
-
-		&, h2, h3, h4 {
-			color: @brand-primary;
-		}
-		.icon {
-			color: white;
-		}
-		&:hover, &:focus, &:active {
-			&, h2, h3, h4, .btn, .btn-cta {
-				color: white;
-			}
-		}
 	}
 }

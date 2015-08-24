@@ -1599,7 +1599,7 @@ Example 2:<br />
 <br />
 <br />
 Example 3:<br />
-<button class="btn btn-accent cta-btn">
+<button class="btn cta-btn">
   <div class="icon-bottom">
     <span>
       <h3>Click Me Now</h3>
@@ -1624,7 +1624,7 @@ Example 2:
 </button>
 
 Example 3:
-<button class="btn btn-accent cta-btn">
+<button class="btn cta-accent cta-btn">
   <div class="icon-bottom">
     <span>
       <h3>Click Me Now</h3>
