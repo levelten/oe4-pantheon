@@ -1470,7 +1470,6 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
     if (isset($bean->field_landingpage) && !empty($bean->field_landingpage[$lang][0]['target_id'])) {
       $nid = $bean->field_landingpage[$lang][0]['target_id'];      
       $body = l($bean->content['field_body'][0]['#markup'], 'node/' . $nid, $link_options);
-      
     }
     else if (isset($bean->field_redirect_url) && !empty($bean->field_redirect_url[$lang][0]['url'])) {
       $link = $bean->field_redirect_url[$lang][0];
@@ -1482,9 +1481,33 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
       }
       $body = l($bean->content['field_body'][0]['#markup'], $link['url'], $link_options);
     }
+
+    // if previewing on the the block/[delta] url,
+    // check if there is any preview prefix or suffix markup set to be added
+    // on the selectors
+    if ((arg(0) == 'block') && (arg(1) == $bean->delta) && !empty($bean->cta['selectors']) && is_array($bean->cta['selectors'])) {
+      $prefix = '';
+      $suffix = '';
+      foreach ($bean->cta['selectors'] as $name) {
+        $selector = cta_selector_load($name);
+        if (!empty($selector['data']['preview_prefix'])) {
+          $prefix = $selector['data']['preview_prefix'];
+        }
+        if (!empty($selector['data']['preview_suffix'])) {
+          $suffix = $selector['data']['preview_suffix'];
+        }
+        if ($prefix || $suffix) {
+          $body = $prefix . $body . $suffix;
+          break;
+        }
+
+      }
+    }
+
     if ($body) {
       $bean->content['field_body'][0]['#markup'] = $body;
     }
+
   }
 }
 

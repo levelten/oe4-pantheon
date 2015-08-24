@@ -30,6 +30,12 @@ function enterprise_conversion_cta_selector_defaults() {
       'data' => array(
         'cta_description' => 'sidebar',
         'preset_vocabulary' => 'cta_categories',
+        'preview_prefix' => '<div class="row">' . PHP_EOL
+          .'<aside class="sidebar sidebar-second col-sm-5">' . PHP_EOL
+          .'<div class="region region-sidebar-second">' . PHP_EOL,
+        'preview_suffix' => '</div>' . PHP_EOL
+          .'</aside>' . PHP_EOL
+          .'</div>' . PHP_EOL,
       ),
     ),
   );

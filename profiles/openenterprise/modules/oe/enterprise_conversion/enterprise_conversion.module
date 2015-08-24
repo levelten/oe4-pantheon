@@ -579,6 +579,12 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     '#collapsed' => TRUE,
   );
 
+  $form['form_customization']['advanced']['form_wrapper_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form wrapper class'),
+    '#default_value' => isset($lp_options['form_wrapper_class']) ? $lp_options['form_wrapper_class'] : '',
+    '#description' => t('Enter any custom classes you would like add to the form wrapper button.'),
+  );
   $form['form_customization']['advanced']['form_submit_class'] = array(
     '#type' => 'textfield',
     '#title' => t('Submit button class'),
@@ -729,7 +735,9 @@ function enterprise_conversion_landingpage_node_form_validate(&$form, &$form_sta
   $form_state['node']->entity_data['landingpages']['form_content_prefix'] = $form_state['values']['form_content_prefix'];
   $form_state['node']->entity_data['landingpages']['form_submit_text'] = $form_state['values']['form_submit_text'];
   $form_state['node']->entity_data['landingpages']['form_submit_class'] = $form_state['values']['form_submit_class'];
+  $form_state['node']->entity_data['landingpages']['form_wrapper_class'] = $form_state['values']['form_wrapper_class'];
 
+  $form_state['node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
   // loop through page_remove_blocks_ignore to attach to entity_data.
   if (isset($form_state['values']['page_remove_blocks_ignore'])) {
     $form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore'] = array();
@@ -741,8 +749,6 @@ function enterprise_conversion_landingpage_node_form_validate(&$form, &$form_sta
     // set flush flag to refresh blocks list on page_alter
     //$form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore_flush'] = 1;
   }
-
-  //$form['#node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
 
   //$form['#node']->cta['selections']['cta_forms'] = $form_state['values']['cta_form'];
 }
@@ -1271,7 +1277,20 @@ function enterprise_conversion_cta_block_view_alter(&$block, $selector, $selecti
         }
 
         if (isset($webform_block['content']['#form'])) {
-          $webform_block['content']['#form']['actions']['submit']['#value'] = $lp_options['form_submit_text'];
+          $form = &$webform_block['content']['#form'];
+          $form['actions']['submit']['#value'] = $lp_options['form_submit_text'];
+          if (!empty($lp_options['form_submit_class'])) {
+            if (!isset($form['actions']['submit']['#attributes']['class'])) {
+              $form['actions']['submit']['#attributes']['class'] = array();
+            }
+            $form['actions']['submit']['#attributes']['class'][] = $lp_options['form_submit_class'];
+          }
+          if (!empty($lp_options['form_wrapper_class'])) {
+            //if (!isset($block['classes_array'])) {
+             // $block['classes_array'] = array();
+            //}
+            $block['form_wrapper_class'] = $lp_options['form_wrapper_class'];
+          }
         }
       }
 
@@ -1287,18 +1306,22 @@ function enterprise_conversion_cta_block_view_alter(&$block, $selector, $selecti
           $block['content']['#markup'] = filter_xss($lp_options['form_content_prefix']) . $block['content']['#markup'];
         }
       }
-
-
       //dsm($block);
       //dsm($selector);
       //dsm($selection);
-
-
-
     }
 
   }
 }
+
+
+function enterprise_conversion_preprocess_block(&$vars) {
+  $block = $vars['block'];
+  if (isset($block->form_wrapper_class)) {
+    $vars['classes_array'] = array_merge($vars['classes_array'], explode(' ', $block->form_wrapper_class));
+  }
+}
+
 
 /**
  * replicates webform's block_view without rendering output so we can do alterations
@@ -1614,22 +1637,25 @@ Example 3:
   );
 
   // CTAs
-  $styles['ctas']['rectangle'] = array(
-    '#title' => t('Rectangles'),
+  $styles['ctas']['sidebar'] = array(
+    '#title' => t('Sidebars'),
     '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
     'element' => array(
       '#tag' => 'markup',
       '#value' => '<div class="row">
   <div class="col-md-6">
     Example 1:<br />
+    <a href="#">
     <div class="cta cta-rectangle">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
       <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
     </div>
+    </a>
   </div>
   <div class="col-md-6">
     Example 2:<br />
+    <a href="#">
     <div class="cta cta-rectangle cta-secondary">
       <h3>Build a Smarter Website</h3>
       <div class="col-md-5">
@@ -1640,23 +1666,79 @@ Example 3:
         <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
       </div>
     </div>
+    </a>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
-<div class="cta cta-rectangle">
+<div class="cta">
   <h3>Build a Smarter Website</h3>
   <p>...</p>
   <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
 </div>
 
 Example 2:
-<div class="cta cta-rectangle cta-secondary">
+<div class="cta cta-secondary">
   <h3>Build a Smarter Website</h3>
   <div class="col-md-5">
-    <img src="..." />
+    <img src="http://placehold.it/120x150" />
   </div>
   <div class="col-md-7">
     <p>....</p>
+    <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+  </div>
+</div>',
+    ),
+  );
+
+  $styles['ctas']['footer'] = array(
+    '#title' => t('Footers'),
+    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<div class="row">
+  <div class="col-md-12">
+    Example 1:<br />
+    <a href="#">
+    <div class="cta">
+      <h3>Build a Smarter Website</h3>
+      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+      <button class="btn btn-cta center-block">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+    </div>
+    </a>
+  </div>
+  </div>
+<div class="row">
+<div class="col-md-12">
+    Example 2:<br />
+    <a href="#">
+    <div class="cta cta-secondary">
+      <div class="col-md-2">
+        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+      </div>
+      <div class="col-md-10">
+        <h3>Build a Smarter Website</h3>
+        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+        <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+      </div>
+    </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta">
+  <h3>Build a Smarter Website</h3>
+  <p>...</p>
+  <button class="btn btn-cta center-block">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+</div>
+
+Example 2:
+<div class="cta cta-secondary">
+  <div class="col-md-2">
+    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+  </div>
+  <div class="col-md-10">
+    <h3>Build a Smarter Website</h3>
+    <p>...</p>
     <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
   </div>
 </div>',

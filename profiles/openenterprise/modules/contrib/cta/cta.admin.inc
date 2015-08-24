@@ -28,8 +28,8 @@ function cta_selector_list() {
  */
 function cta_selector_form($form, &$form_state, $selector) {
   $title = t('Edit %name CTA block', array('%name' => $selector['name']));
-  drupal_set_title($title, PASS_THROUGH); 
-  
+  drupal_set_title($title, PASS_THROUGH);
+
   $form_state['selector'] = $selector;
 
   $form['name'] = array(
@@ -135,6 +135,22 @@ function cta_selector_form($form, &$form_state, $selector) {
     '#default_value' => $preset_vocab,
   );
 
+  $form['advanced']['preview_prefix'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Preview prefix markup'),
+    '#description' => t('Markup to add before the CTA is displayed as a block/bean. This markup is not added when displayed in a CTA selector.'),
+    '#default_value' => !empty($selector['data']['preview_prefix']) ? $selector['data']['preview_prefix'] : '',
+    '#rows' => 3,
+  );
+
+  $form['advanced']['preview_suffix'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Preview suffix markup'),
+    '#description' => t('Markup to add after the CTA is displayed as a block/bean. This markup is not added when displayed in a CTA selector.'),
+    '#default_value' => !empty($selector['data']['preview_suffix']) ? $selector['data']['preview_suffix'] : '',
+    '#rows' => 3,
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save changes'),
@@ -163,6 +179,14 @@ function cta_selector_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['preset_vocabulary'])) {
     $selector['data']['preset_vocabulary'] = $form_state['values']['preset_vocabulary'];
   }
+
+  if (!empty($form_state['values']['preview_prefix'])) {
+    $selector['data']['preview_prefix'] = $form_state['values']['preview_prefix'];
+  }
+  if (!empty($form_state['values']['preview_suffix'])) {
+    $selector['data']['preview_suffix'] = $form_state['values']['preview_suffix'];
+  }
+
   cta_selector_save($selector);
 
   // if preset_vocabulary change, stay on edit form
