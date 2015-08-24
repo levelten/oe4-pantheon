@@ -1583,7 +1583,7 @@ function enterprise_conversion_styler_style() {
       '#tag' => 'markup',
       '#value' => '
 Example 1:<br />
-<a href="#"><button class="btn btn-primary cta-btn">Click Me Now</button></a>
+<button class="btn btn-primary cta-btn">Click Me Now</button>
 <br />
 <br />
 Example 2:<br />
@@ -1645,17 +1645,14 @@ Example 3:
       '#value' => '<div class="row">
   <div class="col-md-6">
     Example 1:<br />
-    <a href="#">
     <div class="cta cta-rectangle">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
       <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
     </div>
-    </a>
   </div>
   <div class="col-md-6">
     Example 2:<br />
-    <a href="#">
     <div class="cta cta-rectangle cta-secondary">
       <h3>Build a Smarter Website</h3>
       <div class="col-md-5">
@@ -1666,7 +1663,6 @@ Example 3:
         <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
       </div>
     </div>
-    </a>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
@@ -1698,19 +1694,16 @@ Example 2:
       '#value' => '<div class="row">
   <div class="col-md-12">
     Example 1:<br />
-    <a href="#">
     <div class="cta">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
       <button class="btn btn-cta center-block">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
     </div>
-    </a>
   </div>
   </div>
 <div class="row">
 <div class="col-md-12">
     Example 2:<br />
-    <a href="#">
     <div class="cta cta-secondary">
       <div class="col-md-2">
         <img src="http://placehold.it/120x150" style="max-height: 120px;" />
@@ -1721,7 +1714,6 @@ Example 2:
         <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
       </div>
     </div>
-    </a>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
