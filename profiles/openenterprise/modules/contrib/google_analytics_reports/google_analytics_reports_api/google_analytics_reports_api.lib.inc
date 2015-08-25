@@ -33,13 +33,13 @@ class GoogleAnalyticsReportsApiFeed {
   public $fromCache = FALSE;
 
   // OAuth access token.
-  public $access_token;
+  public $accessToken;
 
   // OAuth refresh token.
-  public $refresh_token;
+  public $refreshToken;
 
   // OAuth expiration time.
-  public $expires_at;
+  public $expiresAt;
 
   // Host and endpoint of Google Analytics API.
   protected $host = 'www.googleapis.com/analytics/v3';
@@ -57,39 +57,31 @@ class GoogleAnalyticsReportsApiFeed {
    * Check if object is authenticated with Google.
    */
   public function isAuthenticated() {
-    return !empty($this->access_token);
+    return !empty($this->accessToken);
   }
 
   public function __construct($token = NULL) {
-    $this->access_token = $token;
+    $this->accessToken = $token;
   }
 
   /**
-   * Get the current page url
+   * Get the current page url.
    *
-   * @return String
+   * @return string
+   *   - current page url.
    */
   public static function currentUrl() {
-    $https = $_SERVER['HTTPS'] == 'on';
-    $url = $https ? 'https://' : 'http://';
-    $url .= $_SERVER['SERVER_NAME'];
-    if ((!$https && $_SERVER['SERVER_PORT'] != '80') ||
-      ($https && $_SERVER['SERVER_PORT'] != '443')) {
-      $url .= ':' . $_SERVER['SERVER_PORT'];
-     }
-    $url_override = variable_get('google_analytics_reports_redirect_host', '');
-    if ($url_override) {
-      $url = $url_override;
-    }
-
-    return $url . $_SERVER['REQUEST_URI'];
+    global $base_url;
+    return $base_url . request_uri();
   }
 
   /**
    * Create a URL to obtain user authorization.
+   *
    * The authorization endpoint allows the user to first
    * authenticate, and then grant/deny the access request.
-   * @param string $client_id
+   * @param $client_id
+   * @param $redirect_uri
    * @return string
    */
   public function createAuthUrl($client_id, $redirect_uri) {
@@ -99,24 +91,24 @@ class GoogleAnalyticsReportsApiFeed {
       'client_id=' . urlencode($client_id),
       'scope=' . self::SCOPE,
       'access_type=offline',
-      'approval_prompt=force' 
+      'approval_prompt=force',
     );
 
     $params = implode('&', $params);
     return self::OAUTH2_AUTH_URL . "?$params";
   }
- 
- /**
-  * Authenticate with the Google API
-  *
-  * @param String $client_id
-  * @param String $client_secret
-  * @param String $refresh_token
-  * @return GAFeed
+
+  /**
+   * Authenticate with the Google Analytics API.
+   *
+   * @param String $client_id
+   * @param String $client_secret
+   * @param String $refresh_token
+   * @return GAFeed
   */
-  protected function fetchToken($client_id, $client_secret, $redirect_uri, $refresh_token=NULL) {
+  protected function fetchToken($client_id, $client_secret, $redirect_uri, $refresh_token = NULL) {
     if ($refresh_token) {
-     $params = array(
+      $params = array(
         'client_id=' . $client_id,
         'client_secret=' . $client_secret,
         'refresh_token=' . $refresh_token,
@@ -132,29 +124,37 @@ class GoogleAnalyticsReportsApiFeed {
         'client_secret=' . $client_secret,
       );
     }
-     
-  $data = implode('&', $params);
 
-  $this->response = drupal_http_request(self::OAUTH2_TOKEN_URI, array('headers' => array('Content-Type' => 'application/x-www-form-urlencoded'), 'method' => 'POST', 'data' => $data));
+    $data = implode('&', $params);
 
-  if (substr($this->response->code, 0, 1) == '2') {
-    $decoded_response = json_decode($this->response->data, true);
-    $this->access_token = $decoded_response['access_token'];
-    $this->expires_at = time() + $decoded_response['expires_in'];
-    if (!$refresh_token) {
-      $this->refresh_token = $decoded_response['refresh_token'];
+    $this->response = drupal_http_request(self::OAUTH2_TOKEN_URI, array(
+      'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+      'method' => 'POST',
+      'data' => $data,
+    ));
+
+    if ($this->response->code == '200') {
+      $decoded_response = json_decode($this->response->data, TRUE);
+      $this->accessToken = $decoded_response['access_token'];
+      $this->expiresAt = time() + $decoded_response['expires_in'];
+      if (!$refresh_token) {
+        $this->refreshToken = $decoded_response['refresh_token'];
+      }
     }
-  } 
-  else {
-    $error_msg = 'Code: !code - Error: !message - Message: !details';
-    $error_vars = array('!code' => $this->response->code, '!message' => $this->response->error, '!details' => strip_tags($this->response->data));
-    $this->error =  t($error_msg, $error_vars);
-    watchdog('google analytics reports', $error_msg, $error_vars, WATCHDOG_ERROR);
+    else {
+      $error_vars = array(
+        '!code' => $this->response->code,
+        '!message' => $this->response->error,
+        '!details' => strip_tags($this->response->data),
+      );
+      $this->error = t('Code: !code - Error: !message - Message: !details', $error_vars);
+      watchdog('google analytics reports api', 'Code: !code - Error: !message - Message: !details', $error_vars, WATCHDOG_ERROR);
+    }
   }
-}
 
   /**
    * Complete the authentication process.
+   *
    * We got here after being redirected from a successful authorization grant.
    * Fetch the access token
    *
@@ -166,12 +166,22 @@ class GoogleAnalyticsReportsApiFeed {
   }
 
   /**
-   * Begin authentication by allowing the user to grant/deny access to the Google account
+   * Begin authentication.
+   *
+   * Allowing the user to grant/deny access to the Google account.
    *
    * @param String $client_id
    */
   public function beginAuthentication($client_id, $redirect_uri) {
-    drupal_goto($this->createAuthUrl($client_id, $redirect_uri));
+    $url = $this->createAuthUrl($client_id, $redirect_uri);
+    $array = explode("?", $url);
+    $array2 = explode("&", $array[1]);
+    $queries = array();
+    foreach ($array2 as $query) {
+      $array3 = explode("=", $query);
+      $queries[$array3[0]] = $array3[1];
+    }
+    drupal_goto($array[0], array('query' => $queries));
   }
 
   /**
@@ -181,47 +191,58 @@ class GoogleAnalyticsReportsApiFeed {
    * @param string $refresh_token
    */
   public function refreshToken($client_id, $client_secret, $refresh_token) {
-    $this->refresh_token = $refresh_token;
+    $this->refreshToken = $refresh_token;
     $this->fetchToken($client_id, $client_secret, '', $refresh_token);
   }
 
   /**
    * OAuth step #1: Fetch request token.
-   * Revoke an OAuth2 access token or refresh token. This method will revoke the current access
-   * token, if a token isn't provided.
-   * @param string|NULL $token The token (access token or a refresh token) that should be revoked.
-   * @return boolean Returns True if the revocation was successful, otherwise False.
+   *
+   * Revoke an OAuth2 access token or refresh token. This method will revoke
+   * the current access token, if a token isn't provided.
+   *
+   * @param string|NULL $token
+   *   The token (access token or a refresh token) that should be revoked.
+   *
+   * @return boll
+   *   Returns True if the revocation was successful, otherwise False.
    */
   public function revokeToken($token = NULL) {
     if (!$token) {
-      $token = $this->refresh_token ? $this->refresh_token : $this->access_token;
+      $token = $this->refreshToken ? $this->refreshToken : $this->accessToken;
     }
 
-    $this->response = drupal_http_request(self::OAUTH2_REVOKE_URI, array('headers' => array('Content-Type' => 'application/x-www-form-urlencoded'), 'method' => 'POST', 'data' => "token=$token"));
+    $this->response = drupal_http_request(self::OAUTH2_REVOKE_URI, array(
+      'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+      'method' => 'POST',
+      'data' => "token=$token",
+    ));
 
     if ($this->response->code == 200) {
-      $this->access_token = NULL;
-      return true;
+      $this->accessToken = NULL;
+      return TRUE;
     }
 
-    return false;
+    return FALSE;
   }
 
   /**
    * OAuth step #2: Authorize request token.
+   *
    * Generate authorization token header for all requests
    *
-   * @return Array
+   * @return array
    */
-  public function generateAuthHeader($token=NULL) {
+  public function generateAuthHeader($token = NULL) {
     if ($token == NULL) {
-      $token = $this->access_token;
-     }
+      $token = $this->accessToken;
+    }
     return array('Authorization' => 'Bearer ' . $token);
   }
 
   /**
    * OAuth step #3: Fetch access token.
+   *
    * Set the verifier property
    */
   public function setVerifier($verifier) {
@@ -265,7 +286,7 @@ class GoogleAnalyticsReportsApiFeed {
       $cache_options['cid'] = 'GoogleAnalyticsReportsApiFeed:' . md5(serialize(array_merge($params, array($url, $method))));
     }
 
-    $cache = FALSE;
+    $cache = cache_get($cache_options['cid']);
 
     if (!$cache_options['refresh'] && isset($cache) && !empty($cache->data)) {
       $this->response = $cache->data;
@@ -467,7 +488,11 @@ class GoogleAnalyticsReportsApiFeed {
    */
   protected function sanitizeReport() {
     // Get all Google Analytics fields.
-    $fields = google_analytics_reports_views_get_fields();
+    // TODO: Replace with custom hook.
+    if (module_exists('google_analytics_reports')) {
+      module_load_include('inc', 'google_analytics_reports');
+      $fields = google_analytics_reports_get_fields();
+    }
 
     // Named keys for report values.
     $this->results->rawRows = isset($this->results->rows) ? $this->results->rows : array();
@@ -476,8 +501,10 @@ class GoogleAnalyticsReportsApiFeed {
       foreach ($row_value as $item_key => $item_value) {
         $field_without_ga = str_replace('ga:', '', $this->results->columnHeaders[$item_key]->name);
         $item_value = $this->replaceData($field_without_ga, $item_value);
+
         // Date and time datatypes should not have the digits after the zero.
-        if (in_array($fields[$field_without_ga]['datatype'], array('date', 'time'))) {
+        // TODO: Replace with custom hook.
+        if (module_exists('google_analytics_reports') && in_array($fields[$field_without_ga]['datatype'], array('date', 'time'))) {
           $item_value = round($item_value);
         }
         $this->results->rows[$row_key][$field_without_ga] = $item_value;

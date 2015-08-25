@@ -7,7 +7,6 @@ php = 5.3
 dependencies[] = entity
 dependencies[] = googleanalytics
 dependencies[] = google_analytics_reports_api
-dependencies[] = google_analytics_reports_views
 dependencies[] = libraries
 
 files[] = includes/intel.visitor_entity.inc
