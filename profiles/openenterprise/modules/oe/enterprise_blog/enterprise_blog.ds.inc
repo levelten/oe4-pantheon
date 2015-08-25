@@ -301,6 +301,7 @@ function enterprise_blog_ds_field_settings_info() {
       'weight' => '5',
       'label' => 'hidden',
       'format' => 'default',
+      'absolute_url' => 1,
     ),
     'author' => array(
       'weight' => '2',

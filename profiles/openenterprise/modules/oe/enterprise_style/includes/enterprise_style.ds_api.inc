@@ -326,14 +326,46 @@ function enterprise_style_ds_fields_info($entity_type) {
   */
 }
 
+function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
+  dsm($fields);
+  dsm($entity_type);
 
+  // Adding absolute URL option to node link
+  if (!empty($fields['node_link'])) {
+    $fields['node_link']['properties']['settings']['absolute_url'] = array(
+      'type' => 'checkbox',
+      'title' => t('Absolute URL'),
+      'description' => t('Convert this link into an absolute URL. Handy for RSS feeds.'),
+    );
+    $fields['node_link']['properties']['default']['absolute_url'] = 0;
+    // change callback function to add some preprocessing
+    $fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+}
+
+function enterprise_style_ds_field_node_link($field) {
+  $settings = isset($field['formatter_settings']) ? $field['formatter_settings'] : array();
+  $settings += $field['properties']['default'];
+
+  // Link.
+  if (!empty($settings['link']) && !empty($settings['absolute_url'])) {
+    if (!isset($field['entity']->uri)) {
+      $field['entity']->uri = entity_uri($field['entity_type'], $field['entity']);
+    }
+    if (!isset($field['entity']->uri['options'])) {
+      $field['entity']->uri['options'] = array();
+    }
+    $field['entity']->uri['options']['absolute'] = 1;
+  }
+  return ds_render_field($field);
+}
 
 function enterprise_style_ds_field_user_thumbnail($variables) {
   $entity = $variables['entity'];
   $account = user_load($entity->uid);
   $picture_field = 'field_picture_thumbnail';
-  if (isset($user->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
-    if (!isset($user->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
+  if (isset($account->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
+    if (!isset($account->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
       $picture_field = 'field_enterprise_style_picture';
     }
   }
