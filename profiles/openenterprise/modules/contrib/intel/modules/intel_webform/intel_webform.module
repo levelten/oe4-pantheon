@@ -743,8 +743,8 @@ function intel_webform_webform_component_info() {
     'attachment'    => FALSE,
   );
   $components['intelvisitor_reference'] = array(
-    'label'       => t('Intelligence Visitor Reference'),
-    'description' => t('Intelligence Visitor Reference field.'),
+    'label'       => t('Visitor Reference'),
+    'description' => t('Visitor Reference field.'),
     'features'    => $features,
     'file'        => 'intel_webform.webform_references.inc',
   );

@@ -7,6 +7,8 @@ dependencies[] = bean_admin_ui
 dependencies[] = cta
 dependencies[] = ctools
 dependencies[] = enterprise_intel
+dependencies[] = enterprise_webform
+// do not make enterprise_landingpage & enterprise_thankyoupage dependencies to keep flexiblity outside of OE
 dependencies[] = entity_data
 dependencies[] = entityconnect
 dependencies[] = entityreference
