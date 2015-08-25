@@ -1470,7 +1470,6 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
     if (isset($bean->field_landingpage) && !empty($bean->field_landingpage[$lang][0]['target_id'])) {
       $nid = $bean->field_landingpage[$lang][0]['target_id'];      
       $body = l($bean->content['field_body'][0]['#markup'], 'node/' . $nid, $link_options);
-      
     }
     else if (isset($bean->field_redirect_url) && !empty($bean->field_redirect_url[$lang][0]['url'])) {
       $link = $bean->field_redirect_url[$lang][0];
@@ -1482,9 +1481,33 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
       }
       $body = l($bean->content['field_body'][0]['#markup'], $link['url'], $link_options);
     }
+
+    // if previewing on the the block/[delta] url,
+    // check if there is any preview prefix or suffix markup set to be added
+    // on the selectors
+    if ((arg(0) == 'block') && (arg(1) == $bean->delta) && !empty($bean->cta['selectors']) && is_array($bean->cta['selectors'])) {
+      $prefix = '';
+      $suffix = '';
+      foreach ($bean->cta['selectors'] as $name) {
+        $selector = cta_selector_load($name);
+        if (!empty($selector['data']['preview_prefix'])) {
+          $prefix = $selector['data']['preview_prefix'];
+        }
+        if (!empty($selector['data']['preview_suffix'])) {
+          $suffix = $selector['data']['preview_suffix'];
+        }
+        if ($prefix || $suffix) {
+          $body = $prefix . $body . $suffix;
+          break;
+        }
+
+      }
+    }
+
     if ($body) {
       $bean->content['field_body'][0]['#markup'] = $body;
     }
+
   }
 }
 
@@ -1795,12 +1818,13 @@ function cta_preprocess_block(&$vars){
   drupal_add_js(drupal_get_path('module', 'cta') . '/cta.js');
   drupal_add_css(drupal_get_path('module', 'cta') . '/cta.css');
 
-  drupal_add_js('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js', 'external');
-  drupal_add_css('http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css', 'external');
+  //drupal_add_css(libraries_get_path('jquery-ui') . '/jquery-ui.min.css');
+  //drupal_add_js(libraries_get_path('jquery-ui') . '/jquery-ui.min.js');
+
+  //drupal_add_css(libraries_get_path('jsPanel-bootstrap') . '/source/jsPanel.css');
+  //drupal_add_js(libraries_get_path('jsPanel-bootstrap') . '/source/jquery.jspanel.bs-1.4.0.min.js', array('type' => 'file', 'scope' => 'footer'));
 
   if (!empty($meta) && !empty($meta['data']['popup']['enable'])) {
-
-
     $js = array(
       'trigger' => array(),
     );
@@ -1829,6 +1853,8 @@ function cta_preprocess_block(&$vars){
 
     $vars['attributes_array']['role'] = 'dialog';
     $vars['attributes_array']['tabindex'] = '-1';
+
+    //$vars['attributes_array']['data-role'] = 'popup';
 
     $vars['header_classes_array'] = array(
       'modal-header'

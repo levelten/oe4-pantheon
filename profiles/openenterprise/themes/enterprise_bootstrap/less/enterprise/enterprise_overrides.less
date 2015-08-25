@@ -41,7 +41,7 @@ img {
 .btn-secondary {
   background: @brand-secondary;
   border-color: darken(@brand-secondary, 10%);
-  color: white;
+  color: @brand-accent;
   &:hover {
     background: darken(@brand-secondary, 10%);
     .transition;
@@ -51,7 +51,7 @@ img {
 .btn-accent {
   background: @brand-accent;
   border-color: darken(@brand-accent, 10%);
-  color: white;
+  color: @brand-accent;
   &:hover {
     background: darken(@brand-accent, 10%);
     .transition;
@@ -163,7 +163,7 @@ fieldset.panel-default {
 
 .cta {
   padding: 10px 10px;
-  color: white;
+  color: @brand-accent;
   background: @brand-primary;
   border: 0;
   overflow: hidden;
@@ -176,44 +176,68 @@ fieldset.panel-default {
     margin-right: 0;
   }
   .icon {
-    color: white;
+    color: @brand-accent;
   }
   h3, h4, h5, h6 {
-    color: white;
+    color: @brand-accent;
     margin: 0 0 10px 0;
     &:hover {
       text-decoration: none;
     }
   }
   .btn-cta {
-    background: @brand-accent;
-    color: white;
+    background: @brand-secondary;
+    color: @brand-accent;
+    &:hover {
+      background: darken(@brand-secondary, 10%);
+    }
   }
 }
 
-.cta-secondary {
+.cta.cta-secondary, .cta-btn.cta-secondary {
+  color: @brand-accent;
   background: @brand-secondary;
   .transition;
   &:hover {
     background: darken(@brand-secondary, 10%);
     .transition;
   }
+  .icon {
+    color: @brand-accent;
+  }
+  h3, h4, h5, h6 {
+    color: @brand-accent;
+  }
   .btn-cta {
-    background: @brand-accent;
-    color: white;
+    background: @brand-primary;
+    color: @brand-accent;
+    &:hover {
+      background: darken(@brand-primary, 10%);
+    }
   }
 }
 
-.cta-accent {
+.cta.cta-accent, .cta-btn.cta-accent {
+  color: @brand-primary;
   background: @brand-accent;
   .transition;
   &:hover {
     background: darken(@brand-accent, 10%);
+    color: @brand-primary;
     .transition;
+  }
+  .icon {
+    color: @brand-primary;
+  }
+  h3, h4, h5, h6 {
+    color: @brand-primary;
   }
   .btn-cta {
     background: @brand-primary;
-    color: white;
+    color: @brand-accent;
+    &:hover {
+      background: darken(@brand-primary, 10%);
+    }
   }
 }
 
@@ -237,8 +261,9 @@ fieldset.panel-default {
 }
 
 .cta-btn {
+  color: @brand-accent;
   h3, h4, h5, h6 {
-    color: white;
+    color: @brand-accent;
     margin: 0 0 0 0;
     &:hover {
       text-decoration: none;

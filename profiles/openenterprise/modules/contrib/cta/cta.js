@@ -7,17 +7,20 @@ Drupal.behaviors.cta = {
   attach: function (context) {
       /*
       setTimeout(function(){
-          var options = {
-              content: jQuery('#block-block-2').html(),
-              html: 1,
-              placement: 'auto',
-              trigger: manual,
-          };
-          jQuery('#block-block-1').popover(options);
-          jQuery('#block-block-1').popover('show');
-
+          $('#test-container').jsPanel({
+              position:'center',
+              content: 'HI Bob'
+          });
       }, 500);
       */
+
+      //$('#test-container').jsPanel({
+      //    position:'center',
+      //   content: 'HI Bob'
+      //});
+
+
+
       if (Drupal.settings.cta != undefined && Drupal.settings.cta.modal != undefined) {
 
           var settings = Drupal.settings.cta;
