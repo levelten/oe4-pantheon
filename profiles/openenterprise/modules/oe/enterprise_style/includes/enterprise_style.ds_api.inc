@@ -327,9 +327,6 @@ function enterprise_style_ds_fields_info($entity_type) {
 }
 
 function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
-  dsm($fields);
-  dsm($entity_type);
-
   // Adding absolute URL option to node link
   if (!empty($fields['node_link'])) {
     $fields['node_link']['properties']['settings']['absolute_url'] = array(
