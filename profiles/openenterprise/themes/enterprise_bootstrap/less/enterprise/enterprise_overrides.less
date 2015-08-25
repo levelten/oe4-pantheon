@@ -188,10 +188,13 @@ fieldset.panel-default {
   .btn-cta {
     background: @brand-secondary;
     color: @brand-accent;
+    &:hover {
+      background: darken(@brand-secondary, 10%);
+    }
   }
 }
 
-.cta-secondary {
+.cta.cta-secondary, .cta-btn.cta-secondary {
   color: @brand-accent;
   background: @brand-secondary;
   .transition;
@@ -208,15 +211,19 @@ fieldset.panel-default {
   .btn-cta {
     background: @brand-primary;
     color: @brand-accent;
+    &:hover {
+      background: darken(@brand-primary, 10%);
+    }
   }
 }
 
-.cta-accent {
+.cta.cta-accent, .cta-btn.cta-accent {
   color: @brand-primary;
   background: @brand-accent;
   .transition;
   &:hover {
     background: darken(@brand-accent, 10%);
+    color: @brand-primary;
     .transition;
   }
   .icon {
@@ -227,7 +234,10 @@ fieldset.panel-default {
   }
   .btn-cta {
     background: @brand-primary;
-    color: @brand-primary;
+    color: @brand-accent;
+    &:hover {
+      background: darken(@brand-primary, 10%);
+    }
   }
 }
 
