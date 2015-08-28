@@ -5,4 +5,11 @@ package     = User interface
 
 ; Module dependencies
 dependencies[] = ckeditor (>=7.x-1.14)
-dependencies[] = less (>=7.x-4.0)
+dependencies[] = less (<=7.x-3.0)
+
+; Information added by Drupal.org packaging script on 2015-08-28
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "ckeditor_less"
+datestamp = "1440790148"
+
