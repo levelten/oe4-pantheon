@@ -155,7 +155,7 @@ function enterprise_blog_field_default_field_instances() {
           'more_link' => 1,
           'more_text' => 'Read more',
           'summary_handler' => 'full',
-          'trim_length' => 300,
+          'trim_length' => 250,
           'trim_link' => FALSE,
           'trim_options' => array(
             'text' => 0,
@@ -261,6 +261,7 @@ function enterprise_blog_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(
           'conditions' => array(),
+          'ellipsis' => FALSE,
           'field_delimiter' => '',
           'field_formatter_class' => 'body',
           'linked_field' => array(
@@ -274,8 +275,10 @@ function enterprise_blog_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
+          'trim_length' => 500,
+          'word_boundary' => FALSE,
         ),
-        'type' => 'text_default',
+        'type' => 'text_summary_or_trimmed',
         'weight' => 4,
       ),
       'teaser' => array(
@@ -1007,6 +1010,7 @@ function enterprise_blog_field_default_field_instances() {
             'linked' => 0,
           ),
           'picture_group' => 'full-16x9',
+          'picture_mapping' => 'full-0',
         ),
         'type' => 'picture',
         'weight' => 3,
@@ -1033,6 +1037,7 @@ function enterprise_blog_field_default_field_instances() {
             'linked' => 0,
           ),
           'picture_group' => 'full-16x9',
+          'picture_mapping' => 'full-0',
         ),
         'type' => 'picture',
         'weight' => 3,
@@ -1065,6 +1070,7 @@ function enterprise_blog_field_default_field_instances() {
             'linked' => 0,
           ),
           'picture_group' => 'medium-7x5',
+          'picture_mapping' => 'medium-0',
         ),
         'type' => 'picture',
         'weight' => 0,
@@ -1077,7 +1083,7 @@ function enterprise_blog_field_default_field_instances() {
           'field_delimiter' => '',
           'field_formatter_class' => 'image',
           'image_link' => '',
-          'image_style' => '600x300',
+          'image_style' => 'full-16x9-md',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',

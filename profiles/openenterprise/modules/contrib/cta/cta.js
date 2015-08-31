@@ -4,7 +4,17 @@
  * Provide the summary information for the block settings vertical tabs.
  */
 Drupal.behaviors.cta = {
-  attach: function (context) {
+   _html: document.documentElement,
+   _delayTimer: null,
+   sensitivity: 20, //setDefault(config.sensitivity, 20),
+   timer: 1000, //setDefault(config.timer, 1000),
+   delay: 0, //setDefault(config.delay, 0),
+   disableKeydown: false,
+   modal: null,
+   settings: {},
+   options: {},
+   attach: function (context) {
+
       /*
       setTimeout(function(){
           $('#test-container').jsPanel({
@@ -21,32 +31,39 @@ Drupal.behaviors.cta = {
 
 
 
-      if (Drupal.settings.cta != undefined && Drupal.settings.cta.modal != undefined) {
+      if (Drupal.settings.cta === undefined || Drupal.settings.cta.modal === undefined) {
+        return;
+      }
 
-          var settings = Drupal.settings.cta;
-          var modal, options, i;
-          for (i in settings.modal) {
-              modal = settings.modal[i];
-              options = {
-                  show: 1
-              };
-              if (modal.trigger == undefined) {
-                  continue;
-              }
-              //options.backdrop = false;
-              /*
-              if (modal.trigger.pageview) {
-                  var modal_id = i;
-                  setTimeout(function(){ $('#' + modal_id).modal('show') }, 1);
-              }
-              */
-              if (modal.trigger.delay) {
-                  var modal_id = i;
-                  var modal_options = options;
-                  //setTimeout(function(){ $('#' + modal_id).css("display", "block") }, modal.trigger.delay);
-                  setTimeout(function(){ $('#' + modal_id).modal(modal_options) }, modal.trigger.delay);
-              }
+      for (var i in Drupal.settings.cta.modal) {
+          this.modal = $('#' + i);
+          // check if modal exists, and if boostrap modal function is attached
+          if (!this.modal.length || this.modal.modal === undefined) {
+              continue;
           }
+          this.settings = Drupal.settings.cta.modal[i];
+          if (this.settings.trigger == undefined) {
+              continue;
+          }
+
+          this.options = {
+              show: 1
+          };
+
+          if (this.settings.trigger.delay) {
+              //this.delay = this.settings.trigger.delay;
+              /*
+              var modal_options = options;
+              //setTimeout(function(){ $('#' + modal_id).css("display", "block") }, modal.trigger.delay);
+              setTimeout(function(){
+                  $modal.modal(modal_options) }, settings.trigger.delay);
+                  */
+
+          }
+          this._html.addEventListener('mouseleave', this.handleMouseleave);
+          this._html.addEventListener('mouseenter', this.handleMouseenter);
+          this._html.addEventListener('keydown', this.handleKeydown);
+          break;
       }
       // Reposition when a modal is shown
       $('.modal').on('show.bs.modal', this.reposition);
@@ -56,6 +73,27 @@ Drupal.behaviors.cta = {
       $(window).on('resize', function() {
           $('.modal:visible').each(callback);
       }).bind(this);
+  },
+  showModal: function () {
+      Drupal.behaviors.cta.modal.modal(Drupal.behaviors.cta.options)
+  },
+  handleMouseleave: function (e) {
+    if (e.clientY > this.sensitivity) { return; }
+
+      Drupal.behaviors.cta._delayTimer = setTimeout(Drupal.behaviors.cta.showModal, Drupal.behaviors.cta.delay);
+  },
+  handleMouseenter: function () {
+    if (Drupal.behaviors.cta._delayTimer) {
+      clearTimeout(Drupal.behaviors.cta._delayTimer);
+      Drupal.behaviors.cta._delayTimer = null;
+    }
+  },
+  handleKeydown: function (e) {
+    if (Drupal.behaviors.cta.disableKeydown) { return; }
+    else if(!e.metaKey || e.keyCode !== 76) { return; }
+
+    Drupal.behaviors.cta.disableKeydown = true;
+    Drupal.behaviors.cta._delayTimer = setTimeout(Drupal.behaviors.cta.showModal, Drupal.behaviors.cta.delay);
   },
   reposition: function () {
       var modal = $(this);

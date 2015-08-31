@@ -326,14 +326,73 @@ function enterprise_style_ds_fields_info($entity_type) {
   */
 }
 
+function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
+  $link_fields = array();
+  /*
+  $link_fields['properties']['settings']['link_attr_title'] = array(
+    'type' => 'checkbox',
+    'title' => t('Title attribute'),
+    'description' => t('Include title="[entity:title]" in anchor tag.'),
+  );
+  $link_fields['properties']['default']['link_attr_title'] = 1;
+  */
 
+  // Adding absolute URL option to node link
+  $link_fields['properties']['settings']['link_href_absolute'] = array(
+    'type' => 'checkbox',
+    'title' => t('Absolute URL'),
+    'description' => t('Convert this link into an absolute URL. Handy for RSS feeds.'),
+  );
+  $link_fields['properties']['default']['link_href_absolute'] = 0;
+  if (!empty($fields['node_link'])) {
+    $fields['node_link'] = drupal_array_merge_deep($fields['node_link'], $link_fields);
+    $fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+  /*
+  if (!empty($fields['title'])) {
+    $fields['title'] = drupal_array_merge_deep($fields['title'], $link_fields);
+    $fields['title']['function'] = 'enterprise_style_ds_field_node_link';
+    //$fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+  */
+}
+
+function enterprise_style_ds_field_node_link($field) {
+  $settings = isset($field['formatter_settings']) ? $field['formatter_settings'] : array();
+  $settings += $field['properties']['default'];
+
+  // Link.
+  if (!empty($settings['link'])) {
+    if (!empty($settings['link_href_absolute'])) {
+      if (!isset($field['entity']->uri)) {
+        $field['entity']->uri = entity_uri($field['entity_type'], $field['entity']);
+      }
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      $field['entity']->uri['options']['absolute'] = 1;
+    }
+    /*
+    if (!empty($settings['link_attr_title'])) {
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      if (!isset($field['entity']->uri['options']['attributes'])) {
+        $field['entity']->uri['options']['attributes'] = array();
+      }
+      $field['entity']->uri['options']['attributes'] = $field['entity']->title;
+    }
+    */
+  }
+  return ds_render_field($field);
+}
 
 function enterprise_style_ds_field_user_thumbnail($variables) {
   $entity = $variables['entity'];
   $account = user_load($entity->uid);
   $picture_field = 'field_picture_thumbnail';
-  if (isset($user->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
-    if (!isset($user->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
+  if (isset($account->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
+    if (!isset($account->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
       $picture_field = 'field_enterprise_style_picture';
     }
   }

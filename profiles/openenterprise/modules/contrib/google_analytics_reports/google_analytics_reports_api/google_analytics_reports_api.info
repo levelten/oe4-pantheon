@@ -6,3 +6,10 @@ core = 7.x
 files[] = google_analytics_reports_api.lib.inc
 
 configure = admin/config/system/google-analytics-reports-api
+
+; Information added by Drupal.org packaging script on 2015-07-31
+version = "7.x-3.0-beta2"
+core = "7.x"
+project = "google_analytics_reports"
+datestamp = "1438364344"
+

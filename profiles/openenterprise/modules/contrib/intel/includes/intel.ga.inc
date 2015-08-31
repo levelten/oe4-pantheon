@@ -11,6 +11,7 @@
  */
 function intel_get_intel_event_info_default() {
   $event = array();
+  $scripts_enabled = variable_get('intel_intel_scripts_enabled', array());
 
   $event['landing_page_view'] = array(
     'title' => t('Landing page view'),
@@ -20,6 +21,22 @@ function intel_get_intel_event_info_default() {
   $event['landing_page_conversion'] = array(
     'title' => t('Landing page conversion'),
     'description' => t('Form submission from a landing page'),
+    'valued_event' => 1,
+    'value' => 0,
+  );
+  $event['cta_view'] = array(
+    'title' => t('CTA view'),
+    'description' => t('Call to action impression'),
+  );
+  $event['cta_click'] = array(
+    'title' => t('CTA click'),
+    'description' => t('Call to action is clicked'),
+    'valued_event' => 1,
+    'value' => 0,
+  );
+  $event['cta_conversion'] = array(
+    'title' => t('CTA conversion'),
+    'description' => t('Conversion after CTA is clicked'),
     'valued_event' => 1,
     'value' => 0,
   );
@@ -35,38 +52,60 @@ function intel_get_intel_event_info_default() {
     'valued_event' => 1,
     'value' => 25,
   );
-  $event['addthis_social_share'] = array(
-    'title' => t('AddThis social share'),
-    'category' => t('Social share'),
-    'description' => t('Click on social sharing widget'),
-    'valued_event' => 1,
-    'value' => 5,
-    'js_setting' => 1,
-  );
-  $event['addthis_social_share_clickback'] = array(
-    'title' => t('AddThis social share clickback'),
-    'category' => t('Social share clickback'),
-    'description' => t('Visitor referred from a social share'),
-    'valued_event' => 1,
-    'value' => 0,
-    'js_setting' => 1,
-  );
-  $event['addthis_social_follow'] = array(
-    'title' => t('AddThis social profile click'),
-    'category' => t('Social profile'),
-    'description' => t('Click on social profile follow button'),
-    'valued_event' => 1,
-    'value' => 2,
-    'js_setting' => 1,
-  );
-  $event['disqus_comment'] = array(
-    'title' => t('Disqus comment'),
-    'category' => t('Comment'),
-    'description' => t('Click on social sharing widget'),
-    'valued_event' => 1,
-    'value' => 10,
-    'js_setting' => 1,
-  );
+
+  if (!empty($scripts_enabled['addthis'])) {
+    $event['addthis_social_share'] = array(
+      'title' => t('AddThis social share'),
+      'category' => t('Social share'),
+      'description' => t('Click on social sharing widget'),
+      'valued_event' => 1,
+      'value' => 4,
+      'js_setting' => 1,
+    );
+    $event['addthis_social_share_clickback'] = array(
+      'title' => t('AddThis social share clickback'),
+      'category' => t('Social share clickback'),
+      'description' => t('Visitor referred from a social share'),
+      'valued_event' => 1,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['addthis_social_follow'] = array(
+      'title' => t('AddThis social profile click'),
+      'category' => t('Social profile'),
+      'description' => t('Click on social profile follow button'),
+      'valued_event' => 1,
+      'value' => 2,
+      'js_setting' => 1,
+    );
+  }
+  if (!empty($scripts_enabled['youtube'])) {
+    $event['youtube_video_play'] = array(
+      'title' => t('YouTube video play'),
+      'category' => t('Video play'),
+      'description' => t('When a video is played'),
+      'valued_event' => 1,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['youtube_video_stop'] = array(
+      'title' => t('YouTube video stop'),
+      'category' => t('Video stop'),
+      'description' => t('When a video is paused or stopped'),
+      'valued_event' => 0,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['youtube_video_watch'] = array(
+      'title' => t('YouTube video watched'),
+      'category' => t('Video watched'),
+      'description' => t('When a video has been watched. Value is the % that was watched.'),
+      'valued_event' => 0,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+  }
+
   return $event;
 }
 
@@ -159,8 +198,8 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
     $events[$k]['key']  = $k;
   }
 
-  foreach (module_implements('intel_intel_events') AS $module) {
-    $function = $module . '_intel_intel_events';
+  foreach (module_implements('intel_intel_event_info') AS $module) {
+    $function = $module . '_intel_intel_event_info';
     $a = $function();
     if (empty($a) || !is_array($a)) {
       continue;
@@ -172,7 +211,7 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
     }
   }
 
-  drupal_alter('intel_intel_events', $events);
+  drupal_alter('intel_intel_event_info', $events);
 
   uasort($events, '_intel_sort_by_category');
 

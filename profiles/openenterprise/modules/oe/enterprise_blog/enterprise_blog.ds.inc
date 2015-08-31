@@ -301,6 +301,27 @@ function enterprise_blog_ds_field_settings_info() {
       'weight' => '5',
       'label' => 'hidden',
       'format' => 'default',
+      'formatter_settings' => array(
+        'link text' => 'Read more',
+        'wrapper' => '',
+        'class' => '',
+        'link_href_absolute' => 1,
+        'ft' => array(),
+        'field_delimiter' => '',
+        'field_formatter_class' => '',
+        'conditions' => array(),
+        'linked_field' => array(
+          'linked' => 0,
+          'destination' => '',
+          'advanced' => array(
+            'title' => '',
+            'target' => '',
+            'class' => '',
+            'rel' => '',
+            'text' => '',
+          ),
+        ),
+      ),
     ),
     'author' => array(
       'weight' => '2',

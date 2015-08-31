@@ -859,14 +859,17 @@ function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
   }
   $edit = '';
   if (isset($webform['nid'])) {
-
+    $wf_link_options = array(
+      'query' => drupal_get_destination()
+    );
     // webform fields
     $items = array();
     foreach ($webform['components'] AS $comp) {
       if ($comp['type'] == 'markup') {
         continue;
       }
-      $items[] = $comp['name'];// . ' (' . $comp['type'] . ')';
+      //$items[] = $comp['name'];// . ' (' . $comp['type'] . ')';
+      $items[] = l($comp['name'], 'node/' . $webform['nid'] . '/webform/components/' . $comp['cid'], $wf_link_options);
     }
     if (count($items)) {
       $out = implode(', ', $items);
@@ -899,7 +902,13 @@ function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
 
     $items = array();
     foreach ($webform['emails'] AS $email) {
-      $items[] = $email['email'];
+      // check if response is back to submitter (email is the component id)
+      if (is_numeric($email['email'])) {
+        $items[] = l(t('Auto responder'), 'node/' . $webform['nid'] . '/webform/emails/' . $email['eid'], $wf_link_options);
+      }
+      else {
+        $items[] = l($email['email'], 'node/' . $webform['nid'] . '/webform/emails/' . $email['eid'], $wf_link_options);
+      }
     }
     if (count($items)) {
       $out = implode(', ', $items);

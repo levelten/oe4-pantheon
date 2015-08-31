@@ -113,55 +113,9 @@ function enterprise_blog_views_default_views() {
   $handler = $view->new_display('feed', 'Main Feed', 'feed');
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['style_plugin'] = 'rss_fields';
-  $handler->display->display_options['style_options']['channel'] = array(
-    'core' => array(
-      'views_rss_core' => array(
-        'description' => '',
-        'language' => '',
-        'category' => '',
-        'image' => '',
-        'copyright' => '',
-        'managingEditor' => '',
-        'webMaster' => '',
-        'generator' => '',
-        'docs' => '',
-        'cloud' => '',
-        'ttl' => '',
-        'skipHours' => '',
-        'skipDays' => '',
-      ),
-    ),
-  );
-  $handler->display->display_options['style_options']['item'] = array(
-    'core' => array(
-      'views_rss_core' => array(
-        'title' => 'title',
-        'link' => 'path',
-        'description' => 'body',
-        'author' => '',
-        'category' => '',
-        'comments' => '',
-        'enclosure' => '',
-        'guid' => '',
-        'pubDate' => '',
-      ),
-    ),
-    'media' => array(
-      'views_rss_media' => array(
-        'content' => 'field_image',
-        'title' => '',
-        'description' => '',
-        'keywords' => '',
-        'thumbnail' => '',
-        'category' => '',
-      ),
-    ),
-  );
-  $handler->display->display_options['style_options']['feed_settings'] = array(
-    'absolute_paths' => 1,
-    'feed_in_links' => 0,
-  );
+  $handler->display->display_options['style_plugin'] = 'rss';
+  $handler->display->display_options['row_plugin'] = 'node_rss';
+  $handler->display->display_options['row_options']['item_length'] = 'rss';
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Content: Path */
   $handler->display->display_options['fields']['path']['id'] = 'path';
