@@ -305,7 +305,7 @@ function enterprise_blog_ds_field_settings_info() {
         'link text' => 'Read more',
         'wrapper' => '',
         'class' => '',
-        'absolute_url' => 1,
+        'link_href_absolute' => 1,
         'ft' => array(),
         'field_delimiter' => '',
         'field_formatter_class' => '',

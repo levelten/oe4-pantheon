@@ -237,7 +237,7 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
   
   $form_add = array(
     '#type' => 'fieldset',
-    '#title' => t('LevelTen Intelligence'),
+    '#title' => t('Intelligence'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',  
@@ -256,7 +256,7 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
 			$field_count++;
 		}
 		if (isset($form['field_page_attribute_col'])) {
-			$form_add['intel']['field_page_attribute_col'] = $form['field_page_attribute_col'];
+			$form_add['field_page_attribute_col'] = $form['field_page_attribute_col'];
 			unset($form['field_page_attribute_col']);
 			$field_count++;
 		}
@@ -270,6 +270,75 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
 			unset($form['field_intel_event_col']);
 			$field_count++;
 		}
+
+    if (!empty($form['#entity']) && !empty($form['#entity_type'])) {
+      $api_level = intel_api_level();
+      $emsgs = array(
+        'page' => t('Page attribute features are not available with the free version of Intelligence.'),
+        'visitor'  => t('Visitor attribute features are not available with the free or basic versions of Intelligence.'),
+      );
+      $attrs = intel_get_entity_intel_attributes($form['#entity'], $form['#entity_type'], 1);
+      $scopes = ['page', 'visitor'];
+      for ($i = 0; $i < count($scopes); $i++) {
+        $scope = $scopes[$i];
+
+        if (!empty($attrs[$scope])) {
+          $attr_info = intel_get_attribute_info(NULL, $scope);
+          $items = array();
+
+          foreach ($attrs[$scope] as $k => $v) {
+            $msg = '';
+            if ($api_level != 'pro') {
+              if ($scope == 'page' && $api_level != 'basic') {
+                $msg = "<div class=\"messages warning\">\n" . $emsgs['page'] . "\n</div>";
+              }
+              else if ($scope == 'visitor') {
+                $msg = "<div class=\"messages warning\">\n" . $emsgs['visitor'] . "\n</div>";
+              }
+            }
+            $item = $attr_info[$k]['title'] . ' (' . $k . ')'; // . ' (' . $attr_info[$k]['type'] . ')';
+            if ($attr_info[$k]['type'] == 'value' || $attr_info[$k]['type'] == 'scalar') {
+              $item .= ': ' . $v;
+            }
+            else if ($attr_info[$k]['type'] == 'item') {
+              $option = intel_get_attribute_option_info($scope, $k, $v);
+              $item .= ': ' . $option['title']. ' (' . $v . ')';
+            }
+            else if ($attr_info[$k]['type'] == 'list' || $attr_info[$k]['type'] == 'vector') {
+              if (is_array($v)) {
+                $items2 = array();
+                foreach ($v as $kk => $vv) {
+                  $option = intel_get_attribute_option_info($scope, $k, $kk);
+                  $item2 = '';
+                  if (!empty($option['title'])) {
+                    $item2 .= '' . $option['title']. ' (' . $kk . ')';
+                  }
+                  if (!empty($vv)) {
+                    $item2 .= ': ' . $vv;
+                  }
+                  $items2[] = $item2;
+
+                }
+                $item .= ':' . theme('item_list', array('items' => $items2));
+              }
+            }
+            $items[] = $item;
+          }
+        }
+        sort($items);
+        $vars = array(
+          'title' => ($scope == 'page') ? t('Page attributes') : t('Visitor attributes'),
+          'items' => $items,
+          'type' => 'ul',
+        );
+        $form_add['intel_' . $scope . '_attrs_active'] = array(
+          '#type' => 'markup',
+          '#markup' => $msg . theme('item_list', $vars),
+        );
+        $field_count++;
+      }
+    }
+
 		if ($field_count) {
 			$form['intel'] = $form_add;
 		}

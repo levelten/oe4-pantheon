@@ -177,8 +177,6 @@ function intel_webform_webform_submission_presave($node, &$submission) {
     return;
   }
 
-  $wf_ver = 4;
-
   // cache in Drupal session also in case varnish or other caching is filtering
   // cookies
   intel_session_cookie_merge();
@@ -286,6 +284,22 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   $visitor->merge();
 }
 
+function intel_webform_webform_submission_insert($node, $submission) {
+  // add timestamp of submission to break reverse proxy caching
+  // only needed with webform 4. Check if conditionals array exists in webform
+  // data to determine if webform 4.
+  if (isset($node->webform['conditionals']) && !empty($node->webform['redirect_url'])) {
+    $add = ($submission->sid + 46)%100;
+    $uri = intel_parse_url($node->webform['redirect_url']);
+    if (!empty($uri['query'])) {
+      $node->webform['redirect_url'] .= '&sid=A' . dechex($submission->completed) . '-' . $add;
+    }
+    else {
+      $node->webform['redirect_url'] .= '?sid=A' . dechex($submission->completed) . '-' . $add;
+    }
+  }
+}
+
 /**
  * Implements hook_node_insert().
  */
@@ -317,10 +331,25 @@ function intel_webform_node_load($nodes, $types) {
     if (!in_array($node->type, $webform_types)) {
       continue;
     }
+
     $data = variable_get('intel_webform_settings_node_' . $nid, FALSE);
     if (!empty($data)) {
       $nodes[$nid]->webform['intel'] = $data;
     }
+  }
+}
+
+function intel_webform_form_webform_client_form_alter(&$form, &$form_state) {
+  $form['intel_submit_data'] = array(
+    '#type' => 'hidden',
+    '#default_value' => '',
+  );
+  $form['#submit'][] = 'intel_webform_client_form_submit';
+}
+
+function intel_webform_client_form_submit(&$form, &$form_state) {
+  if (!empty($form_state['values']['intel_submit_data'])) {
+    $_SESSION['intel_webform_submit_data'] = $form_state['values']['intel_submit_data'];
   }
 }
 
@@ -350,15 +379,29 @@ function intel_webform_intel_intel_script() {
  * Implements hook_intel_form_submission_check
  */
 function intel_webform_intel_form_submission_check(&$submission, &$track, &$submit_context, &$form_settings, &$link_query) {
-  if (empty($_GET['sid'])) {
+  if (empty($_GET['sid']) && empty($_GET['iwfs'])) {
     return;
   }
 
   require_once './' . drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
-  $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
-  $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
+  if (!empty($_GET['sid']) ) {
+    if (substr($_GET['sid'], 0, 1) == 'A') {
+      $a = explode('-', substr($_GET['sid'], 1));
+      $a[0] = hexdec($a[0]);
+      $wfsubmissions = webform_get_submissions(array('completed' => $a[0]));
+      foreach ($wfsubmissions AS $f) {
+        if (($f->sid + 46)%100 == $a[1]) {
+          $wfsubmission = $f;
+        }
+      }
+    }
+    else {
+      $wfsubmissions = webform_get_submissions(array('sid' => $_GET['sid']));
+      $wfsubmission = $wfsubmissions[$_GET['sid']];    // check if submission exists and if it is recent
+    }
+  }
 
-  if (isset($wfsubmission->submitted)) {
+  if (!empty($wfsubmission) && isset($wfsubmission->submitted)) {
     $link_query = array('sid' => $_GET['sid']);
     $wf_node = node_load($wfsubmission->nid);
     if (isset($wf_node->field_track_submission[$wf_node->language][0]['value'])) {
@@ -408,6 +451,11 @@ function intel_webform_intel_form_submission_check(&$submission, &$track, &$subm
       else if (isset($wfsubmission->data[$data_cid][0])) {
         $submit_context = json_decode($wfsubmission->data[$data_cid][0], TRUE);
       }
+    }
+    // check if data is in session var
+    if (!empty($_SESSION['intel_webform_submit_data'])) {
+      $submit_context = json_decode($_SESSION['intel_webform_submit_data'], TRUE);
+      unset($_SESSION['intel_webform_submit_data']);
     }
     // if component exists, set submit context
     if ($og_cid >= 0) {

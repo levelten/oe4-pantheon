@@ -1176,12 +1176,12 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
   
   
   if ($scope == 'page') {
-    $attributes = variable_get('intel_page_attribute_custom_' . $key, array());
-    variable_set('intel_page_attributes_custom_' . $key, $attribute);
+    //$attributes = variable_get('intel_page_attribute_custom_' . $key, array());
+    variable_set('intel_page_attribute_custom_' . $key, $attribute);
   }
   else {
-    $attributes = variable_get('intel_visitor_attribute_custom_' . $key, array());
-    variable_set('intel_visitor_attributes_custom_' . $key, $attribute);
+    //$attributes = variable_get('intel_visitor_attribute_custom_' . $key, array());
+    variable_set('intel_visitor_attribute_custom_' . $key, $attribute);
   }
   
   if ($add) {
@@ -1197,6 +1197,7 @@ function intel_admin_attribute_form_submit(&$form, &$form_state) {
     ));    
   }
   drupal_set_message($msg);
+  drupal_goto('admin/config/intel/' . $scope . '/page_attribute');
 }
 
 function intel_admin_phonenumber_list_page() {

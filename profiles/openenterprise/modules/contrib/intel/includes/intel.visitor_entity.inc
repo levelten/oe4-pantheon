@@ -219,11 +219,11 @@ class IntelVisitor extends Entity {
     $data = \LevelTen\Intel\IntelData::setVar($data, $keys, $value);
     if ($scope == 'ext') {
       $this->ext_data = $data;
-      $this->ext_updated = time();
+      $this->ext_updated = REQUEST_TIME;
     }
     else {
       $this->data = $data;
-      $this->data_updated = time();
+      $this->data_updated = REQUEST_TIME;
     }
   }
   

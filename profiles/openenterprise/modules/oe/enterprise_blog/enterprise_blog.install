@@ -21,14 +21,3 @@ function enterprise_blog_init() {
     variable_set('enterprise_blog_installed', TRUE);
   }
 }
-
-/**
- * Enable views_rss_media module
- */
-function enterprise_blog_update_7001() {
-  $modules = array(
-    'views_rss',
-    'views_rss_media',
-  );
-  module_enable($modules);
-}

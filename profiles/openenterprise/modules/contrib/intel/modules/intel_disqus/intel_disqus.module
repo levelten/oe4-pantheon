@@ -155,6 +155,22 @@ function intel_disqus_intel_intel_script() {
   return $scripts;
 }
 
+/**
+ * Implements hook_intel_intel_event_info()
+ */
+function intel_disqus_intel_intel_event_info() {
+  $events = array();
+  $events['disqus_comment'] = array(
+    'title' => t('Disqus comment'),
+    'category' => t('Comment'),
+    'description' => t('Comment submitted via Disqus'),
+    'valued_event' => 1,
+    'value' => 5,
+    'js_setting' => 1,
+  );
+  return $events;
+}
+
 function intel_disqus_comment_submit_js() {
   if (empty($_GET['vtk']) || empty($_GET['commentid'])) {
     $response = array(

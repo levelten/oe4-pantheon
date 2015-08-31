@@ -320,6 +320,11 @@ function intel_page_alter(&$page) {
 
 function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $include_events = 0) {
   global $user;
+
+  $attr_cache = &drupal_static(__FUNCTION__, array());
+  //$entity_info_cache = &drupal_static(__FUNCTION__);  // two cached vars, seem to not work
+  static $entity_info_cache;
+
   $visitor_attrs = array();
   $page_attrs = array();
   $page_events = array();
@@ -331,8 +336,29 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
       'visitor' => $visitor_attrs,
     );
   }
-//dsm($entity);
-  $entity_info = entity_get_info($entity_type);
+
+  if (!isset($attr_cache[$entity_type])) {
+    $attr_cache[$entity_type] = array();
+  }
+
+  if (!isset($entity_info_cache)) {
+    $entity_info_cache = array();
+  }
+
+  if (!isset($entity_info_cache[$entity_type])) {
+    $entity_info_cache[$entity_type] = entity_get_info($entity_type);
+  }
+  $entity_info = $entity_info_cache[$entity_type];
+
+  $entity_id = 0;
+  if (isset($entity_info['entity keys']['id']) && isset($entity->{$entity_info['entity keys']['id']})) {
+    $entity_id = $entity->{$entity_info['entity keys']['id']};
+  }
+
+  if ($entity_id && isset($attr_cache[$entity_type][$entity_id])) {
+    return $attr_cache[$entity_type][$entity_id];
+  }
+
   $entity_attrs = array();
 
   $page_attr_info = intel_get_page_attribute_info();
@@ -590,6 +616,11 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
 
   // allow modules to add/alter attributes
   drupal_alter('intel_entity_intel_attributes', $attrs, $entity, $entity_type);
+
+    if ($entity_id) {
+      $attr_cache[$entity_type][$entity_id] = $attrs;
+    }
+
 
   return $attrs;
 }
@@ -893,6 +924,7 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
 
   // generate GoA embed based on Google Analtyics module settings
   if (($type == 'ga') || ($type == 'combined')) {
+    $query_string = '';
     $library_tracker_url = '.google-analytics.com/ga.js';
     $library_cache_url = 'http://www' . $library_tracker_url;
     if (variable_get('googleanalytics_cache', 0) && $url = _googleanalytics_cache($library_cache_url)) {   
@@ -978,9 +1010,10 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
       if ($s = trim(variable_get('intel_custom_embed_script', ''))) {
         $script .= $s;
       } else {
+        $l10ijs_propdir = '';
+        $q_script = '';
         if ($js_embed_style != 'standard') {
-          $l10ijs_propdir = '';
-          $q_script = '';
+
           if (($api_level == 'pro') || ($api_level == 'basic')) {
             $l10ijs_propdir = '/p/' . $l10i_ga_account;
             //if ($js_embed_style != 'property') {
@@ -989,57 +1022,61 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
               //$q_script = "if(c.indexOf('l10i_s=')==-1){q='?t='+t}";
             }
           }
-          $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
+        }
+        $l10ijs_path = '/js/' . $api_js_ver . '/l10i' . $sv . '.js';
 
 
-          $script .= "(function(w,d,o,u,b,i,r,a,s,c,t){" . $terminator;
-          $script .= "w['OEIntelObject']=r;" . $terminator;
-          $script .= "w[r]=w[r]||function() {" . $terminator;
-          $script .= "(w[r].q=w[r].q||[]).push(arguments)" . $terminator;
-          $script .= "}," . $terminator;
-          $script .= "t=1*new Date();" . $terminator;
-          $script .= "a='l10i_bt=';s='';" . $terminator;
+        $script .= "(function(w,d,o,u,b,i,r,a,s,c,t){" . $terminator;
+        $script .= "w['OEIntelObject']=r;" . $terminator;
+        $script .= "w[r]=w[r]||function() {" . $terminator;
+        $script .= "(w[r].q=w[r].q||[]).push(arguments)" . $terminator;
+        $script .= "}," . $terminator;
+        $script .= "t=1*new Date();s='';" . $terminator;
+        if ($l10ijs_propdir) {
+          $script .= "a='l10i_bt=';" . $terminator;
           $script .= "d.cookie=a+t+';path=/';c=d.cookie;" . $terminator;
-          //$script .= "console.log(w[r]);" . $terminator;
-          $script .= "if(c&&c.indexOf(a)!=-1){u+=i;$q_script}u+=b+s;" . $terminator;
-          $script .= "a=d.createElement(o),b=d.getElementsByTagName(o)[0];a.async=1;a.src=u;b.parentNode.insertBefore(a,b)" . $terminator;
-          $script .= "})(window,document,'script','//$api_hostpath','$l10ijs_path','$l10ijs_propdir','$io_name');" . $terminator;
-          /*
-          $script .= "d=q=c='';t=new Date().getTime();" . $terminator;
-          $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
-          $script .= "(function(i,s,o,g,r,a,m){" . $terminator;
-          $script .= "i['OEIntelObject']=r;" . $terminator;
-          $script .= "i[r]=i[r] || function() {" . $terminator;
-          $script .= "(i[r].q=i[r].q||[]).push(arguments)" . $terminator;
-          $script .= "}," . $terminator;
-          $script .= "i[r].l=1*new Date();" . $terminator;
-          $script .= "a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" . $terminator;
-          //$script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','_l10iq');" . $terminator;
-          $script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','io');" . $terminator;
-          */
+          $script .= "if(c&&c.indexOf(a)!=-1){u+=i;$q_script}" . $terminator;
+        }
+        $script .= "u+=b+s;" . $terminator;
+        $script .= "a=d.createElement(o),b=d.getElementsByTagName(o)[0];a.async=1;a.src=u;b.parentNode.insertBefore(a,b)" . $terminator;
+        $script .= "})(window,document,'script','//$api_hostpath','$l10ijs_path','$l10ijs_propdir','$io_name');" . $terminator;
+        /*
+        $script .= "d=q=c='';t=new Date().getTime();" . $terminator;
+        $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
+        $script .= "(function(i,s,o,g,r,a,m){" . $terminator;
+        $script .= "i['OEIntelObject']=r;" . $terminator;
+        $script .= "i[r]=i[r] || function() {" . $terminator;
+        $script .= "(i[r].q=i[r].q||[]).push(arguments)" . $terminator;
+        $script .= "}," . $terminator;
+        $script .= "i[r].l=1*new Date();" . $terminator;
+        $script .= "a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" . $terminator;
+        //$script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','_l10iq');" . $terminator;
+        $script .= "})(window,document,'script','//$api_hostpath'+d+'$l10ijs_path','io');" . $terminator;
+        */
 
-          /*
-          $script .= "(function() {" . $terminator;
-          $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
-          $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
-          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
-          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
-          $script .= "})();" . $terminator;
-          */
-        }
-        else { // standard mode
-          $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : '';
-          $script .= "(function() {" . $terminator;
-          $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
-          $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
-          $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
-          $script .= "})();" . $terminator;
-        }
-        foreach ($l10iq_pushes AS $p) {
-          $p = substr(json_encode($p),1);
-          $p = substr($p, 0 ,-1);
-          $script .= "$io_name(" . $p . ");" . $terminator;
-        }
+        /*
+        $script .= "(function() {" . $terminator;
+        $script .= "var l10i=document.createElement('script'); l10i.type='text/javascript'; l10i.async=true;d=q=c='';t=new Date().getTime();" . $terminator;
+        $script .= "document.cookie='l10i_bt='+t+';path=/';c=document.cookie;if(c&&c.indexOf('l10i_bt=')!=-1){d='$l10ijs_propdir';$q_script}" . $terminator;
+        $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath'+d+'$l10ijs_path'+q;" . $terminator;
+        $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+        $script .= "})();" . $terminator;
+        */
+      }
+      /*
+      else { // standard mode
+        $fr = ($debug && 0) ? " + '?t=' + new Date().getTime()" : '';
+        $script .= "(function() {" . $terminator;
+        $script .= "var l10i = document.createElement('script'); l10i.type = 'text/javascript'; l10i.async = true;" . $terminator;
+        $script .= "l10i.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + '$api_hostpath/js/$api_js_ver/l10i$sv.js'$fr;" . $terminator;
+        $script .= "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(l10i, s);" . $terminator;
+        $script .= "})();" . $terminator;
+      }
+      */
+      foreach ($l10iq_pushes AS $p) {
+        $p = substr(json_encode($p),1);
+        $p = substr($p, 0 ,-1);
+        $script .= "$io_name(" . $p . ");" . $terminator;
       }
     }
   }
@@ -1132,18 +1169,13 @@ function intel_js_alter(&$javascript) {
 
 }
 
+/**************************
+ * @param $page
+ */
 function intel_check_form_submission($page) {
   $vtk = IntelVisitor::extractVtk();
-  // if vtk not present, don't processes
-  if (empty($vtk)) {
-    return;
-  }
 
-  // if api_level!=pro, vtk will not exist to process submission data correctly
   $api_level = intel_api_level();
-  if ($api_level != 'pro') {
-    return;
-  }
 
 //$debug = 1;
 
@@ -1216,20 +1248,23 @@ function intel_check_form_submission($page) {
 
 
   // load data from api to get submission context
-  if (!empty($visitor->vtk)) {
-    try {
-      $visitor->apiVisitorLoad();
-    }
-    catch (Exception $e) {
-      // do nothing
+  if ($api_level == 'pro') {
+    if (!empty($visitor->vtk)) {
+      try {
+        $visitor->apiVisitorLoad();
+      }
+      catch (Exception $e) {
+        // do nothing
+      }
     }
   }
-  $api_data = $visitor->getApiVisitor();
+
 
   if (!empty($_GET['debug']) || !empty($debug)) {
     dpm('$visitor=');//
     dpm($visitor);//
 
+    $api_data = $visitor->getApiVisitor();
     dpm('$api_data=');//
     dpm($api_data);//
     $error = $visitor->apiVisitorLoadError;
@@ -1259,23 +1294,25 @@ function intel_check_form_submission($page) {
   $cta_context = array();
     
   // if vid not set on visitor, save to create vid
-  if (empty($visitor->vid)) {
-    $visitor->save();
-  }
-  
-  // update visitor attributes in analytics cookies
-  // TODO check if this should be done here
-  // va cookie is no longer supported in classic analytics
-  // TODO: change to work with l10i_va cookie
-  $va = $visitor->apiVisitor->extractCookieVa();
-  if (isset($va)) {
-    $visitor->setVar('data', 'analytics', '', $va);
+  if ($api_level == 'pro') {
+    if (empty($visitor->vid)) {
+      $visitor->save();
+    }
+
+    // update visitor attributes in analytics cookies
+    // TODO check if this should be done here
+    // va cookie is no longer supported in classic analytics
+    // TODO: change to work with l10i_va cookie
+    $va = $visitor->apiVisitor->extractCookieVa();
+    if (isset($va)) {
+      $visitor->setVar('data', 'analytics', '', $va);
+    }
+
+    $submission->vid = $visitor->vid;
   }
 
-  $submission->vid = $visitor->vid;
   // check if api vtk was loaded succesfully
   if (!empty($visitor->apiVisitor->vtk)) {
-
 
     // if submit context not set by form_check hook, fetch it from api
     if (empty($submit_context)) {
@@ -1411,7 +1448,7 @@ function intel_check_form_submission($page) {
 
   // if submit_context not available in api, check redirect using cookie
   if (intel_include_library_file('class.visitor.php')) {
-    $loc0 = \LevelTen\Intel\ApiVisitor::getCookie('l10i_l');
+    $loc0 = \LevelTen\Intel\ApiVisitor::getCookie('l10i_lf');
   }
   if (empty($submit_context['location']) && !empty($loc0)) {
     $loc_comps = intel_parse_url($loc0);

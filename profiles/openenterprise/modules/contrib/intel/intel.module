@@ -9,7 +9,7 @@ require_once drupal_get_path('module', 'intel') . "/includes/intel.page_data.inc
 require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
 
 define('INTEL_L10IAPI_URL', 'api.getlevelten.com/v1/intel');
-define('INTEL_L10IAPI_JS_VER', '0.2.0');
+define('INTEL_L10IAPI_JS_VER', '0.2.1');
 define('INTEL_L10IAPI_VER_MIN', '2.0.0');
 define('INTEL_PAGE_INTENT_DEFAULT', 'i');
 define('INTEL_TRACK_PAGE_UID_DEFAULT', 'a');
@@ -607,7 +607,7 @@ function intel_menu() {
     'title' => 'Events',
     'page callback' => 'intel_event_list_report_page',
     'page arguments' => array(4),
-    'access callback' => '_intel_user_access_extended',
+    'access callback' => 'user_access',
     'access arguments' => array('view all intel reports'),
     'type' => MENU_LOCAL_TASK,
     'weight' => $w++,
@@ -940,7 +940,8 @@ function intel_reports() {
     if (empty($info['ga_id']) || in_array($key, $conversion_events)) {
       $reports['event']['ec-' . $key] = array(
         'key' => 'event:' . $key . '.top.pageview',
-        'title' => ((isset($info['title_plural'])) ? $info['title_plural'] : $info['title']),
+        'title' => $info['category'],
+        //'title' => ((isset($info['title_plural'])) ? $info['title_plural'] : $info['title']),
         'page callback' => 'intel_event_list_report_page',
         'file' => 'reports/intel.report_event_list.inc'
       );
@@ -2699,9 +2700,9 @@ function intel_get_field_attribute_allowed_values($mode = 'visitor', $existing_f
   $attributes = ($mode == 'page') ?  intel_get_page_attribute_info() : intel_get_visitor_attribute_info();
   foreach ($attributes AS $key => $va) {
     if (empty($va['selectable'])) {
-      //continue;
+      continue;
     }
-    if (($va['type'] == 'flag') || ($va['type'] == 'item') || ($va['type'] == 'scalar')) {
+    if (($va['type'] == 'flag') || ($va['type'] == 'value')|| ($va['type'] == 'item') || ($va['type'] == 'scalar')) {
       $values[$key] = $va['title'];
     }
     else {
@@ -3063,4 +3064,42 @@ function intel_features_api() {
       'file' => drupal_get_path('module', 'intel') . '/intel.features.inc',
     ),
   );
+}
+
+function intel_get_rl_keys() {
+  // 1 defined as primary identifier
+  return array(
+    'rt' => 1,
+    'rt2' => 1,
+    'rk' => 1,
+  );
+}
+
+function intel_linked_field_settings_alter(&$settings, $context) {
+
+  $attrs = intel_get_entity_intel_attributes($context['entity'], $context['entity_type']);
+  if (!empty($attrs['page']['rl'])) {
+    $settings['options']['attributes']['data-io-uri'] = $attrs['page']['rl'];
+  }
+  return;
+  $uro = array();
+  $rl_keys = intel_get_rl_keys();
+  foreach ($rl_keys as $k => $v) {
+    if ($v && !empty($attrs['page'][$k])) {
+      $uro[$k] = $attrs['page'][$k];
+    }
+  }
+  if (!empty($uro)) {
+    $settings['options']['attributes']['data-io-uro'] = json_encode($uro);
+  }
+  return;
+  $entity_type = $context['entity_type'];
+  $entity = $context['entity'];
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  $view_mode = $context['view_mode'];
+
+  // Add custom attribute for the link.
+  if ($entity_type == 'node' && $bundle == 'article' && $view_mode == 'default') {
+    $settings['options']['attributes']['data-id'] = $entity->nid;
+  }
 }

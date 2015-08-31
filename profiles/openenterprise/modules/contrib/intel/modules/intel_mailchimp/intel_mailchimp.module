@@ -215,7 +215,7 @@ function intel_mailchimp_intel_intel_script() {
     'enabled' => 1,
     'selectable' => 0,
   );
-  $scripts['disqus_email_click'] = array(
+  $scripts['mailchimp_email_click'] = array(
     'title' => t('MailChimp  (email click)'),
     'description' => t('Enables email click events.'),
     'path' => drupal_get_path('module', 'intel_mailchimp') . '/intel_mailchimp.js',
@@ -223,6 +223,21 @@ function intel_mailchimp_intel_intel_script() {
   );
 
   return $scripts;
+}
+
+/**
+ * Implements hook_intel_intel_event_info()
+ */
+function intel_mailchimp_intel_intel_event_info() {
+  $events = array();
+  $events['mailchimp_email_click'] = array(
+    'title' => t('Mailchimp email click'),
+    'category' => t('Email click'),
+    'description' => t('Site visit via link in email.'),
+    'valued_event' => 1,
+    'value' => 0,
+  );
+  return $events;
 }
 
 function intel_mailchimp_email_click_js() {

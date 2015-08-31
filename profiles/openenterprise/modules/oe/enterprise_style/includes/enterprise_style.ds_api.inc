@@ -327,17 +327,34 @@ function enterprise_style_ds_fields_info($entity_type) {
 }
 
 function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
+  $link_fields = array();
+  /*
+  $link_fields['properties']['settings']['link_attr_title'] = array(
+    'type' => 'checkbox',
+    'title' => t('Title attribute'),
+    'description' => t('Include title="[entity:title]" in anchor tag.'),
+  );
+  $link_fields['properties']['default']['link_attr_title'] = 1;
+  */
+
   // Adding absolute URL option to node link
+  $link_fields['properties']['settings']['link_href_absolute'] = array(
+    'type' => 'checkbox',
+    'title' => t('Absolute URL'),
+    'description' => t('Convert this link into an absolute URL. Handy for RSS feeds.'),
+  );
+  $link_fields['properties']['default']['link_href_absolute'] = 0;
   if (!empty($fields['node_link'])) {
-    $fields['node_link']['properties']['settings']['absolute_url'] = array(
-      'type' => 'checkbox',
-      'title' => t('Absolute URL'),
-      'description' => t('Convert this link into an absolute URL. Handy for RSS feeds.'),
-    );
-    $fields['node_link']['properties']['default']['absolute_url'] = 0;
-    // change callback function to add some preprocessing
+    $fields['node_link'] = drupal_array_merge_deep($fields['node_link'], $link_fields);
     $fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
   }
+  /*
+  if (!empty($fields['title'])) {
+    $fields['title'] = drupal_array_merge_deep($fields['title'], $link_fields);
+    $fields['title']['function'] = 'enterprise_style_ds_field_node_link';
+    //$fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+  */
 }
 
 function enterprise_style_ds_field_node_link($field) {
@@ -345,14 +362,27 @@ function enterprise_style_ds_field_node_link($field) {
   $settings += $field['properties']['default'];
 
   // Link.
-  if (!empty($settings['link']) && !empty($settings['absolute_url'])) {
-    if (!isset($field['entity']->uri)) {
-      $field['entity']->uri = entity_uri($field['entity_type'], $field['entity']);
+  if (!empty($settings['link'])) {
+    if (!empty($settings['link_href_absolute'])) {
+      if (!isset($field['entity']->uri)) {
+        $field['entity']->uri = entity_uri($field['entity_type'], $field['entity']);
+      }
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      $field['entity']->uri['options']['absolute'] = 1;
     }
-    if (!isset($field['entity']->uri['options'])) {
-      $field['entity']->uri['options'] = array();
+    /*
+    if (!empty($settings['link_attr_title'])) {
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      if (!isset($field['entity']->uri['options']['attributes'])) {
+        $field['entity']->uri['options']['attributes'] = array();
+      }
+      $field['entity']->uri['options']['attributes'] = $field['entity']->title;
     }
-    $field['entity']->uri['options']['absolute'] = 1;
+    */
   }
   return ds_render_field($field);
 }
