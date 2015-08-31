@@ -3730,6 +3730,7 @@ textarea.input-group-sm > .input-group-btn > .btn {
 @media (max-width: 768px) {
   .navbar-collapse.collapse {
     height: 0 !important;
+    width: 100% !important;
     overflow: hidden !important;
   }
   .navbar-collapse.in {
