@@ -396,6 +396,11 @@ function cta_cta_list() {
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => t('There are no Block Available'),
+      '#attributes' => array(
+        'class' => array(
+          'cta-admin-list',
+        ),
+      ),
     ),
     'pager' => array(
       '#theme' => 'pager',

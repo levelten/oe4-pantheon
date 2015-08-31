@@ -32,7 +32,7 @@ function intel_admin_content_cta_alter_js($cta_type = '') {
       $ctaid = '/' . $r['eventLabel'];
       if (!isset($ctas[$ctaid])) {
         $ctas[$ctaid] = array(
-          'impressions' => array(
+          'views' => array(
             'total' => 0,
             'unique' => 0,
           ),
@@ -50,9 +50,9 @@ function intel_admin_content_cta_alter_js($cta_type = '') {
       if (substr($cat, -1) == '!') {
         $cat = substr($cat, 0, -1);
       }
-      if ($cat == 'cta impression') {
-        $ctas[$ctaid]['impressions']['total'] += $r['totalEvents'];
-        $ctas[$ctaid]['impressions']['unique'] += $r['uniqueEvents'];
+      if ($cat == 'cta view') {
+        $ctas[$ctaid]['views']['total'] += $r['totalEvents'];
+        $ctas[$ctaid]['views']['unique'] += $r['uniqueEvents'];
       }
       if ($cat == 'cta click') {
         $ctas[$ctaid]['clicks']['total'] += $r['totalEvents'];
@@ -67,10 +67,10 @@ function intel_admin_content_cta_alter_js($cta_type = '') {
   }
   $rows = array();
   foreach ($ctas AS $cid => $data) {
-    $row = '<td>' . number_format($data['impressions']['total']) . '</td>';
+    $row = '<td>' . number_format($data['views']['total']) . '</td>';
     $row .= '<td>' . number_format($data['clicks']['total']) . '</td>';
-    if ((int)$data['impressions']['total']) {
-      $row .= '<td>' . number_format(100 * $data['clicks']['total']/$data['impressions']['total'], 1) . '%</td>';
+    if ((int)$data['views']['total']) {
+      $row .= '<td>' . number_format(100 * $data['clicks']['total']/$data['views']['total'], 1) . '%</td>';
     }
     else {
       $row .= '<td>0.0%</td>';
