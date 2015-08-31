@@ -3734,6 +3734,7 @@ textarea.input-group-sm > .input-group-btn > .btn {
   }
   .navbar-collapse.in {
     height: auto !important;
+    width: auto !important;
   }
 }
 .container > .navbar-header,
