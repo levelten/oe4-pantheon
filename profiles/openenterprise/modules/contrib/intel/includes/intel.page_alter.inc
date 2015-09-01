@@ -473,12 +473,9 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $page_attrs['rl'] = $uri['path'];
     //$page_attrs['url'] = url($page_attrs['rl']);
   }
+  
   //dsm($page_attrs);
-
-
-
-
-//dsm($entity->uri);
+  //dsm($entity->uri);
 
   if ($entity_type == 'node') {
     $entity_bundle = $entity->type;
@@ -500,7 +497,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   }
 
   $lang = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
-  $fields_info = field_info_instances($entity_type, $entity_bundle);
+  
   // track entity uid (e.g. node author)
   if (!isset($page_entity_settings['track_page_uid']) || $page_entity_settings['track_page_uid']) {
     $key = !empty($page_entity_settings['track_page_uid']) ? $page_entity_settings['track_page_uid'] : 'a';
@@ -527,26 +524,33 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
 
   $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
 
+  // Obtain field info if entities are set.
+  if (!empty($entity_bundle) && !empty($entity_type)) {
+    $fields_info = field_info_instances($entity_type, $entity_bundle);
+  }
+  
   // process vocabularies with global tracking enabled
-  foreach ($fields_info AS $key => $field) {
-    if (isset($entity->{$key}[$lang][0]['tid'])) {
-      // get field_info to get associated vocabulary
-      $field_info = field_info_field($key);
-      $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
-      // check if tracking is enabled at the content type level or on globally on the vocabulary
-      if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
-        $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
-        foreach ($entity->{$key}[$lang] AS $t) {
-          if (!isset($page_attrs[$page_attr_key])) {
-            $page_attrs[$page_attr_key] = array();
-          }
-          $page_attrs[$page_attr_key][$t['tid']] = '';
-          if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
-            $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
-            if (!isset($visitor_attrs[$visitor_attr_key])) {
-              $visitor_attrs[$visitor_attr_key] = array();
+  if (!empty($fields_info)) {
+    foreach ($fields_info AS $key => $field) {
+      if (isset($entity->{$key}[$lang][0]['tid'])) {
+        // get field_info to get associated vocabulary
+        $field_info = field_info_field($key);
+        $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
+        // check if tracking is enabled at the content type level or on globally on the vocabulary
+        if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
+          $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
+          foreach ($entity->{$key}[$lang] AS $t) {
+            if (!isset($page_attrs[$page_attr_key])) {
+              $page_attrs[$page_attr_key] = array();
             }
-            $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
+            $page_attrs[$page_attr_key][$t['tid']] = '';
+            if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
+              $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
+              if (!isset($visitor_attrs[$visitor_attr_key])) {
+                $visitor_attrs[$visitor_attr_key] = array();
+              }
+              $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
+            }
           }
         }
       }
