@@ -3653,33 +3653,30 @@ textarea.input-group-sm > .input-group-btn > .btn {
     border-radius: 5px;
   }
 }
-.navbar-header {
-  /**
-
-  Ahmad: Causing issues on iPad portrait view on Bella
-
-  @media (min-width: @grid-float-breakpoint) {
+.navbar-header:before,
+.navbar-header:after {
+  content: " ";
+  display: table;
+}
+.navbar-header:after {
+  clear: both;
+}
+.navbar-header:before,
+.navbar-header:after {
+  content: " ";
+  display: table;
+}
+.navbar-header:after {
+  clear: both;
+}
+@media (min-width: 768px) {
+  .navbar-header {
     float: left;
-  } **/
-}
-.navbar-header:before,
-.navbar-header:after {
-  content: " ";
-  display: table;
-}
-.navbar-header:after {
-  clear: both;
-}
-.navbar-header:before,
-.navbar-header:after {
-  content: " ";
-  display: table;
-}
-.navbar-header:after {
-  clear: both;
+  }
 }
 .navbar-collapse {
-  overflow: visible;
+  max-height: 340px;
+  overflow-x: visible;
   padding-right: 15px;
   padding-left: 15px;
   border-top: 1px solid transparent;
@@ -3725,20 +3722,6 @@ textarea.input-group-sm > .input-group-btn > .btn {
   .navbar-fixed-bottom .navbar-collapse {
     padding-left: 0;
     padding-right: 0;
-  }
-}
-@media (max-width: 768px) {
-  .navbar-collapse.collapse {
-    height: 0 !important;
-    width: 100% !important;
-    overflow: hidden !important;
-  }
-  .navbar-collapse.collapsing {
-    width: 100% !important;
-  }
-  .navbar-collapse.in {
-    height: auto !important;
-    width: 100% !important;
   }
 }
 .container > .navbar-header,
@@ -3800,7 +3783,6 @@ textarea.input-group-sm > .input-group-btn > .btn {
   }
 }
 .navbar-toggle {
-  display: none;
   position: relative;
   float: right;
   margin-right: 15px;
@@ -3821,9 +3803,9 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-toggle .icon-bar + .icon-bar {
   margin-top: 4px;
 }
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .navbar-toggle {
-    display: block;
+    display: none;
   }
 }
 .navbar-nav {

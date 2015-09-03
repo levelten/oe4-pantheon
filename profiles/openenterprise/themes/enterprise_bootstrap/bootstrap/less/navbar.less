@@ -31,13 +31,9 @@
 .navbar-header {
   .clearfix();
 
-  /**
-
-  Ahmad: Causing issues on iPad portrait view on Bella
-
   @media (min-width: @grid-float-breakpoint) {
     float: left;
-  } **/
+  }
 }
 
 
@@ -52,13 +48,12 @@
 // content for the user's viewport.
 
 .navbar-collapse {
-  //max-height: 340px;
-  overflow: visible;
+  max-height: 340px;
+  overflow-x: visible;
   padding-right: @navbar-padding-horizontal;
   padding-left:  @navbar-padding-horizontal;
   border-top: 1px solid transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
-
   .clearfix();
   -webkit-overflow-scrolling: touch;
 
@@ -89,23 +84,6 @@
     .navbar-fixed-bottom & {
       padding-left: 0;
       padding-right: 0;
-    }
-  }
-
-  @media (max-width: @grid-float-breakpoint) {
-    &.collapse {
-      height:0 !important;
-      width:100% !important;
-      overflow: hidden !important;
-    }
-
-    &.collapsing {
-      width:100% !important;
-    }
-
-    &.in {
-      height:auto !important;
-      width:100% !important;
     }
   }
 }
@@ -194,7 +172,6 @@
 // JavaScript plugin.
 
 .navbar-toggle {
-  display: none;
   position: relative;
   float: right;
   margin-right: @navbar-padding-horizontal;
@@ -215,11 +192,10 @@
   .icon-bar + .icon-bar {
     margin-top: 4px;
   }
-  
-  
-  @media (max-width: @grid-float-breakpoint) {
-    display: block;
-  } 
+
+  @media (min-width: @grid-float-breakpoint) {
+    display: none;
+  }
 }
 
 
