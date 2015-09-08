@@ -989,13 +989,15 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
     }
     $l10iq_pushes = array();
     //$l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
-    $params = array();
-    $params['name'] = $l10i_ga_tracker_prefix;
-    if ($l10i_domain_name) {
-      $params['cookieDomain'] =  $l10i_domain_name;
-      //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
+    if ($l10i_ga_account) {
+      $params = array();
+      $params['name'] = $l10i_ga_tracker_prefix;
+      if ($l10i_domain_name) {
+        $params['cookieDomain'] = $l10i_domain_name;
+        //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
+      }
+      $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
     }
-    $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
 
     //$l10iq_pushes[] = array('_setOptions', (object) array());
     //$l10iq_pushes[] = array('set', (object) array());

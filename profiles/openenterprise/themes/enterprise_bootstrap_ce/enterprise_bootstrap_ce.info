@@ -16,7 +16,7 @@ regions[content]        = 'Content'
 regions[sidebar_first]  = 'Primary'
 regions[sidebar_second] = 'Secondary'
 regions[footer]         = 'Footer'
-regions[footer_button]  = 'Footer bottom'
+regions[footer_buttom]  = 'Footer bottom'
 regions[page_top]       = 'Page top'
 regions[page_bottom]    = 'Page bottom'
 
@@ -57,3 +57,5 @@ settings[bootstrap_cdn] = ''
 ; --------------
 settings[toggle_main_menu] = 0
 settings[toggle_secondary_menu] = 0
+
+settings[page]

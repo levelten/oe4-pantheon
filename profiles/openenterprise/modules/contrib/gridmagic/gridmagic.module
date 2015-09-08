@@ -33,7 +33,6 @@ function gridmagic_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('gridmagic_admin'),
     'access arguments' => array('administer gridmagic settings'),
-    'type' => MENU_LOCAL_ACTION,
   );
 
   return $items;
