@@ -264,7 +264,7 @@ function enterprise_blog_styler_style() {
 
 /* experimenting with cleaning up highlight markup for styler view modes */
 function enterprise_style_format_styler_highlight_cleanup($html, $options = array()) {
-  dsm($html);
+  //dsm($html);
   $html = utf8_decode($html);
   $dom = new DOMDocument();
   $dom->preserveWhiteSpace = false;
@@ -285,7 +285,7 @@ function enterprise_style_format_styler_highlight_cleanup($html, $options = arra
   foreach($dom->getElementsByTagName('a') as $elem) {
     //dsm($elem.innerHTML);
     $innerHTML = DOMinnerHTML($elem);
-    dsm($innerHTML);
+    //dsm($innerHTML);
     $new = $dom->createElement('a');
     $new->setAttribute('href', '#');
     DOMappendHTML($elem, $innerHTML);
