@@ -1146,7 +1146,7 @@ function enterprise_conversion_node_presave($node) {
     intel_webform_setup_webform_config($node);
   }
 
-  if (isset($node->landingpages_webform_emails)) {
+  if (isset($node->landingpages_webform_emails) && isset($node->webform)) {
     $emails = explode(',', $node->landingpages_webform_emails);
     foreach ($emails AS $email) {
       $email = trim($email);

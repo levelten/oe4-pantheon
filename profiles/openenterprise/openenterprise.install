@@ -172,6 +172,7 @@ function openenterprise_install() {
  */
 function openenterprise_install_theme_settings() {
   // Set default theme.
+  $themes = list_themes(TRUE); //Get all the available themes
   $themes_enable = openenterprise_themes_enable_list();
   $theme_default = $themes_enable[count($themes_enable) - 1];
   variable_set('theme_default', $theme_default);
@@ -182,8 +183,14 @@ function openenterprise_install_theme_settings() {
     $settings = variable_get('theme_' . $theme . '_settings', array());
 
     // get settings in info file
-    $filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
-    if (file_exists($filename)) {
+    if(isset($themes['enterprise_bootstrap'])) {
+      $filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+    }
+    else if(isset($themes['enterprise_bootstrap_ce'])) {
+      $filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap_ce') . '/enterprise_bootstrap_ce.info';
+    }
+
+    if (!empty($filename) && file_exists($filename)) {
       $info = drupal_parse_info_file($filename);
       if (isset($info['settings'])) {
         $settings = drupal_array_merge_deep($settings, $info['settings']);

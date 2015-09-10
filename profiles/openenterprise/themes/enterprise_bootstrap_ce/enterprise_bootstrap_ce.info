@@ -1,8 +1,7 @@
 name = Enterprise Bootstrap CE
-description = Extended Bootstrap base theme for Open Enterprise CE.
+description = Starter Bootstrap sub-theme theme for Open Enterprise CE.
 core = 7.x
 base theme = bootstrap
-
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Regions
@@ -32,18 +31,17 @@ stylesheets[all][] = css/style.css
 
 scripts[] = 'bootstrap/js/affix.js'
 scripts[] = 'bootstrap/js/alert.js'
-scripts[] = 'bootstrap/js/button.js'
+;scripts[] = 'bootstrap/js/button.js'
 scripts[] = 'bootstrap/js/carousel.js'
 scripts[] = 'bootstrap/js/collapse.js'
 scripts[] = 'bootstrap/js/dropdown.js'
 scripts[] = 'bootstrap/js/modal.js'
 scripts[] = 'bootstrap/js/tooltip.js'
 scripts[] = 'bootstrap/js/popover.js'
-scripts[] = 'bootstrap/js/scrollspy.js'
-scripts[] = 'bootstrap/js/tab.js'
+;scripts[] = 'bootstrap/js/scrollspy.js'
+;scripts[] = 'bootstrap/js/tab.js'
 scripts[] = 'bootstrap/js/transition.js'
 
-;scripts[] = 'js/enterprise_bootstrap.js'
 
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
 settings[bootstrap_cdn] = ''
@@ -57,5 +55,4 @@ settings[bootstrap_cdn] = ''
 ; --------------
 settings[toggle_main_menu] = 0
 settings[toggle_secondary_menu] = 0
-
-settings[page]
+settings[bootstrap_navbar_position] = ''

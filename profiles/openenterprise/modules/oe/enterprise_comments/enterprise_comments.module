@@ -32,3 +32,5 @@ function enterprise_comments_enterprise_apps_config_settings() {
 
   return $settings;
 }
+
+
