@@ -278,7 +278,7 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
         'visitor'  => t('Visitor attribute features are not available with the free or basic versions of Intelligence.'),
       );
       $attrs = intel_get_entity_intel_attributes($form['#entity'], $form['#entity_type'], 1);
-      $scopes = ['page', 'visitor'];
+      $scopes = array('page', 'visitor');
       for ($i = 0; $i < count($scopes); $i++) {
         $scope = $scopes[$i];
 
