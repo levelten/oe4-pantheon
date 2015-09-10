@@ -297,7 +297,7 @@ function enterprise_style_format_styler_highlight_cleanup($html, $options = arra
   $html = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $html));
   $html = str_replace(PHP_EOL, '', $html);
   $html = trim($html);
-  dsm($html);
+  //dsm($html);
   return $html;
 }
 
@@ -305,7 +305,7 @@ function DOMappendHTML(DOMNode $parent, $source) {
   $tmpDoc = new DOMDocument();
   $tmpDoc->loadHTML($source);
   foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
-    dsm($node);
+    //dsm($node);
     $node = $parent->ownerDocument->importNode($node);
     $parent->appendChild($node);
   }
