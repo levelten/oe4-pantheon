@@ -600,4 +600,231 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+	// Color settings
+	$form['enterprise_bootstrap_color'] = array(
+		'#type' => 'fieldset',
+		'#group' => 'enterprise_bootstrap',
+		'#title' => t('Colors'),
+	);
+	$form['enterprise_bootstrap_color']['less_colors'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('LESS Colors'),
+	);
+	
+	$color_attrs = array(
+		'class' => array(
+			'minicolor'
+		)
+	);
+	
+	$form['enterprise_bootstrap_color']['less_colors']['brand_color_1'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Brand Primary'),
+		'#default_value' => theme_get_setting('brand_color_1'),
+		'#attributes' => $color_attrs,
+		'#prefix' => '<div class="inline-field">',
+		'#suffix' => '</div>',
+	);
+	
+	$form['enterprise_bootstrap_color']['less_colors']['brand_color_2'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Brand Secondary'),
+		'#default_value' => theme_get_setting('brand_color_2'),
+		'#attributes' => $color_attrs,
+		'#prefix' => '<div class="inline-field">',
+		'#suffix' => '</div>',
+	);
+	
+	$form['enterprise_bootstrap_color']['less_colors']['brand_color_3'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Brand Accent'),
+		'#default_value' => theme_get_setting('brand_color_3'),
+		'#attributes' => $color_attrs,
+		'#prefix' => '<div class="inline-field">',
+		'#suffix' => '</div>',
+	);
+	
+	$form['enterprise_bootstrap_color']['less_colors']['brand_color_4'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Brand Accent 2'),
+		'#default_value' => theme_get_setting('brand_color_4'),
+		'#attributes' => $color_attrs,
+		'#prefix' => '<div class="inline-field">',
+		'#suffix' => '</div>',
+	);
+
+	$form['enterprise_bootstrap_color']['less_colors']['brand_color_5'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Brand Accent 3'),
+		'#default_value' => theme_get_setting('brand_color_5'),
+		'#attributes' => $color_attrs,
+		'#prefix' => '<div class="inline-field">',
+		'#suffix' => '</div>',
+	);
+
+
+	// Extra
+	$form['logo']['settings']['logo_suggestion'] = array(
+  	'#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75. You will need to <a href="/admin/config/media/image-styles/add">create an image style</a> for this.</p></div>',
+  	'#attributes' => array('class' => array('description')),
+  	'#weight' => 10,
+	);
+
+	// Colourlovers settings
+	if (module_exists('colourlovers')) {
+		$form['enterprise_bootstrap_color']['colourlovers'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('COLOURLovers Palettes'),
+			'#weight' => -1,
+			'#description' => t('Enter the URL below to request your palettes. You can use the !playground to get your API URL. This works with !palettes only.', array('!playground' => l('Colourlovers Playground', 'admin/appearance/colourlovers'), '!palettes' => '<strong>PALETTES</strong>')),
+		);
+		
+		$form['enterprise_bootstrap_color']['colourlovers']['cl_palette_mode'] = array(
+			'#type' => 'select',
+			'#title' => t('Palette Mode'),
+			'#default_value' => theme_get_setting('cl_palette_mode'),
+			'#description' => t('Choose from Top or New palettes. Random only returns one. You will need to save once to view the palettes.'),
+			'#options' => array(
+				'top' => t('Top'),
+				'new' => t('New'),
+				'random' => t('Random'),
+				'custom_user' => t('Custom: Username'),
+				'custom_keywords' => t('Custom: Keywords'),
+			),
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+
+		$form['enterprise_bootstrap_color']['colourlovers']['cl_palette_param'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Parameters'),
+			'#default_value' => theme_get_setting('cl_palette_param'),
+			'#description' => t('If using a username, enter it here. If using keywords, you must separate each term using a comma.'),
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+			'#states' => array(
+	      'visible' => array(
+	        array(
+	        	array(':input[name=cl_palette_mode]' => array('value' => 'custom_keywords')),
+	        	'or',
+	        	array(':input[name=cl_palette_mode]' => array('value' => 'custom_user')),
+	        ),
+	      ),
+	    ),
+		);
+
+		$form['enterprise_bootstrap_color']['colourlovers']['colourlovers_container'] = array(
+			'#type' => 'fieldset',
+		);
+		$form['enterprise_bootstrap_color']['colourlovers']['colourlovers_container']['cl_palette_options'] = array(
+			'#type' => 'markup',
+	  	'#markup' => variable_get('cl_palette_options', 'No palettes generated.'),
+	  );
+	}
+
+	// Add related CSS/JS
+	$theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
+	$form['#attached']['css'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.css';
+	$form['#attached']['js'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.min.js';
+	$form['#attached']['js'][] = $theme_path . '/js/enterprise_bootstrap_admin.js';
+
+	// Add form submit handler.
+	$form['#submit'][] = '_enterprise_bootstrap_form_submit';
+
+
 } // end settings_alter
+
+/*
+ * Form submit handler for Enterprise Bootstrap.
+ */
+function _enterprise_bootstrap_form_submit($form, &$form_state) {
+  $input = $form_state['values'];
+
+  // Check for Colourlovers
+  if (module_exists('colourlovers')) {
+  	require_once(drupal_get_path('module', 'colourlovers') . '/colourlovers.admin.inc');
+		if (!empty($input['cl_palette_mode'])) {
+  		variable_set('cl_palette_options', _enterprise_bootstrap_colourlovers($input['cl_palette_mode'], $input['cl_palette_param']));
+  	}  	
+  }
+
+  // Pull form values, assign to single variable.
+  $less_colors = array();
+  foreach ($input as $key => $value) {
+    switch ($key) {
+    	case 'brand_color_1':
+    		$less_colors['brand-primary'] = $value;
+    		break;
+    	case 'brand_color_2':
+    		$less_colors['brand-secondary'] = $value;
+    		break;
+    	case 'brand_color_3':
+    		$less_colors['brand-accent'] = $value;
+    		break;
+    	case 'brand_color_4':
+    		$less_colors['brand-accent-2'] = $value;
+    		break;
+    	case 'brand_color_5':
+    		$less_colors['brand-accent-3'] = $value;
+    		break;
+
+    	default:
+    		# code...
+    		break;
+    }
+  }
+
+  // Assign to variable table.
+  variable_set('less_colors', $less_colors);
+
+}
+
+function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
+	// Set up API call and palettes.
+	$params = array();
+	if ($mode == 'custom_user') {
+		if (empty($param)) {
+			form_set_error('cl_palette_param', t('You must enter a username when using Custom: Username.'));
+		}
+		$params['lover'] = $param;
+	} elseif ($mode == 'custom_keywords') {
+		if (empty(($param))) {
+			form_set_error('cl_palette_param', t('You must enter some keywords when using Custom: Keywords.'));
+		}
+		$params['keywords'] = _colourlovers_format_keyword($param);
+	}
+
+	$palettes = _colourlovers_method('palettes', $mode, 20, $params);
+	$badge = array();
+
+	if (!empty($palettes)) {
+		foreach ($palettes as $key => $value) {
+			// If using palettes, set up Color module palette.
+			if (count($value->colors) < 5) {
+				continue;
+			}
+			$theme_palette[$value->id] = array(
+				'title' => t($value->title),
+				'colors' => $value->colors,
+			);
+			// Set up badge images.
+			$image_vars = array(
+				'path' => $value->badgeUrl,
+				'alt' => $value->url,
+				'title' => t($value->title),
+				'attributes' => array(
+					'style' => '',
+				),
+			);
+
+			$wrapper_attributes = array(
+				'class' => array('colourlovers-image'),
+				'data-colors' => array(implode(',', $value->colors)),
+			);
+
+			$badge[] = '<div '. drupal_attributes($wrapper_attributes).'>'.theme_image($image_vars).'</div>';
+		}
+		$badges = '<div class="colourlovers-images">'.implode('', $badge).'</div>';
+		return $badges;
+	}
+}

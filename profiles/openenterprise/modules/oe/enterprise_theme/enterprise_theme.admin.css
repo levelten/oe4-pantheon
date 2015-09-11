@@ -1,0 +1,55 @@
+/* Fixes for Enterprise Bootstrap theme on Admin side */
+.page-admin .columns {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.page-admin .column-left,
+.page-admin .column-right {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+	float: left;
+	padding-left: 10px;
+	padding-right: 10px;
+	width: 50%;
+}
+
+.page-admin .inline-field {
+	display: inline-block;
+	margin-right: 20px;
+}
+
+/* Fix for Minicolors picker. */
+.page-admin .minicolors {
+	width: 100% !important;
+}
+
+.colourlovers-images {
+	width: 100%;
+}
+.colourlovers-images .colourlovers-image {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	text-align: center;
+	width: 25%;
+}
+.colourlovers-images .colourlovers-image img {
+	cursor:pointer;
+	max-width: 100%;
+}
+.colourlovers-images .colourlovers-image:hover img,
+.colourlovers-images .colourlovers-image:active img,
+.colourlovers-images .colourlovers-image:focus img {
+	-webkit-box-shadow:0 1px 2px #AAA;
+	-moz-box-shadow:0 1px 2px #AAA;
+	-ms-box-shadow:0 1px 2px #AAA;
+	box-shadow:0 1px 2px #AAA;
+}

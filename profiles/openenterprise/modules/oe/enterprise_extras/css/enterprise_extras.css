@@ -1,16 +1,3 @@
 .ds-sticky {
     z-index: 10;
 }
-
-/* Fixes for Enterprise Bootstrap theme on Admin side */
-.page-admin .columns {
-	box-sizing: border-box;
-	width: 100%;
-}
-
-.page-admin .column-left,
-.page-admin .column-right {
-	box-sizing: border-box;
-	float: left;
-	width: 50%;
-}
