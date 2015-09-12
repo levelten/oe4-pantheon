@@ -10,7 +10,7 @@ include_once 'enterprise_theme.features.inc';
 /**
  * Implements hook_less_variables_alter().
  */
-function enterprise_theme_less_variables_alter($less_variables, $system_name) {
+function enterprise_theme_less_variables_alter(&$less_variables, $system_name) {
   // Grab the color palette saved by the color module.
   $color_pallete = variable_get('less_colors', FALSE);
   
@@ -30,6 +30,7 @@ function enterprise_theme_less_variables_alter($less_variables, $system_name) {
     unset($color_pallete[$key]);
   }
 
+  $less_variables = $color_pallete;
   return $color_pallete;
 }
 
