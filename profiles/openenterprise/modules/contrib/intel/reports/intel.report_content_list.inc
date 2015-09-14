@@ -137,7 +137,6 @@ function intel_content_list_report($vars) {
   }
 
   $vars['data'] = $d;
-
   $output .= theme_intel_report($vars);
 
   return $output;

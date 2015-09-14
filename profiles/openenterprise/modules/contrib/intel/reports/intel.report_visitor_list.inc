@@ -50,9 +50,13 @@ function intel_visitor_list_report($vars) {
   $ga_data->setRequestSetting('indexBy', $vars['indexBy']);
   $ga_data->setRequestSetting('details', 0);
 
+  //$vars['feed_rows'] = 20;
+  $ga_data->setRequestDefaultParam('max_results', 1 * $vars['feed_rows']);
+
+  /*
   if ($vars['report_modes'][1] != 'entrance') {
     $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
-    $ga_data->loadFeedData('pageviews'); 
+    $ga_data->loadFeedData('pageviews');
   }
 
   $ga_data->setRequestDefaultParam('max_results', 1 * $vars['feed_rows']);
@@ -60,21 +64,25 @@ function intel_visitor_list_report($vars) {
 
   $ga_data->loadFeedData('pageviews_events_valued');
   $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
+  */
+  $ga_data->loadFeedData('entrances');
+  $ga_data->loadFeedData('entrances_events_valued');
   $ga_data->loadFeedData('visit_info');
   
   $d = $ga_data->data;
 
   $vtkids = array();
   $i = 0;
+
   foreach ($d[$vars['indexBy']] AS $index => $de) {
     $score_components = array();
     if ($vars['report_modes'][1] == 'recent') {
       $d[$vars['indexBy']][$index]['entrance']['pageviews'] = $d[$vars['indexBy']][$index]['pageview']['pageviews'];
     }
-    //$d[$vars['indexBy']][$index]['score'] = intel_score_visit_aggregation($d[$vars['indexBy']][$index], 1, $score_components);
-    $d[$vars['indexBy']][$index]['score'] = intel_score_item($d[$vars['indexBy']][$index], 1, $score_components, '', 'visitor');
 
-    $d[$vars['indexBy']][$index]['score_components'] = $score_components;  
+    $d[$vars['indexBy']][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'trafficsource');
+    $d[$vars['indexBy']][$index]['score_components'] = $score_components;
+
     if (!empty($de['i'])) {
       if ($vars['report_modes'][0] == 'visit') {
         $a = explode('-', $de['i']);
@@ -86,7 +94,7 @@ function intel_visitor_list_report($vars) {
       $vtkids[] = $vtkid;
       // we only need to load enough for the report
       if ($i++ >= $vars['row_count']) {
-        break;
+        //break;
       }
     }
     if (isset($vtkid)) {
@@ -119,19 +127,29 @@ function intel_visitor_list_report($vars) {
       $d[$vars['indexBy']][$index]['links'][] = l(t('sources'), intel_build_report_path('trafficsource', $params));
       $d[$vars['indexBy']][$index]['links'][] = l(t('clickstream'), intel_build_report_path('visitor', array(), 'clickstream', $filter));
 */
-    } 
+    }
   }
 
-  $visitors = intel_visitor_load_multiple($vtkids, array(), FALSE, 'vtkid');
+  //$visitors = intel_visitor_load_multiple($vtkids, array(), FALSE, 'vtkid');
+  //dsm($visitors);
   foreach ($d[$vars['indexBy']] AS $index => $de) {
-    if (isset($de['vtkid']) && !empty($visitors[$de['vtkid']]) && !empty($visitors[$de['vtkid']]->name)) {
-      $d[$vars['indexBy']][$index]['visitor'] = $visitors[$de['vtkid']];    
+    $visitor = intel_visitor_load($index, TRUE, 'vtkid');
+    if (!empty($visitor->name)) {
+      $d[$vars['indexBy']][$index]['info'] = array(
+        'title' => $visitor->name,
+        'uri' => '/visitor/' . $index,
+      );
+    }
+    else {
+      $d[$vars['indexBy']][$index]['info'] = array(
+        'title' => t('anon') . ' (' . substr($index, 0, 10) . ')',
+        'uri' => '/visitor/' . $index . '/clickstream',
+      );
     }
   }
 
 //dsm($d);
   $vars['data'] = $d;
-
   $output .= theme_intel_report($vars);
 
   return $output;  

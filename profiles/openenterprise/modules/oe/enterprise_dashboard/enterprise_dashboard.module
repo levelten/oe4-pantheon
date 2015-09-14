@@ -1,0 +1,337 @@
+<?php
+
+/**
+ * @file
+ */
+
+
+
+/**
+ * Implements hook_block_info().
+ *
+ * This hook declares what blocks are provided by the module.
+ */
+
+function enterprise_dashboard_block_info() {
+  $blocks = array();
+  $data = enterprise_dashboard_quick_links_data();
+  $blocks['quick_links'] = array(
+    'info' => t('Dashboard: Quick links'),
+    //'cache' => DRUPAL_NO_CACHE,
+    //'status' => TRUE,
+  );
+  foreach ($data as $k => $v) {
+    $blocks['quick_links_' . $k] = array(
+      'info' => t('Dashboard: Quick links: @title', array(
+        '@title' => $v['#title']
+      )),
+      //'cache' => DRUPAL_NO_CACHE,
+      //'status' => TRUE,
+    );
+  }
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+
+function enterprise_dashboard_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  $block = array();
+  $data = enterprise_dashboard_quick_links_data();
+  switch ($delta) {
+    case 'quick_links':
+      $block['subject'] = t("Quick links");
+      $block['content'] = enterprise_dashboard_theme_quick_links_block();
+      $block['attributes'] = array(
+        'class' => array('dashboard-quick-links')
+      );
+      break;
+    default:
+      $key = str_replace('quick_links_', '', $delta);
+      $d = $data[$key];
+      $block['subject'] = $d['#title'];
+      $block['content'] = enterprise_dashboard_theme_quick_links_block($key);
+      $block['quick_links_info'] = $d;
+      /*
+      $block['attributes'] = array(
+        'class' => array('dashboard-quick-links', 'admin-panel')
+      );
+      $block['css_class'] = array('dashboard-quick-links', 'admin-panel');
+      */
+      break;
+  }
+  return $block;
+}
+
+function enterprise_dashboard_preprocess_block(&$vars) {
+  //dsm($vars);
+  $block = $vars['block'];
+  //dsm($block);
+  if (isset($block->quick_links_info)) {
+    $vars['classes_array'][] = 'dashboard-quick-links';
+    $vars['classes_array'][] = 'admin-panel';
+    if ($block->quick_links_info['#class']) {
+      $vars['title_attributes_array']['class'] = array_merge($vars['title_attributes_array'], $block->quick_links_info['#class']);
+    }
+
+    $block->subject = '<span class="icon"></span>' . $block->subject;
+    //$vars['classes_array'] = array_merge($vars['classes_array'], $block->gridmagic['attributes']['class']);
+  }
+}
+
+function enterprise_dashboard_theme_quick_links_block($key = '') {
+  $data = enterprise_dashboard_quick_links_data();
+
+  if ($key) {
+    $data = array(
+      $key => $data[$key],
+    );
+  }
+
+  $output = '';
+  $output .= '
+<style>
+.block.dashboard-quick-links .block-title {
+  padding: 8px 5px 9px 50px;
+  font-size: 1em;
+}
+.dashboard-quick-links .block-content {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.dashboard-quick-links .link-btns a {
+  color: #fff;
+  text-shadow: #38a 0px 1px 0px;
+  background-color: #7bc;
+  border-radius: 5px;
+  padding: 1px 5px 1px 4px;
+}
+.dashboard-quick-links .block-content {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+</style>
+
+
+  ';
+  foreach ($data as $k => $v) {
+
+
+    if (!$key) {
+      $output .= '<div class="admin-panel">';
+      $class = '';
+      if (is_array($v['#class'])) {
+        $class = ' class="' . implode(' ', $v['#class']) . '"';
+      }
+      $output .= '<h3' . $class . '><span class="icon"></span>' . $v['#title'] . '</h3>';
+    }
+
+    $output .= '<ul class="admin-list">';
+    foreach ($v as $kk => $vv) {
+      if (substr($kk, 0 ,1) == '#') {
+        continue;
+      }
+      $output .= '<li class="leaf">';
+      $class = '';
+      if (is_array($vv['#class'])) {
+        $class = ' class="' . implode(' ', $vv['#class']) . '"';
+      }
+      $output .= '<a href="' . url($vv['#url']) . '"' . $class . '><span class="icon"></span>' . $vv['#title'] . '</a>';
+      $output .= '<span class="link-btns">';
+      if (!empty($vv['#manage_icon'])) {
+        $output .= ' <a href="' . url($vv['#url']) . '"><i class="' . $vv['#manage_icon'] . '">‌</i>' . t('manage') . '</a>';
+      }
+      foreach ($vv as $kkk => $vvv) {
+        if (substr($kkk, 0 ,1) == '#') {
+          continue;
+        }
+        $output .= ' <a href="' . url($vvv['#url']) . '"><i class="' . $vvv['#icon'] . '">‌</i>' . $vvv['#title'] . '</a>';
+      }
+      $output .= '</span>';
+      if (!empty($vv['#description'])) {
+        $output .= '<div class="description">' . $vv['#description'] . '</div>';
+      }
+      $output .= '</li>';
+    }
+    $output .= '</ul>';
+    if (!$key) {
+      $output .= '</div>';
+    }
+
+  }
+  return $output;
+}
+
+function enterprise_dashboard_quick_links_data() {
+  $info = array();
+  $info['content'] = array(
+    '#title' => t('Content'),
+    '#class' => array('path-admin-content-'),
+    'page' => array(
+      '#title' => t('Basic pages'),
+      '#url' => 'admin/content/node/page',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/page',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+    'blog' => array(
+      '#title' => t('Blog posts'),
+      '#url' => 'admin/content/node/enterprise-blog',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Todo.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/enterprise-blog',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+    'all' => array(
+      '#title' => t('All nodes'),
+      '#url' => 'admin/content/node',
+      '#class' => array('path-admin-content'),
+      '#description' => t('All content pages (nodes) on the site.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+  );
+  $info['blocks'] = array(
+    '#title' => t('Blocks'),
+    '#class' => array('path-admin-structure-block'),
+    'all' => array(
+      '#title' => t('Blocks'),
+      '#url' => 'admin/structure/block',
+      '#class' => array('path-admin-content'),
+      '#description' => t('All content pages (nodes) on the site.'),
+      //'#manage_icon' => 'oeicon oeicon-list',
+      'place' => array(
+        '#title' => t('place'),
+        '#url' => 'admin/structure/block',
+        '#icon' => 'oeicon oeicon-th'
+      ),
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'block/add',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+    'cta' => array(
+      '#title' => t('CTAs'),
+      '#url' => 'admin/content/cta',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/page',
+        '#icon' => 'oeicon oeicon-pencil'
+      ),
+      'place' => array(
+        '#title' => t('defaults'),
+        '#url' => 'admin/structure/cta',
+        '#icon' => 'oeicon oeicon-pictures'
+      ),
+    ),
+  );
+  $info['engage'] = array(
+    '#title' => t('Engage'),
+    '#class' => array('path-admin-content-comment'),
+    'comments' => array(
+      '#title' => t('Comments'),
+      '#url' => 'admin/structure/kwresearch',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Targeted search phrases.'),
+      //'#manage_icon' => 'oeicon oeicon-tag',
+      'place' => array(
+        '#title' => t('targets'),
+        '#url' => 'admin/structure/kwresearch',
+        '#icon' => 'oeicon oeicon-tag'
+      ),
+      'research' => array(
+        '#title' => t('research'),
+        '#url' => 'admin/structure/kwresearch/keyword_report',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'sharing' => array(
+      '#title' => t('Social sharing'),
+      '#url' => 'admin/content/insight/reports',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'research' => array(
+        '#title' => t('research'),
+        '#url' => '/admin/reports/contentanalysis',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'profiles' => array(
+      '#title' => t('Social profiles'),
+      '#url' => 'admin/config/media/socialmedia/profiles',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+    ),
+  );
+  $info['seo'] = array(
+    '#title' => t('Search Engine Optmization (SEO)'),
+    '#class' => array('path-admin-config-search-settings'),
+    'keyword' => array(
+      '#title' => t('Keywords'),
+      '#url' => 'admin/structure/kwresearch',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Targeted search phrases.'),
+      //'#manage_icon' => 'oeicon oeicon-tag',
+      'place' => array(
+        '#title' => t('targets'),
+        '#url' => 'admin/structure/kwresearch',
+        '#icon' => 'oeicon oeicon-tag'
+      ),
+      'research' => array(
+        '#title' => t('research'),
+        '#url' => 'admin/structure/kwresearch/keyword_report',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'onpage' => array(
+      '#title' => t('Content optmization'),
+      '#url' => 'admin/content/insight/reports',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'research' => array(
+        '#title' => t('research'),
+        '#url' => '/admin/reports/contentanalysis',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+  );
+  return $info;
+}
+
+function enterprise_dashboard_theme($existing, $type, $theme, $path) {
+  $themes['block__enterprise_dashboard'] = array( // replace module--delta with your block template suggestions
+    'variables' => array('block' => array()),
+    'template' => 'block--enterprise_dashboard', // the name fo your .tpl.php file.
+    //'path' => $path . '/templates',   // path to the template in your module
+  );
+
+  return $themes;
+}
+
+
+

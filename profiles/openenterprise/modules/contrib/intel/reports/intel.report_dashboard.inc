@@ -7,7 +7,7 @@
  */
 
 //function intel_dashboard_report_page($report_subtype = '-', $context = '-', $timeframe = '-', $filter_type = '-', $filter_element = '-', $subsite = '-') {
-function intel_dashboard_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
+function intel_dashboard_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-', $vars = array()) {
   //$args = func_get_args();
   //dsm($args);
 
@@ -15,7 +15,7 @@ function intel_dashboard_report_page($report_params = '-', $report_subtype = '-'
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
-  $vars = array();
+  //$vars = array();
   if (!empty($entity_type) && $entity_type != '-') {
     $vars['entity_type'] = $entity_type;
     $vars['entity'] = $entity;

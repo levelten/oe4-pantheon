@@ -10,23 +10,18 @@
  * 
  */
 namespace LevelTen\Intel;
-require_once 'class.report_view.php';
-require_once __DIR__ . '/../charts/class.table_chart.php';
-require_once __DIR__ . '/../charts/class.pie_chart.php';
-require_once __DIR__ . '/../charts/class.bubble_chart.php';
+require_once 'class.list_report_view.php';
 
-class VisitorListReportView extends ReportView {
-  private $tableRowCount = 10;
-  
-  function __construct() {
-    parent::__construct();
-  }
-  
-  function setTableRowCount($rowCount) {
-    $this->tableRowCount = $rowCount;
-  }
-  
+class VisitorListReportView extends ListReportView {
+
   function renderReport() {
+    //$this->setParam('indexBy', 'content');
+    $this->setParam('headerLabel', 'Visitors');
+    //$this->setParam('indexByLabel', 'Path');
+    return parent::renderReport();
+  }
+  
+  function renderReportBak() {
     $output = '';
     $startDate = $this->dateRange['start'];
     $endDate = $this->dateRange['end'];
@@ -44,7 +39,7 @@ class VisitorListReportView extends ReportView {
       $table->updateColumn(1, 'string', 'Time');
       $table->setOption('sortColumn', 1);
     }
-    
+
     //$table->insertColumn(1, 'number', 'Posts');
     //$table->setOption('sortColumn', 4);
 
@@ -124,6 +119,8 @@ class VisitorListReportView extends ReportView {
 
     $value_str = '';
     $this->sortData('by_score_then_entrances', $indexBy);
+    dsm("indexBy = $indexBy");
+    dsm($this->data[$indexBy]);
     foreach($this->data[$indexBy] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
       if ($d['i']  == '023c23ba00000766a002') { continue; } // temp fix so error visitor id stats are not included
