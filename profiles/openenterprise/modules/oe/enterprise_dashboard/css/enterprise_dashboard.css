@@ -1,0 +1,19 @@
+.tao .block.dashboard-quick-links .block-title {
+    padding: 8px 5px 9px 50px;
+    font-size: 1em;
+}
+.tao .dashboard-quick-links .block-content {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.tao .dashboard-quick-links .link-btns a {
+    color: #fff;
+    text-shadow: #38a 0px 1px 0px;
+    background-color: #7bc;
+    border-radius: 5px;
+    padding: 1px 5px 1px 4px;
+}
+.tao .dashboard-quick-links .block-content {
+    padding-left: 0px;
+    padding-right: 0px;
+}

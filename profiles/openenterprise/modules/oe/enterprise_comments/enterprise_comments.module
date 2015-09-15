@@ -33,4 +33,22 @@ function enterprise_comments_enterprise_apps_config_settings() {
   return $settings;
 }
 
+function enterprise_comments_menu() {
+  $items = array();
+
+  $items['admin/content/comment_disqus'] = array(
+    'title' => 'Comments',
+    'page callback' => 'enterprise_comment_content_admin_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer disqus'),
+    //'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function enterprise_comment_content_admin_page() {
+  $block = module_invoke('disqus', 'block_view', 'disqus_combination_widget');
+  return render($block['content']);
+}
+
 

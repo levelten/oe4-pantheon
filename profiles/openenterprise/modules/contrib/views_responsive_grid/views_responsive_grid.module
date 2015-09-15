@@ -47,8 +47,6 @@ function template_preprocess_views_view_responsive_grid(&$vars) {
   /******************
    * NEW: added for gridmagic processing
    */
-  dsm($vars);
-  dsm($vars['view']->field);
   if (!empty($options['gridmagic_row_preset'])) {
     $element_count = $columns;
     $item_count = count($vars['rows']);

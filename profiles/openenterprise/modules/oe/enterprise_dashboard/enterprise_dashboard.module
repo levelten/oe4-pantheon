@@ -5,6 +5,80 @@
  */
 
 
+function enterprise_dashboard_enterprise_apps_app_enabled() {
+  // get batch processing for init_app
+  enterprise_apps_config_app('enterprise_dashboard');
+}
+
+function enterprise_dashboard_enterprise_apps_config_settings() {
+  global $theme_key;
+
+  if (!$admin_theme = variable_get('admin_theme')) {
+    drupal_theme_initialize();
+    $admin_theme = $theme_key;
+  }
+
+  /*
+  foreach ($stashed_blocks as $block) {
+    db_update('block')
+      ->fields(array(
+        'status' => 1,
+        'region' => $block['region']
+      ))
+      ->condition('module', $block['module'])
+      ->condition('delta', $block['delta'])
+      ->condition('theme', $admin_theme)
+      ->condition('status', 0)
+      ->execute();
+  }
+  variable_del('dashboard_stashed_blocks');
+  */
+
+  $settings = array(
+    'enterprise_dashboard' => array(
+      'blocks' => array(),
+    ),
+  );
+
+  $settings['enterprise_dashboard']['blocks'] = array(
+    'intel:report_dashboard' => array(
+      'regions' => array(
+        'dashboard_main',
+      ),
+      'admin_theme' => true,
+      'weight' => -9,
+    ),
+  );
+
+  $settings['enterprise_dashboard']['blocks'] = array(
+    'search:form' => array(
+      'admin_theme' => true,
+      'weight' => 5,
+    ),
+  );
+
+  $settings['enterprise_dashboard']['blocks'] = array(
+    'user:online' => array(
+      'admin_theme' => true,
+      'weight' => 6,
+    ),
+  );
+
+  /*
+  $settings['enterprise_dashboard']['blocks'] = array(
+    'intel:report_dashboard' => array(
+      'regions' => array(
+        'dashboard_main',
+      ),
+      'weight' => -9,
+    ),
+  );
+  */
+
+  dsm($settings);
+
+  return $settings;
+}
 
 /**
  * Implements hook_block_info().
@@ -15,18 +89,17 @@
 function enterprise_dashboard_block_info() {
   $blocks = array();
   $data = enterprise_dashboard_quick_links_data();
-  $blocks['quick_links'] = array(
-    'info' => t('Dashboard: Quick links'),
-    //'cache' => DRUPAL_NO_CACHE,
-    //'status' => TRUE,
-  );
+  $w = -9;
   foreach ($data as $k => $v) {
     $blocks['quick_links_' . $k] = array(
       'info' => t('Dashboard: Quick links: @title', array(
         '@title' => $v['#title']
       )),
-      //'cache' => DRUPAL_NO_CACHE,
-      //'status' => TRUE,
+      'status' => 1,
+      'region' => 'dashboard_sidebar',
+      //'weight' => 99,
+      'cache' => DRUPAL_CACHE_PER_ROLE,
+      'weight' => $w++,
     );
   }
   return $blocks;
@@ -86,6 +159,7 @@ function enterprise_dashboard_preprocess_block(&$vars) {
 
 function enterprise_dashboard_theme_quick_links_block($key = '') {
   $data = enterprise_dashboard_quick_links_data();
+  drupal_add_css(drupal_get_path('module', 'enterprise_dashboard') . '/css/enterprise_dashboard.css');
 
   if ($key) {
     $data = array(
@@ -94,31 +168,7 @@ function enterprise_dashboard_theme_quick_links_block($key = '') {
   }
 
   $output = '';
-  $output .= '
-<style>
-.block.dashboard-quick-links .block-title {
-  padding: 8px 5px 9px 50px;
-  font-size: 1em;
-}
-.dashboard-quick-links .block-content {
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.dashboard-quick-links .link-btns a {
-  color: #fff;
-  text-shadow: #38a 0px 1px 0px;
-  background-color: #7bc;
-  border-radius: 5px;
-  padding: 1px 5px 1px 4px;
-}
-.dashboard-quick-links .block-content {
-  padding-left: 0px;
-  padding-right: 0px;
-}
-</style>
-
-
-  ';
+  $output .= '';
   foreach ($data as $k => $v) {
 
 
@@ -182,19 +232,29 @@ function enterprise_dashboard_quick_links_data() {
         '#title' => t('add'),
         '#url' => 'node/add/page',
         '#icon' => 'oeicon oeicon-pencil'
-      )
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/content/f0%3Dpa-rt2%3Apage',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
     ),
     'blog' => array(
       '#title' => t('Blog posts'),
       '#url' => 'admin/content/node/enterprise-blog',
       '#class' => array('path-admin-content'),
-      '#description' => t('Todo.'),
+      '#description' => t('Informative attraction content.'),
       '#manage_icon' => 'oeicon oeicon-list',
       'add' => array(
         '#title' => t('add'),
         '#url' => 'node/add/enterprise-blog',
         '#icon' => 'oeicon oeicon-pencil'
-      )
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/content/f0%3Dpa-rt2%3Ablog',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
     ),
     'all' => array(
       '#title' => t('All nodes'),
@@ -206,7 +266,12 @@ function enterprise_dashboard_quick_links_data() {
         '#title' => t('add'),
         '#url' => 'node/add',
         '#icon' => 'oeicon oeicon-pencil'
-      )
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/content/-',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
     ),
   );
   $info['blocks'] = array(
@@ -216,7 +281,7 @@ function enterprise_dashboard_quick_links_data() {
       '#title' => t('Blocks'),
       '#url' => 'admin/structure/block',
       '#class' => array('path-admin-content'),
-      '#description' => t('All content pages (nodes) on the site.'),
+      '#description' => t('Content designed to be placed on multiple pages.'),
       //'#manage_icon' => 'oeicon oeicon-list',
       'place' => array(
         '#title' => t('place'),
@@ -233,7 +298,7 @@ function enterprise_dashboard_quick_links_data() {
       '#title' => t('CTAs'),
       '#url' => 'admin/content/cta',
       '#class' => array('path-admin-content'),
-      '#description' => t('General content type.'),
+      '#description' => t('Calls to actions'),
       '#manage_icon' => 'oeicon oeicon-list',
       'add' => array(
         '#title' => t('add'),
@@ -245,25 +310,26 @@ function enterprise_dashboard_quick_links_data() {
         '#url' => 'admin/structure/cta',
         '#icon' => 'oeicon oeicon-pictures'
       ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3ACTA',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
     ),
+
   );
   $info['engage'] = array(
     '#title' => t('Engage'),
     '#class' => array('path-admin-content-comment'),
     'comments' => array(
       '#title' => t('Comments'),
-      '#url' => 'admin/structure/kwresearch',
+      '#url' => 'admin/content/comment_disqus',
       '#class' => array('path-admin-content'),
-      '#description' => t('Targeted search phrases.'),
-      //'#manage_icon' => 'oeicon oeicon-tag',
-      'place' => array(
-        '#title' => t('targets'),
-        '#url' => 'admin/structure/kwresearch',
-        '#icon' => 'oeicon oeicon-tag'
-      ),
-      'research' => array(
-        '#title' => t('research'),
-        '#url' => 'admin/structure/kwresearch/keyword_report',
+      '#description' => t('Comments on posts.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3AComment',
         '#icon' => 'oeicon oeicon-chart-bar'
       ),
     ),
@@ -271,11 +337,16 @@ function enterprise_dashboard_quick_links_data() {
       '#title' => t('Social sharing'),
       '#url' => 'admin/content/insight/reports',
       '#class' => array('path-admin-content'),
-      '#description' => t('General content type.'),
+      '#description' => t('Content sharing via social widgets'),
       '#manage_icon' => 'oeicon oeicon-list',
       'research' => array(
         '#title' => t('research'),
         '#url' => '/admin/reports/contentanalysis',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3ASocial%20share',
         '#icon' => 'oeicon oeicon-chart-bar'
       ),
     ),
@@ -283,10 +354,17 @@ function enterprise_dashboard_quick_links_data() {
       '#title' => t('Social profiles'),
       '#url' => 'admin/config/media/socialmedia/profiles',
       '#class' => array('path-admin-content'),
-      '#description' => t('General content type.'),
+      '#description' => t('Social media profiles and profile widgets'),
       '#manage_icon' => 'oeicon oeicon-list',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3ASocial%20profile',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
     ),
   );
+
+
   $info['seo'] = array(
     '#title' => t('Search Engine Optmization (SEO)'),
     '#class' => array('path-admin-config-search-settings'),
@@ -311,7 +389,7 @@ function enterprise_dashboard_quick_links_data() {
       '#title' => t('Content optmization'),
       '#url' => 'admin/content/insight/reports',
       '#class' => array('path-admin-content'),
-      '#description' => t('General content type.'),
+      '#description' => t('On page content optimization'),
       '#manage_icon' => 'oeicon oeicon-list',
       'research' => array(
         '#title' => t('research'),
@@ -320,6 +398,153 @@ function enterprise_dashboard_quick_links_data() {
       ),
     ),
   );
+  $info['conversion'] = array(
+    '#title' => t('Lead generation'),
+    '#class' => array('path-admin-people-'),
+    'webform' => array(
+      '#title' => t('Webforms'),
+      '#url' => 'admin/content/node/webform',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Custom form builder.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/webform',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+    'thankyou' => array(
+      '#title' => t('Thank you pages'),
+      '#url' => 'admin/content/node/enterprise_thankyou',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Form response pages.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/enterprise_thankyou',
+        '#icon' => 'oeicon oeicon-pencil'
+      )
+    ),
+    'landingpage' => array(
+      '#title' => t('Landing pages'),
+      '#url' => 'admin/content/node/enterprise_landingpage',
+      '#class' => array('path-admin-content'),
+      '#description' => t('Promote offers to generate leads.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/enterprise_landingpage',
+        '#icon' => 'oeicon oeicon-pencil'
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3ALanding%20page',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'cta' => array(
+      '#title' => t('CTAs'),
+      '#url' => 'admin/content/cta',
+      '#class' => array('path-admin-content'),
+      '#description' => t('General content type.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+      'add' => array(
+        '#title' => t('add'),
+        '#url' => 'node/add/page',
+        '#icon' => 'oeicon oeicon-pencil'
+      ),
+      'place' => array(
+        '#title' => t('defaults'),
+        '#url' => 'admin/structure/cta',
+        '#icon' => 'oeicon oeicon-pictures'
+      ),
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/event/-/-/event%3ACTA',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+  );
+  $info['connections'] = array(
+    '#title' => t('Connections'),
+    '#class' => array('path-admin-config-people-accounts'),
+    'contact' => array(
+      '#title' => t('Contacts'),
+      '#url' => 'admin/people/contacts',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Generated leads.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+    ),
+    'formsubmission' => array(
+      '#title' => t('Form submissions'),
+      '#url' => 'admin/people/submissions',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('All form submissions.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+    ),
+    'phone' => array(
+      '#title' => t('Phone calls'),
+      '#url' => 'admin/people/submissions',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Phone calls to site numbers.'),
+      '#manage_icon' => 'oeicon oeicon-list',
+    ),
+  );
+  $info['reports'] = array(
+    '#title' => t('Reports'),
+    '#class' => array('path-admin-reports-'),
+    'scorecard' => array(
+      '#title' => t('Scorecard'),
+      '#url' => 'admin/reports/intel/scorecard/-',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Snapshot of site performance.'),
+      //'#manage_icon' => 'oeicon oeicon-chart-bar',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/scorecard/-',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'source' => array(
+      '#title' => t('Traffic sources'),
+      '#url' => 'admin/reports/intel/trafficsource/-',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Performance by traffic sources'),
+      //'#manage_icon' => 'oeicon oeicon-chart-bar',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/trafficsource/-',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'content' => array(
+      '#title' => t('Content'),
+      '#url' => 'admin/reports/intel/content/-',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Content performance'),
+      //'#manage_icon' => 'oeicon oeicon-chart-bar',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/content/-',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+    'events' => array(
+      '#title' => t('Events'),
+      '#url' => 'admin/reports/intel/events/-',
+      '#class' => array('path-admin-reports'),
+      '#description' => t('Analytics events'),
+      //'#manage_icon' => 'oeicon oeicon-chart-bar',
+      'stats' => array(
+        '#title' => t('stats'),
+        '#url' => 'admin/reports/intel/events/-',
+        '#icon' => 'oeicon oeicon-chart-bar'
+      ),
+    ),
+  );
+
+
+
   return $info;
 }
 

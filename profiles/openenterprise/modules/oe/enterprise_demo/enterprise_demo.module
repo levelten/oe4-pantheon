@@ -75,6 +75,7 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     'enterprise_comments',
     'enterprise_blog',
     'enterprise_blog_content',
+    'enterprise_dashboard',
     'enterprise_thankyoupage',
     'enterprise_thankyoupage_content',
     //'enterprise_webform_content', //? why is this before enterprise_webform
