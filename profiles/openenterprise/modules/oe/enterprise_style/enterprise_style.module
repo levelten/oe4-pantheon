@@ -570,7 +570,10 @@ function enterprise_style_format_styler_highlight_cleanup($html, $options = arra
   $dom = new DOMDocument();
   $dom->preserveWhiteSpace = false;
   $dom->formatOutput = true;
+  // Suppress warnings for HTML5 elements.
+  libxml_use_internal_errors(true);
   $dom->loadHTML($html);
+  libxml_clear_errors();
 
   //$dom = $dom->createDocumentFragment();
   //$newItem = new DOMDocument();
