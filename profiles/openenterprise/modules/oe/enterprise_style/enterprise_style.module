@@ -561,4 +561,65 @@ function enterprise_style_construct_demo_node($vars) {
   return $entity;
 }
 
+/**
+ * Cleaning up highlight markup for styler view modes.
+ */
+function enterprise_style_format_styler_highlight_cleanup($html, $options = array()) {
+  $html = utf8_decode($html);
 
+  $dom = new DOMDocument();
+  $dom->preserveWhiteSpace = false;
+  $dom->formatOutput = true;
+  // Suppress warnings for HTML5 elements.
+  libxml_use_internal_errors(true);
+  $dom->loadHTML($html);
+  libxml_clear_errors();
+
+  //$dom = $dom->createDocumentFragment();
+  //$newItem = new DOMDocument();
+  foreach($dom->getElementsByTagName('picture') as $elem) {
+    $new = $dom->createElement('img');
+    $new->setAttribute('src', 'http://placehold.it/640x360');
+    $new->setAttribute('alt', '...');
+    //$new->formatOutput = true;
+
+    //$new->loadXML('<img src="http://placehold.it/640x360" alt="" title="" />');
+    $elem->parentNode->replaceChild($new, $elem);
+  }
+  foreach($dom->getElementsByTagName('a') as $elem) {
+    $innerHTML = DOMinnerHTML($elem);
+    $new = $dom->createElement('a');
+    $new->setAttribute('href', '#');
+    DOMappendHTML($elem, $innerHTML);
+    //$innerElem = $dom->loadHTML($innerHTML);
+    //$new->appendChild($innerElem);
+    $elem->parentNode->replaceChild($new, $elem);
+  }
+  $html = $dom->saveHTML();
+  $html = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $html));
+  $html = str_replace(PHP_EOL, '', $html);
+  $html = trim($html);
+
+  return $html;
+}
+
+function DOMappendHTML(DOMNode $parent, $source) {
+  $tmpDoc = new DOMDocument();
+  $tmpDoc->loadHTML($source);
+  foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
+    $node = $parent->ownerDocument->importNode($node);
+    $parent->appendChild($node);
+  }
+}
+
+function DOMinnerHTML(DOMNode $element) {
+  $innerHTML = "";
+  $children  = $element->childNodes;
+
+  foreach ($children as $child)
+  {
+    $innerHTML .= $element->ownerDocument->saveHTML($child);
+  }
+
+  return $innerHTML;
+}
