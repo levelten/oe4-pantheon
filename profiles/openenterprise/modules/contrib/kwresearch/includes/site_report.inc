@@ -15,6 +15,7 @@ function kwresearch_keywords_list_page($mode = 'site') {
   drupal_add_css(drupal_get_path('module', 'kwresearch') . '/kwresearch.css');
   drupal_add_js(drupal_get_path('module', 'kwresearch') . '/kwresearch.js');
 
+
   $output = "";
   // create site keyword data for js
 
@@ -172,7 +173,7 @@ function kwresearch_keywords_list_page($mode = 'site') {
         'class' => array('user'),
       );
       $row[] = array(
-        //'data' => l(number_format($values['page_count']), 'admin/content/kwresearch/keyword_pages/' . $values['kid'], array('query' => 'destination=admin/content/kwresearch/keyword_list' . (($mode == 'site') ? '/site' : ''))),
+        //'data' => l(number_format($values['page_count']), 'admin/structure/kwresearch/keyword_pages/' . $values['kid'], array('query' => 'destination=admin/structure/kwresearch/keyword_list' . (($mode == 'site') ? '/site' : ''))),
         'data' => l(number_format($values['page_count']), 'admin/structure/kwresearch/keyword_pages/' . $values['kid'], array('query' => array('destination' => 'admin/structure/kwresearch/keyword_list'))),
         'class' => array('page_count'),
       );
@@ -229,6 +230,11 @@ function kwresearch_keywords_list_page($mode = 'site') {
       'enable_site_keyword_tool' => user_access('kwresearch admin site keywords'),
       'site_keywords_data' => isset($site_kw) ? $site_kw : '',
       'site_priority_options' => $site_priority_options,
+      'permissions' => array(
+        'query_keyword_stats' => user_access('kwresearch query keyword stats'),
+        'admin_site_keywords' => user_access('kwresearch admin site keywords'),
+        'admin_page_keywords' => user_access('kwresearch admin page keywords'),
+      ),
       'post_token' => drupal_get_token('kwresearch'),
     )), array('type' => 'setting', 'scope' => JS_DEFAULT));
   return $output;

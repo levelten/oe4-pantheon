@@ -20,7 +20,7 @@ function kwresearch_menu() {
     'description' => 'Research keywords and prioritize site keywords.',
     'page callback' => 'kwresearch_keywords_list_page',
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/site_report.inc',
   );
@@ -28,7 +28,7 @@ function kwresearch_menu() {
     'title' => 'Keyword lists',
     'page callback' => 'kwresearch_keywords_list_page',
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'file' => 'includes/site_report.inc',
     'weight' => -8,
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -38,7 +38,7 @@ function kwresearch_menu() {
     'page callback' => 'kwresearch_keywords_list_page',
     'page arguments' => array(4),
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'file' => 'includes/site_report.inc',
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -68,7 +68,7 @@ function kwresearch_menu() {
     'title' => 'Keyword stats',
     'page callback' => 'kwresearch_keyword_stats_report_page',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('kwresearch query keyword stats'),
     'type' => MENU_LOCAL_TASK,
     'weight' => -6,
     'file' => 'includes/stats_report.inc',
@@ -209,12 +209,20 @@ function kwresearch_util($pid) {
  */
 function kwresearch_permission() {
   return array(
+    'kwresearch access site keywords' => array(
+      'title' => t('Access site keywords'),
+      'description' => t('Enables viewing of the site keywords.'),
+    ),
+    'kwresearch query keyword stats' => array(
+      'title' => t('Query keyword stats'),
+      'description' => t('Enables access to keyword research form.'),
+    ),
     'kwresearch admin site keywords' => array(
-      'title' => t('kwresearch admin site keywords'),
+      'title' => t('Administer site keywords'),
       'description' => t('Enables site (global) level keyword management such as adding and prioritizing keywords.'),
     ),
     'kwresearch admin page keywords' => array(
-      'title' => t('kwresearch admin page keywords'),
+      'title' => t('Administer page keywords'),
       'description' => t('Enables page level keyword management.'),
     ),
   );

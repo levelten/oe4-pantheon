@@ -20,9 +20,26 @@ function enterprise_permissions_user_default_permissions_alter(&$permissions) {
     $existing = module_invoke_all('permission');
   }
 
+  $r = user_roles();
+  $roles = array();
+  foreach ($r as $rid => $role) {
+    $roles[$role] = 1;
+  }
+
   foreach ($permissions as $permission => $perm_item) {
+    // check if the permission exists (e.g. module is enabled), if not remove
+    // permission
     if (!isset($existing[$permission])) {
       unset($permissions[$permission]);
+      continue;
+    }
+    // check if role exists, if not remove the permission
+    if (!empty($perm_item['roles']) && is_array($perm_item['roles'])) {
+      foreach ($perm_item['roles'] as $name => $v) {
+        if (empty($roles[$name])) {
+          unset($permissions[$permission]['roles'][$name]);
+        }
+      }
     }
   }
 }

@@ -303,11 +303,12 @@ function intel_page_alter(&$page) {
   /**
    * check admin alter enhancements
    */
-  if ($_GET['q'] == 'admin/content') {
+
+  if ($_GET['q'] == 'admin/content' && user_access('view all intel reports')) {
     drupal_add_css(drupal_get_path('module', 'intel') . '/css/intel.report.css');
     drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.admin_content_alter.js');
   }
-  if ($_GET['q'] == 'admin/content/cta') {
+  if ($_GET['q'] == 'admin/content/cta' && user_access('view all intel reports')) {
     drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.admin_content_cta_alter.js');
   }
 

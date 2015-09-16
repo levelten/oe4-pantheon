@@ -57,10 +57,8 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
-
-  $a = module_exists('enterprise_base');
-  dsm($a);
-
+  require_once(drupal_get_path('module', 'enterprise_dashboard') . '/enterprise_dashboard.install');
+  enterprise_dashboard_enable();
   return '';
 }
 
@@ -331,6 +329,7 @@ function enterprise_apps_config_app($app_name, $config_settings = null) {
   enterprise_apps_config_nodes($config_settings, $config_info);
   enterprise_apps_config_menus($config_settings, $config_info);
   enterprise_apps_config_variables($config_settings, $config_info);
+  enterprise_apps_config_permissions($config_settings, $config_info);
   enterprise_apps_config_cta_selectors($config_settings, $config_info);
 
   // clear all caches just in case
@@ -666,7 +665,7 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
         //dsm("continue 1 $theme");
         continue;
       }
-      else if ($settings['admin_theme'] && ($theme != $admin_theme)) {
+      else if (!empty($settings['admin_theme']) && ($theme != $admin_theme)) {
         //dsm("continue 2 $theme");
         continue;
       }
@@ -806,8 +805,8 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
       $query = db_merge('block')
         ->key($key)
         ->fields($fields);
-dsm($key);
-dsm($fields);
+//dsm($key);
+//dsm($fields);
       $query->execute();
 
       db_delete('block_node_type')
@@ -1246,6 +1245,34 @@ function enterprise_apps_config_variables($config_settings, $config_info) {
   }
 }
 
+function enterprise_apps_config_permissions($config_settings, $config_info) {
+  //dsm($config_settings);
+  //dsm($config_info);
+  if (!isset($config_settings['permissions'])) {
+    return;
+  }
+
+  $existing = &drupal_static(__FUNCTION__);
+  if (!isset($existing)) {
+    $existing = module_invoke_all('permission');
+  }
+
+  $roles = user_roles();
+  foreach ($config_settings['permissions'] AS $name => $perms) {
+    $role = user_role_load_by_name($name);
+    if (!empty($role) && !empty($role->rid)) {
+      // check if the permission exists (e.g. module is enabled), if not remove
+      // permission
+      foreach ($perms as $perm_name => $v) {
+        if (!isset($existing[$perm_name])) {
+          unset($perms[$perm_name]);
+        }
+      }
+      user_role_change_permissions($role->rid, $perms);
+    }
+  }
+}
+
 function enterprise_apps_config_cta_selectors($config_settings, $config_info) {
 //dsm($config_settings);
 //dsm($config_info);
@@ -1356,7 +1383,21 @@ function enterprise_apps_uuid_entities_features_import_entity_alter(&$entity, $e
       }
     }
   }
-//dsm($entity);
+  // adjust user roles to match correct ids
+  if ($entity->entity_type == 'user') {
+    if (!empty($entity->roles)) {
+      $new = array();
+      foreach ($entity->roles as $name) {
+        $role = user_role_load_by_name($name);
+        if (!empty($role) && !empty($role->rid)) {
+          $new[$role->rid] = $name;
+        }
+      }
+      $entity->roles = $new;
+    }
+
+  }
+  //dsm($entity);
 }
 
 /**

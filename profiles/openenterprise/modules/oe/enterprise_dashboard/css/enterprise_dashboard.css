@@ -17,3 +17,7 @@
     padding-left: 0px;
     padding-right: 0px;
 }
+
+.tao .dashboard-quick-links.hide {
+    display: none;
+}
