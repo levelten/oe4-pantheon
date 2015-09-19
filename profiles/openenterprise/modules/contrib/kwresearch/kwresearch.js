@@ -99,13 +99,18 @@ var kwresearch = kwresearch || {};
 		kwresearch_get_buttons: function(keyword) {
 		    str = '<div class="kwresearch_actions">';
 		    title = Drupal.t('Keyword report');
-		    str += '<a href="#" onclick="kwresearch.kwresearch_launch_report(\'' + keyword + '\'); return false;" title="' + title + '" class="kwresearch-tool-button">';
-		    str += '<img src="' + Drupal.settings.kwresearch.module_path + '/icons/report.png" title="' + title + '" />';
-		    str += '</a>';
-
-		    str += $$.kwresearch_get_toggle_button(keyword, 'sitekw');
-		    str += $$.kwresearch_get_toggle_button(keyword, 'siteops');
-		    str += $$.kwresearch_get_toggle_button(keyword, 'pagekw');
+            if (Drupal.settings.kwresearch.permissions.query_keyword_stats) {
+                str += '<a href="#" onclick="kwresearch.kwresearch_launch_report(\'' + keyword + '\'); return false;" title="' + title + '" class="kwresearch-tool-button">';
+                str += '<img src="' + Drupal.settings.kwresearch.module_path + '/icons/report.png" title="' + title + '" />';
+                str += '</a>';
+            }
+            if (Drupal.settings.kwresearch.permissions.admin_site_keywords) {
+                str += $$.kwresearch_get_toggle_button(keyword, 'sitekw');
+                str += $$.kwresearch_get_toggle_button(keyword, 'siteops');
+            }
+            if (Drupal.settings.kwresearch.permissions.admin_page_keywords) {
+                str += $$.kwresearch_get_toggle_button(keyword, 'pagekw');
+            }
 		    str += $$.kwresearch_get_toggle_button(keyword, 'vocab');
 		    str += $$.kwresearch_get_toggle_button(keyword, 'mlt');
 		    str += $$.kwresearch_get_toggle_button(keyword, 'meta_keywords');

@@ -1043,40 +1043,68 @@ function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
     //return;
   }
 
-  if (empty($form['regions']['#type']) || ($form['regions']['#type'] != 'vertical_tabs')) {
+  if (0 && empty($form['display']['#type']) || 0 && ($form['display']['#type'] != 'vertical_tabs')) {
     $form['display_title'] = array(
       '#type' => 'item',
       '#title' => 'Display settings',
       '#weight' => 1,
     );
 
-    $form['regions'] = array(
+    $form['display'] = array(
       '#type' => 'vertical_tabs',
       '#weight' => 2,
       '#attached' => array(
         'js' => array('modules/block/block.js')
       ),
-      'regions' => $form['regions'] ,
+      'regions' => $form['regions'],
     );
+
+    $form['visibility_title']['#weight'] = 3;
+    $form['visibility']['#weight'] = 4;
+    unset($form['regions']);
   }
 
   $meta = cta_block_meta_load($form['module']['#value'], $form['delta']['#value']);
   if ($form['module']['#value'] != 'cta') {
     $f = cta_settings_form_fields($meta);
-
     $f['cta']['#type'] = 'fieldset';
-    $f['cta']['#group'] = 'Display';
 
-    $form['regions'] = array_merge($form['regions'], $f);
+    if (module_exists('enterprise_base')) {
+      drupal_add_js(drupal_get_path('module', 'enterprise_base') . '/js/enterprise_base.edit_form.js');
+      $f['cta']['#attributes']['class'][] = 'display_sidebar';
+      $form = array_merge($form, $f);
+    }
+    else if (!empty($form['display'])) {
+      $f['cta']['#group'] = 'Display';
+      $form['display'] = array_merge($form['display'], $f);
+    }
+    else {
+      $form = array_merge($form, $f);
+    }
   }
 
   $f = cta_popup_settings_form_fields($meta);
-  $f['cta_popup']['#group'] = 'Display';
-  $form['regions'] = array_merge($form['regions'], $f);
+  if (module_exists('enterprise_base')) {
+    drupal_add_js(drupal_get_path('module', 'enterprise_base') . '/js/enterprise_base.edit_form.js');
+    $f['cta_popup']['#attributes']['class'][] = 'display_sidebar';
+    $f['cta_popup']['#weight'] = 11;
+    if (empty($f['cta_popup']['data']['popup']['enabled']['#default_value'])) {
+      $f['cta_popup']['#collapsed'] = 1;
+    }
+
+    $form = array_merge($form, $f);
+  }
+  else if (!empty($form['display'])) {
+    $f['cta_popup']['#group'] = 'Display';
+    $form['display'] = array_merge($form['display'], $f);
+  }
+  else {
+    $form = array_merge($form, $f);
+  }
+
+  dsm($form);
 
   $form['#submit'][] = 'cta_block_admin_configure_submit';
-
-  //dsm($form);
 }
 
 function cta_block_admin_configure_submit($form, &$form_state) {
@@ -1364,6 +1392,7 @@ function cta_form_bean_form_alter(&$form, &$form_state, $form_id) {
   
   if (module_exists('enterprise_base')) {
     drupal_add_js(drupal_get_path('module', 'enterprise_base') . '/js/enterprise_base.edit_form.js');
+    $form['cta']['#type'] = 'fieldset';
     $form['cta']['#attributes']['class'][] = 'display_sidebar';
   }
 }

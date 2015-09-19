@@ -17,7 +17,7 @@
         colCount++;
       }
       });
-      //alert("ci=" + colIndex + ", cc=" + colCount);
+      //console.log("ci=" + colIndex + ", cc=" + colCount);
     
     }
     if (colIndex == 0) {
@@ -28,7 +28,7 @@
 	var imgsrc = ('https:' == document.location.protocol) ? 'https://' : 'http://';
     imgsrc += Drupal.settings.intel.config.cmsHostpath + Drupal.settings.intel.config.modulePath + "/images/ajax_loader_row.gif";
     $("#node-admin-content tr").each ( function( index ) {
-      var href = $(this).find("td:eq(1) a").attr("href");
+      var href = $(this).find("td:eq(" + (colIndex-1) + ") a").attr("href");
       if (typeof href != 'undefined') {
         hrefs.push(href);
         $(this).find("td:eq(" + (colIndex-1) + ")").after('<td data-path="' + href + '" colspan="3" style="text-align:center;"><img src="' + imgsrc + '"></td>');        

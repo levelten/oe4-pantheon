@@ -364,7 +364,7 @@ function socialmedia_googleplus_parser($values, $scope = 'site') {
     // check numeric id format.
     $pattern = '/(?:http(?:s)?:\/\/)?(plus\.)(google\.com\/)?([0-9]*)/i';
     if (!preg_match($pattern, $str, $matches, PREG_OFFSET_CAPTURE)) {
-      if (!isset($matches[3][0])) {
+      if (trim($values['url']) && !isset($matches[3][0])) {
         form_set_error('input_googleplus_url', t('Google+ URL invalid.'));
       }
       return FALSE;

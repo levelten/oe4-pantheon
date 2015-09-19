@@ -75,6 +75,11 @@ function kwresearch_keyword_stats_report_page($keyword = NULL) {
       'enable_site_keyword_tool' => user_access('kwresearch admin site keywords'),
       'site_keywords_data' => isset($site_kw) ? $site_kw : NULL,
       'site_priority_options' => $site_priority_options,
+      'permissions' => array(
+        'query_keyword_stats' => user_access('kwresearch query keyword stats'),
+        'admin_site_keywords' => user_access('kwresearch admin site keywords'),
+        'admin_page_keywords' => user_access('kwresearch admin page keywords'),
+      ),
       'post_token' => drupal_get_token('kwresearch'),
     )), array('type' => 'setting', 'scope' => JS_DEFAULT));
 
@@ -112,31 +117,25 @@ function kwresearch_stats_report_form($form, $form_state, $analysis, $ajax = FAL
 	   $form_e = kwresearch_stats_report_params_form_elements($analysis);
 	   $form['options'] = array_merge($form['options'], $form_e);
 	   */
-	  
+	  $has_options = 0;
 	  $sources = module_invoke_all('kwresearch_sources');
 	  if (is_array($sources)) {
 	    foreach ($sources as $aid => $source) {
 	      if (isset($source['form_options'])) {
-	        //$form['options'][$aid . '_stats_report_options'] = array(      
-	
-	//  '#type' => 'item',      
-	
-	//  '#title' => $source['title'] . ' ' . t('filters'),      
-	
-	        // );
-	
-	
 	        $form['options'][$aid . '_stats_report_options'] = array(
 	          '#type' => 'fieldset',
 	          '#title' => $source['title'] . ' ' . ('filters'),
 	          '#collapsible' => FALSE,
 	          '#collapsed' => FALSE,
 	        );
-	
 	        $form['options'][$aid . '_stats_report_options'] = array_merge($form['options'][$aid . '_stats_report_options'], call_user_func($source['form_options'], $analysis));
+          $has_options = 1;
 	      }
 	    }
 	  }
+    if (!$has_options) {
+      hide($form['options']);
+    }
   }
 
   $form['post_inputs'] = array(
@@ -146,6 +145,8 @@ function kwresearch_stats_report_form($form, $form_state, $analysis, $ajax = FAL
   if ($ajax) {
     $submit_btn = l(t('Submit'), base_path() . 'kwresearch/analyze_js', array('attributes' => array('id' => 'kwresearch-submit-button', 'class' => "contentanalysis-analyze-content contentanalysis-button", "onclick" => "kwresearch.kwresearch_analyze(); return (false);")));
     $back_btn = l(t('Back'), base_path() . '#', array('attributes' => array('class' => "contentanalysis-analyze-content contentanalysis-button", "onclick" => "contentanalysis.contentanalysis_back(); return (false);")));
+    //$submit_btn = '<input type="submit" value="Submit" onclick="contentanalysis.contentanalysis_back();">';
+    //$back_btn = '<input type="button" value="Back" onclick="contentanalysis.contentanalysis_back();">';
     $form['submit'] = array(
       '#type' => 'markup',
       '#markup' => '<div id="kwresearch-form-buttons">' . $submit_btn . ' ' . $back_btn . '</div>',

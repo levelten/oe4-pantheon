@@ -303,11 +303,12 @@ function intel_page_alter(&$page) {
   /**
    * check admin alter enhancements
    */
-  if ($_GET['q'] == 'admin/content') {
+
+  if ($_GET['q'] == 'admin/content' && user_access('view all intel reports')) {
     drupal_add_css(drupal_get_path('module', 'intel') . '/css/intel.report.css');
     drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.admin_content_alter.js');
   }
-  if ($_GET['q'] == 'admin/content/cta') {
+  if ($_GET['q'] == 'admin/content/cta' && user_access('view all intel reports')) {
     drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.admin_content_cta_alter.js');
   }
 
@@ -473,9 +474,12 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $page_attrs['rl'] = $uri['path'];
     //$page_attrs['url'] = url($page_attrs['rl']);
   }
-  
   //dsm($page_attrs);
-  //dsm($entity->uri);
+
+
+
+
+//dsm($entity->uri);
 
   if ($entity_type == 'node') {
     $entity_bundle = $entity->type;
@@ -497,7 +501,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   }
 
   $lang = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
-  
+  $fields_info = field_info_instances($entity_type, $entity_bundle);
   // track entity uid (e.g. node author)
   if (!isset($page_entity_settings['track_page_uid']) || $page_entity_settings['track_page_uid']) {
     $key = !empty($page_entity_settings['track_page_uid']) ? $page_entity_settings['track_page_uid'] : 'a';
@@ -524,33 +528,26 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
 
   $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
 
-  // Obtain field info if entities are set.
-  if (!empty($entity_bundle) && !empty($entity_type)) {
-    $fields_info = field_info_instances($entity_type, $entity_bundle);
-  }
-  
   // process vocabularies with global tracking enabled
-  if (!empty($fields_info)) {
-    foreach ($fields_info AS $key => $field) {
-      if (isset($entity->{$key}[$lang][0]['tid'])) {
-        // get field_info to get associated vocabulary
-        $field_info = field_info_field($key);
-        $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
-        // check if tracking is enabled at the content type level or on globally on the vocabulary
-        if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
-          $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
-          foreach ($entity->{$key}[$lang] AS $t) {
-            if (!isset($page_attrs[$page_attr_key])) {
-              $page_attrs[$page_attr_key] = array();
+  foreach ($fields_info AS $key => $field) {
+    if (isset($entity->{$key}[$lang][0]['tid'])) {
+      // get field_info to get associated vocabulary
+      $field_info = field_info_field($key);
+      $vocab_name = $field_info['settings']['allowed_values'][0]['vocabulary'];
+      // check if tracking is enabled at the content type level or on globally on the vocabulary
+      if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
+        $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
+        foreach ($entity->{$key}[$lang] AS $t) {
+          if (!isset($page_attrs[$page_attr_key])) {
+            $page_attrs[$page_attr_key] = array();
+          }
+          $page_attrs[$page_attr_key][$t['tid']] = '';
+          if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
+            $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
+            if (!isset($visitor_attrs[$visitor_attr_key])) {
+              $visitor_attrs[$visitor_attr_key] = array();
             }
-            $page_attrs[$page_attr_key][$t['tid']] = '';
-            if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
-              $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
-              if (!isset($visitor_attrs[$visitor_attr_key])) {
-                $visitor_attrs[$visitor_attr_key] = array();
-              }
-              $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
-            }
+            $visitor_attrs[$visitor_attr_key][$t['tid']] = '=+1';
           }
         }
       }
@@ -989,15 +986,13 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
     }
     $l10iq_pushes = array();
     //$l10iq_pushes[] = array('_setAccount', $l10i_ga_account, $l10i_ga_tracker_prefix);
-    if ($l10i_ga_account) {
-      $params = array();
-      $params['name'] = $l10i_ga_tracker_prefix;
-      if ($l10i_domain_name) {
-        $params['cookieDomain'] = $l10i_domain_name;
-        //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
-      }
-      $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
+    $params = array();
+    $params['name'] = $l10i_ga_tracker_prefix;
+    if ($l10i_domain_name) {
+      $params['cookieDomain'] =  $l10i_domain_name;
+      //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
     }
+    $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
 
     //$l10iq_pushes[] = array('_setOptions', (object) array());
     //$l10iq_pushes[] = array('set', (object) array());

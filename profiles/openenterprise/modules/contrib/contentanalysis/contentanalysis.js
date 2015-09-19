@@ -26,7 +26,9 @@ var contentanalysis = contentanalysis || {};
 		},
 
 		contentanalysis_back: function() {
-			$$.contentanalysis_show_analyzer_tab(contentanalysisPrevAnalyzerTab);
+          if ($$.contentanalysisPrevAnalyzerTab) {
+            $$.contentanalysis_show_analyzer_tab($$.contentanalysisPrevAnalyzerTab);
+          }
 		  //contentanalysis_show_report_tab(contentanalysisPrevReportTab);
 		},
 

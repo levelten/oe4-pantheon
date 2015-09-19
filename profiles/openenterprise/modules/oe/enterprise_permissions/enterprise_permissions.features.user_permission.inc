@@ -16,6 +16,9 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'admin_menu',
   );
@@ -26,6 +29,9 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'system',
   );
@@ -2383,6 +2389,55 @@ function enterprise_permissions_user_default_permissions() {
     'module' => 'geocoder',
   );
 
+  // Exported permission: 'kwresearch access site keywords'.
+  $permissions['kwresearch access site keywords'] = array(
+    'name' => 'kwresearch access site keywords',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'kwresearch',
+  );
+
+  // Exported permission: 'kwresearch access site keywords'.
+  $permissions['kwresearch query keyword stats'] = array(
+    'name' => 'kwresearch query keyword stats',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+      'writer' => 'writer',
+    ),
+    'module' => 'kwresearch',
+  );
+
+  // Exported permission: 'kwresearch access site keywords'.
+  $permissions['kwresearch admin site keywords'] = array(
+    'name' => 'kwresearch admin site keywords',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'manager' => 'manager',
+    ),
+    'module' => 'kwresearch',
+  );
+
+  // Exported permission: 'kwresearch access site keywords'.
+  $permissions['kwresearch admin page keywords'] = array(
+    'name' => 'kwresearch admin page keywords',
+    'roles' => array(
+      'administrator' => 'administrator',
+      'demo' => 'demo',
+      'editor' => 'editor',
+      'manager' => 'manager',
+    ),
+    'module' => 'kwresearch',
+  );
+
   // Exported permission: 'manage blocker blocks'.
   $permissions['manage blocker blocks'] = array(
     'name' => 'manage blocker blocks',
@@ -2746,6 +2801,7 @@ function enterprise_permissions_user_default_permissions() {
       'demo' => 'demo',
       'editor' => 'editor',
       'manager' => 'manager',
+      'writer' => 'writer',
     ),
     'module' => 'intel',
   );
@@ -2778,6 +2834,7 @@ function enterprise_permissions_user_default_permissions() {
     'roles' => array(
       'administrator' => 'administrator',
       'demo' => 'demo',
+      'manager' => 'manager',
     ),
     'module' => 'bean',
   );

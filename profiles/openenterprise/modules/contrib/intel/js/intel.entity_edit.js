@@ -32,6 +32,7 @@ Drupal.behaviors.intelSettingsSummary = {
 
   },
   setPageAttrDisplay: function () {
+        console.log(this);
         var a = this.value.split('.');
         var id = this.id;
         if (a[0] in Drupal.settings.intel.page_attribute_types) {
@@ -51,6 +52,7 @@ Drupal.behaviors.intelSettingsSummary = {
         }
   },
   setVisitorAttrDisplay: function () {
+      console.log(this);
       var a = this.value.split('.');
       var id = this.id;
       if (a[0] in Drupal.settings.intel.visitor_attribute_types) {

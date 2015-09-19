@@ -264,6 +264,9 @@ function intel_init_reports_vars($report_name, $report_type, $report_params = '-
     if ($report_type == 'trafficsource') {
       $vars['context'] = 'trafficsource';
     }
+    if ($report_type == 'visitor') {
+      $vars['context'] = 'visitor';
+    }
   }
 
   $attr_info = intel_get_page_attribute_info();
@@ -541,10 +544,10 @@ function intel_build_report($vars) {
   if ($error) {
     drupal_set_message($error, 'error');
   }
-  elseif (empty($_GET['return_type'])) {
-    $output .= intel_get_report_ajax_container();
+  elseif (empty($_GET['return_type']) && empty($vars['return_type'])) {
+    $output .= intel_get_report_ajax_container($vars);
   }
-  elseif ($_GET['return_type'] == 'nonajax') {
+  elseif ($_GET['return_type'] == 'nonajax' || (!empty($vars['return_type']) && ($vars['return_type'] == 'nonajax'))) {
     $output .= $vars['report callback']($vars);
   }
   elseif ($_GET['return_type'] == 'json') {
@@ -1187,8 +1190,8 @@ function intel_add_report_headers() {
   drupal_add_js(drupal_get_path('module', 'intel') . '/js/intel.report.js');
 }
 
-function intel_get_report_ajax_container() {
-  $output = '<div id="intel-report-container" data-q="' . $_GET['q'] . '" data-dates="' . ((!empty($_GET['dates'])) ? $_GET['dates'] : '') . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
+function intel_get_report_ajax_container($vars) {
+  $output = '<div id="intel-report-container" data-q="' . (!empty($vars['q']) ? $vars['q'] : $_GET['q']) . '" data-dates="' . ((!empty($_GET['dates'])) ? $_GET['dates'] : '') . '" data-refresh="' . ((!empty($_GET['refresh'])) ? 1 : 0) . '"><div class="loader"><img src="/' . drupal_get_path('module', 'intel') . '/images/ajax_loader_report.gif' . '" alt="loading LevelTen Intelligence"><br>Gathering Intelligence...</div></div>';
   return $output;
 }
 

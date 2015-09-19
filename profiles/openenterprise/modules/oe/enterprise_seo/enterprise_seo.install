@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_enable()
+ *
+ * Adds permissions
+ */
+/*
+function enterprise_seo_enable() {
+  $grants = array(
+    'writer' => array('access dashboard'),
+  );
+  $grants['editor'] = $grants['writer'];
+  $grants['marketer'] = $grants['writer'];
+  $grants['manager'] = $grants['writer'];
+  $grants['demo'] = $grants['writer'];
+
+  $roles = array();
+  foreach ($grants AS $name => $g) {
+    $role = user_role_load_by_name($name);
+    if (!empty($role) && !empty($role->rid)) {
+      $roles[$name] = $role;
+    }
+  }
+
+  foreach ($roles as $name => $role) {
+    user_role_grant_permissions($role->rid, $grants[$name]);
+  }
+}
+*/

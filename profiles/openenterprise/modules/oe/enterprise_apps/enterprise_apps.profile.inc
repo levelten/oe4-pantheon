@@ -179,6 +179,26 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#default_value' => TRUE,
   );
 
+  $form['rolesfs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Roles'),
+    '#description' => t('User roles added during the installation.'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $options = array(
+    'writer' => t('Writer'),
+    'editor' => t('Editor'),
+    'manager' => t('Manager'),
+    'demo' => t('Demo (admin)'),
+  );
+  $form['rolesfs']['roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Roles',
+    '#options' => $options,
+    '#default_value' => array('writer', 'editor', 'manager'),
+  );
 
   $link_options = array(
     'attributes' => array(
@@ -214,7 +234,6 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#default_value' => '',
     '#description' => st('Input the property api key.'),
   );
-
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -281,7 +300,27 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
+  watchdog('install-form', print_r($form_state['values'], 1));
+
+
   if ($form_state['values']['op'] == t('Continue')) {
+    if (!empty($form_state['values']['roles']) && is_array($form_state['values']['roles'])) {
+      $w = 2;
+      foreach ($form_state['values']['roles'] as $name => $v) {
+        if ($v) {
+          $role = new stdClass();
+          $role->name = $name;
+          $role->weight = $w++;
+          user_role_save($role);
+        }
+      }
+      // sort admin role to end of list
+      $r = user_role_load_by_name('administrator');
+      $r->weight = $w;
+      user_role_save($r);
+    }
+
+
     $profile_settings = array();
     if (isset($form_state['api_profile_settings'])) {
       $profile_settings = $form_state['api_profile_settings'];

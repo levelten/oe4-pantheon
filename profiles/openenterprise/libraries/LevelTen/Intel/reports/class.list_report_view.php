@@ -58,6 +58,14 @@ class ListReportView extends ReportView {
       }
     }
 
+    /*
+    if ($context == 'visitor') {
+      $pageviewScope = 'pageview';
+      $eventScope = 'pageview';
+      $goalScope = 'pageview';
+    }
+    */
+
     // set formaters and data sources for standard & trend reports
     $dataSource = $indexBy;
     $metricSource = $indexBy;

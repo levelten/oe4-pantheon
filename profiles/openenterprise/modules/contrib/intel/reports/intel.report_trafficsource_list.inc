@@ -6,12 +6,11 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_trafficsource_list_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
+function intel_trafficsource_list_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-', $vars = array()) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
-  $vars = array();
   if (!empty($entity_type) && $entity_type != '-') {
     $vars['entity_type'] = $entity_type;
     $vars['entity'] = $entity;
@@ -32,7 +31,6 @@ function intel_trafficsource_list_report($vars) {
 
   $indexBy = $vars['indexBy'] = $vars['report_modes'][0];
   $vars['indexByLabel'] = $vars['report_info']['title'];
-
   $output = '';
 
   $ga_data = new LevelTen\Intel\GAModel();

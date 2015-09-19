@@ -17,7 +17,7 @@ function prev_next_menu() {
     'description' => 'Prev/Next API for nodes',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('prev_next_admin'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
   );
 
   $items['admin/config/system/prev_next/settings'] = array(
@@ -30,7 +30,7 @@ function prev_next_menu() {
     'title' => 'Prev/Next reset',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('prev_next_reindex_confirm'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
   );
 
   return $items;

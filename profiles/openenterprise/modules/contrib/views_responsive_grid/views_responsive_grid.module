@@ -53,6 +53,7 @@ function template_preprocess_views_view_responsive_grid(&$vars) {
     if ($item_count < $element_count) {
       $element_count = $item_count;
     }
+
     $preset = gridmagic_get_row_preset_info($options['gridmagic_row_preset']);
     $gridmagic_attrs = gridmagic_get_element_attributes($preset, 0, $item_count);
     if (!empty($gridmagic_attrs['class']) && is_array($gridmagic_attrs['class'])) {
