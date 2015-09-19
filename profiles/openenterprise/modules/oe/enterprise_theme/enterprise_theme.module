@@ -44,3 +44,27 @@ function enterprise_theme_page_alter(&$page) {
     drupal_add_css($module_path . '/enterprise_theme.admin.css');
   }
 }
+
+/**
+ * Implementation of hook_theme().
+ */
+function enterprise_theme_theme($existing, $type, $theme, $path) {
+  return array(
+    'pictaculous_info' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-info',
+    ),
+    'pictaculous_kuler' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-kuler',
+    ),
+    'pictaculous_colour' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-colour',
+    ),
+    'pictaculous_color_palette' => array(
+      'variables' => array('colors' => NULL),
+      'template' => 'templates/pictaculous-color-palette',
+    ),
+  );
+}

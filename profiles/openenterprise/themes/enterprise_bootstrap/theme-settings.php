@@ -609,6 +609,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_color']['less_colors'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('LESS Colors'),
+		'#weight' => 1,
 	);
 	
 	$color_attrs = array(
@@ -675,7 +676,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		$form['enterprise_bootstrap_color']['colourlovers'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('COLOURLovers Palettes'),
-			'#weight' => -1,
+			'#weight' => -2,
 			'#description' => t('Enter the URL below to request your palettes. You can use the !playground to get your API URL. This works with !palettes only.', array('!playground' => l('Colourlovers Playground', 'admin/appearance/colourlovers'), '!palettes' => '<strong>PALETTES</strong>')),
 		);
 		
@@ -722,6 +723,31 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	  );
 	}
 
+	// Pictaculous settings
+	if (module_exists('pictaculous')) {
+		$form['enterprise_bootstrap_color']['pictaculous'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Pictaculous Palettes'),
+			'#description' => t('You must upload an image using the !pictaculous interface, we will pull the settings from there.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))),
+			'#weight' => -1,
+		);
+
+		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'] = array(
+			'#type' => 'value',
+			'#title' => t('Pictaculous Object'),
+			'#value' => theme_get_setting('pictaculous_object'),
+		);
+		
+		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
+			'#type' => 'fieldset',
+		);
+
+		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container']['pictaculous_options'] = array(
+	    '#type' => 'markup',
+			'#markup' => _enterprise_bootstrap_pictaculous(theme_get_setting('pictaculous_object')),
+	  );
+	}
+
 	// Add related CSS/JS
 	$theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 	$form['#attached']['css'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.css';
@@ -729,24 +755,55 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['#attached']['js'][] = $theme_path . '/js/enterprise_bootstrap_admin.js';
 
 	// Add form submit handler.
+	$form['#validate'][] = '_enterprise_bootstrap_form_validate';
 	$form['#submit'][] = '_enterprise_bootstrap_form_submit';
-
 
 } // end settings_alter
 
 /*
- * Form submit handler for Enterprise Bootstrap.
+ * Validate handler for Enterprise Bootstrap.
  */
-function _enterprise_bootstrap_form_submit($form, &$form_state) {
-  $input = $form_state['values'];
+function _enterprise_bootstrap_form_validate($form, &$form_state) {
+	$input = $form_state['values'];
 
-  // Check for Colourlovers
+	// Check for Colourlovers
   if (module_exists('colourlovers')) {
   	require_once(drupal_get_path('module', 'colourlovers') . '/colourlovers.admin.inc');
 		if (!empty($input['cl_palette_mode'])) {
   		variable_set('cl_palette_options', _enterprise_bootstrap_colourlovers($input['cl_palette_mode'], $input['cl_palette_param']));
   	}  	
   }
+
+  // Check for Pictaculous
+  if (module_exists('pictaculous')) {
+  	// Get value from Pictaculous.
+  	$pictaculous_object = variable_get('pictaculous_object', NULL);
+
+  	// If image isn't available in Pictaculous, throw error.
+  	if (!empty($pictaculous_object)) {
+  		
+  		$pictaculous_theme = $form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'];
+
+  		// If FID's don't match, grab newest info.
+  		if (isset($pictaculous_theme['fid'])) {
+  			if ($pictaculous_theme['fid'] != $pictaculous_object['fid']) {
+  				form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+  			}
+  		} else {
+  			form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+  		}
+
+  	} else {
+  		form_set_error('pictaculous_object', t('You must upload an image to the !pictaculous admin form to generate palettes.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))));
+  	}
+	}
+}
+
+/*
+ * Form submit handler for Enterprise Bootstrap.
+ */
+function _enterprise_bootstrap_form_submit($form, &$form_state) {
+  $input = $form_state['values'];
 
   // Pull form values, assign to single variable.
   $less_colors = array();
@@ -779,6 +836,9 @@ function _enterprise_bootstrap_form_submit($form, &$form_state) {
 
 }
 
+/**
+ * Generate palettes from COLOURLovers.
+ */
 function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
 	// Set up API call and palettes.
 	$params = array();
@@ -827,4 +887,53 @@ function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
 		$badges = '<div class="colourlovers-images">'.implode('', $badge).'</div>';
 		return $badges;
 	}
+}
+
+/**
+ * Generate palettes from Pictaculous.
+ */
+function _enterprise_bootstrap_pictaculous($object) {
+	$output = '';
+
+	if (is_array($object) && !empty($object)) {
+		foreach ($object as $key => $value) {
+			if (is_array($value) || is_object($value)) {
+
+				switch ($key) {
+
+					case 'info':
+						$value->fid = $object['fid'];
+						$value->title = $object['title'];
+						$element = array(
+							'#title' => t('Pictaculous: Image'),
+							'#description' => t('The palette returned based on the image supplied.'),
+							'#children' => theme('pictaculous_info', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+						break;
+
+					case 'kuler_themes':
+						$element = array(
+							'#title' => t('Pictaculous: Adobe Kuler'),
+							'#description' => t('Suggestions supplied by Adober Kuler.'),
+							'#children' => theme('pictaculous_kuler', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+					break;
+
+					case 'cl_themes':
+						$element = array(
+							'#title' => t('Pictaculous: COLOURLovers'),
+							'#description' => t('Suggestions supplied by COLOURLovers.'),
+							'#children' => theme('pictaculous_colour', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+					break;
+					
+				}
+			}
+		}
+	}
+
+	return $output;
 }
