@@ -600,68 +600,70 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
-	// Color settings
-	$form['enterprise_bootstrap_color'] = array(
-		'#type' => 'fieldset',
-		'#group' => 'enterprise_bootstrap',
-		'#title' => t('Colors'),
-	);
-	$form['enterprise_bootstrap_color']['less_colors'] = array(
-		'#type' => 'fieldset',
-		'#title' => t('LESS Colors'),
-		'#weight' => 1,
-	);
-	
-	$color_attrs = array(
-		'class' => array(
-			'minicolor'
-		)
-	);
-	
-	$form['enterprise_bootstrap_color']['less_colors']['brand_color_1'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Brand Primary'),
-		'#default_value' => theme_get_setting('brand_color_1'),
-		'#attributes' => $color_attrs,
-		'#prefix' => '<div class="inline-field">',
-		'#suffix' => '</div>',
-	);
-	
-	$form['enterprise_bootstrap_color']['less_colors']['brand_color_2'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Brand Secondary'),
-		'#default_value' => theme_get_setting('brand_color_2'),
-		'#attributes' => $color_attrs,
-		'#prefix' => '<div class="inline-field">',
-		'#suffix' => '</div>',
-	);
-	
-	$form['enterprise_bootstrap_color']['less_colors']['brand_color_3'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Brand Accent'),
-		'#default_value' => theme_get_setting('brand_color_3'),
-		'#attributes' => $color_attrs,
-		'#prefix' => '<div class="inline-field">',
-		'#suffix' => '</div>',
-	);
-	
-	$form['enterprise_bootstrap_color']['less_colors']['brand_color_4'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Brand Accent 2'),
-		'#default_value' => theme_get_setting('brand_color_4'),
-		'#attributes' => $color_attrs,
-		'#prefix' => '<div class="inline-field">',
-		'#suffix' => '</div>',
-	);
+	// Color settings if LESS module enabled.
+	if (module_exists('less')) {
+		$form['enterprise_bootstrap_color'] = array(
+			'#type' => 'fieldset',
+			'#group' => 'enterprise_bootstrap',
+			'#title' => t('Colors'),
+		);
+		$form['enterprise_bootstrap_color']['less_colors'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('LESS Colors'),
+			'#weight' => 1,
+		);
+		
+		$color_attrs = array(
+			'class' => array(
+				'minicolor'
+			)
+		);
+		
+		$form['enterprise_bootstrap_color']['less_colors']['brand_color_1'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Brand Primary'),
+			'#default_value' => theme_get_setting('brand_color_1'),
+			'#attributes' => $color_attrs,
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+		
+		$form['enterprise_bootstrap_color']['less_colors']['brand_color_2'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Brand Secondary'),
+			'#default_value' => theme_get_setting('brand_color_2'),
+			'#attributes' => $color_attrs,
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+		
+		$form['enterprise_bootstrap_color']['less_colors']['brand_color_3'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Brand Accent'),
+			'#default_value' => theme_get_setting('brand_color_3'),
+			'#attributes' => $color_attrs,
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+		
+		$form['enterprise_bootstrap_color']['less_colors']['brand_color_4'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Brand Accent 2'),
+			'#default_value' => theme_get_setting('brand_color_4'),
+			'#attributes' => $color_attrs,
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
 
-	$form['enterprise_bootstrap_color']['less_colors']['brand_color_5'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Brand Accent 3'),
-		'#default_value' => theme_get_setting('brand_color_5'),
-		'#attributes' => $color_attrs,
-		'#prefix' => '<div class="inline-field">',
-		'#suffix' => '</div>',
-	);
+		$form['enterprise_bootstrap_color']['less_colors']['brand_color_5'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Brand Accent 3'),
+			'#default_value' => theme_get_setting('brand_color_5'),
+			'#attributes' => $color_attrs,
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+	}
 
 
 	// Extra
@@ -738,14 +740,18 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'#value' => theme_get_setting('pictaculous_object'),
 		);
 		
-		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
-			'#type' => 'fieldset',
-		);
+		if ($pictaculous_object = theme_get_setting('pictaculous_object')) {
+			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
+				'#type' => 'fieldset',
+			);
 
-		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container']['pictaculous_options'] = array(
-	    '#type' => 'markup',
-			'#markup' => _enterprise_bootstrap_pictaculous(theme_get_setting('pictaculous_object')),
-	  );
+			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container']['pictaculous_options'] = array(
+		    '#type' => 'markup',
+				'#markup' => _enterprise_bootstrap_pictaculous($pictaculous_object),
+		  );
+		} else {
+			drupal_set_message(t('Re-save this form to pull in the palettes provided by Pictaculous.'), 'status', FALSE);
+		}
 	}
 
 	// Add related CSS/JS
@@ -756,7 +762,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 
 	// Add form submit handler.
 	$form['#validate'][] = '_enterprise_bootstrap_form_validate';
-	$form['#submit'][] = '_enterprise_bootstrap_form_submit';
 
 } // end settings_alter
 
@@ -797,43 +802,6 @@ function _enterprise_bootstrap_form_validate($form, &$form_state) {
   		form_set_error('pictaculous_object', t('You must upload an image to the !pictaculous admin form to generate palettes.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))));
   	}
 	}
-}
-
-/*
- * Form submit handler for Enterprise Bootstrap.
- */
-function _enterprise_bootstrap_form_submit($form, &$form_state) {
-  $input = $form_state['values'];
-
-  // Pull form values, assign to single variable.
-  $less_colors = array();
-  foreach ($input as $key => $value) {
-    switch ($key) {
-    	case 'brand_color_1':
-    		$less_colors['brand-primary'] = $value;
-    		break;
-    	case 'brand_color_2':
-    		$less_colors['brand-secondary'] = $value;
-    		break;
-    	case 'brand_color_3':
-    		$less_colors['brand-accent'] = $value;
-    		break;
-    	case 'brand_color_4':
-    		$less_colors['brand-accent-2'] = $value;
-    		break;
-    	case 'brand_color_5':
-    		$less_colors['brand-accent-3'] = $value;
-    		break;
-
-    	default:
-    		# code...
-    		break;
-    }
-  }
-
-  // Assign to variable table.
-  variable_set('less_colors', $less_colors);
-
 }
 
 /**
