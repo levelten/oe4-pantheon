@@ -220,7 +220,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   }
 
   // Option to use Blokk font.
-  if(theme_get_setting('enterprise_bootstrap_blokkfont')) {
+  if (theme_get_setting('enterprise_bootstrap_blokkfont')) {
     $blokk_path = $theme_path .'/fonts/blokkneue/blokkneue.css';
     $options = array(
       'group' => CSS_THEME,
