@@ -3,6 +3,14 @@
  * @file
  */
 
+/**
+ * Implements hook_install();
+ */
+function enterprise_theme_install() {
+	// Update to new color palette system if needed.
+	_enterprise_theme_color_update();
+}
+
  /**
   * Enable RespondJS for media query fix in IE8.
   */
@@ -12,3 +20,33 @@
      module_enable(array('respondjs'), TRUE);
    }
  }
+
+/**
+  * Update LESS colors for new palette integration.
+  */
+function enterprise_theme_update_7001() {
+	_enterprise_theme_color_update();
+}
+
+/**
+* Function updates older color palettes.
+*/
+function _enterprise_theme_color_update() {
+	// Get theme and current palette.
+	$theme_name = variable_get('theme_default', NULL);
+	$theme_settings = 'theme_'.$theme_name.'_settings';
+	$settings = variable_get($theme_settings, NULL);
+	
+	if ($settings && $color_palette = $settings['palette']) {
+		// Swap color. Use old value or set to default Bella.
+		$settings['brand_color_1'] = (!empty($color_palette['brandprimary'])) ? strtoupper($color_palette['brandprimary']) : '#EA9B3E';
+		$settings['brand_color_2'] = (!empty($color_palette['brandsecondary'])) ? strtoupper($color_palette['brandsecondary']) : '#F5F5F5';
+		$settings['brand_color_3'] = (!empty($color_palette['brandaccent'])) ? strtoupper($color_palette['brandaccent']) : '#FFFFFF';
+		$settings['brand_color_4'] = (!empty($color_palette['brandaccent2'])) ? strtoupper($color_palette['brandaccent2']) : '#EA9B3E';
+		$settings['brand_color_5'] = (!empty($color_palette['brandaccent3'])) ? strtoupper($color_palette['brandaccent3']) : '#EA9B3E';
+
+		// Update new theme settings.
+		variable_set($theme_settings, $settings);
+		less_flush_caches();
+	} 
+}
