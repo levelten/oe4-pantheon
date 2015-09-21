@@ -19,7 +19,7 @@ function enterprise_theme_less_variables_alter(&$less_variables, $system_name) {
     $color_pallete = array(
       'brand-primary' => '#EA9B3E',   // Orange
       'brand-secondary' => '#F5F5F5', // Gray
-      'brand-accent' => '#FFFFF',     // White
+      'brand-accent' => '#FFFFFF',     // White
       'brand-accent2' => '#EA9B3E',   // Orange
       'brand-accent3' => '#EA9B3E',   // Orange
     );

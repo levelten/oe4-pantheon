@@ -200,6 +200,13 @@ function openenterprise_install_theme_settings() {
     // turn off non block primary nav element, main-menu implemented as block
     $settings['toggle_main_menu'] = 0;
 
+    // Set default colors for LESS integration.
+    $settings['brand_color_1'] = '#EA9B3E';
+    $settings['brand_color_2'] = '#F5F5F5';
+    $settings['brand_color_3'] = '#FFFFFF';
+    $settings['brand_color_4'] = '#EA9B3E';
+    $settings['brand_color_5'] = '#EA9B3E';
+
     variable_set('theme_' . $theme . '_settings', $settings);
   }
 
