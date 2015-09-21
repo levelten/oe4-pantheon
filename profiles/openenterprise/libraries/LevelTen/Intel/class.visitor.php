@@ -15,6 +15,8 @@ require_once 'class.apiclient.php';
 
 class ApiVisitor {
 	protected $vtk;
+  protected $uid;
+  protected $cid;
 	public $apiVisitor;
 	protected $apiClient;
 	protected $cookies = array();
@@ -44,8 +46,38 @@ class ApiVisitor {
   }
 
   public static function extractVtk() {
-    $vtk = self::getCookie('l10ivtk');
-    return !empty($vtk) ? $vtk : '';
+    $d = self::extractCookieVtk();
+    return !empty($d['vtk']) ? $d['vtk'] : '';
+  }
+
+  public static function extractUserId() {
+    $d = self::extractCookieVtk();
+    return !empty($d['userId']) ? $d['userId'] : '';
+  }
+
+  public static function extractCid() {
+    $cid = self::getCookie('_ga');
+    if (empty($cid)) {
+      return '';
+    }
+    $cid = explode('.', $cid);
+    if (!empty($cid[3])) {
+      return $cid[2] . '.' . $cid[3];
+    }
+    return '';
+  }
+
+  public static function extractCookieVtk() {
+    $cookie = self::getCookie('l10ivtk');
+    $d = array();
+    if (!empty($cookie)) {
+      $cookie = explode('.', $cookie);
+      $d['vtk'] = $cookie[0];
+      if (isset($cookie[1])) {
+        $d['userId'] = !empty($cookie[1]) ? $cookie[1] : $d['vtk'];
+      }
+    }
+    return $d;
   }
   
   public static function extractCookieVa() {
@@ -63,6 +95,14 @@ class ApiVisitor {
   
   public function getVtk() {
     return $this->vtk;
+  }
+
+  public function getUid() {
+    return $this->uid;
+  }
+
+  public function getCid() {
+    return $this->cid;
   }
   
   public function getVisitor() {

@@ -88,14 +88,17 @@ function intel_twilio_process_incoming($number, $options, &$watchdog) {
   if (empty($visitor->name) && isset($_REQUEST['CallerName'])) {
     $visitor->setName($_REQUEST['CallerName']);
   }
+  /*
   if (empty($visitor->vtk)) {
     $session = $tracker->sessionInit();
     if (isset($session['vtk'])) {
       $visitor->setIdentifier('vtk', $session['vtk']);
     }
   }
+  */
   if (isset($visitor->vtk)) {
-    $tracker->setVtk($session['vtk']);
+    $tracker->setVtk($visitor->vtk);
+    $tracker->setUid('.');
   }
 
   $visitor->contact_created = REQUEST_TIME;
@@ -183,9 +186,11 @@ if (!empty($_REQUEST['debug'])) {
 
   intel_phonecall_save($phonecall);
   $watchdog .= "phonecall:" . "<br>\n" . print_r($phonecall, 1) . "<br>\n<br>\n";
+  $tracker->setCid('tel.' . $phonecall->cid);
 
   $watchdog .= "track:" . "<br>\n" . print_r($track, 1) . "<br>\n<br>\n";
   if (!empty($track['category'])) {
+    /*
     $event = array(
       'category' => $track['category'],
       'action' => $track['number_title'],
@@ -193,6 +198,14 @@ if (!empty($_REQUEST['debug'])) {
       'value' => $track['value'],
     );
     $ret = $tracker->trackEvent($event);
+    */
+    $event = array(
+      'ec' => $track['category'],
+      'ea' => $track['number_title'],
+      'el' => $track['to_number'],
+      'ev' => $track['value'],
+    );
+    $ret = $tracker->sendEvent($event);
     if (!empty($_REQUEST['debug'])) {
       dsm('$event:'); dsm($event);//
       dsm('tracker_return:'); dsm($ret);//

@@ -345,6 +345,10 @@ class IntelVisitor extends Entity {
   public function setVtk($vtk) {
     $this->vtk = $vtk;
   }
+
+  public function setUserId($userId) {
+    $this->userId = $userId;
+  }
   
   public function setContactCreated($time = null) {
     $this->contact_created = isset($time) ? $time : REQUEST_TIME;
@@ -357,6 +361,16 @@ class IntelVisitor extends Entity {
   public static function extractVtk() {
     intel_include_library_file('class.visitor.php');
     return \LevelTen\Intel\ApiVisitor::extractVtk();
+  }
+
+  public static function extractUserId() {
+    intel_include_library_file('class.visitor.php');
+    return \LevelTen\Intel\ApiVisitor::extractUserId();
+  }
+
+  public static function extractCid() {
+    intel_include_library_file('class.visitor.php');
+    return \LevelTen\Intel\ApiVisitor::extractCid();
   }
 
   /**

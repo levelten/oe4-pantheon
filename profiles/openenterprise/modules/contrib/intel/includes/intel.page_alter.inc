@@ -495,6 +495,11 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $path_entity = 1;
   }
 
+  if (empty($entity_bundle)) {
+    watchdog('intel-entity-attrs', print_r($entity, 1));
+    return;
+  }
+
   $page_entity_settings = array();
   if (!empty($entity_type) && !empty($entity_bundle)) {
     $page_entity_settings = variable_get('intel_entity_settings_' . $entity_type . '__' . $entity_bundle, array());
@@ -884,6 +889,8 @@ function intel_parse_cms_url() {
  * @return string - embed code
  */
 function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'latest', $terminator = "") {
+  global $user;
+
   $script = '';
   $l10i_ga_account = variable_get('intel_ga_account', '');
   // if l01i_ga_account not set, don't generate embed
@@ -991,6 +998,9 @@ function intel_get_js_embed($type = 'l10i', $mode = 'external', $version = 'late
     if ($l10i_domain_name) {
       $params['cookieDomain'] =  $l10i_domain_name;
       //$l10iq_pushes[] = array('_setDomainName', $l10i_domain_name);
+    }
+    if (!empty($user->uid)) {
+      $params['userId'] =  '.';
     }
     $l10iq_pushes[] = array('ga.create', $l10i_ga_account, 'auto', $params);
 
@@ -1148,7 +1158,15 @@ function intel_js_alter(&$javascript) {
     //$str = '_l10iq.push(["set", "config", ' . drupal_json_encode($options['config']) . ']);' . "\n";
     if (isset($options['pushes']) && is_array($options['pushes'])) {
       foreach ($options['pushes'] as $cm => $push) {
-        $pushstr .= $io_name . '("' . $cm . '",' . drupal_json_encode($push) . ');' . "\n";
+        if ($cm == 'setUserId') {
+          $pushstr .= $io_name . '("' . $cm . '","' . $push[0][0];
+          if (!empty($push[0][1])) {
+            $pushstr .= '","' . $push[0][1];
+          }
+          $pushstr .= '");' . "\n";
+        } else {
+          $pushstr .= $io_name . '("' . $cm . '",' . drupal_json_encode($push) . ');' . "\n";
+        }
         //$str .= '_l10iq.push(["' . $cm . '",' . drupal_json_encode($push) . ']);' . "\n";
       }
     }
@@ -1523,6 +1541,8 @@ if (!empty($_GET['debug']) || !empty($debug)) {
   if (!empty($visitor->vid)) {
     intel_visitor_save($visitor);
     //watchdog('intel.page_alter 992', print_r($visitor, 1));
+    $userId = IntelVisitor::extractUserId();
+    intel_add_page_intel_push(array('setUserId', '.', $visitor->vtk));
   }
 
   // queue to sync visitor data
@@ -1559,6 +1579,8 @@ if (!empty($_GET['debug']) || !empty($debug)) {
   if (!empty($visitor->contact_created)) {
     intel_add_page_intel_push(array('set', "va.k", ''));
   }
+
+
 
   if (module_exists('rules')) {
     rules_invoke_event('intel_form_submission', $submission->type, $submission->fid, $visitor);
