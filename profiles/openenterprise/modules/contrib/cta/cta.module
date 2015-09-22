@@ -1102,8 +1102,6 @@ function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
     $form = array_merge($form, $f);
   }
 
-  dsm($form);
-
   $form['#submit'][] = 'cta_block_admin_configure_submit';
 }
 

@@ -207,17 +207,20 @@ function intel_dashboard_report($vars) {
   $ga_data->loadFeedData('entrances_events_valued');
   
   $ga_data->setRequestDefaultParam('max_results', 5 * $number_of_days);
-  $submission_goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
-
+  $conversion_goals = variable_get('intel_submission_goals', intel_get_submission_goals_default());
+  $a = variable_get('intel_phonecall_goals', intel_get_phonecall_goals_default());
+  if (is_array($a)) {
+    $conversion_goals += $a;
+  }
   $i = 0;
 //$ga_data->setDebug(1);
-  foreach ($submission_goals AS $key => $goal) {
+  foreach ($conversion_goals AS $key => $goal) {
     if ($i == 0) {
       $details = array();
     }
-    $id = $submission_goals[$key]['ga_id'];
+    $id = $conversion_goals[$key]['ga_id'];
     $details[] = $id;      
-    $goals["n$id"] = $submission_goals[$key]['title'];
+    $goals["n$id"] = $conversion_goals[$key]['title'];
     $i++;
     if ($i >= 5) {
       $ga_data->loadFeedData('entrances_goals', 'date', $details); 
