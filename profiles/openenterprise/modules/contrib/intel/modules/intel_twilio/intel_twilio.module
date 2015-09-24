@@ -41,17 +41,18 @@ function intel_twilio_twilio_voice_incoming($number, $options) {
   if (!$phonenumber) {
     $say = t('This phone number has not been configured.');
     $watchdog = $say . "<br>\n<br>\n" . $watchdog;
-    watchdog('intel_twilio voice incoming', $watchdog, WATCHDOG_ERROR);
+    watchdog('intel_twilio voice incoming', $watchdog, array(), WATCHDOG_ERROR);
     echo intel_twilio_say_response($say);
     return;
   }
   if (empty($phonenumber['handling_forwarding_number']) && empty($phonenumber['handling_twiml'])) {
     $say = t('Handling options have not been set on this phone number.');
     $watchdog = $say . "<br>\n<br>\n" . $watchdog;
-    watchdog('intel_twilio voice incoming', $watchdog, WATCHDOG_ERROR);
+    watchdog('intel_twilio voice incoming', $watchdog, array(), WATCHDOG_ERROR);
     echo intel_twilio_say_response($say);
     return;
   }
+
 
   if (!empty($phonenumber['handling_twiml'])) {
     $twiml = twilio_twiml_load($phonenumber['handling_twiml']);
@@ -96,6 +97,21 @@ function intel_twilio_process_incoming($number, $options, &$watchdog) {
     }
   }
   */
+  // either uid or cid needs to be set for ga so that the session can be updated
+  // later
+
+  $key = ':tel:' . $from_num;
+  $cid_arr = $visitor->getVar('data', 'cid', $key);
+  if (empty($cid_arr) || empty($cid_arr['cid'])) {
+    $cid_arr = array(
+      'type' => 'tel',
+      'cid' => intel_gen_cid(),
+      'id' =>  $key,
+    );
+    $visitor->setVar('data', 'cid', $key, $cid_arr);
+  }
+  $tracker->setCid($cid_arr['cid']);
+
   if (isset($visitor->vtk)) {
     $tracker->setVtk($visitor->vtk);
     $tracker->setUid('.');
@@ -186,6 +202,7 @@ if (!empty($_REQUEST['debug'])) {
 
   intel_phonecall_save($phonecall);
   $watchdog .= "phonecall:" . "<br>\n" . print_r($phonecall, 1) . "<br>\n<br>\n";
+  $visitor->setVar('visitor', '');
   $tracker->setCid('tel.' . $phonecall->cid);
 
   $watchdog .= "track:" . "<br>\n" . print_r($track, 1) . "<br>\n<br>\n";
