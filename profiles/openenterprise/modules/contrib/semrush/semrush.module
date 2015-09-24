@@ -1,0 +1,641 @@
+<?php
+
+/**
+ * @file
+ * Analyzes node content for search engine optimization recommendations using the Scribe SEO optimizer
+ */
+
+DEFINE('SEMRUSH_LINK_API_ACCOUNT', 'http://www.semrush.com/keyword-tool-api-drupal');
+DEFINE('SEMRUSH_PHASE_FULLSEARCH_DISPLAY_LIMIT_DEFAULT', 100);
+DEFINE('SEMRUSH_CACHE_TIME', 604800);
+
+/**
+ * Implements hook_menu().
+().
+ */
+function semrush_menu() {
+  $items = array();
+  $items['admin/config/services/semrush'] = array(
+    'title' => 'SEMRush',
+    'description' => 'Configure SEMRush API and options.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('semrush_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin semrush'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'semrush.admin.inc',
+  );
+  $items['admin/structure/kwresearch/semrush'] = array(
+    'title' => 'SEMRush',
+    'description' => 'Research keywords using SEMRush API.',
+    'page callback' => 'semrush_keyword_stats_report_page',
+    'page arguments' => array('keywords'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access semrush reports'),
+    'file' => 'semrush.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -6,
+  );
+  $items['admin/structure/kwresearch/semrush/keywords'] = array(
+    'title' => 'Keywords tool',
+    'page callback' => 'semrush_keyword_stats_report_page',
+    'page arguments' => array('keywords'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access semrush reports'),
+    'type' => MENU_CALLBACK,
+    'file' => 'semrush.admin.inc',
+  );
+  /*
+  $items['admin/structure/semrush'] = array(
+    'title' => 'SEMRush',
+    'description' => 'Research keywords using SEMRush API.',
+    'page callback' => 'semrush_keyword_stats_report_page',
+    'page arguments' => array('keywords'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access semrush reports'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'semrush.admin.inc',
+  );
+  $items['admin/structure/semrush/keywords'] = array(
+    'title' => 'Keywords tool',
+    'page callback' => 'semrush_keyword_stats_report_page',
+    'page arguments' => array('keywords'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access semrush reports'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'semrush.admin.inc',
+  );
+  */
+  $items['semrush/util'] = array(
+    'title' => 'SEMRush util',
+    'page callback' => 'semrush_util',
+    'access callback' => TRUE,
+    'access arguments' => array('access semrush reports'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission()
+().
+ */
+function semrush_permission() {
+  return array(
+    'admin semrush' => array(
+      'title' => t('admin semrush'),
+      'description' => t('TODO Add a description for \'admin semrush\''),
+    ),
+    'access semrush reports' => array(
+      'title' => t('access semrush reports'),
+      'description' => t('TODO Add a description for \'access semrush reports\''),
+    ),
+  );
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function semrush_util() {
+  return "OK";
+}
+
+function semrush_api_request($params) {
+  $url = 'http://api.semrush.com/';
+  $params['key'] = variable_get('semrush_apikey', '');
+  if (empty($params['key'])) {
+    return '';
+  }
+  $str = array();
+  foreach($params AS $k => $v) {
+    $str[] = urlencode($k) . "=" . urlencode($v);
+  }
+  $url .= '?' . implode("&", $str);
+//dsm($url);
+
+  $ret = file_get_contents($url);
+
+  return $ret;
+}
+
+function semrush_get_keyword_data($keywords, &$msgs = array(), $params = array()) {
+  //watchdog('semrush:55', print_r($params, 1));
+  $params = is_array($params) ? $params : array();
+
+
+  $query = db_select('semrush_cache', 'c')
+    ->fields('c')
+    ->condition('type', 'phrase_fullsearch')
+    ->condition('arg0', $keywords);
+  $dbresult = $query->execute()->fetchObject();
+
+
+  if ($dbresult) {
+    $dbret = unserialize($dbresult->data);
+    if((REQUEST_TIME - $dbresult->updated) < variable_get('semrush_cache_time', SEMRUSH_CACHE_TIME)) {
+      return $dbret;
+      //return array_slice($dbret, 0, $limit);
+    }
+  }
+
+
+  $params += array(
+    'type' => 'phrase_fullsearch',
+    'export_columns' => 'Ph,Nq,Cp,Co,Nr',
+    'phrase' => $keywords,
+    'database' => 'us',
+    'display_limit' => variable_get('semrush_phrase_fullsearch_display_limit', SEMRUSH_PHASE_FULLSEARCH_DISPLAY_LIMIT_DEFAULT),
+  );
+
+  $ret = semrush_api_request($params);
+  $ret = explode(PHP_EOL, $ret);
+  $columns = array(
+    'Ph',
+    'Nq',
+    'Cp',
+    'Co',
+    'Nr'
+  );
+  $data = array();
+  $count = 0;
+  if (is_array($ret)) {
+    foreach ($ret as $r) {
+      if ($count == 0) {
+        $count++;
+        continue;
+      }
+      $r = explode(';', trim($r));
+      $data[] = $r;
+      /*
+      $cols = count($columns);
+      $d = array();
+      for ($i = 0; $i < $cols; $i++) {
+        $d[$columns[$i]] = $r[$i];
+      }
+
+      $data[] = $d;
+      */
+      $count++;
+    }
+
+  }
+
+
+  // if keywords longer than 255, don't cache
+  if (strlen($keywords) > 255) {
+    return $data;
+  }
+
+  //dsm($apiret);
+
+
+  if (!$dbresult) {
+    $query = db_insert('semrush_cache')
+      ->fields(array(
+        'type' => 'phrase_fullsearch',
+        'arg0' => $keywords,
+        'updated' => REQUEST_TIME,
+        'data' => serialize($data),
+      ));
+    $id = $query->execute();
+  }
+  elseif (!$dbret) {
+    $query = db_update('semrush_cache')
+      ->condition('type',  'phrase_fullsearch')
+      ->condition('arg0',  $keywords)
+      ->fields(array(
+        'updated' => REQUEST_TIME,
+        'data' => serialize($data),
+      ));
+    $query->execute();
+  }
+  /*
+  elseif (array_slice($dbret, 0, 10) != array_slice($apiret, 0, 10)) { // empty cache, it is out of date
+    db_delete('semrush_cache')->execute();
+    drupal_set_message(t('Keyword cache reset.'));
+    variable_set('semrush_last_cache', time());
+
+  }
+*/
+
+
+  //dsm($ret);
+  //dsm($data);
+  return $data;
+}
+
+/**
+ * Displays keyword stats report
+ *
+ * @param str $keyword
+ */
+function semrush_keyword_stats_report_page($type = 'keywords', $keyword = NULL) {
+  if (module_exists('kwresearch')) {
+    drupal_add_css(drupal_get_path('module', 'kwresearch') . '/kwresearch.css');
+    drupal_add_js(drupal_get_path('module', 'kwresearch') . '/kwresearch.js');
+  }
+
+  if(isset($_SESSION['semrush'])) {
+    $analysis = $_SESSION['semrush']['analysis'];
+    $_SESSION['semrush']['analysis'] = '';
+  }
+  else {
+    $analysis = array();
+  }
+
+  $stats = TRUE;
+  if ((empty($analysis) || !is_array($analysis)) && $keyword) {
+    $analysis = array();
+    $analysis['inputs']['keyword'] = $keyword;
+    $analysis['analysis'] = semrush_get_keyword_data($keyword, $msgs);
+    if (!empty($msgs)) {
+      $analysis['messages'] = $msgs;
+    }
+  }
+  if (!empty($analysis)) {
+    // turn on keyword operations
+
+    $analysis['inputs']['operations'] = TRUE;
+  }
+
+  $form = drupal_get_form('semrush_stats_report_form', $analysis);
+  $output = render($form);
+
+  //$output = t('Content Analysis.');
+
+  if (!empty($analysis)) {
+    $output .= '<div id="semrush-report" style="clear: both;">';
+    $output .= '<h3>' . t('Report') . '</h3>';
+    $output .= theme_semrush_stats_report($analysis);
+    $output .= '</div>';
+    // initialize kw data array for javascript
+
+    if (is_array($analysis['analysis'])) {
+      foreach ($analysis['analysis'] as $kw => $v) {
+      	if(isset($v['term'])) {
+	        $site_kw[$v['term']] = array(
+	          'kid' => (int) $v['kid'],
+	          'priority' => (int) $v['priority'],
+	          'value' => (int) $v['value'],
+	          'page_count' => (int) $v['page_count'],
+	        );
+      	}
+      }
+    }
+  }
+
+  if (module_exists('kwresearch')) {
+    $site_priority_options = kwresearch_get_priority_options();
+    drupal_add_js(
+      array('kwresearch' => array(
+        'form' => 'admin_keyword_stats',
+        'analyze_path' => base_path() . 'admin/content/kwresearch/keyword_report/',
+        'keyword_edit_path' => base_path() . 'admin/content/kwresearch/keyword_list/edit/',
+        'return_destination' => 'admin/content/kwresearch/keyword_report/' . $keyword,
+        'toggle_site_keyword_callback' => base_path() . 'kwresearch/toggle_site_keyword_js',
+        'module_path' => base_path() . drupal_get_path('module', 'kwresearch'),
+        'enable_site_keyword_tool' => user_access('kwresearch admin site keywords'),
+        'site_keywords_data' => !empty($site_kw) ? $site_kw : array(),
+        'site_priority_options' => $site_priority_options,
+      )), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+
+  return $output;
+}
+
+/**
+ * Generates main semrush report form
+ *
+ * @param $form_state
+ * @param analysis struc $analysis
+ * @param bool $ajax
+ */
+function semrush_stats_report_form($form, $form_state, $analysis, $ajax = FALSE) {
+  $form['pre_inputs'] = array(
+    '#type' => 'markup',
+    '#value' => '<div id="semrush-form-inputs">',
+  );
+
+  $form['semrush_keyword'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Keyword'),
+    '#default_value' => ($analysis && $analysis['inputs']['semrush_keyword']) ? $analysis['inputs']['semrush_keyword'] : '',
+  );
+
+  $form['semrush_stats_report_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Filters'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['semrush_stats_report_options'] = array_merge($form['semrush_stats_report_options'], semrush_stats_report_form_options($analysis));
+
+  $form['post_inputs'] = array(
+    '#type' => 'markup',
+    '#value' => '</div>',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  
+  return $form;
+}
+
+/**
+ * returns stats report paramter options form fields array
+ * @param analysis struc $analysis
+ */
+function semrush_stats_report_form_options($analysis = NULL) {
+  
+	$defvals = (isset($analysis['inputs'])) ? $analysis['inputs'] : array();
+  $form = array();
+
+  $form['semrush_display_limit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Results limit'),
+    '#default_value' => (isset($defvals['semrush_display_limit']))
+      ? $defvals['semrush_display_limit']
+      : variable_get('semrush_phrase_fullsearch_display_limit', SEMRUSH_PHASE_FULLSEARCH_DISPLAY_LIMIT_DEFAULT),
+    //'#description' => t('Set the default value adult filter for SEMRush report values.'),
+  );
+
+  return $form;
+}
+
+/**
+ * Stats report form submit handler.
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function semrush_stats_report_form_submit($form, &$form_state) {
+  //echo "setags_extract_tags_submit($form, &$form_state)";
+
+  //print_r($form_state['values']);
+
+  $analysis['inputs'] = $form_state['values'];
+
+  $params = array(
+  );
+
+  $analysis['analysis'] = semrush_get_keyword_data($form_state['values']['semrush_keyword'], $msgs, $params);
+  if (!empty($msgs)) {
+    $analysis['messages'] = $msgs;
+  }
+  if($analysis['analysis']) {
+    $_SESSION['semrush']['analysis'] = $analysis;
+  }
+
+  return;
+}
+
+/**
+ * Generates keyword search volume data from SEMRush
+ *
+ * @param $keywords
+ * @param $msgs
+ * @param $params
+ */
+function xsemrush_get_keyword_data($keywords, &$msgs, $params) {
+//dsm($params);  
+	$type = ($params['type']) ? $params['type'] : NULL;
+  $adult_filter = ($params['adult_filter']) ? 1 : 0;
+  //$limit = ($params['limit'])?$params['limit']:NULL;
+
+  if (is_null($adult_filter)) {
+    $adult_filter = variable_get('adult_filter', SEMRUSH_ADULT_FILTER_DEFAULT);
+  }
+
+  if (!$type) {
+    $type = 'keywords';
+    $params['type'] = 'keywords';
+  }
+
+  $query = db_select('semrush_cache', 'c')
+    ->fields('c')
+    ->condition('keyphrase', $keywords)
+    ->condition('adult_filter', $adult_filter)
+    ->condition('api_call', $type);
+  $dbresult = $query->execute()->fetchObject();
+  
+
+  if ($dbresult) {
+    $dbret = unserialize($dbresult->data);
+    if((time() - $dbresult->updated) < variable_get('semrush_cache_time', SEMRUSH_CACHE_TIME)) {
+      return $dbret;
+      //return array_slice($dbret, 0, $limit);   
+    }
+  }
+
+  $semrush = semrush_include_api_class();
+
+  if (!$semrush) {
+    return FALSE;
+  }
+
+  if ($type == 'keywords') {
+    $apiret = $semrush->getKeywords($keywords);
+  }
+  //dsm($apiret);
+
+  if (!is_array($apiret)) {
+    $errmsg = t('Expected return of type array, but got [@type]', array('@type' => gettype($apiret)));
+    $msgs[] = kwresearch_format_message($errmsg, 'error');
+    return FALSE;
+  }
+  
+  // if keywords longer than 255, don't cache
+  if (strlen($keywords) > 255) {
+    return $apiret;
+  }
+
+  //dsm($apiret);
+
+
+  if (!$dbresult) {
+    $query = db_insert('semrush_cache')
+	    ->fields(array(
+	      'keyphrase' => $keywords,
+	      'adult_filter' => $adult_filter,
+	      'api_call' => $type,
+	      'updated' => time(),
+	      'data' => serialize($apiret),
+	    ));
+    $id = $query->execute();
+  }
+  elseif (!$dbret) {
+    /*
+  	$sql = '
+      UPDATE {semrush_cache}
+      SET 
+        time = %d,
+        data = "%s"
+      WHERE 
+        keyphrase = "%s" AND
+        adult_filter = %d AND
+        api_call = "%s"
+    ';
+    //dsm(sprintf($sql, time(), serialize($apiret), $keywords, $adult_filter, $type));
+
+    $query = db_query($sql, REQUEST_TIME, serialize($apiret), $keywords, $adult_filter, $type);
+    */
+  	
+    $query = db_update('semrush_cache')
+      ->condition('keyphrase',  $keywords)
+      ->condition('adult_filter',  $adult_filter)
+      ->condition('api_call',  $type)
+      ->fields(array(
+        'updated' => time(),
+        'data' => serialize($apiret),
+      ));
+      $query->execute();    
+  }
+  elseif (array_slice($dbret, 0, 10) != array_slice($apiret, 0, 10)) { // empty cache, it is out of date
+    /*
+  	$sql = '
+      DELETE FROM {semrush_cache}
+    ';
+    //dsm(sprintf($sql));
+
+    $query = db_query($sql);
+    */
+    db_delete('semrush_cache')->execute();
+    drupal_set_message(t('Keyword cache reset.'));
+    variable_set('semrush_last_cache', time());
+    
+    // update new data set search ratios
+    //scribeseo_update_kwresearch_searches_ratio();
+  }
+  return $apiret;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function theme_semrush_stats_report($analysis) {
+  // TODO: Should this theme semrush_stats_report be declared in hook_theme()?
+
+  $hdrs = array(
+    t('Keyword'),
+    t('Volume'),
+    t('CPC'),
+    t('Comp.'),
+    t('Results'),
+  );
+
+  $rows = array();
+  foreach ($analysis['analysis'] as $v) {
+    $row = array(
+      $v[0],
+      is_numeric($v[1]) ? number_format($v[1]) : t('NA'),
+      is_numeric($v[2]) ? t('$') . number_format($v[2], 2) : t('NA'),
+      is_numeric($v[3]) ? number_format($v[3], 2) : t('NA'),
+      is_numeric($v[4]) ? number_format($v[4]) : t('NA'),
+    );
+    $rows[] = array(
+      'data' => $row,
+      'id' => 'kid-' . ((isset($v['kid'])) ? $v['kid'] : 'n'),
+    );
+  }
+  $attr = array(
+    'id' => 'kwresearch-result-table-' . check_plain(str_replace(' ', '-', (isset($analysis['inputs']['keyword'])?$analysis['inputs']['keyword']:''))),
+    'class' => array('kwresearch-result-table'),
+  );
+  $output = '<div id="kwresearch-result-block-' . check_plain(str_replace(' ', '-', (isset($analysis['inputs']['keyword'])?$analysis['inputs']['keyword']:''))) . '" class="kwresearch-result-block">';
+  $vars = array(
+    'header' => $hdrs,
+    'rows' => $rows,
+    'attributes' => $attr
+  );
+  $output .= theme('table', $vars);
+
+  return $output;
+}
+
+/**
+ *  Implentation of hook_contentanalysis_analyzers()
+ *  register contentanalysisexample with contentanalysis analyzers registry
+ */
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function semrush_kwresearch_sources() {
+  $sources['semrush'] = array(
+    'title' => t('SEMRush'),
+    'module' => 'semrush',
+    'form_options' => 'semrush_stats_report_form_options',
+    'stats_callback' => 'semrush_kwresearch_get_keyword_stats',
+    'searches_ratio' => 0.032854, // ratio = total daily searches / count from data
+    'stats_report_columns' => array(
+      'semrush_searches' => t('SR count'),
+      'semrush_competition' => t('SR comp'),
+      'semrush_bid' => t('SR bid'),
+    ),
+    'stats_report_values_callback' => 'semrush_kwresearch_format_stats_values',
+  );
+  return $sources;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function semrush_update_kwresearch_searches_ratio() {
+
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function semrush_kwresearch_get_keyword_stats($keywords, $params = NULL) {
+  $data = semrush_get_keyword_data($keywords, $msgs, $params);
+  //dsm($data);
+
+
+  $ret = array();
+  if (is_array($data)) {
+    foreach ($data as $v) {
+      $ret[$v[0]] = array(
+        'searches' => $v[1],
+        'competition' => 100 * $v[3],
+        'bid' => $v[2],
+      );
+    }
+  }
+  return $ret;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function semrush_kwresearch_format_stats_values($values, $keyword = '', $type = 'term') {
+  $output = '';
+  switch ($type) {
+    case 'semrush_searches':
+      if (!empty($values['semrush_searches']) && is_numeric($values['semrush_searches'])) {
+        $output = number_format($values['semrush_searches']);
+      }
+      break;
+    case 'semrush_competition':
+      if (isset($values['semrush_competition'])) {
+        $output = $values['semrush_competition'];
+      }
+      break;
+    case 'semrush_bid':
+      if (isset($values['semrush_bid'])) {
+        $output = t('$') . number_format($values['semrush_bid'], 2);
+      }
+      break;
+    default:
+      return FALSE;
+  }
+  return $output;
+}

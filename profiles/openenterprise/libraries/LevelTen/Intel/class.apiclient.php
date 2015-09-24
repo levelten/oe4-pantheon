@@ -18,7 +18,7 @@ if (!empty($_GET['debug'])) {
 class ApiClient {
     protected $apikey;
     protected $tid;
-    protected $apiUrl = 'http://api.leveltendesign.com/v1/intel';
+    protected $apiUrl = 'http://api.getlevelten.com/v1/intel';
     protected $apiConnector = '';
     protected $apiUrlCallMethod = 'curl';
     protected $isTest = FALSE;
@@ -168,5 +168,30 @@ class ApiClient {
         $str[] = urlencode($k) . "=" . urlencode($v);
       }
       return implode("&", $str);     
+    }
+
+    /**
+    * Utility function used to determine if variable is empty
+    *
+    * @param s: Variable to be evaluated
+    *
+    * @returns Boolean
+    **/
+    protected function isBlank ($s) {
+        if ((trim($s)=='')||($s==null)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Sets the status code from a curl request
+     *
+     * @param resource $ch
+     */
+    protected function setLastStatusFromCurl($ch) {
+        $info = curl_getinfo($ch);
+        $this->lastStatus = (isset($info['http_code'])) ? $info['http_code'] : null;
     }
 }
