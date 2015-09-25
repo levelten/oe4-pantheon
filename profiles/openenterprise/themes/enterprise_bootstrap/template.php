@@ -251,14 +251,8 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $settings['fittext'] = $selectors;
   }
 
-  drupal_add_js(
-    array(
-      'enterprise_bootstrap' => $settings,
-      ),
-    array(
-      'type' => 'setting',
-      )
-    );
+  // Add settings to Drupal.settings
+  drupal_add_js(array('enterprise_bootstrap' => $settings),array('type' => 'setting'));
 
   // fitText.js
   $fittext = theme_get_setting('fittext');

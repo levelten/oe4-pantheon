@@ -39,11 +39,11 @@ function _enterprise_theme_color_update() {
 	
 	if ($settings && $color_palette = $settings['palette']) {
 		// Swap color. Use old value or set to default Bella.
-		$settings['brand_color_1'] = (!empty($color_palette['brandprimary'])) ? strtoupper($color_palette['brandprimary']) : '#EA9B3E';
-		$settings['brand_color_2'] = (!empty($color_palette['brandsecondary'])) ? strtoupper($color_palette['brandsecondary']) : '#F5F5F5';
-		$settings['brand_color_3'] = (!empty($color_palette['brandaccent'])) ? strtoupper($color_palette['brandaccent']) : '#FFFFFF';
-		$settings['brand_color_4'] = (!empty($color_palette['brandaccent2'])) ? strtoupper($color_palette['brandaccent2']) : '#EA9B3E';
-		$settings['brand_color_5'] = (!empty($color_palette['brandaccent3'])) ? strtoupper($color_palette['brandaccent3']) : '#EA9B3E';
+		$settings['less'][$theme_name]['@brand-primary']   = (!empty($color_palette['brandprimary'])) ? strtoupper($color_palette['brandprimary']) : '#EA9B3E';
+		$settings['less'][$theme_name]['@brand-secondary'] = (!empty($color_palette['brandsecondary'])) ? strtoupper($color_palette['brandsecondary']) : '#F5F5F5';
+		$settings['less'][$theme_name]['@brand-accent']    = (!empty($color_palette['brandaccent'])) ? strtoupper($color_palette['brandaccent']) : '#FFFFFF';
+		$settings['less'][$theme_name]['@brand-accent-2']  = (!empty($color_palette['brandaccent2'])) ? strtoupper($color_palette['brandaccent2']) : '#EA9B3E';
+		$settings['less'][$theme_name]['@brand-accent-3']  = (!empty($color_palette['brandaccent3'])) ? strtoupper($color_palette['brandaccent3']) : '#EA9B3E';
 
 		// Update new theme settings.
 		variable_set($theme_settings, $settings);
