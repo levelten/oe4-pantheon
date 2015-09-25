@@ -1,14 +1,15 @@
-name = Enterprise Health for OpenEnterprise
+name = Enterprise Health
 description = A Bootstrap Sub-theme for Open Enterprise.
 core = 7.x
 base theme = enterprise_bootstrap
-
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Regions
 ;;;;;;;;;;;;;;;;;;;;;
 
+regions[header_top]     = 'Header Top'
 regions[navigation]     = 'Navigation'
+regions[header_bottom]  = 'Header Bottom'
 regions[header]         = 'Top Bar'
 regions[highlighted]    = 'Highlighted'
 regions[help]           = 'Help'
@@ -16,16 +17,24 @@ regions[content]        = 'Content'
 regions[sidebar_first]  = 'Primary'
 regions[sidebar_second] = 'Secondary'
 regions[footer]         = 'Footer'
-regions[footer_bottom]  = 'Footer Bottom'
-regions[page_top]       = 'Page top'
-regions[page_bottom]    = 'Page bottom'
+regions[footer_bottom]  = 'Footer bottom'
 
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Stylesheets
 ;;;;;;;;;;;;;;;;;;;;;
 
-stylesheets[all][] = css/style.css
+stylesheets[all][] = less/style.less
+
+;;;;;;;;;;;;;;;;;;;;;
+;; LESS
+;;;;;;;;;;;;;;;;;;;;;
+
+less[vars][@brand-primary]   = #2A90CC
+less[vars][@brand-secondary] = #FFC629
+less[vars][@brand-accent]    = #FF5C29
+less[vars][@brand-accent-2]  = #FF9F29
+less[vars][@brand-accent-3]  = #078ED0
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
@@ -33,20 +42,27 @@ stylesheets[all][] = css/style.css
 
 scripts[] = 'js/enterprise_health.js'
 
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/affix.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/alert.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/button.js'
-scripts[] = '../enterprise_bootstrap/bootstrap/js/carousel.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/collapse.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/dropdown.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/modal.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/tooltip.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/popover.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/scrollspy.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/tab.js'
-;scripts[] = '../enterprise_bootstrap/bootstrap/js/transition.js'
-
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
 settings[bootstrap_cdn] = ''
 settings[bootstrap_navbar_position] = 'static-top'
 settings[toggle_name] = 0
+
+; Enterprise Bootstrap
+; ---------------
+settings[fittext] = 0
+settings[enterprise_bootstrap_front_container] = 1
+settings[enterprise_bootstrap_sidebar_column] = 0
+settings[enterprise_bootstrap_block_striping] = 1
+settings[enterprise_bootstrap_dropdown] = 1
+settings[title_placement] = 1
+settings[title_container] = 1
+settings[highlighted_placement] = 1
+settings[highlighted_container] = 0
+settings[header_container] = 0
+settings[footer_container] = 1
+settings[enterprise_bootstrap_js_options][affix] = 1
+settings[enterprise_bootstrap_js_options][alert] = 1
+settings[enterprise_bootstrap_js_options][carousel] = 1
+settings[enterprise_bootstrap_js_options][collapse] = 1
+settings[enterprise_bootstrap_js_options][dropdown] = 1
+settings[enterprise_bootstrap_js_options][transition] = 1
