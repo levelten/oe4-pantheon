@@ -1,0 +1,79 @@
+// Classes related to brand colors.
+
+@colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
+@names  : primary, secondary, accent, success, info, warning, danger;
+@length : length(@colors);
+
+.brand-variation(@names; @colors; @index) when (@index > 0) {
+  .brand-variation(@names; @colors; (@index - 1)); // decrement.
+
+  @name  : extract(@names, @index);
+  @color : extract(@colors, @index);
+
+  .btn-@{name} {
+  	border-color: darken(@color, 10%);
+  	background-color: @color;
+  	color: #FFF;
+  	&:hover, &:focus {
+  		background-color: darken(@color, 10%);
+  		border-color: darken(@color, 10%);
+  	}
+  	&.btn-flat {
+  		border-color: @color;
+  	}
+  	&.btn-dark {
+  		color: @gray-dark;
+  	}
+  }
+  .bg-@{name}, .background-@{name} {
+  	background-color: @color;
+  	&, a {
+  		color: #FFF;
+  	}
+  	&.bg-dark, &.background-dark {
+  		color: @gray-dark;
+  	}
+  }
+  .color-@{name} {
+  	color: @color;
+  }
+
+  // Component styling
+  .section-@{name} {
+  	background-color: @color;
+  	&, h2, h3, h4, h5, h6 {
+  		color: #FFF;
+  	}
+  	a {
+  		color: #FFF;
+  		&:hover, &:active {
+  			color: #FFF;
+  		}
+  	}
+  	&.section-inverse {
+  		&, h2, h3, h4, h5, h6 {
+  			color: @gray-dark;
+  		}
+  		a {
+  			color: @gray-dark;
+  			&:hover, &:active {
+  				color: @gray-dark;
+  			}
+  		}
+  	}
+  }
+  .section-dark-@{name} {
+  	background-color: @gray-darker;
+  	color: #FFF;
+  	.heading-variant(@color);
+  }
+
+}
+
+.brand-variation(@names; @colors; @length);
+
+.section-dark {
+	background-color: @gray-darker;
+	color: #FFF;
+	.heading-variant(@brand-primary);
+}

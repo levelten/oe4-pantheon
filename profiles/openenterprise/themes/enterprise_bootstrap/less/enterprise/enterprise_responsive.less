@@ -1,0 +1,25 @@
+// Media queries for Enterprise Bootstrap and subthemes.
+@mobile:  ~"only screen and (max-width: @{screen-sm-min})"; /*  For Phones*/
+@tablet:  ~"only screen and (min-width: @{screen-sm-min})"; /*  For Small devices Tablets*/
+@tablet-max: ~"only screen and (max-width: @{screen-sm-max})";
+@normal:  ~"only screen and (min-width: @{screen-md-min})"; /*  For Medium devices Desktops */
+@normal-max: ~"only screen and (max-width: @{screen-md-max})";
+@wide:    ~"only screen and (min-width: @{screen-lg-min})"; /*  For Large devices Desktops */
+
+// iPad
+@ipad: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px)";
+@ipad-portrait: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait)";
+@ipad-landscape: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape)";
+
+@ipad-hd: ~"@{ipad} and (-webkit-min-device-pixel-ratio: 2)";
+@ipad-hd-portrait: ~"@{ipad-portrait} and (-webkit-min-device-pixel-ratio: 2)";
+@ipad-hd-landscape: ~"@{ipad-landscape} and (-webkit-min-device-pixel-ratio: 2)";
+
+// iPhone
+@ipad: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px)";
+@ipad-portrait: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait)";
+@ipad-landscape: ~"only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape)";
+
+@ipad-hd: ~"@{ipad} and (-webkit-min-device-pixel-ratio: 2)";
+@ipad-hd-portrait: ~"@{ipad-portrait} and (-webkit-min-device-pixel-ratio: 2)";
+@ipad-hd-landscape: ~"@{ipad-landscape} and (-webkit-min-device-pixel-ratio: 2)";
