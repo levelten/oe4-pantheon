@@ -7,7 +7,7 @@
         <!-- Navbar Logo Region -->
         <div id="navbar-logo" <?php print drupal_attributes($nav_logo_class); ?>>
           <?php if ($logo): ?>
-          <a class="logo navbar-btn pull-left navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
+          <a class="logo navbar-btn pull-left" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
             <img class="img-responsive" src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
           </a>
           <?php endif; ?>
