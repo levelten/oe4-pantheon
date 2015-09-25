@@ -133,4 +133,5 @@ function enterprise_theme_image_default_styles() {
     'label' => 'Enterprise Bootstrap Logo',
   );
 
+  return $styles;
 }
