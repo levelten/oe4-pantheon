@@ -1171,12 +1171,25 @@ function kwresearch_nodeapi_OLD(&$node, $op, $a3 = NULL, $a4 = NULL) { }
  * Add Content Optimizer field set to node edit forms.
  * Add Content Analysis enabled field to content type admin form
  */
-function kwresearch_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']['#value']) && ($form['type']['#value'] . '_node_form' == $form_id)) {
+//function kwresearch_form_alter(&$form, $form_state, $form_id) {
+function kwresearch_form_node_form_alter(&$form, $form_state, $form_id) {
+  //if (isset($form['type']['#value']) && ($form['type']['#value'] . '_node_form' == $form_id)) {
+  if (1) {
 
     $node = $form['#node'];
     
     require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'kwresearch') . "/includes/tax_report.inc";
+
+    if ($_GET['kwresearch_page_kid']) {
+      $kid0 = $_GET['kwresearch_page_kid'];
+      $kw0 = kwresearch_get_keyword($kid0);
+      if (isset($form['contentanalysis'])
+        && isset($form['contentanalysis']['seo'])
+        && isset($form['contentanalysis']['seo']['keyword'])
+        && !$form['contentanalysis']['seo']['keyword']['#default_value']) {
+        $form['contentanalysis']['seo']['keyword']['#default_value'] = $kw0;
+      }
+    }
 
     drupal_add_css(drupal_get_path('module', 'kwresearch') . '/kwresearch.css');
     drupal_add_js(drupal_get_path('module', 'kwresearch') . '/kwresearch.js');
@@ -1212,7 +1225,10 @@ function kwresearch_form_alter(&$form, $form_state, $form_id) {
             if (empty($terms[$keyword_obj->keyword])) {
               $form[$id][$node->language]['#default_value'] .= (($form[$id][$node->language]['#default_value']) ? ', ' : '') . $keyword_obj->keyword;
             }
-          }          
+          }
+          if (empty($form[$id][$node->language]['#default_value']) && !empty($kw0)) {
+            $form[$id][$node->language]['#default_value'] = $kw0;
+          }
           $keywords = $form[$id][$node->language]['#default_value'];
           // move field to additional settings group 
           $form['kwresearch'] = array(

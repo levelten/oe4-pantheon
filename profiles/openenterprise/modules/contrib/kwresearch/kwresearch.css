@@ -123,7 +123,7 @@
 }
 
 /* clean up styling on Rubik */
-body.tao input.form-submit {
+body.tao #kwresearch-stats-report-form input.form-submit {
     margin-left: 10px;
     margin-top: 1.5em;
 }

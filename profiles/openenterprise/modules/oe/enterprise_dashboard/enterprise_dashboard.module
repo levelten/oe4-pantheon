@@ -472,13 +472,13 @@ function enterprise_dashboard_quick_links_data() {
     ),
     'thankyou' => array(
       '#title' => t('Thank you pages'),
-      '#url' => 'admin/content/node/enterprise_thankyou',
+      '#url' => 'admin/content/node/enterprise-thankyou',
       '#class' => array('path-admin-content'),
       '#description' => t('Form response pages.'),
       '#manage_icon' => 'oeicon oeicon-list',
       'add' => array(
         '#title' => t('add'),
-        '#url' => 'node/add/enterprise_thankyou',
+        '#url' => 'node/add/enterprise-thankyou',
         '#icon' => 'oeicon oeicon-pencil'
       )
     ),
@@ -490,7 +490,7 @@ function enterprise_dashboard_quick_links_data() {
       '#manage_icon' => 'oeicon oeicon-list',
       'add' => array(
         '#title' => t('add'),
-        '#url' => 'node/add/enterprise_landingpage',
+        '#url' => 'node/add/enterprise-landingpage',
         '#icon' => 'oeicon oeicon-pencil'
       ),
       'stats' => array(
