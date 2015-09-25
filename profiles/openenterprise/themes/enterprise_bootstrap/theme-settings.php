@@ -11,6 +11,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		$default_settings = $info['settings'];
 	}
 
+  // Logo
 	$logo_options = array('default' => "Default") + image_style_options(false);
 	$form['logo']['settings']['logo_image_style'] = array(
 		'#type' => 'select',
@@ -19,6 +20,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#default_value' => theme_get_setting('logo_image_style'),
 		'#options' => $logo_options,
 	);
+  $form['logo']['settings']['logo_suggestion'] = array(
+    '#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75 available in the "Enterprise Bootstrap Logo" image style.</p></div>',
+    '#attributes' => array('class' => array('description')),
+    '#weight' => 10,
+  );
 
 	$form['enterprise_bootstrap'] = array(
 		'#type' => 'vertical_tabs',
@@ -83,7 +89,14 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 	
-	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
+  $form['enterprise_bootstrap_config']['column_right']['eb_dark_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Dark Theme'),
+    '#default_value' => theme_get_setting('eb_dark_theme'),
+    '#description' => t('Adds a "theme-dark" class to the body, only affects subthemes that use it.'),
+  );
+
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
@@ -93,7 +106,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_blokkfont'] = array(
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_blokkfont'] = array(
 		'#type' => 'select',
 		'#title' => t('Blokk Font'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
@@ -598,14 +611,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('No'),
 			1 => t('Yes'),
 		),
-	);
-
-
-	// Extra
-	$form['logo']['settings']['logo_suggestion'] = array(
-  	'#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75. You will need to <a href="/admin/config/media/image-styles/add">create an image style</a> for this.</p></div>',
-  	'#attributes' => array('class' => array('description')),
-  	'#weight' => 10,
 	);
 
 	// Colourlovers settings

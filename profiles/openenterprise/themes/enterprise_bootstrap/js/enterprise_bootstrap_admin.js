@@ -13,6 +13,25 @@ var Drupal = Drupal || {};
 	Drupal.behaviors.enterprisebootstrap = {
 		attach: function(context, settings) {
 
+			function shuffle(array) {
+				var currentIndex = array.length, temporaryValue, randomIndex ;
+
+				// While there remain elements to shuffle...
+				while (0 !== currentIndex) {
+
+					// Pick a remaining element...
+					randomIndex = Math.floor(Math.random() * currentIndex);
+					currentIndex -= 1;
+
+					// And swap it with the current element.
+					temporaryValue = array[currentIndex];
+					array[currentIndex] = array[randomIndex];
+					array[randomIndex] = temporaryValue;
+				}
+
+				return array;
+			}
+
 			// Run minicolors
 			if ($.minicolors) {
 				$.minicolors.defaults.letterCase = 'uppercase';
@@ -62,20 +81,38 @@ var Drupal = Drupal || {};
 				$(themes).each(function(index, el) {
 					// Replace underscores with hyphens.
 					var theme_name = el.replace(/[_]/g, "-");
-					var variables = $(".less-theme-settings input[id^='edit-less-"+theme_name+"'", context);
+					var variables = $(".less-theme-settings input[id^='edit-less-"+theme_name+"-brand'", context);
 
 					if (variables.length > 0) {
 						// Click reset
-						$("#edit-less-"+theme_name+"-reset", context).click(function(event) {
+						$("#edit-less-"+theme_name+"-actions-reset", context).click(function(event) {
 							event.preventDefault();
 							// For each variable, reset to default placeholder value.
 							$(variables).each(function(index, el) {
 								var defaultColor = $(el).attr("placeholder");
-								$(el).minicolors('value', defaultColor).attr('value', defaultColor);
+								$(el).minicolors('value', defaultColor).val(defaultColor);
+							});
+
+						});
+
+						// Shuffle colors
+						$("#edit-less-"+theme_name+"-actions-shuffle", context).click(function(event) {
+							event.preventDefault();
+							// Get list of colors.
+							var inputColors = [];
+							$(variables).each(function(index, el) {
+								inputColors.push($(el).val());
+							});
+							// Shuffle
+							shuffle(inputColors);
+							// Reapply to fields.
+							$(variables).each(function(index, el) {
+								$(el).minicolors('value', inputColors[index]).val(inputColors[index]);
 							});
 
 						});
 					}
+
 				});
 			}
 		}
