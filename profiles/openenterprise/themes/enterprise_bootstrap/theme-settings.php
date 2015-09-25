@@ -106,16 +106,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_blokkfont'] = array(
-		'#type' => 'select',
-		'#title' => t('Blokk Font'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
-		'#description' => t('Enables Blokk Neue as the default font. Great for testing designs.'),
-		'#options' => array(
-			0 => t('No'),
-			1 => t('Yes'),
-		),
-	);
 
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',
