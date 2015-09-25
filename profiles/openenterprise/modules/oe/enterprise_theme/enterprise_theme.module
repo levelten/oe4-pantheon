@@ -82,20 +82,55 @@ function enterprise_theme_form_alter(&$form, &$form_state, $form_id) {
           // Add minicolors to brand colors.
           if (strpos($key, '@brand-') !== FALSE) {
             $form['less'][$theme_name][$key]['#attributes']['class'][] = 'minicolor';
-            // $form['less'][$theme_name][$key]['#default_value'] = $form['less'][$theme_name][$key]['#attributes']['placeholder'];
             $form['less'][$theme_name][$key]['#prefix'] = '<div class="inline-field">';
             $form['less'][$theme_name][$key]['#suffix'] = '</div>';
           }
         }
+        
+        $form['less'][$theme_name]['actions'] = array('#type' => 'actions');
         // Add reset button for default settings.
-        $form['less'][$theme_name]['reset'] = array(
-          '#type' => 'submit',
+        $form['less'][$theme_name]['actions']['reset'] = array(
+          '#type' => 'button',
           '#value' => t('Reset'),
-          '#attributes' => array(
-            'class' => array(''),
-          ),
+        );
+        // Add shuffle button to switch colors.
+        $form['less'][$theme_name]['actions']['shuffle'] = array(
+          '#type' => 'button',
+          '#value' => t('Shuffle'),
         );
       }
     }
   }
+}
+
+/**
+ * Implements hook_image_default_styles()
+ *
+ * @return array
+ */
+function enterprise_theme_image_default_styles() {
+  // Add logo image style.
+  $styles = array();
+  $styles['enterprise_bootstrap_logo'] = array(
+    'name' => 'Enterprise Bootstrap Logo',
+    'effects' => array(
+      2 => array(
+        'label' => 'Scale and crop',
+        'help' => 'Scale and crop will maintain the aspect-ratio of the original image, then crop the larger dimension. This is most useful for creating perfectly square thumbnails without stretching the image.',
+        'effect callback' => 'image_scale_and_crop_effect',
+        'dimensions callback' => 'image_resize_dimensions',
+        'form callback' => 'image_resize_form',
+        'summary theme' => 'image_resize_summary',
+        'module' => 'image',
+        'name' => 'image_scale_and_crop',
+        'data' => array(
+          'width' => 200,
+          'height' => 75,
+        ),
+        'weight' => 1,
+      ),
+    ),
+    'label' => 'Enterprise Bootstrap Logo',
+  );
+
 }

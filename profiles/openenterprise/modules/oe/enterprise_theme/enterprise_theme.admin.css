@@ -73,6 +73,7 @@
 }
 .colourlovers-images .color-title {
 	margin-bottom: 10px;
+	word-wrap: break-word;
 }
 .colourlovers-images .color-palette .color-index {
 	border-right: 1px solid #383838;
@@ -92,4 +93,8 @@
 #pictaculous-adobe-kuler.colourlovers-images .colourlovers-image,
 #pictaculous-colourlovers.colourlovers-images .colourlovers-image {
 	width: 180px;
+}
+
+.less-theme-settings .form-submit {
+	margin-right: 10px;
 }
