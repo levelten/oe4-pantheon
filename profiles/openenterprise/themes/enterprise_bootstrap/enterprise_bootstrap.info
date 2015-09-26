@@ -24,7 +24,7 @@ regions[footer_bottom]  = 'Footer bottom'
 ;; Stylesheets
 ;;;;;;;;;;;;;;;;;;;;;
 
-stylesheets[all][] = css/style.css
+stylesheets[all][] = css/enterprise_bootstrap.less
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; LESS
