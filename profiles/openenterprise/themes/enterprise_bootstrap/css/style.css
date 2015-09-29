@@ -6818,7 +6818,7 @@ div.workbench-info-block > p + p {
   margin-top: 5px;
 }
 .navbar-nav > li > .dropdown-menu {
-  width: 100%;
+  width: auto;
   padding: 0;
   white-space: normal;
 }
@@ -6847,6 +6847,14 @@ div.workbench-info-block > p + p {
   color: #222222;
   background-color: transparent;
   text-decoration: none;
+}
+@media screen and (max-width: 768px) {
+  .navbar-nav > li > .dropdown-menu a {
+    color: #eeeeee !important;
+  }
+  .navbar-nav > li > .dropdown-menu a:hover {
+    color: #222222 !important;
+  }
 }
 .footer .footer-bottom {
   background-color: #727274;
