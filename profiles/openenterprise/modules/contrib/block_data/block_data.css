@@ -1,0 +1,16 @@
+.block-data-column .fieldset-wrapper .button-add {
+	margin-right: 10px;
+}
+
+.block-data-column .fieldset-wrapper .form-item {
+  float: left;
+  width: 48%;
+}
+
+.block-data-column .fieldset-wrapper > .form-wrapper > .fieldset-content {
+	padding-top: 20px;
+}
+
+.block-data-column .fieldset-wrapper .form-item .form-text {
+  width: 85%;
+}
