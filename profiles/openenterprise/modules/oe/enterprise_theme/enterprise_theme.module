@@ -84,10 +84,15 @@ function enterprise_theme_form_alter(&$form, &$form_state, $form_id) {
             $form['less'][$theme_name][$key]['#attributes']['class'][] = 'minicolor';
             $form['less'][$theme_name][$key]['#prefix'] = '<div class="inline-field">';
             $form['less'][$theme_name][$key]['#suffix'] = '</div>';
+            if (empty($form['less'][$theme_name][$key]['#default_value'])) {
+              $form['less'][$theme_name][$key]['#default_value'] = $form['less'][$theme_name][$key]['#attributes']['placeholder'];
+            }
           }
         }
         
-        $form['less'][$theme_name]['actions'] = array('#type' => 'actions');
+        $form['less'][$theme_name]['actions'] = array(
+          '#type' => 'actions',
+        );
         // Add reset button for default settings.
         $form['less'][$theme_name]['actions']['reset'] = array(
           '#type' => 'button',

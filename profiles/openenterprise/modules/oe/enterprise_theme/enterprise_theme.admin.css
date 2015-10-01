@@ -98,3 +98,6 @@
 .less-theme-settings .form-submit {
 	margin-right: 10px;
 }
+.less-theme-settings .form-actions {
+	display: block !important;
+}
