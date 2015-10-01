@@ -1,11 +1,3 @@
-// Media query variables.
-@mobile:  ~"screen and (max-width: @{screen-sm-min})";
-@tablet:  ~"screen and (min-width: @{screen-sm-min})";
-@tablet-max: ~"(max-width: @{screen-md-min})";
-@normal:  ~"screen and (min-width: @{screen-md-min})";
-@normal-max: ~"(max-width: @{screen-lg-min})";
-@wide:    ~"screen and (min-width: @{screen-lg-min})";
-
 // Drop shadows.
 .box-shadow(@shadow) {
   -webkit-box-shadow: @shadow;
@@ -455,7 +447,7 @@ a .glyphicon-spin {
  * @see http://stackoverflow.com/questions/18432577/stacked-tabs-in-bootstrap-3
  * @see http://bootply.com/74926
  */
- .tabbable {
+.tabbable {
   margin-bottom: 20px;
 }
 .tabs-below, .tabs-left, .tabs-right {
@@ -651,7 +643,7 @@ img {
 
 // Krumo fix
 .krumo-root {
-  color: black;
+  color: @gray-dark;
 }
 
 // Blocker
@@ -716,5 +708,5 @@ img {
 // Workbench block
 div.workbench-info-block {
   .alert();
-  background-color: #FFEC5E; // pale yellow
+  background-color: @brand-warning;
 }

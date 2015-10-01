@@ -40,6 +40,17 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
 }
 
 /**
+ * Implements hook_preprocess_html()
+ */
+function enterprise_bootstrap_preprocess_html(&$variables) {
+  // Add dark class to theme if enabled.
+  $theme_dark = theme_get_setting('eb_dark_theme');
+  if ($theme_dark) {
+    $variables['classes_array'][] = 'theme-dark';
+  }
+}
+
+/**
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
@@ -77,6 +88,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $sidebar_column_width = FALSE;
   }
 
+  // Set sidebar columns.
   if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
     $variables['content_column_class'] = ($sidebar_column_width) ? ' class="col-sm-6"' : ' class="col-sm-4"';
   }
@@ -219,18 +231,6 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     }
   }
 
-  // Option to use Blokk font.
-  if (theme_get_setting('enterprise_bootstrap_blokkfont')) {
-    $blokk_path = $theme_path .'/fonts/blokkneue/blokkneue.css';
-    $options = array(
-      'group' => CSS_THEME,
-      'every_page' => TRUE,
-      'weight' => -1,
-      'preprocess' => TRUE,
-      );
-    drupal_add_css($blokk_path, $options);
-  }
-
   // Add Javscript files and settings from Enterprise Bootstrap settings
   // Mega Menu and mobile menu settings.
   $settings = array();
@@ -251,14 +251,8 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $settings['fittext'] = $selectors;
   }
 
-  drupal_add_js(
-    array(
-      'enterprise_bootstrap' => $settings,
-      ),
-    array(
-      'type' => 'setting',
-      )
-    );
+  // Add settings to Drupal.settings
+  drupal_add_js(array('enterprise_bootstrap' => $settings),array('type' => 'setting'));
 
   // fitText.js
   $fittext = theme_get_setting('fittext');
