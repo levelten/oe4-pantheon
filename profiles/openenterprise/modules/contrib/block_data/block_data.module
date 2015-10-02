@@ -29,12 +29,14 @@ function block_data_permission() {
  */
 function block_data_preprocess_block(&$vars) {
   $block = $vars['block'];
-  $block_attr = unserialize($block->data_attr);
+  $modules = unserialize($block->data_attr);
   // Add attributes to block;
-  if (!empty($block_attr)) {
+  if (!empty($modules)) {
     $data_attr = array();
-    foreach ($block_attr as $key => $value) {
-      $data_attr['data-'.$key] = $value;
+    foreach ($modules as $module) {
+      foreach ($module as $key => $value) {
+        $data_attr[$key] = $value;
+      }
     }
     $vars['attributes_array'] = array_merge($vars['attributes_array'], $data_attr);
   }
@@ -53,13 +55,15 @@ function block_data_preprocess_panels_pane(&$vars) {
   $block_parts = explode('-', $vars['pane']->subtype);
   // Load the block based on the block parts.
   $block = block_load($block_parts[0], $block_parts[1]);
-  // Add $data_attr to the $attributes_array.
-  $block_attr = unserialize($block->data_attr);
+  // Extract data attributes.
+  $modules = unserialize($block->data_attr);
   // Add attributes to block;
-  if (!empty($block_attr)) {
+  if (!empty($modules)) {
     $data_attr = array();
-    foreach ($block_attr as $key => $value) {
-      $data_attr['data-'.$key] = $value;
+    foreach ($modules as $module) {
+      foreach ($module as $key => $value) {
+        $data_attr[$key] = $value;
+      }
     }
     $vars['attributes_array'] = array_merge($vars['attributes_array'], $data_attr);
   }
@@ -79,7 +83,6 @@ function block_data_form_alter(&$form, &$form_state, $form_id) {
     block_data_add_attr($form, $form_state, $block);
 
     $form['#submit'][] = 'block_data_form_submit';
-    $form['#attached']['css'][] = drupal_get_path('module', 'block_data') . '/block_data.css';
   }
 }
 
@@ -90,20 +93,28 @@ function block_data_form_alter(&$form, &$form_state, $form_id) {
  */
 function block_data_form_submit($form, &$form_state) {
   if ($form_state['values']['form_id'] == 'block_admin_configure' || $form_state['values']['form_id'] == 'block_add_block_form') {
-    
-    if (isset($form_state['values']['data_attr']) && user_access('administer blocks')) {
+    if (isset($form_state['values']['data_attr']['options_field']) && user_access('administer blocks')) {
       
-      // Remove empty values, create new array using prop:value
-      $data_attr = array();
-      foreach ($form_state['input']['data_attr'] as $key => $value) {
-        if (empty($value['data_prop']) || empty($value['data_value'])) {
-          unset($form_state['input']['data_attr'][$key]);
-        } else {
-          $data_prop = drupal_clean_css_identifier($value['data_prop']);
-          $data_value = $value['data_value'];
-          $data_attr[$data_prop] = $data_value;
+      // Explode values, create new array using prop:value
+      $input = explode("\n", trim($form_state['input']['data_attr']['options_field']));
+
+      $block_data = array();
+      // Loop through pairs.
+      if (!empty($input)) {
+        foreach ($input as $key => $value) {
+          // Split by pipe.
+          $data = explode('|', $value);
+          // Remove spaces, clean up for data attributes.
+          $data_prop = drupal_clean_css_identifier($data[0]);
+          $data_value = trim($data[1]);
+          // Assign to array.
+          $block_data[$data_prop] = $data_value;
         }
       }
+      // Key by module name.
+      $data_attr = array(
+        'block_data' => $block_data,
+      );
 
       $data_serialized = serialize($data_attr);
 
@@ -124,124 +135,26 @@ function block_data_add_attr(&$form, &$form_state, $block) {
   // Retrieve block attributes data.
   $data = (!empty($block->data_attr)) ? unserialize($block->data_attr) : NULL;
 
-  $form['settings']['data_attr'] = array(
+  // Account for CSS Class weight, put after them.
+  if (isset($form['settings']['css_class'])) {
+    if (empty($form['settings']['css_class']['#weight'])) {
+      $form['settings']['css_class']['#weight'] = (isset($form['settings']['body_field']['#weight'])) ? $form['settings']['body_field']['#weight']+1 : 0;
+    }
+  }
+
+  $form['settings']['block_data'] = array(
     '#type' => 'fieldset',
     '#title' => t('Block Data Attributes'),
-    '#tree' => TRUE,
-    '#prefix' => '<div id="data-attr-wrapper">',
-    '#suffix' => '</div>',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#attributes' => array(
-      'class' => array('block-data-column'),
-    ),
+    '#weight' => $form['settings']['css_class']['#weight']+1,
   );
 
-  // Update count for number of existing attributes.
-  if (empty($form_state['num_attr'])) {
-    $form_state['num_attr'] = count($data);
-  }
-
-  // Convert key:value to keyed array.
-  $block_attr = array();
-  if (!empty($data)) {
-    foreach ($data as $key => $value) {
-      $block_attr[] = array(
-        'prop' => $key,
-        'value' => $value,
-      );
-    }
-  }
-
-  // Provide fields by default if no existing data is available.
-  if ($form_state['num_attr'] < 1) {
-    $form['settings']['data_attr'][0] = array(
-      '#type' => 'fieldset',
-      '#tree' => TRUE,
-    );
-    $form['settings']['data_attr'][0]['data_prop'] = array(
-      '#type' => 'textfield',
-      '#field_prefix' => 'data-',
-    );
-    $form['settings']['data_attr'][0]['data_value'] = array(
-      '#type' => 'textfield',
-      '#field_prefix' => '= "',
-      '#field_suffix' => '"',
-    );
-    $form_state['num_attr'] = 1;
-  } else {
-    for ($attribute = 0; $attribute < $form_state['num_attr']; $attribute++) {
-      $form['settings']['data_attr'][$attribute] = array(
-        '#type' => 'fieldset',
-        '#tree' => TRUE,
-      );
-      $form['settings']['data_attr'][$attribute]['data_prop'] = array(
-        '#type' => 'textfield',
-        '#field_prefix' => 'data-',
-        '#default_value' => (!empty($block_attr[$attribute]['prop'])) ? $block_attr[$attribute]['prop'] : NULL,
-      );
-      $form['settings']['data_attr'][$attribute]['data_value'] = array(
-        '#type' => 'textfield',
-        '#field_prefix' => '= "',
-        '#field_suffix' => '"',
-        '#default_value' => (!empty($block_attr[$attribute]['value'])) ? $block_attr[$attribute]['value'] : NULL,
-      );
-    }
-  }
-
-  // Add more button
-  $form['settings']['data_attr']['add_attr'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add one more'),
-    '#submit' => array('block_data_add_more_blocks'),
-    '#ajax' => array(
-      'callback' => 'block_data_add_more_callback',
-      'wrapper' => 'data-attr-wrapper',
-    ),
+  $form['settings']['block_data']['data_attr'] = array(
+    '#type' => 'options',
+    '#key_type_toggle' => NULL,
+    '#key_type_toggled' => TRUE,
+    '#default_value_allowed' => FALSE,
+    '#options' => (!empty($data['block_data'])) ? $data['block_data'] : array(),
   );
-  // Remove one button
-  if ($form_state['num_attr'] > 1) {
-    $form['settings']['data_attr']['remove_name'] = array(
-      '#type' => 'submit',
-      '#value' => t('Remove one'),
-      '#submit' => array('block_data_add_more_remove_one'),
-      '#ajax' => array(
-        'callback' => 'block_data_add_more_callback',
-        'wrapper' => 'data-attr-wrapper',
-      ),
-    );
-  }
-}
-
-/**
- * Ajax callback for adding more attributes to the block.
- */
-function block_data_add_more_callback($form, &$form_state) {
-  return $form['settings']['data_attr'];
-}
-
-/**
- * Submit handler for the "Add One More" button of a field form.
- *
- * This handler makes changes to the form state.
- * If the button was clicked with JS disabled, then
- * the page is reloaded with the complete rebuilt form. If the button was
- * clicked with JS enabled, then ajax_form_callback(),
- * block_data_add_more_callback()
- * to return just the changed part of the form.
- */
-function block_data_add_more_blocks($form, &$form_state) {
-  $form_state['num_attr']++;
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Submit handler for the "Remove One" button of the block attribute form.
- * This handler removes the last attribute added.
- */
-function block_data_add_more_remove_one($form, &$form_state) {
-  if ($form_state['num_attr'] > 1) {
-    $form_state['num_attr']--;
-  }
-  $form_state['rebuild'] = TRUE;
 }
