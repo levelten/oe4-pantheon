@@ -1,0 +1,7 @@
+name = StellarJS
+description = Add StellarJS to any site.
+core = 7.x
+configure = admin/config/development/stellarjs
+project = stellarjs
+
+dependencies[] = libraries

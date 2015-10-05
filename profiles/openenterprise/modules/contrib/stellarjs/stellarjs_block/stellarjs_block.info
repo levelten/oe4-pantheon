@@ -1,0 +1,7 @@
+name = "StellarJS Block"
+description = Provides a file field in block configuration form for displaying a parallax image in a block.
+core = 7.x
+
+dependencies[] = block
+dependencies[] = image
+dependencies[] = stellarjs
