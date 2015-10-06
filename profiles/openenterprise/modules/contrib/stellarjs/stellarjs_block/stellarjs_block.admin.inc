@@ -59,16 +59,16 @@ function stellarjs_block_admin_settings_form_validate($form, &$form_state) {
  */
 function stellarjs_block_add_block_form() {
   module_load_include('inc', 'block', 'block.admin');
-  $form = block_admin_configure($form, $form_state, 'stellarjs_block', NULL);
-  
+  $form = block_admin_configure($form = array(), $form_state, 'stellarjs_block', NULL);
+
   // Other modules should be able to use hook_form_block_add_block_form_alter()
   // to modify this form, so add a base form ID.
   $form_state['build_info']['base_form_id'] = 'block_add_block_form';
 
   // Prevent block_add_block_form_validate/submit() from being automatically
   // added because of the base form ID by providing these handlers manually.
-  $form['#validate'] = 'stellarjs_block_add_block_form_validate';
-  $form['#submit'] = 'stellarjs_block_add_block_form_submit';
+  $form['#validate'] = array('stellarjs_block_add_block_form_validate');
+  $form['#submit'] = array('stellarjs_block_add_block_form_submit');
   return $form;
 }
 
