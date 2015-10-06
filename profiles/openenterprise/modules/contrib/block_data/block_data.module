@@ -35,6 +35,10 @@ function block_data_preprocess_block(&$vars) {
     $data_attr = array();
     foreach ($modules as $module) {
       foreach ($module as $key => $value) {
+        // Account for style attribute, merge with existing value.
+        if ($key === 'style') {
+          $value = (!empty($vars['attributes_array']['style'])) ? $vars['attributes_array']['style'] . $value : $value;
+        }
         $data_attr[$key] = $value;
       }
     }
@@ -80,14 +84,40 @@ function block_data_form_alter(&$form, &$form_state, $form_id) {
     $block = block_load($form['module']['#value'], $form['delta']['#value']);
 
     // Add block data fields.
-    block_data_add_attr($form, $form_state, $block);
+    // Retrieve block attributes data.
+    $data = (!empty($block->data_attr)) ? unserialize($block->data_attr) : NULL;
+
+    // Account for CSS Class weight, put after them.
+    $block_data_weight = NULL;
+    if (isset($form['settings']['css_class'])) {
+      if (empty($form['settings']['css_class']['#weight'])) {
+        $form['settings']['css_class']['#weight'] = (isset($form['settings']['body_field']['#weight'])) ? $form['settings']['body_field']['#weight']+1 : 0;
+        $block_data_weight = $form['settings']['css_class']['#weight']+1;
+      }
+    }
+
+    $form['settings']['block_data'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Block Data Attributes'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => $block_data_weight,
+    );
+
+    $form['settings']['block_data']['data_attr'] = array(
+      '#type' => 'options',
+      '#key_type_toggle' => NULL,
+      '#key_type_toggled' => TRUE,
+      '#default_value_allowed' => FALSE,
+      '#options' => (!empty($data['block_data'])) ? $data['block_data'] : array(),
+    );
 
     $form['#submit'][] = 'block_data_form_submit';
   }
 }
 
 /**
- * Helper function: additional submit callback for block configuration pages.
+ * Helper function: submit callback for block configuration pages.
  *
  * Save added data attributes.
  */
@@ -104,11 +134,14 @@ function block_data_form_submit($form, &$form_state) {
         foreach ($input as $key => $value) {
           // Split by pipe.
           $data = explode('|', $value);
-          // Remove spaces, clean up for data attributes.
-          $data_prop = drupal_clean_css_identifier($data[0]);
-          $data_value = trim($data[1]);
-          // Assign to array.
-          $block_data[$data_prop] = $data_value;
+          // Check if data attributes exist (will always have empty values) by default.
+          if (!empty($data[0]) && !empty($data[1])) {
+            // Remove spaces, clean up for data attributes.
+            $data_prop = drupal_clean_css_identifier($data[0]);
+            $data_value = trim($data[1]);
+            // Assign to array.
+            $block_data[$data_prop] = $data_value;
+          }
         }
       }
       // Key by module name.
@@ -129,32 +162,4 @@ function block_data_form_submit($form, &$form_state) {
       }
     }
   }
-}
-
-function block_data_add_attr(&$form, &$form_state, $block) {
-  // Retrieve block attributes data.
-  $data = (!empty($block->data_attr)) ? unserialize($block->data_attr) : NULL;
-
-  // Account for CSS Class weight, put after them.
-  if (isset($form['settings']['css_class'])) {
-    if (empty($form['settings']['css_class']['#weight'])) {
-      $form['settings']['css_class']['#weight'] = (isset($form['settings']['body_field']['#weight'])) ? $form['settings']['body_field']['#weight']+1 : 0;
-    }
-  }
-
-  $form['settings']['block_data'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Block Data Attributes'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#weight' => $form['settings']['css_class']['#weight']+1,
-  );
-
-  $form['settings']['block_data']['data_attr'] = array(
-    '#type' => 'options',
-    '#key_type_toggle' => NULL,
-    '#key_type_toggled' => TRUE,
-    '#default_value_allowed' => FALSE,
-    '#options' => (!empty($data['block_data'])) ? $data['block_data'] : array(),
-  );
 }
