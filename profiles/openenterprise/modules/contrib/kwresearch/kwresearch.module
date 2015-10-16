@@ -199,10 +199,10 @@ function kwresearch_admin_paths() {
 /**
  * Testing function
  */
-function kwresearch_util($pid) {
-  return " ";
+function kwresearch_util() {
+  return '';
 }
-    
+
 /**
  * Implements hook_permission()
 ().
@@ -417,13 +417,17 @@ function kwresearch_load_filtered_keyword_result($filter = array(), $options = a
   $query = db_select('kwresearch_keyword', 'k')
      ->extend('PagerDefault')
      ->limit($limit);
-  $u = $query->leftJoin('users', 'u', '%alias.uid = k.uid');
+  //$u = $query->leftJoin('users', 'u', '%alias.uid = k.uid');
   $query->fields('k');
-  $query->addField($u, 'name', 'username'); 
+  //$query->addField($u, 'name', 'username');
 
   if (module_exists('linkintel')) {
     $r = $query->leftJoin('linkintel_request', 'r', '%alias.kid = k.kid');
     $query->addField($r, 'path', 'link_request_path');
+  }
+
+  if (module_exists('intel_gwt')) {
+    kwresearch_add_intel_gwt_query_settings($query);
   }
 
   if (!empty($header)) {
@@ -442,10 +446,35 @@ function kwresearch_load_filtered_keyword_result($filter = array(), $options = a
     //$sql .= " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') . $filter['where'];
     //$count_sql .=  " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') .  $filter['where'];
   }
-  
+
+  //dsm(" " . $query);
+
   $result = $query->execute();
 
   return $result;
+}
+
+function kwresearch_add_intel_gwt_query_settings(&$query) {
+  $g = $query->leftJoin('intel_gwt_search', 'g', '%alias.keyword = k.keyword AND (%alias.timeframe = :timeframe1 OR %alias.keyword IS NULL)',
+    array(
+      ':timeframe1' => 'l28',
+    ));
+  $query->addField($g, 'impressions', 'gwt_impressions');
+  $query->addField($g, 'clicks', 'gwt_clicks');
+  $query->addField($g, 'position', 'gwt_position');
+
+  $h = $query->leftJoin('intel_gwt_search', 'h', '%alias.keyword = k.keyword AND (%alias.timeframe = :timeframe0 OR %alias.keyword IS NULL)',
+    array(
+      ':timeframe0' => 'm28',
+    ));
+  $query->addField($h, 'impressions', 'gwt_impressions0');
+  $query->addField($h, 'clicks', 'gwt_clicks0');
+  $query->addField($h, 'position', 'gwt_position0');
+  $query->addExpression('CAST(' . $g . '.impressions AS SIGNED) - CAST(' . $h . '.impressions AS SIGNED)', 'gwt_impressions_chg');
+  $query->addExpression('CAST(' . $g . '.clicks AS SIGNED) - CAST(' . $h . '.clicks AS SIGNED)', 'gwt_clicks_chg');
+  $query->addExpression($g . '.position - ' . $h . '.position', 'gwt_position_chg');
+  $query->groupBy('k.keyword');
+  return $query;
 }
 
 /**

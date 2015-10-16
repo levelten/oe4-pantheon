@@ -73,10 +73,10 @@ function kwresearch_keywords_list_page($mode = 'site') {
       'data' => t('Value'),
       'field' => 'k.value',
     ),
-    array(
-      'data' => t('Set by'),
-      'field' => 'u.name',
-    ),
+    //array(
+    //  'data' => t('Set by'),
+    //  'field' => 'u.name',
+    //),
     array(
       'data' => t('Pages'),
       'field' => 'k.page_count',
@@ -86,6 +86,24 @@ function kwresearch_keywords_list_page($mode = 'site') {
     $header[] = array(
       'data' => t('Link target'),
       'field' => 'r.path',      
+    );
+  }
+  if (module_exists('intel_gwt')) {
+    $header[] = array(
+      'data' => t('Imprs'),
+      'field' => 'gwt_impressions',
+    );
+    $header[] = array(
+      'data' => t('Clicks'),
+      'field' => 'gwt_clicks',
+    );
+    $header[] = array(
+      'data' => t('Rank'),
+      'field' => 'gwt_position',
+    );
+    $header[] = array(
+      'data' => t('Chg'),
+      'field' => 'gwt_position_chg',
     );
   }
   if (is_array($data_options)) {
@@ -156,6 +174,7 @@ function kwresearch_keywords_list_page($mode = 'site') {
       );
     }
   }
+  //dsm($analysis['analysis']);
   if (is_array($analysis['analysis']) && !empty($analysis['analysis'])) {
     foreach ($analysis['analysis'] as $keyword => $values) {
       $row = array();
@@ -168,10 +187,10 @@ function kwresearch_keywords_list_page($mode = 'site') {
         'data' => ($values['value'] >= 0) ? t('$') . number_format($values['value'], 2)  : '-',
         'class' => array('value'),
       );
-      $row[] = array(
-        'data' => ($values['username']) ? l($values['username'], 'user/' . $values['uid']) : '-',
-        'class' => array('user'),
-      );
+      //$row[] = array(
+      //  'data' => ($values['username']) ? l($values['username'], 'user/' . $values['uid']) : '-',
+      // 'class' => array('user'),
+      //);
       $row[] = array(
         //'data' => l(number_format($values['page_count']), 'admin/structure/kwresearch/keyword_pages/' . $values['kid'], array('query' => 'destination=admin/structure/kwresearch/keyword_list' . (($mode == 'site') ? '/site' : ''))),
         'data' => l(number_format($values['page_count']), 'admin/structure/kwresearch/keyword_pages/' . $values['kid'], array('query' => array('destination' => 'admin/structure/kwresearch/keyword_list'))),
@@ -179,6 +198,24 @@ function kwresearch_keywords_list_page($mode = 'site') {
       );
       if (module_exists('linkintel')) {
         $row[] = (!isset($values['link_request_path'])) ? '-' : l($values['link_request_path'], $values['link_request_path']);
+      }
+      if (module_exists('intel_gwt')) {
+        $row[] = array(
+          'data' => isset($values['gwt_impressions']) ? number_format($values['gwt_impressions'])  : 'NA',
+          'class' => array('gwt-impressions'),
+        );
+        $row[] = array(
+          'data' => isset($values['gwt_clicks']) ? number_format($values['gwt_clicks'])  : 'NA',
+          'class' => array('gwt-clicks'),
+        );
+        $row[] = array(
+          'data' => isset($values['gwt_position']) ? number_format($values['gwt_position'], 1)  : 'NA',
+          'class' => array('gwt-position'),
+        );
+        $row[] = array(
+          'data' => isset($values['gwt_position_chg']) ? number_format($values['gwt_position_chg'], 1)  : 'NA',
+          'class' => array('gwt-position'),
+        );
       }
       foreach ($data_options as $k => $v) {
         if ($v) {

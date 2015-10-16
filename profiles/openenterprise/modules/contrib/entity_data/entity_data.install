@@ -27,6 +27,13 @@ function entity_data_schema() {
         'default' => 0,
         'description' => 'The entity id this data is attached to',
       ),
+      'entity_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The entity machine name the data is attached to',
+      ),
       'revision_id' => array(
         'type' => 'int',
         'unsigned' => TRUE,
@@ -72,9 +79,6 @@ function entity_data_schema() {
  * Add revision_id field to enable versioning support
  */
 function entity_data_update_7001() {
-  //$schema = dwyr_franchise_schema();
-  //$schema['dwyr_franchise']['lic']['initial'] = '';
-  //$schema['dwyr_franchise']['slug']['initial'] = '';
   $revision_id_field = array(
     'type' => 'int',
     'unsigned' => TRUE,
@@ -98,4 +102,31 @@ function entity_data_update_7001() {
 
   $query = db_query('UPDATE entity_data SET revision_id = entity_id WHERE revision_id = 0');
   $query->execute();
+}
+
+/**
+ * Add entity_name support
+ */
+function entity_data_update_7002() {
+  $entity_name_field = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'The entity machine name the data is attached to',
+  );
+
+  $primary_key = array(
+    'entity_type',
+    'entity_id',
+    'entity_name',
+    'revision_id',
+    'language',
+    'name',
+  );
+
+  db_add_field('entity_data', 'entity_name', $entity_name_field);
+
+  db_drop_primary_key('entity_data');
+  db_add_primary_key('entity_data', $primary_key);
 }
