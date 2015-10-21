@@ -496,7 +496,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   }
 
   if (empty($entity_bundle)) {
-    watchdog('intel-entity-attrs', print_r($entity, 1));
+    //watchdog('intel-entity-attrs', print_r($entity, 1));
     return;
   }
 
