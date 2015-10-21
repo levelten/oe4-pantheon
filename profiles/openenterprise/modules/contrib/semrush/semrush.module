@@ -25,6 +25,7 @@ function semrush_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'semrush.admin.inc',
   );
+  /*
   $items['admin/structure/kwresearch/semrush'] = array(
     'title' => 'SEMRush',
     'description' => 'Research keywords using SEMRush API.',
@@ -43,26 +44,6 @@ function semrush_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('access semrush reports'),
     'type' => MENU_CALLBACK,
-    'file' => 'semrush.admin.inc',
-  );
-  /*
-  $items['admin/structure/semrush'] = array(
-    'title' => 'SEMRush',
-    'description' => 'Research keywords using SEMRush API.',
-    'page callback' => 'semrush_keyword_stats_report_page',
-    'page arguments' => array('keywords'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access semrush reports'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'semrush.admin.inc',
-  );
-  $items['admin/structure/semrush/keywords'] = array(
-    'title' => 'Keywords tool',
-    'page callback' => 'semrush_keyword_stats_report_page',
-    'page arguments' => array('keywords'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access semrush reports'),
-    'type' => MENU_NORMAL_ITEM,
     'file' => 'semrush.admin.inc',
   );
   */

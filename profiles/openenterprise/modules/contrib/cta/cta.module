@@ -1102,7 +1102,6 @@ function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
     $form = array_merge($form, $f);
   }
   $entity_data_id = $form['module']['#value'] . ':' . $form['delta']['#value'];
-  dsm(entity_data_get('block', $entity_data_id, 'cta_popup', 'not found'));
   $form['#submit'][] = 'cta_block_admin_configure_submit';
 }
 
