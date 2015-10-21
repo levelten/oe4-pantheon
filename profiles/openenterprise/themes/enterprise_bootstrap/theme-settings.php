@@ -675,8 +675,12 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		);
 		
     // Don't wait on save to provide palettes.
-    $pictaculous_object = (!empty(theme_get_setting('pictaculous_object'))) ? theme_get_setting('pictaculous_object') : variable_get('pictaculous_object', NULL);
-		if ($pictaculous_object) {
+    $pictaculous_object = theme_get_setting('pictaculous_object');
+    if (empty($pictaculous_object)) {
+    	$pictaculous_object = variable_get('pictaculous_object', NULL);
+    }
+
+		if (!empty($pictaculous_object)) {
 			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
 				'#type' => 'fieldset',
 			);
