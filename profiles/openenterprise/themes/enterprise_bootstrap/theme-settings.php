@@ -748,7 +748,7 @@ function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
 		}
 		$params['lover'] = $param;
 	} elseif ($mode == 'custom_keywords') {
-		if (empty(($param))) {
+		if (empty($param)) {
 			form_set_error('cl_palette_param', t('You must enter some keywords when using Custom: Keywords.'));
 		}
 		$params['keywords'] = _colourlovers_format_keyword($param);
