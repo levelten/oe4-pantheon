@@ -140,7 +140,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
 
   // Navigation region settings.
   $variables['navbar_region_class'] .= theme_get_setting('navbar_region_class');
-  
+
   // Add nav_logo classes from theme settings.
   $variables['nav_logo_class']['class'][] = 'navbar-header';
   $nav_logo_class = explode(' ', trim(theme_get_setting('nav_logo_class')));
@@ -240,7 +240,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   $settings['mobilemenuhoverpushwidth'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width');
   $settings['fittext'] = theme_get_setting('fittext_selector');
   $settings['sticky_menu'] = theme_get_setting('sticky_menu');
-  
+
   // Process FitText selectors
   $selectors = array();
   if (!empty($settings['fittext'])) {
@@ -322,7 +322,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   // $equalize = theme_get_setting('equalize');
   // if (!empty($equalize)) {
   //   if ($equalize == 1) {
-  //     drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');        
+  //     drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');
   //   }
   // }
 
@@ -398,7 +398,7 @@ function enterprise_bootstrap_task_list($variables) {
     $output .= $item;
     $output .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
     $output .= '</li>';
-  } 
+  }
   $output .= '</ol>';
   return $output;
 }
@@ -500,7 +500,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
     'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
     'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
   );
-  
+
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
@@ -518,7 +518,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
       $menu_data['mega_item_class'] = $menu_data['mega_columns'];
       $menu_data['mega_wrapper_class'] = 'row';
       break;
-    
+
     case 'col-table':
       // Use display:table-cell hack
       $menu_data['mega_item_class'] = 'mega-table-cell';
@@ -538,7 +538,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
       $menu_data['mega_wrapper_class'] = '';
       break;
   }
-  
+
   // Last chance to turn into a mega menu via Enterprise Extras option.
   // But only do that if it's the main menu.
   if (!empty($element['#original_link']['options']['enterprise_mega']) && $element['#original_link']['options']['enterprise_mega']) {
@@ -596,7 +596,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
           $output[] = '<div class="'.$menu_data['mega_wrapper_class'].'">';
         }
       }
-      
+
       // Add conditions for Mega Block.
       if (!empty($menu_data['mega_block'])) {
         $mega_block_pieces = explode('|', $menu_data['mega_block']);
@@ -624,7 +624,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
         $output[] = drupal_render($element['#below']);
       }
       $output[] = '</ul></div>';
-      
+
       if (in_array('last', $element['#attributes']['class'])) {
         if ($menu_data['enterprise_mega'] == 'yamm') {
           $output[] = '</li>';
@@ -698,7 +698,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
         // Add our own wrapper.
         unset($element['#below']['#theme_wrappers']);
         $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
-        
+
         // Generate as standard dropdown.
         $element['#attributes']['class'][] = 'dropdown';
         $element['#localized_options']['html'] = TRUE;
@@ -755,7 +755,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
     'mobile_dropdown' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
     'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
   );
-  
+
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
@@ -763,7 +763,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
   // Add Menu link ID for specific styling cases.
   $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
 
-  
+
   // Handle all other menus.
   if ($element['#below'] && $menu_data['expanded']) {
     // Prevent dropdown functions from being added to management menu so it
@@ -813,7 +813,7 @@ function _enterprise_bootstrap_menu_wrapper($variables) {
   // 'bootstrap' => t('Bootstrap Default'),
   // 'enterprise' => t('Enterprise Mega Menu'),
   // 'yamm' => t('YAMM'),
-  
+
   // Extract additional data.
   if (!empty($variables['#tree'])) {
     foreach ($variables['#tree'] as $element) {
@@ -830,7 +830,7 @@ function _enterprise_bootstrap_menu_wrapper($variables) {
         break;
 
       case 'enterprise':
-        return '<div class="mega-content"><ul class="menu nav">' . $variables['tree'] . '</ul></div>';
+        return '<div class="mega-content"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
         break;
 
       case 'yamm':

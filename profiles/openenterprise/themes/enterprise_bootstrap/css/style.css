@@ -6817,6 +6817,49 @@ div.workbench-info-block > ul {
 div.workbench-info-block > p + p {
   margin-top: 5px;
 }
+.navbar-nav > li > .dropdown-menu {
+  width: auto;
+  padding: 0;
+  white-space: normal;
+}
+.navbar-nav > li > .dropdown-menu li {
+  border-bottom: 1px solid #e2e2e2;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 5px !important;
+}
+.navbar-nav > li > .dropdown-menu li:last-child {
+  border: 0;
+}
+.navbar-nav > li > .dropdown-menu li:hover {
+  color: #222222;
+  background-color: #eeeeee;
+}
+.navbar-nav > li > .dropdown-menu a {
+  display: block;
+  font-weight: 300;
+  padding: 5px 20px;
+  color: #222222 !important;
+}
+.navbar-nav > li > .dropdown-menu a:hover {
+  color: #222222;
+  background-color: transparent;
+  text-decoration: none;
+}
+@media screen and (max-width: 768px) {
+  .navbar-nav > li > .dropdown-menu a {
+    color: #eeeeee !important;
+  }
+  .navbar-nav > li > .dropdown-menu a:hover {
+    color: #222222 !important;
+  }
+}
+.footer .footer-bottom {
+  background-color: #727274;
+  padding: 20px 0;
+}
 .style-date-stacked {
   margin-right: 10px;
   position: relative;

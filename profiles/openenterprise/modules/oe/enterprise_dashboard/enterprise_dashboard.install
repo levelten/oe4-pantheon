@@ -25,7 +25,6 @@ function enterprise_dashboard_enable() {
       $roles[$name] = $role;
     }
   }
-  dsm($roles);
   foreach ($roles as $name => $role) {
     user_role_grant_permissions($role->rid, $grants[$name]);
   }

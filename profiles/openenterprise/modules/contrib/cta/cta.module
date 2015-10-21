@@ -1101,7 +1101,7 @@ function cta_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
   else {
     $form = array_merge($form, $f);
   }
-
+  $entity_data_id = $form['module']['#value'] . ':' . $form['delta']['#value'];
   $form['#submit'][] = 'cta_block_admin_configure_submit';
 }
 
@@ -1132,6 +1132,7 @@ function cta_block_admin_configure_submit($form, &$form_state) {
     }
   }
 
+
   if (count($meta['selectors'])) {
     $meta['list_visibility'] = 1;
   }
@@ -1146,6 +1147,13 @@ function cta_block_admin_configure_submit($form, &$form_state) {
     unset($meta['data']['ga_event']['custom']);
   }
 
+  $entity_data_id = $form_state['values']['module'] . ':' . $form_state['values']['delta'];
+  if (isset($meta['data']['popup'])) {
+    entity_data_set('block', $entity_data_id, 'cta_popup', $meta['data']['popup']);
+  }
+  else {
+    entity_data_del('block', $entity_data_id, 'cta_popup');
+  }
   cta_block_meta_save($meta, $form_state['values']['module'], $form_state['values']['delta']);
 }
 

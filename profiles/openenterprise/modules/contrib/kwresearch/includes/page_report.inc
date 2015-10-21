@@ -14,6 +14,7 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
   drupal_add_css(drupal_get_path('module', 'kwresearch') . '/kwresearch.css');
   kwresearch_set_admin_theme();
   $query = db_select('kwresearch_page_keyword', 'pk');
+  $k  = $query->innerJoin('kwresearch_keyword', 'k', '%alias.kid = pk.kid');
   drupal_set_title('Page keywords');
   if ($mode == 'node') {
     $pid = $pid->nid;
@@ -47,10 +48,6 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
       'field' => 'pk.priority',
       'sort' => 'desc',
     ),
-    //array(
-    //  'data' => t('Set by'),
-    //  'field' => 'up.name',
-    //),
     array(
       'data' => t('Site priority'),
       'field' => 'k.priority',
@@ -59,10 +56,6 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
       'data' => t('Value'),
       'field' => 'k.value',
     ),
-    //array(
-    //  'data' => t('Set by'),
-    //  'field' => 'u.name',
-    //),
   );
   
   $linkintel_exists = module_exists('linkintel');
@@ -74,6 +67,34 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
     $l = $query->leftJoin('linkintel_request', 'l', "l.kid = pk.kid");
     $query->addField('l', 'path', 'link_target_path');   
   }
+
+  $intel_gwt_exists = module_exists('intel_gwt');
+  if ($intel_gwt_exists) {
+    // check if data should be refreshed
+    if (!empty($_GET['refresh_gwt'])) {
+      $options = array(
+        'requests' => array()
+      );
+      $options['requests'][] = array(
+        'page' => base_path() . drupal_get_path_alias('node/' . $pid),
+      );
+      intel_gwt_search_fetch_batch(array(), $options);
+    }
+    $header[] = array(
+      'data' => t('Imprs'),
+      'field' => 'g.impressions',
+    );
+    $header[] = array(
+      'data' => t('Clicks'),
+      'field' => 'g.clicks',
+    );
+    $header[] = array(
+      'data' => t('Position'),
+      'field' => 'g.position',
+    );
+    kwresearch_add_intel_gwt_query_settings($query);
+  }
+
   $header[] =  array(
       'data' => t('Total Daily'),
       'field' => 'k.daily_volume',
@@ -94,7 +115,7 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
   $result = pager_query($sql, 100, 0, NULL, $pid);
   */
   
-  $k  = $query->innerJoin('kwresearch_keyword', 'k', '%alias.kid = pk.kid');
+
   $u  = $query->leftJoin('users', 'u', '%alias.uid = k.uid');
   $up = $query->leftJoin('users', 'up', '%alias.uid = pk.uid');
   $query->fields($k);
@@ -106,10 +127,22 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
     ->limit(100);
   $query->extend('TableSort')
     ->orderByHeader($header);
+
+  if ($intel_gwt_exists) {
+    if (!empty($_GET['refresh_gwt'])) {
+      $options = array(
+        'pages' => array()
+      );
+      $options['pages'][] = array(
+        'page' => base_path() . drupal_get_path_alias('node/' . $pid),
+      );
+      intel_gwt_search_fetch_batch(array(), $options);
+    }
+    kwresearch_add_intel_gwt_query_settings($query);
+  }
+
   $result = $query->execute();
 
-  
-  
   $priorities = kwresearch_get_priority_options();
   $dest = 'admin/structure/kwresearch/page_keywords/' . $pid;
   if ($mode == 'node') {
@@ -140,6 +173,11 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
       $row['data'][] = (!isset($r->link_target_path)) ? '-' : (($r->link_target_path == $path) ? 'this' : l($r->link_target_path, $r->link_target_path));
       $ops .= ' | ' . l(t('set link request'), 'admin/structure/kwresearch/keyword_list/edit/' . $r->kid, $lo2);
     }
+    if ($intel_gwt_exists) {
+      $row['data'][] = isset($r->gwt_impressions) ? number_format($r->gwt_impressions) : 'NA';
+      $row['data'][] = isset($r->gwt_clicks) ? number_format($r->gwt_clicks) : 'NA';
+      $row['data'][] = isset($r->gwt_position) ? number_format($r->gwt_position, 1) : 'NA';
+    }
     $row['data'][] = ($r->daily_volume >= 0) ? number_format($r->daily_volume) : '-';
     $row['data'][] = $ops;
 
@@ -161,6 +199,14 @@ function kwresearch_page_keywords_page($pid, $mode = NULL) {
   $output .= theme('pager', array('tags' => NULL, 'element' => 0));
 
   $output .= l(t('Add page keyword'), 'admin/structure/kwresearch/page_keywords_edit/' . $pid, $lo);
+
+  if ($intel_gwt_exists) {
+    $output .= '<br /><br />' . '<h3>' . t('GWT Search Analytics') . '</h3>';
+    $output .= intel_gwt_search_report(array('conditions' => array(array('s.nid', $pid))));
+    $output .= l('Refresh GWT data', current_path(), array('query' => array(
+        'refresh_gwt' => 1
+      )));
+  }
 
   return $output;
 }
