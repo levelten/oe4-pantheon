@@ -18,7 +18,7 @@ var Drupal = Drupal || {};
       var $body = $("body", context),
       $header = $("#navbar", context),
       $mainContainer = $(".page-wrapper", context),
-      hoverPushActivation = (settings.enterprise_bootstrap.mobilemenuhoverpushwidth ? settings.enterprise_bootstrap.mobilemenuhoverpushwidth : 568),
+      hoverPushActivation = (settings.enterprise_bootstrap && settings.enterprise_bootstrap.mobilemenuhoverpushwidth) ? settings.enterprise_bootstrap.mobilemenuhoverpushwidth : 568,
       mobileMenuActivationWidth = 568,
       isMobile = function() {
         // Check if we're in a mobile breakpoint.
@@ -96,7 +96,7 @@ var Drupal = Drupal || {};
       /*
       * Sticky Menu
       */
-      if (settings.enterprise_bootstrap.sticky_menu) {
+      if (settings.enterprise_bootstrap && settings.enterprise_bootstrap.sticky_menu) {
         var $navbar = $("#navbar", context),
             $navbarWrapper = $("#navbar-wrapper", context);
         var navbarTop = $navbar.outerHeight(),
@@ -121,7 +121,7 @@ var Drupal = Drupal || {};
       /*
       * Mobile menu - hover vs push down
       */
-      var mobileMenuHoverPush = (settings.enterprise_bootstrap.mobilemenuhoverpush) ? settings.enterprise_bootstrap.mobilemenuhoverpush : false,
+      var mobileMenuHoverPush = (settings.enterprise_bootstrap && settings.enterprise_bootstrap.mobilemenuhoverpush) ? settings.enterprise_bootstrap.mobilemenuhoverpush : false,
       navbarHeight = $header.outerHeight(),
       staticToFixed = function() {
         // Switch navbar-static-top to navbar-fixed-top
