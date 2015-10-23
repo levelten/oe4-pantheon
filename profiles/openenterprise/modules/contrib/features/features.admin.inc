@@ -142,7 +142,7 @@ function features_export_form($form, $form_state, $feature = NULL) {
   // If recreating this feature, disable machine name field to ensure the
   // machine name cannot be changed, unless user role has granted permission to
   // edit machine name of disabled features.
-  if (isset($feature) && !user_access('rename features')) {
+  if (isset($feature) && (!user_access('rename features'))) {
     $form['info']['module_name']['#value'] = $feature_name;
     $form['info']['module_name']['#disabled'] = TRUE;
   }
