@@ -1,0 +1,6 @@
+name = Block Data
+description = Allows adding data attributes to blocks.
+core = 7.x
+
+dependencies[] = block
+dependencies[] = options_element

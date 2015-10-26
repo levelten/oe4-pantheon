@@ -11,6 +11,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		$default_settings = $info['settings'];
 	}
 
+  // Logo
 	$logo_options = array('default' => "Default") + image_style_options(false);
 	$form['logo']['settings']['logo_image_style'] = array(
 		'#type' => 'select',
@@ -19,6 +20,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#default_value' => theme_get_setting('logo_image_style'),
 		'#options' => $logo_options,
 	);
+  $form['logo']['settings']['logo_suggestion'] = array(
+    '#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75 available in the "Enterprise Bootstrap Logo" image style.</p></div>',
+    '#attributes' => array('class' => array('description')),
+    '#weight' => 10,
+  );
 
 	$form['enterprise_bootstrap'] = array(
 		'#type' => 'vertical_tabs',
@@ -83,21 +89,18 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 	
-	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
+  $form['enterprise_bootstrap_config']['column_right']['eb_dark_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Dark Theme'),
+    '#default_value' => theme_get_setting('eb_dark_theme'),
+    '#description' => t('Adds a "theme-dark" class to the body, only affects subthemes that use it.'),
+  );
+
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
 		'#description' => t('Adds odd/even classes to blocks on the home page.'),
-		'#options' => array(
-			0 => t('No'),
-			1 => t('Yes'),
-		),
-	);
-	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_blokkfont'] = array(
-		'#type' => 'select',
-		'#title' => t('Blokk Font'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
-		'#description' => t('Enables Blokk Neue as the default font. Great for testing designs.'),
 		'#options' => array(
 			0 => t('No'),
 			1 => t('Yes'),
@@ -600,79 +603,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
-	// Color settings if LESS module enabled.
-	if (module_exists('less')) {
-		$form['enterprise_bootstrap_color'] = array(
-			'#type' => 'fieldset',
-			'#group' => 'enterprise_bootstrap',
-			'#title' => t('Colors'),
-		);
-		$form['enterprise_bootstrap_color']['less_colors'] = array(
-			'#type' => 'fieldset',
-			'#title' => t('LESS Colors'),
-			'#weight' => 1,
-		);
-		
-		$color_attrs = array(
-			'class' => array(
-				'minicolor'
-			)
-		);
-		
-		$form['enterprise_bootstrap_color']['less_colors']['brand_color_1'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Brand Primary'),
-			'#default_value' => theme_get_setting('brand_color_1'),
-			'#attributes' => $color_attrs,
-			'#prefix' => '<div class="inline-field">',
-			'#suffix' => '</div>',
-		);
-		
-		$form['enterprise_bootstrap_color']['less_colors']['brand_color_2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Brand Secondary'),
-			'#default_value' => theme_get_setting('brand_color_2'),
-			'#attributes' => $color_attrs,
-			'#prefix' => '<div class="inline-field">',
-			'#suffix' => '</div>',
-		);
-		
-		$form['enterprise_bootstrap_color']['less_colors']['brand_color_3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Brand Accent'),
-			'#default_value' => theme_get_setting('brand_color_3'),
-			'#attributes' => $color_attrs,
-			'#prefix' => '<div class="inline-field">',
-			'#suffix' => '</div>',
-		);
-		
-		$form['enterprise_bootstrap_color']['less_colors']['brand_color_4'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Brand Accent 2'),
-			'#default_value' => theme_get_setting('brand_color_4'),
-			'#attributes' => $color_attrs,
-			'#prefix' => '<div class="inline-field">',
-			'#suffix' => '</div>',
-		);
-
-		$form['enterprise_bootstrap_color']['less_colors']['brand_color_5'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Brand Accent 3'),
-			'#default_value' => theme_get_setting('brand_color_5'),
-			'#attributes' => $color_attrs,
-			'#prefix' => '<div class="inline-field">',
-			'#suffix' => '</div>',
-		);
-	}
-
-
-	// Extra
-	$form['logo']['settings']['logo_suggestion'] = array(
-  	'#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75. You will need to <a href="/admin/config/media/image-styles/add">create an image style</a> for this.</p></div>',
-  	'#attributes' => array('class' => array('description')),
-  	'#weight' => 10,
-	);
-
 	// Colourlovers settings
 	if (module_exists('colourlovers')) {
 		$form['enterprise_bootstrap_color']['colourlovers'] = array(
@@ -680,6 +610,8 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'#title' => t('COLOURLovers Palettes'),
 			'#weight' => -2,
 			'#description' => t('Enter the URL below to request your palettes. You can use the !playground to get your API URL. This works with !palettes only.', array('!playground' => l('Colourlovers Playground', 'admin/appearance/colourlovers'), '!palettes' => '<strong>PALETTES</strong>')),
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
 		);
 		
 		$form['enterprise_bootstrap_color']['colourlovers']['cl_palette_mode'] = array(
@@ -732,6 +664,8 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'#title' => t('Pictaculous Palettes'),
 			'#description' => t('You must upload an image using the !pictaculous interface, we will pull the settings from there.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))),
 			'#weight' => -1,
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
 		);
 
 		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'] = array(
@@ -740,7 +674,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			'#value' => theme_get_setting('pictaculous_object'),
 		);
 		
-		if ($pictaculous_object = theme_get_setting('pictaculous_object')) {
+    // Don't wait on save to provide palettes.
+    $pictaculous_object = theme_get_setting('pictaculous_object');
+    if (empty($pictaculous_object)) {
+    	$pictaculous_object = variable_get('pictaculous_object', NULL);
+    }
+
+		if (!empty($pictaculous_object)) {
 			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
 				'#type' => 'fieldset',
 			);
@@ -750,7 +690,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 				'#markup' => _enterprise_bootstrap_pictaculous($pictaculous_object),
 		  );
 		} else {
-			drupal_set_message(t('Re-save this form to pull in the palettes provided by Pictaculous.'), 'status', FALSE);
+			drupal_set_message(t('You must upload an image to the !pictaculous admin form to generate palettes.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))), 'status', FALSE);
 		}
 	}
 
@@ -761,14 +701,14 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['#attached']['js'][] = $theme_path . '/js/enterprise_bootstrap_admin.js';
 
 	// Add form submit handler.
-	$form['#validate'][] = '_enterprise_bootstrap_form_validate';
+	$form['#validate'][] = 'enterprise_bootstrap_form_validate';
 
-} // end settings_alter
+}
 
 /*
  * Validate handler for Enterprise Bootstrap.
  */
-function _enterprise_bootstrap_form_validate($form, &$form_state) {
+function enterprise_bootstrap_form_validate(&$form, &$form_state) {
 	$input = $form_state['values'];
 
 	// Check for Colourlovers
@@ -784,24 +724,16 @@ function _enterprise_bootstrap_form_validate($form, &$form_state) {
   	// Get value from Pictaculous.
   	$pictaculous_object = variable_get('pictaculous_object', NULL);
 
-  	// If image isn't available in Pictaculous, throw error.
-  	if (!empty($pictaculous_object)) {
-  		
-  		$pictaculous_theme = $form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'];
-
-  		// If FID's don't match, grab newest info.
-  		if (isset($pictaculous_theme['fid'])) {
-  			if ($pictaculous_theme['fid'] != $pictaculous_object['fid']) {
-  				form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
-  			}
-  		} else {
-  			form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
-  		}
-
-  	} else {
-  		form_set_error('pictaculous_object', t('You must upload an image to the !pictaculous admin form to generate palettes.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))));
-  	}
-	}
+		$pictaculous_theme = $form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'];
+		// If FID's don't match, grab newest info.
+		if (isset($pictaculous_theme['fid'])) {
+			if ($pictaculous_theme['fid'] != $pictaculous_object['fid']) {
+				form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+			}
+		} else {
+			form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+		}
+  }
 }
 
 /**
@@ -816,7 +748,7 @@ function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
 		}
 		$params['lover'] = $param;
 	} elseif ($mode == 'custom_keywords') {
-		if (empty(($param))) {
+		if (empty($param)) {
 			form_set_error('cl_palette_param', t('You must enter some keywords when using Custom: Keywords.'));
 		}
 		$params['keywords'] = _colourlovers_format_keyword($param);
@@ -902,6 +834,5 @@ function _enterprise_bootstrap_pictaculous($object) {
 			}
 		}
 	}
-
 	return $output;
 }

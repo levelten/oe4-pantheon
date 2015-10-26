@@ -67,6 +67,6 @@ function enterprise_base_update_7000() {
 
   // Notify user to re-save theme settings.
   $theme_name = variable_get('theme_default', NULL);
-  $message = t('If you theme colors are different, be sure to re-save your theme settings located at: !location', array('!location' => l(ucwords($theme_name), 'admin/appearance/settings/'.$theme_name)));
+  $message = t('If your theme colors are different, be sure to re-save your theme settings located at: !location', array('!location' => l(ucwords($theme_name), 'admin/appearance/settings/'.$theme_name)));
   drupal_set_message($message, 'status', FALSE);
 }

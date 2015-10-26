@@ -110,12 +110,6 @@ projects[video_filter][version] = 3.x-dev
 ; http://drupal.org/node/1689440
 projects[video_filter][patch][1434158] = https://www.drupal.org/files/issues/update_the_readme_for-1434158-11.patch
 
-projects[ckeditor_less][type] = module
-projects[ckeditor_less][download][type] = git
-projects[ckeditor_less][download][directory_name] = ckeditor_less
-projects[ckeditor_less][download][branch] = 7.x-1.x
-projects[ckeditor_less][download][url] = http://git.drupal.org/sandbox/KyleTaylored/2306291.git
-
 ;;;;;;
 ; UI Enhancements
 ;;;;;;

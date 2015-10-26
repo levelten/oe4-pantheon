@@ -1,0 +1,25 @@
+From ff2a68302511517322be63b84eee259905b45352 Mon Sep 17 00:00:00 2001
+From: Kyle Taylor <kyletaylored@gmail.com>
+Date: Fri, 23 Oct 2015 08:28:20 -0500
+Subject: [PATCH] remove $feature->status from condition
+
+---
+ profiles/openenterprise/modules/contrib/features/features.admin.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/features.admin.inc b/features.admin.inc
+index 8360e97..ef6451e 100644
+--- a/features.admin.inc
++++ b/features.admin.inc
+@@ -142,7 +142,7 @@ function features_export_form($form, $form_state, $feature = NULL) {
+   // If recreating this feature, disable machine name field to ensure the
+   // machine name cannot be changed, unless user role has granted permission to
+   // edit machine name of disabled features.
+-  if (isset($feature) && ($feature->status || !user_access('rename features'))) {
++  if (isset($feature) && (!user_access('rename features'))) {
+     $form['info']['module_name']['#value'] = $feature_name;
+     $form['info']['module_name']['#disabled'] = TRUE;
+   }
+-- 
+2.3.8 (Apple Git-58)
+

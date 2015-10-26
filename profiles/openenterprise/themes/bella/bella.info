@@ -30,6 +30,15 @@ stylesheets[all][] = less/style.less
 stylesheets[all][] = fonts/bella/css/bella_font.css
 
 ;;;;;;;;;;;;;;;;;;;;;
+;; LESS
+;;;;;;;;;;;;;;;;;;;;;
+less[vars][@brand-primary]   = #EA9B3E
+less[vars][@brand-secondary] = #F5F5F5
+less[vars][@brand-accent]    = #FFFFFF
+less[vars][@brand-accent-2]  = #EA9B3E
+less[vars][@brand-accent-3]  = #EA9B3E
+
+;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
 ;;;;;;;;;;;;;;;;;;;;;
 

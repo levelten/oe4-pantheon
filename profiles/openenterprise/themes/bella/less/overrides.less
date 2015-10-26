@@ -236,36 +236,6 @@ blockquote {
 	}
 }
 
-// Cool LESS loop stuff
-@colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
-@names  : primary, secondary, accent, success, info, warning, danger;
-@length : length(@colors);
-
-.brand-variation(@names; @colors; @index) when (@index > 0) {
-    .brand-variation(@names; @colors; (@index - 1)); // decrement.
-
-    @name  : extract(@names, @index);
-    @color : extract(@colors, @index);
-
-    .btn-@{name} {
-    	border-color: @color;
-    	background-color: @color;
-    	color: white;
-    	&:hover, &:focus {
-    		background-color: darken(@color, 10%);
-    		border-color: darken(@color, 10%);
-    	}
-    }
-    .bg-@{name} {
-    	background-color: @color;
-    	&, a {
-    		color: white;
-    	}
-    }
-  }
-
-  .brand-variation(@names; @colors; @length);
-
 // Override for other buttons/backgrounds
 .btn-secondary, .bg-secondary {
 	color: @brand-accent;

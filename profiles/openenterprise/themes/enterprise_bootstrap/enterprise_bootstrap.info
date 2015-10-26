@@ -24,8 +24,17 @@ regions[footer_bottom]  = 'Footer bottom'
 ;; Stylesheets
 ;;;;;;;;;;;;;;;;;;;;;
 
-;stylesheets[all][] = css/style.css
-stylesheets[all][] = less/style.less
+stylesheets[all][] = less/enterprise_bootstrap.less
+
+;;;;;;;;;;;;;;;;;;;;;
+;; LESS
+;;;;;;;;;;;;;;;;;;;;;
+
+less[vars][@brand-primary]   = #553D7B
+less[vars][@brand-secondary] = #3F2766
+less[vars][@brand-accent]    = #745F95
+less[vars][@brand-accent-2]  = #271149
+less[vars][@brand-accent-3]  = #9B8CB4
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
