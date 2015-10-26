@@ -1,0 +1,6 @@
+name = Google Webmaster Tools Intelligence
+core = "7.x"
+description = "Integrates Google Webmaster Tools with Intelligence EXPERIMENTAL"
+package = Intelligence
+
+dependencies[] = intel
