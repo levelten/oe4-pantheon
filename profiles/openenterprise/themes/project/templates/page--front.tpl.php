@@ -75,34 +75,22 @@
 ?>
 
 <div class="page-wrapper">
+
   <div class="header-container">
     <?php 
       // Header Top.
-      include 'header_top.inc';
-
-      // Determine which navbar to use.
-      switch ($nav_mega_menu) {
-        case 'enterprise-megamenu':
-           include 'includes/navigation_enterprise.inc';
-           break;
-
-         case 'yamm':
-           include 'includes/navigation_yamm.inc';
-           break;
-         
-         default:
-           include 'includes/navigation_bootstrap.inc';
-           break;
-      }
+      include 'includes/header_top.inc';
+      // Navigation
+      include 'includes/header.inc';
       // Header Bottom
-      include 'header_bottom.inc'
+      include 'includes/header_bottom.inc';
     ?>
   </div>
 
   <!-- Main Container -->
   <div class="main-container <?php print $full_width_container; ?>">
 
-    <?php include 'includes/header.inc'; ?>
+    <?php include 'includes/top_bar.inc'; ?>
 
     <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
     <?php if ($sidebars_front): include 'includes/sidebar_first.inc'; endif; ?>

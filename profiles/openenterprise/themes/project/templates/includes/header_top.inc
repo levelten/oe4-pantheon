@@ -1,5 +1,6 @@
+<!-- Header Top -->
 <?php if (!empty($page['header_top'])): ?>
-	<div class="header-top">
+	<div <?php if (!empty($header_top_attr)) { print drupal_attributes($header_top_attr);} ?>>
 		<div class="container">
 			<div class="row">
 				<div class="col-xs-3 col-sm-6 col-md-9">

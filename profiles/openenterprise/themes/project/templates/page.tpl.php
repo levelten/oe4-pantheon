@@ -75,30 +75,36 @@
 ?>
 
 <div class="page-wrapper">
-  <?php include 'includes/navigation_yamm.inc';?>
 
-  <?php if(!$title_placement): include 'includes/title.inc'; endif; ?>
-  <?php include 'includes/header.inc'; ?>
-  <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-
-  <div class="main-container container">
-
-    <div class="main-container-inner row">
-      <?php include 'includes/sidebar_first.inc'; ?>
-      <section id="main-content-region" <?php print $content_column_class; ?>>
-
-        <?php if($highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-        <?php if($title_placement): include 'includes/title.inc'; endif; ?>
-        <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
-
-        <a id="main-content"></a>
-        <?php include 'includes/information.inc'; ?>
-        <?php print render($page['content']); ?>
-
-      </section>
-      <?php include 'includes/sidebar_second.inc'; ?>
-    </div>
+  <div class="header-container">
+    <?php 
+      // Header Top.
+      include 'includes/header_top.inc';
+      // Navigation
+      include 'includes/header.inc';
+      // Header Bottom
+      include 'includes/header_bottom.inc';
+    ?>
   </div>
 
+  <!-- breadcrumbs -->
+  <?php if (!empty($breadcrumb)):?> 
+    <div class="breadcrumb-container">
+      <div class="container">
+        <?php print $breadcrumb; ?>
+      </div>
+    </div>
+  <?php endif;?>
+
+  <!-- banner -->
+  <?php include 'includes/banner.inc'; ?>
+
+  <!-- top-bar -->
+  <?php include 'includes/top_bar.inc'; ?>
+
+  <!-- main-content -->
+  <?php include 'includes/content.inc'; ?>
+
+  <!-- footer -->
   <?php include 'includes/footer.inc'; ?>
 </div>

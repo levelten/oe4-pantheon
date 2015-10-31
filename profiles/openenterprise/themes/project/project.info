@@ -8,9 +8,8 @@ base theme = enterprise_bootstrap
 ;;;;;;;;;;;;;;;;;;;;;
 
 regions[header_top]     = 'Header Top'
-regions[navigation]     = 'Navigation'
 regions[header_bottom]  = 'Header Bottom'
-regions[header]         = 'Top Bar'
+regions[top_bar]        = 'Top Bar'
 regions[highlighted]    = 'Highlighted'
 regions[help]           = 'Help'
 regions[content]        = 'Content'

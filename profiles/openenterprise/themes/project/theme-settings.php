@@ -93,6 +93,94 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 	);
 
 	/********************* Project Javascript ***********************/
+	$form['project_regions'] = array(
+		'#type' => 'fieldset',
+		'#group' => 'project',
+		'#title' => t('Regions'),
+		'#description' => t('Settings for different regions.'),
+	);
+
+	$form['project_regions']['header_top'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Header Top'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+	);
+	$form['project_regions']['header_top']['header_top_color'] = array(
+		'#type' => 'select',
+		'#title' => t('Header Top Color'),
+		'#description' => t('Change the color of the header top section.'),
+		'#default_value' => (theme_get_setting('header_top_color')) ? theme_get_setting('header_top_color') : 'no-color',
+		'#options' => array(
+			'no-color' => t('Default (no-color)'),
+			'dark' => t('Dark'),
+			'colored' => t('Colored'),
+		),
+	);
+
+	$form['project_regions']['header'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Header'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+	);
+	$form['project_regions']['header']['header_sticky'] = array(
+		'#type' => 'select',
+		'#title' => t('Header Sticky'),
+		'#description' => t('Change stickiness of header region.'),
+		'#default_value' => (theme_get_setting('header_sticky')) ? theme_get_setting('header_sticky') : 'fixed',
+		'#options' => array(
+			'fixed' => t('Fixed (default)'),
+			'static' => t('Static'),
+		),
+	);
+	$form['project_regions']['header']['navbar_actions'] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Navbar Actions'),
+		'#description' => t('Change actions of navigation bar.'),
+		'#default_value' => (theme_get_setting('navbar_actions')) ? theme_get_setting('navbar_actions') : '',
+		'#options' => array(
+			'onclick' => t('OnClick'),
+			'animated' => t('Animated'),
+		),
+	);
+
+	$form['project_regions']['main_content'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Main Content'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+	);
+	$form['project_regions']['main_content']['page_title_separator'] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Page Title Separator'),
+		'#description' => t('Adds a separator below the page title.'),
+		'#default_value' => (theme_get_setting('page_title_separator')) ? theme_get_setting('page_title_separator') : 0,
+		'#options' => array(
+			0 => t('None'),
+			1 => t('Left to Right'),
+			2 => t('Right to Left'),
+		),
+	);
+
+	$form['project_regions']['footer'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Footer'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+	);
+	$form['project_regions']['footer']['footer_dark'] = array(
+		'#type' => 'select',
+		'#title' => t('Footer Dark'),
+		'#description' => t('Add dark class to footer.'),
+		'#default_value' => (theme_get_setting('footer_dark')) ? theme_get_setting('footer_dark') : 0,
+		'#options' => array(
+			'light' => t('Light (default)'),
+			'dark' => t('Dark'),
+		),
+	);
+
+	/********************* Project Javascript ***********************/
 	$form['project_js'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'project',
