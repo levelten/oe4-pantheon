@@ -152,14 +152,14 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 		'#collapsed' => TRUE,
 	);
 	$form['project_regions']['main_content']['page_title_separator'] = array(
-		'#type' => 'checkboxes',
+		'#type' => 'select',
 		'#title' => t('Page Title Separator'),
 		'#description' => t('Adds a separator below the page title.'),
 		'#default_value' => (theme_get_setting('page_title_separator')) ? theme_get_setting('page_title_separator') : 0,
 		'#options' => array(
-			0 => t('None'),
-			1 => t('Left to Right'),
-			2 => t('Right to Left'),
+			1 => t('None'),
+			2 => t('Left to Right'),
+			3 => t('Right to Left'),
 		),
 	);
 

@@ -65,8 +65,8 @@ function project_preprocess_page(&$vars) {
   // Header
   $header = array();
   $header['class'][] = 'header';
+  $header['class'][] = theme_get_setting('header_sticky');
   $header['class'][] = 'clearfix';
-  $header['class'][] = theme_get_setting('navigation_sticky');
   $vars['header_attr'] = $header;
 
   // Navigation

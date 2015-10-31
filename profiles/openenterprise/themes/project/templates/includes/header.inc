@@ -1,5 +1,5 @@
 <!-- Header -->
-<header <?php if($header_attr){ print drupal_attributes($header_attr); } ?> >
+<header <?php print drupal_attributes($header_attr); ?> >
     <div class="container">
       <div class="row">
 
