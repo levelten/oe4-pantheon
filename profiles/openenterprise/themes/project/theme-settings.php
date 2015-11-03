@@ -14,7 +14,7 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 	$form['project'] = array(
 		'#type' => 'vertical_tabs',
 		'#prefix' => '<h2><small>Project</small></h2>',
-		// '#weight' => -5,
+		'#weight' => -8,
 	);
 
 	$form['project_config'] = array(
@@ -92,7 +92,7 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 		),
 	);
 
-	/********************* Project Javascript ***********************/
+	/********************* Project Regions ***********************/
 	$form['project_regions'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'project',
@@ -180,54 +180,138 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 		),
 	);
 
-	/********************* Project Javascript ***********************/
-	$form['project_js'] = array(
+	/********************* Project Plugins ***********************/
+	$form['project_plugins'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'project',
-		'#title' => t('JavaScript'),
-		'#description' => t('Which JavaScript libraries or scripts to include.'),
+		'#title' => t('Plugins'),
+		'#description' => t('Additional libraries to enhance the theme.'),
 	);
-
-	$form['project_js']['bootstrap_hover_fieldset'] = array(
-		'#type' => 'fieldset', 
-		'#title' => t('Bootstrap Hover Dropdown'), 
-		'#collapsible' => TRUE, 
-		'#collapsed' => TRUE,
-	);
-	$form['project_js']['bootstrap_hover_fieldset']['bootstrap_hover_dropdown'] = array(
+	$form['project_plugins']['animate'] = array(
 		'#type' => 'select',
-		'#title' => t('Bootstrap Hover Dropdown'),
-		'#description' => t('A jQuery plugin that delays the dropdown of the menu on hover. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/CWSpear/bootstrap-hover-dropdown'))),
-		'#default_value' => (theme_get_setting('bootstrap_hover_dropdown')) ? theme_get_setting('bootstrap_hover_dropdown') : 0,
+		'#title' => t('Animate.css'),
+		'#description' => t('Plug and play, app-like animations for your websites and web apps. Read the docs on !github', array('!github' => l('Github.', 'https://daneden.github.io/animate.css/'))),
+		'#default_value' => (theme_get_setting('animate')) ? theme_get_setting('animate') : 0,
 		'#options' => array(
 			0 => t('Disabled'),
-			1 => t('Production (bootstrap-hover-dropdown.min.js)'),
-			2 => t('Development (bootstrap-hover-dropdown.js)'),
+			1 => t('Production (animate.min.css)'),
+			2 => t('Development (animate.css)'),
+			3 => t('CDN'),
 		),
 	);
-
-	/********************* Project CSS ***********************/
-	$form['project_css'] = array(
-		'#type' => 'fieldset',
-		'#group' => 'project',
-		'#title' => t('CSS'),
-		'#description' => t('Which CSS libraries to include.'),
-	);
-	$form['project_css']['bootstrap_hover_fieldset'] = array(
-		'#type' => 'fieldset', 
-		'#title' => t('Bootstrap Hover Dropdown'), 
-		'#collapsible' => TRUE, 
-		'#collapsed' => TRUE,
-	);
-	$form['project_css']['bootstrap_hover_fieldset']['bootstrap_hover_dropdown'] = array(
+	$form['project_plugins']['morphext'] = array(
 		'#type' => 'select',
-		'#title' => t('Bootstrap Hover Dropdown'),
-		'#description' => t('A jQuery plugin that delays the dropdown of the menu on hover. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/CWSpear/bootstrap-hover-dropdown'))),
-		'#default_value' => (theme_get_setting('bootstrap_hover_dropdown')) ? theme_get_setting('bootstrap_hover_dropdown') : 0,
+		'#title' => t('Morphext'),
+		'#description' => t('The simplest text rotator powered by jQuery and Animate.css. Read the docs on their !site', array('!site' => l('site.', 'http://morphext.fyianlai.com/'))),
+		'#default_value' => (theme_get_setting('morphext')) ? theme_get_setting('morphext') : 0,
 		'#options' => array(
 			0 => t('Disabled'),
-			1 => t('Production (bootstrap-hover-dropdown.min.js)'),
-			2 => t('Development (bootstrap-hover-dropdown.js)'),
+			1 => t('Production (morphext.min.js)'),
+			2 => t('Development (morphext.min.js)'),
+		),
+		'#states' => array(
+      'invisible' => array(
+        ':input[name="animate"]' => array('value' => 0),
+      ),
+    ),
+	);
+
+	$form['project_plugins']['bootstrap_notify'] = array(
+		'#type' => 'select',
+		'#title' => t('Bootstrap Notify'),
+		'#description' => t('A jQuery plugin helps to turn standard bootstrap alerts into "growl" like notifications. Read the docs on their !site', array('!site' => l('site.', 'http://bootstrap-notify.remabledesigns.com/'))),
+		'#default_value' => (theme_get_setting('bootstrap_notify')) ? theme_get_setting('bootstrap_notify') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (bootstrap-notify.min.js)'),
+			2 => t('Development (bootstrap-notify.js)'),
+		),
+	);
+	$form['project_plugins']['chartjs'] = array(
+		'#type' => 'select',
+		'#title' => t('Chart.js'),
+		'#description' => t('Simple, clean and engaging charts for designers and developers. Read the docs on their !site', array('!site' => l('site.', 'http://www.chartjs.org/docs/'))),
+		'#default_value' => (theme_get_setting('chartjs')) ? theme_get_setting('chartjs') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (Chart.min.js)'),
+			2 => t('Development (Chart.js)'),
+			3 => t('CDN'),
+		),
+	);
+	$form['project_plugins']['hover_css'] = array(
+		'#type' => 'select',
+		'#title' => t('Hover.css'),
+		'#description' => t('A collection of CSS3 powered hover effects to be applied to links, buttons, logos, SVG, featured images and so on. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/IanLunn/Hover'))),
+		'#default_value' => (theme_get_setting('hover_css')) ? theme_get_setting('hover_css') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (hover.min.css)'),
+			2 => t('Development (hover.css)'),
+			3 => t('CDN'),
+		),
+	);
+	$form['project_plugins']['hover_css'] = array(
+		'#type' => 'select',
+		'#title' => t('Hover.css'),
+		'#description' => t('A collection of CSS3 powered hover effects to be applied to links, buttons, logos, SVG, featured images and so on. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/IanLunn/Hover'))),
+		'#default_value' => (theme_get_setting('hover_css')) ? theme_get_setting('hover_css') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (hover.min.css)'),
+			2 => t('Development (hover.css)'),
+			3 => t('CDN'),
+		),
+	);
+	$form['project_plugins']['vide'] = array(
+		'#type' => 'select',
+		'#title' => t('Vide'),
+		'#description' => t('Easy as hell jQuery plugin for video backgrounds. Read the docs on !github', array('!github' => l('Github.', 'http://vodkabears.github.io/vide/'))),
+		'#default_value' => (theme_get_setting('vide')) ? theme_get_setting('vide') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (jquery.vide.min.js)'),
+			2 => t('Development (jquery.vide.js)'),
+		),
+	);
+	$form['project_plugins']['waypoints'] = array(
+		'#type' => 'select',
+		'#title' => t('Waypoints'),
+		'#description' => t('Waypoints is a library that makes it easy to execute a function whenever you scroll to an element. Read the docs on !github', array('!github' => l('Github.', 'https://github.com/imakewebthings/waypoints'))),
+		'#default_value' => (theme_get_setting('waypoints')) ? theme_get_setting('waypoints') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (jquery.waypoints.min.js)'),
+			2 => t('Development (jquery.waypoints.js)'),
+			3 => t('CDN'),
+		),
+	);
+	$form['project_plugins']['jasny'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Jasny Bootstrap'),
+		'#description' => t('Jasny Bootstrap is an extension to vanilla Bootstrap, adding a number of features and components. Read the docs on !site', array('!site' => l('Jasny.net.', 'http://www.jasny.net/bootstrap/getting-started/'))),
+		'#collapsible' => FALSE,
+	);
+	$form['project_plugins']['jasny']['jasny_css'] = array(
+		'#type' => 'select',
+		'#title' => t('Jasny CSS'),
+		'#default_value' => (theme_get_setting('jasny_css')) ? theme_get_setting('jasny_css') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (jasny-bootstrap.min.css)'),
+			2 => t('Development (jasny-bootstrap.css)'),
+			3 => t('CDN'),
+		),
+	);
+	$form['project_plugins']['jasny']['jasny_js'] = array(
+		'#type' => 'select',
+		'#title' => t('Jasny JS'),
+		'#default_value' => (theme_get_setting('jasny_js')) ? theme_get_setting('jasny_js') : 0,
+		'#options' => array(
+			0 => t('Disabled'),
+			1 => t('Production (jasny-bootstrap.min.js)'),
+			2 => t('Development (jasny-bootstrap.js)'),
+			3 => t('CDN'),
 		),
 	);
 

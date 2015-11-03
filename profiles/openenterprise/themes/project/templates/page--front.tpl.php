@@ -87,28 +87,24 @@
     ?>
   </div>
 
-  <!-- Main Container -->
-  <div class="main-container <?php print $full_width_container; ?>">
+  <!-- breadcrumbs -->
+  <?php if (!empty($breadcrumb)):?> 
+    <div class="breadcrumb-container">
+      <div class="container">
+        <?php print $breadcrumb; ?>
+      </div>
+    </div>
+  <?php endif;?>
 
-    <?php include 'includes/top_bar.inc'; ?>
+  <!-- banner -->
+  <?php include 'includes/banner.inc'; ?>
 
-    <?php if(!$highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-    <?php if ($sidebars_front): include 'includes/sidebar_first.inc'; endif; ?>
-    <?php include 'includes/information.inc'; ?>
+  <!-- top-bar -->
+  <?php include 'includes/top_bar.inc'; ?>
 
-    <section id="main-content-region" <?php if ($sidebars_front && !empty($page['sidebar_first']) || !empty($page['sidebar_second'])): print $content_column_class; endif; ?>>
+  <!-- main-content -->
+  <?php include 'includes/content.inc'; ?>
 
-      <?php if($highlighted_placement): include 'includes/highlighted.inc'; endif; ?>
-      <?php include 'includes/title.inc'; ?>
-
-      <a id="main-content"></a>
-      <?php print render($page['content']); ?>
-    </section>
-
-    <?php include 'includes/sidebar_second.inc'; ?>
-
-  </div>
-  <!-- End Main Container -->
-
+  <!-- footer -->
   <?php include 'includes/footer.inc'; ?>
 </div>

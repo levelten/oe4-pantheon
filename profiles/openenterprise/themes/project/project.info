@@ -39,6 +39,7 @@ less[vars][@brand-accent-3]  = #078ED0
 ;; Scripts
 ;;;;;;;;;;;;;;;;;;;;;
 
+scripts[] = 'js/modernizr.js'
 scripts[] = 'js/project.js'
 
 ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
@@ -60,3 +61,5 @@ settings[enterprise_bootstrap_js_options][collapse] = 1
 settings[enterprise_bootstrap_js_options][dropdown] = 1
 settings[enterprise_bootstrap_js_options][transition] = 1
 settings[enterprise_bootstrap_js_options][modal] = 1
+
+settings[project_plugins][bootstrap_notify] = 1

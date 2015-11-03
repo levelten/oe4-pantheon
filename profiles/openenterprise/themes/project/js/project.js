@@ -1,6 +1,6 @@
 /**
  * @file
- * enterprise_health.js
+ * project.js
  *
  * Provides general enhancements.
  */
@@ -10,15 +10,31 @@ var Drupal = Drupal || {};
 (function($, Drupal) {
   "use strict";
 
-  Drupal.behaviors.project = {
+  Drupal.behaviors.projectTheme = {
+    attach: function(context, settings) {
+
+      var $socialFollow = $("#block-widgets-s-enterprise-social-follow", context);
+      $socialFollow.find("a.btn-social").each(function(index, el) {
+        $(el).wrap('<li class="social-link"></li>');
+        $(el).removeClass('btn btn-default');
+        $(el).find('.icon').removeClass('icon');
+      });
+      $socialFollow.wrapInner( "<ul class='social-links circle small hidden-xs'></ul>");
+
+    }
+  };
+
+  
+  
+  Drupal.behaviors.projectPlugins = {
     attach: function(context) {
 
-      if ($('.boxed .fullscreen-bg').length > 0) {
-        $("body").addClass("transparent-page-wrapper");
+      if ($(".boxed .fullscreen-bg", context).length > 0) {
+        $("body", context).addClass("transparent-page-wrapper");
       }
 
       $(window).load(function() {
-        $("body").removeClass("no-trans");
+        $("body", context).removeClass("no-trans");
       });
       // Enable Smooth Scroll only on Chrome and only on Win and Linux Systems
       var platform = navigator.platform.toLowerCase();
@@ -32,7 +48,7 @@ var Drupal = Drupal || {};
       //-----------------------------------------------
       var delay = 0,
         setTimeoutConst;
-      if (Modernizr && (Modernizr.mq('only all and (min-width: 768px)') && !Modernizr.touch) || $("html.ie8").length > 0) {
+      if (typeof Modernizr === 'object' && (Modernizr.mq('only all and (min-width: 768px)') && !Modernizr.touch) || $("html.ie8").length > 0) {
         $('.main-navigation:not(.onclick) .navbar-nav>li.dropdown, .main-navigation:not(.onclick) li.dropdown>ul>li.dropdown').hover(
           function() {
             var $this = $(this);
@@ -47,11 +63,11 @@ var Drupal = Drupal || {};
             $(this).removeClass('open');
             $(this).find('.dropdown-toggle').removeClass('disabled');
           });
-      };
+      }
 
       //Show dropdown on click only for mobile devices
       //-----------------------------------------------
-      if (Modernizr.mq('only all and (max-width: 767px)') || Modernizr.touch || $(".main-navigation.onclick").length > 0) {
+      if (Modernizr && Modernizr.mq('only all and (max-width: 767px)') || Modernizr.touch || $(".main-navigation.onclick").length > 0) {
         $('.main-navigation [data-toggle=dropdown], .header-top [data-toggle=dropdown]').on('click', function(event) {
           // Avoid following the href location when clicking
           event.preventDefault();
@@ -64,31 +80,31 @@ var Drupal = Drupal || {};
           // opening the one you clicked on
           $(this).parent().toggleClass('open');
         });
-      };
+      }
 
       //Transparent Header Calculations
       var timer_tr;
-      if ($(".transparent-header").length > 0) {
+      if ($(".transparent-header", context).length > 0) {
         $(window).load(function() {
-          trHeaderHeight = $("header.header").outerHeight();
-          $(".transparent-header .tp-bannertimer").css("marginTop", (trHeaderHeight) + "px");
+          trHeaderHeight = $("header.header", context).outerHeight();
+          $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
         });
         $(window).resize(function() {
           if ($(this).scrollTop() < headerTopHeight + headerHeight - 5) {
-            trHeaderHeight = $("header.header").outerHeight();
-            $(".transparent-header .tp-bannertimer").css("marginTop", (trHeaderHeight) + "px");
+            trHeaderHeight = $("header.header", context).outerHeight();
+            $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
           }
         });
         $(window).scroll(function() {
-          if ($(this).scrollTop() == 0) {
+          if ($(this).scrollTop() === 0) {
             if (timer_tr) {
               window.clearTimeout(timer_tr);
-            };
+            }
             timer_tr = window.setTimeout(function() {
-              trHeaderHeight = $("header.header").outerHeight();
-              $(".transparent-header .tp-bannertimer").css("marginTop", (trHeaderHeight) + "px");
+              trHeaderHeight = $("header.header", context).outerHeight();
+              $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
             }, 300);
-          };
+          }
         });
       }
 
@@ -99,7 +115,7 @@ var Drupal = Drupal || {};
       }
 
       //Full Width Slider with Transparent Header Calculations
-      if ($(".transparent-header .slider-banner-fullwidth-big-height").length > 0) {
+      if ($(".transparent-header .slider-banner-fullwidth-big-height", context).length > 0) {
         if (Modernizr.mq('only all and (max-width: 991px)')) {
           $("body").removeClass("transparent-header");
           $(".header-container header.header").removeClass("transparent-header-on");
@@ -110,27 +126,27 @@ var Drupal = Drupal || {};
           $(".header-container header.header").addClass("transparent-header-on");
           $("body").removeClass("slider-banner-fullwidth-big-height-removed");
         }
-      };
+      }
 
-      if ($(".transparent-header .slider-banner-fullwidth-big-height").length > 0 || $(".slider-banner-fullwidth-big-height-removed").length > 0) {
+      if ($(".transparent-header .slider-banner-fullwidth-big-height", context).length > 0 || $(".slider-banner-fullwidth-big-height-removed", context).length > 0) {
         $(window).resize(function() {
           if (Modernizr.mq('only all and (max-width: 991px)')) {
-            $("body").removeClass("transparent-header");
-            $(".header-container header.header").removeClass("transparent-header-on");
-            $(".tp-bannertimer").css("marginTop", "0px");
+            $("body", context).removeClass("transparent-header");
+            $(".header-container header.header", context).removeClass("transparent-header-on");
+            $(".tp-bannertimer", context).css("marginTop", "0px");
           } else {
-            $("body").addClass("transparent-header");
-            $(".header-container header.header").addClass("transparent-header-on");
+            $("body", context).addClass("transparent-header");
+            $(".header-container header.header", context).addClass("transparent-header-on");
           }
         });
-      };
+      }
 
-      //Revolution Slider
-      if ($(".slider-banner-container").length > 0) {
+      // Revolution Slider
+      if ($(".slider-banner-container", context).length > 0) {
 
-        $(".tp-bannertimer").show();
+        $(".tp-bannertimer", context).show();
 
-        $('body:not(.transparent-header) .slider-banner-container .slider-banner-fullscreen').show().revolution({
+        $('body:not(.transparent-header) .slider-banner-container .slider-banner-fullscreen', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 520,
@@ -181,7 +197,7 @@ var Drupal = Drupal || {};
           hideAllCaptionAtLilmit: 0,
           startWithSlide: 0
         });
-        $('.transparent-header .slider-banner-container .slider-banner-fullscreen').show().revolution({
+        $('.transparent-header .slider-banner-container .slider-banner-fullscreen', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 520,
@@ -233,7 +249,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.slider-banner-container .slider-banner-fullwidth').show().revolution({
+        $('.slider-banner-container .slider-banner-fullwidth', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -282,7 +298,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.slider-banner-container .slider-banner-fullwidth-big-height').show().revolution({
+        $('.slider-banner-container .slider-banner-fullwidth-big-height', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 650,
@@ -331,7 +347,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth').show().revolution({
+        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -381,7 +397,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth').show().revolution({
+        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -431,7 +447,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.slider-banner-container .slider-banner-boxedwidth-no-shadow').show().revolution({
+        $('.slider-banner-container .slider-banner-boxedwidth-no-shadow', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -481,7 +497,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth-stopped').show().revolution({
+        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth-stopped', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -531,7 +547,7 @@ var Drupal = Drupal || {};
           startWithSlide: 0
         });
 
-        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth-stopped').show().revolution({
+        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth-stopped', context).show().revolution({
           delay: 8000,
           startwidth: 1140,
           startheight: 450,
@@ -585,21 +601,21 @@ var Drupal = Drupal || {};
 
       //Owl carousel
       //-----------------------------------------------
-      if ($('.owl-carousel').length > 0) {
-        $(".owl-carousel.carousel").owlCarousel({
+      if ($('.owl-carousel', context).length > 0) {
+        $(".owl-carousel.carousel", context).owlCarousel({
           items: 4,
           pagination: false,
           navigation: true,
           navigationText: false
         });
-        $(".owl-carousel.carousel-autoplay").owlCarousel({
+        $(".owl-carousel.carousel-autoplay", context).owlCarousel({
           items: 4,
           autoPlay: 5000,
           pagination: false,
           navigation: true,
           navigationText: false
         });
-        $(".owl-carousel.clients").owlCarousel({
+        $(".owl-carousel.clients", context).owlCarousel({
           items: 6,
           autoPlay: true,
           pagination: false,
@@ -607,54 +623,54 @@ var Drupal = Drupal || {};
           itemsTablet: [768, 4],
           itemsMobile: [479, 3]
         });
-        $(".owl-carousel.content-slider").owlCarousel({
+        $(".owl-carousel.content-slider", context).owlCarousel({
           singleItem: true,
           autoPlay: 5000,
           navigation: false,
           navigationText: false,
           pagination: false
         });
-        $(".owl-carousel.content-slider-with-controls").owlCarousel({
+        $(".owl-carousel.content-slider-with-controls", context).owlCarousel({
           singleItem: true,
           autoPlay: false,
           navigation: true,
           pagination: true
         });
-        $(".owl-carousel.content-slider-with-large-controls").owlCarousel({
+        $(".owl-carousel.content-slider-with-large-controls", context).owlCarousel({
           singleItem: true,
           autoPlay: false,
           navigation: true,
           pagination: true
         });
-        $(".owl-carousel.content-slider-with-controls-autoplay").owlCarousel({
+        $(".owl-carousel.content-slider-with-controls-autoplay", context).owlCarousel({
           singleItem: true,
           autoPlay: 5000,
           navigation: true,
           pagination: true
         });
-        $(".owl-carousel.content-slider-with-large-controls-autoplay").owlCarousel({
+        $(".owl-carousel.content-slider-with-large-controls-autoplay", context).owlCarousel({
           singleItem: true,
           autoPlay: 5000,
           navigation: true,
           pagination: true
         });
-        $(".owl-carousel.content-slider-with-controls-autoplay-hover-stop").owlCarousel({
+        $(".owl-carousel.content-slider-with-controls-autoplay-hover-stop", context).owlCarousel({
           singleItem: true,
           autoPlay: 5000,
           navigation: true,
           pagination: true,
           stopOnHover: true
         });
-      };
+      }
 
       // Fixed header
       //-----------------------------------------------
-      headerTopHeight = $(".header-top").outerHeight(),
-        headerHeight = $("header.header.fixed").outerHeight();
+      var headerTopHeight = $(".header-top", context).outerHeight(),
+          headerHeight = $("header.header.fixed", context).outerHeight();
       $(window).resize(function() {
         if (($(this).scrollTop() < headerTopHeight + headerHeight - 5) && ($(window).width() > 767)) {
-          headerTopHeight = $(".header-top").outerHeight(),
-            headerHeight = $("header.header.fixed").outerHeight();
+          headerTopHeight = $(".header-top", context).outerHeight(),
+              headerHeight = $("header.header.fixed", context).outerHeight();
         }
       });
 
@@ -677,15 +693,15 @@ var Drupal = Drupal || {};
             $("body").removeClass("fixed-header-on");
             $(".header.fixed").removeClass('animated object-visible fadeInDown');
           }
-        };
+        }
       });
 
       // Charts
       //-----------------------------------------------
-      if ($(".graph").length > 0) {
+      if ($(".graph", context).length > 0) {
         // Creates random numbers you don't need this for real graphs
         var randomScalingFactor = function() {
-          return Math.round(Math.random() * 500)
+          return Math.round(Math.random() * 500);
         };
 
         if ($(".graph.line").length > 0) {
@@ -1467,7 +1483,7 @@ var Drupal = Drupal || {};
           disableScrolling: false,
           toggle: false
         });
-      };
+      }
 
       if ($("#offcanvas").length > 0) {
         $('#offcanvas [data-toggle=dropdown]').on('click', function(event) {
@@ -1482,84 +1498,30 @@ var Drupal = Drupal || {};
           // opening the one you clicked on
           $(this).parent().toggleClass('open');
         });
-      };
+      }
 
       // Parallax section
       //-----------------------------------------------
       if (($(".parallax").length > 0) && !Modernizr.touch) {
         $(".parallax").parallax("50%", 0.2);
-      };
+      }
       if (($(".parallax-2").length > 0) && !Modernizr.touch) {
         $(".parallax-2").parallax("50%", 0.3);
-      };
+      }
       if (($(".parallax-3").length > 0) && !Modernizr.touch) {
         $(".parallax-3").parallax("50%", 0.4);
-      };
-
-      // Notify Plugin
-      //-----------------------------------------------
-      if (($(".main-navigation.onclick").length > 0) && !Modernizr.touch) {
-        $.notify({
-          // options
-          message: 'The Dropdowns of the Main Menu, are now open with click on Parent Items. Click "Home" to checkout this behavior.'
-        }, {
-          // settings
-          type: 'info',
-          delay: 10000,
-          offset: {
-            y: 150,
-            x: 20
-          }
-        });
-      };
-      if (!($(".main-navigation.animated").length > 0) && !Modernizr.touch && $(".main-navigation").length > 0) {
-        $.notify({
-          // options
-          message: 'The animations of main menu are disabled.'
-        }, {
-          // settings
-          type: 'info',
-          delay: 10000,
-          offset: {
-            y: 150,
-            x: 20
-          }
-        });
-      };
-      if ($(".btn-alert").length > 0) {
-        $(".btn-alert").on('click', function(event) {
-          $.notify({
-            // options
-            message: 'Great! you have just created this message :-) you can configure this into the template.js file'
-          }, {
-            // settings
-            type: 'info',
-            delay: 4000,
-            offset: {
-              y: 100,
-              x: 20
-            }
-          });
-          return false;
-        });
-      };
-
-      // Remove Button
-      //-----------------------------------------------
-      $(".btn-remove").click(function() {
-        $(this).closest(".remove-data").remove();
-      });
+      }
 
       // Shipping Checkbox
       //-----------------------------------------------
-      if ($("#shipping-info-check").is(':checked')) {
-        $("#shipping-information").hide();
+      if ($("#shipping-info-check", context).is(':checked')) {
+        $("#shipping-information", context).hide();
       }
-      $("#shipping-info-check").change(function() {
+      $("#shipping-info-check", context).change(function() {
         if ($(this).is(':checked')) {
-          $("#shipping-information").slideToggle();
+          $("#shipping-information", context).slideToggle();
         } else {
-          $("#shipping-information").slideToggle();
+          $("#shipping-information", context).slideToggle();
         }
       });
 
@@ -1568,7 +1530,7 @@ var Drupal = Drupal || {};
       if ($(".full-image-overlay").length > 0) {
         overlayHeight = $(".full-image-overlay").outerHeight();
         $(".full-image-overlay").css("marginTop", -overlayHeight / 2);
-      };
+      }
 
       //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes (Header Top).
       //-----------------------------------------------
