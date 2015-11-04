@@ -40,7 +40,6 @@ function enterprise_block_field_default_field_instances() {
         'weight' => 0,
       ),
     ),
-    'enterprise_edit_form_display' => 'sidebar',
     'entity_type' => 'bean',
     'field_name' => 'field_body',
     'label' => 'Body',

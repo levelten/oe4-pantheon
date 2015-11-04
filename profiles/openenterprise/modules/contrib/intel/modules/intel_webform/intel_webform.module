@@ -288,8 +288,11 @@ function intel_webform_webform_submission_insert($node, $submission) {
   // add timestamp of submission to break reverse proxy caching
   // only needed with webform 4. Check if conditionals array exists in webform
   // data to determine if webform 4.
-  if (isset($node->webform['conditionals']) && !empty($node->webform['redirect_url'])) {
-    $add = ($submission->sid + 46)%100;
+  if (
+    !empty($node->webform['redirect_url'])
+    && ($node->webform['redirect_url'] != '<confirmation>')
+  ) {
+    $add = ($submission->sid + 46) % 100;
     $uri = intel_parse_url($node->webform['redirect_url']);
     if (!empty($uri['query'])) {
       $node->webform['redirect_url'] .= '&sid=A' . dechex($submission->completed) . '-' . $add;

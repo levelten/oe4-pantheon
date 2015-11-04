@@ -65,9 +65,6 @@ class ApiClient {
         }
         $data_str = substr($data_str, 0, -1);
       }
-      watchdog('c1', print_r($url, 1));
-      watchdog('c2', print_r($params, 1));
-      watchdog('c3', print_r($data, 1));
       if (!empty($_GET['debug'])) {
         Debug::printVar($url);
         Debug::printVar($params);
@@ -90,7 +87,6 @@ class ApiClient {
         }
         include_once $this->apiConnector;        
         $ret = \l10iapi\init($get, $data);
-        watchdog($return);
         return $ret;
       } else {
          // intialize cURL and send POST data
