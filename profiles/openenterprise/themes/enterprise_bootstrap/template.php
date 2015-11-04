@@ -141,6 +141,11 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   // Navigation region settings.
   $variables['navbar_region_class'] .= theme_get_setting('navbar_region_class');
 
+  // Hide caret.
+  if (theme_get_setting('enterprise_bootstrap_hide_caret')) {
+    $variables['navbar_region_class'] .= ' hide-caret';
+  }
+
   // Add nav_logo classes from theme settings.
   $variables['nav_logo_class']['class'][] = 'navbar-header';
   $nav_logo_class = explode(' ', trim(theme_get_setting('nav_logo_class')));
