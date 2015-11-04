@@ -1,3 +1,4 @@
+<!-- Header Bottom -->
 <?php if (!empty($page['header_bottom'])): ?>
 	<div class="header-bottom">
 		<div class="container">
