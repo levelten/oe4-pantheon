@@ -366,7 +366,7 @@ function project_status_messages($variables) {
     else {
       $output .= $messages[0];
       $notify_message .= $messages[0];
-      if (preg_match('/\b(devel\w+)\b/', $message)) {
+      if (preg_match('/\b(devel\w+)\b/', $messages[0])) {
         $devel++;
         dd("preg match passed");
       }
@@ -466,4 +466,17 @@ function project_menu_local_action($variables) {
   $output .= "</li>\n";
 
   return $output;
+}
+
+/**
+ * Alter LESS include paths.
+ *
+ * @param &string[]  $less_paths
+ * @param string     $system_name
+ */
+function project_less_paths_alter(array &$less_paths, $system_name) {
+  $colorize = theme_get_setting('colorize');
+  if ($colorize) {
+    $less_paths[] = drupal_get_path('theme', 'project') . '/less/color.less';
+  }
 }

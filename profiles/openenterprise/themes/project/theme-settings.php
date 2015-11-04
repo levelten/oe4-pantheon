@@ -74,11 +74,11 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 		),
 	);
 	
-  $form['project_config']['column_right']['eb_dark_theme'] = array(
+  $form['project_config']['column_right']['colorize'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Dark Theme'),
-    '#default_value' => theme_get_setting('eb_dark_theme'),
-    '#description' => t('Adds a "theme-dark" class to the body, only affects subthemes that use it.'),
+    '#title' => t('Colorize Theme'),
+    '#default_value' => theme_get_setting('colorize'),
+    '#description' => t('Use colors defined to skin the theme.'),
   );
 
 	$form['project_config']['column_right']['project_block_striping'] = array(
