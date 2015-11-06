@@ -60,9 +60,18 @@
 }
 
 .btn-social-share {
-	.addthis_counter.addthis_bubble_style a.addthis_button_expanded {
-		color: @brand-primary;
-		font-size: @font-size-base;
+	.addthis_counter.addthis_bubble_style {
+		a.addthis_button_expanded {
+			color: @brand-primary;
+			font-size: @font-size-base;
+		}
+	}
+	.addthis_button {
+		&:hover, &:active, &:focus {
+			a.addthis_button_expanded {
+				color: #FFF;
+			}
+		}
 	}
 }
 
