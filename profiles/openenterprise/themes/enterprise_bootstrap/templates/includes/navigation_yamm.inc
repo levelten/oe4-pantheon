@@ -1,7 +1,7 @@
+<?php include 'header_top.inc'; ?>
 <!-- Navigation YAMM region -->
 <div id="navbar-wrapper">
   <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
-    <?php include 'header_top.inc'; ?>
     <div class="container">
       <div class="navbar-region <?php print $navbar_region_class; ?>">
         <!-- Navbar Logo Region -->
@@ -44,6 +44,6 @@
         <?php endif; ?>
       </div>
     </div>
-    <?php include 'header_bottom.inc'; ?>
   </header>
 </div>
+<?php include 'header_bottom.inc'; ?>

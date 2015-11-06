@@ -1,0 +1,822 @@
+<?php
+
+
+
+/**
+ *  Implements of hook_menu()
+ */
+function intel_gwt_menu() {
+  $items = array();
+  $items['admin/config/intel/intel_gwt'] = array(
+    'title' => 'Google Webmaster Tools',
+    'description' => 'Configure your account, profiles, and reports.',
+    'page callback' => 'drupal_get_form',
+    'file' => 'intel_gwt.admin.inc',
+    'page arguments' => array('intel_gwt_admin_form'),
+    'access arguments' => array('admin intel'),
+  );
+  $items['admin/config/intel/intel_gwt/oauth'] = array(
+    'title' => 'Google Webmaster Tools OAuth',
+    'description' => 'Configure your account, profiles, and reports.',
+    'page callback' => 'intel_gwt_admin_oauth',
+    'file' => 'intel_gwt.admin.inc',
+    'access arguments' => array('admin intel'),
+  );
+  $items['admin/config/intel/intel_gwt/oauth_test'] = array(
+    'title' => 'Google Webmaster Tools OAuth Test',
+    //'description' => 'Configure your account, profiles, and reports.',
+    'page callback' => 'intel_gwt_admin_oauth_test',
+    'file' => 'intel_gwt.admin.inc',
+    'access arguments' => array('admin intel'),
+  );
+  $items['admin/config/intel/intel_gwt/refresh_search_data'] = array(
+    'title' => 'Refresh Search Analytics Data',
+    //'description' => 'Configure your account, profiles, and reports.',
+    'page callback' => 'intel_gwt_search_fetch_batch_page',
+    //'file' => 'intel_gwt.admin.inc',
+    'access arguments' => array('admin intel'),
+  );
+  $items['intel_gwt/fetch_search_analytics'] = array(
+    'title' => 'Intel GWT util',
+    'page callback' => 'intel_gwt_fetch_search_analytics',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['intel_gwt/util'] = array(
+    'title' => 'Intel GWT util',
+    'page callback' => 'intel_gwt_util',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Testing function
+ */
+function intel_gwt_util() {
+  $nid = 3741;
+
+  return '';
+}
+
+function intel_gwt_search_fetch_batch_page() {
+  $settings = variable_get('intel_gwt_settings', array());
+
+  $vars = array();
+  $options = array(
+    'display_messages' => 1,
+    'queries' => array(array())
+  );
+  // data import for a single week can be done using 'week' query string.
+  if (!empty($_GET['week'])) {
+    $time = strtotime($_GET['week']);
+    if (!$time) {
+      drupal_set_message(t('week param not valide'), 'error');
+      return;
+    }
+    $day = date('Y-m-d', $time);
+    $dow = date('w', strtotime($day));
+    $vars = array(
+      'rowLimit' => isset($settings['search_batch_row_limit_weekly']) ? $settings['search_batch_row_limit_weekly'] : 1000,
+      'startDate' => $day,
+    );
+    if ($dow > 0) {
+      $vars['startDate'] = $vars['startDate'] = date('Y-m-d', strtotime($day . ' - ' . $dow . ' days'));
+    }
+    $vars['endDate'] = date('Y-m-d', strtotime($vars['startDate'] . ' +6 days'));
+    $options['timeframes'] = array('w');
+
+    if (!empty($settings['search_batch_contains_queries_weekly']) && is_array($settings['search_batch_contains_queries_weekly'])) {
+      foreach ($settings['search_batch_contains_queries_weekly'] as $v) {
+        $query = array(
+          'query' => $v['query'],
+        );
+        if (isset($v['row_limit'])) {
+          $query['rowLimit'] = $v['row_limit'];
+        }
+        $options['queries'][] = $query;
+      }
+    }
+
+    intel_gwt_search_fetch_batch($vars, $options);
+    return 'OK';
+  }
+
+  // import data for l28, m28, l7 and m7
+  intel_gwt_search_get_latest_fetch_vars_options($vars, $options, $settings);
+  //dsm($vars);
+  //dsm($options);
+  intel_gwt_search_fetch_batch($vars, $options, 1);
+
+  // setup weekly data fetch
+  $vars = array();
+  $options = array(
+    'display_messages' => 1,
+  );
+  intel_gwt_search_get_weekly_fetch_vars_options($vars, $options, $settings);
+  //dsm($vars);
+  //dsm($options);
+  intel_gwt_search_fetch_batch($vars, $options);
+
+  // refresh last weeks data if still early in new week. (sometimes GWT data
+  // takes a few days to provide correct data)
+  if ($vars['latestDataDayDow'] < 3) {
+    $vars = array(
+      'startDate' => date('Y-m-d', strtotime($vars['startDate'] . ' - 7 days')),
+      'endDate' => date('Y-m-d', strtotime($vars['startDate'] . ' - 1 day')),
+    );
+    //dsm($vars);
+    //dsm($options);
+    intel_gwt_search_fetch_batch($vars, $options);
+  }
+
+  return 'OK';
+}
+
+function intel_gwt_search_get_weekly_fetch_vars_options(&$vars = array(), &$options = array(), $settings = array()) {
+  if (empty($settings)) {
+    $settings = variable_get('intel_gwt_settings', array());
+  }
+
+  $options += array(
+    'queries' => array(array()),
+    'timeframes' => array(
+      'w'
+    ),
+  );
+
+  if (!empty($settings['search_batch_contains_queries_weekly']) && is_array($settings['search_batch_contains_queries_weekly'])) {
+    foreach ($settings['search_batch_contains_queries_weekly'] as $v) {
+      $query = array(
+        'query' => $v['query'],
+      );
+      if (isset($v['row_limit'])) {
+        $query['rowLimit'] = $v['row_limit'];
+      }
+      $options['queries'][] = $query;
+    }
+  }
+
+  $siteUrl = intel_gwt_get_site_url($settings);
+
+  $ldd = $vars['latestDataDay'] = intel_gwt_get_search_analytics_latest_data_day($siteUrl);
+  $ldd_dow = $vars['latestDataDayDow'] = date('w', strtotime($ldd));
+  $vars = array(
+    'rowLimit' => isset($settings['search_batch_row_limit_weekly']) ? $settings['search_batch_row_limit_weekly'] : 1000,
+    'startDate' => $ldd,
+    'endDate' => $ldd,
+  );
+  if ($ldd_dow > 0) {
+    $vars['startDate'] = date('Y-m-d', strtotime($ldd . ' - ' . $ldd_dow . ' days'));
+  }
+}
+
+function intel_gwt_get_site_url($settings = '') {
+  if (empty($settings)) {
+    $settings = variable_get('intel_gwt_settings', array());
+  }
+  $siteUrl = !empty($settings['site_url']) ? $settings['site_url'] : 'http://' . $_SERVER['HTTP_HOST'];
+  return $siteUrl;
+}
+
+function intel_gwt_search_get_latest_fetch_vars_options(&$vars = array(), &$options = array(), $settings = array()) {
+  if (empty($settings)) {
+    $settings = variable_get('intel_gwt_settings', array());
+  }
+
+  $options += array(
+    'queries' => array(array())
+  );
+  if (!empty($settings['search_batch_contains_queries']) && is_array($settings['search_batch_contains_queries'])) {
+    foreach ($settings['search_batch_contains_queries'] as $v) {
+      $query = array(
+        'query' => $v['query'],
+      );
+      if (isset($v['row_limit'])) {
+        $query['rowLimit'] = $v['row_limit'];
+      }
+      $options['queries'][] = $query;
+    }
+  }
+  return array(
+    'vars' => $vars,
+    'options' => $options,
+  );
+}
+
+/**
+ * Implements hook_cron()
+ */
+function intel_gwt_cron() {
+  $latest_data_info = variable_get('intel_gwt_search_latest_data_info', array());
+  $today = date('Y-m-d');
+  if (empty($latest_data_info['checked']) || $today != $latest_data_info['checked']) {
+    $settings = variable_get('intel_gwt_settings', array());
+    $ldd = intel_gwt_get_search_analytics_latest_data_day('', 1);
+    if (empty($latest_data_info['day']) || $ldd != $latest_data_info['day']) {
+      $queue = DrupalQueue::get('intel_gwt_search_fetch_requests');
+
+      // queue latest data fetches
+      $vars = array();
+      $options = array();
+      intel_gwt_search_get_latest_fetch_vars_options($vars, $options, $settings);
+
+      foreach ($options['queries'] as $query) {
+        $options = array(
+          'queries' => array(
+            $query
+          ),
+        );
+        $item = new stdClass();
+        $item->created = REQUEST_TIME;
+        $item->vars = $vars;
+        $item->options = $options;
+        $item->remove_expired = empty($query['query']);
+        $queue->createItem($item);
+      }
+
+      // queue weekly data fetches
+      $vars = array();
+      $options = array();
+      intel_gwt_search_get_weekly_fetch_vars_options($vars, $options, $settings);
+      $queue = DrupalQueue::get('intel_gwt_search_fetch_requests');
+      foreach ($options['queries'] as $query) {
+        $options = array(
+          'queries' => array(
+            $query
+          ),
+        );
+        $item = new stdClass();
+        $item->created = REQUEST_TIME;
+        $item->vars = $vars;
+        $item->options = $options;
+        $item->remove_expired = 0;
+        $queue->createItem($item);
+        // update last weeks data if early in this week
+        if ($vars['latestDataDayDow'] < 3) {
+          $item->vars = array(
+            'startDate' => date('Y-m-d', strtotime($vars['startDate'] . ' - 7 days')),
+            'endDate' => date('Y-m-d', strtotime($vars['startDate'] . ' - 1 day')),
+          );
+          $queue->createItem($item);
+        }
+      }
+    }
+  }
+}
+
+function intel_gwt_cron_queue_info() {
+  $queues['intel_gwt_search_fetch_requests'] = array(
+    'worker callback' => 'intel_gwt_update_data_worker',
+    'time' => 30,
+  );
+  return $queues;
+}
+
+function intel_gwt_update_data_worker($item) {
+  watchdog('intel_gwt_update_data_worker', print_r($item, 1));
+  intel_gwt_search_fetch_batch($item->vars, $item->options, $item->remove_expired);
+  return $item;
+}
+
+/**
+ * Executes multiple search analytics requests based on multiple timeframes, and
+ * query or page filters.
+ *
+ *
+ * @param array $vars
+ * @param array $options
+ * @param int $remove_expired
+ * @return string
+ */
+function intel_gwt_search_fetch_batch($vars = array(), $options = array(), $remove_expired = 0) {
+  $settings = variable_get('intel_gwt_settings', array());
+
+  if (!is_array($vars)) {
+    $vars = array();
+  }
+  $vars += array(
+    'siteUrl' => intel_gwt_get_site_url($settings),
+    'filters' => array(),
+  );
+  $options += array(
+    'timeframes' => array(
+      'l28',
+      'm28',
+      'l7',
+      'm7',
+    ),
+    'queries' => array(),
+    'pages' => array(),
+  );
+
+  $vars['latestDataDay'] = intel_gwt_get_search_analytics_latest_data_day($vars['siteUrl']);
+
+  $vars['rowLimit'] = isset($settings['search_batch_row_limit']) ? $settings['search_batch_row_limit'] : 1000;
+
+  if ($remove_expired) {
+    foreach ($options['timeframes'] as $timeframe) {
+      if (substr($timeframe, 0, 1) != 'l' && substr($timeframe, 0, 1) != 'm') {
+        continue;
+      }
+      intel_gwt_search_analytics_delete_multi(array('timeframe' => $timeframe));
+    }
+  }
+
+  $vars0 = $vars;
+  foreach ($options['timeframes'] as $timeframe) {
+    $vars = $vars0;
+    $vars['timeframe'] = $timeframe;
+    // if queries && pages are empty, run request with no filters
+    if (!empty($options['queries'])) {
+      foreach ($options['queries'] as $query) {
+        $filter_msg = '';
+        $vars['filters'] = array();
+        if (!empty($query['query'])) {
+          $vars['filters'][] = array(
+            'dimension' => 'query',
+            'operator' => !empty($query['operator']) ? $query['operator'] : 'contains',
+            'expression' => $query['query']
+          );
+          $filter_msg .= ' ' . t('query') . ': ' . $query['query'];
+        }
+        $vars['rowLimit'] = isset($query['rowLimit']) ? $query['rowLimit'] : $vars0['rowLimit'];
+
+        $objs = intel_gwt_search_analytics_request($vars, 1);
+        if (!empty($options['display_messages'])) {
+          drupal_set_message(t('Fetched rowLimit: @rowlimit, timeframe: @timeframe, filter by @filter.',
+            array(
+              '@rowlimit' => $vars['rowLimit'],
+              '@timeframe' => $vars['timeframe'],
+              '@filter' => $filter_msg ? $filter_msg : t('NONE'),
+            )
+          ));
+        }
+      }
+    }
+
+    if (!empty($options['pages'])) {
+      foreach ($options['pages'] as $page) {
+        $filter_msg = '';
+        $vars['filters'] = array();
+        if (!empty($page['page'])) {
+          $vars['filters'][] = array(
+            'dimension' => 'page',
+            'operator' => !empty($query['operator']) ? $query['operator'] : 'contains',
+            'expression' => $page['page']
+          );
+          $filter_msg .= ' ' . t('page') . ': ' . $page['page'];
+        }
+
+        $vars['rowLimit'] = isset($page['rowLimit']) ? $page['rowLimit'] : $vars0['rowLimit'];
+
+        $objs = intel_gwt_search_analytics_request($vars, 1);
+        if (!empty($options['display_messages'])) {
+          drupal_set_message(t('Fetched rowLimit: @rowlimit, timeframe: @timeframe, filter by @filter.',
+            array(
+              '@rowlimit' => $vars['rowLimit'],
+              '@timeframe' => $vars['timeframe'],
+              '@filter' => $filter_msg ? $filter_msg : t('NONE'),
+            )
+          ));
+        }
+      }
+    }
+  }
+
+  return 'OK';
+}
+
+/**
+ * Returns the latest date (YYYY-MM-DD) that GWT has data available.
+ *
+ * GWT search analytics data is typically not available for a few days.
+ * This function queries GWT for data starting from yesterday. The latest day
+ * that data was provide is then returned and saved as a variable.
+ *
+ * @param $site_url
+ * @param int $recheck
+ * @return string latest data day (YYYY-MM-DD)
+ */
+function intel_gwt_get_search_analytics_latest_data_day($site_url = '', $recheck = 0) {
+  $latest_data_info = variable_get('intel_gwt_search_latest_data_info', array());
+
+  if (
+    !$recheck
+    && !empty($latest_data_info['day'])
+    && !empty($latest_data_info['checked'])
+    && ($latest_data_info['checked'] != date('Y-m-d'))
+  ) {
+    return $latest_data_info['day'];
+  }
+
+  if (empty($site_url)) {
+    $site_url = intel_gwt_get_site_url();
+  }
+
+  // setup vars to fetch searc analytics
+  $vars = array(
+    'siteUrl' => $site_url,
+    'rowLimit' => 10,
+  );
+
+  $latestDataDayAgo = 1;
+  $latestDataDay = '';
+  while ($latestDataDayAgo < 7) {
+    $latestDataDay = date('Y-m-d', strtotime('today -' . $latestDataDayAgo . ' day'));
+    $vars['startDate'] = $latestDataDay;
+    $vars['endDate'] = $latestDataDay;
+
+    $results = intel_gwt_fetch_search_analytics($vars);
+    if (!empty($results) && count($results)) {
+      break;
+    }
+    $latestDataDayAgo++;
+  }
+
+  // save latest data day info
+  $latest_data_info['checked'] = date('Y-m-d');
+  $latest_data_info['day'] = $latestDataDay;
+  variable_set('intel_gwt_search_latest_data_info', $latest_data_info);
+
+  return $latestDataDay;
+
+}
+
+/**
+ * Fetches data from GWT search analytics API. Acts as a wrapper to set uninitialied
+ * request variables and translate raw results from API into search objects.
+ *
+ * Can optionally save results to intel_gwt_search database table.
+ *
+ * @param $vars An associative array containing the keys 'siteUrl', 'startDate',
+ *   'endDate', 'rowLimit', 'timeframe'
+ * @param int $save
+ * @return array of search objects.
+ */
+function intel_gwt_search_analytics_request($vars, $save = 0) {
+  $settings = variable_get('intel_gwt_settings', array());
+
+  if (!isset($vars['rowLimit'])) {
+    $vars['rowLimit'] = isset($settings['search_batch_row_limit']) ? $settings['search_batch_row_limit'] : 1000;
+  }
+
+  if (!isset($vars['latestDataDay'])) {
+    $vars['latestDataDay'] = intel_gwt_get_search_analytics_latest_data_day($vars['siteUrl']);
+    if (empty($vars['latestDataDay'])) {
+      $vars['latestDataDay'] = date('Y-m-d', strtotime('yesterday'));
+    }
+  }
+  // set endDate and startDate based on timeframe
+  if ($vars['timeframe'] == 'l28' || $vars['timeframe'] == 'm28' || $vars['timeframe'] == 'l7' || $vars['timeframe'] == 'm7') {
+    $ftDays = (int)substr($vars['timeframe'], 1);
+    if (substr($vars['timeframe'], 0, 1) == 'm') {
+      $vars['endDate'] = date('Y-m-d', strtotime($vars['latestDataDay'] . ' -' . $ftDays . ' day'));
+    }
+    else {
+      $vars['endDate'] = $vars['latestDataDay'];
+    }
+    $vars['startDate'] = date('Y-m-d', strtotime($vars['endDate'] . ' -' . ($ftDays - 1) . ' day'));
+  }
+
+  $results = intel_gwt_fetch_search_analytics($vars);
+  $searchObjs = intel_gwt_trans_search_results($results, $vars);
+  if ($save) {
+    intel_gwt_search_save_multi($searchObjs);
+  }
+
+  return $searchObjs;
+}
+
+/**
+ * Low level search analytics request to GWT. Maps $vars to google-api object
+ * and returns raw response.
+ * @param $vars
+ * @return array|\Google_Service_Webmasters_SearchAnalyticsQueryResponse
+ */
+
+function intel_gwt_fetch_search_analytics($vars) {
+  $results = array();
+  if (empty($vars['siteUrl']) || empty($vars['startDate']) || empty($vars['endDate'])) {
+    return $results;
+  }
+if ($vars['rowLimit'] > 100) {
+  $vars['rowLimit'] = round($vars['rowLimit']/100);
+}
+  require_once libraries_get_path('google-api') . '/src/Google/autoload.php';
+  try {
+    $client = intel_gapi_get_client(array(Google_Service_Webmasters::WEBMASTERS));
+    if (!$client) {
+      return $results;
+    }
+    $webmaster = new Google_Service_Webmasters($client);
+    $searchanalytics = $webmaster->searchanalytics;
+
+    $post = new Google_Service_Webmasters_SearchAnalyticsQueryRequest($client);
+    $post->setStartDate($vars['startDate']);
+    $post->setEndDate($vars['endDate']);
+    if (!empty($vars['dimensions'])) {
+      $post->setDimensions($vars['dimensions']);
+    }
+    else {
+      $post->setDimensions(array('query', 'page'));
+    }
+
+
+    if (isset($vars['rowLimit'])) {
+      $post->setRowLimit($vars['rowLimit']);
+    }
+
+    if (isset($vars['filters'])) {
+      $filters = array();
+      foreach ($vars['filters'] as $f) {
+        if (empty($f['expression'])) {
+          continue;
+        }
+        $filter = new Google_Service_Webmasters_ApiDimensionFilter();
+        // valid dimensions: country, device, page, query
+        $filter->setDimension(isset($f['dimension']) ? $f['dimension'] : 'query');
+        // valid operators: equals, contains, notEquals, notContains;
+        $filter->setOperator(isset($f['operator']) ? $f['operator'] : 'equals');
+        $filter->setExpression($f['expression']);
+        $filters[] = $filter;
+      }
+      $filter_grp = new Google_Service_Webmasters_ApiDimensionFilterGroup();
+      $filter_grp->setFilters($filters);
+      $post->setDimensionFilterGroups(array($filter_grp));
+    }
+    //}
+
+    $results = $searchanalytics->query($vars['siteUrl'], $post);
+  } catch (Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+  }
+  return $results;
+}
+
+function intel_gwt_trans_search_results($results, $vars) {
+  $objs = array();
+  $site_frontpage = variable_get('site_frontpage', 'node');
+  foreach ($results as $item) {
+    $obj = (object) array();
+    $obj->keyword = $item['keys'][0];
+    $obj->day = $vars['startDate'];
+    $obj->timeframe = isset($vars['timeframe']) ? $vars['timeframe'] : '';
+    $a = str_replace($vars['siteUrl'] . base_path(), '', $item['keys'][1]);
+    $obj->alias = $a;
+    if ($a == '') {
+      $a = $site_frontpage;
+    }
+    $p = drupal_get_normal_path($a);
+    if (!empty($p)) {
+      $obj->path = $p;
+      $a = explode('/', $p);
+      if (count($a) == 2 && $a[0] == 'node' && is_numeric($a[1])) {
+        $obj->nid = $a[1];
+
+      }
+    }
+    $obj->impressions = (int) $item['impressions'];
+    $obj->clicks = (int) $item['clicks'];
+    $obj->position = (float) $item['position'];
+    $objs[] = $obj;
+  }
+  return $objs;
+}
+
+function intel_gwt_search_save($obj) {
+  $fields = array(
+    'impressions' => $obj->impressions,
+    'clicks' => $obj->clicks,
+    'position' => $obj->position,
+  );
+  if (!empty($obj->nid)) {
+    $fields['nid'] = $obj->nid;
+  }
+  if (!empty($obj->path)) {
+    $fields['path'] = $obj->path;
+  }
+  $key = array(
+    'keyword' => $obj->keyword,
+    'day' => $obj->day,
+    'timeframe' => $obj->timeframe,
+    'alias' => $obj->alias,
+  );
+  $alias_limit = 255;
+  if (strlen($key['alias']) > $alias_limit) {
+    dsm('alias: ' . $key['alias']);
+    $key['alias'] = substr($key['alias'], 0, $alias_limit);
+  }
+  if (strlen($fields['path']) > $alias_limit) {
+    dsm('path: ' . $fields['path']);
+    $fields['path'] = substr($fields['path'], 0, $alias_limit);
+  }
+  unset($fields['keyword']);
+  unset($fields['day']);
+  unset($fields['day']);
+  $query = db_merge('intel_gwt_search')
+    ->key($key)
+    ->fields($fields);
+  $query->execute();
+}
+
+function intel_gwt_search_save_multi($objs) {
+  if (!is_array($objs)) {
+    return false;
+  }
+  $count = 0;
+  foreach ($objs as $obj) {
+    intel_gwt_search_save($obj);
+    $count++;
+  }
+  return $count;
+}
+
+function intel_gwt_search_load_filtered_result($filter = array(), $options = array(), $header = array(), $limit = 100, $offset = NULL) {
+  $query = db_select('intel_gwt_search', 's')
+    ->extend('PagerDefault')
+    ->limit($limit);
+  $query->fields('s');
+
+  $tf1 = 'l28';
+  $tf0 = 'm28';
+  if (isset($options['timeframe'])) {
+
+  }
+  $query->condition('s.timeframe', $tf1);
+
+  $t = $query->leftJoin('intel_gwt_search', 't', '%alias.keyword = s.keyword AND (%alias.timeframe = :timeframe0 OR %alias.keyword IS NULL)',
+    array(
+      ':timeframe0' => $tf0,
+    ));
+  $query->addField($t, 'impressions', 'impressions0');
+  $query->addField($t, 'clicks', 'clicks0');
+  $query->addField($t, 'position', 'position0');
+  $query->addExpression('CAST(s.impressions AS SIGNED) - CAST(' . $t . '.impressions AS SIGNED)', 'impressions_chg');
+  $query->addExpression('CAST(s.clicks AS SIGNED) - CAST(' . $t . '.clicks AS SIGNED)', 'clicks_chg');
+  $query->addExpression('s.position - ' . $t . '.position', 'position_chg');
+
+  $query->groupBy('s.keyword');
+
+  if (!empty($header)) {
+    $query->extend('TableSort')->orderByHeader($header);
+  }
+
+  //TODO get filters working
+  if (!empty($filter['where'])) {
+    //$sql .= " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') . $filter['where'];
+    //$count_sql .=  " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') .  $filter['where'];
+  }
+  if (!empty($filter['conditions'])) {
+    foreach ($filter['conditions'] AS $condition) {
+      if (count($condition) == 3) {
+        $query->condition($condition[0], $condition[1], $condition[2]);
+      }
+      else {
+        $query->condition($condition[0], $condition[1]);
+      }
+    }
+  }
+
+  $result = $query->execute();
+
+  return $result;
+}
+
+function intel_gwt_search_analytics_delete_multi($vars) {
+  $query = db_delete('intel_gwt_search');
+  if (isset($vars['timeframe'])) {
+    $query->condition('timeframe', $vars['timeframe']);
+  }
+  return $query->execute();
+}
+
+function intel_gapi_get_client($scopes = array()) {
+  $client_id = variable_get('google_analytics_reports_client_id', NULL);
+  $client_secret = variable_get('google_analytics_reports_client_secret', NULL);
+  $access_token = variable_get('intel_gwt_access_token', NULL);
+  $refresh_token = variable_get('intel_gwt_refresh_token', NULL);
+  $redirect_uri = variable_get('intel_gwt_redirect_uri', NULL);
+
+  if (!$client_id || !$client_secret || !$access_token || !$redirect_uri) {
+    return FALSE;
+  }
+
+  // Load the Google API PHP Client Library.
+  require_once libraries_get_path('google-api') . '/src/Google/autoload.php';
+  $client = new Google_Client();
+  try {
+    $client->setClientId($client_id);
+    $client->setClientSecret($client_secret);
+    foreach ($scopes as $scope) {
+      //$client->addScope(Google_Service_Webmasters::WEBMASTERS);
+      $client->addScope($scope);
+    }
+    $client->setAccessToken(json_encode($access_token));
+    if ($client->getAuth()->isAccessTokenExpired()) {
+      //dsm('Token expired');
+      //dsm($access_token);
+      if (!empty($access_token['refresh_token'])) {
+        $client->getAuth()->refreshToken($access_token['refresh_token']);
+        $access_token = $client->getAccessToken();
+        $access_token = json_decode($access_token, TRUE);
+        $client->setAccessToken(json_encode($access_token));
+        variable_set('intel_gwt_access_token', $access_token);
+      }
+      //$client->getAuth()->refreshTokenWithAssertion($cred);
+
+    }
+  }
+  catch (Exception $e) {
+    return FALSE;
+  }
+  return $client;
+}
+
+
+
+function intel_gwt_search_report_page() {
+  $output = intel_gwt_search_report();
+  return $output;
+}
+
+function intel_gwt_search_report($filter = array(), $options = array()) {
+  $output = "";
+  $header = array();
+  $header[] = array(
+    'data' => t('Keyword'),
+    'field' => 's.keyword',
+  );
+  $header[] = array(
+    'data' => t('Impressions'),
+    'field' => 's.impressions',
+    'sort' => 'desc',
+  );
+  $header[] = array(
+    'data' => t('Chg'),
+    'field' => 'impressions_chg',
+  );
+  $header[] = array(
+    'data' => t('Clicks'),
+    'field' => 's.clicks',
+  );
+  $header[] = array(
+    'data' => t('Chg'),
+    'field' => 'clicks_chg',
+  );
+  $header[] = array(
+    'data' => t('Position'),
+    'field' => 's.position',
+  );
+  $header[] = array(
+    'data' => t('Chg'),
+    'field' => 'position_chg',
+  );
+  /*
+  $header[] = array(
+    'data' => t('Operations'),
+  );
+  */
+
+  if (empty($filter['conditions'])) {
+    //$filter['conditions'] = array(
+    //  array('s.vid', 0, '!='),
+    //);
+  }
+  $searches = intel_gwt_search_load_filtered_result($filter, $options, $header, 100);
+
+  $rows = array();
+  foreach ($searches AS $cid => $search) {
+
+    $row = array();
+    $ops = '';
+    //$ops = l(t('meta'), 'phonecall/' . $phonecall->cid);
+    $row[] = $search->keyword;
+
+    $row[] = number_format($search->impressions);
+    $chg = !empty($search->impressions_chg) ? $search->impressions_chg : $search->impressions;
+    $row[] = (($chg > 0) ? '+' : '') . number_format($chg);
+
+    $row[] = number_format($search->clicks);
+    $chg = !empty($search->clicks_chg) ? $search->clicks_chg : $search->clicks;
+    $row[] = (($chg > 0) ? '+' : '') . number_format($chg);
+
+    $row[] = number_format($search->position, 1);
+    $chg = !empty($search->position_chg) ? $search->position_chg : $search->position;
+    $row[] = (($chg > 0) ? '+' : '') . number_format($chg, 1);
+
+    //$row[] = $ops;
+    $rows[] = $row;
+  }
+
+  $vars = array(
+    'header' => $header,
+    'rows' => $rows,
+  );
+  $output .= theme('table', $vars);
+  //pager_default_initialize($total, 1, $element = 0);
+  $output .= theme('pager');
+
+  return $output;
+}

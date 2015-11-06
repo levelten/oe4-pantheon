@@ -265,7 +265,12 @@ function enterprise_base_form_alter(&$form, &$form_state, $form_id) {
 	  );
 	}
 	// use JavaScript to move 
-	elseif (isset($form['#node_edit_form'])) {
+  elseif (
+    isset($form['#node_edit_form']) // node edit form
+    || $form_id == 'user_profile_form' // taxonomy term edit form
+    || $form_id == 'taxonomy_form_term' // taxonomy term edit form
+    || $form_id == 'bean_form' // bean edit form
+  ) {
     // if admin theme is Rubik, enhance node admin
 		$theme = variable_get('admin_theme', 'bartik');
 		$node_admin = variable_get('node_admin_theme', 'bartik');

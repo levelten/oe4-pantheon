@@ -472,6 +472,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+	$form['enterprise_bootstrap_megamenu_config']['section_top']['enterprise_bootstrap_hide_caret'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Hide Caret'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_hide_caret'),
+		'#description' => t('Hide caret in dropdown links in the navbar.'),
+	);
+
 	$form['enterprise_bootstrap_megamenu_config']['section_right']['enterprise_bootstrap_mega_columns'] = array(
 		'#type' => 'select',
 		'#title' => t('Mega Menu Columns'),
