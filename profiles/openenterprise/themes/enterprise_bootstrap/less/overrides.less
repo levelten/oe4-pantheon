@@ -447,7 +447,7 @@ a .glyphicon-spin {
  * @see http://stackoverflow.com/questions/18432577/stacked-tabs-in-bootstrap-3
  * @see http://bootply.com/74926
  */
-.tabbable {
+ .tabbable {
   margin-bottom: 20px;
 }
 .tabs-below, .tabs-left, .tabs-right {
@@ -747,7 +747,22 @@ div.workbench-info-block {
   }
 }
 
+// Default footer color.
 .footer .footer-bottom {
-  background-color: #727274;
+  background-color: @gray-dark;
   padding: 20px 0;
+}
+
+// Carousel fix for widening images.
+.carousel {
+  &.wide {
+    .item img {
+      width: 100%;
+    }
+  }
+  &.short {
+    .carousel-inner {
+      max-height: 400px;
+    }
+  }
 }
