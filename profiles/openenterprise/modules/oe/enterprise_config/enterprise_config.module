@@ -177,6 +177,13 @@ function enterprise_config_config_wizard_info() {
     'skipable' => TRUE,
     'weight' => $w+=10,
   );
+  $wizard_info[$wizard_name]['steps']['disqus'] = array(
+    'title' => t('Disqus'),
+    'description' => '',
+    'callback' => 'enterprise_config_wizard_web_services_setup_disqus',
+    'skipable' => TRUE,
+    'weight' => $w+=10,
+  );
   $wizard_info[$wizard_name]['steps']['finished'] = array(
     'title' => t('Finished'),
     'description' => '',

@@ -9,9 +9,9 @@ function enterprise_config_config_wizard_analytics_setup($form, $form_state) {
     '#editable' => 1,
   ); 
   $options = array(
-    '' => t('Do not enable Google Analtyics tracking'),
+    '' => t('Do not enable Google Analytics tracking'),
     'ga_basic' => t('Enable basic Google Analytics tracking'),
-    'ga_intel' => t('Enable advanced Google Analtyics and LevelTen Intelligence tracking'),
+    'ga_intel' => t('Enable advanced Google Analytics and LevelTen Intelligence tracking'),
   ); 
   $form['analytics'] = array(
     '#tree' => TRUE,
@@ -62,7 +62,7 @@ function enterprise_config_config_wizard_analytics_setup_basic_validate($form, $
   
   $gaid = variable_get('googleanalytics_account', '');
   if (!$gaid) {
-    $msg = t('Please enter a valid Google Analtyics tracking id before proceeding.');
+    $msg = t('Please enter a valid Google Analytics tracking id before proceeding.');
     form_set_error('main', $msg);
   }
 }
@@ -85,7 +85,7 @@ function enterprise_config_config_wizard_analytics_setup_intel($form, $form_stat
   config_module_enable_disable($modules); 
   
   $items = array();
-  $items[] = t('Create a second Google Analtyics tracking id');
+  $items[] = t('Create a second Google Analytics tracking id');
   $items[] = t('Get a @linkLevelTen Intelligence api key');
   
   //$form[] = array(
