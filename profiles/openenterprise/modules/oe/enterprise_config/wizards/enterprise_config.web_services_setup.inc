@@ -78,6 +78,7 @@ function enterprise_config_wizard_web_services_setup_primary($form, $form_state)
     '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
     '#description' => t('Input: The gender of the agency owner.'),
   );
+  /*
   $fieldname = 'security_questions';
   $form['accounts']['personal'][$fieldname] = array(
     '#type' => 'textarea',
@@ -86,6 +87,7 @@ function enterprise_config_wizard_web_services_setup_primary($form, $form_state)
     '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
     '#description' => t('Input: Questions and Answers for any security questions.'),
   );
+  */
   
   return $form;
 }
