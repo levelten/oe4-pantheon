@@ -21,21 +21,70 @@ function enterprise_config_wizard_web_services_setup_primary($form, $form_state)
     '#tree' => TRUE,
     '#config_var' => 'accounts'
   );
-  $form['accounts']['primary']['email'] = array(
-    '#markup' => $help,
-    '#editable' => 1,
-  );   
-  $form['accounts']['primary']['email'] = array(
+  //$form['accounts']['primary']['email'] = array(
+  //  '#markup' => $help,
+  //  '#editable' => 1,
+  //);
+  $fieldname = 'email';
+  $form['accounts']['primary'][$fieldname] = array(
     '#type' => 'textfield',
     '#title' => t('Primary email address'),
-    //'#descriptions' => $options,
-    '#default_value' => isset($data['accounts']['primary']['email']) ? $data['accounts']['primary']['email'] : '',
+    '#default_value' => isset($data['accounts']['primary'][$fieldname]) ? $data['accounts']['primary'][$fieldname] : '',
+    '#description' => t('Input: The recovery email address, e.g. reggie@getlevelten.com'),
   );
-  $form['accounts']['primary']['phone'] = array(
+  $fieldname = 'phone';
+  $form['accounts']['primary'][$fieldname] = array(
     '#type' => 'textfield',
     '#title' => t('Primary phone'),
-    //'#descriptions' => $options,
-    '#default_value' => isset($data['accounts']['primary']['phone']) ? $data['accounts']['primary']['phone'] : '',
+    '#default_value' => isset($data['accounts']['primary'][$fieldname]) ? $data['accounts']['primary'][$fieldname] : '',
+  );
+  $fieldname = 'username';
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+    '#description' => t('Input: reggie[clientcode]'),
+  );
+  $fieldname = 'firstname';
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'textfield',
+    '#title' => t('First name'),
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+    '#description' => t('Input: Reggie'),
+  );
+  $fieldname = 'lastname';
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'textfield',
+    '#title' => t('Lastname name'),
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+  );
+  $fieldname = 'birthdate';
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'textfield',
+    '#title' => t('Birthdate'),
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+    '#description' => t('Input: Use the start date of the agency - 20 years'),
+  );
+  $fieldname = 'gender';
+  $options = array(
+    'male' => t('Male'),
+    'femail' => t('Female'),
+    'other' => t('Other'),
+  );
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'select',
+    '#title' => t('Gender'),
+    '#options' => $options,
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+    '#description' => t('Input: The gender of the agency owner.'),
+  );
+  $fieldname = 'security_questions';
+  $form['accounts']['personal'][$fieldname] = array(
+    '#type' => 'textarea',
+    '#title' => t('Security Questions'),
+    '#options' => $options,
+    '#default_value' => isset($data['accounts']['personal'][$fieldname]) ? $data['accounts']['personal'][$fieldname] : '',
+    '#description' => t('Input: Questions and Answers for any security questions.'),
   );
   
   return $form;
@@ -47,6 +96,13 @@ function enterprise_config_wizard_web_services_setup_primary_submit($form, $form
   $var['primary'] = array(
     'email' => $values['accounts']['primary']['email'],
     'phone' => $values['accounts']['primary']['phone'],
+  );
+  $var['personal'] = array(
+    'username' => $values['accounts']['personal']['username'],
+    'firstname' => $values['accounts']['personal']['firstname'],
+    'lastname' => $values['accounts']['personal']['lastname'],
+    'birthdate' => $values['accounts']['personal']['birthdate'],
+    'gender' => $values['accounts']['personal']['gender'],
   );
   variable_set('config_var_accounts', $var);
 }
