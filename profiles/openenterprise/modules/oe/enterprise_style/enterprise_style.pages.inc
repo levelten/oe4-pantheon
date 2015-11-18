@@ -1,7 +1,6 @@
 <?php
 
 function theme_user_thumbnail($vars) {
-  dsm($vars);
   $entity = $vars['entity'];
   $account = (isset($vars['user'])) ? $vars['user'] : '';
   if (!$account && isset($vars['uid'])) {
@@ -10,12 +9,10 @@ function theme_user_thumbnail($vars) {
   if (!$account && isset($vars['entity'])) {
     $account = user_load($vars['entity']->uid);
   }
-  dsm($account);
-
 
   $picture_field = 'field_picture_thumbnail';
-  if (isset($user->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
-    if (!isset($user->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
+  if (isset($account->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
+    if (!isset($account->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
       $picture_field = 'field_enterprise_style_picture';
     }
   }

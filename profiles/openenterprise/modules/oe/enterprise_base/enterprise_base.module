@@ -321,7 +321,6 @@ function enterprise_base_form_alter(&$form, &$form_state, $form_id) {
 		}
 		if (isset($form['metatags'])) {
 			$form['metatags']['#weight'] = -20;
-			
 		}
 	}
 }
@@ -431,3 +430,284 @@ function jquery_update_jquery_path() {
   }
 }
 */
+
+function enterprise_base_get_context_view_info() {
+  $info = &drupal_static(__FUNCTION__);
+  if (isset($info)) {
+    return $info;
+  }
+  $info = array();
+
+  $router_item = menu_get_item();
+  // determine context view and display
+  // first check if current url is a view
+  if((arg(0) != 'admin') && isset($router_item['page_callback']) &&  ($router_item['page_callback'] == 'views_page')) {
+    //$view = views_page($router_item['page_arguments'][0], $router_item['page_arguments'][0]);
+    $info['view'] = $view = views_get_view($router_item['page_arguments'][0]);
+    //dsm($view);
+    $display = $router_item['page_arguments'][1];
+    if (is_array($display)) {
+      $info['view_display'] = $display = array_shift($display);
+    }
+  }
+  if (!isset($info['view'])) {
+    return $info;
+  }
+  $info['path'] = !empty($view->display[$display]->display_options['path']) ? $view->display[$display]->display_options['path'] : '';
+  $info['view_relationships'] = !empty($view->display['default']->display_options['relationships']) ? $view->display['default']->display_options['relationships'] : array();
+  if (!empty($view->display[$display]->display_options['relationships'])) {
+    $info['view_relationships'] = $view->display[$display]->display_options['relationships'];
+  }
+  $info['view_filters'] = !empty($view->display['default']->display_options['filters']) ? $view->display['default']->display_options['filters'] : array();
+  if (!empty($view->display[$display]->display_options['filters'])) {
+    $info['view_filters'] = $view->display[$display]->display_options['filters'];
+  }
+  $info['view_arguments'] = !empty($view->display['default']->display_options['arguments']) ? $view->display['default']->display_options['arguments'] : array();
+  if (!empty($view->display[$display]->display_options['arguments'])) {
+    $info['view_arguments'] = $view->display[$display]->display_options['arguments'];
+  }
+  //dsm($view);
+
+  if (isset($info['view_filters']['type'])) {
+    $info['entity_filter'] = array(
+      'type' => $info['view_filters']['type']['table'],
+    );
+    if (!isset($info['view_filters']['type']['operator']) || ($info['view_filters']['type']['operator'] == 'in')) {
+      $info['entity_filter']['bundle'] = array_shift($info['view_filters']['type']['value']);
+    }
+  }
+
+  $info['taxonomy_filtargs'] = array();
+  $info['field_filtargs'] = array();
+
+  $arg_index = 0;
+  foreach ($info['view_arguments'] as $key => $v) {
+    if ($v['table'] == 'taxonomy_term_data') {
+      $tname = $v['validate_options']['vocabularies'];
+      $tname = array_pop($tname);
+      $info['taxonomy_filtargs'][$tname] = array(
+        'argument' => $v,
+        'arg_index' => $arg_index,
+        'name' => $tname,
+        'vocab' => taxonomy_vocabulary_machine_name_load($tname),
+      );
+    }
+    $arg_index++;
+  }
+
+  foreach ($info['view_filters'] as $key => $v) {
+
+    // TODO taxonomy filter
+    if (!empty($v['field'])) {
+      $info['field_filtargs'][$v['field']] = array(
+        'filter' => $v,
+        'filt_index' => !empty($v['expose']['identifier']) ? $v['expose']['identifier'] : $v['field'],
+        'name' => $v['field'],
+        'exposed' => $v['exposed'],
+      );
+    }
+    $arg_index++;
+  }
+
+
+
+  return $info;
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ * This hook declares what blocks are provided by the module.
+ */
+function enterprise_base_block_info() {
+  $blocks['views_taxonomy_filter'] = array(
+    // info: The name of the block.
+    'info' => t('Views Taxonomy Filter'),
+    // Block caching options (per role, per user, etc.)
+    // DRUPAL_CACHE_PER_ROLE is the default.
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function enterprise_base_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'views_taxonomy_filter':
+      $block['subject'] = t('Filters');
+      $block['content'] = enterprise_base_block_views_taxonomy_filter_view($delta);
+      break;
+  }
+  return $block;
+}
+
+function enterprise_base_block_views_taxonomy_filter_view() {
+  $info = enterprise_base_get_context_view_info();
+  dsm($info);
+  if (empty($info)) {
+    return '';
+  }
+
+  $items = array();
+
+  foreach ($info['taxonomy_filtargs'] as $v) {
+    $query = db_select('taxonomy_term_data', 't')
+      ->fields('t')
+      ->condition('t.vid', $v['vocab']->vid)
+    ;
+    $alias = $query->innerJoin('taxonomy_index', 'ti', 't.tid = ti.tid');
+    $query->addExpression('COUNT(ti.nid)', 'count');
+
+    if (!empty($info['entity_filter']['type']) && $info['entity_filter']['type'] == 'node') {
+      $alias2 = $query->innerJoin('node', 'n', 'ti.nid = n.nid');
+      $query->condition('n.type', $info['entity_filter']['bundle']);
+      $query->condition('n.status', NODE_PUBLISHED);
+    }
+
+    $query->groupBy('t.tid');
+
+    $result = $query->execute();
+    //dsm(" " . $query);
+
+    //dsm($result);
+    $vocab_name = $v['name'];
+    $vitems = (object)array(
+      'name' => $vocab_name,
+      'title' => $v['vocab']->name,
+      'count' => 0,
+      'levels' => 1,
+      'rows' => array(),
+    );
+    $url0 = $info['path'] . '/';
+    $url1 = '';
+    $count = 0;
+    while($row = $result->fetchObject()) {
+      $parents = taxonomy_get_parents($row->tid);
+      if (!empty($parents)) {
+        foreach ($parents as $p) {
+          if (empty($vitems->rows[$p->tid])) {
+            $vitems->rows[$p->tid] = (object)array(
+              'title' => $p->name,
+              'link' => l($p->name, $url0 . drupal_html_class($p->name) . $url1),
+              'url' => $url0 . drupal_html_class($p->name) . $url1,
+              'count' => 0,
+              'rows' => array(),
+            );
+          }
+          $vitems->rows[$p->tid]->rows[$row->tid] = (object)array(
+            'title' => $row->name,
+            'url' => $url0 . drupal_html_class($row->name) . $url1,
+            'link' => l($row->name, $url0 . drupal_html_class($row->name) . $url1),
+            'count' => $row->count,
+          );
+          $vitems->rows[$p->tid]->count += $row->count;
+          $vitems->levels = 2;
+        }
+      }
+      else {
+        $vitems->rows[$row->tid] = (object)array(
+          'title' => $row->name,
+          'url' => $url0 . drupal_html_class($row->name) . $url1,
+          'link' => l($row->name, $url0 . drupal_html_class($row->name) . $url1),
+          'count' => $row->count,
+        );
+      }
+      $vitems->count += $row->count;
+      $count++;
+
+      dsm($row);
+      //dsm($parents);
+    }
+    $items[] = $vitems;
+  }
+
+
+  dsm($vitems);
+  dsm($items);
+
+
+  $out =  '';
+  $vars = array(
+    'sets' => $items,
+    'options' => array(
+      'count' => TRUE,
+    ),
+  );
+  dsm($vars);
+  $out .= theme('views_filter', $vars);
+  return $out;
+}
+
+function enterprise_base_theme() {
+  $themes = array();
+
+  $themes['views_filter'] = array(
+    'template' => 'templates/enterprise-base-views-filter',
+    'variables' => array(
+      'sets' => NULL,
+      'options' => NULL,
+    ),
+  );
+
+  $themes['views_filter_set'] = array(
+    'template' => 'templates/enterprise-base-views-filter-set',
+    'variables' => array(
+      'rows' => NULL,
+      'options' => NULL,
+    ),
+  );
+
+  $themes['views_filter_view_summary'] = array(
+    'template' => 'enterprise-style-views-view-summary',
+    'path' => drupal_get_path('module', 'enterprise_style') . '/templates/list',
+    'variables' => array(
+      'rows' => NULL,
+      'options' => NULL,
+    ),
+  );
+
+  return $themes;
+}
+
+function enterprise_base_preprocess_views_filter(&$vars) {
+  //dsm($vars);
+  $sets = &$vars['sets'];
+  foreach ($sets as $id => $set) {
+    if (!empty($set->rows)) {
+      $vars2 = (array)$set;
+      if (!isset($vars2['options'])) {
+        $vars2['options'] = array();
+      }
+      $vars2['options'] += $vars['options'];
+      //dsm($vars2);
+      $sets[$id]->markup = theme('views_filter_set', $vars2);
+    }
+  }
+
+  //dsm($vars);
+}
+
+function enterprise_base_preprocess_views_filter_set(&$vars) {
+  //dsm($vars);
+  $rows = &$vars['rows'];
+  foreach ($rows as $id => $row) {
+    if (!empty($row->rows)) {
+      $rows[$id]->sub_items = theme('views_filter_view_summary', array('rows' => $row->rows, 'options' => $vars['options']));
+    }
+    if ($vars['levels'] == 2) {
+      $rows[$id]->link = "- " . $rows[$id]->link;
+    }
+  }
+  enterprise_style_preprocess_views_view_summary($vars);
+  dsm($vars);
+}
+
+function enterprise_base_preprocess_views_filter_view_summary(&$vars) {
+  enterprise_style_preprocess_views_view_summary($vars);
+}
