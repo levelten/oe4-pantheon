@@ -177,6 +177,13 @@ function enterprise_config_config_wizard_info() {
     'skipable' => TRUE,
     'weight' => $w+=10,
   );
+  $wizard_info[$wizard_name]['steps']['disqus'] = array(
+    'title' => t('Disqus'),
+    'description' => '',
+    'callback' => 'enterprise_config_wizard_web_services_setup_disqus',
+    'skipable' => TRUE,
+    'weight' => $w+=10,
+  );
   $wizard_info[$wizard_name]['steps']['finished'] = array(
     'title' => t('Finished'),
     'description' => '',
@@ -225,6 +232,56 @@ function enterprise_config_config_wizard_info() {
     'title' => 'LevelTen Intelligence',
     'description' => '',
     'callback' => 'enterprise_config_config_wizard_analytics_setup_intel',
+    'weight' => $w+=10,
+  );
+
+  // Analtyics setup wizard
+  $wizard_name = 'intel_setup';
+  $wizard_info[$wizard_name] = array(
+    'title' => t('Intelligence setup'),
+    'description' => t('Configures OE Intelligence and Google Analytics'),
+    'file' => '/wizards/enterprise_config.intel_setup.inc',
+    'path' => drupal_get_path('module', 'enterprise_config'),
+    'menu_include' => 'admin/config',
+    'category' => array(
+      array(
+        'name' => 'setup',
+        'weight' => $wizard_weight+=10,
+      ),
+
+      /* array(
+         'name' => 'marketing',
+         'weight' => 0,
+       ),
+     */
+    ),
+    'weight' => $wizard_weight+=10,
+    'steps' => array(),
+  );
+  $w = 0;
+  $wizard_info[$wizard_name]['steps']['ga'] = array(
+    'title' => 'Google Analytics Account',
+    'description' => '',
+    'callback' => 'enterprise_config_config_wizard_intel_setup_ga',
+    'weight' => $w+=10,
+  );
+  $wizard_info[$wizard_name]['steps']['intel_account'] = array(
+    'title' => 'Intelligence Account',
+    'description' => '',
+    'callback' => 'enterprise_config_config_wizard_intel_setup_intel_account',
+    'weight' => $w+=10,
+  );
+  $wizard_info[$wizard_name]['steps']['ga_api'] = array(
+    'title' => 'Google Analytics API',
+    'description' => '',
+    'callback' => 'enterprise_config_config_wizard_intel_setup_ga_api',
+    'weight' => $w+=10,
+  );
+  $wizard_info[$wizard_name]['steps']['finished'] = array(
+    'title' => t('Finished'),
+    'description' => '',
+    'callback' => 'enterprise_config_config_wizard_intel_setup_finished',
+    'finished' => 1,
     'weight' => $w+=10,
   );
 
