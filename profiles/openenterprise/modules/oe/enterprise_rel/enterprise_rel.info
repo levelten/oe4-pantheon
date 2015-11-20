@@ -1,0 +1,7 @@
+name = Enterprise Relevance
+description = Provides relevance framework for OE.
+core = 7.x
+package = Open Enterprise
+version = 7.x-3.0
+project = enterprise_rel
+dependencies[] = views
