@@ -3,18 +3,18 @@
  */
 (function($) {
 Drupal.behaviors.rubik = {};
-Drupal.behaviors.rubik.attach = function(context) {
+Drupal.behaviors.rubik.attach = function(context, settings) {
   // If there are both main column and side column buttons, only show the main
   // column buttons if the user scrolls past the ones to the side.
-  $('div.form:has(div.column-main div.form-actions):not(.rubik-processed)').each(function() {
+  $('div.form:has(div.column-main div.form-actions):not(.rubik-processed)', context).each(function() {
     var form = $(this);
     var offset = $('div.column-side div.form-actions', form).height() + $('div.column-side div.form-actions', form).offset().top;
-    $(window).scroll(function () {
+    $(window).scroll(function() {
       if ($(this).scrollTop() > offset) {
-        $('div.column-main div.form-actions', form).show();
+        $('div.column-main .column-wrapper > div.form-actions#edit-actions', form).show();
       }
       else {
-        $('div.column-main div.form-actions', form).hide();
+        $('div.column-main .column-wrapper > div.form-actions#edit-actions', form).hide();
       }
     });
     form.addClass('rubik-processed');
@@ -50,31 +50,81 @@ Drupal.behaviors.rubik.attach = function(context) {
     $(this).parents('.secondary-tabs').toggleClass('focused');
   });
 
-  // Sticky sidebar
-  if ($('#content .column-side .column-wrapper').length !== 0) {
-    var rubikColumn = $('#content .column-side .column-wrapper', context);
-    if(rubikColumn && rubikColumn.offset()){
+  // Sticky sidebar functionality.
+  var disableSticky = (settings.rubik !== undefined) ? settings.rubik.disable_sticky : false;
+  if ($('#content .column-side .column-wrapper').length !== 0 ) {
+
+    // Move fields to sidebar if it exists.
+    $('.rubik_sidebar_field', context).once('rubik', function() {
+      $('.column-side .column-wrapper').append($(this));
+    });
+
+    // Check if the sidebar should be made sticky.
+    if (!disableSticky) {
+      var rubikColumn = $('#content .column-side .column-wrapper', context);
+      if (rubikColumn && rubikColumn.offset()) {
         var rubikStickySidebar = rubikColumn.offset().top;
-        $(window).scroll(function(){
-          if( $(window).scrollTop() > rubikStickySidebar ) {
+        $(window).scroll(function() {
+          if ($(window).scrollTop() > rubikStickySidebar) {
             rubikColumn.each(function() {
               $(this).addClass("fixed");
               $(this).width($(this).parent().width());
             });
-          } else {
+          }
+          else {
             rubikColumn.each(function() {
               $(this).removeClass("fixed");
               $(this).width($(this).parent().width());
             });
           }
         });
+      }
     }
 
-    // Move fields to sidebar.
-    $(".rubik_sidebar_field").each(function() {
-      $('.column-side .column-wrapper').append($(this));
-    });
   }
   
+  // Cache the primary tabs.
+  var $primaryTabsWrap = $('.primary-tabs');
+  if ($primaryTabsWrap.length) {
+    var $primaryTabs = $primaryTabsWrap.find('> li');
+    // Trigger adjusting function upon first page load.
+    adjustPrimaryTabs();
+    // Trigger adjusting function upon any screen resizing.
+    $(window).resize(function() {
+      adjustPrimaryTabs();
+    });
+  }
+
+  function adjustPrimaryTabs() {
+    // Get the position of whole element.
+    var parentPosition = $primaryTabs.offset().top;
+    // Complicated count.
+    var count = [];
+    var rowNumber = 1;
+    // Remove remainings of other classes we attached.
+    $primaryTabs.removeClass('last-row-link');
+    $primaryTabs.removeClass('first-row-link');
+    // Loop through and compare the position of each tab.
+    $primaryTabs.each(function(index) {
+      var $this = $(this);
+      // New row.
+      if (count[rowNumber] != $this.offset().top) {
+        // Increase the count for this row.
+        rowNumber++;
+        count[rowNumber] = $this.offset().top;
+        // Add "first" class to this element.
+        $this.addClass('first-row-link');
+        // Add "last" class to the previous element, if there is one.
+        if ($this.prev('li').length) {
+          $this.prev('li').addClass('last-row-link');
+        }
+      }
+      // Add "last" class if this is the last element.
+      if (index === ($primaryTabs.length - 1)) {
+        $this.addClass('last-row-link');
+      }
+    });
+  }
+
 };
 })(jQuery);

@@ -6,6 +6,20 @@ function rubik_preprocess_html(&$vars) {
   if (theme_get_setting('rubik_inline_field_descriptions')) {
     $vars['classes_array'][] = 'rubik-inline-field-descriptions';
   }
+
+   // add in a specific stylesheet for overrides in IE7. (BLAH)
+  drupal_add_css(drupal_get_path('theme', 'rubik') . '/css/ie.css', array(
+    'browsers' => array(
+      '!IE' => FALSE,
+    ),
+    'weight' => 500,
+    'group' => 5000,
+    'every_page' => TRUE,
+  ));
+
+  // Disable sticky in the sidebar. Set option in JS
+  $disable_sticky = theme_get_setting('rubik_disable_sticky_sidebar');
+  drupal_add_js(array('rubik' => array('disable_sticky' => $disable_sticky)), array('type' => 'setting'));
 }
 
 /**
@@ -14,10 +28,10 @@ function rubik_preprocess_html(&$vars) {
  */
 function rubik_css_alter(&$css) {
   if (isset($css['modules/overlay/overlay-child.css'])) {
-    $css['modules/overlay/overlay-child.css']['data'] = drupal_get_path('theme', 'rubik') . '/overlay-child.css';
+    $css['modules/overlay/overlay-child.css']['data'] = drupal_get_path('theme', 'rubik') . '/css/overlay-child.css';
   }
   if (isset($css['modules/shortcut/shortcut.css'])) {
-    $css['modules/shortcut/shortcut.css']['data'] = drupal_get_path('theme', 'rubik') . '/shortcut.css';
+    $css['modules/shortcut/shortcut.css']['data'] = drupal_get_path('theme', 'rubik') . '/css/shortcut.css';
   }
 }
 
@@ -358,7 +372,7 @@ function rubik_breadcrumb($vars) {
     $item = menu_get_item();
     $end = end($vars['breadcrumb']);
     if ($end && strip_tags($end) !== $item['title']) {
-      $vars['breadcrumb'][] = check_plain($item['title']);
+      $vars['breadcrumb'][] = (isset($item['localized_options']['html']) && $item['localized_options']['html']) ? $item['title'] : check_plain($item['title']);
     }
   }
 
@@ -483,7 +497,8 @@ function rubik_admin_drilldown_menu_item_link($link) {
  */
 function rubik_preprocess_textfield(&$vars) {
   if ($vars['element']['#size'] >= 30 && empty($vars['element']['#field_prefix']) && empty($vars['element']['#field_suffix'])) {
-    $vars['element']['#size'] = '';
+    // Set text field to default size.
+    $vars['element']['#size'] = 20;
     if (!isset($vars['element']['#attributes']['class'])
       || !is_array($vars['element']['#attributes']['class'])) {
        $vars['element']['#attributes']['class'] = array();
