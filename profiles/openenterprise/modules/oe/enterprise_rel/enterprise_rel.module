@@ -96,6 +96,9 @@ function enterprise_rel_get_rel_view_meta() {
         );
       }
     }
+    else if (substr($v['table'], 0, 17) == 'field_data_field_') {
+
+    }
     $arg_index++;
   }
 
@@ -106,15 +109,46 @@ function enterprise_rel_get_rel_view_meta() {
       'id' => $v['id'],
       'exposed' => $v['exposed'],
     );
-    if (substr($v['table'], 0, 6) == 'field_') {
+    if (substr($v['table'], 0, 11) == 'field_data_') {
+      $name = substr($v['table'], 11);
+      $fi = field_info_field($name);
+      //dsm($name);
+      //dsm($fi);
       // check if taxonomy field type
       if (!empty($v['vocabulary'])) {
         $item['vocabulary'] = $v['vocabulary'];
         $info['taxonomy_filtargs'][$v['vocabulary']] = $item;
       }
-      $info['field_filtargs'][$v['field']] = $item;
+      else if ($fi['type'] == 'entityreference') {
+        $item['entity_type'] = $fi['settings']['target_type'];
+        $bundles = $fi['settings']['handler_settings']['target_bundles'];
+        foreach ($bundles as $bundle) {
+          $item['bundle'] = $bundle;
+          $info[$item['entity_type'] . '_filtargs'][$item['bundle']] = $item;
+        }
+        $item['bundles'] = $bundles;
+      }
+      $info['field_filtargs'][$name] = $item;
     }
-    if ($v['table'] == 'taxonomy_term_data') {
+    else if (substr($v['relationship'], -10) == '_target_id') {
+      $rel = $info['view_relationships'][$v['relationship']];
+      dsm($rel);
+      if (substr($rel['field'], -10) == '_target_id') {
+        $name = substr($rel['table'], 11);
+        $fi = field_info_field($name);
+        dsm($name);
+        dsm($fi);
+        if ($fi['type'] == 'entityreference') {
+          $item['entity_type'] = $fi['settings']['target_type'];
+          $bundles = $fi['settings']['handler_settings']['target_bundles'];
+          foreach ($bundles as $bundle) {
+            $item['bundle'] = $bundle;
+            $info[$item['entity_type'] . '_filtargs'][$item['bundle']] = $item;
+          }
+        }
+      }
+    }
+    else if ($v['table'] == 'taxonomy_term_data') {
       $name = enterprise_rel_get_vocab_name_from_views_relationship($v, $info['view_relationships']);
       if ($name) {
         $item['vocabulary'] = $name;
@@ -124,7 +158,7 @@ function enterprise_rel_get_rel_view_meta() {
     $arg_index++;
   }
 
-//dsm($info);
+dsm($info);
 
   return $info;
 }
@@ -147,9 +181,7 @@ function enterprise_rel_get_vocab_name_from_views_relationship($options, $relati
 
 function enterprise_rel_url($url, &$options) {
   static $terms, $rv_meta;
-  if (!isset($terms)) {
-    $terms = array();
-  }
+
   if (!isset($rv_meta)) {
     $rv_meta = enterprise_rel_get_rel_view_meta();
   }
@@ -158,27 +190,43 @@ function enterprise_rel_url($url, &$options) {
   if (empty($rv_meta)) {
     return $url;
   }
-  if (substr($url, 0, 9) == 'taxonomy/') {
-    $a = explode('/', $url);
-    $tid = $a[2];
+  $url0 = $url;
+  $query0 = $options['query'];
+
+  $url_elms = explode('/', $url);
+  if ($url_elms[0] == 'taxonomy') {
+    if (!isset($terms)) {
+      $terms = array();
+    }
+
+    $tid = $url_elms[2];
+    $term = '';
     //dsm($tid);
     if (empty($terms[$tid])) {
       if (!is_numeric($tid)) {
-        if ($a[1] != 'term') {
-          $term = taxonomy_get_term_by_name($tid, $a[1]);
+        //if (!empty($arg_options['transform_dash'])) {
+          $tid = strtr($tid, '-', ' ');
+        //}
+        if ($url_elms[1] != 'term') {
+          $t = taxonomy_get_term_by_name($tid, $url_elms[1]);
         }
         else {
-          $term = taxonomy_get_term_by_name($tid);
+          $t = taxonomy_get_term_by_name($tid);
+        }
+        if (!empty($t)) {
+          $term = array_pop($t);
         }
       }
       else {
         $term = taxonomy_term_load($tid);
       }
+      //dsm($term);
       if (empty($term)) {
         return $url;
       }
       // cache term using tid and name as indexes
       $terms[$term->tid] = $terms[$term->name] = $term;
+      $tid = $term->tid;
     }
     if (
       empty($terms[$tid]->vocabulary_machine_name)
@@ -195,14 +243,52 @@ function enterprise_rel_url($url, &$options) {
     );
     $url = enterprise_rel_url_by_params($params, $options);
   }
+  else if ($url_elms[0] == 'field') {
+    $field_name = $url_elms[1];
+    $value = array();
+    if (count($url_elms) == 4) {
+      $value['value_type'] = $url_elms[2];
+      $value['value'] = $url_elms[3];
+    }
+    else {
+      $value['value'] = $url_elms[2];
+    }
+    $params = array(
+      'field' => array(
+        $field_name => $value,
+      )
+    );
+    $url = enterprise_rel_url_by_params($params, $options);
+  }
+  else if ($url_elms[0] == 'node' && is_numeric($url_elms[1]) && !isset($url_elms[2])) {
+    $nid = (int)$url_elms[1];
+    $entity = node_load($nid);
+    $value = array();
+    $value['entity_id'] = $nid;
+    $value['entity_type'] = 'node';
+    $value['bundle'] = $entity->type;
+    $value['entity'] = $entity;
+    $value['title'] = $entity->title;
+
+    $params = array(
+      'node' => array(
+        $value['bundle'] => $value,
+      )
+    );
+    $url = enterprise_rel_url_by_params($params, $options);
+  }
+
+  if ($url == $rv_meta['path'] && count($query0) == count($options['query'])) {
+    $url = $url0;
+  }
+
   return $url;
   //$rv_meta = enterprise_rel_get_rel_view_meta();
 }
 
 function enterprise_rel_url_by_params($params, &$options = array()) {
   $rv_meta = enterprise_rel_get_rel_view_meta();
-  //dsm($rv_meta);
-  //dsm($params);
+
   $url = $rv_meta['path'];
   $args = array();
   $query = array();
@@ -211,10 +297,40 @@ function enterprise_rel_url_by_params($params, &$options = array()) {
       if (isset($rv_meta['taxonomy_filtargs'][$vocab_name])) {
         $me = $rv_meta['taxonomy_filtargs'][$vocab_name];
         if (!empty($me['argument'])) {
-          $args[$me['arg_index']] = enterprise_rel_format_views_argument_string($terms[0], $rv_meta['view'], $me['argument']);
+          $args[$me['arg_index']] = enterprise_rel_format_views_argument_string('taxonomy', $terms[0], $rv_meta['view'], $me['argument']);
         }
         if (!empty($me['filter'])) {
-          enterprise_rel_format_views_filter_query($terms[0], $rv_meta['view'], $me['filter'], $query);
+          enterprise_rel_format_views_filter_query('taxonomy', $terms[0], $rv_meta['view'], $me['filter'], $query);
+        }
+      }
+    }
+  }
+  if (!empty($params['field'])) {
+    //dsm($rv_meta);
+    //dsm($params);
+    foreach ($params['field'] as $field_name => $value) {
+      if (isset($rv_meta['field_filtargs'][$field_name])) {
+        $me = $rv_meta['field_filtargs'][$field_name];
+        if (!empty($me['argument'])) {
+          $args[$me['arg_index']] = enterprise_rel_format_views_argument_string('field', $value, $rv_meta['view'], $me['argument']);
+        }
+        if (!empty($me['filter'])) {
+          enterprise_rel_format_views_filter_query('field', $value, $rv_meta['view'], $me['filter'], $query);
+        }
+      }
+    }
+  }
+  if (!empty($params['node'])) {
+    dsm($rv_meta);
+    dsm($params);
+    foreach ($params['node'] as $bundle => $value) {
+      if (isset($rv_meta['node_filtargs'][$bundle])) {
+        $me = $rv_meta['node_filtargs'][$bundle];
+        if (!empty($me['argument'])) {
+          $args[$me['arg_index']] = enterprise_rel_format_views_argument_string('entity', $value, $rv_meta['view'], $me['argument']);
+        }
+        if (!empty($me['filter'])) {
+          enterprise_rel_format_views_filter_query('entity', $value, $rv_meta['view'], $me['filter'], $query);
         }
       }
     }
@@ -247,20 +363,30 @@ function enterprise_rel_url_by_params($params, &$options = array()) {
   return $url;
 }
 
-function enterprise_rel_format_views_argument_string($value, $view, $arg_options) {
+function enterprise_rel_format_views_argument_string($type, $value, $view, $arg_options) {
   $vh = new views_handler_argument_string($view, $arg_options);
   //dsm($vh);
-  //dsm($value);
+  dsm($value);
   //dsm($arg_options);
   //$data = (object)array();
+  dsm($type);
   $v_type = 'id';
   $v = '';
-  if ($arg_options['table'] == 'taxonomy_term_data') {
-    $v_type = 'name';
-    $v = $value->name;
+
+  if ($type == 'taxonomy') {
+    if ($arg_options['table'] == 'taxonomy_term_data') {
+      $v_type = 'name';
+      $v = $value->name;
+    }
+    else {
+      $v = $value->tid;
+    }
+  }
+  else if ($type == 'field') {
+    $v = $value['value'];
   }
   else {
-    $v = $value->tid;
+    $v = $value;
   }
 
   if ($v_type == 'name') {
@@ -273,22 +399,39 @@ function enterprise_rel_format_views_argument_string($value, $view, $arg_options
   return $v;
 }
 
-function enterprise_rel_format_views_filter_query($value, $view, $filt_options, &$query = array()) {
+function enterprise_rel_format_views_filter_query($type, $value, $view, $filt_options, &$query = array()) {
   if (empty($filt_options['expose']) && $filt_options['expose']['identifier']) {
     return;
   }
   $v_type = 'id';
   $v = '';
-  if (!empty($filt_options['vocabulary'])) {
-    if ($filt_options['table'] == 'taxonomy_term_data') {
-      $v_type = 'name';
-      $v = $value->name;
-      $v = strtolower($v);
-    }
-    else {
-      $v = $value->tid;
+  if ($type == 'taxonomy') {
+    if (!empty($filt_options['vocabulary'])) {
+      if ($filt_options['table'] == 'taxonomy_term_data') {
+        $v_type = 'name';
+        $v = $value->name;
+        $v = strtolower($v);
+      }
+      else {
+        $v = $value->tid;
+      }
     }
   }
+  else if ($type == 'entity') {
+    if (!empty($filt_options['relationship'])) {
+      $v = $value['title'];
+    }
+    else {
+      $v = $value['entity_id'];
+    }
+  }
+  else if ($type == 'field') {
+    $v = $value['value'];
+  }
+  else {
+    $v = $value;
+  }
+
   $query[$filt_options['expose']['identifier']] = $v;
 }
 
@@ -296,15 +439,26 @@ function enterprise_rel_l($text, $options) {
 
 }
 
-function enterprise_rel_url_outbound_alter(&$path, &$options, $original_path) {
-  if (substr($original_path, 0, 9) != 'rel-view/') {
+function enterprise_rel_url_outbound_alter(&$path, &$options, &$original_path) {
+  if (substr($path, 0, 9) != 'rel-view/' && (empty($options['query']['rel-view']))) {
     return;
   }
-  $path = substr($original_path, 9);
-  $path = enterprise_rel_url($path, $options);
-
   //dsm($path);
   //dsm($options);
+  //dsm($original_path);
+
+  if (!empty($options['query']['rel-view'])) {
+    unset($options['query']['rel-view']);
+  }
+  else {
+    $path = substr($path, 9);
+  }
+  $original_path = $path = enterprise_rel_url($path, $options);
+  //$path = '/' . $path;
+
+  if (!empty($options['query']['rel-view'])) {
+    unset($options['query']['rel-view']);
+  }
 }
 
 /**
