@@ -280,7 +280,8 @@ function project_preprocess_page(&$vars) {
   }
 
   // Add search bar.
-  if (module_exists('search')) {
+  $vars['toggle_search'] = theme_get_setting('toggle_search');
+  if ($vars['toggle_search'] && module_exists('search')) {
     $search_form = drupal_get_form('search_form');
     $search_box = drupal_render($search_form);
     $vars['search_box'] = $search_box;

@@ -51,7 +51,7 @@
                       <?php endif; ?>
                       <!-- header buttons -->
                       <div class="header-dropdown-buttons hidden-xs">
-                        <?php if(!empty($search_box)): ?>
+                        <?php if($toggle_search): ?>
                           <div class="btn-group dropdown">
                             <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                               <?php print $search_icon; ?>

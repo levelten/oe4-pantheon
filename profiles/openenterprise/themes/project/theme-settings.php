@@ -10,6 +10,14 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
 		$default_settings = $info['settings'];
 	}
 
+	// Add checkbox for Search if enabled.
+	if (module_exists('search')) {
+		$form['theme_settings']['toggle_search'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Search'),
+			'#default_value' => theme_get_setting('toggle_search'),
+		);
+	}
 
 	$form['project'] = array(
 		'#type' => 'vertical_tabs',
