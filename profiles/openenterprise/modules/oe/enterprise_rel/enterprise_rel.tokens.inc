@@ -3,6 +3,13 @@
  * @file
  */
 
+
+function enterprise_rel_token_info_alter(&$info) {
+  //$entity_info = entity_get_info();
+  //$token_types = entity_token_types_chained();
+  //dsm($token_types);
+}
+
 function enterprise_rel_token_info() {
 
   $info['types']['relevant'] = array(
@@ -22,24 +29,14 @@ function enterprise_rel_token_info() {
     'type' => 'relevant',
   );
 
-  /*
-  $info['tokens']['node']['rel-view'] = array(
+
+  $info['tokens']['node']['rel-view']['path'] = array(
     'name' => t('Node relevant view'),
     'description' => t("Formats relevant page uris. Does not includes base_path."),
     'type' => 'relevant',
   );
 
-  $info['tokens']['current-page']['rel-view'] = array(
-    'name' => t('Current page relevant view'),
-    'description' => t("Formats relevant page uris. Does not includes base_path."),
-    'type' => 'relevant',
-  );
-  */
-
-
-
   return $info;
-
 }
 
 /**
@@ -51,6 +48,8 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
   $replacements = array();
   $sanitize = !empty($options['sanitize']);
   $rv_meta = &drupal_static(__FUNCTION__);
+  //dsm($rv_meta);
+
   if (!isset($rv_meta)) {
     if (isset($data['relevant_view_meta'])) {
       $rv_meta = $data['relevant_view_meta'];
@@ -60,8 +59,81 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
     }
   }
   if (empty($rv_meta)) {
-    return;
+    return $replacements;
   }
+
+  $ret_types = array(
+    'path' => 'path',
+    'path-value' => 'path-value',
+    'dyn-path' => 'dyn-path',
+  );
+
+  if ($type == 'node') {
+    //dsm($tokens);
+    //dsm($data);
+    $node = $data['node'];
+    foreach ($tokens as $name => $original) {
+      if (substr($name, 0, 9) != 'rel-view:') {
+        continue;
+      }
+      $toks = explode(':', $name);
+      array_shift($toks);
+      $ret_type = 'url';
+      if (!empty($ret_types[$toks[0]])) {
+        //dsm($toks);
+        $ret_type = $ret_types[$toks[0]];
+        array_shift($toks);
+      }
+      $param_keys = array();
+      $obj = null;
+      //dsm($ret_type);
+      //dsm($toks);
+      $wrapper = entity_metadata_wrapper('node', $node);
+      if (count($toks) >= 2 && $toks[0] == 'field') {
+        $param_keys[] = 'field';
+        $param_keys[] = $fn = $toks[1];
+        $param_value = array(
+          'entities' => array(),
+        );
+        if (empty($node->{$fn}[LANGUAGE_NONE][0])) {
+          continue;
+        }
+        $param_value['entities'][] = (object)$node->{$fn}[LANGUAGE_NONE][0];
+      }
+
+      if (empty($param_value['entities'])) {
+        continue;
+      }
+
+      if ($ret_type == 'dyn-path' || $ret_type == 'path-value' ) {
+        if (empty($rv_meta[$param_keys[0] . '_filtargs'][$param_keys[1]])) {
+          continue;
+        }
+        $fa = $rv_meta[$param_keys[0] . '_filtargs'][$param_keys[1]];
+
+        $value = enterprise_rel_format_dyn_argument_string($param_keys[0], $param_value, $rv_meta['view'], $fa);
+      }
+      else {
+        // TODO: non field types not finished
+        $param_keys[] = $toks[0];
+        $param_keys[] = $fn = $toks[1];
+        $param_value = array(
+          'entities' => array(),
+        );
+        $options = array();
+
+      }
+      //dsm("value=$value");
+      if (!empty($value)) {
+        if ($ret_type == 'dyn-path') {
+          $replacements[$original] = "rel-view/{$param_keys[0]}/{$param_keys[1]}/$value";
+        }
+      }
+    }
+  }
+
+  //dsm($replacements);
+
 
   if ($type == 'relevant') {
 
@@ -75,7 +147,7 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
     //$test = og_context('dywr_franchise');
     //$lang = isset($franchise->language) ? $franchise->language : LANGUAGE_NONE;
     //$node_lang = '';
-return;
+return $replacements;
     foreach ($tokens as $name => $original) {
       switch ($name) {
         default:
@@ -117,3 +189,4 @@ return;
 //dsm($replacements);
   return $replacements;
 }
+

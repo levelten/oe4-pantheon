@@ -4,4 +4,6 @@ core = 7.x
 package = Open Enterprise
 version = 7.x-3.0
 project = enterprise_rel
+files[] = enterprise_rel.tokens.inc
+files[] = enterprise_rel.module
 dependencies[] = views
