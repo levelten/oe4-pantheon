@@ -753,8 +753,8 @@ function cta_block_view($delta = '') {
       $block['set'] = 'bean';
     }
     else if (isset($selection['block'])) {
-      $block['subject'] = $selection['block']['subject'];
-      $block['content'] = $selection['block']['content'];
+      $block['subject'] = !empty($selection['block']['subject']) ? $selection['block']['subject'] : '';
+      $block['content'] = !empty($selection['block']['content']) ? $selection['block']['content'] : '';
       $block['set'] = 'block';
     }
   } 

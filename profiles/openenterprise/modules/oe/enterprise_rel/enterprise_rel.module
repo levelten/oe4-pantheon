@@ -14,24 +14,44 @@ include_once ('enterprise_rel.ds_api.inc');
  * rel-view/node/[nid]
  * rel-view/field/[field name]/[value]
  * node:rel-view:path:
+ *  - field:[field name]:[value]
+ *  - default-args
  */
 
-function enterprise_rel_get_rel_view(&$display_name) {
-  $view = &drupal_static(__FUNCTION__);
-  if (isset($view)) {
-    return $view;
+/**
+ * Implements hook_views_api().
+ * Notifies the Views module that we're compatible with a particular API revision.
+ */
+function enterprise_rel_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'enterprise_rel') . '/views',
+  );
+}
+
+function enterprise_rel_get_rel_view($path = '') {
+  $returns = &drupal_static(__FUNCTION__, array());
+  if (isset($returns[$path])) {
+    return $returns[$path];
+  }
+  $ret = array(
+    'view' => '',
+    'display_name' => '',
+  );
+  if (!empty($path)) {
+    $router_item = menu_get_item($path);
+  }
+  else {
+    $router_item = menu_get_item();
   }
 
-  $router_item = menu_get_item();
   // determine rel view and display
   // first check if current url is a view
-  if((arg(0) != 'admin') && isset($router_item['page_callback']) &&  ($router_item['page_callback'] == 'views_page')) {
-    $view = views_get_view($router_item['page_arguments'][0]);
-    $display_name = $router_item['page_arguments'][1];
-    //if (is_array($display_name)) {
-      //$display = array_shift($display_name);
-    //}
-    return $view;
+  if(isset($router_item['page_callback']) &&  ($router_item['page_callback'] == 'views_page')) {
+    $ret['view'] = views_get_view($router_item['page_arguments'][0]);
+    $ret['display_name'] = $router_item['page_arguments'][1];
+    $returns[$path] = $ret;
+    return $ret;
   }
 
   if (
@@ -42,33 +62,30 @@ function enterprise_rel_get_rel_view(&$display_name) {
     $settings = variable_get('enterprise_rel_entity_settings_' . 'node' . '__' . $router_item['page_arguments'][0]->type, array());
     if (!empty($settings['view_display'])) {
       $a = explode(':', $settings['view_display']);
-      $view = views_get_view($a[0]);
-      $display_name = $a[1];
-      return $view;
+      $ret['view'] = views_get_view($a[0]);
+      $ret['display_name'] = $a[1];
+      $returns[$path] = $ret;
+      return $ret;
     }
   }
 
   return FALSE;
 }
 
-function enterprise_rel_get_rel_view_meta() {
-  $info = &drupal_static(__FUNCTION__);
-  if (isset($info)) {
-    return $info;
+function enterprise_rel_get_rel_view_meta($path = '') {
+  $infos = &drupal_static(__FUNCTION__, array());
+  if (isset($infos[$path])) {
+    return $infos[$path];
   }
-  $info = array();
 
-  $display_name = '';
-  $info['view'] = $view = enterprise_rel_get_rel_view($display_name);
-
-  if (empty($view)) {
-    $info = FALSE;
-    return $info;
+  $info = enterprise_rel_get_rel_view($path);
+  if (empty($info) || empty($info['view'])) {
+    $infos[$path] = FALSE;
+    return $infos[$path];
   }
-  $info['display_name'] = $display_name;
 
-  //$info['view']->build($info['display_name']);
-  //dsm($info['view']);
+  $view = $info['view'];
+  $display_name = $info['display_name'];
 
   $info['display'] = $display = $view->display[$display_name];
   //dsm($info['display']);
@@ -386,7 +403,7 @@ function enterprise_rel_get_rel_view_meta() {
           //$entity = entity_load
         }
 //dsm($fa);
-        dsm($item);
+        //dsm($item);
         $info['current']['params'][$params_key][$fa['bundle']] = $item;
         if ($filtarg == 'argument') {
           $info['current']['path_args_params'][$fa['arg_index']] = &$info['current']['params'][$params_key][$fa['bundle']];
@@ -400,8 +417,8 @@ function enterprise_rel_get_rel_view_meta() {
   }
 
 
-dsm($info);
-
+//dsm($info);
+  $infos[$path] = $info;
   return $info;
 }
 
@@ -432,7 +449,7 @@ function enterprise_rel_get_vocab_name_from_views_relationship($options, $relati
 
 
 function enterprise_rel_path($path, &$options) {
-  static $rv_meta;
+  static $rv_meta, $term_parent_params;
 
   if (!isset($rv_meta)) {
     $rv_meta = enterprise_rel_get_rel_view_meta();
@@ -460,12 +477,37 @@ function enterprise_rel_path($path, &$options) {
     ) {
       return $path;
     }
+    $params_key = 'taxonomy_term';
+    $params = array();
+    // check if term parent argument exists for this vocab
+    if (!empty($rv_meta['taxonomy_term_parent_filtargs'][$entity->vocabulary_machine_name])) {
+      // if no parent, term is at top level
+      if (empty($entity->parent)) {
+        $params_key .= '_parent';
+        if (!isset($term_parents)) {
+          $term_parent_params = array();
+        }
+        $term_parent_params[$entity->tid] = 1;
+      }
+      else if (
+        !empty($entity->parent)
+        && !empty($term_parent_params[$entity->parent[0]])
+        && is_array(($term_parent_params[$entity->parent[0]]))
+      ) {
+        $params = $term_parent_params[$entity->parent[0]];
+      }
+    }
+
     $v['entities'][$entity->tid] = $entity;
-    $params = array(
-      'taxonomy_term' => array(
+    $params += array(
+      $params_key => array(
         $entity->vocabulary_machine_name => $v,
       ),
     );
+
+    if (!empty($term_parent_params[$entity->tid]) && ($term_parent_params[$entity->tid] == 1)) {
+      $term_parent_params[$entity->tid] = $params;
+    }
     $path = enterprise_rel_path_by_params($params, $options);
   }
   else if ($url_elms[0] == 'field') {
@@ -861,7 +903,6 @@ function enterprise_rel_get_entity_default_arguments($node) {
             }
           }
         }
-        dsm($v);
         $v['path_value'] = enterprise_rel_format_views_argument_string($fa['entity_type'], $v, $rv_meta['view'], $fa);
         if (!isset($params[$params_key])) {
           $params[$params_key] = array();
@@ -870,7 +911,6 @@ function enterprise_rel_get_entity_default_arguments($node) {
           $params[$params_key][$fa['bundle']] = array();
         }
         $params[$params_key][$fa['bundle']] = $v;
-        dsm($params);
         $v['path'] = enterprise_rel_path_by_params($params, $v['path_options']);
       }
     }
@@ -1043,8 +1083,22 @@ function enterprise_rel_form_node_type_form_submit(&$form, &$form_state) {
   if (isset($values['view_display'])) {
     $entity_settings['view_display'] = $values['view_display'];
   }
-
+if (empty($entity_settings)) {
+  drupal_set_message('enterprise_rel_entity_settings_' . $entity_type . '__' . $bundle . ' UNSET', 'warning');
+}
   variable_set('enterprise_rel_entity_settings_' . $entity_type . '__' . $bundle, $entity_settings);
+}
+
+function enterprise_rel_query_rel_terms_alter(&$query) {
+  return;
+  $tables =& $query->getTables();
+  $where =& $query->getTables();
+  $expressions =& $query->getExpressions();
+  $conditions =& $query->conditions();
+  dsm($tables);
+  dsm($conditions);
+  dsm($query);
+  dsm(" " . $query);
 }
 
 function enterprise_rel_get_views_options($options = array()) {
@@ -1369,7 +1423,7 @@ function enterprise_rel_block_views_filter_view() {
     }
   }
 
-dsm($items);
+//dsm($items);
   $out =  '';
   $vars = array(
     'sets' => $items,

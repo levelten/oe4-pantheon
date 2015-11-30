@@ -689,7 +689,7 @@ function cta_select_block($selector, $path, $module, $delta) {
     cta_selection_save(urldecode($path), $selector, '', $module, $delta);
     $selection = cta_selection_load(urldecode($path), $selector, TRUE);
     $vars = array(
-      '%title' => $selection['block']['subject'],
+      '%title' => !empty($selection['block']['subject']) ? $selection['block']['subject'] : '',
       '%selector' => $sel['description'],
       '@path' => urldecode($path),
     );

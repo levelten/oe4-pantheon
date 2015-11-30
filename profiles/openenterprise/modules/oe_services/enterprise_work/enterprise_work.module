@@ -176,20 +176,6 @@ function enterprise_work_taxonomy_term_service_tags_uri_alter(&$url, $term) {
  * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
  *
  */
-function enterprise_work_taxonomy_term_temp_uri_alter(&$url, $term) {
-  //return;
-  $app_settings = enterprise_apps_config_settings('enterprise_work');
-  $url['path'] = 'rel-view/' . $url['path'];
-  return;
-  $url = array(
-    //'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
-  );
-}
-
-/**
- * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
- *
- */
 function enterprise_work_taxonomy_term_service_areas_uri_alter(&$url, $term) {
   $app_settings = enterprise_apps_config_settings('enterprise_work');
   $url = array(
