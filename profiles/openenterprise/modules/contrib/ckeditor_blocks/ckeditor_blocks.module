@@ -75,7 +75,7 @@ function ckeditor_blocks_blocks_ajax() {
   }
   
   // Sort alphabetically to find blocks easier.
-  ksort($options);
+  asort($options);
 
   drupal_json_output($options);
 }
