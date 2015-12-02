@@ -1593,7 +1593,7 @@ function enterprise_conversion_styler_style() {
       '#tag' => 'markup',
       '#value' => '
 Example 1:<br />
-<button class="btn btn-primary cta-btn">Click Me Now</button>
+<button class="btn cta-btn">Click Me Now</button>
 <br />
 <br />
 Example 2:<br />
@@ -1609,7 +1609,7 @@ Example 2:<br />
 <br />
 <br />
 Example 3:<br />
-<button class="btn cta-accent cta-btn">
+<button class="cta-btn cta-accent">
   <div class="icon-bottom">
     <span>
       <h3>Click Me Now</h3>
@@ -1658,7 +1658,10 @@ Example 3:
     <div class="cta cta-rectangle">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-      <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+      <button class="btn-cta btn-group pull-right" href="#">
+        <span class="btn btn-verb">Download Now</span>
+        <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
     </div>
   </div>
   <div class="col-md-6">
@@ -1670,7 +1673,10 @@ Example 3:
       </div>
       <div class="col-md-7">
         <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+        <button class="btn-cta btn-group" href="#">
+          <span class="btn btn-verb">Download Now</span>
+          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
       </div>
     </div>
   </div>
@@ -1679,7 +1685,10 @@ Example 3:
 <div class="cta">
   <h3>Build a Smarter Website</h3>
   <p>...</p>
-  <button class="btn btn-cta pull-right">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+  <button class="btn-cta btn-group pull-right">
+    <span class="btn btn-verb">Download Now</span>
+    <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
 </div>
 
 Example 2:
@@ -1690,7 +1699,10 @@ Example 2:
   </div>
   <div class="col-md-7">
     <p>....</p>
-    <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+    <button class="btn-cta btn-group pull-right">
+      <span class="btn btn-verb">Download Now</span>
+      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
   </div>
 </div>',
     ),
@@ -1707,7 +1719,10 @@ Example 2:
     <div class="cta">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-      <button class="btn btn-cta center-block">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+      <button class="btn-cta btn-group center-block">
+        <span class="btn btn-verb">Download Now</span>
+        <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
     </div>
   </div>
   </div>
@@ -1721,7 +1736,28 @@ Example 2:
       <div class="col-md-10">
         <h3>Build a Smarter Website</h3>
         <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+        <button class="btn-cta btn-group">
+          <span class="btn btn-verb">Download Now</span>
+          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+<div class="col-md-12">
+    Example 3:<br />
+    <div class="cta cta-secondary cta-bg">
+      <div class="col-md-2">
+        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+      </div>
+      <div class="col-md-10">
+        <h3>Build a Smarter Website</h3>
+        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+        <button class="btn-cta btn-group">
+          <span class="btn btn-verb">Download Now</span>
+          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
       </div>
     </div>
   </div>
@@ -1730,7 +1766,10 @@ Example 2:
 <div class="cta">
   <h3>Build a Smarter Website</h3>
   <p>...</p>
-  <button class="btn btn-cta center-block">Get it now! <i class="icon glyphicon glyphicon-download"></i></button>
+  <button class="btn-cta btn-group center-block">
+    <span class="btn btn-verb">Download Now</span>
+    <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
 </div>
 
 Example 2:
@@ -1741,7 +1780,25 @@ Example 2:
   <div class="col-md-10">
     <h3>Build a Smarter Website</h3>
     <p>...</p>
-    <button class="btn btn-primary">Get it now!<i class="icon glyphicon glyphicon-download"></i></button>
+    <a class="btn-cta btn-group" href="#">
+      <span class="btn btn-verb">Download Now</span>
+      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </a>
+  </div>
+</div>
+
+Example 3:
+<div class="cta cta-secondary cta-bg">
+  <div class="col-md-2">
+    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+  </div>
+  <div class="col-md-10">
+    <h3>Build a Smarter Website</h3>
+    <p>...</p>
+    <a class="btn-cta btn-group" href="#">
+      <span class="btn btn-verb">Download Now</span>
+      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </a>
   </div>
 </div>',
     ),
