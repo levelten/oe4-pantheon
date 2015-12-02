@@ -221,6 +221,9 @@ function enterprise_style_preprocess_views_view_summary(&$vars) {
       $vars['rows'][$id]->link = theme('icon', array('bundle' => 'bootstrap', 'icon' => 'glyphicon-tag')) . $vars['rows'][$id]->link;
     }
 
+    if (!isset($vars['row_classes'][$id])) {
+      $vars['row_classes'][$id] = '';
+    }
     $vars['row_classes'][$id] .= $row_classes_default;
     $vars['row_list_item_classes'][$id] = $row_list_item_classes_default;
     $vars['row_badge_classes'][$id] = $row_badge_classes_default;

@@ -22,6 +22,7 @@ function enterprise_style_ds_view_modes_info() {
   $ds_view_mode->entities = array(
     'node' => 'node',
     'user' => 'user',
+    'field_collection_item' => 'field_collection_item',
   );
   $view_modes['mini'] = $ds_view_mode;
   
@@ -226,6 +227,8 @@ function enterprise_style_ds_span_column_replace(&$classes, $columns = 1) {
 function enterprise_style_ds_fields_info($entity_type) {
   $node = array();
   $user = array();
+  $fc_item = array();
+  $bean = array();
   $user['user_thumbnail'] = array(
     'title' => t('User Thumbnail'),
     'field_type' => DS_FIELD_TYPE_FUNCTION,
@@ -289,8 +292,8 @@ function enterprise_style_ds_fields_info($entity_type) {
     'function' => 'enterprise_style_ds_field_date_stacked',
     'properties' => array(),
   );
-  for ($i = 1; $i < 4; $i++) {
-    $node['enterprise_custom_' . $i] = array(
+  for ($i = 1; $i <= 5; $i++) {
+    $fc_item['enterprise_custom_' . $i] = $bean['enterprise_custom_' . $i] = $node['enterprise_custom_' . $i] = array(
       'title' => t('Custom') . ' ' . $i,
       'field_type' => DS_FIELD_TYPE_FUNCTION,
       'ui_limit' => array('*|*'),
@@ -312,7 +315,7 @@ function enterprise_style_ds_fields_info($entity_type) {
   }
 
 
-  return array('node' => $node, 'user' => $user);
+  return array('node' => $node, 'user' => $user, 'bean' => $bean, 'field_collection_item' => $fc_item);
 
   /*
   $node['bootstrap_jumbotron'] = array(

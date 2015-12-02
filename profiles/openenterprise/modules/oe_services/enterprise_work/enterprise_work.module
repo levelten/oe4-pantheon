@@ -4,7 +4,7 @@
  * Code for the Enterprise Work feature.
  */
 
-include_once 'enterprise_work.features.inc';
+include_once('enterprise_work.features.inc');
 
 
 /**
@@ -149,9 +149,26 @@ function enterprise_work_enterprise_apps_config_info() {
  *
  */
 function enterprise_work_taxonomy_term_service_types_uri_alter(&$url, $term) {
+  //return;
   $app_settings = enterprise_apps_config_settings('enterprise_work');
+  $url['path'] = 'rel-view/' . $url['path'];
+  return;
   $url = array(
-    'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
+    //'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
+  );
+}
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
+ *
+ */
+function enterprise_work_taxonomy_term_service_tags_uri_alter(&$url, $term) {
+  //return;
+  $app_settings = enterprise_apps_config_settings('enterprise_work');
+  $url['path'] = 'rel-view/' . $url['path'];
+  return;
+  $url = array(
+    //'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
   );
 }
 

@@ -1209,7 +1209,7 @@ function kwresearch_form_node_form_alter(&$form, $form_state, $form_id) {
     
     require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'kwresearch') . "/includes/tax_report.inc";
 
-    if ($_GET['kwresearch_page_kid']) {
+    if (!empty($_GET['kwresearch_page_kid'])) {
       $kid0 = $_GET['kwresearch_page_kid'];
       $kw0 = kwresearch_get_keyword($kid0);
       if (isset($form['contentanalysis'])
