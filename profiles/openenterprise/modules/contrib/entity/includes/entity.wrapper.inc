@@ -331,10 +331,19 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
     if (!isset($name)) {
       return $this->propertyInfo['properties'];
     }
-    if (!isset($this->propertyInfo['properties'][$name])) {
-      throw new EntityMetadataWrapperException('Unknown data property ' . check_plain($name) . '.');
+    if ($name == 'field_service_types') {
+      dsm('hi');
+      $bt = debug_backtrace();
+      dsm($bt);
     }
-    return $this->propertyInfo['properties'][$name] + $this->info['property defaults'] + $this->propertyInfoDefaults;
+    else {
+      if (!isset($this->propertyInfo['properties'][$name])) {
+        throw new EntityMetadataWrapperException('Unknown data property ' . check_plain($name) . '.');
+      }
+      return $this->propertyInfo['properties'][$name] + $this->info['property defaults'] + $this->propertyInfoDefaults;
+    }
+
+
   }
 
   /**

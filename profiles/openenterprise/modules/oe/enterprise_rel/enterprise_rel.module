@@ -18,6 +18,21 @@ include_once ('enterprise_rel.ds_api.inc');
  *  - default-args
  */
 
+function enterprise_rel_entity_context($path = '') {
+  $returns = &drupal_static(__FUNCTION__, array());
+  if (isset($returns[$path])) {
+    return $returns[$path];
+  }
+  $returns[$path] = '';
+
+  $rv_meta = enterprise_rel_get_rel_view_meta($path);
+  if (!empty($rv_meta['context_entity_type']) && !empty($rv_meta['context_bundle'])) {
+    $returns[$path] = $rv_meta['context_entity_type'] . ':' . $rv_meta['context_bundle'];
+  }
+
+  return $returns[$path];
+}
+
 /**
  * Implements hook_views_api().
  * Notifies the Views module that we're compatible with a particular API revision.
@@ -64,6 +79,8 @@ function enterprise_rel_get_rel_view($path = '') {
       $a = explode(':', $settings['view_display']);
       $ret['view'] = views_get_view($a[0]);
       $ret['display_name'] = $a[1];
+      $ret['context_entity_type'] = $router_item['page_arguments'][0]->entity_type;
+      $ret['context_bundle'] = $router_item['page_arguments'][0]->type;
       $returns[$path] = $ret;
       return $ret;
     }
@@ -109,8 +126,14 @@ function enterprise_rel_get_rel_view_meta($path = '') {
     $info['entity_filter'] = array(
       'type' => $info['view_filters']['type']['table'],
     );
+    if (!isset($info['context_entity_type'])) {
+      $info['context_entity_type'] = $info['entity_filter']['type'];
+    }
     if (!isset($info['view_filters']['type']['operator']) || ($info['view_filters']['type']['operator'] == 'in')) {
       $info['entity_filter']['bundle'] = array_shift($info['view_filters']['type']['value']);
+      if (!isset($info['context_bundle'])) {
+        $info['context_bundle'] = $info['entity_filter']['bundle'];
+      }
     }
   }
 
@@ -971,6 +994,7 @@ function enterprise_rel_preprocess_page(&$variables) {
   if (empty($rv_meta)) {
     return;
   }
+  dsm($rv_meta);
 
   $trail = drupal_get_breadcrumb();
   $cur_path = current_path();
@@ -1052,7 +1076,7 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
     'entity_type' => 'node',
     'bundle' => $form['#node_type']->type,
   );
-  $settings = variable_set('enterprise_rel_entity_settings_' . $form_state['enterprise_rel']['entity_type'] . '__' . $form_state['enterprise_rel']['bundle'], array());
+  $settings = variable_get('enterprise_rel_entity_settings_' . $form_state['enterprise_rel']['entity_type'] . '__' . $form_state['enterprise_rel']['bundle'], array());
 
   $options = enterprise_rel_get_views_options(array('' => t('- none -')));
   $form['enterprise_rel']['view_display'] = array(
@@ -1083,9 +1107,7 @@ function enterprise_rel_form_node_type_form_submit(&$form, &$form_state) {
   if (isset($values['view_display'])) {
     $entity_settings['view_display'] = $values['view_display'];
   }
-if (empty($entity_settings)) {
-  drupal_set_message('enterprise_rel_entity_settings_' . $entity_type . '__' . $bundle . ' UNSET', 'warning');
-}
+
   variable_set('enterprise_rel_entity_settings_' . $entity_type . '__' . $bundle, $entity_settings);
 }
 
