@@ -1,0 +1,231 @@
+
+.cta-btn {
+	background-color: @brand-primary;
+	color: white;
+	&.cta-alt {
+		background-color: transparent;
+		color: @brand-primary;
+		border-color: @brand-primary;
+		&:hover {
+			background-color: @brand-primary;
+			color: white;
+		}
+	}
+	&.cta-secondary {
+		background-color: @brand-secondary;
+		&.cta-alt {
+			
+		}
+	}
+	&.cta-accent {
+		background-color: @brand-accent;
+	}
+	&.cta-dark {
+		color: @text-color;
+	}
+}
+
+.cta {
+	.box-sizing();
+	padding: 10px;
+	border: 0;
+	overflow: hidden;
+
+	&:last-child {
+		margin-right: 0;
+	}
+	.icon {
+		color: white;
+	}
+	h2, h3, h4, h5, h6 {
+		color: @brand-primary;
+		margin: 0 0 10px 0;
+		&:hover {
+			text-decoration: none;
+		}
+	}
+	.btn-cta {
+		.btn();
+		background-color: @brand-primary;
+		color: white;
+		padding: 0;
+		.rounded(4px);
+		&:hover, .btn-icon {
+			background: darken(@brand-primary, 10%);
+			color: white;
+		}
+		.btn {	
+			.btn();
+			.rounded(0);
+			.remove-margin();
+			&:hover {
+				color: white;
+			}
+		}
+	}
+
+	&.cta-secondary {
+		h2, h3, h4, h5, h6 {
+			color: @brand-secondary;
+		}
+		.btn-cta {
+			background-color: @brand-secondary;
+			&:hover, .btn-icon {
+				background-color: darken(@brand-secondary, 10%);
+			}
+		}
+		&.cta-light {
+			.btn-cta {
+				&:hover, .btn-icon {
+					background-color: lighten(@brand-secondary, 10%);
+				}
+			}
+		}
+	}
+	&.cta-accent {
+		h2, h3, h4, h5, h6 {
+			color: @brand-accent;
+		}
+		.btn-cta {
+			background-color: @brand-accent;
+			&:hover, .btn-icon {
+				background-color: darken(@brand-accent, 10%);
+			}
+		}
+		&.cta-light {
+			.btn-cta {
+				&:hover, .btn-icon {
+					background-color: lighten(@brand-accent, 10%);
+				}
+			}
+		}
+	}
+
+	// Dark version if primary color is light.
+	&.cta-dark {
+		.icon, .btn-cta, .btn {
+			&, &:hover {
+				color: @text-color;
+			}
+		}
+	}
+
+	&.cta-light {
+		.btn-cta {
+			&:hover, .btn-icon {
+				background-color: lighten(@brand-primary, 10%);
+			}
+		}
+	}
+
+	&.cta-bg {
+		background-color: @brand-primary;
+		color: white;
+		h2, h3, h4, h5, h6 {
+			color: white;
+		}
+		.btn-cta {
+			background-color: transparent;
+			border: 2px solid white;
+			.btn-icon {
+				border-left: 2px solid white;
+			}
+			&:hover {
+				&, .btn, .icon {
+					color: @brand-primary;
+					background-color: white;
+				}
+				.btn-icon {
+					border-left-color: @brand-primary;
+				}
+			}
+		}
+		&.cta-dark {
+			&, h2, h3, h4, h5, h6 {
+				color: @text-color;
+			}
+			.btn-cta {
+				&, .btn-icon {
+					border-color: @text-color;
+				}
+				&:hover {
+					&, .btn, .icon {
+						background-color: @text-color;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+.cta-rectangle {
+	// max-width: 300px;
+	.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
+	.col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
+	.col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
+	.col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
+	.col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
+	.col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
+	.col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
+	.col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
+	.col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
+	.col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
+	.col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
+	.col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+}
+
+.cta-btn {
+	color: @brand-accent;
+	h3, h4, h5, h6 {
+		color: @brand-accent;
+		margin: 0 0 0 0;
+		&:hover {
+			text-decoration: none;
+		}
+	}
+	.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
+	.col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
+	.col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
+	.col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
+	.col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
+	.col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
+	.col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
+	.col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
+	.col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
+	.col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
+	.col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
+	.col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	.icon-right {
+		span {
+			display:inline-block;
+			vertical-align:middle;
+			width:80%;
+		}
+		i {
+			display:inline-block;
+			vertical-align:middle;
+			padding-left:5px;
+			width:20%;
+		}
+	}
+	.icon-bottom {
+		span {
+			display:block;
+			width:100%;
+		}
+		i {
+			display:block;
+			text-align: center;
+			width:100%;
+			margin-top: 5px;
+		}
+	}
+
+}
