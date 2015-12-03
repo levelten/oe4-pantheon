@@ -938,7 +938,7 @@ function enterprise_rel_preprocess_page(&$variables) {
   if (!empty($entity->entity_type) && $entity->entity_type == 'node') {
     $args = enterprise_rel_get_entity_default_arguments($entity);
     //dsm($args);
-    dsm($trail);
+    //dsm($trail);
 
     $trail = array();
     $trail[] = l(t('Home'), '');
@@ -949,7 +949,7 @@ function enterprise_rel_preprocess_page(&$variables) {
       }
       //dsm($trail);
     }
-    dsm($trail);
+    //dsm($trail);
   }
   // check if on view
   else if (strpos($cur_path, $rv_meta['path']) === 0)  {
