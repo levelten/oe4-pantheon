@@ -26,7 +26,7 @@ function field_multiple_limit_field_formatter_info_alter(&$info) {
  * Implements hook_field_formatter_settings_summary_alter().
  */
 function field_multiple_limit_field_formatter_settings_summary_alter(&$summary, $context) {
-  if ($context['field']['cardinality'] > 1 || $context['field']['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+  if (isset($context['field']['cardinality']) && ($context['field']['cardinality'] > 1 || $context['field']['cardinality'] == FIELD_CARDINALITY_UNLIMITED)) {
     $settings = $context['instance']['display'][$context['view_mode']]['settings'];
 
     if (!empty($summary)) {
@@ -115,7 +115,8 @@ function field_multiple_limit_field_attach_view_alter(&$output, $context) {
       $max_level = 0;
       if ($level != '') {
         foreach ($element['#items'] as $delta => $item) {
-          $term = $item['taxonomy_term'];
+          $tid = $item['tid'];
+          $term = !empty($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($tid);
           $terms[$term->tid] = $term;
           if (empty($term->parent)) {
             $terms[$term->tid]->level = 0;
