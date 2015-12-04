@@ -435,7 +435,7 @@ function enterprise_rel_path($path, &$options) {
         'bundle' => $a[1],
       );
     }
-    else if ($a[0] == 'view') {
+    else if ($a[0] == 'view' || $a[0] == 'views') {
       $id = array(
         'view_name' => $a[1],
         'display_name' => $a[2],
