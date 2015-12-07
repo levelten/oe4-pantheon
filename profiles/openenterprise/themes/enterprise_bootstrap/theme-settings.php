@@ -4,8 +4,9 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['general']['#weight'] = -8;
 
 	$default_settings = array();
+	$theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 
-	$filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+	$filename = DRUPAL_ROOT . '/' . $theme_path . '/enterprise_bootstrap.info';
 	$info = drupal_parse_info_file($filename);
 	if (isset($info['settings'])) {
 		$default_settings = $info['settings'];
@@ -702,20 +703,23 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	}
 
 	// Add related CSS/JS
-	$theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 	$form['#attached']['css'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.css';
 	$form['#attached']['js'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.min.js';
 	$form['#attached']['js'][] = $theme_path . '/js/enterprise_bootstrap_admin.js';
 
 	// Add form submit handler.
-	$form['#validate'][] = 'enterprise_bootstrap_form_validate';
+	$form['#submit'][] = 'enterprise_bootstrap_theme_settings_submit';
+
+	// Specify theme-settings.php as dependency. We won't use the active theme since it's usually a subtheme.
+	// http://ghosty.co.uk/2014/03/managed-file-upload-in-drupal-theme-settings
+	$form_state['build_info']['files'][] = $theme_path . '/theme-settings.php';
 
 }
 
 /*
  * Validate handler for Enterprise Bootstrap.
  */
-function enterprise_bootstrap_form_validate(&$form, &$form_state) {
+function enterprise_bootstrap_theme_settings_submit(&$form, &$form_state) {
 	$input = $form_state['values'];
 
 	// Check for Colourlovers
