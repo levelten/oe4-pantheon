@@ -1012,6 +1012,21 @@ function enterprise_rel_form_alter(&$form, &$form_state, $form_id) {
 
 }
 
+function enterprise_rel_form_node_form_alter(&$form, &$form_state) {
+dsm($form);
+  $node = $form['#node'];
+  $form['options']['universal'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Universal add to relevant lists'),
+    '#default_value' => !empty($node->universal) ? $node->universal : 0,
+  );
+  $form['options']['rel_view_hide'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide in section lists'),
+    '#default_value' => !empty($node->rel_view_hide) ? $node->rel_view_hide : 0,
+  );
+}
+
 /**
  * Implements hook_form_alter().
  */
@@ -1728,4 +1743,112 @@ function enterprise_rel_preprocess_views_filter_set(&$vars) {
 
 function enterprise_rel_preprocess_views_filter_view_summary(&$vars) {
   enterprise_style_preprocess_views_view_summary($vars);
+}
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function enterprise_rel_field_formatter_settings_summary_alter(&$summary, $context) {
+  //dsm($context);
+  if (isset($context['field']['type']) && $context['field']['type'] == 'taxonomy_term_reference') {
+    if (!empty($settings['enterprise_rel_taxonomy_level'])) {
+      $summary .= '<br />' . t('Select a level for items in a hierarchy such as taxonomy terms. 0 will select the top most level items only, 1 the first children, -1 selects the bottom most level items.');
+    }
+  }
+}
+
+function enterprise_rel_field_formatter_info_alter(&$info) {
+  // Added to all formatters.
+  foreach ($info as $formatter_key => &$formatter) {
+    if (!empty($formatter['field types'][0]) && $formatter['field types'][0] == 'taxonomy_term_reference') {
+      $formatter['settings']['enterprise_rel_taxonomy_level'] = '';
+    }
+  }
+  //if (!empty($info['ds_taxonomy_view_mode'])) {
+  //  $info['ds_taxonomy_view_mode']['settings']['enterprise_rel_taxonomy_level'] = '';
+  //}
+}
+
+/**
+ * Implements hook_field_formatter_settings_form_alter().
+ */
+function enterprise_rel_field_formatter_settings_form_alter(&$settings_form, $context) {
+  if (isset($context['field']['type']) && $context['field']['type'] == 'taxonomy_term_reference') {
+    $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+    $options = array(
+      '' => t('- None -')
+    );
+    $options += drupal_map_assoc(range(-2, 2));
+    $settings_form['enterprise_rel_taxonomy_level'] = array(
+      '#type' => 'select',
+      '#title' => t('Filter values to taxonomy hierarchy level'),
+      '#options' => $options,
+      '#default_value' => $settings['enterprise_rel_taxonomy_level'],
+    );
+  }
+}
+
+/**
+ * Implements hook_field_attach_view_alter().
+ */
+function enterprise_rel_field_attach_view_alter(&$output, $context) {
+
+  foreach (element_children($output) as $field_name) {
+
+    $entity_type = $output[$field_name]['#entity_type'];
+    $bundle      = $output[$field_name]['#bundle'];
+
+    $info = field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $context['view_mode']);
+
+    if (!isset($info['enterprise_rel_taxonomy_level']) || $info['enterprise_rel_taxonomy_level'] == '') {
+      continue;
+    }
+
+    $level = $info['enterprise_rel_taxonomy_level'];
+
+    $element = &$output[$field_name];
+
+    $terms = array();
+    $max_level = 0;
+    if ($level != '') {
+      foreach ($element['#items'] as $delta => $item) {
+        $tid = $item['tid'];
+        $term = !empty($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($tid);
+        $terms[$term->tid] = $term;
+        if (empty($term->parent)) {
+          $terms[$term->tid]->level = 0;
+        }
+      }
+      for ($i = 1; $i <= 2; $i++) {
+        foreach ($terms as $tid => $term) {
+          if (!isset($term->level) && !empty($term->parent)) {
+            foreach ($term->parent as $ptid) {
+              if (isset($terms[$ptid]->level)) {
+                $max_level = $terms[$tid]->level = $terms[$ptid]->level+1;
+                continue;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if ($level < 0) {
+      $level = $max_level + 1 + $level;
+    }
+
+    //dsm("level: $level");
+    //dsm($terms);
+
+    foreach ($element['#items'] as $delta => $item) {
+      if ($level != '') {
+        $tid = $item['tid'];
+        if (isset($terms[$tid]->level) && $terms[$tid]->level != $level) {
+          //$element[$delta]['#access'] = FALSE;
+          unset($element['#items'][$delta]);
+          //dsm("remove $tid");
+          continue;
+        }
+      }
+    }
+  }
 }

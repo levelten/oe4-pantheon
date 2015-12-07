@@ -53,6 +53,7 @@ class enterprise_rel_handler_argument_rel_terms extends views_handler_argument_m
     $this->tids = array();
     $is_valid = 0;
 
+    /*
     $term = taxonomy_get_term_by_name('default');
     //dsm($term);
     if (!empty($term)) {
@@ -60,6 +61,7 @@ class enterprise_rel_handler_argument_rel_terms extends views_handler_argument_m
       $this->view->default_tids = $this->default_tids = array();
       $this->view->default_tids[$term->tid] = $this->default_tids[$term->tid] = $term->tid;
     }
+    */
 
     $tids = explode('+', $arg);
     //dsm($tids);
@@ -104,14 +106,24 @@ class enterprise_rel_handler_argument_rel_terms extends views_handler_argument_m
 
     $this->query->add_tag('rel_terms');
 
-
     //dsm($this->tids);
-    //dsm($this->default_tids);
 
-    // TODO: turn into patch
-    //$this->query->add_table('taxonomy_index', NULL, NULL, 'similarterms_taxonomy_index');
-    //$this->query->add_where(0, "similarterms_taxonomy_index.tid", $this->tids, 'IN');
-    //$this->query->add_table('taxonomy_index', NULL, NULL, 'rel_terms_taxonomy_index');
+    $tids = !empty($this->tids) ? $this->tids : array(0 => 0);
+    $extra = array(
+      array(
+        'field' => 'tid',
+        'value' => array($tids),
+        'operator' => 'IN',
+      )
+    );
+    $join = new views_join;
+    $join->construct('taxonomy_index','node','nid','nid', $extra, "LEFT");
+    $this->query->add_relationship('rel_terms_taxonomy_index', $join, 'taxonomy_index');
+
+    $this->query->add_where_expression(0, "rel_terms_taxonomy_index.tid IS NOT NULL OR node.universal = 1");
+
+    return;
+
 
     $tids = !empty($this->tids) ? $this->tids : array();
     $where_exp = '';
@@ -130,7 +142,7 @@ class enterprise_rel_handler_argument_rel_terms extends views_handler_argument_m
       $this->query->add_relationship('rel_terms_default_taxonomy_index', $join, 'taxonomy_index');
       $where_exp .= 'rel_terms_default_taxonomy_index.tid IS NOT NULL';
     }
-    if (1 || !empty($this->tids)) {
+    if (!empty($this->tids)) {
       $tids = !empty($this->tids) ? $this->tids : array(0 => 0);
       $extra = array(
         array(
