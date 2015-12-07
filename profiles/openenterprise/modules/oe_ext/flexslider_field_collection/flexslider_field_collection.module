@@ -102,6 +102,7 @@ function flexslider_field_collection_field_formatter_view($entity_type, $entity,
         $renderable = $field_collection->view($view_mode);
         $result[$delta] = array(
           'slide' => drupal_render($renderable),
+          'item' => $field_collection,
         );
       }
     }
