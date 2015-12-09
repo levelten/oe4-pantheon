@@ -292,7 +292,7 @@ function enterprise_style_ds_fields_info($entity_type) {
     'function' => 'enterprise_style_ds_field_date_stacked',
     'properties' => array(),
   );
-  for ($i = 1; $i <= 5; $i++) {
+  for ($i = 1; $i <= 9; $i++) {
     $fc_item['enterprise_custom_' . $i] = $bean['enterprise_custom_' . $i] = $node['enterprise_custom_' . $i] = array(
       'title' => t('Custom') . ' ' . $i,
       'field_type' => DS_FIELD_TYPE_FUNCTION,

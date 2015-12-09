@@ -16,6 +16,65 @@ function enterprise_conversion_menu() {
     'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
+
+
+
+  $items['node/%node/convwf'] = array(
+    'title' => 'Conversion WF',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+
+  /*
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  */
+
+  $items['node/%node/convwf/thankyou'] = array(
+    'title' => 'Thank you pages',
+    'page callback' => 'enterprise_conversion_premiumoffer_thankyou_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['node/%node/convwf/cta'] = array(
+    'title' => 'CTAs',
+    'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+
   $items['node/%node/cta'] = array(
     'title' => 'CTAs',
     'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
@@ -66,6 +125,17 @@ function enterprise_conversion_menu_alter(&$items) {
   //$items['node/%node/blocks']['weight'] = 1;
 }
 
+function enterprise_conversion_node_convwf_list_access($node) {
+  if (!node_access('create', $node)) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['premiumoffer'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
 /**
  * limite CTAs node tab to landingpages
  * @param $node
@@ -98,7 +168,7 @@ function enterprise_conversion_node_submission_list_access($node) {
     return FALSE;
   }
   $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
-  if ((!empty($et_settings['landingpage']) || !empty($et_settings['thankyou'])) && user_access('view intel visitor data')) {
+  if ((!empty($et_settings['landingpage']) || !empty($et_settings['thankyou']) || !empty($et_settings['premiumoffer'])) && user_access('view intel visitor data')) {
     return TRUE;
   }
   return FALSE;
@@ -112,6 +182,8 @@ function enterprise_conversion_admin_paths() {
     'node/*/cta' => 1,
     'node/*/landingpage' => 1,
     'node/*/submissions' => 1,
+    'node/*/convwf' => 1,
+    'node/*/convwf/*' => 1,
   );
   return $paths;
 }
@@ -248,13 +320,20 @@ function enterprise_conversion_tokens_alter(array &$replacements, array $context
   }
 }
 
-function enterprise_conversion_ctas_load_by_node($nid, $filters = array()) {
+function enterprise_conversion_ctas_load_by_node($node, $filters = array()) {
   $filters['types'] = (isset($filters['types'])) ? $filters['types'] : array('cta');
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'bean');
 
-  $query->fieldCondition('field_landingpage', 'target_id', $nid);
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['landingpage'])) {
+    $query->fieldCondition('field_landingpage', 'target_id', $node->nid);
+  }
+  else {
+    $query->fieldCondition('field_premiumoffer', 'target_id', $node->nid);
+  }
+
 
   if (!empty($filters['types'])) {
     $query->entityCondition('bundle', $filters['types'], 'IN');
@@ -353,6 +432,11 @@ function enterprise_conversion_form_bean_form_alter(&$form, $form_state) {
     $form['field_landingpage'][$lang]['#default_value'] = $_GET['target_id'];
     $lp_node = node_load($_GET['target_id']);
   }
+  if (!empty($_GET['po_target_id'])) {
+    $lang = $form['field_premiumoffer']['#language'];
+    $form['field_premiumoffer'][$lang]['#default_value'] = $_GET['po_target_id'];
+    $lp_node = node_load($_GET['po_target_id']);
+  }
 
   if (!empty($_GET['selectors'])) {
     $defs = explode(',', $_GET['selectors']);
@@ -391,6 +475,11 @@ function enterprise_conversion_form_node_form_alter(&$form, $form_state) {
   else if (isset($form['#node']) && ($form['#node']->type == 'webform')) {
     enterprise_conversion_webform_node_form_alter($form, $form_state);
 //dsm($form);
+  }
+
+  $lang = $form['language']['#value'];
+  if (!empty($_GET['po_target_id']) && !empty($form['field_premiumoffer'])) {
+    $form['field_premiumoffer'][$lang]['#default_value'] = array($_GET['po_target_id']);
   }
 }
 
@@ -670,6 +759,8 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
   //$form['#groups']['group_form_redirect']['#weight']
 
 
+
+
   $intel_level = intel_api_level();
   if ($intel_level != 'pro') {
     $msg = '<div class="messages warning">';
@@ -685,6 +776,7 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     $form['field_thankyou']['#disabled'] = TRUE;
     $form['field_redirect_url']['#disabled'] = TRUE;
   }
+
 }
 
 function enterprise_conversion_landingpage_node_form_validate(&$form, &$form_state) {
@@ -782,7 +874,8 @@ function enterprise_conversion_form_add_edit_button_submit(&$form, &$form_state)
   }
 
   $data = array(
-    'form'       => $form,    'form_state' => $form_state,
+    'form'       => $form,
+    'form_state' => $form_state,
     'dest'       => $_GET['q'],
     'field'      => $field,
     'field_info' => array(),

@@ -256,7 +256,7 @@ function intel_menu() {
     'access callback' => '_intel_permission_access_content_report',
     'file' => 'reports/intel.report_scorecard.inc',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
+    'weight' => 5,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
   /*

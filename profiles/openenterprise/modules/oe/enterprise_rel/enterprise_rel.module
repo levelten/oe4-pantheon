@@ -923,10 +923,17 @@ function enterprise_rel_get_entity_default_arguments($node) {
       if (!empty($entities)) {
 
         $params_key = $fa['entity_type'];
+        if (!isset($params[$params_key])) {
+          $params[$params_key] = array();
+        }
         $bundle = $fa['bundle'];
+        if (!isset($params[$params_key][$fa['bundle']])) {
+          $params[$params_key][$bundle] = array();
+        }
 
         if ($fa['entity_type'] == 'taxonomy_term') {
-          //$terms[$bundle] = enterprise_rel_get_terms_levels($entities);
+          $terms[$bundle] = enterprise_rel_get_terms_levels($entities);
+          $count = 0;
           foreach ($entities as $i => $entity) {
             if (!empty($fa['term_parent'])) {
               if (empty($entity->parent)) {
@@ -950,19 +957,34 @@ function enterprise_rel_get_entity_default_arguments($node) {
               }
             }
             else {
-              $v['title'] = $entity->name;
-              break;
+              if (count($entities) >= ($count+2)) {
+                $v = array(
+                  'title' => $entity->name,
+                  'entities' => array(
+                    $entity,
+                  )
+                );
+                $v['path_value'] = enterprise_rel_format_views_argument_string($fa['entity_type'], $v, $rv_meta['view'], $fa);
+                $params[$params_key][$bundle] = $v;
+                $v['path'] = enterprise_rel_view_path_by_params($params, $v['path_options']);
+                $args[] = $v;
+              }
+              else {
+                $v = array(
+                  'title' => $entity->name,
+                  'entities' => array(
+                    $entity,
+                  )
+                );
+                break;
+              }
             }
+            $count++;
           }
         }
         $v['path_value'] = enterprise_rel_format_views_argument_string($fa['entity_type'], $v, $rv_meta['view'], $fa);
-        if (!isset($params[$params_key])) {
-          $params[$params_key] = array();
-        }
-        if (!isset($params[$params_key][$fa['bundle']])) {
-          $params[$params_key][$fa['bundle']] = array();
-        }
-        $params[$params_key][$fa['bundle']] = $v;
+
+        $params[$params_key][$bundle] = $v;
         $v['path'] = enterprise_rel_view_path_by_params($params, $v['path_options']);
       }
     }
@@ -1097,22 +1119,7 @@ function enterprise_rel_preprocess_page(&$variables) {
   $variables['breadcrumb'] = theme('breadcrumb', array('breadcrumb' => drupal_get_breadcrumb()));
 }
 
-/**
- * Implements hook_block_info().
- *
- * This hook declares what blocks are provided by the module.
- */
-function enterprise_rel_block_info() {
-  $blocks['views_taxonomy_filter'] = array(
-    // info: The name of the block.
-    'info' => t('Views Relevant Facet Filter'),
-    // Block caching options (per role, per user, etc.)
-    // DRUPAL_CACHE_PER_ROLE is the default.
-    'cache' => DRUPAL_CACHE_PER_PAGE,
-  );
 
-  return $blocks;
-}
 
 function enterprise_rel_form_alter(&$form, &$form_state, $form_id) {
   //dsm($form_id);
@@ -1121,10 +1128,7 @@ function enterprise_rel_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function enterprise_rel_form_node_form_alter(&$form, &$form_state) {
-dsm($form);
-dsm($form_state);
   $node = $form['#node'];
-dsm($node);
   $form['options']['universal'] = array(
     '#type' => 'checkbox',
     '#title' => t('Universal add to relevant lists'),
@@ -1361,17 +1365,32 @@ function enterprise_rel_get_views_options($options = array()) {
 }
 
 /**
+ * Implements hook_block_info().
+ *
+ * This hook declares what blocks are provided by the module.
+ */
+function enterprise_rel_block_info() {
+  $blocks['views_facet_filter'] = array(
+    // info: The name of the block.
+    'info' => t('Views Facet Filter'),
+    // Block caching options (per role, per user, etc.)
+    // DRUPAL_CACHE_PER_ROLE is the default.
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+
+  return $blocks;
+}
+
+/**
  * Implements hook_block_view().
  *
  * This hook generates the contents of the blocks themselves.
  */
 function enterprise_rel_block_view($delta = '') {
-
-
-
   // The $delta parameter tells us which block is being requested.
+  $block = '';
   switch ($delta) {
-    case 'views_taxonomy_filter':
+    case 'views_facet_filter':
       $block = enterprise_rel_block_views_filter_view_block();
       break;
   }
@@ -1385,16 +1404,27 @@ function enterprise_rel_block_views_filter_view_block() {
     return '';
   }
   $f_settings = $rv_meta['settings']['filter'];
-  $block = array();
-  $block['content'] = enterprise_rel_block_views_filter_view_content($rv_meta);
-  if (empty($block['content'])) {
+
+  $content = enterprise_rel_block_views_filter_view_content($rv_meta);
+  if (empty($content)) {
     return '';
   }
+  $block = array(
+    'subject' => '',
+    'content' => array(),
+  );
+  $block['content']['#markup'] = $content;
+  $block['content']['#attached'] = array(
+    'css' => array(
+      drupal_get_path('module', 'enterprise_rel') . '/css/enterprise_rel.filter.css'
+    ),
+  );
 
   $block['subject'] = !empty($f_settings['block_title']) ?  $f_settings['block_title'] : t('Filters');
   if ($block['subject'] == '<none>') {
     $block['subject'] = '';
   }
+
   return $block;
 }
 
@@ -1422,6 +1452,9 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
     ) {
       continue;
     }
+
+    $entity_type = $fa['entity_type'];
+    $bundle = $fa['bundle'];
 
     //if ($fa['id'] != 'field_bio_target_id') {
     //  continue;
@@ -1491,100 +1524,111 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
           ),
         )
       );
+      if (empty($terms[$bundle])) {
+        $terms[$bundle] = array();
+      }
+
 
       while($row = $result->fetchObject()) {
-        //dsm($row);
-        //return;
-        $parents = taxonomy_get_parents($row->tid);
-        $value = $row->name;
-        $params['taxonomy_term'][$fa['bundle']]['entities'] = array(
-          (object) array(
-            'tid' => $row->tid,
-            'name' => $row->name,
-          ),
-        );
-        /*
-        $params_value->tid = $row->tid;
-        $params_value->name = $row->name;
-        */
-        $options = array();
+        $row->parents = taxonomy_get_parents($row->tid);
+        if (empty($row->parents)) {
+          $row->children = array();
+          $row->level = 0;
+          $vitems->rows[$row->tid] = (object)array();
+        }
+        $terms[$bundle][$row->tid] = $row;
+      }
 
-        $params_parent = array();
-        if (!empty($parents)) {
-          foreach ($parents as $p) {
-            if (empty($vitems->rows[$p->tid])) {
-              $vitems->rows[$p->tid] = (object)array();
+      //dsm($terms[$bundle]);
+
+      foreach($terms[$bundle] as $tid => $term) {
+        if (!isset($term->parents)) {
+          continue;
+        }
+        foreach ($term->parents as $p_tid => $p_term) {
+          if (!isset($terms[$bundle][$p_tid])) {
+            $p_term->parents = taxonomy_get_parents($p_tid);
+            if (empty($p_term->parents)) {
+              $p_term->children = array();
+              $p_term->level = 0;
             }
-            // initialize parent elements
-            if (empty($vitems->rows[$p->tid]->is_parent)) {
-              $vitems->rows[$p->tid]->is_parent = 1;
-              $vitems->rows[$p->tid]->rows = array();
-              if (empty($vitems->rows[$p->tid]->url) || !empty($term_parents[$fa['bundle']])) {
-                $p_params[$p_params_type][$fa['bundle']]['entities'] = array(
-                  (object) array(
-                    'tid' => $p->tid,
-                    'name' => $p->name,
-                  ),
-                );
-                if (!empty($term_parents[$fa['bundle']])) {
-                  $params_parent[$p->tid] = $p_params;
+            else {
+              foreach ($p_term->parents as $pp_tid => $pp_term) {
+                if (!isset($terms[$bundle][$pp_tid])) {
+                  $pp_term->parents = taxonomy_get_parents($pp_tid);
+                  if (empty($pp_term->parents)) {
+                    $pp_term->children = array();
+                    $pp_term->level = 0;
+                  }
+                  $terms[$bundle][$pp_term->tid] = $pp_term;
                 }
-                $p_options = array();
-                $p_path = enterprise_rel_view_path_by_params($p_params, $p_options);
-
-                $vitems->rows[$p->tid]->link = l($p->name, $p_path, $p_options);
-                $vitems->rows[$p->tid]->url = url($p_path, $p_options);
-              }
-              if (!empty($term_parents[$fa['bundle']])) {
-                $vitems->rows[$p->tid]->count = 0;
               }
             }
+            $terms[$bundle][$p_term->tid] = $p_term;
+          }
+          if (isset($terms[$bundle][$p_tid]->level)) {
+            $terms[$bundle][$tid]->level = $terms[$bundle][$p_tid]->level + 1;
+            $terms[$bundle][$tid]->ancestors = array($p_tid);
+            $terms[$bundle][$tid]->p_tid = $p_tid;
 
-            if (!empty($term_parents[$fa['bundle']]) && !empty($params_parent[$p->tid])) {
-              $params = array_merge($params, $params_parent[$p->tid]);
+
+            if ($terms[$bundle][$tid]->level == 1) {
+              if (!isset($vitems->rows[$p_tid])) {
+                $vitems->rows[$p_tid] = (object)array(
+                  'rows' => array()
+                );
+              }
+              $vitems->rows[$p_tid]->rows[$tid] = (object)array();
             }
-            $path = enterprise_rel_view_path_by_params($params, $options);
-            $vitems->rows[$p->tid]->rows[$row->tid] = (object)array(
-              'title' => $row->name,
-              'url' => url($path, $options),
-              'link' => l($row->name, $path, $options),
-              'count' => $row->count,
-            );
-            // if term is parent and parent arg exists, calculate total via aggregation
-            if (!empty($term_parents[$fa['bundle']])) {
-              $vitems->rows[$p->tid]->count += $row->count;
+            if ($terms[$bundle][$tid]->level == 2) {
+              reset($terms[$bundle][$p_tid]->parents);
+              $pp_tid = key($terms[$bundle][$p_tid]->parents);
+              $terms[$bundle][$tid]->ancestors[] = $pp_tid;
+              $terms[$bundle][$tid]->pp_tid = $pp_tid;
+
+              if (!isset($vitems->rows[$pp_tid])) {
+                $vitems->rows[$pp_tid] = (object)array(
+                  'rows' => array()
+                );
+              }
+              if (!isset($vitems->rows[$pp_tid]->rows[$p_tid])) {
+                $vitems->rows[$pp_tid]->rows[$p_tid] = (object)array(
+                  'rows' => array()
+                );
+              }
+              $vitems->rows[$pp_tid]->rows[$p_tid]->rows[$tid] = (object)array();
             }
-            //$vitems->rows[$p->tid]->count += $row->count;
-            $vitems->levels = 2;
           }
         }
-        else {
-          //dsm($row);
-          $path = enterprise_rel_view_path_by_params($params, $options);
-          // this is structured this way, because parents show up in the query data
-          if (!isset($vitems->rows[$row->tid])) {
-            $vitems->rows[$row->tid] = (object)array(
-              'title' => $row->name,
-              'url' => url($path, $options),
-              'link' => l($row->name, $path, $options),
-              //'count' => $row->count,
-            );
-/*
-            $vitems->rows[$row->tid] = (object)array();
-            $vitems->rows[$row->tid]->title = $row->name;
-            $vitems->rows[$row->tid]->url = url($path, $options);
-            $vitems->rows[$row->tid]->link = l($row->name, $path, $options);
-*/
-          }
+      }
 
-          if (empty($vitems->rows[$row->tid]->is_parent) || empty($term_parents[$fa['bundle']])) {
-            $vitems->rows[$row->tid]->count = $row->count;
-          }
+      $params_parent = array();
+      foreach($terms[$bundle] as $tid => $term) {
+        $params['taxonomy_term'][$bundle]['entities'] = array(
+          $term
+        );
+        $options = array();
+        $path = enterprise_rel_view_path_by_params($params, $options);
+        //dsm($params);
+        //dsm($path);
 
 
+        if ($term->level == 0) {
+          $v = &$vitems->rows[$term->tid];
         }
-        $vitems->count += $row->count;
-        $count++;
+        else if ($term->level == 1) {
+          $v = &$vitems->rows[$term->p_tid]->rows[$term->tid];
+        }
+        else if ($term->level == 2) {
+          $v = &$vitems->rows[$term->pp_tid]->rows[$term->p_tid]->rows[$term->tid];
+        }
+
+        $v->title = $term->name;
+        $v->link = l($term->name, $path, $options);
+        $v->url = url($path, $options);
+        if (!empty($term->count)) {
+          $v->count = $term->count;
+        }
       }
       $items[] = $vitems;
     }
@@ -1838,17 +1882,46 @@ function enterprise_rel_preprocess_views_filter(&$vars) {
 
 function enterprise_rel_preprocess_views_filter_set(&$vars) {
   //dsm($vars);
+  static $collapse_index;
+  if (!isset($collapse_index)) {
+    $collapse_index = 0;
+  }
+
+  $level = isset($vars['level']) ? $vars['level'] : 0;
+
   $rows = &$vars['rows'];
   foreach ($rows as $id => $row) {
     if (!empty($row->rows)) {
-      $rows[$id]->sub_items = theme('views_filter_view_summary', array('rows' => $row->rows, 'options' => $vars['options']));
-    }
-    if ($vars['levels'] == 2) {
-      $rows[$id]->link = "- " . $rows[$id]->link;
+      $sub_vars = array();
+      $sub_vars['level'] = $level+1;
+      $sub_vars['rows'] = $row->rows;
+      $sub_vars['options'] = $vars['options'];
+
+      $rows[$id]->sub_items = theme('views_filter_set', $sub_vars);
+
+      $dom_id = 'rel-filter-collapse-' . $collapse_index++;
+      $options = array(
+        'attributes' => array(
+          'data-toggle' => 'collapse',
+          'class' => array(
+            'collapse-toggle'
+          )
+        ),
+        'fragment' => $dom_id,
+        'external' => TRUE,
+        'html' => TRUE,
+      );
+      $rows[$id]->link = l('<i class="glyphicon glyphicon-menu-right"></i>', '', $options) . $rows[$id]->link;
+      //$rows[$id]->sub_items = '<div id="' . $dom_id . '" class="panel-collapse collapse sub-level level-' . ($level+1) . '">' . $rows[$id]->sub_items . '</div>';
+      $rows[$id]->sub_items = '<div id="' . $dom_id . '" class="panel-collapse sub-level level-' . ($level+1) . '">' . $rows[$id]->sub_items . '</div>';
     }
   }
+
+  //if () {
+
+  //}
+
   enterprise_style_preprocess_views_view_summary($vars);
-  //dsm($vars);
 }
 
 function enterprise_rel_preprocess_views_filter_view_summary(&$vars) {

@@ -103,10 +103,7 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
       $param_keys = array();
       $obj = null;
       $wrapper = entity_metadata_wrapper('node', $node);
-      if ($toks[0] == 'default-args') {
-
-      }
-      else if (count($toks) >= 2 && $toks[0] == 'field') {
+      if (count($toks) >= 2 && $toks[0] == 'field') {
         $param_keys[] = 'field';
         $param_keys[] = $fn = $toks[1];
         $param_value = array(
@@ -133,13 +130,6 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
       }
       else {
         // TODO: non field types not finished
-        $param_keys[] = $toks[0];
-        $param_keys[] = $fn = $toks[1];
-        $param_value = array(
-          'entities' => array(),
-        );
-        $options = array();
-
       }
       //dsm($toks);
       //dsm($ret_type);

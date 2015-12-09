@@ -49,6 +49,7 @@ function enterprise_rel_install() {
   foreach ($fields as $name => $def) {
     db_add_field('node', $name, $def);
     db_add_index('node', 'node_' . $name, array($name));
+
     db_add_field('node_revision', $name, $def);
   }
 }
@@ -59,8 +60,9 @@ function enterprise_rel_install() {
 function enterprise_rel_uninstall() {
   $fields = enterprise_rel_schema_fields_definition();
   foreach ($fields as $name => $def) {
-    db_drop_index('node', 'node_' . $name);
     db_drop_field('node', $name, $def);
-    db_drop_index('node_revision', 'node_' . $name);
+    db_drop_index('node', 'node_' . $name);
+
+    db_drop_field('node_revision', $name);
   }
 }
