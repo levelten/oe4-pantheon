@@ -1,9 +1,5 @@
-#block-enterprise-rel-views-facet-filter .sub-level.level-1 {
+#block-enterprise-rel-views-facet-filter .sub-level {
     padding-left: 1em;
-}
-
-#block-enterprise-rel-views-facet-filter .sub-level.level-2 {
-    padding-left: 2em;
 }
 
 #block-enterprise-rel-views-facet-filter .collapse-toggle {

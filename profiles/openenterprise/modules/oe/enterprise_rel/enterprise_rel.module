@@ -417,10 +417,16 @@ function enterprise_rel_get_field_meta_from_views_relationship($options, $relati
 function enterprise_rel_get_vocab_name_from_views_relationship($options, $relationships) {
   $name = '';
   if (!empty($options['relationship']) && !empty($relationships[$options['relationship']])) {
+
     $r = $relationships[$options['relationship']];
     if (substr($r['table'], 0, 6) == 'field_') {
       $fi = field_info_field(substr($r['field'], 0, -4));
       $name = $fi['settings']['allowed_values'][0]['vocabulary'];
+    }
+    else if ($r['table'] == 'node') {
+      if (!empty($options['validate_options']['vocabularies']) && count($options['validate_options']['vocabularies']) == 1) {
+        $name = key($options['validate_options']['vocabularies']);
+      }
     }
   }
   return $name;
@@ -1019,7 +1025,6 @@ function enterprise_rel_get_terms_levels($terms) {
 function enterprise_rel_get_rel_view_default_arguments() {
   $rv_meta = enterprise_rel_get_rel_view_meta();
   $args = array();
-  $wrapper = entity_metadata_wrapper('node', $node);
   $params = array();
   foreach ($rv_meta['_filtargs'] as $k => $fa) {
     if (empty($fa['argument'])) {
@@ -1100,8 +1105,35 @@ function enterprise_rel_preprocess_page(&$variables) {
     $path = $rv_meta['path'];
     //dsm($trail);
     $tc = count($trail);
+    $aa = 0;
     for ($ti = 2; $ti <= $tc; $ti++) {
       if (!empty($rv_meta['current']['path_args_params'][$ti - 2])) {
+        $pa_params = $rv_meta['current']['path_args_params'][$ti - 2];
+
+        if (
+          !empty($pa_params['entities'][0]->entity_type)
+          && $pa_params['entities'][0]->entity_type = 'taxonomy_term'
+        ) {
+          if (!empty($pa_params['entities'][0]->parent)) {
+            $term_anc = array();
+            $term_anc[] = taxonomy_term_load($pa_params['entities'][0]->parent[0]);
+            if (!empty($term_anc[0]->parent)) {
+              $term_anc[] = taxonomy_term_load($term_anc[0]->parent[0]);
+            }
+            if (!empty($term_anc[1]->parent)) {
+              $term_anc[] = taxonomy_term_load($term_anc[1]->parent[0]);
+            }
+            $c = 0;
+            for ($tia = count($term_anc) - 1; $tia >= 0; $tia--) {
+              $patha = $path . '/' . strtr(strtolower($term_anc[$tia]->name), ' ', '-');
+              $trail[$ti+$aa+$c] = l($term_anc[$tia]->name, $patha);
+              $c++;
+            }
+            $aa += $c;
+          }
+
+        }
+
         $label = !empty($rv_meta['current']['path_args_params'][$ti - 2]['label']) ? $rv_meta['current']['path_args_params'][$ti - 2]['label'] : 'NA';
         $path .= '/' . (!empty($rv_meta['current']['path_args_params'][$ti - 2]['path_value']) ? $rv_meta['current']['path_args_params'][$ti - 2]['path_value'] : '-');
       }
@@ -1109,7 +1141,7 @@ function enterprise_rel_preprocess_page(&$variables) {
         $label = t('All');
         $path .= '/-';
       }
-      $trail[$ti] = l($label, $path);
+      $trail[$ti+$aa] = l($label, $path);
     }
     $trail[1] = l($base_label, $rv_meta['path']);
     //dsm($trail);
@@ -1461,6 +1493,7 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
     //}
 
     //dsm("{$fa['entity_type']}: {$fa['bundle']}");
+    //dsm($fa);
     if ($fa['entity_type'] == 'taxonomy_term') {
 
       if (!empty($fa['term_parent'])) {
@@ -1630,6 +1663,7 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
           $v->count = $term->count;
         }
       }
+      //dsm($vitems);
       $items[] = $vitems;
     }
     else if (!empty($fa['field_name'])) {
@@ -1911,7 +1945,7 @@ function enterprise_rel_preprocess_views_filter_set(&$vars) {
         'external' => TRUE,
         'html' => TRUE,
       );
-      $rows[$id]->link = l('<i class="glyphicon glyphicon-menu-right"></i>', '', $options) . $rows[$id]->link;
+      $rows[$id]->link = l('<i class="glyphicon glyphicon-triangle-right"></i>', '', $options) . $rows[$id]->link;
       //$rows[$id]->sub_items = '<div id="' . $dom_id . '" class="panel-collapse collapse sub-level level-' . ($level+1) . '">' . $rows[$id]->sub_items . '</div>';
       $rows[$id]->sub_items = '<div id="' . $dom_id . '" class="panel-collapse sub-level level-' . ($level+1) . '">' . $rows[$id]->sub_items . '</div>';
     }
