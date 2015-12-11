@@ -156,6 +156,7 @@ function enterprise_rel_get_rel_view_meta($path = '') {
     return $infos[$static_key];
   }
 
+  //$info['view']->build($info['display_name']);
   $view = $info['view'];
   $display_name = $info['display_name'];
 
@@ -299,6 +300,7 @@ function enterprise_rel_get_rel_view_meta($path = '') {
    // determine any existing params from url
   $info['current'] = array(
     'path_args' => array(),
+    'path_args_validated' => array(),
     'path_query' => array(),
     'path_args_params' => array(),
     'path_query_params' => array(),
@@ -309,6 +311,8 @@ function enterprise_rel_get_rel_view_meta($path = '') {
   $cur_path = current_path();
   // if on the rel view, get any current args/filters
   if (strpos($cur_path, $info['path']) === 0) {
+    $info['view']->set_display($info['display_name']);
+    $info['view']->init_handlers();
 
     $view_path_args = explode('/', $info['path']);
     $cur_path_args = explode('/', $cur_path);
@@ -331,6 +335,11 @@ function enterprise_rel_get_rel_view_meta($path = '') {
         }
         $aq_value = $cur_path_args[$seek_arg_i];
         $info['current']['path_args'][$fa['arg_index']] = $aq_value;
+        if(!$info['view']->argument[$fa['id']]->validate_argument($aq_value)) {
+          continue;
+        }
+        $aq_value_validated = $info['view']->argument['tid_1']->get_value();
+        $info['current']['path_args_validated'][$fa['arg_index']] = $aq_value_validated;
       }
       else {
         if (empty($fa['filter']['expose']['identifier'])) {
@@ -349,15 +358,14 @@ function enterprise_rel_get_rel_view_meta($path = '') {
         );
 
         if ($fa['entity_type'] == 'taxonomy_term') {
-          if (is_numeric($aq_value)) {
-            $entity = taxonomy_term_load($aq_value);
+          if (is_numeric($aq_value_validated)) {
+            $entity = taxonomy_term_load($aq_value_validated);
           }
           else {
-            $name = $tid = strtr($aq_value, '-', ' ');
-            $entity = taxonomy_get_term_by_name($name);
+            $entity = taxonomy_get_term_by_name($aq_value_validated);
             $entity = array_shift($entity);
           }
-          //dsm($entity);
+
           if (!empty($entity)) {
             $item['entities'][] = $entity;
             $item['label'] = $entity->name;
@@ -1074,6 +1082,8 @@ function enterprise_rel_preprocess_page(&$variables) {
     return;
   }
 
+  //dsm($rv_meta);
+
   $trail = drupal_get_breadcrumb();
   $cur_path = current_path();
   $entity = menu_get_object();
@@ -1131,7 +1141,6 @@ function enterprise_rel_preprocess_page(&$variables) {
             }
             $aa += $c;
           }
-
         }
 
         $label = !empty($rv_meta['current']['path_args_params'][$ti - 2]['label']) ? $rv_meta['current']['path_args_params'][$ti - 2]['label'] : 'NA';
@@ -1464,7 +1473,16 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
 
   $f_settings = $rv_meta['settings']['filter'];
 
+  $rv_meta['view']->preview = TRUE;
+  $rv_meta['view']->pre_execute($rv_meta['current']['path_args_validated']);
+  //$rv_meta['view']->pre_execute(array('non-surgical'));
   $rv_meta['view']->build($rv_meta['display_name']);
+
+  //dsm($rv_meta);
+
+  //$rv_meta['view']->override_url = $_GET['q'];
+  //$rv_meta['view']->preview = TRUE;
+  //$rv_meta['view']->pre_execute(array($node->nid));
 
   $term_parents = array();
   $items = array();
