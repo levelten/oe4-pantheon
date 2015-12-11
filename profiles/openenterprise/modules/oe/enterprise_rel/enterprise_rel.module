@@ -314,6 +314,9 @@ function enterprise_rel_get_rel_view_meta($path = '') {
     $info['view']->set_display($info['display_name']);
     $info['view']->init_handlers();
 
+    //dsm($info['view']);
+    //dsm($info['view']->filter);
+
     $view_path_args = explode('/', $info['path']);
     $cur_path_args = explode('/', $cur_path);
 
@@ -350,6 +353,16 @@ function enterprise_rel_get_rel_view_meta($path = '') {
           continue;
         }
         $aq_value = $info['current']['path_query'][$qid] = $_GET[$qid];
+        if (is_numeric($aq_value)) {
+          $aq_value_validated = $aq_value;
+        }
+        else {
+          $form = array();
+          $values = validate_term_strings($form, array($aq_value));
+          $aq_value_validated = array_shift($aq_value_validated);
+        }
+        // TODO deal with string validators
+        //validate_term_strings(&$form, $values)
       }
       if (!isset($info['current_params'][$params_key][$fa['bundle']])) {
         $item = array(
