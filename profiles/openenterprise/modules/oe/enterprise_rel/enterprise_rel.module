@@ -341,7 +341,7 @@ function enterprise_rel_get_rel_view_meta($path = '') {
         if(!$info['view']->argument[$fa['id']]->validate_argument($aq_value)) {
           continue;
         }
-        $aq_value_validated = $info['view']->argument['tid_1']->get_value();
+        $aq_value_validated = $info['view']->argument[$fa['id']]->get_value();
         $info['current']['path_args_validated'][$fa['arg_index']] = $aq_value_validated;
       }
       else {
@@ -369,7 +369,8 @@ function enterprise_rel_get_rel_view_meta($path = '') {
           'path_value' => $aq_value,
           'entities' => array(),
         );
-
+//dsm("aq_value: $aq_value");
+//dsm($aq_value_validated);
         if ($fa['entity_type'] == 'taxonomy_term') {
           if (is_numeric($aq_value_validated)) {
             $entity = taxonomy_term_load($aq_value_validated);
@@ -378,6 +379,7 @@ function enterprise_rel_get_rel_view_meta($path = '') {
             $entity = taxonomy_get_term_by_name($aq_value_validated);
             $entity = array_shift($entity);
           }
+          //dsm($entity);
 
           if (!empty($entity)) {
             $item['entities'][] = $entity;
@@ -1308,7 +1310,7 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
       'display_name' => $a[1],
     );
     $rv_meta = enterprise_rel_get_rel_view_meta($view_id);
-    //dsm($rv_meta);
+    dsm($rv_meta);
 
     $form['enterprise_rel']['filter'] = array(
       '#type' => 'fieldset',
@@ -2041,7 +2043,6 @@ function enterprise_rel_field_formatter_settings_form_alter(&$settings_form, $co
 function enterprise_rel_field_attach_view_alter(&$output, $context) {
 
   foreach (element_children($output) as $field_name) {
-
     $entity_type = $output[$field_name]['#entity_type'];
     $bundle      = $output[$field_name]['#bundle'];
 
@@ -2086,7 +2087,7 @@ function enterprise_rel_field_attach_view_alter(&$output, $context) {
 
     //dsm("level: $level");
     //dsm($terms);
-
+dsm($element['#items']);
     foreach ($element['#items'] as $delta => $item) {
       if ($level != '') {
         $tid = $item['tid'];
