@@ -1,0 +1,303 @@
+<?php
+
+/**
+ * @file
+ * Adds fields integration with Blueimp
+ *
+ * @author kyletaylored
+ * @author Kyle Taylor <kyletaylored@gmail.com>
+ */
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * Adds the blueimp format option within the manage display form of
+ * of an image field.
+ */
+function blueimp_fields_field_formatter_info() {
+  return array(
+    'blueimp' => array(
+      'label' => t('Blueimp'),
+      'field types' => array('image', 'media'),
+      'settings' => array(
+        'display_style' => 'carousel',
+        'fullScreen' => 0,
+        'image_style' => '',
+        'thumbnail_style' => 'thumbnail',
+        'gallery_controls' => 1,
+        'stretchImages' => 0,
+        'slideshowInterval' => 5000,
+      ),
+    ),
+  );
+}
+
+// /**
+//  * Implements hook_field_formatter_info_alter().
+//  */
+// function blueimp_fields_field_formatter_info_alter(&$infos) {
+//   foreach ($infos as &$info) {
+//     // Add a settings array if no settings were found.
+//     if (!isset($info['settings']) || !is_array($info['settings'])) {
+//       $info['settings'] = array();
+//     }
+// 
+//     $info['settings'] += array(
+//       'blueimp' => array(
+//         'label' => t('Blueimp'),
+//         'field types' => array('image', 'media'),
+//         'settings' => array(
+//           'display_style' => 'carousel',
+//           'fullScreen' => 0,
+//           'image_style' => '',
+//           'gallery_controls' => 1,
+//           'stretchImages' => 0,
+//           'slideshowInterval' => 5000,
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ *
+ * Provides display settings form within the manage display page of
+ * an image field with formatter Blueimp.
+ */
+function blueimp_fields_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $form = array();
+
+  $form['display_style'] = array(
+      '#title' => t('Display Style'),
+      '#type' => 'select',
+      '#default_value' => $settings['display_style'],
+      '#options' => array(
+        'carousel' => t('Carousel'),
+        'lightbox' => t('Lightbox'),
+      ),
+  );
+
+  $form['fullScreen'] = array(
+    '#title' => t('Fullscreen'),
+    '#description' => t('Defines if the gallery should open in fullscreen mode.'),
+    '#type' => 'checkbox',
+    '#default_value' => $settings['fullScreen'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name*="display_style"]' => array('value' => 'lightbox'),
+      ),
+    ),
+  );
+
+  $image_styles = image_style_options(FALSE, PASS_THROUGH);
+  $form['image_style'] = array(
+      '#title' => t('Image style'),
+      '#type' => 'select',
+      '#default_value' => $settings['image_style'],
+      '#empty_option' => t('None (original image)'),
+      '#options' => $image_styles,
+  );
+  $form['thumbnail_style'] = array(
+      '#title' => t('Thumbnail style'),
+      '#type' => 'select',
+      '#default_value' => (!empty($settings['thumbnail_style'])) ? $settings['thumbnail_style'] : 'thumbnail',
+      '#empty_option' => t('None (original image)'),
+      '#options' => $image_styles,
+  );
+
+  $form['stretchImages'] = array(
+    '#title' => t('Stretch Images'),
+    '#description' => t('Defines if images should be stretched to fill the available space, while maintaining their aspect ratio (will only be enabled for browsers supporting background-size="contain", which excludes IE < 9). Set to "cover", to make images cover all available space (requires support for background-size="cover", which excludes IE < 9).'),
+    '#type' => 'select',
+    '#default_value' => ($settings['stretchImages']) ? $settings['stretchImages'] : 0,
+    '#options' => array(
+      0 => t('No'),
+      1 => t('Contain'),
+      2 => t('Cover'),
+    ),
+  );
+
+  $form['slideshowInterval'] = array(
+    '#title' => t('Slideshow Interval'),
+    '#description' => t('Delay in milliseconds between slides for the automatic slideshow.'),
+    '#type' => 'textfield',
+    '#default_value' => ($settings['slideshowInterval']) ? $settings['slideshowInterval'] : 5000,
+    '#element_validate' => array('element_validate_integer_positive'),
+  );
+
+  $form['gallery_controls'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable gallery controls'),
+    '#default_value' => ($settings['gallery_controls']) ? $settings['gallery_controls'] : 1,
+  );
+
+  $path = _blueimp_fields_get_bundle_path($instance);
+
+  $form['caption'] = array(
+    '#title' => t('Use image title as the caption'),
+    '#type' => 'checkbox',
+    '#default_value' => ($settings['caption']) ? $settings['caption'] : 0,
+  );
+
+  if (!empty($instance['settings'])) {
+    // If the image field doesn't have the Title field enabled, tell the user.
+    if ($instance['settings']['title_field'] == FALSE and $instance['bundle'] != 'ctools') {
+      $form['caption']['#disabled'] = TRUE;
+      $form['caption']['#description'] = t('You need to <a href="@url">enable the Title field</a> for this image field to be able use it as a caption.', array('@url' => url($path['field'], array('fragment' => 'edit-instance-settings-title-field', 'query' => array('destination' => $path['display'])))));
+      $form['caption']['#default_value'] = 0;
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ *
+ * Displays the summary of the set options of a blueimp formatted image field
+ */
+function blueimp_fields_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = array();
+
+  // Display the selected image style
+  if (!empty($settings['image_style'])) {
+    $is = t('Image style: %imagestyle', array('%imagestyle' => $settings['image_style']));
+    $ts = t('Thumbnail style: %thumbnailstyle', array('%thumbnailstyle' => $settings['thumbnail_style']));
+  }
+  else {
+    $is = t('Image style: None (original image)');
+    $is = t('Thumbnail style: None (original image)');
+  }
+
+  // Build settings summary
+  $summary[] = t('Display style: %display_style', array('%display_style' => $settings['display_style']));
+  $summary[] = t('Slideshow interval: %interval', array('%interval' => $settings['slideshowInterval']));
+  $summary[] = t('Gallery controls: %controls', array('%controls' => (!empty($settings['gallery_controls'])) ? t('Yes') : t('No')));
+  $summary[] = t('Image title as caption: %title', array('%title' => (!empty($settings['caption'])) ? t('Yes') : t('No')));
+  $summary[] = $is;
+
+  return implode('<br />', $summary);
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ *
+ * Prepares a renderable array of images and adds the neccessary JS and CSS
+ */
+function blueimp_fields_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  if (count($items) > 0) {
+
+    foreach ($items as $key => $item) {
+      if(isset($item['item'])) continue;
+      $tmp = $item;
+      $item = array();
+      $item['item'] = $tmp;
+
+      // Setup the variables for calling theme_image_style
+      if (isset($item['item']['uri'])) {
+        $item['slide']['path'] = $item['item']['uri'];
+      }
+      if (isset($display['settings']['image_style'])) {
+        $item['slide']['style_name'] = $display['settings']['image_style'];
+      }
+      if (isset($item['item']['width'])) {
+        $item['slide']['width'] = $item['item']['width'];
+      }
+      if (isset($item['item']['height'])) {
+        $item['slide']['height'] = $item['item']['height'];
+      }
+      if (isset($item['item']['alt'])) {
+        $item['slide']['alt'] = $item['item']['alt'];
+      }
+      if (isset($item['item']['title'])) {
+        $item['slide']['title'] = $item['item']['title'];
+      }
+
+      // Clone existing slide image properties.
+      $item['thumbnail'] = $item['slide'];
+
+      // Render the slide item
+      // If not style set, we have to call theme_image since theme_image_style
+      // doesn't auto-fallback to full size image
+      if (!empty($item['slide']['style_name'])) {
+        // Generate the HTML for the slide
+        // $item['slide'] = theme('image_style', $item['slide']);
+        $item['slide'] = image_style_url($item['slide']['style_name'], $item['slide']['path']);
+
+      }
+      else {
+        // Generate the HTML for the slide
+        $item['slide'] = file_create_url($item['slide']['path']);
+      }
+
+      // Render thumbnail.
+      // Check if thumbnail style is available.
+      if (!empty($display['settings']['thumbnail_style'])) {
+        // Grab thumbnail image style.
+        $item['thumbnail']['style_name'] = $display['settings']['thumbnail_style'];
+        // Generate HTML for thumbnail.
+        $item['thumbnail'] = theme('image_style', $item['thumbnail']);
+      } else {
+        // Generate HTML for thumbnail.
+        $item['thumbnail'] = theme('image', $item['thumbnail']);
+      }
+
+      // Check caption settings
+      if (isset($display['settings']['caption']) && $display['settings']['caption']) {
+        $item['caption'] = filter_xss($item['item']['title']);
+      }
+
+      $items[$key] = $item;
+    }
+
+    $element = array(
+      '#theme' => 'blueimp',
+      '#items' => $items,
+      '#settings' => $display['settings'],
+    );
+  }
+
+  dpm(libraries_get_libraries());
+  // libraries_load($name, $variant = NULL);
+  drupal_add_js(drupal_get_path('module', 'blueimp_fields') . '/blueimp_fields.js');
+
+  return $element;
+}
+
+/*
+ * Helper function for getting correct bundle for manage field/display path.
+ */
+function _blueimp_fields_get_bundle_path($instance) {
+  $entity_type = $instance['entity_type'];
+  $bundle = $instance['bundle'];
+  $field = $instance['field_name'];
+  $bundle_path = array();
+
+  switch ($entity_type) {
+    case 'bean':
+      $path['field'] = 'admin/structure/block-types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'];
+      $path['display'] = 'admin/structure/block-types/manage/' . $instance['bundle'] . '/display';
+      break;
+
+    case 'taxonomy':
+      $path['field'] = 'admin/structure/taxonomy/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'];
+      $path['display'] = 'admin/structure/taxonomy/manage/' . $instance['bundle'] . '/display';
+      break;
+
+    case 'node':
+    default:
+      $path['field'] = 'admin/structure/types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'];
+      $path['display'] = 'admin/structure/types/manage/' . $instance['bundle'] . '/display';
+      break;
+  }
+
+  return $path;
+}
