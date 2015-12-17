@@ -36,8 +36,7 @@ function theme_blueimp_gallery(&$vars) {
         ),
       );
 
-      $output .= theme('blueimp_links', $image);
-      $output .= '<a' . drupal_attributes($image['settings']['attributes']) . '>' . $image['thumbnail'] . "</a>\n";
+      $output .= theme('blueimp_links', array('image' => $image));
     }
     $output .= '</div>';
   }
@@ -49,7 +48,8 @@ function theme_blueimp_gallery(&$vars) {
  * Default theme implementation for blueimp_links
  */
 function theme_blueimp_links(&$vars) {
-  return '<a' . drupal_attributes($vars['settings']['attributes']) . '>' . $vars['thumbnail'] . "</a>\n";
+  $image = $vars['image'];
+  return '<a' . drupal_attributes($image['settings']['attributes']) . '>' . $image['thumbnail'] . "</a>\n";
 }
 
 /**

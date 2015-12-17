@@ -23,7 +23,7 @@ function blueimp_fields_field_formatter_info() {
         'display_style' => 'carousel',
         'fullScreen' => 0,
         'image_style' => '',
-        'thumbnail_style' => 'thumbnail',
+        'thumbnail_style' => 'media_thumbnail',
         'gallery_controls' => 1,
         'stretchImages' => 0,
         'slideshowInterval' => 5000,
@@ -104,7 +104,7 @@ function blueimp_fields_field_formatter_settings_form($field, $instance, $view_m
   $form['thumbnail_style'] = array(
       '#title' => t('Thumbnail style'),
       '#type' => 'select',
-      '#default_value' => (!empty($settings['thumbnail_style'])) ? $settings['thumbnail_style'] : 'thumbnail',
+      '#default_value' => (!empty($settings['thumbnail_style'])) ? $settings['thumbnail_style'] : 'media_thumbnail',
       '#empty_option' => t('None (original image)'),
       '#options' => $image_styles,
   );
