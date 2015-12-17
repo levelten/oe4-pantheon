@@ -265,9 +265,14 @@ function blueimp_fields_field_formatter_view($entity_type, $entity, $field, $ins
     );
   }
 
-  dpm(libraries_get_libraries());
-  // libraries_load($name, $variant = NULL);
-  drupal_add_js(drupal_get_path('module', 'blueimp_fields') . '/blueimp_fields.js');
+  // Load Blueimp libraries.
+  if (!blueimp_library_loaded()) {
+    libraries_load('blueimp');  
+    dpm(libraries_load('blueimp'));
+  }
+  
+  
+  $element['#attached']['js'][] = drupal_get_path('module', 'blueimp_fields') . '/blueimp_fields.js';
 
   return $element;
 }

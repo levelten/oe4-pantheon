@@ -31,6 +31,7 @@ function theme_blueimp_gallery(&$vars) {
           'attributes' => array(
             'href' => $item['slide'],
             'title' => $caption,
+            // 'data-gallery' => '',
           ),
         ),
       );
@@ -131,11 +132,11 @@ function template_process_blueimp_gallery(&$vars) {
     $vars['settings']['attributes']['id'] = str_replace('gallery', 'links', $settings['attributes']['id']);
   }
 
-  $options = $vars['settings'];
-  $options['gallery_id'] = $gallery_id;
+  $vars['settings']['gallery_id'] = $gallery_id;
+  $vars['settings']['link_id'] = $vars['settings']['attributes']['id'];
 
   // Finally, add the configuration to the page
-  blueimp_add($options);
+  blueimp_add($vars['settings']);
 }
 
 /**
@@ -163,10 +164,7 @@ function blueimp_add($vars) {
   );
 
   // Add additional options.
-  $options['slides'][] = array(
-    'gallery_id' => $vars['gallery_id'],
-    'link_id' => $vars['attributes']['id'],
-  );
+  $options['slides'][] = $vars;
 
   drupal_add_js(array('blueimp_fields' => $options), array('type' => 'setting'));
 }

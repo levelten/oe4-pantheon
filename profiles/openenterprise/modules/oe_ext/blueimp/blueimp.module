@@ -28,9 +28,6 @@ function blueimp_init() {
     ),
     'setting');
     libraries_load('blueimp');
-    drupal_add_js($module_path . '/blueimp.js');
-    drupal_add_js($module_path . '/jquery.blueimp-gallery.js');
-    drupal_add_css($module_path . '/blueimp.css');
   }
 }
 
@@ -177,15 +174,17 @@ function blueimp_libraries_info() {
     'name' => 'Blueimp',
     'vendor url' => 'https://blueimp.github.io/Gallery/',
     'download url' => 'https://github.com/blueimp/Gallery/archive/master.zip',
-    'version'=> "2.15.2",
+    'version arguments' => array(
+      'file' => 'js/jquery.blueimp-gallery.js',
+      'pattern' => '/blueimp Gallery jQuery plugin (\d+\.+\d+\.+\d+)/',
+    ),
     'files' => array(
       'js' => array(
-        'js/blueimp-gallery.min.js',
-        'js/blueimp-gallery-fullscreen.js',
+        'js/blueimp-gallery.js',
+        'js/jquery.blueimp-gallery.js',
       ),
       'css' => array(
         'css/blueimp-gallery.css',
-        'css/blueimp-gallery.min.css',
         'css/blueimp-gallery-indicator.css',
         'css/blueimp-gallery-video.css',
       ),
@@ -195,7 +194,28 @@ function blueimp_libraries_info() {
 }
 
 /**
- * Check if the Sroll Reveal library is installed.
+ * Implements hook_library().
+ *
+ * We also define Blueimp through the core library callbacks.
+ */
+function blueimp_library() {
+  $library_path = libraries_get_path('blueimp');
+
+  $libraries['blueimp'] = array(
+    'title' => 'Blueimp',
+    'website' => 'https://blueimp.github.io/Gallery/',
+    'version' => STELLARJS_VERSION,
+    'js' => array(
+      $library_path . 'js/jquery.blueimp-gallery.min.js' => array(
+        'scope' => 'footer',
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Check if the Blueimp library is installed.
  *
  * @return
  *   A boolean indicating the installed status.
@@ -210,7 +230,7 @@ function blueimp_installed() {
 }
 
 /**
- * Check if the Scroll Reveal library has been loaded.
+ * Check if the Blueimp library has been loaded.
  *
  * @return
  *   A boolean indicating the loaded status.

@@ -14,10 +14,17 @@ var Drupal = Drupal || {};
         attach: function(context, settings) {
 
             window.console.log(settings);
+            window.console.log(typeof blueimp);
 
-            if (blueimp && settings.blueimp_fields && settings.blueimp_fields.slides) {
+            if (settings.blueimp_fields && settings.blueimp_fields.slides) {
 
-                document.getElementById('links').onclick = function(event) {
+                var slides = settings.blueimp_fields.slides;
+
+                for (var i = slides.length - 1; i >= 0; i--) {
+                    window.console.log(slides[i]);
+                }
+
+                document.getElementById('blueimp-links-1').onclick = function(event) {
                     event = event || window.event;
                     var target = event.target || event.srcElement,
                         link = target.src ? target.parentNode : target,
@@ -30,8 +37,8 @@ var Drupal = Drupal || {};
                 };
 
                 blueimp.Gallery(
-                    document.getElementById('links').getElementsByTagName('a'), {
-                        container: '#blueimp-gallery-carousel',
+                    document.getElementById('blueimp-links-1').getElementsByTagName('a'), {
+                        container: '#blueimp-gallery-1',
                         carousel: true
                     }
                 );
@@ -39,6 +46,7 @@ var Drupal = Drupal || {};
             } else {
                 window.console.log("Something is wrong with the Blueimp gallery settings.");
             }
+            // var gallery = $('#blueimp-gallery-1').data('gallery');
 
         }
     };
