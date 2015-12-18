@@ -10,14 +10,15 @@ var Drupal = Drupal || {};
 (function($, Drupal) {
     "use strict";
 
-    function blueimp_lightbox(link_id) {
+    function blueimp_lightbox(link_id, widget_container) {
         document.getElementById(link_id).onclick = function(event) {
             event = event || window.event;
             var target = event.target || event.srcElement,
                 link = target.src ? target.parentNode : target,
                 options = {
                     index: link,
-                    event: event
+                    event: event,
+                    container: "#".widget_container,
                 },
                 links = this.getElementsByTagName('a');
             blueimp.Gallery(links, options);
