@@ -10,15 +10,14 @@
 function enterprise_gallery_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance:
-  // 'bean-enterprise_slideshow_image-field_slideshow_image'.
-  $field_instances['bean-enterprise_slideshow_image-field_slideshow_image'] = array(
-    'bundle' => 'enterprise_slideshow_image',
+  // Exported field_instance: 'bean-enterprise_gallery-field_gallery_image'.
+  $field_instances['bean-enterprise_gallery-field_gallery_image'] = array(
+    'bundle' => 'enterprise_gallery',
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
-        'label' => 'above',
+        'label' => 'hidden',
         'module' => 'slick_fields',
         'settings' => array(
           'asnavfor_auto' => 0,
@@ -27,7 +26,7 @@ function enterprise_gallery_field_default_field_instances() {
           'aspect_ratio' => '',
           'cache' => '',
           'color_field' => '',
-          'colorbox_style' => 'full-0-lg',
+          'colorbox_style' => '',
           'conditions' => array(),
           'current_display' => 'main',
           'current_view_mode' => 'default',
@@ -37,7 +36,7 @@ function enterprise_gallery_field_default_field_instances() {
           'grid_medium' => '',
           'grid_small' => '',
           'iframe_lazy' => FALSE,
-          'image_style' => 'enterprise_slideshow_full',
+          'image_style' => '',
           'lightbox_ready' => FALSE,
           'linked_field' => array(
             'advanced' => array(
@@ -56,8 +55,8 @@ function enterprise_gallery_field_default_field_instances() {
           'nested_optionset' => '',
           'nested_slick' => FALSE,
           'nested_style' => '',
-          'optionset' => 'slideshow_normal',
-          'optionset_thumbnail' => 'slideshow_normal',
+          'optionset' => 'default',
+          'optionset_thumbnail' => '',
           'overridables' => array(
             'arrows' => 0,
             'autoplay' => 0,
@@ -70,23 +69,23 @@ function enterprise_gallery_field_default_field_instances() {
           'picture_ready' => FALSE,
           'picture_style' => '',
           'preserve_keys' => FALSE,
-          'skin' => 'classic',
+          'skin' => '',
           'skin_arrows' => '',
           'skin_dots' => '',
-          'skin_thumbnail' => 'classic',
+          'skin_thumbnail' => '',
           'slide_caption' => array(
             'alt_field' => 0,
-            'title_field' => 'title_field',
+            'title_field' => 0,
           ),
           'slide_classes' => '',
           'slide_image' => '',
-          'slide_layout' => 'bottom',
+          'slide_layout' => '',
           'slide_link' => '',
           'slide_overlay' => array(),
           'slide_title' => '',
           'thumbnail_caption' => '',
           'thumbnail_hover' => 0,
-          'thumbnail_style' => 'media_thumbnail',
+          'thumbnail_style' => '',
           'type' => '',
           'use_ajax' => FALSE,
           'view_mode' => '',
@@ -96,7 +95,7 @@ function enterprise_gallery_field_default_field_instances() {
         'weight' => 0,
       ),
       'slick_carousel' => array(
-        'label' => 'above',
+        'label' => 'hidden',
         'module' => 'slick_fields',
         'settings' => array(
           'asnavfor_auto' => 0,
@@ -105,12 +104,8 @@ function enterprise_gallery_field_default_field_instances() {
           'aspect_ratio' => '',
           'cache' => '',
           'color_field' => '',
-          'colorbox_style' => 'full-0-lg',
-          'conditions' => array(
-            0 => array(
-              'condition' => '',
-            ),
-          ),
+          'colorbox_style' => '',
+          'conditions' => array(),
           'current_display' => 'main',
           'current_view_mode' => 'slick_carousel',
           'field_delimiter' => '',
@@ -119,7 +114,7 @@ function enterprise_gallery_field_default_field_instances() {
           'grid_medium' => '',
           'grid_small' => '',
           'iframe_lazy' => FALSE,
-          'image_style' => 'enterprise_slideshow_full',
+          'image_style' => 'full-0-lg',
           'lightbox_ready' => FALSE,
           'linked_field' => array(
             'advanced' => array(
@@ -178,7 +173,7 @@ function enterprise_gallery_field_default_field_instances() {
         'weight' => 0,
       ),
       'slick_gallery' => array(
-        'label' => 'above',
+        'label' => 'hidden',
         'module' => 'slick_fields',
         'settings' => array(
           'asnavfor_auto' => 1,
@@ -187,7 +182,7 @@ function enterprise_gallery_field_default_field_instances() {
           'aspect_ratio' => '',
           'cache' => '',
           'color_field' => '',
-          'colorbox_style' => 'full-0-lg',
+          'colorbox_style' => '',
           'conditions' => array(),
           'current_display' => 'main',
           'current_view_mode' => 'slick_gallery',
@@ -197,7 +192,7 @@ function enterprise_gallery_field_default_field_instances() {
           'grid_medium' => '',
           'grid_small' => '',
           'iframe_lazy' => FALSE,
-          'image_style' => 'large-0-lg',
+          'image_style' => 'full-0-lg',
           'lightbox_ready' => FALSE,
           'linked_field' => array(
             'advanced' => array(
@@ -230,10 +225,10 @@ function enterprise_gallery_field_default_field_instances() {
           'picture_ready' => FALSE,
           'picture_style' => '',
           'preserve_keys' => FALSE,
-          'skin' => 'default',
+          'skin' => 'classic',
           'skin_arrows' => '',
           'skin_dots' => '',
-          'skin_thumbnail' => 'default',
+          'skin_thumbnail' => 'classic',
           'slide_caption' => array(
             'alt_field' => 0,
             'title_field' => 'title_field',
@@ -259,7 +254,7 @@ function enterprise_gallery_field_default_field_instances() {
     'ds_extras_field_template' => '',
     'enterprise_edit_form_display' => '',
     'entity_type' => 'bean',
-    'field_name' => 'field_slideshow_image',
+    'field_name' => 'field_gallery_image',
     'label' => 'Image',
     'required' => 0,
     'settings' => array(
@@ -267,7 +262,7 @@ function enterprise_gallery_field_default_field_instances() {
       'default_image' => 0,
       'file_directory' => '',
       'file_extensions' => 'png gif jpg jpeg',
-      'max_filesize' => '10 MB',
+      'max_filesize' => '',
       'max_resolution' => '',
       'min_resolution' => '',
       'title_field' => 1,
