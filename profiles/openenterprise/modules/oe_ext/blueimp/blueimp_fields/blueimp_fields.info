@@ -1,6 +1,0 @@
-name = Blueimp Fields
-description = Adds a display mode in Fields for Blueimp
-core = 7.x
-package = Blueimp
-
-dependencies[] = blueimp
