@@ -19,7 +19,7 @@ function enterprise_gallery_slick_default_presets() {
   $preset->skin = 'default';
   $preset->options = array(
     'general' => array(
-      'normal' => 'full-0-lg',
+      'normal' => 'enterprise_slideshow_full',
       'thumbnail' => 'media_thumbnail',
       'template_class' => '',
       'goodies' => array(
@@ -89,8 +89,8 @@ function enterprise_gallery_slick_default_presets() {
   $preset->skin = 'default';
   $preset->options = array(
     'general' => array(
-      'normal' => 'enterprise_slideshow_full',
-      'thumbnail' => 'medium',
+      'normal' => 'media_thumbnail',
+      'thumbnail' => '',
       'template_class' => '',
       'goodies' => array(
         'arrow-down' => 0,
@@ -160,7 +160,7 @@ function enterprise_gallery_slick_default_presets() {
   $preset->options = array(
     'general' => array(
       'normal' => 'enterprise_slideshow_full',
-      'thumbnail' => 'medium',
+      'thumbnail' => 'media_thumbnail',
       'template_class' => '',
       'goodies' => array(
         'arrow-down' => 0,
@@ -230,7 +230,7 @@ function enterprise_gallery_slick_default_presets() {
   $preset->options = array(
     'general' => array(
       'normal' => 'enterprise_slideshow_full',
-      'thumbnail' => 'medium',
+      'thumbnail' => 'media_thumbnail',
       'template_class' => '',
       'goodies' => array(
         'arrow-down' => 0,
