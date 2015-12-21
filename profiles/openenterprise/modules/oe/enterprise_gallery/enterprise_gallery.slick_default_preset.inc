@@ -63,7 +63,7 @@ function enterprise_gallery_slick_default_presets() {
       'speed' => 500,
       'swipe' => TRUE,
       'swipeToSlide' => FALSE,
-      'edgeFriction' => 0.34999999999999997779553950749686919152736663818359375,
+      'edgeFriction' => 0.35,
       'touchMove' => TRUE,
       'touchThreshold' => 5,
       'useCSS' => TRUE,
@@ -89,7 +89,7 @@ function enterprise_gallery_slick_default_presets() {
   $preset->skin = 'default';
   $preset->options = array(
     'general' => array(
-      'normal' => 'enterprise_slideshow_full',
+      'normal' => 'media_thumbnail',
       'thumbnail' => 'medium',
       'template_class' => '',
       'goodies' => array(
@@ -112,7 +112,7 @@ function enterprise_gallery_slick_default_presets() {
       'arrows' => TRUE,
       'prevArrow' => '<button type="btn btn-primary" data-role="none" class="slick-prev" aria-label="previous">Previous</button>',
       'nextArrow' => '<button type="btn btn-primary" data-role="none" class="slick-next" aria-label="next">Next</button>',
-      'centerMode' => FALSE,
+      'centerMode' => TRUE,
       'centerPadding' => '50px',
       'dots' => FALSE,
       'dotsClass' => 'slick-dots',
@@ -133,7 +133,7 @@ function enterprise_gallery_slick_default_presets() {
       'speed' => 500,
       'swipe' => TRUE,
       'swipeToSlide' => FALSE,
-      'edgeFriction' => 0.34999999999999997779553950749686919152736663818359375,
+      'edgeFriction' => 0.35,
       'touchMove' => TRUE,
       'touchThreshold' => 5,
       'useCSS' => TRUE,
@@ -159,8 +159,8 @@ function enterprise_gallery_slick_default_presets() {
   $preset->skin = 'default';
   $preset->options = array(
     'general' => array(
-      'normal' => 'enterprise_slideshow_full',
-      'thumbnail' => 'medium',
+      'normal' => 'full-0-lg',
+      'thumbnail' => 'media_thumbnail',
       'template_class' => '',
       'goodies' => array(
         'arrow-down' => 0,
@@ -171,7 +171,7 @@ function enterprise_gallery_slick_default_presets() {
       'arrow_down_offset' => '',
     ),
     'settings' => array(
-      'mobileFirst' => FALSE,
+      'mobileFirst' => TRUE,
       'asNavFor' => '',
       'accessibility' => TRUE,
       'adaptiveHeight' => FALSE,
@@ -203,7 +203,7 @@ function enterprise_gallery_slick_default_presets() {
       'speed' => 500,
       'swipe' => TRUE,
       'swipeToSlide' => FALSE,
-      'edgeFriction' => 0.34999999999999997779553950749686919152736663818359375,
+      'edgeFriction' => 0.35,
       'touchMove' => TRUE,
       'touchThreshold' => 5,
       'useCSS' => TRUE,
@@ -273,7 +273,7 @@ function enterprise_gallery_slick_default_presets() {
       'speed' => 500,
       'swipe' => TRUE,
       'swipeToSlide' => FALSE,
-      'edgeFriction' => 0.34999999999999997779553950749686919152736663818359375,
+      'edgeFriction' => 0.35,
       'touchMove' => TRUE,
       'touchThreshold' => 5,
       'useCSS' => TRUE,

@@ -197,7 +197,7 @@ function enterprise_gallery_field_default_field_instances() {
           'grid_medium' => '',
           'grid_small' => '',
           'iframe_lazy' => FALSE,
-          'image_style' => 'enterprise_slideshow_full',
+          'image_style' => 'large-0-lg',
           'lightbox_ready' => FALSE,
           'linked_field' => array(
             'advanced' => array(
