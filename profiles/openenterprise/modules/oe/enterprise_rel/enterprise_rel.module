@@ -29,6 +29,29 @@ include_once ('enterprise_rel.ds_api.inc');
  *   * rel-view/taxonomy/term/1?rel_context=view:enterprise_blog:main
  */
 
+
+function enterprise_rel_ajax_callback($js, $terms = '', $content = '') {
+  // If the nojs didn't get changed to ajax, the user has no javascript.
+  // Send them to the regular node page instead.
+  if ($js == 'nojs') {
+    drupal_goto('node/' . $node->nid);
+  }
+
+  // Get the render array for the node.
+  $build = node_view($node);
+
+  // Render the node into html.
+  $html = render($build);
+
+  // Prepare an ajax command to insert the node html into our ajax wrapper.
+  $commands = array();
+  $commands[] = ajax_command_html('#mymodule-ajax-wrapper', $html);
+
+  // Render the commands into JSON and print them.
+  print ajax_render($commands);
+  exit;  // Exit so Drupal doesn't have a chance to build a whole page.
+}
+
 function enterprise_rel_entity_context($path = '') {
   $returns = &drupal_static(__FUNCTION__, array());
   if (isset($returns[$path])) {
@@ -1173,6 +1196,35 @@ function enterprise_rel_preprocess_page(&$variables) {
 
   drupal_set_breadcrumb($trail);
   $variables['breadcrumb'] = theme('breadcrumb', array('breadcrumb' => drupal_get_breadcrumb()));
+
+/*
+
+  $view = views_get_view('enterprise_blog_blocks');
+  $view->set_display('related');
+  $view->set_use_ajax(TRUE);
+  //$view->set_arguments(array());
+
+  $settings = array(
+    'views' => array(
+      'ajax_path' => url('views/ajax'),
+      'ajaxViews' => array(
+        array(
+          'view_name' => $view->name,
+          'view_display_id' => $view->current_display,
+          'view_args' => check_plain(implode('/', $view->args)),
+          'view_path' => check_plain($_GET['q']),
+          'view_base_path' => $view->get_path(),
+          'view_dom_id' => 1,
+          //'pager_element' => $view->pager['element'],
+        ),
+      ),
+    ),
+  );
+  drupal_add_js($settings, 'setting');
+  views_add_js('ajax_view');
+
+*/
+
 }
 
 
@@ -1602,16 +1654,27 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
           $row->level = 0;
           $vitems->rows[$row->tid] = (object)array();
         }
+        else {
+          foreach ($row->parents as $p_tid => $p_term) {
+            $p_term->parents = taxonomy_get_parents($p_tid);
+            if (empty($p_term->parents)) {
+              $p_term->children = array();
+              $p_term->level = 0;
+              $vitems->rows[$p_tid] = (object)array();
+            }
+            $terms[$bundle][$p_tid] = $p_term;
+          }
+        }
         $terms[$bundle][$row->tid] = $row;
       }
 
-      //dsm($terms[$bundle]);
-
-      foreach($terms[$bundle] as $tid => $term) {
+      // user &$term to force itteration over items added in loop
+      foreach($terms[$bundle] as $tid => &$term) {
         if (!isset($term->parents)) {
           continue;
         }
         foreach ($term->parents as $p_tid => $p_term) {
+          /*
           if (!isset($terms[$bundle][$p_tid])) {
             $p_term->parents = taxonomy_get_parents($p_tid);
             if (empty($p_term->parents)) {
@@ -1632,6 +1695,7 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
             }
             $terms[$bundle][$p_term->tid] = $p_term;
           }
+          */
           if (isset($terms[$bundle][$p_tid]->level)) {
             $terms[$bundle][$tid]->level = $terms[$bundle][$p_tid]->level + 1;
             $terms[$bundle][$tid]->ancestors = array($p_tid);
@@ -1668,16 +1732,12 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
         }
       }
 
-      $params_parent = array();
-      foreach($terms[$bundle] as $tid => $term) {
+      foreach($terms[$bundle] as $tid => &$term) {
         $params['taxonomy_term'][$bundle]['entities'] = array(
           $term
         );
         $options = array();
         $path = enterprise_rel_view_path_by_params($params, $options);
-        //dsm($params);
-        //dsm($path);
-
 
         if ($term->level == 0) {
           $v = &$vitems->rows[$term->tid];
@@ -1696,6 +1756,7 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
           $v->count = $term->count;
         }
       }
+
       //dsm($vitems);
       $items[] = $vitems;
     }
@@ -2087,7 +2148,7 @@ function enterprise_rel_field_attach_view_alter(&$output, $context) {
 
     //dsm("level: $level");
     //dsm($terms);
-dsm($element['#items']);
+//dsm($element['#items']);
     foreach ($element['#items'] as $delta => $item) {
       if ($level != '') {
         $tid = $item['tid'];
