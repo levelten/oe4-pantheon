@@ -1,0 +1,16 @@
+diff --git a/includes/bean.pages.inc b/includes/bean.pages.inc
+index 1676a52..a54e06c 100644
+--- a/includes/bean.pages.inc
++++ b/includes/bean.pages.inc
+@@ -10,8 +10,10 @@
+  */
+ function bean_view_page(Bean $bean) {
+   $title = $bean->label() ? $bean->label() : $bean->adminTitle();
++  $view_mode = ($bean->view_mode) ? $bean->view_mode : 'default';
+   drupal_set_title($title);
+-  return bean_view($bean);
++
++  return bean_view($bean, $view_mode);
+ }
+ 
+ /**
