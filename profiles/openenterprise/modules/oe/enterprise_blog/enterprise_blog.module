@@ -161,7 +161,7 @@ function enterprise_blog_enterprise_apps_config_info() {
       'visibility_presets' => $visibility,
     ),
     'views:enterprise_blog_blocks-related' => array(
-      'description' => $display_desc['related'],
+      'description' => $display_desc['rel'],
       'default' => array(
         'regions' => array('content'),
         'visibility_presets' => array('enterprise_blog_content_type'),

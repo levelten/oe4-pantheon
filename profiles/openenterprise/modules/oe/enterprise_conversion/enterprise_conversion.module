@@ -1655,7 +1655,7 @@ function enterprise_conversion_enterprise_apps_config_info() {
       'visibility_presets' => $visibility_presets,
     );
     $structures['enterprise_conversion']['blocks']['views:enterprise_blog_blocks-related'] = array(
-      'description' => $display_desc['blog:related'],
+      'description' => $display_desc['blog:rel'],
       'default' => array(
         'regions' => array('content'),
         'visibility_presets' => array('enterprise_thankyou_content_type'),
