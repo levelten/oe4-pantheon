@@ -778,7 +778,7 @@ function cta_block_view($delta = '') {
     //unset($block['content']['#markup']);
   }
 
-  $block = cta_process_ga_events($block, $selection);
+  $block = cta_block_process_ga_events($block, $selection);
   
   // add contextual link to select CTA
   $contextual_links = array(
@@ -811,18 +811,34 @@ function cta_block_view($delta = '') {
 
   // allow other modules to alter data
   drupal_alter('cta_block_view', $block, $selector, $selection);
+
   return $block;
 }
 
-function cta_process_ga_events($block, $selection) {
-//dsm($block);
+function cta_block_process_ga_events($block, $selection) {
+  //dsm($block);
+  $js = cta_process_ga_events($selection, $block['set']);
+  if (!$js) {
+    return $block;
+  }
+  $block['content']['#attached'] = array(
+    'js' => array(array(
+      'data' => $js,
+      'type' => 'setting'
+    ),
+    )
+  );
+  return $block;
+}
+
+function cta_process_ga_events($selection, $set = 'bean') {
 //dsm($selection);
   if (!isset($selection['meta']['data']['ga_event']) || !module_exists('intel') || (intel_api_level() != 'pro')) {
-    return $block;
+    return FALSE;
   }
   $defs = $ga = $selection['meta']['data']['ga_event'];
   if (empty($ga['track'])) {
-    return $block;
+    return FALSE;
   }
 
   $evtDef = array(
@@ -846,7 +862,7 @@ function cta_process_ga_events($block, $selection) {
   $defs['display']['selector'] = 'body';
   $defs['display']['noninteraction'] = TRUE;
 
-  if ($block['set'] == 'bean') {
+  if ($set == 'bean') {
     $ga_event_click = $defs['click'];
     $action = $selection['bean']->label;
     if ($selection['meta']['list_visibility'] == 0) {
@@ -869,7 +885,7 @@ function cta_process_ga_events($block, $selection) {
     $evtDef['selectorFilter'] = $defs['click']['selector_filter'] = ':first';
     $evtDef['cid'] = $defs['click']['cid'] = $selection['bean']->delta;
   }
-  else if ($block['set'] == 'block') {
+  else if ($set == 'block') {
     // check if block contains custom settings
     if (isset($block['content']['cta']['ga_event'])) {
       $cg = $block['content']['cta']['ga_event'];
@@ -922,16 +938,10 @@ function cta_process_ga_events($block, $selection) {
         ),
       ),
     );
-    $block['content']['#attached'] = array(
-        'js' => array(array(
-          'data' => $js,
-          'type' => 'setting'
-        ),
-      )
-    );
+    return $js;
   }
 //dsm($block);
-  return $block;
+  return FALSE;
 }
 
 //function cta_render($type, $delta, $module) {
@@ -1034,6 +1044,7 @@ function cta_selection_load($path, $selector, $load_object = FALSE, $load_meta =
       }
     }
   }
+
   return $selection;
 }
 
@@ -1499,6 +1510,7 @@ function _cta_is_true($var) {
 
 function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
   if (($bean->type == 'cta') && (isset($bean->field_body))) {
+//dsm($bean);
     $body = '';
     $lang = !empty($bean->language) ? $bean->language : LANGUAGE_NONE;
     $link_options = array('html' => TRUE);
@@ -1541,6 +1553,14 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
 
     if ($body) {
       $bean->content['field_body'][0]['#markup'] = $body;
+      $selection = array(
+        'meta' => $bean->cta,
+      );
+
+      // TODO
+      //$js = cta_process_ga_events($bean->cta, 'bean');
+      //dsm($js);
+//
     }
 
   }

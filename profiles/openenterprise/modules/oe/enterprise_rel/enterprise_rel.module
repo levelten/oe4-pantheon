@@ -1046,21 +1046,29 @@ function enterprise_rel_get_entity_default_arguments($node) {
   return $args;
 }
 
-function enterprise_rel_get_terms_levels($terms) {
+function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0) {
   $ret = array();
+  $to = array();
   foreach ($terms as $term) {
-    $ret[$term->tid] = $term;
+
     if (empty($term->parent)) {
+      $ret[$term->tid] = $term;
       $ret[$term->tid]->level = 0;
+    }
+    else {
+      $to[$term->tid] = $term;
     }
   }
   for ($i = 1; $i <= 3; $i++) {
-    foreach ($terms as $tid => $term) {
-      if (!isset($terms[$tid]->level)) {
-        foreach ($term->parent as $p_tid) {
-          if (!empty($terms[$p_tid]->level)) {
-            $terms[$tid]->level = $terms[$p_tid]->level + 1;
+    foreach ($to as $tid => $term) {
+      foreach ($term->parent as $p_tid) {
+        if (isset($ret[$p_tid]->level)) {
+          $ret[$tid] = $term;
+          $ret[$tid]->level = $ret[$p_tid]->level + 1;
+          if ($ret[$tid]->level > $bottom_level) {
+            $bottom_level = $ret[$tid]->level;
           }
+          unset($to[$tid]);
         }
       }
     }

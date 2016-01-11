@@ -162,3 +162,12 @@ function enterprise_rel_views_data() {
 
   return $data;
 }
+
+function enterprise_rel_views_plugins_alter(&$plugins) {
+  //dsm($plugins);
+  $p = &$plugins['argument default']['taxonomy_tid'];
+  $p['handler'] = 'enterprise_rel_views_plugin_argument_default_taxonomy_tid';
+  $p['file'] = 'enterprise_rel_views_plugin_argument_default_taxonomy_tid.inc';
+  $p['path'] = drupal_get_path('module', 'enterprise_rel');
+  //dsm($plugins);
+}
