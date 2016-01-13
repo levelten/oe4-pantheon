@@ -37,10 +37,23 @@ function enterprise_rel_token_info() {
 
   $info['tokens']['node']['rel-view']['path'] = array(
     'name' => t('Path to relevant view'),
-    'description' => t("Formats relevant page uris. Does not includes base_path."),
+    'description' => t("Provides path to rel-view. Does not includes base_path. Example: blog/test/author"),
     'type' => 'rel-view',
   );
 
+  $info['tokens']['node']['rel-view']['path-args'] = array(
+    'name' => t('Contextual arguments'),
+    'description' => t("Provides the contextual argument path elements to filter for a specific node. E.g. same as path without the view base path element. Example: test/author"),
+    'type' => 'rel-view',
+  );
+
+  $info['tokens']['node']['rel-view']['dyn-path'] = array(
+    'name' => t('Path to relevant view'),
+    'description' => t("Provides the to translate rel-view url. E.g. rel-view/taxonomy/term/1"),
+    'type' => 'rel-view',
+  );
+
+  /*
   $info['tokens']['node']['rel-view']['path']['default-args'] = array(
     'name' => t('Path with all default args to relevant view'),
     'description' => t("Formats relevant page uris. Does not includes base_path."),
@@ -71,6 +84,7 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
 
   $ret_types = array(
     'path' => 'path',
+    'path-args' => 'path-args',
     'path-value' => 'path-value',
     'dyn-path' => 'dyn-path',
   );

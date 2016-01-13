@@ -6,30 +6,6 @@
 include_once ('enterprise_rel.ds_api.inc');
 //include_once 'enterprise_rel.tokens.inc';
 
-/*
- * Url paterns
- *
- * rel-view/taxonomy/term/[tid|name]
- * rel-view/taxonomy/[vocab name]/[tid|name]
- * rel-view/node/[nid]
- * rel-view/field/[field name]/[value]
- *
- * contextual arguments (arg 1)
- * 2 methods, as arg 1 or query params: *
- *   * arg 1 - rel-view/[context id]/...
- *   * query - rel-view/...?rel_context=[context id]
- *
- * context id formats:
- *   * by content type = node:[content_type]
- *   * by entity = entity:[entity_type]:[bundle]
- *   * by view = view:[view_name]:[display_name]
- *
- * Examples
- *   * rel-view/node:enterprise_blog/taxonomy/term/1
- *   * rel-view/taxonomy/term/1?rel_context=view:enterprise_blog:main
- */
-
-
 function enterprise_rel_ajax_callback($js, $terms = '', $content = '') {
   // If the nojs didn't get changed to ajax, the user has no javascript.
   // Send them to the regular node page instead.
@@ -1046,34 +1022,51 @@ function enterprise_rel_get_entity_default_arguments($node) {
   return $args;
 }
 
-function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0) {
-  $ret = array();
-  $to = array();
-  foreach ($terms as $term) {
+function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = array()) {
+  $ct = &drupal_static(__FUNCTION__, array());
+  //dsm($ct);
 
+  $to = array();
+  foreach ($terms as $i => $term) {
     if (empty($term->parent)) {
-      $ret[$term->tid] = $term;
-      $ret[$term->tid]->level = 0;
+      $terms[$i]->level = 0;
     }
     else {
-      $to[$term->tid] = $term;
+      $to[$i] = $term;
     }
+    $ct[$term->tid] = $terms[$term->tid];
   }
-  for ($i = 1; $i <= 3; $i++) {
-    foreach ($to as $tid => $term) {
+  for ($j = 0; $j <= 4; $j++) {
+    foreach ($to as $i => $term) {
+      $tid = $term->tid;
       foreach ($term->parent as $p_tid) {
-        if (isset($ret[$p_tid]->level)) {
-          $ret[$tid] = $term;
-          $ret[$tid]->level = $ret[$p_tid]->level + 1;
-          if ($ret[$tid]->level > $bottom_level) {
-            $bottom_level = $ret[$tid]->level;
+        if (!isset($ct[$p_tid])) {
+          $ct[$p_tid] = taxonomy_term_load($p_tid);
+          if (empty($ct[$p_tid]->parent)) {
+            $ct[$p_tid]->level = 0;
+          }
+          else {
+            $to[$p_tid] = $ct[$p_tid];
+          }
+          if (!empty($options['fill_parents'])) {
+            $terms[$p_tid] = $ct[$p_tid];
+          }
+        }
+        if (isset($ct[$p_tid]->level)) {
+          $ct[$tid]->level = $ct[$p_tid]->level + 1;
+          if (isset($terms[$i]->tid) || !empty($options['fill_parents'])) {
+            $terms[$i]->level = $ct[$tid]->level;
+            if ($terms[$i]->level > $bottom_level) {
+              $bottom_level = $terms[$i]->level;
+            }
           }
           unset($to[$tid]);
         }
+
       }
     }
   }
-  return $ret;
+  return $terms;
 }
 
 function enterprise_rel_get_rel_view_default_arguments() {
@@ -1245,6 +1238,7 @@ function enterprise_rel_form_alter(&$form, &$form_state, $form_id) {
 
 function enterprise_rel_form_node_form_alter(&$form, &$form_state) {
   $node = $form['#node'];
+  $settings = variable_get('enterprise_rel_entity_settings_node__' . $node->type, array());
   $form['options']['universal'] = array(
     '#type' => 'checkbox',
     '#title' => t('Universal add to relevant lists'),
@@ -1255,6 +1249,46 @@ function enterprise_rel_form_node_form_alter(&$form, &$form_state) {
     '#title' => t('Hide in section lists'),
     '#default_value' => !empty($node->rel_view_hide) ? $node->rel_view_hide : 0,
   );
+
+  if (!empty($settings['inherit']['ref_field'])) {
+    //dsm($form);
+    //dsm($node);
+    //dsm($settings);
+    $ref_field_weight = !empty($form[$settings['inherit']['ref_field']]['#weight']) ? $form[$settings['inherit']['ref_field']]['#weight'] : 0;
+
+    $form['rel_inherit'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Inherit relevancy settings from referenced %ref_type', array(
+        '%ref_type' => $form[$settings['inherit']['ref_field']][LANGUAGE_NONE]['#title'],
+      )),
+      '#default_value' => !empty($node->rel_inherit) ? $node->$node->rel_inherit : 1,
+      '#weight' => $ref_field_weight + 0.1,
+      '#prefix' => '<div class="display_sidebar">',
+      '#suffix' => '</div>',
+    );
+  }
+}
+
+function enterprise_rel_node_presave($node) {
+  if (!empty($node->rel_inherit)) {
+    $settings = variable_get('enterprise_rel_entity_settings_node__' . $node->type, array());
+
+    $ref_field = $settings['inherit']['ref_field'];
+    $lang = $node->language;
+    if (empty($node->{$ref_field}[$lang][0])) {
+      drupal_set_message('No relevancy settings were inherited as source reference was not set.', 'warning');
+      return;
+    }
+    $ref_nid = $node->{$ref_field}[$lang][0]['target_id'];
+    $ref_node = node_load($ref_nid);
+
+    foreach ($settings['inherit']['fields'] as $key => $v) {
+      if ($v) {
+        $k = explode(':', $key);
+        $node->{$k[1]}[$lang] = $ref_node->{$k[0]}[$lang];
+      }
+    }
+  }
 }
 
 /**
@@ -1339,6 +1373,7 @@ function enterprise_rel_form_views_exposed_form_alter(&$form, &$form_state, $for
 
 function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
   //dsm($form);
+  $node_type = $form['#node_type'];
   drupal_add_js(drupal_get_path('module', 'enterprise_rel') . '/js/enterprise_rel.node_type_form.js');
   $form['enterprise_rel'] = array(
     '#type' => 'fieldset',
@@ -1370,7 +1405,6 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
       'display_name' => $a[1],
     );
     $rv_meta = enterprise_rel_get_rel_view_meta($view_id);
-    dsm($rv_meta);
 
     $form['enterprise_rel']['filter'] = array(
       '#type' => 'fieldset',
@@ -1428,6 +1462,107 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
         '#description' => t('Enter the maximium number of items to show. Leave blank for no limit (show all items).'),
       );
     }
+  }
+
+
+
+  $field_info_instances = field_info_instances('node', $node_type->type);
+  $field_info_fields = array();
+  $field_info_fields_by = array();
+  $options = array(
+    '' => '- ' . t('None') . ' -',
+  );
+  foreach ($field_info_instances as $name => $fi) {
+    $f = $field_info_fields[$name] = field_info_field($name);
+    $entity_type = '';
+    if ($f['type'] == 'entityreference') {
+      $options[$name] = $fi['label'];
+      $entity_type = $f['settings']['target_type'];
+      reset($f['settings']['handler_settings']['target_bundles']);
+      $bundle = key($f['settings']['handler_settings']['target_bundles']);
+    }
+    else if ($f['type'] == 'taxonomy_term_reference') {
+      $entity_type = 'taxonomy_term';
+      $bundle = $f['settings']['allowed_values'][0]['vocabulary'];
+    }
+
+    if ($entity_type) {
+      if (!isset($field_info_fields_by[$entity_type])) {
+        $field_info_fields_by[$entity_type] = array();
+      }
+      $field_info_fields_by[$entity_type][$bundle] = $name;
+    }
+  }
+  //dsm($settings);
+  //dsm($field_info_instances);
+  //dsm($field_info_fields);
+  //dsm($field_info_fields_by);
+  $inherit_ref_field = !empty($settings['inherit']['ref_field']) ? $settings['inherit']['ref_field'] : '';
+
+  $form['enterprise_rel']['inherit'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Inherit option'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
+  $form['enterprise_rel']['inherit']['ref_field'] = array(
+    '#type' => 'select',
+    '#title' => t('Inherit relevancy settings from'),
+    '#default_value' => !empty($settings['inherit']['ref_field']) ? $settings['inherit']['ref_field'] : '',
+    '#options' => $options,
+    '#description' => t('Select an entity ref field to enable the "Inherit relevancy settings from ..." option.'),
+  );
+
+  if (!empty($inherit_ref_field)) {
+    $ref_type_label = $options[$inherit_ref_field];
+    $fi = $field_info_fields[$inherit_ref_field];
+    $ref_entity_type = $fi['settings']['target_type'];
+    reset($fi['settings']['handler_settings']['target_bundles']);
+    $ref_bundle = key($fi['settings']['handler_settings']['target_bundles']);
+    $ref_fii = field_info_instances($ref_entity_type, $ref_bundle);
+
+    //dsm($ref_fii);
+
+
+    $options = array();
+    foreach ($ref_fii as $name => $field) {
+      $f = $ref_field_info_fields[$name] = field_info_field($name);
+
+      if (!empty($field_info_instances[$name])) {
+        $options["$name:$name"] = $field_info_instances[$name]['label'];
+      }
+      else {
+        $entity_type = '';
+        if ($f['type'] == 'entityreference') {
+          $entity_type = $f['settings']['target_type'];
+          reset($f['settings']['handler_settings']['target_bundles']);
+          $bundle = key($f['settings']['handler_settings']['target_bundles']);
+        }
+        else if ($f['type'] == 'taxonomy_term_reference') {
+          $entity_type = 'taxonomy_term';
+          $bundle = $f['settings']['allowed_values'][0]['vocabulary'];
+        }
+
+        if ($entity_type && !empty($field_info_fields_by[$entity_type][$bundle])) {
+          $options["$name:" . $field_info_fields_by[$entity_type][$bundle]] = $field_info_instances[$field_info_fields_by[$entity_type][$bundle]]['label'];
+        }
+      }
+    }
+    //dsm($options);
+    $form['enterprise_rel']['inherit']['fields'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Inherit fields'),
+      '#default_value' => !empty($settings['inherit']['fields']) ? $settings['inherit']['fields'] : array(),
+      '#options' => $options,
+      '#description' => t('Select fields to copy when the Inherit relevancy settings option is enabled. Note, only field that %this_type and %ref_type content types have in common are available for selection.',
+        array(
+          '%this_type' => $node_type->name,
+          '%ref_type' => $ref_type_label,
+        )),
+    );
+
+
   }
 
   $form['#submit'][] = 'enterprise_rel_form_node_type_form_submit';
@@ -1654,119 +1789,58 @@ function enterprise_rel_block_views_filter_view_content($rv_meta) {
         $terms[$bundle] = array();
       }
 
-
+      $tids = array();
+      $rows = array();
       while($row = $result->fetchObject()) {
-        $row->parents = taxonomy_get_parents($row->tid);
-        if (empty($row->parents)) {
-          $row->children = array();
-          $row->level = 0;
-          $vitems->rows[$row->tid] = (object)array();
-        }
-        else {
-          foreach ($row->parents as $p_tid => $p_term) {
-            $p_term->parents = taxonomy_get_parents($p_tid);
-            if (empty($p_term->parents)) {
-              $p_term->children = array();
-              $p_term->level = 0;
-              $vitems->rows[$p_tid] = (object)array();
-            }
-            $terms[$bundle][$p_tid] = $p_term;
-          }
-        }
-        $terms[$bundle][$row->tid] = $row;
+        $tids[] = $row->tid;
+        $rows[$row->tid] = $row;
       }
+      $terms[$bundle] = taxonomy_term_load_multiple($tids);
 
-      // user &$term to force itteration over items added in loop
-      foreach($terms[$bundle] as $tid => &$term) {
-        if (!isset($term->parents)) {
-          continue;
+      $bottom_level = 0;
+      $terms[$bundle] = enterprise_rel_get_terms_levels($terms[$bundle], $bottom_level, array('fill_parents' => 1));
+
+      uasort($terms[$bundle], function ($a, $b) {
+        return ($a->level > $b->level);
+      });
+
+      foreach ($terms[$bundle] as $tid => &$term) {
+        $terms[$bundle][$tid]->ancestors = array();
+        if ($term->level == 0) {
+          $vitems->rows[$tid] = (object)array();
+          $v = &$vitems->rows[$tid];
         }
-        foreach ($term->parents as $p_tid => $p_term) {
-          /*
-          if (!isset($terms[$bundle][$p_tid])) {
-            $p_term->parents = taxonomy_get_parents($p_tid);
-            if (empty($p_term->parents)) {
-              $p_term->children = array();
-              $p_term->level = 0;
-            }
-            else {
-              foreach ($p_term->parents as $pp_tid => $pp_term) {
-                if (!isset($terms[$bundle][$pp_tid])) {
-                  $pp_term->parents = taxonomy_get_parents($pp_tid);
-                  if (empty($pp_term->parents)) {
-                    $pp_term->children = array();
-                    $pp_term->level = 0;
-                  }
-                  $terms[$bundle][$pp_term->tid] = $pp_term;
-                }
-              }
-            }
-            $terms[$bundle][$p_term->tid] = $p_term;
-          }
-          */
-          if (isset($terms[$bundle][$p_tid]->level)) {
-            $terms[$bundle][$tid]->level = $terms[$bundle][$p_tid]->level + 1;
-            $terms[$bundle][$tid]->ancestors = array($p_tid);
-            $terms[$bundle][$tid]->p_tid = $p_tid;
-
-
-            if ($terms[$bundle][$tid]->level == 1) {
-              if (!isset($vitems->rows[$p_tid])) {
-                $vitems->rows[$p_tid] = (object)array(
-                  'rows' => array()
-                );
-              }
-              $vitems->rows[$p_tid]->rows[$tid] = (object)array();
-            }
-            if ($terms[$bundle][$tid]->level == 2) {
-              reset($terms[$bundle][$p_tid]->parents);
-              $pp_tid = key($terms[$bundle][$p_tid]->parents);
-              $terms[$bundle][$tid]->ancestors[] = $pp_tid;
-              $terms[$bundle][$tid]->pp_tid = $pp_tid;
-
-              if (!isset($vitems->rows[$pp_tid])) {
-                $vitems->rows[$pp_tid] = (object)array(
-                  'rows' => array()
-                );
-              }
-              if (!isset($vitems->rows[$pp_tid]->rows[$p_tid])) {
-                $vitems->rows[$pp_tid]->rows[$p_tid] = (object)array(
-                  'rows' => array()
-                );
-              }
-              $vitems->rows[$pp_tid]->rows[$p_tid]->rows[$tid] = (object)array();
-            }
-          }
+        else if ($term->level == 1) {
+          $p_tid = $term->parent[0];
+          $term->ancestors[] = array($p_tid);
+          $vitems->rows[$p_tid]->rows[$tid] = (object)array();
+          $v = &$vitems->rows[$p_tid]->rows[$tid];
         }
-      }
+        else if ($term->level == 2) {
+          $p_tid = $term->parent[0];
+          $pp_tid = $terms[$bundle][$p_tid]->parent[0];
+          $term->ancestors[] = array($p_tid, $pp_tid);
+          $vitems->rows[$pp_tid]->rows[$p_tid]->rows[$tid] = (object)array();
+          $v = &$vitems->rows[$pp_tid]->rows[$p_tid]->rows[$tid];
+        }
 
-      foreach($terms[$bundle] as $tid => &$term) {
         $params['taxonomy_term'][$bundle]['entities'] = array(
           $term
         );
         $options = array();
         $path = enterprise_rel_view_path_by_params($params, $options);
 
-        if ($term->level == 0) {
-          $v = &$vitems->rows[$term->tid];
-        }
-        else if ($term->level == 1) {
-          $v = &$vitems->rows[$term->p_tid]->rows[$term->tid];
-        }
-        else if ($term->level == 2) {
-          $v = &$vitems->rows[$term->pp_tid]->rows[$term->p_tid]->rows[$term->tid];
-        }
-
         $v->title = $term->name;
         $v->link = l($term->name, $path, $options);
         $v->url = url($path, $options);
-        if (!empty($term->count)) {
-          $v->count = $term->count;
+        if (!empty($rows[$tid]->count)) {
+          $v->count = $rows[$tid]->count;
         }
+
       }
 
-      //dsm($vitems);
       $items[] = $vitems;
+
     }
     else if (!empty($fa['field_name'])) {
 //dsm($fa);
