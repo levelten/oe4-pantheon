@@ -353,6 +353,31 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
     '#value' => 'The following snippet of text is <em>rendered as italicized text</em>.',
   );
 
+  // Blockquotes
+  $styles['type']['blockquotes'] = array(
+    '#title' => t('Blockquotes'),
+    '#description' => t('For quoting blocks of content from another source within your document.'),
+  );
+  $styles['type']['blockquotes']['default'] = array(
+    '#title' => t('Default blockquote'),
+    //'#description' => t('For de-emphasizing inline or blocks of text, use the <code>&lt;small&gt;</code> tag to set text at 85% the size of the parent. Heading elements receive their own <code>font-size</code> for nested <code>&lt;small&gt;</code> elements.'),
+    '#tag' => 'markup',
+    '#value' => '<blockquote>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+  <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>
+</blockquote>',
+  );
+
+  $styles['type']['blockquotes']['reverse'] = array(
+    '#title' => t('Alternate blockquote'),
+    //'#description' => t('For de-emphasizing inline or blocks of text, use the <code>&lt;small&gt;</code> tag to set text at 85% the size of the parent. Heading elements receive their own <code>font-size</code> for nested <code>&lt;small&gt;</code> elements.'),
+    '#tag' => 'markup',
+    '#value' => '<blockquote class="blockquote-reverse">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+  <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>
+</blockquote>',
+  );
+
   // Contextual colors
   $styles['type']['colors'] = array(
     '#title' => t('Contextual colors'),

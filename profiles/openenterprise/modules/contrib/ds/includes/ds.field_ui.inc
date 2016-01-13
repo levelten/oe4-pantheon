@@ -1632,7 +1632,7 @@ function _ds_field_ui_table_layouts($entity_type, $bundle, $view_mode, &$form, $
       'header' => 'Header',
       'footer' => 'Footer',
       'aside' => 'Aside',
-      'figure' => 'Figure'
+      'figure' => 'Figure',
     );
     $form['additional_settings']['region_wrapper'] = array(
       '#type' => 'fieldset',
