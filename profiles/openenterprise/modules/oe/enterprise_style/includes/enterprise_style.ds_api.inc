@@ -162,6 +162,10 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['margin-bottom'] = t('Margin: Bottom');
     $classes['margin-left'] = t('Margin: Left');
 
+    $classes['no-gutter'] = t('No Gutter');
+    $classes['no-gutter-right'] = t('No Gutter: Right');
+    $classes['no-gutter-left'] = t('No Gutter: Left');
+
     $classes['no-margin-top'] = t('No Margin: Top');
     $classes['no-margin-right'] = t('No Margin: Right');
     $classes['no-margin-bottom'] = t('No Margin: Bottom');
