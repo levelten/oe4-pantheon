@@ -186,7 +186,8 @@ function enterprise_rel_get_rel_view_meta($path = '') {
       $info['context_entity_type'] = $info['entity_filter']['type'];
     }
     if (!isset($info['view_filters']['type']['operator']) || ($info['view_filters']['type']['operator'] == 'in')) {
-      $info['entity_filter']['bundle'] = array_shift($info['view_filters']['type']['value']);
+      reset($info['view_filters']['type']['value']);
+      $info['entity_filter']['bundle'] = key($info['view_filters']['type']['value']);
       if (!isset($info['context_bundle'])) {
         $info['context_bundle'] = $info['entity_filter']['bundle'];
       }
@@ -272,8 +273,19 @@ function enterprise_rel_get_rel_view_meta($path = '') {
           $item['entity_type'] = 'taxonomy_term';
           $item['bundle'] = $name;
           $item['vocabulary'] = taxonomy_vocabulary_machine_name_load($name);
+          // see if we can get the field name via a relationship
           $field_meta = enterprise_rel_get_field_meta_from_views_relationship($v, $info['view_relationships']);
-          $item += $field_meta;
+          // if not, try searching through the entity field instances
+          if (empty($field_meta)) {
+            $field_info = enterprise_rel_get_entity_field_for_vocabulary($info['context_entity_type'], $info['context_bundle'], $item['bundle']);
+            if ($field_info) {
+              $field_meta['field_info'] = $field_info;
+              $field_meta['field_name'] = $field_info['field_name'];
+            }
+          }
+          if (is_array($field_meta)) {
+            $item += $field_meta;
+          }
 
           $info['taxonomy_term_filtargs'][$name] = $item;
           $info['_filtargs'][$filtarg_key] = &$info['taxonomy_term_filtargs'][$name];
@@ -422,6 +434,25 @@ function enterprise_rel_get_rel_view_meta($path = '') {
 
   $infos[$static_key] = $info;
   return $info;
+}
+
+function enterprise_rel_get_entity_field_for_vocabulary($entity_type, $bundle, $vocabulary) {
+  $fi_cache = &drupal_static(__FUNCTION__, array());
+  if (empty($fi_cache[$entity_type][$bundle])) {
+    $fi_cache[$entity_type][$bundle] = field_info_instances($entity_type, $bundle);
+    foreach ($fi_cache[$entity_type][$bundle] as $name => $fi) {
+      $fi_cache[$entity_type][$bundle][$name] = field_info_field($name);
+    }
+  }
+  $fi = $fi_cache[$entity_type][$bundle];
+  foreach ($fi_cache[$entity_type][$bundle] as $name => $fi) {
+    if ($fi['type'] == 'taxonomy_term_reference') {
+      if (!empty($fi['settings']['allowed_values'][0]['vocabulary']) && $fi['settings']['allowed_values'][0]['vocabulary'] == $vocabulary) {
+        return $fi;
+      }
+    }
+  }
+  return FALSE;
 }
 
 function enterprise_rel_get_field_meta_from_views_relationship($options, $relationships) {
@@ -919,6 +950,7 @@ function enterprise_rel_url_outbound_alter(&$path, &$options, &$original_path) {
 
 function enterprise_rel_get_entity_default_arguments($node) {
   $rv_meta = enterprise_rel_get_rel_view_meta();
+
   $args = array();
 
   $wrapper = entity_metadata_wrapper('node', $node);
@@ -1034,7 +1066,7 @@ function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = 
     else {
       $to[$i] = $term;
     }
-    $ct[$term->tid] = $terms[$term->tid];
+    $ct[$term->tid] = $terms[$i];
   }
   for ($j = 0; $j <= 4; $j++) {
     foreach ($to as $i => $term) {
@@ -1062,7 +1094,6 @@ function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = 
           }
           unset($to[$tid]);
         }
-
       }
     }
   }
