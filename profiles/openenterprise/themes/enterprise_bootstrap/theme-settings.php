@@ -153,6 +153,12 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
 	);
+  $form['enterprise_bootstrap_region_settings']['navigation']['navbar_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Navbar Class'),
+    '#default_value' => theme_get_setting('navbar_class'),
+    '#description' => t('Class that wraps the navbar region.')
+  );
 	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Navigation Region Class'),

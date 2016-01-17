@@ -150,6 +150,13 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['nav_inner'] = 'navbar-mega-menu';
   }
 
+  // Navbar attributes
+  $s = theme_get_setting('navbar_class');
+  if (!empty($s)) {
+    $s = explode(' ', $s);
+    $variables['navbar_classes_array'] = array_merge($variables['navbar_classes_array'], $s);
+  }
+
   // Navigation region settings.
   $variables['navbar_region_class'] .= theme_get_setting('navbar_region_class');
 
