@@ -122,8 +122,8 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#collapsed' => TRUE,
   );
   $options = array(
-    '' => t('None'),
-    'logo' => t('Logo'),
+    '' => t('Standard template (logo/site name/slogan)'),
+    'none' => t('None'),
     'region' => t('Region'),
   );
   $form['enterprise_bootstrap_header_settings']['nav_left']['nav_left_display'] = array(
