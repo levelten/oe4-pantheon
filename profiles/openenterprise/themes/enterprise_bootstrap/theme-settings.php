@@ -108,6 +108,32 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+  $form['enterprise_bootstrap_header_settings'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap',
+    '#title' => t('Header'),
+    '#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+  );
+  $form['enterprise_bootstrap_header_settings']['nav_left'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap_header_settings',
+    '#title' => t('Navigation left'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $options = array(
+    '' => t('None'),
+    'logo' => t('Logo'),
+    'region' => t('Region'),
+  );
+  $form['enterprise_bootstrap_header_settings']['nav_left']['nav_left_display'] = array(
+    '#type' => 'select',
+    '#title' => t('Display (default)'),
+    '#default_value' => theme_get_setting('nav_left_display'),
+    '#description' => t('Choose to either place this above the content/sidebars, or inside the content area.'),
+    '#options' => $options,
+  );
+
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',

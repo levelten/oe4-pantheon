@@ -100,6 +100,14 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   }
 
   /*
+   * Enterprise Header settings
+   */
+  $variables['nav_left_display'] = theme_get_setting('nav_left_display');
+  if (empty($variables['nav_left_display'])) {
+    $variables['navbar_classes_array'][] = 'navbar-menu-only';
+  }
+
+  /*
    * Enterprise Megamenu settings
    */
   $enterprise_megamenu = theme_get_setting('enterprise_bootstrap_megamenu');

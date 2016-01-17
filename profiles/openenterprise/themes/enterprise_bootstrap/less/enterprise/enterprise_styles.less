@@ -240,3 +240,48 @@ section {
     }
 }
 }
+
+/* Tom's temp styling */
+.navbar-menu-only {
+  .navbar-collapse {
+    width: 100%;
+    .navbar-nav {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: @screen-sm) {
+  .navbar.navbar-menu-only {
+    min-height: 0;
+  }
+}
+
+.region-brand-bar {
+  margin-top: .5em;
+  margin-bottom: .5em;
+  .navbar-default {
+    border-bottom: none;
+  }
+  .navbar-inverse {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: @screen-sm) {
+  .region-brand-bar .brand-bar-left {
+    text-align: center;
+  }
+  .region-brand-bar .brand-bar-right {
+    text-align: center;
+  }
+}
+
+@media (min-width: @screen-sm) {
+  .region-brand-bar .brand-bar-right {
+    text-align: right;
+  }
+}
+.region-brand-bar .phone {
+  font-size: 1.6em;
+}

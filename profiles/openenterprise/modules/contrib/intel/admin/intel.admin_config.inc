@@ -85,6 +85,13 @@ function intel_admin_settings($form, $form_state) {
     '#description' => t('The URL for the API without the protocall. Leave blank to use the default of api.getlevelten.com/api/intel.'),
     '#field_suffix' => '/',
   );
+  $form['l10iapi']['advanced']['intel_l10iapi_ver'] = array(
+    '#type' => 'textfield',
+    '#title' => t('API Ver'),
+    '#default_value' => variable_get('intel_l10iapi_ver', ''),
+    //'#description' => t('The URL for the API without the protocall. Leave blank to use the default of api.getlevelten.com/api/intel.'),
+    //'#field_suffix' => '/',
+  );
   $options = array(
     '' => t('Default'),
     'standard' => t('Standard'),
@@ -258,7 +265,28 @@ function intel_admin_settings($form, $form_state) {
     '#default_value' => variable_get('intel_visitor_default_image_path', ''),
     '#description' => t('URL of picture to display for visitors with no custom picture. Leave blank for none.'),
   );
-  return system_settings_form($form);
+  $system_form = system_settings_form($form);
+  $system_form['#submit'][] = 'intel_admin_settings_submit';
+  return $system_form;
+}
+
+function intel_admin_settings_submit($form, &$form_state) {
+  $api_ver = variable_get('intel_l10iapi_ver', '');
+  if (!$api_ver || $api_ver == 1) {
+    return;
+  }
+
+  $scripts = $form_state['values']['intel_intel_scripts_enabled'];
+  $plugins = array();
+  foreach ($scripts as $script => $value) {
+    if ($value) {
+      $plugins[] = $script;
+    }
+  }
+
+  $message = '';
+  $apiclient = intel_get_api($message);
+  $apiclient->put('property/');
 }
 
 function intel_admin_settings_validate($form, &$form_state) {

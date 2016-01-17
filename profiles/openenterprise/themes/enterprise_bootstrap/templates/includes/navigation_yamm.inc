@@ -1,4 +1,5 @@
 <?php include 'header_top.inc'; ?>
+<?php include 'brand_bar.inc'; ?>
 <!-- Navigation YAMM region -->
 <div id="navbar-wrapper">
   <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
