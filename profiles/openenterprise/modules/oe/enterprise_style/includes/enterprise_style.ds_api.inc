@@ -139,6 +139,18 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['col-md-10'] = t('Col Md 10');
     $classes['col-md-11'] = t('Col Md 11');
     $classes['col-md-12'] = t('Col Md 12');
+    $classes['col-xs-1'] = t('Col XS 1');
+    $classes['col-xs-2'] = t('Col XS 2');
+    $classes['col-xs-3'] = t('Col XS 3');
+    $classes['col-xs-4'] = t('Col XS 4');
+    $classes['col-xs-5'] = t('Col XS 5');
+    $classes['col-xs-6'] = t('Col XS 6');
+    $classes['col-xs-7'] = t('Col XS 7');
+    $classes['col-xs-8'] = t('Col XS 8');
+    $classes['col-xs-9'] = t('Col XS 9');
+    $classes['col-xs-10'] = t('Col XS 10');
+    $classes['col-xs-11'] = t('Col XS 11');
+    $classes['col-xs-12'] = t('Col XS 12');
 
     $classes['row'] = t('Row');
     $classes['row-fluid'] = t('Row Fluid');
