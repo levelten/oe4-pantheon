@@ -7,7 +7,7 @@
       <div class="container">
         <div class="navbar-region <?php print $navbar_region_class; ?>">
           <!-- Navbar Logo Region -->
-          <?php if (empty($page['nav_left_display']) || ($page['nav_left_display'] != 'none')): ?>
+          <?php if (!empty($page['nav_left_display'])): ?>
             <div id="navbar-logo" <?php print drupal_attributes($nav_logo_class); ?>>
               <?php if ($logo): ?>
                 <a class="logo navbar-btn pull-left" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">

@@ -103,7 +103,11 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
    * Enterprise Header settings
    */
   $variables['nav_left_display'] = theme_get_setting('nav_left_display');
-  if (isset($variables['nav_left_display']) && $variables['nav_left_display'] == 'none') {
+  if (empty($variables['nav_left_display'])) {
+    $variables['nav_left_display'] = 'standard';
+  }
+  if ($variables['nav_left_display'] == 'none') {
+    $variables['nav_left_display'] = '';
     $variables['navbar_classes_array'][] = 'navbar-no-header';
   }
 

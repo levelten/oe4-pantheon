@@ -122,7 +122,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#collapsed' => TRUE,
   );
   $options = array(
-    '' => t('Standard template (logo/site name/slogan)'),
+    'standard' => t('Standard template (logo/site name/slogan)'),
     'none' => t('None'),
     'region' => t('Region'),
   );
