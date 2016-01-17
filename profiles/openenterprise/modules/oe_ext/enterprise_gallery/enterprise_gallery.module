@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Gallery feature.
+ */
+
+include_once 'enterprise_gallery.features.inc';

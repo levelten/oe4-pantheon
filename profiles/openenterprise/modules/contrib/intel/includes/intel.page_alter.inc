@@ -468,19 +468,16 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     }
     */
   }
-
-  $uri = entity_uri($entity_type, $entity);
-  if (!empty($uri['path'])) {
-    $page_attrs['rl'] = $uri['path'];
-    //$page_attrs['url'] = url($page_attrs['rl']);
+  
+  // Only load URI if entity has been created (has ID).
+  if ($entity_id) {
+    $uri = entity_uri($entity_type, $entity);
+    if (!empty($uri['path'])) {
+      $page_attrs['rl'] = $uri['path'];
+      //$page_attrs['url'] = url($page_attrs['rl']);
+    }
   }
-  //dsm($page_attrs);
-
-
-
-
-//dsm($entity->uri);
-
+  
   if ($entity_type == 'node') {
     $entity_bundle = $entity->type;
     $page_title = $entity->title;

@@ -1484,6 +1484,10 @@ function contentanalysis_format_content($value, $weight = -1, $tab = FALSE) {
  * Add Content Analysis enabled field to content type admin form
  */
 function contentanalysis_form_alter(&$form, &$form_state, $form_id) {
+  // Only use on Node edit forms.
+  if (strpos($form_id, '_node_form') == FALSE) {
+    return;
+  }
   if (isset($form['type']['#value']) && $form['type']['#value'] .'_node_form' == $form_id && variable_get('contentanalysis_type_' . $form['#node']->type . '_enable', 1)) {
     if (!user_access('perform content analysis')) {
       return '';

@@ -10,8 +10,10 @@
  */
 function bean_view_page(Bean $bean) {
   $title = $bean->label() ? $bean->label() : $bean->adminTitle();
+  $view_mode = ($bean->view_mode) ? $bean->view_mode : 'default';
   drupal_set_title($title);
-  return bean_view($bean);
+
+  return bean_view($bean, $view_mode);
 }
 
 /**
@@ -277,9 +279,22 @@ function bean_form($form, &$form_state, Bean $bean, $type = NULL) {
 
   // The view mode.
   if (user_access('edit bean view mode')) {
-    $bean_info = $bean->entityInfo();
-    foreach ($bean_info['view modes'] as $view_mode_name => $data) {
-      $view_modes[$view_mode_name] = $data['label'];
+    $entity_type = $bean->entityType();
+    $bundle = $bean->type;
+
+    $entity_info = entity_get_info($entity_type);
+    $view_mode_list = $entity_info['view modes'];
+    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
+
+    foreach ($view_mode_list as $view_mode_name => $view_mode_info) {
+      if (!empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
+        $view_modes[$view_mode_name] = $view_mode_info['label'];
+      }
+    }
+
+    // If no custom view modes selected, add default.
+    if (empty($view_modes)) {
+      $view_modes['default'] = t('Default');
     }
 
     $form['view_mode'] = array(
