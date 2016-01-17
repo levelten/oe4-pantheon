@@ -103,7 +103,6 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
    * Enterprise Header settings
    */
   $variables['nav_left_display'] = theme_get_setting('nav_left_display');
-  dsm($variables['nav_left_display']);
   if (empty($variables['nav_left_display'])) {
     $variables['nav_left_display'] = 'standard';
   }
@@ -111,7 +110,6 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['nav_left_display'] = '';
     $variables['navbar_classes_array'][] = 'navbar-no-header';
   }
-  dsm($variables['nav_left_display']);
 
   /*
    * Enterprise Megamenu settings
