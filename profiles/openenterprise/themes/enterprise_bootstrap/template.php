@@ -104,7 +104,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
    */
   $variables['nav_left_display'] = theme_get_setting('nav_left_display');
   if (isset($variables['nav_left_display']) && $variables['nav_left_display'] == 'none') {
-    $variables['navbar_classes_array'][] = 'navbar-menu-only';
+    $variables['navbar_classes_array'][] = 'navbar-no-header';
   }
 
   /*
