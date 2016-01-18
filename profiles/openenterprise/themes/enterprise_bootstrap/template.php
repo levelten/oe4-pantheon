@@ -102,12 +102,12 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   /*
    * Enterprise Header settings
    */
-  $variables['nav_left_display'] = theme_get_setting('nav_left_display');
-  if (empty($variables['nav_left_display'])) {
-    $variables['nav_left_display'] = 'standard';
+  $variables['navbar_header_display'] = theme_get_setting('navbar_header_display');
+  if (empty($variables['navbar_header_display'])) {
+    $variables['navbar_header_display'] = 'standard';
   }
-  if ($variables['nav_left_display'] == 'none') {
-    $variables['nav_left_display'] = '';
+  if ($variables['navbar_header_display'] == 'none') {
+    $variables['navbar_header_display'] = '';
     $variables['navbar_classes_array'][] = 'navbar-no-header';
   }
 
