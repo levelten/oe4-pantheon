@@ -13,9 +13,9 @@
 <?php elseif (!$highlighted_placement): ?>
 	<?php if (!$highlighted_container): ?>
 		<?php if (!empty($highlighted)): ?>
-			<div class="highlighted">
+			<div class="highlighted jumbotron">
 				<div class="container">
-					<div class="jumbotron">
+					<div class="">
 						<?php print render($page['highlighted']); ?>
 					</div>
 				</div>
