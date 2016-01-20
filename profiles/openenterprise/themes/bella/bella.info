@@ -8,17 +8,17 @@ base theme = enterprise_bootstrap
 ;; Regions
 ;;;;;;;;;;;;;;;;;;;;;
 
+regions[header_top]     = 'Header Top'
 regions[navigation]     = 'Navigation'
-regions[header]					= 'Top Bar'
+regions[header_bottom]  = 'Header Bottom'
+regions[header]         = 'Top Bar'
 regions[highlighted]    = 'Highlighted'
 regions[help]           = 'Help'
 regions[content]        = 'Content'
 regions[sidebar_first]  = 'Primary'
 regions[sidebar_second] = 'Secondary'
 regions[footer]         = 'Footer'
-regions[footer_bottom]  = 'Footer Bottom'
-regions[page_top]       = 'Page top'
-regions[page_bottom]    = 'Page bottom'
+regions[footer_bottom]  = 'Footer bottom'
 
 
 ;;;;;;;;;;;;;;;;;;;;;
