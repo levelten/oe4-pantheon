@@ -975,6 +975,9 @@ function enterprise_rel_get_entity_default_arguments($node) {
       //$wf = $wrapper->{$fa['field_name']}->value();
 
       $entities = $wrapper->{$fa['field_name']}->value();
+      if (!is_array($entities)) {
+        $entities = array($entities);
+      }
       $v = array(
         'entities' => $entities
       );
