@@ -37,7 +37,7 @@
 		padding: 14px 0;
 	}
 	.views-row-odd {
-		background-color: @brand-secondary;
+		background-color: @gray-lighter;
 	}
 	&.view-display-id-page {
 		.views-row {
@@ -61,6 +61,11 @@
 			margin-top: 0;
 			padding-bottom: 0.5em;
 			.heading-underline(40px);
+		}
+	}
+	&.view-display-id-featured {
+		.views-row-odd {
+			background-color: none;
 		}
 	}
 }

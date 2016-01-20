@@ -97,6 +97,20 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#description' => t('Adds a "theme-dark" class to the body, only affects subthemes that use it.'),
   );
 
+  $form['enterprise_bootstrap_config']['column_right']['eb_light_primary'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Light Primary Color'),
+    '#default_value' => theme_get_setting('eb_light_primary'),
+    '#description' => t('If your primary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+  );
+
+  $form['enterprise_bootstrap_config']['column_right']['eb_light_secondary'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Light Secondary Color'),
+    '#default_value' => theme_get_setting('eb_light_secondary'),
+    '#description' => t('If your secondary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+  );
+
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
@@ -249,7 +263,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_region_settings']['footer']['footer_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Footer Class'),
-		'#default_value' => theme_get_setting('header_class'),
+		'#default_value' => theme_get_setting('footer_class'),
 		'#description' => t('Add classes for the footer region, separated by space.')
 	);
 

@@ -60,40 +60,61 @@
 	background-color: @brand-primary;
 	padding: 30px 0 50px;
 	&, a, p, h2, h3, h4, h5 {
-		color: @brand-accent;
+		color: @white;
+		.light & {
+			color: @black;
+		}
 	}
 	&.block-blocker {
 		a {
-			background-color: @brand-accent;
+			background-color: @white;
 			color: @brand-primary;
 			display: inline-block;
 			margin: 0 5px 5px 0;
 			padding: 5px 8px;
+			.light & {
+				background-color: @black;
+			}
 			&:hover {
 				background-color: darken(@brand-primary, 10%);
-				color: @brand-accent;
+				color: @white;
 				text-decoration: none;
+				.light & {
+					background-color: @black;
+				}
 			}
 		}
 	}
 	.style-block-icon {
 		background-color: @brand-primary;
-		color: @brand-accent;
+		color: @white;
 		&:before, &:after {
-			background-color: @brand-accent;
+			background-color: @white;
+		}
+		.light & {
+			color: @black;
+			&:before, &:after {
+				background-color: @black;
+			}
 		}
 	}
 	&.style-block-title {
 		.block-title {
-			color: @brand-accent;
+			color: @white;
+			.light & {
+				color: @black;
+			}
 		}
 	}
 }
 .style-date-stacked {
 	.day {
 		background-color: @brand-primary;
-		color: @brand-accent;
+		color: @white;
 		font-weight: 300;
+		.light & {
+			color: @black;
+		}
 	}
 	.month {
 		background-color: @gray-light;
@@ -135,9 +156,12 @@
 	&.style-social-profile {
 		.btn-social {
 			background-color: @brand-primary;
-			color: @brand-accent;
+			color: @white;
 			&:hover {
 				background-color: darken(@brand-primary, 10%);
+			}
+			.light & {
+				color: @black;
 			}
 		}
 	}
@@ -146,7 +170,10 @@
 .icon {
 	&.i-circle, &.i-rounded, &.i-thumbnail {
 		background-color: @brand-primary;
-		color: @brand-accent;
+		color: @white;
+		.light & {
+			color: @black;
+		}
 	}
 }
 
@@ -174,250 +201,253 @@
 }
 
 .style-section-comparison-table {
-  color: @gray-darker;
-  header {
-	min-height: 225px;
-	padding: 10px;
-	@media @mobile {
-	  height: auto !important;
-	}
-	@media @tablet, @normal {
-	  min-height: 200px;
-	}
-  }
-  ul, li {
-	list-style: none;
-	list-style-image: none;
-	margin: 0;
-	padding: 0;
-  }
-  li {
-	padding: 10px;
-  }
-  li:nth-child(odd) {
-	background: rgba(0,0,0,.1);
-  }
-  .info {
-	color: @gray;
+	color: @gray-darker;
 	header {
-	  color: @gray;
-	  font-family: @headings-font-family;
-	  .font-size(3.4);
-	  line-height: 1em;
-	  text-align: center;
-	  text-transform: uppercase;
-	  .btn {
-		font-family: @font-family-sans-serif;
-		.font-size(1.6);
-		line-height: 1em;
-		text-transform: none;
-		.icon {
-		  margin-left: -5px;
-		  padding-right: 5px;
-		  position: relative;
-		  top: -2px;
+		min-height: 225px;
+		padding: 10px;
+		@media @mobile {
+			height: auto !important;
 		}
-	  }
-	  @media @mobile {
-		.font-size(2);
-		margin: 1em 0;
-		min-height: 0;
-	  }
-	  @media @tablet {
-		.font-size(2.6);
-	  }
-	  @media @normal {
-		.font-size(2.5);
-	  }
-	  em {
-		color: @gray-light;
-		font-style: normal;
-		font-weight: 600;
-	  }
-	  p {
-		margin: 0.5em 0;
-		&:last-child {
-		  margin-bottom: 0;
+		@media @tablet, @normal {
+			min-height: 200px;
 		}
-	  }
 	}
-	section ul {
-	  background: #F6F6F6;
-	}
-	@media @mobile {
-	  section, footer {
-		display: none;
-	  }
+	ul, li {
+		list-style: none;
+		list-style-image: none;
+		margin: 0;
+		padding: 0;
 	}
 	li {
-	  font-weight: 600;
-	}
-	@media @tablet, @normal, @wide {
-	  float: left;
-	}
-	@media @tablet {
-	  width: 40%;
-	}
-	@media @normal {
-	  width: 36%;
-	}
-	@media @wide {
-	  width: 30%;
-	}
-  }
-  .products {
-	@media @tablet, @normal, @wide {
-	  float: left;
-	}
-	@media @tablet {
-	  width: 60%;
-	}
-	@media @normal {
-	  width: 64%;
-	}
-	@media @wide {
-	  width: 70%;
-	}
-	.product {
-	  float: left;
-	  text-align: center;
-	  width: 100%;
-	  @media @mobile {
-		margin-top: 2em;
-		&:first-child {
-		  margin-top: 0;
-		}
-	  }
-	  @media @normal, @wide {
-		&:hover {
-		  .box-shadow(5px 0 30px rgba(0, 0, 0, 0.5));
-		  .scale(1.01);
-		  position: relative;
-		  z-index: 99;
-		}
-	  }
-	  header {
-		background: @brand-primary;
-		color: #fff;
-		position: relative;
-		.title {
-		  background: rgba(0,0,0,0.1);
-		  font-family: @headings-font-family;
-		  .font-size(2);
-		  line-height: 1em;
-		  margin: -10px -10px 10px;
-		  padding: 10px;
-		}
-		.price {
-		  font-family: @headings-font-family;
-		  .font-size(5);
-		  line-height: 1em;
-		  @media @tablet {
-			.font-size(3);
-		  }
-		  @media @normal {
-			.font-size(4);
-		  }
-		}
-		.conditions {
-		  .font-size(1.1);
-		  font-style: italic;
-		  line-height: 1.25em;
-		  margin-top: 10px;
-		  .opacity(75);
-		}
-		.btn {
-		  bottom: 10px;
-		  .box-shadow(0 0 5px rgba(0, 0, 0, 0.25));
-		  color:#fff4c0;
-		  left: 10px;
-		  margin-top: 10px;
-		  position: absolute;
-		  right: 10px;
-		  width: auto;
-		}
-	  }
-	  section {
-		background: #fff;
-		li {
-		  .clearfix;
-		  @media @mobile {
-			height: auto !important;
-			text-align: right;
-		  }
-		  .title {
-			display: none;
-			@media @mobile {
-			  display: block;
-			  float: left;
-			  max-width: 50%;
-			  text-align: left;
-			}
-		  }
-		  .btn {
-			@media @mobile {
-			  clear: both;
-			  float: none;
-			  display: block;
-			}
-		  }
-		}
-		.oeicon-check {
-		  color: @brand-primary;
-		  font-size: 150%;
-		  margin: -1em 0 0;
-		  position: relative;
-		  top: 2px;
-		}
-		.oeicon-star-empty {
-		  color: @gray-light;
-		}
-		.oeicon-star {
-		  color: @brand-primary;
-		}
-	  }
-	  footer {
-		background: #fff;
 		padding: 10px;
-	  }
-	  &:nth-child(even) section ul {
-		background: #F6F6F6;
-	  }
-	  &:nth-child(2) header {
-		background: darken(@brand-primary, 10%);
-	  }
-	  &:nth-child(3) header {
-		background: darken(@brand-primary, 20%);
-	  }
-	  &:nth-child(4) header {
-		background: darken(@brand-primary, 30%);
-	  }
-	  &:nth-child(5) header {
-		background: darken(@brand-primary, 20%);
-	  }
-	  &:nth-child(6) header {
-		background: darken(@brand-primary, 10%);
-	  }
 	}
-	@media @tablet, @normal, @wide {
-	  &.columns-2 .product {
-		width: 50%;
-	  }
-	  &.columns-3 .product {
-		width: 33.33333%;
-	  }
-	  &.columns-4 .product {
-		width: 25%;
-	  }
-	  &.columns-5 .product {
-		width: 20%;
-	  }
-	  &.columns-6 .product {
-		width: 16.66666%;
-	  }
-	  &.columns-7 .product {
-		width: 14.28571%;
-	  }
+	li:nth-child(odd) {
+		background: rgba(0,0,0,.1);
 	}
-  }
+	.info {
+		color: @gray;
+		header {
+			color: @gray;
+			font-family: @headings-font-family;
+			.font-size(3.4);
+			line-height: 1em;
+			text-align: center;
+			text-transform: uppercase;
+			.btn {
+				font-family: @font-family-sans-serif;
+				.font-size(1.6);
+				line-height: 1em;
+				text-transform: none;
+				.icon {
+					margin-left: -5px;
+					padding-right: 5px;
+					position: relative;
+					top: -2px;
+				}
+			}
+			@media @mobile {
+				.font-size(2);
+				margin: 1em 0;
+				min-height: 0;
+			}
+			@media @tablet {
+				.font-size(2.6);
+			}
+			@media @normal {
+				.font-size(2.5);
+			}
+			em {
+				color: @gray-light;
+				font-style: normal;
+				font-weight: 600;
+			}
+			p {
+				margin: 0.5em 0;
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
+		}
+		section ul {
+			background: #F6F6F6;
+		}
+		@media @mobile {
+			section, footer {
+				display: none;
+			}
+		}
+		li {
+			font-weight: 600;
+		}
+		@media @tablet, @normal, @wide {
+			float: left;
+		}
+		@media @tablet {
+			width: 40%;
+		}
+		@media @normal {
+			width: 36%;
+		}
+		@media @wide {
+			width: 30%;
+		}
+	}
+	.products {
+		@media @tablet, @normal, @wide {
+			float: left;
+		}
+		@media @tablet {
+			width: 60%;
+		}
+		@media @normal {
+			width: 64%;
+		}
+		@media @wide {
+			width: 70%;
+		}
+		.product {
+			float: left;
+			text-align: center;
+			width: 100%;
+			@media @mobile {
+				margin-top: 2em;
+				&:first-child {
+					margin-top: 0;
+				}
+			}
+			@media @normal, @wide {
+				&:hover {
+					.box-shadow(5px 0 30px rgba(0, 0, 0, 0.5));
+					.scale(1.01);
+					position: relative;
+					z-index: 99;
+				}
+			}
+			header {
+				background: @brand-primary;
+				color: #fff;
+				position: relative;
+				.title {
+					background: rgba(0,0,0,0.1);
+					font-family: @headings-font-family;
+					.font-size(2);
+					line-height: 1em;
+					margin: -10px -10px 10px;
+					padding: 10px;
+				}
+				.price {
+					font-family: @headings-font-family;
+					.font-size(5);
+					line-height: 1em;
+					@media @tablet {
+						.font-size(3);
+					}
+					@media @normal {
+						.font-size(4);
+					}
+				}
+				.conditions {
+					.font-size(1.1);
+					font-style: italic;
+					line-height: 1.25em;
+					margin-top: 10px;
+					.opacity(75);
+				}
+				.btn {
+					bottom: 10px;
+					.box-shadow(0 0 5px rgba(0, 0, 0, 0.25));
+					color: @white;
+					left: 10px;
+					margin-top: 10px;
+					position: absolute;
+					right: 10px;
+					width: auto;
+					.light & {
+						color: @black;
+					}
+				}
+			}
+			section {
+				background: #fff;
+				li {
+					.clearfix;
+					@media @mobile {
+						height: auto !important;
+						text-align: right;
+					}
+					.title {
+						display: none;
+						@media @mobile {
+							display: block;
+							float: left;
+							max-width: 50%;
+							text-align: left;
+						}
+					}
+					.btn {
+						@media @mobile {
+							clear: both;
+							float: none;
+							display: block;
+						}
+					}
+				}
+				.oeicon-check {
+					color: @brand-primary;
+					font-size: 150%;
+					margin: -1em 0 0;
+					position: relative;
+					top: 2px;
+				}
+				.oeicon-star-empty {
+					color: @gray-light;
+				}
+				.oeicon-star {
+					color: @brand-primary;
+				}
+			}
+			footer {
+				background: #fff;
+				padding: 10px;
+			}
+			&:nth-child(even) section ul {
+				background: #F6F6F6;
+			}
+			&:nth-child(2) header {
+				background: darken(@brand-primary, 10%);
+			}
+			&:nth-child(3) header {
+				background: darken(@brand-primary, 20%);
+			}
+			&:nth-child(4) header {
+				background: darken(@brand-primary, 30%);
+			}
+			&:nth-child(5) header {
+				background: darken(@brand-primary, 20%);
+			}
+			&:nth-child(6) header {
+				background: darken(@brand-primary, 10%);
+			}
+		}
+		@media @tablet, @normal, @wide {
+			&.columns-2 .product {
+				width: 50%;
+			}
+			&.columns-3 .product {
+				width: 33.33333%;
+			}
+			&.columns-4 .product {
+				width: 25%;
+			}
+			&.columns-5 .product {
+				width: 20%;
+			}
+			&.columns-6 .product {
+				width: 16.66666%;
+			}
+			&.columns-7 .product {
+				width: 14.28571%;
+			}
+		}
+	}
 }

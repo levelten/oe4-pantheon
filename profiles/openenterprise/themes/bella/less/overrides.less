@@ -81,12 +81,23 @@ body.admin-menu.navbar-is-fixed-top {
 ul.tags {
 	a {
 		background-color: @brand-primary;
-		color: @brand-accent;
+		color: @white;
 		.rounded(3px);
 		&:hover {
 			background-color: darken(@brand-primary, 10%);
 			text-decoration: none;
 		}
+	}
+	.light & {
+		color: @black;
+	}
+}
+
+.badge {
+	background-color: @brand-primary;
+	color: @white;
+	.light & {
+		color: @black;
 	}
 }
 
@@ -222,20 +233,6 @@ blockquote {
 // Button/Background Color overrides
 .btn { font-family: @font-family-base; }
 
-
-.btn-default, .btn {
-	background-color: transparent;
-	border-color: @brand-primary;
-	color: @brand-primary;
-	font-weight: 300;
-	text-transform: uppercase;
-	&:hover {
-		background-color: @brand-primary;
-		border-color: @brand-primary;
-		color: white;
-	}
-}
-
 // Override for other buttons/backgrounds
 .btn-secondary, .bg-secondary {
 	color: @brand-accent;
@@ -251,4 +248,39 @@ blockquote {
 		background-color: transparent;
 		color: @brand-link;
 	}
+}
+
+// Cool LESS loop stuff
+@colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
+@names  : primary, secondary, accent, success, info, warning, danger;
+@length : length(@colors);
+
+.brand-variation(@names; @colors; @index) when (@index > 0) {
+	.brand-variation(@names; @colors; (@index - 1)); // decrement.
+
+	@name  : extract(@names, @index);
+	@color : extract(@colors, @index);
+
+	.btn-@{name} {
+		background-color: transparent;
+		border-color: @color;
+		color: @color;
+		font-weight: 300;
+		text-transform: uppercase;
+		&:hover {
+			background-color: @color;
+			border-color: @color;
+			color: white;
+		}
+	}
+
+}
+
+.brand-variation(@names; @colors; @length);
+
+// Fix Carousel transition for Safari
+.carousel-inner > .item.next.left,
+.carousel-inner > .item.prev.right,
+.carousel-inner > .item.active {
+	.transition(transform 0.6s ease-in-out);
 }
