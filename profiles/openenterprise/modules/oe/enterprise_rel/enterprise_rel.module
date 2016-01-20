@@ -948,6 +948,58 @@ function enterprise_rel_url_outbound_alter(&$path, &$options, &$original_path) {
   }
 }
 
+function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = array()) {
+  $ct = &drupal_static(__FUNCTION__, array());
+  //dsm($ct);
+
+  $to = array();
+  foreach ($terms as $i => $term) {
+    if (empty($term)) {
+      continue;
+    }
+    if (empty($term->parent)) {
+      $terms[$i]->level = 0;
+    }
+    else {
+      $to[$i] = $term;
+    }
+    $terms[$i]->ancestors = array();
+    $ct[$term->tid] = $terms[$i];
+  }
+  for ($j = 0; $j <= 4; $j++) {
+    foreach ($to as $i => $term) {
+      $tid = $term->tid;
+      foreach ($term->parent as $p_tid) {
+        if (!isset($ct[$p_tid])) {
+          $ct[$p_tid] = taxonomy_term_load($p_tid);
+          if (empty($ct[$p_tid]->parent)) {
+            $ct[$p_tid]->level = 0;
+          }
+          else {
+            $to[$p_tid] = $ct[$p_tid];
+          }
+          if (!empty($options['fill_parents'])) {
+            $terms[$p_tid] = $ct[$p_tid];
+          }
+        }
+        if (isset($ct[$p_tid]->level)) {
+          $ct[$tid]->level = $ct[$p_tid]->level + 1;
+          $ct[$tid]->ancestors = $ct[$p_tid]->ancestors;
+          array_unshift($ct[$tid]->ancestors, $p_tid);
+          if (isset($terms[$i]->tid) || !empty($options['fill_parents'])) {
+            $terms[$i]->level = $ct[$tid]->level;
+            if ($terms[$i]->level > $bottom_level) {
+              $bottom_level = $terms[$i]->level;
+            }
+          }
+          unset($to[$i]);
+        }
+      }
+    }
+  }
+  return $terms;
+}
+
 function enterprise_rel_get_entity_default_arguments($node) {
   $rv_meta = enterprise_rel_get_rel_view_meta();
 
@@ -975,6 +1027,9 @@ function enterprise_rel_get_entity_default_arguments($node) {
       //$wf = $wrapper->{$fa['field_name']}->value();
 
       $entities = $wrapper->{$fa['field_name']}->value();
+      if (empty($entities)) {
+        continue;
+      }
       if (!is_array($entities)) {
         $entities = array($entities);
       }
@@ -985,17 +1040,33 @@ function enterprise_rel_get_entity_default_arguments($node) {
 
       if (!empty($entities)) {
 
-        $params_key = $fa['entity_type'];
+        $v['entity_type'] = $params_key = $fa['entity_type'];
         if (!isset($params[$params_key])) {
           $params[$params_key] = array();
         }
-        $bundle = $fa['bundle'];
+        $v['bundle'] = $bundle = $fa['bundle'];
         if (!isset($params[$params_key][$fa['bundle']])) {
           $params[$params_key][$bundle] = array();
         }
 
         if ($fa['entity_type'] == 'taxonomy_term') {
-          $terms[$bundle] = enterprise_rel_get_terms_levels($entities);
+          $bottom_level = 0;
+          $terms[$bundle] = enterprise_rel_get_terms_levels($entities, $bottom_level);
+          // select only one term per level
+          $selected = array();
+          foreach($terms[$bundle] as $term) {
+            if ($term->level == $bottom_level) {
+              $selected = $term->ancestors;
+              $selected[] = $term->tid;
+              break;
+            }
+          }
+          foreach($entities as $i => $term) {
+            if (!in_array($term->tid, $selected)) {
+              unset($entities[$i]);
+            }
+          }
+
           $count = 0;
           foreach ($entities as $i => $entity) {
             if (!empty($fa['term_parent'])) {
@@ -1021,11 +1092,9 @@ function enterprise_rel_get_entity_default_arguments($node) {
             }
             else {
               if (count($entities) >= ($count+2)) {
-                $v = array(
-                  'title' => $entity->name,
-                  'entities' => array(
-                    $entity,
-                  )
+                $v['title'] = $entity->name;
+                $v['entities'] = array(
+                  $entity,
                 );
                 $v['path_value'] = enterprise_rel_format_views_argument_string($fa['entity_type'], $v, $rv_meta['view'], $fa);
                 $params[$params_key][$bundle] = $v;
@@ -1033,11 +1102,9 @@ function enterprise_rel_get_entity_default_arguments($node) {
                 $args[] = $v;
               }
               else {
-                $v = array(
-                  'title' => $entity->name,
-                  'entities' => array(
-                    $entity,
-                  )
+                $v['title'] = $entity->name;
+                $v['entities'] = array(
+                  $entity,
                 );
                 break;
               }
@@ -1055,52 +1122,6 @@ function enterprise_rel_get_entity_default_arguments($node) {
   }
 
   return $args;
-}
-
-function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = array()) {
-  $ct = &drupal_static(__FUNCTION__, array());
-  //dsm($ct);
-
-  $to = array();
-  foreach ($terms as $i => $term) {
-    if (empty($term->parent)) {
-      $terms[$i]->level = 0;
-    }
-    else {
-      $to[$i] = $term;
-    }
-    $ct[$term->tid] = $terms[$i];
-  }
-  for ($j = 0; $j <= 4; $j++) {
-    foreach ($to as $i => $term) {
-      $tid = $term->tid;
-      foreach ($term->parent as $p_tid) {
-        if (!isset($ct[$p_tid])) {
-          $ct[$p_tid] = taxonomy_term_load($p_tid);
-          if (empty($ct[$p_tid]->parent)) {
-            $ct[$p_tid]->level = 0;
-          }
-          else {
-            $to[$p_tid] = $ct[$p_tid];
-          }
-          if (!empty($options['fill_parents'])) {
-            $terms[$p_tid] = $ct[$p_tid];
-          }
-        }
-        if (isset($ct[$p_tid]->level)) {
-          $ct[$tid]->level = $ct[$p_tid]->level + 1;
-          if (isset($terms[$i]->tid) || !empty($options['fill_parents'])) {
-            $terms[$i]->level = $ct[$tid]->level;
-            if ($terms[$i]->level > $bottom_level) {
-              $bottom_level = $terms[$i]->level;
-            }
-          }
-          unset($to[$tid]);
-        }
-      }
-    }
-  }
-  return $terms;
 }
 
 function enterprise_rel_get_rel_view_default_arguments() {
@@ -1161,21 +1182,30 @@ function enterprise_rel_preprocess_page(&$variables) {
   $cur_path = current_path();
   $entity = menu_get_object();
 
+
   $base_label = $rv_meta['view']->display['default']->display_options['title'];
   if (isset($rv_meta['display']->display_options['title'])) {
     $base_label = $rv_meta['display']->display_options['title'];
   }
 
   if (!empty($entity->entity_type) && $entity->entity_type == 'node') {
+    $settings = variable_get('enterprise_rel_entity_settings_node__' . $entity->type, array());
     $args = enterprise_rel_get_entity_default_arguments($entity);
     //dsm($args);
     //dsm($trail);
+    //dsm($settings);
 
     $trail = array();
     $trail[] = l(t('Home'), '');
     $trail[] = l($base_label, $rv_meta['path']);
+
     foreach ($args as $arg) {
-      if (!empty($arg['path'])) {
+      $set = 1;
+      if (!empty($settings['breadcrumbs']['node']["{$arg['entity_type']}:{$arg['bundle']}"])
+        && $settings['breadcrumbs']['node']["{$arg['entity_type']}:{$arg['bundle']}"]['display'] == 'hide') {
+        $set = 0;
+      }
+      if ($set && !empty($arg['path'])) {
         $trail[] = l($arg['title'], $arg['path']);
       }
       //dsm($trail);
@@ -1498,8 +1528,48 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
     }
   }
 
+  $form['enterprise_rel']['breadcrumbs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Breadcrumbs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
 
+  $form['enterprise_rel']['breadcrumbs']['node'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
 
+  $display_options = array(
+    '' => t('Include'),
+    'hide' => t('Exclude'),
+  );
+  foreach ($rv_meta['_filtargs'] as $key => $fa) {
+    if(empty($fa['argument'])) {
+      continue;
+    }
+    $fs_key = $fa['entity_type'] . ':' . $fa['bundle'];
+    $form['enterprise_rel']['breadcrumbs']['node'][$fs_key] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Argument: :element', array(
+        ':element' => $fa['entity_type'] . ': ' . $fa['bundle']
+      )),
+      '#collapsible' => FALSE,
+    );
+    $form['enterprise_rel']['breadcrumbs']['node'][$fs_key]['display'] = array(
+      '#type' => 'select',
+      '#title' => t('Display'),
+      '#default_value' => !empty($settings['breadcrumbs']['node'][$fs_key]['display']) ? $settings['breadcrumbs']['node'][$fs_key]['display'] : '',
+      '#options' => $display_options,
+      //'#description' => t('Select a view display to act as the default relevant view for this content type.'),
+    );
+  }
+
+  // inherit field options
   $field_info_instances = field_info_instances('node', $node_type->type);
   $field_info_fields = array();
   $field_info_fields_by = array();
