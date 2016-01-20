@@ -21,9 +21,7 @@ function enterprise_config_wizard_install_config0($form, $form_state) {
 }
 
 function enterprise_config_wizard_install_config0_submit($form, $form_state) {
-//dsm('enterprise_config_config_wizard_install_form_submit');
   $values = $form_state['values'];
-dsm($form_state['values']);
   if (!empty($values['config0_enable_base_config'])) {
     $modules = array();
     $modules['admin_menu'] = 1;
@@ -119,12 +117,10 @@ function enterprise_config_wizard_install_content_features($form, $form_state) {
 }
 
 function enterprise_config_wizard_install_features_validate($form, $form_state) {
-//dsm('enterprise_config_config_wizard_install_form_validate');
 //form_set_error('enterprise_blog', t('sure you dont want to blog'));
 }
 
 function enterprise_config_wizard_install_features_submit($form, $form_state) {
-//dsm('enterprise_config_config_wizard_install_form_submit');
   $values = $form_state['values'];
   $modules = array();
   $modules['fontello'] = 1; // TODO: hack to solve enterprise_base dependancy on Fontello
@@ -135,8 +131,6 @@ function enterprise_config_wizard_install_features_submit($form, $form_state) {
 }
 
 function enterprise_config_wizard_install_content_feature_config($form, $form_state) {
-dsm($form);
-dsm($form_state);
   $feature_name = $form_state['config']['substep_n'];
 
   $config_info = enterprise_apps_config_info($feature_name);
@@ -147,7 +141,6 @@ dsm($form_state);
   $form = array_merge($form, $cf);
 
   $form['#submit'][] = 'enterprise_apps_config_form_submit';
-dsm($form);
   return $form;
 }
 
@@ -177,8 +170,6 @@ function enterprise_config_wizard_install_ia_submit($form, $form_state) {
   $wizard = $config['wizard'];
   $config_data = $config['wizard_data'];
   $values = $form_state['values'];
-//dsm($config_data);
-//dsm($values);
 
   $tree = menu_tree_all_data('main-menu');
 
@@ -203,8 +194,6 @@ function enterprise_config_wizard_install_ia_submit($form, $form_state) {
       $level++;
     }
     $title = substr($title, ($level-1));
-//dsm($menu_parents);
-//dsm("level=$level");
     // check item is child of previous
     // check if change in menu level
     if ($level != (count($menu_parents) -1)) {
@@ -225,7 +214,6 @@ function enterprise_config_wizard_install_ia_submit($form, $form_state) {
       'parent' => 'main-menu:' . $plid,
       'plid' => $plid,
     );
-//dsm($menu_settings);
     $mlid = _enterprise_config_wizard_install_ia_setup_menu_item($title, $path, $type_comp, $menu_settings);
     if ($mlid) {
       $prev_mlid = $mlid;
@@ -238,11 +226,9 @@ function enterprise_config_wizard_install_ia_submit($form, $form_state) {
         'menu_name' => 'main-menu',
         'weight' => $i,
       );
-dsm($menu_link);
       menu_link_save($menu_link);
     }
     */
-//dsm($a);
   }
   
   return $form;
@@ -250,7 +236,6 @@ dsm($menu_link);
 
 function _enterprise_config_wizard_install_ia_setup_menu_item($title, $path, $type_comp, $menu_settings) {
 //$args = func_get_args();
-//dsm($args);
   static $content_types;
   if (!isset($content_types)) {
     $content_types = node_type_get_types();
@@ -287,7 +272,6 @@ function _enterprise_config_wizard_install_ia_setup_menu_item($title, $path, $ty
     }
     $node = '';
     $sys_path = drupal_lookup_path("source", $path);
-//dsm($sys_path);
     if ($sys_path) {
       $node = menu_get_object("node", 1, $sys_path);
     }
