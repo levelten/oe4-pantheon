@@ -24,7 +24,6 @@ regions[footer_sticky]  = 'Sticky footer'
 regions[page_top]       = 'Page top'
 regions[page_bottom]    = 'Page bottom'
 
-
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Stylesheets
 ;;;;;;;;;;;;;;;;;;;;;

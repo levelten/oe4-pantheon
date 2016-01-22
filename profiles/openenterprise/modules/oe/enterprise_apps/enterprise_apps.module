@@ -589,16 +589,15 @@ function enterprise_apps_config_form_submit($form, &$form_state) {
         'region' => array($block['region']),
         'visibility_presets' => array(),
       );
-      foreach ($block['visibility_presets'] AS $k => $v) {
-        if ($v) {
-          $config_settings['blocks'][$ci_name]['visibility_presets'][] = $k;
+      if (!empty($block['visibility_presets'])) {
+        foreach ($block['visibility_presets'] AS $k => $v) {
+          if ($v) {
+            $config_settings['blocks'][$ci_name]['visibility_presets'][] = $k;
+          }
         }
       }
     }
   }
-
-  //dsm($config_settings);
-  //dsm($config_info);
 
   enterprise_apps_config_blocks($config_settings, $config_info);
 

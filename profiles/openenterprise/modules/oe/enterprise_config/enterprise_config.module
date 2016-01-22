@@ -670,7 +670,6 @@ function enterprise_config_apps_structures_blocks_form($form, &$form_state, $con
   //drupal_add_css(drupal_get_path('module', 'enterprise_config') . '/css/enterprise_config.admin.css');
   $form = array();
   $theme = variable_get('theme_default', 'bartik');
-dsm($config_info);
   // Fetch and sort blocks.
   require_once(drupal_get_path('module', 'block') . '/block.admin.inc');
   $app_block_deltas = array();
@@ -692,10 +691,6 @@ dsm($config_info);
       $app_blocks[] = $block;
     }
   }
-dsm($blocks);
-dsm($app_block_deltas);
-dsm($config_info);
-dsm($app_blocks);
 
   $block_regions = system_region_list($theme);
 
@@ -794,8 +789,6 @@ dsm($app_blocks);
           ),
         );
         $bc = $b;
-        //dsm($b);
-        //dsm($block);
 
         if (($b['path']['visibility'] == $block['visibility'])) {
           foreach ($block['pages_array'] AS $i => $page) {
@@ -806,10 +799,8 @@ dsm($app_blocks);
           }
         }
         foreach ($block['node_types'] AS $i => $type) {
-          //dsm($type);
           $bci = array_search($type, $b['node_type']['types']);
           if ($bci !== FALSE) {
-            //dsm($bci);
             unset($bc['node_type']['types'][$bci]);
             unset($custom['node_types'][$i]);
           }
@@ -822,13 +813,10 @@ dsm($app_blocks);
           }
         }
 
-        //dsm($bc);
         if (empty($bc['path']['pages']) && empty($bc['node_type']['types']) && empty($bc['views']['views'])) {
           $defaults[] = $k;
         }
       }
-      //dsm($custom);
-      //dsm($options);
       $description_extra = '';
       if (!empty($custom['pages_array'])|| !empty($custom['node_types']) || !empty($custom['views'])) {
         $options['custom'] = t('Keep existing custom settings');
@@ -895,7 +883,6 @@ function enterprise_config_apps_structures_blocks_form_validate($form, &$form_st
 
 function enterprise_config_apps_structures_blocks_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-dsm($values);
   // check if tree from apps config or standard config page
   if (!isset($values['app_structures']) && isset($values['blocks']['app_structures'])) {
     $config_info = $values['blocks']['app_structures'];
@@ -970,12 +957,6 @@ dsm($values);
       }
     }
 
-//dsm($config_info);
-//dsm($block);
-//dsm($region);
-//dsm($pages);
-//dsm($types);
-//dsm($views);
     $fields = array(
       'region' => ($region) ? $region : -1,
       'status' => ($region) ? 1 : 0,
@@ -990,7 +971,6 @@ dsm($values);
       ->condition('theme', $default_theme)
       ->condition('module', $block['module'])
       ->condition('delta', $block['delta']);
-//dsm(" " . $query);
     $query->execute();
 
     db_delete('block_node_type')
@@ -1025,7 +1005,4 @@ dsm($values);
         ->execute();
     }
   }
-
-  //dsm($form);
-  //dsm($form_state['values']);
 }

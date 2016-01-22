@@ -96,8 +96,7 @@ function styler_style_view() {
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler.js');
 
   // Add default bootstrap javascript plugins
-
-  $bootstrap_js = array('scrollspy' => 'scrollspy' , 'affix' => 'scrollspy');
+  $bootstrap_js = array('scrollspy' => 'scrollspy' , 'affix' => 'affix', 'tooltip' => 'tooltip' , 'popover' => 'popover');
   $theme_name = 'enterprise_bootstrap';
   $themes = list_themes();
 
@@ -242,15 +241,15 @@ function theme_styler_element($vars) {
             </div>
           </div>
         ';
-    // process highlight code
+
+    // Process highlight code.
     $highlight = '';
-    if (isset($vars['#value_highlight'])) {
-      if ($vars['#value_highlight']) {
-        $highlight = $vars['#value_highlight'];
-      }
+
+    if (!empty($vars['#value_highlight'])) {
+      $highlight = (string) $vars['#value_highlight'];
     }
     else {
-      $highlight = $code;
+      $highlight = (string) $code;
     }
 
     if ($highlight) {
@@ -629,9 +628,6 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 '
     ),
   );
-
-
-
 
   return $styles;
 }

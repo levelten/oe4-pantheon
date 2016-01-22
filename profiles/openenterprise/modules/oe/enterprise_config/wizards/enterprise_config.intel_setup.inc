@@ -217,7 +217,6 @@ HELP;
 }
 
 function enterprise_config_analytics_setup_form_alter(&$form, &$form_state, $form_id) {
-//dsm($form_id);
   if ($form_id == 'googleanalytics_admin_settings_form') {
     $form['tracking']['#type'] = '';
     $show = array('domain_tracking');
@@ -230,9 +229,7 @@ function enterprise_config_analytics_setup_form_alter(&$form, &$form_state, $for
     hide($form['advanced']);
   }
   else if ($form_id == 'intel_admin_settings') {
-//dsm($form);
     $ga_domain_mode = variable_get('googleanalytics_domain_mode', '');
-//dsm($GLOBALS);
     if ($ga_domain_mode) {
       $a = explode('//', $GLOBALS['base_root']);
       $domain = $a[1];
@@ -254,12 +251,9 @@ function enterprise_config_analytics_setup_form_alter(&$form, &$form_state, $for
         }
       }
       hide($form['revoke']);
-//dsm($intel_ga_account);      
     }
-//dsm($form);    
   }
   else if ($form_id == 'intel_admin_scoring') {
-//dsm($form);
     hide($form['targets']);
     hide($form['scores']);
     $form['advanced']['#title'] = t('Goal settings');

@@ -1677,26 +1677,27 @@ function enterprise_conversion_styler_style() {
 
   $styles['ctas'] = array(
     '#title' => t('Calls to Action'),
+    '#description' => t('Various templates for marking up CTAs.'),
   );
 
+  // Buttons
   $styles['ctas']['button'] = array(
     '#title' => t('Buttons'),
     '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => '
-Example 1:<br />
-<button class="btn cta-btn">Click Me Now</button>
+      '#value' => 'Example 1:<br />
+<button class="cta-btn">Click Me Now</button>
 <br />
 <br />
 Example 2:<br />
-<button class="btn btn-secondary cta-btn">
+<button class="cta-btn cta-secondary">
   <div class="icon-right">
     <span>
       <h3>Click Me Now</h3>
       <small>Get started in seconds</small>
     </span>
-    <i class="icon glyphicon glyphicon glyphicon-chevron-right"></i>
+    <i class="icon glyphicon glyphicon-chevron-right"></i>
   </div>
 </button>
 <br />
@@ -1710,13 +1711,12 @@ Example 3:<br />
     </span>
     <i class="icon glyphicon glyphicon-chevron-down"></i>
   </div>
-</button>
-',
+</button>',
       '#value_highlight' => 'Example 1:
-<button class="btn btn-primary cta-btn">Click Me Now</button>
+<button class="cta-btn">Click Me Now</button>
 
 Example 2:
-<button class="btn btn-secondary cta-btn">
+<button class="cta-btn cta-secondary">
   <div class="icon-right">
     <span>
       <h3>Click Me Now</h3>
@@ -1727,7 +1727,7 @@ Example 2:
 </button>
 
 Example 3:
-<button class="btn cta-accent cta-btn">
+<button class="cta-btn cta-accent">
   <div class="icon-bottom">
     <span>
       <h3>Click Me Now</h3>
@@ -1739,7 +1739,7 @@ Example 3:
     ),
   );
 
-  // CTAs
+  // Sidebar
   $styles['ctas']['sidebar'] = array(
     '#title' => t('Sidebars'),
     '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
@@ -1752,8 +1752,8 @@ Example 3:
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
       <button class="btn-cta btn-group pull-right" href="#">
-        <span class="btn btn-verb">Download Now</span>
-        <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
     </div>
   </div>
@@ -1767,8 +1767,8 @@ Example 3:
       <div class="col-md-7">
         <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
         <button class="btn-cta btn-group" href="#">
-          <span class="btn btn-verb">Download Now</span>
-          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+          <span class="btn-verb">Download Now</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
         </button>
       </div>
     </div>
@@ -1779,8 +1779,8 @@ Example 3:
   <h3>Build a Smarter Website</h3>
   <p>...</p>
   <button class="btn-cta btn-group pull-right">
-    <span class="btn btn-verb">Download Now</span>
-    <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <span class="btn-verb">Download Now</span>
+    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
@@ -1793,33 +1793,34 @@ Example 2:
   <div class="col-md-7">
     <p>....</p>
     <button class="btn-cta btn-group pull-right">
-      <span class="btn btn-verb">Download Now</span>
-      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      <span class="btn-verb">Download Now</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
     </button>
   </div>
 </div>',
     ),
   );
 
+  // Footer
   $styles['ctas']['footer'] = array(
     '#title' => t('Footers'),
     '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => '<div class="row">
+      '#value' => '<div class="row margin-bottom">
   <div class="col-md-12">
     Example 1:<br />
     <div class="cta">
       <h3>Build a Smarter Website</h3>
       <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
       <button class="btn-cta btn-group center-block">
-        <span class="btn btn-verb">Download Now</span>
-        <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
     </div>
   </div>
   </div>
-<div class="row">
+<div class="row margin-bottom">
 <div class="col-md-12">
     Example 2:<br />
     <div class="cta cta-secondary">
@@ -1830,8 +1831,26 @@ Example 2:
         <h3>Build a Smarter Website</h3>
         <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
         <button class="btn-cta btn-group">
-          <span class="btn btn-verb">Download Now</span>
-          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+          <span class="btn-verb">Download Now</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row margin-bottom">
+<div class="col-md-12">
+    Example 3:<br />
+    <div class="cta cta-bg">
+      <div class="col-md-2">
+        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+      </div>
+      <div class="col-md-10">
+        <h3>Build a Smarter Website</h3>
+        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+        <button class="btn-cta btn-group">
+          <span class="btn-verb">Download Now</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
         </button>
       </div>
     </div>
@@ -1839,7 +1858,7 @@ Example 2:
 </div>
 <div class="row">
 <div class="col-md-12">
-    Example 3:<br />
+    Example 4:<br />
     <div class="cta cta-secondary cta-bg">
       <div class="col-md-2">
         <img src="http://placehold.it/120x150" style="max-height: 120px;" />
@@ -1848,8 +1867,8 @@ Example 2:
         <h3>Build a Smarter Website</h3>
         <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
         <button class="btn-cta btn-group">
-          <span class="btn btn-verb">Download Now</span>
-          <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+          <span class="btn-verb">Download Now</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
         </button>
       </div>
     </div>
@@ -1860,8 +1879,8 @@ Example 2:
   <h3>Build a Smarter Website</h3>
   <p>...</p>
   <button class="btn-cta btn-group center-block">
-    <span class="btn btn-verb">Download Now</span>
-    <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <span class="btn-verb">Download Now</span>
+    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
@@ -1873,14 +1892,28 @@ Example 2:
   <div class="col-md-10">
     <h3>Build a Smarter Website</h3>
     <p>...</p>
-    <a class="btn-cta btn-group" href="#">
-      <span class="btn btn-verb">Download Now</span>
-      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </a>
+    <button class="btn-cta btn-group" href="#">
+      <span class="btn-verb">Download Now</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
   </div>
 </div>
 
 Example 3:
+<div class="cta cta-bg">
+  <div class="col-md-2">
+    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+  </div>
+  <div class="col-md-10">
+    <h3>Build a Smarter Website</h3>
+    <p>...</p>
+    <button class="btn-cta btn-group" href="#">
+      <span class="btn-verb">Download Now</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
+  </div>
+</div>
+Example 4:
 <div class="cta cta-secondary cta-bg">
   <div class="col-md-2">
     <img src="http://placehold.it/120x150" style="max-height: 120px;" />
@@ -1888,10 +1921,73 @@ Example 3:
   <div class="col-md-10">
     <h3>Build a Smarter Website</h3>
     <p>...</p>
-    <a class="btn-cta btn-group" href="#">
-      <span class="btn btn-verb">Download Now</span>
-      <span class="btn btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <button class="btn-cta btn-group" href="#">
+      <span class="btn-verb">Download Now</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
+  </div>
+</div>',
+    ),
+  );
+
+  $styles['ctas']['rectangle'] = array(
+    '#title' => t('Rectangles'),
+    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<div class="row">
+  <div class="col-md-6">
+    <a href="#">
+    <div class="cta cta-rectangle">
+      <h3>Build a Smarter Website</h3>
+      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+      <button class="btn-cta btn-group pull-right">
+        <span class="btn-verb">Get it now!</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
     </a>
+  </div>
+  <div class="col-md-6">
+    <a href="#">
+    <div class="cta cta-rectangle cta-secondary">
+      <h3>Build a Smarter Website</h3>
+      <div class="col-md-5">
+        <img src="http://placehold.it/120x150" />
+      </div>
+      <div class="col-md-7">
+        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+        <button class="btn-cta btn-group">
+          <span class="btn-verb">Get it now!</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-rectangle">
+  <h3>Build a Smarter Website</h3>
+  <p>...</p>
+  <button class="btn-cta btn-group pull-right">
+          <span class="btn-verb">Get it now!</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+</div>
+
+Example 2:
+<div class="cta cta-rectangle cta-secondary">
+  <h3>Build a Smarter Website</h3>
+  <div class="col-md-5">
+    <img src="..." />
+  </div>
+  <div class="col-md-7">
+    <p>....</p>
+    <button class="btn-cta btn-group">
+      <span class="btn-verb">Get it now!</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
   </div>
 </div>',
     ),
