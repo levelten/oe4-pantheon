@@ -272,7 +272,7 @@ function intel_admin_settings($form, $form_state) {
 
 function intel_admin_settings_submit($form, &$form_state) {
   $api_ver = variable_get('intel_l10iapi_ver', '');
-  if (!$api_ver || $api_ver == 1) {
+  if (!$api_ver || $api_ver == intel_verify_apikey()) {
     return;
   }
 
@@ -284,9 +284,16 @@ function intel_admin_settings_submit($form, &$form_state) {
     }
   }
 
-  $message = '';
-  $apiclient = intel_get_api($message);
-  $apiclient->put('property/');
+  $property = intel_get_property_obj();
+  try {
+    $property->save(array(), array(
+      'plugins' => $plugins
+    ));
+    drupal_set_message('Successfully saved Property');
+  }
+  catch (exception $e) {
+    drupal_set_message('Unable to save property', 'error');
+  }
 }
 
 function intel_admin_settings_validate($form, &$form_state) {

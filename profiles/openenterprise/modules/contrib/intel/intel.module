@@ -1428,7 +1428,7 @@ function intel_verify_library(&$message = '') {
   return $lib_path;
 }
 
-function intel_verify_apikey(&$message = '', &$property = array(), $options = array()) {
+function intel_get_property_obj() {
   $api_ver = variable_get('intel_l10iapi_ver', '');
   $apiUrl = variable_get('intel_l10iapi_url', '');
   $tid = variable_get('intel_ga_account', '');
@@ -1454,7 +1454,8 @@ function intel_verify_apikey(&$message = '', &$property = array(), $options = ar
   $params = array();
   $data = array();
   intel_include_library_file('class.property.php');
-  $property_factory = new \LevelTen\Intel\ApiProperty($apiClientProps, $api_ver);
+
+  $property = new \LevelTen\Intel\ApiProperty($apiClientProps, $api_ver);
 
   if ($api_ver != 2) {
     $params = isset($options['params']) ? $options['params'] : array();
@@ -1464,14 +1465,31 @@ function intel_verify_apikey(&$message = '', &$property = array(), $options = ar
     );
   }
 
-  $property = $property_factory->load($params, $data);
+  try {
+    $property->load($params, $data);
+  }
+  catch (exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+  }
+
+  return $property;
+}
+
+function intel_verify_apikey(&$message = '', &$property = array(), $options = array()) {
+  $property = intel_get_property_obj();
   if (!$property) {
-    $message = $property_factory->getError();
+    $message = $property->getError();
     return FALSE;
   }
   else {
-    variable_set('intel_api_level', $property->level);
-    return $property->level;
+    $apiProperty = $property->getProperty();
+    if ($apiProperty) {
+      variable_set('intel_api_level', $apiProperty->level);
+      return $apiProperty->level;
+    }
+    else {
+      return FALSE;
+    }
   }
 }
 

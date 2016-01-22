@@ -16,32 +16,28 @@ require_once 'class.apiclient2.php';
 require_once 'class.exception.php';
 
 class ApiProperty {
-
-  protected $version;
 	protected $apiProperty;
 	protected $apiClient;
+  protected $version;
   protected $error;
 
   public function __construct($apiClientProperties = array(), $version = 1) {
-    $this->version = $version;
+    $apiClientProperties['version'] = $version;
     $this->error = '';
     $this->apiProperty = null;
-    switch ($this->version) {
-      case 1:
-        $this->apiClient = new ApiClient($apiClientProperties);
-        break;
-      case 2:
-        $this->apiClient = new ApiClient2($apiClientProperties);
-        break;
-      default:
-        $this->apiClient = new ApiClient($apiClientProperties);
-    }
+    $this->version = $version;
+    $this->apiClient = new ApiClient($apiClientProperties);
   }
 	
   public function load($params = array(), $data = array()){
   	$endpoint = ($this->version == 1) ? 'property/load' : 'property';
   	try {
-  	  $ret = $this->apiClient->getJSON($endpoint, $params, $data);
+      if ($this->version == 1) {
+        $ret = $this->apiClient->getJSON($endpoint, $params, $data);
+      }
+      else {
+        $ret = $this->apiClient->get($endpoint, $params, $data);
+      }
       $prop = ($this->version == 1) ? (object)$ret['property'] : (object)$ret;
       if (empty($ret)) {
         return FALSE;
