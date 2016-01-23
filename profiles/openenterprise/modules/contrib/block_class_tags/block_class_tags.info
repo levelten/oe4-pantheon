@@ -1,0 +1,8 @@
+name = Block Class Tags
+description = Turns class names into tags and allows developers to define their own classes.
+core = 7.x
+version = 7.x-1.0
+
+dependencies[] = block_class
+
+configure = admin/structure/block/tags
