@@ -12,68 +12,55 @@
 namespace LevelTen\Intel;
 
 require_once 'class.apiclient.php';
-require_once 'class.apiclient2.php';
 require_once 'class.exception.php';
 
 class ApiProperty {
+
+  protected $pid;
 	protected $apiProperty;
 	protected $apiClient;
-  protected $version;
-  protected $error;
 
-  public function __construct($apiClientProperties = array(), $version = 1) {
-    $apiClientProperties['version'] = $version;
-    $this->error = '';
-    $this->apiProperty = null;
-    $this->version = $version;
+  public function __construct($pid = '', $apiClientProperties = array()) {
     $this->apiClient = new ApiClient($apiClientProperties);
+    $this->pid = $pid; 
   }
 	
   public function load($params = array(), $data = array()){
-  	$endpoint = ($this->version == 1) ? 'property/load' : 'property';
+  	$endpoint = 'property/load';
+    if (!isset($params['pid'])) {
+      $params['pid'] = $this->pid;
+    }
   	try {
-      if ($this->version == 1) {
-        $ret = $this->apiClient->getJSON($endpoint, $params, $data);
-      }
-      else {
-        $ret = $this->apiClient->get($endpoint, $params, $data);
-      }
-      $prop = ($this->version == 1) ? (object)$ret['property'] : (object)$ret;
-      if (empty($ret)) {
+  	  $ret = $this->apiClient->getJSON($endpoint, $params, $data);
+      if (empty($ret['property'])) {
         return FALSE;
       }
-  	  $this->apiProperty = $prop;
+  	  $this->apiProperty = (object)$ret['property'];
   		return $this->apiProperty;
   	} 
   	catch (L10IntelException $e) {
-      $this->error = $e->getMessage();
+  		throw new L10IntelException('Unable to load property: ' . $e);
   	}
   }
   
   public function save($params = array(), $data = array()){
-    $endpoint = ($this->version == 1) ? 'property/save' : 'property';
+    $endpoint = 'property/save';
+    if (!isset($params['pid'])) {
+      $params['pid'] = $this->pid;
+    }
     try {
-      if ($this->version == 1) {
-        $ret = $this->apiClient->getJSON($endpoint, $params, $data);
-      }
-      else {
-        $ret = $this->apiClient->put($endpoint, $params, $data);
-      }
-      if (!$ret) {
-        throw new L10IntelException('Property not returned from API. msg: ' . $ret['message']);
-        return;
-      }
-      $prop = ($this->version == 1) ? (object)$ret['property'] : (object)$ret;
-      if ($prop) {
+      $ret = $this->apiClient->getJSON($endpoint, $params, $data);
+      if (isset($ret['property'])) {
+        $prop = (object)$ret['property'];
         $this->apiProperty = $prop;
         return $prop;
       }
       else {
-        $this->error = 'Property not returned from API. msg: ' . $ret['message'];
+        throw new L10IntelException('Property not returned from API. msg: ' . $ret['message']);
       }
     } 
     catch (L10IntelException $e) {
-      $this->error = $e->getMessage();
+      throw new L10IntelException('Unable to save property: ' . $e);
     }
   }
     
@@ -83,10 +70,6 @@ class ApiProperty {
   
   public function getProperty() {
     return $this->apiProperty;
-  }
-
-  public function getError() {
-    return $this->error;
   }
   
   public function __toString() {

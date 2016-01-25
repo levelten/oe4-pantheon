@@ -256,7 +256,7 @@ function intel_menu() {
     'access callback' => '_intel_permission_access_content_report',
     'file' => 'reports/intel.report_scorecard.inc',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
+    'weight' => 1,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
   /*
@@ -1428,68 +1428,50 @@ function intel_verify_library(&$message = '') {
   return $lib_path;
 }
 
-function intel_get_property_obj() {
-  $api_ver = variable_get('intel_l10iapi_ver', '');
-  $apiUrl = variable_get('intel_l10iapi_url', '');
-  $tid = variable_get('intel_ga_account', '');
-  $apikey = variable_get('intel_apikey', '');
-  $api_params = variable_get('intel_l10iapi_custom_params', array());
-  if ($api_ver == 2) {
-    $apiClientProps = array(
-      'apiUrl' => ($apiUrl ? $apiUrl : INTEL_L10IAPI_URL),
-      'apiParams' => $api_params,
-      'tid' => $tid,
-      'apikey' => $apikey,
-    );
-  }
-  else {
-    $apiClientProps = array(
-      'apiUrl' => ($apiUrl ? $apiUrl : INTEL_L10IAPI_URL) . '/',
-      'apiConnector' => variable_get('intel_l10iapi_connector', ''),
-      'apiParams' => $api_params,
-      'tid' => $tid,
-      'apikey' => $apikey,
-    );
-  }
-  $params = array();
-  $data = array();
-  intel_include_library_file('class.property.php');
-
-  $property = new \LevelTen\Intel\ApiProperty($apiClientProps, $api_ver);
-
-  if ($api_ver != 2) {
-    $params = isset($options['params']) ? $options['params'] : array();
-    $params['tid'] = $tid;
-    $data = array(
-      'apikey' => $apikey,
-    );
-  }
-
-  try {
-    $property->load($params, $data);
-  }
-  catch (exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-  }
-
-  return $property;
-}
-
 function intel_verify_apikey(&$message = '', &$property = array(), $options = array()) {
-  $property = intel_get_property_obj();
-  if (!$property) {
-    $message = $property->getError();
+  if (!intel_verify_library($message)) {
     return FALSE;
   }
+  $tid = isset($options['tid']) ? $options['tid'] : variable_get('intel_ga_account', '');
+  if (!$tid) {
+    $message = t('Tracking id is not set.');
+    return FALSE;
+  }
+  $apikey = isset($options['apikey']) ? $options['apikey'] : variable_get('intel_apikey', '');
+  if (!$apikey) {
+    $message = t('API key is not set');
+    return FALSE;
+  }
+  intel_include_library_file('class.apiclient.php');
+  $apiUrl = variable_get('intel_l10iapi_url', '');
+  $api_params = variable_get('intel_l10iapi_custom_params', array());
+  $apiClientProps = array(
+    'apiUrl' => ($apiUrl ? $apiUrl : INTEL_L10IAPI_URL) . '/',
+    'apiConnector' => variable_get('intel_l10iapi_connector', ''),
+    'apiParams' => $api_params,
+  );
+  $apiclient = new \LevelTen\Intel\ApiClient($apiClientProps);
+  $ret = '';
+  $params = isset($options['params']) ? $options['params'] : array();
+  $params['tid'] = $tid;
+  $data = array(
+    'apikey' => $apikey,
+  );
+  try {
+    $ret = $apiclient->getJSON('property/validate', $params, $data);
+  }
+  catch (Exception $e) {
+    $message = $e->getMessage();
+  }
+  if (!empty($ret['property'])) {
+    $property = (array) $ret['property'];
+    $api_level = $property['level'];
+    variable_set('intel_api_level', $api_level);
+    return $api_level;
+  }
   else {
-    $apiProperty = $property->getProperty();
-    if ($apiProperty) {
-      variable_set('intel_api_level', $apiProperty->level);
-      return $apiProperty->level;
-    }
-    else {
-      return FALSE;
-    }
+    $message = t('API key invalid.') . ' ' . $message;
+    return FALSE;
   }
 }
 
