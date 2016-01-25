@@ -90,6 +90,12 @@ function block_class_tags_menu() {
 function block_class_tags_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'block_admin_configure' || $form_id == 'block_add_block_form') {
 
+    // Store default value for later.
+    $form['block_class_tags'] = array(
+      '#type' => 'hidden',
+      '#value' => $form['settings']['css_class']['#default_value'],
+    );
+
     $module_path = drupal_get_path('module', 'block_class_tags');
     $plugins = array();
 
@@ -168,7 +174,10 @@ function block_class_tags_form_alter(&$form, $form_state, $form_id) {
 /**
  * Alter class string when saving block data.
  */
-function block_class_tags_validate($form, &$form_state) {
+function block_class_tags_validate(&$form, &$form_state) {
+  // Set default back to original state for processing.
+  $form['settings']['css_class']['#default_value'] = $form['block_class_tags']['#value'];
+  // Clean up submitted values.
   $value = _block_class_tags_modify($form_state['input']['css_class']);
   $form_state['values']['css_class'] = $form_state['input']['css_class'] = $value;
 }
@@ -217,5 +226,6 @@ function block_class_tags_default_tags() {
  */
 function _block_class_tags_modify($text) {
   // Remove extra characters.
-  return str_replace(',', ' ', str_replace(array('[', ']', '"'), '', $text));
+  $text = (!empty($text)) ? str_replace(',', ' ', str_replace(array('[', ']', '"'), '', $text)) : '';
+  return $text;
 }
