@@ -47,7 +47,6 @@ function enterprise_bootstrap_preprocess_html(&$variables) {
   if (theme_get_setting('eb_dark_theme')) {
     $variables['classes_array'][] = 'dark';
   }
-
   // Add light class to theme if enabled.
   if (theme_get_setting('eb_light_primary')) {
     $variables['classes_array'][] = 'light';
@@ -55,6 +54,9 @@ function enterprise_bootstrap_preprocess_html(&$variables) {
   if (theme_get_setting('eb_light_secondary')) {
     $variables['classes_array'][] = 'light-secondary';
   }
+
+  // Add page-header-above class
+  $variables['classes_array'][] = (theme_get_setting('title_placement')) ? 'page-title-inside' : 'page-title-above';
 }
 
 /**
