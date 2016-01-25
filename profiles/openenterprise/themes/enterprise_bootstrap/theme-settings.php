@@ -89,6 +89,16 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Wide'),
 		),
 	);
+	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
+		'#type' => 'select',
+		'#title' => t('Block Striping'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
+		'#description' => t('Adds odd/even classes to blocks on the home page.'),
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+	);
 	
   $form['enterprise_bootstrap_config']['column_right']['eb_dark_theme'] = array(
     '#type' => 'checkbox',
@@ -121,8 +131,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-
-  $form['enterprise_bootstrap_header_settings'] = array(
+ $form['enterprise_bootstrap_header_settings'] = array(
     '#type' => 'fieldset',
     '#group' => 'enterprise_bootstrap',
     '#title' => t('Header'),
