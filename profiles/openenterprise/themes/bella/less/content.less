@@ -1,13 +1,12 @@
 // Insert your styling here.
 
 .page-title {
-	background-color: @gray;
+	background-color: @gray-light;
 	&, h1, h2, .page-header {
 		color: white;
 	}
 	.page-header {
 		border: none;
-		font-weight: 500;
 		letter-spacing: 1px;
 		margin: 0;
 		padding: 0.5em 0;
@@ -19,6 +18,19 @@
 		}
 	}
 }
+
+.page-title-above {
+	.navbar {
+		margin-bottom: 0;
+	}
+}
+.page-title-inside {
+	.page-header {
+		margin-top: 0;
+		padding-top: 0;
+	}
+}
+
 #page-header {
 	background-color: @brand-secondary;
 	padding: 2em 0;
