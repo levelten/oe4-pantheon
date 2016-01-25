@@ -486,9 +486,6 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 ',
   );
 
-
-
-
   // Images
   $desc = t('Add classes to an <img> element to easily style images in any project.');
   $styles['images'] = array(
