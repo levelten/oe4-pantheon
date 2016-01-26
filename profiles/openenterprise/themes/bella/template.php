@@ -27,3 +27,15 @@ function bella_process_page(&$variables) {
     }
   }
 }
+
+/**
+ * Implements hook_preprocess_html()
+ */
+function bella_preprocess_html(&$vars) {
+
+  // Add Bella button class.
+  if (theme_get_setting('bella_buttons')) {
+    $vars['classes_array'][] = 'bella-buttons';
+  }
+
+}
