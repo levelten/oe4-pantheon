@@ -1748,54 +1748,138 @@ Example 3:
       '#value' => '<div class="row">
   <div class="col-md-6">
     Example 1:<br />
-    <div class="cta cta-default">
-      <h3 class="cta-heading">Call to Action Heading</h3>
-      <p>Aenean lacinia bibendum nulla sed consectetur.</p>
-      <button class="btn-cta btn-group pull-right">
-        <span class="btn-verb">Download Now</span>
-        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-      </button>
-    </div>
-  </div>
-  <div class="col-md-6">
-    Example 2:<br />
-    <div class="cta cta-secondary">
-      <h3 class="cta-heading">Call to Action Heading</h3>
-      <div class="col-md-5">
-        <img src="http://placehold.it/120x150" />
-      </div>
-      <div class="col-md-7">
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
+    <a href="#">
+      <div class="cta cta-default">
+        <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+        <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+        <button class="btn btn-cta btn-group">
           <span class="btn-verb">Download Now</span>
           <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
         </button>
       </div>
-    </div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-primary">
+        <h3 class="cta-heading">Call to Action Heading</h3>
+        <div class="row">
+          <div class="col-md-5">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-md-7 no-gutter-left">
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn btn-accent btn-group">
+              <span class="btn-verb">Download Now</span>
+              <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    Example 3:<br />
+    <a href="#">
+      <div class="cta cta-secondary">      
+        <div class="row">
+          <div class="col-md-5">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-md-7 no-gutter-left text-left">
+            <h3 class="cta-heading">Call to Action Heading</h3>
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn btn-cta btn-group pull-right">
+              <span class="btn-verb">Download Now</span>
+              <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    Example 4:<br />
+    <a href="#">
+      <div class="cta cta-accent">
+        <h3 class="cta-heading text-left">Call to Action Heading</h3>
+        <div class="row">
+          <div class="col-md-4">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-md-8 no-gutter-left text-left">
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn btn-primary btn-group pull-right">
+              <span class="btn-verb">Download Now</span>
+              <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </a>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
-<div class="cta">
-  <h3>Build a Smarter Website</h3>
+<div class="cta cta-default">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
   <p>...</p>
-  <button class="btn-cta btn-group pull-right">
+  <button class="btn btn-cta btn-group">
     <span class="btn-verb">Download Now</span>
     <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
 Example 2:
-<div class="cta cta-secondary">
-  <h3>Build a Smarter Website</h3>
-  <div class="col-md-5">
-    <img src="http://placehold.it/120x150" />
+<div class="cta cta-primary">
+  <h3 class="cta-heading">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-md-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-md-7 no-gutter-left">
+      <p>...</p>
+      <button class="btn btn-accent btn-group">
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
   </div>
-  <div class="col-md-7">
-    <p>....</p>
-    <button class="btn-cta btn-group pull-right">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
+</div>
+
+Example 3:
+<div class="cta cta-secondary">      
+  <div class="row">
+    <div class="col-md-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-md-7 no-gutter-left text-left">
+      <h3 class="cta-heading">Call to Action Heading</h3>
+      <p>...</p>
+      <button class="btn btn-cta btn-group pull-right">
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+Example 4:
+<div class="cta cta-accent">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-md-4">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-md-8 no-gutter-left text-left">
+      <p>...</p>
+      <button class="btn btn-primary btn-group pull-right">
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
   </div>
 </div>',
     ),
@@ -1810,10 +1894,10 @@ Example 2:
       '#value' => '<div class="row margin-bottom">
   <div class="col-md-12">
     Example 1:<br />
-    <div class="cta">
-      <h3>Build a Smarter Website</h3>
-      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-      <button class="btn-cta btn-group center-block">
+    <div class="cta cta-default cta-block">
+      <h3 class="cta-heading">Call to Action Heading</h3>
+      <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+      <button class="btn btn-cta btn-group center-block">
         <span class="btn-verb">Download Now</span>
         <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
@@ -1823,108 +1907,47 @@ Example 2:
 <div class="row margin-bottom">
 <div class="col-md-12">
     Example 2:<br />
-    <div class="cta cta-secondary">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row margin-bottom">
-<div class="col-md-12">
-    Example 3:<br />
-    <div class="cta cta-bg">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row">
-<div class="col-md-12">
-    Example 4:<br />
-    <div class="cta cta-secondary cta-bg">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
+    <div class="cta cta-primary cta-block">
+      <div class="row">
+        <div class="col-md-2">
+          <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+        </div>
+        <div class="col-md-10 text-left">
+          <h3 class="cta-heading">Call to Action Heading</h3>
+          <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+          <button class="btn btn-cta btn-group pull-right">
+            <span class="btn-verb">Download Now</span>
+            <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
-<div class="cta">
-  <h3>Build a Smarter Website</h3>
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading">Call to Action Heading</h3>
   <p>...</p>
-  <button class="btn-cta btn-group center-block">
+  <button class="btn btn-cta btn-group center-block">
     <span class="btn-verb">Download Now</span>
     <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
 Example 2:
-<div class="cta cta-secondary">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
-  </div>
-</div>
-
-Example 3:
-<div class="cta cta-bg">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
-  </div>
-</div>
-Example 4:
-<div class="cta cta-secondary cta-bg">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
+<div class="cta cta-primary cta-block">
+  <div class="row">
+    <div class="col-md-2">
+      <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+    </div>
+    <div class="col-md-10 text-left">
+      <h3 class="cta-heading">Call to Action Heading</h3>
+      <p>...</p>
+      <button class="btn btn-cta btn-group pull-right">
+        <span class="btn-verb">Download Now</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
   </div>
 </div>',
     ),

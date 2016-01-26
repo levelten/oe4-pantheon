@@ -439,6 +439,8 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
     '#value' => '
     <button type="button" class="btn btn-default">Default</button>
     <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-secondary">Secondary</button>
+    <button type="button" class="btn btn-accent">Accent</button>
     <button type="button" class="btn btn-success">Success</button>
     <button type="button" class="btn btn-info">Info</button>
     <button type="button" class="btn btn-warning">Warning</button>
@@ -450,6 +452,12 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 
 <!-- Provides extra visual weight and identifies the primary action in a set of buttons -->
 <button type="button" class="btn btn-primary">Primary</button>
+
+<!-- Styled to match brand secondary color -->
+<button type="button" class="btn btn-secondary">Secondary</button>
+
+<!-- Styled to match brand accent color -->
+<button type="button" class="btn btn-accent">Accent</button>
 
 <!-- Indicates a successful or positive action -->
 <button type="button" class="btn btn-success">Success</button>
