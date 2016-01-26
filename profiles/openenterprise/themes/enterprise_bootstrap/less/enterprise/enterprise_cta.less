@@ -2,42 +2,53 @@
   .btn();
   white-space: normal;
 
+
   &.cta-default {
-    .btn-default();
+    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
     .btn-cta {
-      .btn-primary();
+      .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
     }
   }
   &.cta-primary {
-    .btn-primary();
+    .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
     .btn-cta {
-      .btn-default();
+      .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
     }
   }
   &.cta-secondary {
-    .btn-secondary();
+    .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
     .btn-cta {
-      .btn-default();
+      .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
     }
   }
   &.cta-accent {
-    .btn-accent();
+    .button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
     .btn-cta {
-      .btn-default();
+      .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
     }
   }
-
-  .cta-heading {
-    margin-top: 0;
-    margin-bottom: 5px;
-    &:hover {
-      color: inherit;
-    }
+  &.text-primary, .text-primary {
+    .text-primary();
   }
+  &.text-secondary, .text-secondary {
+    .text-secondary();
+  }
+  &.text-accent, .text-accent {
+    .text-accent();
+  }
+}
 
-  .cta-body {
+.cta-heading {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: inherit;
+  &:hover {
     color: inherit;
   }
+}
+
+.cta-body {
+  color: inherit;
 }
 
 .cta-block {
