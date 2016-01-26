@@ -1,164 +1,55 @@
-
-.cta-btn {
-	.button-variant(@white; @brand-primary; @brand-primary);
-	.rounded(3px);
-	border: 0;
-
-	h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-		color: @white;
-		margin-top: 5px;
-		margin-bottom: 3px;
-	}
-	.light & {
-		color: @black;
-		h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-			color: @black;
-		}
-	}
-
-	&.cta-alt {
-		.button-variant(@brand-primary; transparent; @brand-primary);
-	}
-	&.cta-secondary {
-		.button-variant(@white; @brand-secondary; @brand-secondary);
-		&.cta-alt {
-			.button-variant(@brand-secondary; transparent; @brand-secondary);
-		}
-		.light-secondary & {
-			color: @black;
-			h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-				color: @black;
-			}
-		}
-	}
-	&.cta-accent {
-		background-color: @brand-accent;
-		.button-variant(@white; @brand-accent; @brand-accent);
-		&.cta-alt {
-			.button-variant(@brand-accent; transparent; @brand-accent);
-		}
-	}
-}
-
 .cta {
-	.box-sizing();
-	padding: 10px;
-	border: 0;
-	overflow: hidden;
+  .btn();
+  white-space: normal;
 
-	&:last-child {
-		margin-right: 0;
-	}
-
+  &.cta-default {
+    .btn-default();
     .btn-cta {
-      padding-top: 4px;
-      padding-bottom: 5px;
-      .rounded(4px);
-      .btn-verb {
-        padding-right: 6px;
-        border-width-right: 1px;
-        border-width-style: solid;
-      }
-      .btn-icon {
-        padding-left: 3px;
-      }
-
-      &.btn-cta-default {
-        .button-variant(@white, @brand-primary, @brand-primary);
-        .btn-verb, .btn-icon {
-          color: @white;
-          .light & {
-            color: @black;
-          }
-        }
-        .btn-verb {
-          padding-right: 6px;
-          border-color-right: @white;
-          .light & {
-            border-right-color: @black;
-          }
-        }
-      }
+      .btn-primary();
     }
+  }
+  &.cta-primary {
+    .btn-primary();
+    .btn-cta {
+      .btn-default();
+    }
+  }
+  &.cta-secondary {
+    .btn-secondary();
+    .btn-cta {
+      .btn-default();
+    }
+  }
+  &.cta-accent {
+    .btn-accent();
+    .btn-cta {
+      .btn-default();
+    }
+  }
 
-	&.cta-secondary {
-		h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-			color: @brand-secondary
-		}
-		.btn-cta {
-			.button-variant(@white, @brand-secondary, @brand-secondary);
-			.light-secondary & {
-				.button-variant(@black, @brand-secondary, @brand-secondary);
-				.btn-verb, .btn-icon {
-					color: @black;
-				}
-				.btn-verb {
-					border-right-color: @black;
-				}
-			}
-		}
-	}
+  .cta-heading {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: inherit;
+  }
 
-	&.cta-bg {
-		background-color: @brand-primary;
-		&, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-			color: @white;
-		}
-		.btn-cta {
-			.button-variant(@brand-primary, @white, @white);
-		}
-		.btn-verb, .btn-icon {
-			color: @brand-primary;
-			border-right-color: @brand-primary;
-		}
-		.light & {
-			&, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-				color: @black;
-			}
-			.btn-cta {
-				.button-variant(@brand-primary, @black, @black);
-			}
-		}
-		&.cta-secondary {
-			background-color: @brand-secondary;
-			&, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-				color: @white
-			}
-			.btn-cta {
-				.button-variant(@brand-secondary, @white, @white);
-			}
-			.btn-verb, .btn-icon {
-				color: @brand-secondary;
-				border-right-color: @brand-secondary;
-			}
-			.light-secondary & {
-				&, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-					color: @black;
-				}
-				.btn-verb, .btn-icon {
-					color: @brand-secondary;
-					border-right-color: @brand-secondary;
-				}
-				.btn-cta {
-					.button-variant(@brand-secondary, @black, @black);
-				}
-			}
-		}
-	}
-	&.cta-rectangle {
-		color: @text-color;
-		h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-			color: @brand-primary;
-		}
-		&:hover {
-			&, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-				text-decoration: none;
-			}
-		}
-		&.cta-secondary {
-			h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-				color: @brand-secondary;
-			}	
-		}
-	}
+  .cta-body {
+    color: inherit;
+  }
 }
+
+.btn-group {
+  .btn-verb {
+    padding-right: 6px;
+    border-right-width: 1px;
+    border-right-style: solid;
+  }
+  .btn-icon {
+    padding-left: 3px;
+  }
+}
+
+
+
+
+
