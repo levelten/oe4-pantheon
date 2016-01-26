@@ -27,6 +27,21 @@
       .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
     }
   }
+  .btn-cta-default {
+    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+  .btn-cta-primary {
+    .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  }
+  .btn-cta-secondary {
+    .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+  }
+  .btn-cta-accent {
+    .button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
+  }
+  &.cta-link {
+    .btn-link();
+  }
   &.text-primary, .text-primary {
     .text-primary();
   }
@@ -65,8 +80,3 @@
     padding-left: 3px;
   }
 }
-
-
-
-
-
