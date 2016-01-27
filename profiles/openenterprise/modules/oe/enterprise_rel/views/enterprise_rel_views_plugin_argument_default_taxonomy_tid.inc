@@ -107,8 +107,15 @@ class enterprise_rel_views_plugin_argument_default_taxonomy_tid extends views_pl
   function get_argument() {
     $arg = parent::get_argument();
 
-    if (!empty($this->options['hierarchy_level']) || !empty($this->options['count'])) {
-      $tids = explode('+', $arg);
+    if (!empty($arg) && (!empty($this->options['hierarchy_level']) || !empty($this->options['count']))) {
+      // some args come seperated by '+' and some by ','
+      // TODO: more reliable way to determine delimiter
+      $delimiter = '+';
+      if (strpos($arg, ',')) {
+        $delimiter = ',';
+      }
+
+      $tids = explode($delimiter, $arg);
 
       if (!empty($this->options['hierarchy_level'])) {
         $terms = array();
@@ -133,8 +140,9 @@ class enterprise_rel_views_plugin_argument_default_taxonomy_tid extends views_pl
         array_splice($tids, $this->options['count']);
       }
 
-      $arg = implode('+', $tids);
+      $arg = implode($delimiter, $tids);
     }
+
 
     return $arg;
   }
