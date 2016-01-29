@@ -188,6 +188,7 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
 
     $classes['no-wrap'] = t('No Wrap (Overflow)');
 
+    $classes['field-collection-embed'] = t('Field Collection Embed');
   }
 }
 
