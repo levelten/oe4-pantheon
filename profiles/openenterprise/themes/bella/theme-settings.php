@@ -37,7 +37,7 @@ function bella_form_system_theme_settings_alter(&$form, &$form_state) {
   $form['bella'] = array(
     '#type' => 'vertical_tabs',
     '#prefix' => '<h2><small>Bella</small></h2>',
-    '#weight' = -8,
+    '#weight' => -8,
   );
 
   $form['bella_display'] = array(
