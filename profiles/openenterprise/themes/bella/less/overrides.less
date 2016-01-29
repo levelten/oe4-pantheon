@@ -278,6 +278,18 @@ blockquote {
 
 .bella-buttons {
 	.brand-variation(@names; @colors; @length);
+	.btn-default {
+		background-color: transparent;
+		border-color: @gray;
+		color: @gray;
+		font-weight: 300;
+		text-transform: uppercase;
+		&:hover {
+			background-color: @gray;
+			border-color: @gray;
+			color: white;
+		}
+	}
 }
 
 // Fix Carousel transition for Safari
