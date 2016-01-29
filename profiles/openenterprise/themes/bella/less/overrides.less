@@ -240,15 +240,6 @@ blockquote {
 .btn-accent, .bg-accent {
 	color: @brand-primary;
 }
-.btn-link {
-	background: transparent;
-	border: 0;
-	color: @brand-link;
-	&:hover, &:focus {
-		background-color: transparent;
-		color: @brand-link;
-	}
-}
 
 // Cool LESS loop stuff
 @colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
@@ -261,7 +252,7 @@ blockquote {
 	@name  : extract(@names, @index);
 	@color : extract(@colors, @index);
 
-	.btn-@{name} {
+	.bella-buttons .btn-@{name} {
 		background-color: transparent;
 		border-color: @color;
 		color: @color;
@@ -276,8 +267,9 @@ blockquote {
 
 }
 
+// Compile brand buttons.
+.brand-variation(@names; @colors; @length);
 .bella-buttons {
-	.brand-variation(@names; @colors; @length);
 	.btn-default {
 		background-color: transparent;
 		border-color: @gray;
@@ -288,6 +280,16 @@ blockquote {
 			background-color: @gray;
 			border-color: @gray;
 			color: white;
+		}
+	}
+	.btn-link {
+		background: transparent;
+		border: 0;
+		color: @brand-link;
+		font-family: @font-family-base;
+		&:hover, &:focus {
+			background-color: transparent;
+			color: @brand-link;
 		}
 	}
 }
