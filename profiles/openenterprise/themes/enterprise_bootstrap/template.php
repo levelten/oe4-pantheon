@@ -54,6 +54,9 @@ function enterprise_bootstrap_preprocess_html(&$variables) {
   if (theme_get_setting('eb_light_secondary')) {
     $variables['classes_array'][] = 'light-secondary';
   }
+  if (theme_get_setting('eb_light_accent')) {
+    $variables['classes_array'][] = 'light-accent';
+  }
 
   // Add page-header-above class
   $variables['classes_array'][] = (theme_get_setting('title_placement')) ? 'page-title-inside' : 'page-title-above';

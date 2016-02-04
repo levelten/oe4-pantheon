@@ -1708,56 +1708,72 @@ function enterprise_conversion_styler_style() {
 
 
   // Buttons
-  $styles['ctas']['button'] = array(
-    '#title' => t('Buttons'),
-    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+  $styles['ctas']['button-group'] = array(
+    '#title' => t('Button Groups'),
+    '#description' => t('Extend buttons by adding text or icons before, after, or on both sides of any text-based button group body. Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => 'Example 1:<br />
+      '#value_replace_eol' => 1,
+      '#value' => '<a href="#" class="cta cta-default btn-group">
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  <span class="btn-group-body">Download Now</span>  
+</a>
+
+<a href="#" class="cta cta-primary btn-group">
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+</a>
+
 <a href="#" class="cta cta-accent btn-group">
-  <span class="btn-verb">Download Now</span>
-  <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-</a>',
-      '#value_highlight' => 'Example 1:
-<a href="#" class="cta cta-accent btn-group">
-  <span class="btn-verb">Download Now</span>
-  <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-</a>',
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-star"></i></span>
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon cta-default"><i class="icon glyphicon glyphicon-download"></i></span>
+</a>
+',
     ),
   );
 
   // Sidebar
-  $styles['ctas']['sidebar'] = array(
-    '#title' => t('Sidebars'),
-    '#description' => t('To be displayed in narrow containers such as sidebars.'),
+  $styles['ctas']['panel'] = array(
+    '#title' => t('Panels'),
+    '#description' => t('The cta-panel class makes cta-header, cta-body and cta-footer full width to allow content and background colors to go full width.'),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => '<div class="row">
+      '#value' => '
+<div class="row">
   <div class="col-sm-6">
     Example 1:<br />
     <a href="#">
-      <div class="cta cta-default cta-block">
-        <h3 class="cta-heading text-primary">Call to Action Heading</h3>
-        <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
-        <button class="btn btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
+      <div class="cta cta-panel cta-default cta-outline-none cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title">Call to Action Heading</h3>
+        </div>
+          <p class="m-t-1 m-b-1">
+          Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.
+          </p>
+
+          <div class="cta cta-accent btn-group btn-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+          </div>
       </div>
     </a>
   </div>
   <div class="col-sm-6">
     Example 2:<br />
     <a href="#">
-      <div class="cta cta-primary">
-        <h3 class="cta-heading text-left">Call to Action Heading</h3>
-        <div class="row">
-          <div class="col-lg-5 col-sm-12 col-xs-5">
-            <img src="http://placehold.it/120x150" />
-          </div>
-          <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
-            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
-            <button class="btn btn-cta-accent btn-block">Download Now</button>
+      <div class="cta cta-panel cta-default cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body">
+          <img src="http://placehold.it/120x150" class="pull-left" />
+          <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>            
+        </div>
+        <div class="cta-footer">
+          <div class="cta cta-accent btn-group">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
           </div>
         </div>
       </div>
@@ -1769,8 +1785,75 @@ function enterprise_conversion_styler_style() {
   <h3 class="cta-heading text-primary">Call to Action Heading</h3>
   <p>...</p>
   <button class="btn btn-cta btn-group">
-    <span class="btn-verb">Download Now</span>
-    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
+</div>
+
+Example 2:
+<div class="cta cta-primary">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-lg-5 col-sm-12 col-xs-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-block">Download Now</button>
+    </div>
+  </div>
+</div>',
+    ),
+  );
+
+  // Sidebar
+  $styles['ctas']['sidebar'] = array(
+    '#title' => t('Sidebars'),
+    '#description' => t('To be displayed in narrow containers such as sidebars.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '
+<div class="row">
+  <div class="col-sm-6">
+    Example 1:<br />
+    <a href="#">
+      <div class="cta cta-default cta-block">
+        <h3 class="cta-title text-primary">Call to Action Heading</h3>
+        <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+        <button class="btn btn-cta btn-group">
+          <span class="btn-group-body">Download Now</span>
+          <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-primary cta-block">
+        <div class="cta-heading">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body row">
+          <div class="col-lg-5 col-sm-12 col-xs-5">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn cta-accent btn-block">Download Now</button>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+  <p>...</p>
+  <button class="btn btn-cta btn-group">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
@@ -1800,11 +1883,11 @@ Example 2:
   <div class="col-md-12">
     Example 1:<br />
     <div class="cta cta-default cta-block">
-      <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+      <h3 class="cta-title text-primary">Call to Action Heading</h3>
       <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
       <button class="btn btn-cta btn-group center-block">
-        <span class="btn-verb">Download Now</span>
-        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
     </div>
   </div>
@@ -1818,11 +1901,11 @@ Example 2:
           <img src="http://placehold.it/120x150" style="max-height: 120px;" />
         </div>
         <div class="col-md-10 col-xs-8 text-left">
-          <h3 class="cta-heading">Call to Action Heading</h3>
+          <h3 class="cta-title">Call to Action Heading</h3>
           <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
-          <button class="btn btn-cta-accent btn-group center-block">
-            <span class="btn-verb">Download Now</span>
-            <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+          <button class="btn cta-accent btn-group center-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
           </button>
         </div>
       </div>
@@ -1834,8 +1917,8 @@ Example 2:
   <h3 class="cta-heading text-primary">Call to Action Heading</h3>
   <p>...</p>
   <button class="btn btn-cta btn-group center-block">
-    <span class="btn-verb">Download Now</span>
-    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
@@ -1849,8 +1932,8 @@ Example 2:
       <h3 class="cta-heading">Call to Action Heading</h3>
       <p>...</p>
       <button class="btn btn-cta-accent btn-group center-block">
-        <span class="btn-verb">Download Now</span>
-        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
     </div>
   </div>

@@ -121,6 +121,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#description' => t('If your secondary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
   );
 
+	$form['enterprise_bootstrap_config']['column_right']['eb_light_accent'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Light Accent Color'),
+		'#default_value' => theme_get_setting('eb_accent_secondary'),
+		'#description' => t('If your accent color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+	);
+
 	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
