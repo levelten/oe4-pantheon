@@ -972,6 +972,7 @@ function enterprise_rel_get_terms_levels($terms, &$bottom_level = 0, $options = 
       foreach ($term->parent as $p_tid) {
         if (!isset($ct[$p_tid])) {
           $ct[$p_tid] = taxonomy_term_load($p_tid);
+          $ct[$p_tid]->ancestors = array();
           if (empty($ct[$p_tid]->parent)) {
             $ct[$p_tid]->level = 0;
           }
