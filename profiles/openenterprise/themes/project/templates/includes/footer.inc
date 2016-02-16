@@ -4,9 +4,7 @@
     <div class="footer">
       <div class="container">
         <div class="footer-inner">
-          <div class="row">
-            <?php print render($page['footer']); ?>
-          </div>
+          <?php print render($page['footer']); ?>
         </div>
       </div>
     </div>
@@ -15,9 +13,7 @@
     <div class="subfooter">
       <div class="container">
         <div class="subfooter-inner">
-          <div class="row">
-            <?php print render($page['footer_bottom']); ?>
-          </div>
+          <?php print render($page['footer_bottom']); ?>
         </div>
       </div>
     </div>
