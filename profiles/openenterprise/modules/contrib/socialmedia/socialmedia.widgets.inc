@@ -9,7 +9,6 @@
  * Implements hook_widgets_element_info().
  */
 function socialmedia_widgets_element_info() {
-  //$addthis_js = '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?addthis_username:[socialmedia:addthis:username]]"></script>';
   $elements = array(
     'socialmedia_twitter-tweet-no-count' => array(
       'label' => t('Twitter tweet button (no count)'),
@@ -460,9 +459,9 @@ function socialmedia_widgets_element_form_alter(&$form, $set, $element) {
 }
 
 function socialmedia_widgets_element_addthis_js() {
-  //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?username=[socialmedia:sm-addthis_username]?]"></script>';
-  return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
-  //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username="></script>';
+  //return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#username=[?username=[socialmedia:sm-addthis_username]?]"></script>';
+  return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
+  //return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#username="></script>';
 }
 
 function socialmedia_widgets_element_addthis_addthis_counter() {
