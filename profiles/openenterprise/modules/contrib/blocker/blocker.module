@@ -341,9 +341,13 @@ function blocker_form_block_admin_configure_alter(&$form, &$form_state, $form_id
   if (count($blockers)) {
     foreach($blockers as $blocker) {
       $entities = entity_load($blocker->entity_type, array($blocker->entity_id));
-      $entity = reset($entities);
-      $uri = entity_uri($blocker->entity_type, $entity);
-      $paths .= '<li>' . $uri['path'] . '</li>';
+
+      // Check if entities exist and have been loaded
+      if(count($entities)) {
+        $entity = reset($entities);
+        $uri = entity_uri($blocker->entity_type, $entity);
+        $paths .= '<li>' . $uri['path'] . '</li>';
+      }
     }
   }
   else {
