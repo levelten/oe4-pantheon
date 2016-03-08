@@ -4,3 +4,352 @@
  * Code for the Enterprise Social feature.
  */
 
+include_once 'enterprise_social.features.inc';
+
+/**
+ * Implements hook_ds_fields_info().
+ */
+function enterprise_social_ds_fields_info($entity_type) {
+  $node = array();
+  $user = array();
+  $node['social_media_share_buttons'] = array(
+    'title' => t('Social Share Buttons'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'ui_limit' => array('*|*'),
+    'function' => 'enterprise_social_share_field',
+    'properties' => array(),
+  );
+  $user['socialmedia_user_profile_buttons'] = array(
+    'title' => t('Social User Profile Buttons'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'ui_limit' => array('*|*'),
+    'function' => 'enterprise_social_user_profile_buttons_field',
+    'properties' => array(),
+  );
+  return array('node' => $node, 'user' => $user);
+}
+
+/**
+ * Implements hook_icon_bundles().
+ */
+function enterprise_social_icon_bundles() {
+  $bundles['enterprise_social'] = array(
+    'render' => 'sprite',
+    'title' => t('Social Media'),
+    'provider' => 'fontello',
+    'path' => drupal_get_path('module', 'enterprise_social'),
+    'icons' => array(
+      'social-delicious' => t('Delicious'),
+      'social-bitbucket' => t('Bitbucket'),
+      'social-drupal' => t('Drupal'),
+      'social-mail' => t('E-mail'),
+      'social-share' => t('Share'),
+      'social-comments' => t('Comments'),
+      'social-twitter' => t('Twitter'),
+      'social-facebook' => t('Facebook'),
+      'social-github' => t('GitHub'),
+      'social-gplus' => t('Google+'),
+      'social-instagram' => t('Instagram'),
+      'social-linkedin' => t('LinkedIn'),
+      'social-pinterest' => t('Pinterest'),
+      'social-link' => t('Link'),
+      'social-youtube' => t('YouTube'),
+    ),
+    'settings' => array(
+      'animation' => 0,
+      'filename_prefix' => 'enterprise_social',
+      'ie7' => 1,
+      'method' => 'embedded',
+      'tag' => 'i',
+    ),
+    '#attached' => array(
+      'fontello_process_attached' => array(array('enterprise_social')),
+    ),
+  );
+  return $bundles;
+}
+
+function enterprise_social_socialmedia_iconset_info() {
+  $icons['enterprise_vector'] = array(
+    'name' => 'Enterprise vector',                                 // name of your icon set
+    'publisher' => 'LevelTen Interactive',                       // name of publisher
+    'publisher url' => 'http://www.leveltendesign.com',          // url to publisher's site
+    'icon api' => 1,
+    'styles' => array(                                           // different variants of icons available
+      '16x16' => '16x16',
+      '32x32' => '32x32',
+      '48x48' => '48x48',
+    ),
+    'markup callback' => 'enterprise_social_icon_markup',  // callback for icon urls
+  );
+  return $icons;
+}
+
+function enterprise_social_icon_markup($platform = 'twitter', $style = NULL) {
+  $pt = array(
+    'googleplus' => 'gplus',
+    'email' => 'mail',
+  );
+  $icon = 'social-' . ((isset($pt[$platform])) ? $pt[$platform] : $platform);
+  $markup = theme('icon', array('bundle' => 'enterprise_social', 'icon' => $icon));
+  return $markup;
+}
+
+/**
+ * Field callback for media share field.
+ *
+ * @param type $variables
+ * @return string
+ */
+function enterprise_social_share_field($variables) {
+  $widget = '';
+  $set = '';
+  // check if widget is managed in widgets module
+  if (module_exists('widgets')) {
+    $set = widgets_set_load('enterprise_social-share');
+  }
+  if (!empty($set)) {
+    $widget = theme('widgets_set_view', array('set' => $set));
+  }
+  else {
+  $entity = $variables['entity'];
+  // Settings
+    $pubid = variable_get('enterprise_social_pubid', ''); //AddThis ID
+    if (empty($pubid) && $pubid !== FALSE) {
+      drupal_set_message(t('The %pubid variable has not been set. Please set this variable to the AddThis ID to enable share tracking. Set to FALSE to disable.', array(
+        '%pubid' => '$conf[\'enterprise_social_pubid\']'
+      )), 'warning');
+    }
+    if (!empty($pubid)) {
+      $pubid = 'pubid=' . $pubid;
+    }
+    $services = array(
+      'facebook' => 'facebook',
+      'twitter' => 'twitter',
+      'google_plusone_share' => 'gplus',
+      'linkedin' => 'linkedin',
+      'pinterest' => 'pinterest',
+    );
+    $widget = '';
+    $widget .= '  <div class="addthis_toolbox addthis_default_style">';
+    $widget .= '    <div class="counter">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-share')) . '<a class="addthis_counter addthis_bubble_style"></a></div>';
+    $widget .= '  </div>';
+    $widget .= '  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#' . $pubid . '"></script>';
+    foreach ($services as $service => $icon_name) {
+      $query = array(
+        'url' => $_SERVER['HTTP_HOST'] . request_uri(),
+      );
+      if (!empty($pubid)) {
+        $query['pubid'] = $pubid;
+      }
+      $output .= '  ' . l(theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-' . $icon_name)), '//api.addthis.com/oexchange/0.8/forward/' . $service . '/offer', array(
+          'external' => TRUE,
+          'query' => $query,
+          'html' => TRUE,
+          'attributes' => array(
+            'onclick' => "javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=1200');return false;",
+          ),
+        ));
+    }
+  }
+  // Render the content.
+  $output = '<section class="style-social-media">';
+  $output .= $widget;
+  $output .= '</section>';
+
+  return $output;
+}
+
+/**
+ * Field callback for media share field.
+ *
+ * @param type $variables
+ * @return string
+ */
+function enterprise_social_user_profile_buttons_field($variables) {
+  $widget = '';
+  $set = '';
+  // check if widget is managed in widgets module
+  if (module_exists('widgets')) {
+    $set = widgets_set_load('enterprise_social-user-follow');
+  }
+  if (!empty($set)) {
+    $widget = theme('widgets_set_view', array('set' => $set));
+  }
+  // Render the content.
+  $output = '<section class="style-social-media style-social-profile style-social-profile-user">';
+  $output .= $widget;
+  $output .= '</section>';
+
+  return $output;
+}
+
+/**
+ * Field callback for media share field.
+ *
+ * @param type $variables
+ * @return string
+ */
+function enterprise_social_share_addthis_field($variables) {
+  $entity = $variables['entity'];
+  // Settings
+  $pubid = variable_get('enterprise_social_pubid', ''); //AddThis ID
+  if (empty($pubid) && $pubid !== FALSE) {
+    drupal_set_message(t('The %pubid variable has not been set. Please set this variable to the AddThis ID to enable share tracking. Set to FALSE to disable.', array(
+      '%pubid' => '$conf[\'enterprise_social_pubid\']'
+    )), 'warning');
+  }
+  if (!empty($pubid)) {
+    $pubid = 'pubid=' . $pubid;
+  }
+  $services = array(
+    'facebook' => 'facebook',
+    'twitter' => 'twitter',
+    'google_plusone_share' => 'gplus',
+    'linkedin' => 'linkedin',
+    'pinterest' => 'pinterest',
+  );
+  // Render the content.
+  $output = '<section class="style-social-media">';
+  $output .= <<<EOT
+  <!-- AddThis Button BEGIN -->
+<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+<a class="addthis_button_preferred_1"></a>
+<a class="addthis_button_preferred_2"></a>
+<a class="addthis_button_preferred_3"></a>
+<a class="addthis_button_preferred_4"></a>
+<a class="addthis_button_compact"></a>
+<a class="addthis_counter addthis_bubble_style"></a>
+</div>
+<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=$pubid"></script>
+<!-- AddThis Button END -->
+EOT;
+  $output .= '</section>';
+  return $output;
+}
+
+/**
+ * Implements hook_widgets_element_info()
+ */
+function enterprise_social_widgets_element_info() {
+  $addthis_js = socialmedia_widgets_element_addthis_js();
+  $elements = array();
+  $defaults = array(
+    'add_js' => array(
+      'data' => $addthis_js,
+      'options' => array(
+        'scope' => 'set_post',
+      ),
+    ),
+  );
+
+  $template = '<a class="addthis_button[?link_class= {[socialmedia:sm-default_link_class_sharing]}?]"><span class="icon">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-share')) . '</span><span class="addthis_counter addthis_bubble_style"></span></a>';
+  //$template = '<a class="addthis_counter addthis_bubble_style">' . theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-share')) . '</a>';
+
+  $elements['enterprise_social-addthis-share'] = array(
+    'label' => t('Enterprise Addthis share box'),
+    'help' => t(''),
+    'group' => t('Social media: Multi'),
+    'template' => $template,
+    //'prefix' => '<div class="addthis_toolbox addthis_default_style[?link_class= {[socialmedia:sm-default_link_class_profile]}?]">' . '<div class="counter">',
+    //'template' => theme('icon', array('bundle' => 'enterprise_social', 'icon' => 'social-share')) . '<a class="addthis_counter addthis_bubble_style"></a>',
+    //'postfix' => '</div>' . '</div>',
+  ) + $defaults;
+
+  return $elements;
+}
+
+/**
+ * Implements hook_widgets_default_sets()
+ */
+
+function enterprise_social_widgets_default_sets() {
+  $sets = array();
+  $weight = 1;
+  $sets['enterprise_social-share'] = array(
+    'data' => array(
+      'style' => '',
+      'cache' => array('scope' => 'page'),
+    ),
+    'elements' => array(
+      array(
+        'name' => 'enterprise_social-addthis-share',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-tweet-simple',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-facebook-share-simple',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-google-share-simple',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+
+      array(
+        'name' => 'socialmedia_addthis-linkedin-share-simple',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-pinterest-share-simple',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+    ),
+  );
+  $weight = 1;
+  $sets['enterprise_social-follow'] = array(
+    'data' => array(
+      'style' => '',
+      'cache' => array('scope' => 'page'),
+      'socialmedia' => array(
+        'profile_context' => 'site',
+      ),
+    ),
+    'elements' => array(
+      array(
+        'name' => 'socialmedia_addthis-twitter-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-facebook-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-google-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-linkedin-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-youtube-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+      array(
+        'name' => 'socialmedia_addthis-pinterest-follow',
+        'data' => array(),
+        'weight' => $weight++,
+      ),
+    ),
+  );
+  $sets['enterprise_social-user-follow'] = $sets['enterprise_social-follow'];
+  $sets['enterprise_social-user-follow']['data']['socialmedia']['profile_context'] = 'user';
+
+  return $sets;
+}
