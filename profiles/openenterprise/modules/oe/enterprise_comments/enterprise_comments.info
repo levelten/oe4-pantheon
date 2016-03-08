@@ -1,12 +1,4 @@
 name = Enterprise Comments
 core = 7.x
 package = Open Enterprise
-dependencies[] = ctools
-dependencies[] = disqus
-dependencies[] = features
-dependencies[] = strongarm
-features[ctools][] = strongarm:strongarm:1
-features[features_api][] = api:2
-features[user_permission][] = toggle disqus comments
-features[user_permission][] = view disqus comments
-features[variable][] = disqus_location
+dependencies[] = enterprise_comments_config

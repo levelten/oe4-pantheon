@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Intelligence feature.
+ */
+
+include_once 'enterprise_intel_config.features.inc';
+
+/**
+ * Dynamically assigns intel fields instances based on enterprise_intel settings.
+ * @param $component
+ */
+function enterprise_intel_config_post_features_revert($component) {
+  if ($component == 'field_instance' && function_exists('enterprise_intel_revert_intel_controls')) {
+    enterprise_intel_revert_intel_controls();
+  }
+}

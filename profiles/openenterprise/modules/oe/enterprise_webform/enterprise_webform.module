@@ -4,4 +4,3 @@
  * Code for the Enterprise webform feature.
  */
 
-include_once 'enterprise_webform.features.inc';

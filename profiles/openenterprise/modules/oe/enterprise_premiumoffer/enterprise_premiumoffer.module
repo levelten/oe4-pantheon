@@ -4,4 +4,4 @@
  * Code for the Enterprise Premium Offers feature.
  */
 
-include_once 'enterprise_premiumoffer.features.inc';
+

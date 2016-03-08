@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Editor feature.
+ */
+
+include_once 'enterprise_editor_config.features.inc';

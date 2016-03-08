@@ -1,0 +1,8 @@
+#edit-enterprise-conversion-setup .form-item {
+  clear: left;
+}
+#edit-enterprise-conversion-setup #edit-landingpages-webform-fields .form-item {
+  clear: none;
+  width: 50%;
+  float: left;
+}

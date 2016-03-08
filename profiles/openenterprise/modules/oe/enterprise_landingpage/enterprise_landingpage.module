@@ -3,6 +3,3 @@
  * @file
  * Code for the Enterprise landing pages feature.
  */
-
-include_once 'enterprise_landingpage.features.inc';
-

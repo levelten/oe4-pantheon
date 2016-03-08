@@ -4,8 +4,6 @@
  * Code for the Enterprise Editor feature.
  */
 
-include_once 'enterprise_editor.features.inc';
-
 /**
  * Implements hook_permission().
  */

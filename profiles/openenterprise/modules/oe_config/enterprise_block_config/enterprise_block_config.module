@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Block feature.
+ */
+
+include_once 'enterprise_block_config.features.inc';

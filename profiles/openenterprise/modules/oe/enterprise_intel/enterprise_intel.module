@@ -4,8 +4,6 @@
  * Code for the Enterprise Intelligence feature.
  */
 
-include_once 'enterprise_intel.features.inc';
-
 function enterprise_intel_menu() {
   $items = array();
   $items['admin/config/intel/config'] = array(
@@ -19,12 +17,6 @@ function enterprise_intel_menu() {
     'file' => 'enterprise_intel.admin.inc',
   );
   return $items;
-}
-
-function enterprise_intel_post_features_revert($component) {
-  if ($component == 'field_instance') {
-    enterprise_intel_revert_intel_controls();
-  }
 }
 
 function enterprise_intel_revert_intel_controls() {

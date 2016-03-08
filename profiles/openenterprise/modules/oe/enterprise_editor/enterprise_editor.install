@@ -28,7 +28,7 @@ function enterprise_editor_update_dependencies() {
  * Revert Enterprise Editor feature.
  */
 function enterprise_editor_update_7200() {
-  features_revert_module('enterprise_editor');
+  features_revert_module('enterprise_editor_config');
 }
 
 /**

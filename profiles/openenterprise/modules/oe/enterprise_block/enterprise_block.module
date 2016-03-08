@@ -4,8 +4,6 @@
  * Code for the Enterprise Block feature.
  */
 
-include_once 'enterprise_block.features.inc';
-
 /**
  * Implements hook_form_alter
  *
