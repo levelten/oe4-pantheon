@@ -7,7 +7,7 @@
 /**
  * Implements hook_field_default_field_instances().
  */
-function enterprise_user_field_default_field_instances() {
+function enterprise_user_config_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance: 'user-user-field_description'

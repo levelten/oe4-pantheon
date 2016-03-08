@@ -7,7 +7,7 @@
 /**
  * Implements hook_field_default_field_bases().
  */
-function enterprise_user_field_default_field_bases() {
+function enterprise_user_config_field_default_field_bases() {
   $field_bases = array();
 
   // Exported field_base: 'field_title'
