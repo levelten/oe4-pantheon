@@ -354,85 +354,165 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
 function enterprise_apps_install_demo(&$install_state) {
   $profile_settings = variable_get('enterprise_apps_profile_settings', array());
 //drupal_set_message(json_encode($profile_settings));
-  $app = '';
+  $demo_app = '';
+  $demo_info = array();
+
   if ($profile_settings['demo']['mode'] != 'min') {
-    $app = 'enterprise_demo';
+    $demo_app = 'enterprise_demo';
   }
 
-  if ($app) {
-    require_once(drupal_get_path('module', $app) . '/' . $app . '.module');
+  if (!enterprise_apps_module_files_exist($demo_app)) {
+    return;
   }
 
-  $func = $app . '_enterprise_apps_app_enabled_batch';
-  if (function_exists($func)) {
+  require_once(drupal_get_path('module', $demo_app) . '/' . $demo_app . '.module');
 
-    // get installation batch
-    $batch = $func();
+  $func = $demo_app . '_enterprise_apps_install_demo_info';
 
-    $pre_ops = array();
+  if (!function_exists($func)) {
+    return;
+  }
 
-    $apps_ops = array();
+  $demo_info = $func();
 
-    // disable triggering demo auto config on install
-    enterprise_apps_prevent_app_enabled_hook(TRUE);
+  $debug['demo_info'] = $demo_info;
 
-    // prepend enabling demo module
-    $pre_ops[] = array(
-      '_enterprise_apps_enable_module_batch',
-      array(
-        'enterprise_demo',
-        'Enterprise demo',
-      ),
-    );
+  $batch = array(
+    'operations' => array(),
+    'title' => !empty($demo_info['batch_title']) ? st($demo_info['batch_title']) : st('Installing Open Enterprise Demo'),
+    'init_message' => st('Preparing to install'),
+    'error_message' => st('The installation has encountered an error.'),
+    'finished' => '_enterprise_apps_install_demo_batch_finished',
+  );
 
-    // re-enable app auto config for all apps after demo
-    $pre_ops[] = array(
-      '_enterprise_apps_prevent_app_enabled_hook_batch',
-      array(
-        FALSE,
-      ),
-    );
+  // disable triggering demo auto config on install
+  //enterprise_apps_prevent_app_enabled_hook(TRUE);
 
-    // prepend pre_ops to array
-    $batch['operations'] = array_merge($pre_ops, $batch['operations']);
+  // prepend enabling demo module
+  $batch['operations'][] = array(
+    '_enterprise_apps_enable_module_batch',
+    array(
+      $demo_app,
+      'Enterprise demo',
+    ),
+  );
 
-    if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
-      foreach ($profile_settings['apps'] AS $name) {
-        $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name);
-        if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
-          $apps_ops[] = enterprise_apps_get_batch_operation_enable_module($name . '_content');
-        }
+  // re-enable app auto config for all apps after demo
+  /*
+  $batch['operations'][] = array(
+    '_enterprise_apps_prevent_app_enabled_hook_batch',
+    array(
+      FALSE,
+    ),
+  );
+  */
+
+  if (empty($demo_info['required_apps'])) {
+    $demo_info['required_apps'] = array();
+  }
+
+  // create array of demo apps with optional apps from form
+  $apps = array();
+  foreach ($demo_info['required_apps'] as $name) {
+    $apps[] = $name;
+  }
+
+  // add optional apps before demo content
+  if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
+    foreach ($profile_settings['apps'] AS $opt_name) {
+      $apps[] = $opt_name;
+      if (!empty($profile_settings['demo']['demo_content'])) {
+        $apps[] = $opt_name . '_content';
       }
     }
+  }
 
-    // apps ops need to be inserted just before demo content, so find demo
-    // content
-    $i = 0;
-    foreach ($batch['operations'] AS $i => $op) {
-      if (isset($op[0])
-        && $op[0] == '_enterprise_apps_enable_module_batch'
-        && is_array($op[1]) && isset($op[1][0])
-        && $op[1][0] == 'enterprise_demo_content'
-      ) {
-        break;
-      }
+  // add demo_config and content apps
+  $apps[] = $demo_app . '_config';
+
+  $apps[] = !empty($profile_settings['demo']['demo_content']) ? 'enterprise_demo_content' : 'enterprise_demo_nocontent';
+
+  $apps[] = 'enterprise_permissions';
+  $apps[] = 'enterprise_permissions_content';
+
+  $debug['apps'] = $apps;
+
+  // verify app module exists and add to batch
+  $missing = array();
+  foreach ($apps as $name) {
+    // if not content app
+    if (enterprise_apps_module_files_exist($name)) {
+      $batch['operations'][] = enterprise_apps_get_batch_operation_enable_module($name);
     }
+    else if (enterprise_apps_module_files_exist($name . '_config')) {
+      $batch['operations'][] = enterprise_apps_get_batch_operation_enable_module($name . '_config');
+    }
+    else {
+      $missing[] = $name;
+    }
+  }
 
-    // insert apps_ops before enterprise_demo_content
-    array_splice($batch['operations'], $i, 0, $apps_ops);
-
-    // process any custom settings from api
-    $batch['operations'][] = array(
-      'enterprise_apps_process_profile_settings',
-      array(),
-    );
+  // process any custom settings from api
+  $batch['operations'][] = array(
+    'enterprise_apps_process_profile_settings',
+    array(),
+  );
 
 //drupal_set_message(json_encode($batch))
 //drupal_set_message(print_r($batch, 1));
 
-    return $batch;
+  $debug['batch'] = $batch;
+  variable_set('enterprise_demo_debug', $debug);
+
+  return $batch;
+}
+
+function _enterprise_apps_install_demo_batch_finished($success, $results, $operations) {
+  // CKEditor sets some settings that override the enterprise_editor. Make sure the
+  // feature is fully reverted at this time.
+  //features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
+
+  // must rebuild field instances after all fields are installed.
+  //features_revert(array('enterprise_demo' => array('field_instance')));
+  features_revert(array('enterprise_intel' => array('field_instance')));
+
+  // remove any redirects created on content import
+  $query = db_delete('redirect')
+    ->condition('access', 0);
+  $query->execute();
+
+  // bulk update pathauto paths
+  module_load_include('inc', 'pathauto', 'pathauto.pathauto');
+  $context = array();
+  node_pathauto_bulk_update_batch_process($context);
+
+  // set default front page
+  $path = drupal_lookup_path("source", 'home');
+  if (!empty($path)) {
+    variable_set('site_frontpage', $path);
+  }
+
+  drupal_flush_all_caches();
+
+  // clear status messages
+  drupal_get_messages('status', TRUE);
+
+  if ($success) {
+    drupal_set_message(t('Congratulations! You have successfully installed Open Enterprise.'));
+  }
+  else {
+    $error_operation = reset($operations);
+    drupal_set_message(
+      t('An error occurred during installation processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      ), 'error'
+    );
   }
 }
+
 
 function enterprise_apps_process_profile_settings() {
   $settings = variable_get('enterprise_apps_profile_settings', array());

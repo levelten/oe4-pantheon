@@ -7,7 +7,7 @@
 /**
  * Implements hook_strongarm().
  */
-function enterprise_demo_strongarm() {
+function enterprise_demo_config_strongarm() {
   $export = array();
 
   $strongarm = new stdClass();

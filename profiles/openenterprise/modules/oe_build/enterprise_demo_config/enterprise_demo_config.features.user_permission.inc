@@ -7,7 +7,7 @@
 /**
  * Implements hook_user_default_permissions().
  */
-function enterprise_demo_user_default_permissions() {
+function enterprise_demo_config_user_default_permissions() {
   $permissions = array();
 
   // Exported permission: 'search content'.

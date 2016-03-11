@@ -1,4 +1,4 @@
-name = Enterprise Premium Offers
+name = Enterprise Premium Offers (CBD)
 core = 7.x
 package = Open Enterprise
 dependencies[] = enterprise_premiumoffer_config

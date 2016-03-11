@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Demo feature.
+ */
+
+include_once 'enterprise_demo_config.features.inc';

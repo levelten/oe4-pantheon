@@ -1,4 +1,4 @@
-name = Enterprise Demo
+name = Enterprise Demo Config
 description = Builds standard Open Enterprise demo.
 core = 7.x
 package = Open Enterprise Demo
@@ -12,7 +12,6 @@ dependencies[] = strongarm
 dependencies[] = uuid
 dependencies[] = uuid_path
 dependencies[] = dblog
-
 
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:2

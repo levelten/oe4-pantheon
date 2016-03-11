@@ -7,7 +7,7 @@
 /**
  * Implements hook_field_default_field_instances().
  */
-function enterprise_demo_field_default_field_instances() {
+function enterprise_demo_config_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance: 'node-enterprise_blog-field_cta_category'
