@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Enterprise Work Content feature.
- */
-
-include_once 'enterprise_work_content.features.inc';

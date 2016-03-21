@@ -373,7 +373,7 @@ function enterprise_apps_install_demo(&$install_state) {
     return;
   }
 
-  $demo_info = $func();
+  $profile_settings['demo']['info'] = $demo_info = $func();
 
   $debug['demo_info'] = $demo_info;
 
@@ -414,15 +414,25 @@ function enterprise_apps_install_demo(&$install_state) {
   // create array of demo apps with optional apps from form
   $apps = array();
   foreach ($demo_info['required_apps'] as $name) {
-    $apps[] = $name;
+    if (enterprise_apps_module_files_exist($name)) {
+      $apps[] = $name;
+    }
+    if (enterprise_apps_module_files_exist($name . '_config')) {
+      $apps[] = $name . '_config';
+    }
   }
 
   // add optional apps before demo content
   if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
-    foreach ($profile_settings['apps'] AS $opt_name) {
-      $apps[] = $opt_name;
+    foreach ($profile_settings['apps'] AS $name) {
+      if (enterprise_apps_module_files_exist($name)) {
+        $apps[] = $name;
+      }
+      if (enterprise_apps_module_files_exist($name . '_config')) {
+        $apps[] = $name . '_config';
+      }
       if (!empty($profile_settings['demo']['demo_content'])) {
-        $apps[] = $opt_name . '_content';
+        $apps[] = $name . '_content';
       }
     }
   }
@@ -440,16 +450,7 @@ function enterprise_apps_install_demo(&$install_state) {
   // verify app module exists and add to batch
   $missing = array();
   foreach ($apps as $name) {
-    // if not content app
-    if (enterprise_apps_module_files_exist($name)) {
-      $batch['operations'][] = enterprise_apps_get_batch_operation_enable_module($name);
-    }
-    else if (enterprise_apps_module_files_exist($name . '_config')) {
-      $batch['operations'][] = enterprise_apps_get_batch_operation_enable_module($name . '_config');
-    }
-    else {
-      $missing[] = $name;
-    }
+    $batch['operations'][] = enterprise_apps_get_batch_operation_enable_module($name);
   }
 
   // process any custom settings from api
@@ -464,6 +465,8 @@ function enterprise_apps_install_demo(&$install_state) {
   $debug['batch'] = $batch;
   variable_set('enterprise_demo_debug', $debug);
 
+  variable_set('enterprise_apps_profile_settings', $profile_settings);
+
   return $batch;
 }
 
@@ -472,9 +475,16 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
   // feature is fully reverted at this time.
   //features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
 
+  $profile_settings = variable_get('enterprise_apps_profile_settings', array());
+
+  // must rebuild field instances after all fields are installed.
+  if (!empty($profile_settings['demo']['info']['features_revert'])) {
+    features_revert($profile_settings['demo']['info']['features_revert']);
+  }
+
   // must rebuild field instances after all fields are installed.
   //features_revert(array('enterprise_demo' => array('field_instance')));
-  features_revert(array('enterprise_intel' => array('field_instance')));
+  //features_revert(array('enterprise_intel' => array('field_instance')));
 
   // remove any redirects created on content import
   $query = db_delete('redirect')

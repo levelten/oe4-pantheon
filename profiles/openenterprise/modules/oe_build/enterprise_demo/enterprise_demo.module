@@ -35,6 +35,57 @@ function enterprise_demo_util() {
 
   return '';
 
+  $info = enterprise_demo_enterprise_apps_install_demo_info();
+
+  $info['required_apps'][] = 'enterprise_work';
+
+  $apps = array();
+  foreach ($info['required_apps'] as $app) {
+    if (enterprise_apps_module_files_exist($app)) {
+      $apps[] = $app;
+    }
+    if (enterprise_apps_module_files_exist($app . '_config')) {
+      $apps[] = $app . '_config';
+    }
+  }
+
+
+  $nodes = array();
+  foreach ($apps as $app) {
+    $module_path = drupal_get_path('module', $app);
+    $file_path = $module_path . '/' . $app . '.features.inc';
+    if (file_exists($file_path)) {
+      require_once($file_path);
+      $hook_name = $app . '_node_info';
+      if (function_exists($hook_name)) {
+        $nodes += $hook_name();
+      }
+      dsm($file_path);
+    }
+  }
+  dsm($nodes);
+  $existing = node_type_get_types();
+  dsm($existing);
+  foreach ($nodes as $type => $def) {
+    if (empty($existing[$type])) {
+      $def['type'] = $type;
+      $def = node_type_set_defaults($def);
+      node_type_save($def);
+    }
+  }
+
+  return 'OK';
+
+  $settings = variable_get('enterprise_apps_profile_settings', array());
+
+  dsm($settings);
+
+  $var = variable_get('enterprise_demo_debug', array());
+
+  dsm($var);
+
+  return '';
+
   features_revert(array('enterprise_demo' => array('field_instance')));
 
   return '';
@@ -44,15 +95,7 @@ function enterprise_demo_util() {
   return '';
 }
 
-/**
- * Implements hook_enterprise_apps_app_enabled()
- */
-function enterprise_demo_enterprise_apps_app_enabled_x() {
-  // get batch processing for init_app
-  //$batch = enterprise_apps_install_demo_batch_settings(enterprise_demo_enterprise_apps_install_demo_info());
-  //batch_set($batch);
-  //batch_process('<front>');
-}
+
 
 function enterprise_demo_enterprise_apps_install_demo_info() {
   global $base_path;
@@ -60,10 +103,11 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
   $settings = variable_get('enterprise_apps_profile_settings', array());
 
   $required_apps = array(
-    'enterprise_intel',
+    'enterprise_intel', // contains base fields controls for Intelligence
     'enterprise_social',
     'enterprise_social_content',
     'enterprise_seo',
+    'enterprise_seo_config',
     'enterprise_user',
     'enterprise_user_content',
     'enterprise_comments',
@@ -82,7 +126,15 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
     $required_apps[] = 'enterprise_conversion_content';
   }
 
+  /*
+   * Insert Apps for vertical demos here. Using
+   */
+  //$required_apps[] = 'enterprise_APP;
 
+  $features_revert = array();
+  $features_revert['enterprise_intel'] = array(
+    'field_instances'
+  );
 
   $info = array(
     'required_apps' => $required_apps,

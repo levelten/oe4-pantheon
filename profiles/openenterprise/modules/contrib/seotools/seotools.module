@@ -60,3 +60,27 @@ function seotools_menu() {
 function seotools_util() {
 	return 'OK';
 }
+
+
+/**
+ * Help to make exporting features easier. Functions below will add metatag
+ * settings to features when a content type or taxonomy is selected
+ */
+/**
+ * Implements hook_features_pipe_COMPONENT_alter().
+ */
+function seotools_features_pipe_node_alter(&$pipe, $data, $export) {
+  foreach ($data as $node_type) {
+    //$pipe['variable'][] = "metatag_enable_node__{$node_type}";
+    //$pipe['variable'][] = "xmlsitemap_settings_node__{$node_type}";
+  }
+}
+
+/**
+ * Implements hook_features_pipe_COMPONENT_alter().
+ */
+function seotools_features_pipe_taxonomy_alter(&$pipe, $data, $export) {
+  foreach ($data as $vocabulary) {
+    //$pipe['variable'][] = "seotools_taxonomy_term__{$vocabulary}";
+  }
+}

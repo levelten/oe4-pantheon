@@ -1692,15 +1692,25 @@ function enterprise_rel_form_node_type_form_submit(&$form, &$form_state) {
 }
 
 function enterprise_rel_query_rel_terms_alter(&$query) {
-  return;
   $tables =& $query->getTables();
   $where =& $query->getTables();
   $expressions =& $query->getExpressions();
   $conditions =& $query->conditions();
+  $groupby =& $query->getGroupBy();
+
+  // TODO: might be a better way to do this.
+  // Problem is views automatically adds a groupby rel_score. However, the
+  // complexity of the field does not allow a groupby.
+  if (!empty($groupby['rel_score'])) {
+    unset($groupby['rel_score']);
+  }
+
   //dsm($tables);
   //dsm($conditions);
+  //dsm($groupby);
   //dsm($query);
   //dsm(" " . $query);
+
 }
 
 function enterprise_rel_get_views_options($options = array()) {

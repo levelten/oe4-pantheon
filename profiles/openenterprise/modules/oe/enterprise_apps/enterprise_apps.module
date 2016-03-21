@@ -167,13 +167,21 @@ function enterprise_apps_modules_enabled($modules) {
     //dsm('prevent set not set');
   }
   // determine modules implementing app_enable hook
+  $apps = variable_get('enterprise_apps_apps', array());
   $implements = array();
   foreach ($modules AS $module) {
     $func = $module . '_enterprise_apps_app_enabled';
     if (function_exists($func)) {
       $implements[] = $func;
     }
+    $path = drupal_get_path("module", $module) . "/" . $module . ".info";
+    $info = drupal_parse_info_file($path);
+    if (!empty($info['apps'])) {
+      $apps[$module] = 1;
+    }
+    watchdog('apps_me_' . $module, json_encode($info));
   }
+  variable_set('enterprise_apps_apps', $apps);
   // modules_enabled executes before features_api, clear caches is used to force
   // features components to be built before executing app_enabled hook
   if (count($implements)) {

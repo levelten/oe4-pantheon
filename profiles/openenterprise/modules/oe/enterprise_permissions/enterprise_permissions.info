@@ -1,5 +1,4 @@
-name = Enterprise Permissions
+name = Enterprise Permissions (CBD)
 description = Enables roles and permissions
 core = 7.x
 package = Open Enterprise
-dependencies[] = enterprise_permissions_config

@@ -2,4 +2,3 @@ name = Enterprise Thank You Page (CBD)
 description = Provides redirect pages for form submissions
 core = 7.x
 package = Open Enterprise
-dependencies[] = enterprise_thankyoupage_config

@@ -2,4 +2,3 @@ name = Enterprise Page
 description = Page definition and configuration
 core = 7.x
 package = Open Enterprise
-dependencies[] = enterprise_page_config

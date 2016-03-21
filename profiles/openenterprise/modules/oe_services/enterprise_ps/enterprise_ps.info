@@ -1,4 +1,0 @@
-name = Enterprise Products & Services Base
-description = Base module for products & services verticles
-core = 7.x
-package = Open Enterprise

@@ -5,8 +5,6 @@
 
 // Drupal needs this blank file.
 
-include_once('enterprise_base.features.inc');
-
 /**
  * Implements hook_menu_alter().
  *
