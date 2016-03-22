@@ -459,15 +459,9 @@ function socialmedia_widgets_element_form_alter(&$form, $set, $element) {
 }
 
 function socialmedia_widgets_element_addthis_js() {
-<<<<<<< HEAD
   //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?username=[socialmedia:sm-addthis_username]?]"></script>';
   return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
   //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username="></script>';
-=======
-  //return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#username=[?username=[socialmedia:sm-addthis_username]?]"></script>';
-  return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
-  //return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#username="></script>';
->>>>>>> develop
 }
 
 function socialmedia_widgets_element_addthis_addthis_counter() {
