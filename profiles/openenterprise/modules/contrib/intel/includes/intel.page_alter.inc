@@ -853,7 +853,11 @@ function intel_init() {
 
 }
 
-
+/**
+ * Parse URL to return separated arguments in the current path.
+ *
+ * @return array $parsed_url
+ */
 function intel_parse_cms_url() {
   $parsed_url = &drupal_static(__FUNCTION__);
   if (!empty($parse_url)) {
@@ -861,9 +865,13 @@ function intel_parse_cms_url() {
   }
 
   global $base_root, $base_path;
-  $url = $base_root . $base_path . '?' . http_build_query($_GET);
+  $url = $base_root . $base_path . '?';
+  foreach ($_GET AS $key => $value) {
+    if (!is_array($_GET[$key])) {
+      $url .= '&' . $key . '=' . $value;
+    }
+  }
   $parsed_url = parse_url($url);
-
   $parsed_url['base_path'] = $base_path;
   $parsed_url['hostpath'] = $parsed_url['host'] . ((!empty($parsed_url['port'])) ? ':' . $parsed_url['port'] : '') . $base_path;
 

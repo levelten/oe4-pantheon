@@ -234,8 +234,6 @@ blockquote {
 .btn { font-family: @font-family-base; }
 
 // Override for other buttons/backgrounds
-
-
 .btn-link {
 	background: transparent;
 	border: 0;
@@ -244,6 +242,12 @@ blockquote {
 		background-color: transparent;
 		color: @brand-link;
 	}
+}
+.btn-secondary, .bg-secondary {
+	color: @brand-accent;
+}
+.btn-accent, .bg-accent {
+	color: @brand-primary;
 }
 
 // Cool LESS loop stuff
@@ -257,7 +261,7 @@ blockquote {
 	@name  : extract(@names, @index);
 	@color : extract(@colors, @index);
 
-	.btn-@{name} {
+	.bella-buttons .btn-@{name} {
 		background-color: transparent;
 		border-color: @color;
 		color: @color;
@@ -271,8 +275,31 @@ blockquote {
 	}
 }
 
+// Compile brand buttons.
+.brand-variation(@names; @colors; @length);
 .bella-buttons {
-	.brand-variation(@names; @colors; @length);
+	.btn-default {
+		background-color: transparent;
+		border-color: @gray;
+		color: @gray;
+		font-weight: 300;
+		text-transform: uppercase;
+		&:hover {
+			background-color: @gray;
+			border-color: @gray;
+			color: white;
+		}
+	}
+	.btn-link {
+		background: transparent;
+		border: 0;
+		color: @brand-link;
+		font-family: @font-family-base;
+		&:hover, &:focus {
+			background-color: transparent;
+			color: @brand-link;
+		}
+	}
 }
 
 // Fix Carousel transition for Safari

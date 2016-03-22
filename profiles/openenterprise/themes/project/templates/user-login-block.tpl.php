@@ -1,4 +1,3 @@
-
 <form class="login-form margin-clear">
 	<div class="form-group has-feedback">
 		<label class="control-label">Username</label>
