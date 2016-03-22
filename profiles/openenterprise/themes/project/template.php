@@ -9,6 +9,7 @@
  * Include common functions used through out theme.
  */
 include_once dirname(__FILE__) . '/theme/common.inc';
+include_once dirname(__FILE__) . '/theme/slider.inc';
 
 /*
  * Implements hook_preprocess_html().
@@ -31,20 +32,20 @@ function project_preprocess_html(&$vars) {
 
   // Animate.css
   $animate = theme_get_setting('animate');
-    if ($animate > 0) {
-    $plugins['animate']['external'] = NULL;
+  if ($animate > 0) {
+    $plugins['animate']['options']['type'] = NULL;
     $plugins['animate']['type'] = 'css';
     switch ($animate) {
       case 1:
-        $plugins['animate']['path'] = $plugin_path.'animate/animate.min.css';
-        break;
+      $plugins['animate']['path'] = $plugin_path.'animate/animate.min.css';
+      break;
       case 2:
-        $plugins['animate']['path'] = $plugin_path.'animate/animate.css';
-        break;
+      $plugins['animate']['path'] = $plugin_path.'animate/animate.css';
+      break;
       case 3:
-        $plugins['animate']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.4.0/animate.min.css';
-        $plugins['animate']['external'] = 'external';
-        break;
+      $plugins['animate']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.4.0/animate.min.css';
+      $plugins['animate']['options']['type'] = 'external';
+      break;
     }
 
     // Conditionally add Morphext based on Animate.
@@ -53,11 +54,11 @@ function project_preprocess_html(&$vars) {
       $plugins['morphext_js']['type'] = 'js';
       switch ($morphext) {
         case 1:
-          $plugins['morphext_js']['path'] = $plugin_path.'morphext/morphext.min.js';
-          break;
+        $plugins['morphext_js']['path'] = $plugin_path.'morphext/morphext.min.js';
+        break;
         case 2:
-          $plugins['morphext_js']['path'] = $plugin_path.'morphext/morphext.js';
-          break;
+        $plugins['morphext_js']['path'] = $plugin_path.'morphext/morphext.js';
+        break;
       }
       if ($morphext > 0) {
         $plugins['morphext_css']['path'] = $plugin_path.'morphext/morphext.css';
@@ -69,171 +70,211 @@ function project_preprocess_html(&$vars) {
   // Bootstrap Notify
   $bootstrap_notify = theme_get_setting('bootstrap_notify');
   if ($bootstrap_notify > 0) {
-    $plugins['bootstrap_notify']['external'] = NULL;
+    $plugins['bootstrap_notify']['options']['type'] = NULL;
     $plugins['bootstrap_notify']['type'] = 'js';
     switch ($bootstrap_notify) {
       case 1:
-        $plugins['bootstrap_notify']['path'] = $plugin_path.'bootstrap-notify/bootstrap-notify.min.js';
-        break;
+      $plugins['bootstrap_notify']['path'] = $plugin_path.'bootstrap-notify/bootstrap-notify.min.js';
+      break;
       case 2:
-        $plugins['bootstrap_notify']['path'] = $plugin_path.'bootstrap-notify/bootstrap-notify.js';
-        break;
+      $plugins['bootstrap_notify']['path'] = $plugin_path.'bootstrap-notify/bootstrap-notify.js';
+      break;
     }
   }
 
   // Chart.js
   $chartjs = theme_get_setting('chartjs');
   if ($chartjs > 0) {
-    $plugins['chartjs']['external'] = NULL;
+    $plugins['chartjs']['options']['type'] = NULL;
     $plugins['chartjs']['type'] = 'js';
     switch ($chartjs) {
       case 1:
-        $plugins['chartjs']['path'] = $plugin_path.'charts/Chart.min.js';
-        break;
+      $plugins['chartjs']['path'] = $plugin_path.'charts/Chart.min.js';
+      break;
       case 2:
-        $plugins['chartjs']['path'] = $plugin_path.'charts/Chart.js';
-        break;
+      $plugins['chartjs']['path'] = $plugin_path.'charts/Chart.js';
+      break;
       case 3:
-        $plugins['chartjs']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js';
-        $plugins['chartjs']['external'] = 'external';
-        break;
+      $plugins['chartjs']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js';
+      $plugins['chartjs']['options']['type'] = 'external';
+      break;
     }
   }
 
   // Font Awesome
   $fontawesome = theme_get_setting('fontawesome');
   if ($fontawesome > 0) {
-    $plugins['fontawesome']['external'] = NULL;
+    $plugins['fontawesome']['options']['type'] = NULL;
     $plugins['fontawesome']['type'] = 'css';
     switch ($fontawesome) {
       case 1:
-        $plugins['fontawesome']['path'] = $plugin_path.'font-awesome/css/font-awesome.min.css';
-        break;
+      $plugins['fontawesome']['path'] = $plugin_path.'font-awesome/css/font-awesome.min.css';
+      break;
       case 2:
-        $plugins['fontawesome']['path'] = $plugin_path.'font-awesome/css/font-awesome.css';
-        break;
+      $plugins['fontawesome']['path'] = $plugin_path.'font-awesome/css/font-awesome.css';
+      break;
       case 3:
-        $plugins['fontawesome']['path'] = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
-        $plugins['fontawesome']['external'] = 'external';
-        break;
+      $plugins['fontawesome']['path'] = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
+      $plugins['fontawesome']['options']['type'] = 'external';
+      break;
     }
   }
 
   // Hover.css
   $hover_css = theme_get_setting('hover_css');
   if ($hover_css > 0) {
-    $plugins['hover_css']['external'] = NULL;
+    $plugins['hover_css']['options']['type'] = NULL;
     $plugins['hover_css']['type'] = 'css';
     switch ($hover_css) {
       case 1:
-        $plugins['hover_css']['path'] = $plugin_path.'hover/hover-min.css';
-        break;
+      $plugins['hover_css']['path'] = $plugin_path.'hover/hover-min.css';
+      break;
       case 2:
-        $plugins['hover_css']['path'] = $plugin_path.'hover.css';
-        break;
+      $plugins['hover_css']['path'] = $plugin_path.'hover.css';
+      break;
       case 3:
-        $plugins['hover_css']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.0.2/css/hover-min.css';
-        $plugins['hover_css']['external'] = 'external';
-        break;
+      $plugins['hover_css']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.0.2/css/hover-min.css';
+      $plugins['hover_css']['options']['type'] = 'external';
+      break;
     }
   }
 
   // Jasny Bootstrap CSS
   $jasny_css = theme_get_setting('jasny_css');
   if ($jasny_css > 0) {
-    $plugins['jasny_css']['external'] = NULL;
+    $plugins['jasny_css']['options']['type'] = NULL;
     $plugins['jasny_css']['type'] = 'css';
     switch ($jasny_css) {
       case 1:
-        $plugins['jasny_css']['path'] = $plugin_path.'jasny-bootstrap/css/jasny-bootstrap.min.css';
-        break;
+      $plugins['jasny_css']['path'] = $plugin_path.'jasny-bootstrap/css/jasny-bootstrap.min.css';
+      break;
       case 2:
-        $plugins['jasny_css']['path'] = $plugin_path.'jasny-bootstrap/css/jasny-bootstrap.css';
-        break;
+      $plugins['jasny_css']['path'] = $plugin_path.'jasny-bootstrap/css/jasny-bootstrap.css';
+      break;
       case 3:
-        $plugins['jasny_css']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css';
-        $plugins['jasny_css']['external'] = 'external';
-        break;
+      $plugins['jasny_css']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css';
+      $plugins['jasny_css']['options']['type'] = 'external';
+      break;
     }
   }
 
   // Jasny Bootstrap JS
   $jasny_js = theme_get_setting('jasny_js');
   if ($jasny_js > 0) {
-    $plugins['jasny_js']['external'] = NULL;
+    $plugins['jasny_js']['options']['type'] = NULL;
     $plugins['jasny_js']['type'] = 'js';
     switch ($jasny_js) {
       case 1:
-        $plugins['jasny_js']['path'] = $plugin_path.'jasny-bootstrap/js/jasny-bootstrap.min.js';
-        break;
+      $plugins['jasny_js']['path'] = $plugin_path.'jasny-bootstrap/js/jasny-bootstrap.min.js';
+      break;
       case 2:
-        $plugins['jasny_js']['path'] = $plugin_path.'jasny-bootstrap/js/jasny-bootstrap.js';
-        break;
+      $plugins['jasny_js']['path'] = $plugin_path.'jasny-bootstrap/js/jasny-bootstrap.js';
+      break;
       case 3:
-        $plugins['jasny_js']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js';
-        $plugins['jasny_js']['external'] = 'external';
-        break;
+      $plugins['jasny_js']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js';
+      $plugins['jasny_js']['options']['type'] = 'external';
+      break;
+    }
+  }
+
+  // Maplace
+  $maplace = theme_get_setting('maplace');
+  if ($maplace > 0) {
+    $plugins['maplace']['options']['type'] = NULL;
+    $plugins['maplace']['type'] = 'js';
+    switch ($maplace) {
+      case 1:
+      $plugins['maplace']['path'] = $plugin_path.'maplace/maplace.min.js';
+      break;
+      case 1:
+      $plugins['maplace']['path'] = $plugin_path.'maplace/maplace.min.js';
+      break;
+      case 3:
+      $plugins['maplace']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/maplace-js/0.2.5/maplace.min.js';
+      $plugins['maplace']['options']['type'] = 'external';
+      break;
+    }
+
+    // Google Maps API Key
+    $gmap_api_key = theme_get_setting('gmap_api_key');
+    if (!empty($gmap_api_key)) {
+      $plugins['gmap']['type'] = 'js';
+      $plugins['gmap']['path'] = 'https://maps.google.com/maps/api/js?sensor=false&libraries=geometry&v=3.22&key='.$gmap_api_key;
+      $plugins['gmap']['options']['type'] = 'external';
+      $plugins['gmap']['options']['weight'] = -100;
+    } else {
+      drupal_set_message(t('You do not have an API key set. If using Maplace, you need to obtain a Google Maps API key. For more info please go to !google website', array('!google' => l('Google Maps JavaScript API developers', 'https://developers.google.com/maps/documentation/javascript/get-api-key'))), 'status', FALSE);
     }
   }
 
   // Pace by Hubspot
   $pacejs = theme_get_setting('pacejs');
   if ($pacejs > 0) {
-    $plugins['pacejs']['external'] = NULL;
+    $plugins['pacejs']['options']['type'] = NULL;
     $plugins['pacejs']['type'] = 'js';
     switch ($pacejs) {
       case 1:
-        $plugins['pacejs']['path'] = $plugin_path.'pace/pace.min.js';
-        break;
-      case 2:
-        $plugins['pacejs']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js';
-        $plugins['pacejs']['external'] = 'external';
-        break;
+      $plugins['pacejs']['path'] = $plugin_path.'pace/pace.min.js';
+      break;
+      case 1:
+      $plugins['pacejs']['path'] = $plugin_path.'pace/pace.js';
+      break;
+      case 3:
+      $plugins['pacejs']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js';
+      $plugins['pacejs']['options']['type'] = 'external';
+      break;
     }
   }
 
   // Vide
   $vide = theme_get_setting('vide');
   if ($vide > 0) {
-    $plugins['vide']['external'] = NULL;
+    $plugins['vide']['options']['type'] = NULL;
     $plugins['vide']['type'] = 'js';
     switch ($vide) {
       case 1:
-        $plugins['vide']['path'] = $plugin_path.'vide/jquery.vide.min.js';
-        break;
+      $plugins['vide']['path'] = $plugin_path.'vide/jquery.vide.min.js';
+      break;
       case 2:
-        $plugins['vide']['path'] = $plugin_path.'vide/jquery.vide.js';
-        break;
+      $plugins['vide']['path'] = $plugin_path.'vide/jquery.vide.js';
+      break;
     }
   }
 
   // Waypoints
   $waypoints = theme_get_setting('waypoints');
   if ($waypoints > 0) {
-    $plugins['waypoints']['external'] = NULL;
+    $plugins['waypoints']['options']['type'] = NULL;
     $plugins['waypoints']['type'] = 'js';
     switch ($waypoints) {
       case 1:
-        $plugins['waypoints']['path'] = $plugin_path.'waypoints/jquery.waypoints.min.js';
-        break;
+      $plugins['waypoints']['path'] = $plugin_path.'waypoints/jquery.waypoints.min.js';
+      break;
       case 2:
-        $plugins['waypoints']['path'] = $plugin_path.'waypoints/jquery.waypoints.js';
-        break;
+      $plugins['waypoints']['path'] = $plugin_path.'waypoints/jquery.waypoints.js';
+      break;
       case 3:
-        $plugins['waypoints']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.0/noframework.waypoints.min.js';
-        $plugins['waypoints']['external'] = 'external';
-        break;
+      $plugins['waypoints']['path'] = 'https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.0/noframework.waypoints.min.js';
+      $plugins['waypoints']['options']['type'] = 'external';
+      break;
     }
   }
-
 
   // Add all plugins.
   foreach ($plugins as $key => $value) {
     if (isset($value['path'])) {
       if ($value['type'] == 'js') {
-        drupal_add_js($value['path'], $value['external']);
+        if (!empty($value['options']['external'])) {
+          drupal_add_js($value['path'], $value['options']);
+        } else {
+          drupal_add_js($value['path']);
+        }
       } else {
-        drupal_add_css($value['path'], $value['external']);
+        if (!empty($value['options']['external'])) {
+          drupal_add_css($value['path'], $value['options']);
+        } else {
+          drupal_add_css($value['path']);
+        }
       }
     }
   }
@@ -242,6 +283,13 @@ function project_preprocess_html(&$vars) {
   // Transparent Navbar.
   if (theme_get_setting('navbar_transparent')) {
     $vars['classes_array'][] = 'transparent-header';
+  }
+  // Boxed layout.
+  if (theme_get_setting('layout_style')) {
+    $vars['classes_array'][] = 'boxed';
+    if ($pattern = theme_get_setting("pattern")) {
+     $vars['classes_array'][] = $pattern; 
+    }
   }
 
 }
@@ -286,6 +334,28 @@ function project_preprocess_page(&$vars) {
   $header_top['class'][] = 'header-top';
   $header_top['class'][] = theme_get_setting('header_top_color');
   $vars['header_top_attr'] = $header_top;
+  // Header Top Classes for Menu width
+  $header_top_class = (theme_get_setting('header_top_class')) ? theme_get_setting('header_top_class') : 'small';
+  if (!empty($header_top_class)) {
+    switch ($header_top_class) {
+      case 'small':
+        $vars['header_top_class']['left']['class'][] = 'col-sm-6 col-md-9';
+        $vars['header_top_class']['right']['class'][] = 'col-sm-6 col-md-3';
+        break;
+      case 'medium':
+        $vars['header_top_class']['left']['class'][] = 'col-sm-6 col-md-8';
+        $vars['header_top_class']['right']['class'][] = 'col-sm-6 col-md-4';
+        break;
+      case 'large':
+        $vars['header_top_class']['left']['class'][] = 'col-sm-6 col-md-7';
+        $vars['header_top_class']['right']['class'][] = 'col-sm-6 col-md-5';
+        break;
+      default:
+        $vars['header_top_class']['left']['class'][] = 'col-sm-6 col-md-6';
+        $vars['header_top_class']['right']['class'][] = 'col-sm-6 col-md-6';
+        break;
+    }
+  }
 
   // Header
   $header = array();
@@ -319,12 +389,65 @@ function project_preprocess_page(&$vars) {
   // Main Content
   $vars['page_title_separator'] = theme_get_setting('page_title_separator');
 
+
   // Footer
   $footer = array();
   $footer['class'][] = 'clearfix';
   $footer['class'][] = theme_get_setting('footer_dark');
   $vars['footer_attr'] = $footer;
 
+  // Add Javscript settings from Project settings
+  $settings = array();
+  $settings['social_media_links'] = theme_get_setting('social_media_links');
+
+  // Add settings to Drupal.settings
+  drupal_add_js(array('project' => $settings),array('type' => 'setting'));
+
+}
+
+/**
+ * Implements hook_preprocess_maintenance_page().
+ */
+function project_preprocess_maintenance_page(&$vars) {
+  project_preprocess_page($vars);
+
+  // Add main menu.
+  $main_menu = menu_tree('main-menu');
+  $main_menu['#theme_wrappers'][] = 'project_menu_tree__main_menu';
+  $vars['main_menu'] = $main_menu;
+
+  // Add back Bootstrap.js
+  $bootstrap_path = drupal_get_path('theme', 'bootstrap');
+  drupal_add_js($bootstrap_path . '/dist/js/bootstrap.js');
+
+}
+
+
+/**
+ * Implements hook_preprocess_block()
+ */
+function project_preprocess_block(&$variables) {
+  // Remove duplicate classes and empty classes
+  $variables['classes_array'] = array_unique(array_diff($variables['classes_array'], array('')));
+  // Add classes to blocks for front page containers.
+  if (isset($variables['elements']['#block']->block_container) && $variables['elements']['#block']->block_container == 'content') {
+    // Only add container class if it's the front page and NOT the main system block.
+    if ($variables['is_front']) {
+      $variables['theme_hook_suggestions'][] = 'block__container';
+    }
+  }
+}
+
+/*
+ * Implements hook_css_alter().
+ */
+function project_css_alter(&$css) {
+  // Explicitly remove Enterprise Bootstrap styling.
+  foreach ($css as $key => $value) {
+    if (strpos($value['data'], 'enterprise_bootstrap.less') !== FALSE) {
+      unset($css[$key]);
+    }
+  }
 }
 
 /*
@@ -379,11 +502,10 @@ function project_status_messages($variables) {
       foreach ($messages as $message) {
         $output .= '  <li>' . $message . "</li>\n";
         $notify_message .= '  <li>' . $message . "</li>\n";
-        if (preg_match('/\b(devel\w+)\b/', $message)) {
-          $devel++;
-          dd("preg match passed");
+        $msg = substr($message, 0, 150);
+        if (strpos($msg, 'Krumo') !== FALSE) {
+          $devel = 1;
         }
-        dd("preg match DID NOT pass");
       }
 
       $output .= " </ul>\n";
@@ -392,16 +514,15 @@ function project_status_messages($variables) {
     else {
       $output .= $messages[0];
       $notify_message .= $messages[0];
-      if (preg_match('/\b(devel\w+)\b/', $messages[0])) {
-        $devel++;
-        dd("preg match passed");
+      $msg = substr($messages[0], 0, 150);
+      if (strpos($msg, 'Krumo') !== FALSE) {
+        $devel = 1;
       }
-      dd("preg match DID NOT pass");
     }
 
     $output .= "</div>\n";
 
-    // Add Bootstrap Notify
+    // Only process if Bootstrap Notify is enabled.
     $template = '<div data-notify="container" class="col-xs-11 col-sm-5 alert alert-{0}" role="alert"><button type="button" aria-hidden="true" class="close" data-notify="dismiss">&times;</button><span data-notify="icon" style="margin-right:5px;"></span><span data-notify="title">{1}</span><div class="well-sm" data-notify="message">{2}</div></div>';
     $notify_options = '{
       message:'.json_encode($notify_message).',
@@ -431,7 +552,7 @@ function project_status_messages($variables) {
   // Normal output if not using Bootstrap Notify.
   $status_output = '';
   foreach ($statuses as $status) {
-    if ($status['devel'] > 0) {
+    if ($status['devel'] == 1) {
       $status_output .= $status['standard'];
       continue;
     } elseif ($bootstrap_notify) {
@@ -464,24 +585,24 @@ function project_menu_local_action($variables) {
   $icon = _project_iconize_button($link['title']);
 
   // Format the action link.
-  $output = '<li>';
+  $output = '<li class="active alt">';
   if (isset($link['href'])) {
     // Turn link into a mini-button and colorize based on title.
-    if ($class = _project_colorize_button($link['title'])) {
-      if (!isset($options['attributes']['class'])) {
-        $options['attributes']['class'] = array();
-      }
-      $string = is_string($options['attributes']['class']);
-      if ($string) {
-        $options['attributes']['class'] = explode(' ', $options['attributes']['class']);
-      }
-      $options['attributes']['class'][] = 'btn';
-      $options['attributes']['class'][] = 'btn-xs';
-      $options['attributes']['class'][] = $class;
-      if ($string) {
-        $options['attributes']['class'] = implode(' ', $options['attributes']['class']);
-      }
-    }
+    // if ($class = _project_colorize_button($link['title'])) {
+    //   if (!isset($options['attributes']['class'])) {
+    //     $options['attributes']['class'] = array();
+    //   }
+    //   $string = is_string($options['attributes']['class']);
+    //   if ($string) {
+    //     $options['attributes']['class'] = explode(' ', $options['attributes']['class']);
+    //   }
+    //   // $options['attributes']['class'][] = 'btn';
+    //   // $options['attributes']['class'][] = 'btn-xs';
+    //   // $options['attributes']['class'][] = $class;
+    //   if ($string) {
+    //     $options['attributes']['class'] = implode(' ', $options['attributes']['class']);
+    //   }
+    // }
     // Force HTML so we can add the icon rendering element.
     $options['html'] = TRUE;
     $output .= l($icon . $link['title'], $link['href'], $options);
@@ -505,4 +626,78 @@ function project_less_paths_alter(array &$less_paths, $system_name) {
   if ($colorize) {
     $less_paths[] = drupal_get_path('theme', 'project') . '/less/color.less';
   }
+}
+
+/**
+ * Implements hook_menu_tree__MENU_ID
+ */
+function project_menu_tree__main_menu($variables) {
+  return '<ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul>';
+}
+
+/**
+ * Implements hook_menu_link__MENU_ID
+ */
+function project_menu_link__main_menu(array $variables) {
+  // Default Bootstrap menu
+  $element = $variables['element'];
+  $sub_menu = '';
+
+  // We'll store a lot of info about this menu link in here.
+  $menu_data = array(
+    'mlid' => $element['#original_link']['mlid'],
+    'theme_hook' => $variables['theme_hook_original'],
+    'depth' => (!empty($element['#original_link']['depth'])) ? intval($element['#original_link']['depth']) : NULL,
+    'expanded' => (!empty($element['#original_link']['expanded'])) ? $element['#original_link']['expanded'] : 0,
+    'menu_block' => (is_array($element['#theme']) && in_array('menu_link__menu_block', $element['#theme'])) ? TRUE : FALSE,
+    'dropdown' => theme_get_setting('enterprise_bootstrap_dropdown'),
+    'mobile_dropdown' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
+    'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
+  );
+
+  // Add class for when Icon Menu is being used.
+  if (!empty($element['#localized_options']['icon']['icon'])) {
+    $element['#attributes']['class'][] = 'has-icon';
+  }
+  // Add Menu link ID for specific styling cases.
+  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
+
+
+  // Handle all other menus.
+  if ($element['#below'] && $menu_data['expanded']) {
+    // Prevent dropdown functions from being added to management menu so it
+    // does not affect the navbar module.
+    if (($element['#original_link']['menu_name'] == 'management') && (module_exists('navbar'))) {
+      $sub_menu = drupal_render($element['#below']);
+    }
+    elseif ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 1)) {
+      // Add our own wrapper.
+      unset($element['#below']['#theme_wrappers']);
+      $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
+
+      // Generate as standard dropdown.
+      $element['#attributes']['class'][] = 'dropdown';
+      $element['#localized_options']['html'] = TRUE;
+
+      // Set dropdown trigger element to # to prevent inadvertant page loading
+      // when a submenu link is clicked.
+      if (!empty($menu_data['dropdown'])) {
+        $element['#localized_options']['attributes']['data-target'] = '#';
+        $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
+        $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';        
+      } else {
+        $element['#attributes']['class'][] = 'hover';
+        $element['#localized_options']['attributes']['data-target'] = '#';
+        $element['#localized_options']['attributes']['class'][] = 'dropdown-hover';
+        $element['#localized_options']['attributes']['data-hover'] = 'dropdown';
+      }
+    }
+  }
+  // On primary navigation menu, class 'active' is not set on active menu item.
+  // @see https://drupal.org/node/1896674
+  if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
+    $element['#attributes']['class'][] = 'active';
+  }
+  $output = l($element['#title'], $element['#href'], $element['#localized_options']);
+  return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
 }

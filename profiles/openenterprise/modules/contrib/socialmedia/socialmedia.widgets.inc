@@ -9,7 +9,6 @@
  * Implements hook_widgets_element_info().
  */
 function socialmedia_widgets_element_info() {
-  //$addthis_js = '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?addthis_username:[socialmedia:addthis:username]]"></script>';
   $elements = array(
     'socialmedia_twitter-tweet-no-count' => array(
       'label' => t('Twitter tweet button (no count)'),

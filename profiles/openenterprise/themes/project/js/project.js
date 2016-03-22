@@ -13,13 +13,49 @@ var Drupal = Drupal || {};
   Drupal.behaviors.projectTheme = {
     attach: function(context, settings) {
 
+      var project = settings.project;
+
+      // Add custom social media link classes.
+      var socialMediaClasses = "";
+      if (project.social_media_links && typeof(project.social_media_links) === "object") {
+        for (var cl in project.social_media_links) {
+          // skip loop if the property is from prototype
+          if (!project.social_media_links.hasOwnProperty(cl)) continue;
+
+          var prop = project.social_media_links[cl];
+          if (prop !== 0) {
+            socialMediaClasses += prop + " ";
+          }
+        };
+      }
+
       var $socialFollow = $("#block-widgets-s-enterprise-social-follow", context);
+      var socialClasses = ["facebook", "twitter", "google", "skype", "instagram", "linkedin", "pinterest", "flickr", "youtube", "foursquare", "soundcloud", "tumblr", "vimeo", "dribble", "behance", "vine", "stumbleupon"];
       $socialFollow.find("a.btn-social").each(function(index, el) {
         $(el).wrap('<li class="social-link"></li>');
         $(el).removeClass('btn btn-default');
         $(el).find('.icon').removeClass('icon');
+
+        // Add proper social classes.
+        for (var i = el.classList.length - 1; i >= 0; i--) {
+          // Break up addThis classes.
+          var addthisClass = el.classList[i].split("_");
+          for (var j = addthisClass.length - 1; j >= 0; j--) {
+            // Check if social media class is supported.
+            if (socialClasses.indexOf(addthisClass[j]) > -1) {
+              var linkClass = socialClasses[socialClasses.indexOf(addthisClass[j])];
+              // Google Plus is more specific.
+              if (linkClass === "google") {
+                linkClass = "googleplus";
+              }
+              // Add social class to parent link.
+              $("."+el.classList[i], $socialFollow).parent("li").addClass(linkClass);
+            }
+          };
+        };
+
       });
-      $socialFollow.wrapInner( "<ul class='social-links circle small hidden-xs'></ul>");
+      $socialFollow.wrapInner( "<ul class='social-links " + socialMediaClasses + "'></ul>");
 
     }
   };
@@ -82,16 +118,16 @@ var Drupal = Drupal || {};
         });
       }
 
-      //Transparent Header Calculations
+      // Transparent Header Calculations
       var timer_tr;
       if ($(".transparent-header", context).length > 0) {
         $(window).load(function() {
-          trHeaderHeight = $("header.header", context).outerHeight();
+          var trHeaderHeight = $("header.header", context).outerHeight();
           $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
         });
         $(window).resize(function() {
           if ($(this).scrollTop() < headerTopHeight + headerHeight - 5) {
-            trHeaderHeight = $("header.header", context).outerHeight();
+            var trHeaderHeight = $("header.header", context).outerHeight();
             $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
           }
         });
@@ -101,7 +137,7 @@ var Drupal = Drupal || {};
               window.clearTimeout(timer_tr);
             }
             timer_tr = window.setTimeout(function() {
-              trHeaderHeight = $("header.header", context).outerHeight();
+              var trHeaderHeight = $("header.header", context).outerHeight();
               $(".transparent-header .tp-bannertimer", context).css("marginTop", (trHeaderHeight) + "px");
             }, 300);
           }
@@ -138,528 +174,6 @@ var Drupal = Drupal || {};
             $("body", context).addClass("transparent-header");
             $(".header-container header.header", context).addClass("transparent-header-on");
           }
-        });
-      }
-
-      // Revolution Slider
-      if ($(".slider-banner-container", context).length > 0) {
-
-        $(".tp-bannertimer", context).show();
-
-        $('body:not(.transparent-header) .slider-banner-container .slider-banner-fullscreen', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 520,
-          fullWidth: "off",
-          fullScreen: "on",
-          fullScreenOffsetContainer: ".header-container",
-          fullScreenOffset: "0",
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          spinner: "spinner2",
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-          hideTimerBar: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-        $('.transparent-header .slider-banner-container .slider-banner-fullscreen', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 520,
-          fullWidth: "off",
-          fullScreen: "on",
-          fullScreenOffsetContainer: ".header-top",
-          fullScreenOffset: "",
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          spinner: "spinner2",
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-          hideTimerBar: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.slider-banner-container .slider-banner-fullwidth', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "on",
-
-          spinner: "spinner2",
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.slider-banner-container .slider-banner-fullwidth-big-height', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 650,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "on",
-
-          spinner: "spinner2",
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "off",
-
-          spinner: "spinner2",
-          shadow: 1,
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "off",
-
-          spinner: "spinner2",
-          shadow: 3,
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.slider-banner-container .slider-banner-boxedwidth-no-shadow', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "off",
-
-          spinner: "spinner2",
-          shadow: 0,
-
-          stopLoop: "off",
-          stopAfterLoops: -1,
-          stopAtSlide: -1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.banner:not(.dark-bg) .slider-banner-container .slider-banner-boxedwidth-stopped', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "off",
-
-          spinner: "spinner2",
-          shadow: 1,
-
-          stopLoop: "off",
-          stopAfterLoops: 0,
-          stopAtSlide: 1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-        $('.banner.dark-bg .slider-banner-container .slider-banner-boxedwidth-stopped', context).show().revolution({
-          delay: 8000,
-          startwidth: 1140,
-          startheight: 450,
-
-          navigationArrows: "solo",
-
-          navigationStyle: "preview2",
-          navigationHAlign: "center",
-          navigationVAlign: "bottom",
-          navigationHOffset: 0,
-          navigationVOffset: 20,
-
-          soloArrowLeftHalign: "left",
-          soloArrowLeftValign: "center",
-          soloArrowLeftHOffset: 0,
-          soloArrowLeftVOffset: 0,
-
-          soloArrowRightHalign: "right",
-          soloArrowRightValign: "center",
-          soloArrowRightHOffset: 0,
-          soloArrowRightVOffset: 0,
-
-          fullWidth: "off",
-
-          spinner: "spinner2",
-          shadow: 3,
-
-          stopLoop: "off",
-          stopAfterLoops: 0,
-          stopAtSlide: 1,
-          onHoverStop: "off",
-
-          shuffle: "off",
-
-          autoHeight: "off",
-          forceFullWidth: "off",
-
-          hideThumbsOnMobile: "off",
-          hideNavDelayOnMobile: 1500,
-          hideBulletsOnMobile: "off",
-          hideArrowsOnMobile: "off",
-          hideThumbsUnderResolution: 0,
-
-          hideSliderAtLimit: 0,
-          hideCaptionAtLimit: 0,
-          hideAllCaptionAtLilmit: 0,
-          startWithSlide: 0
-        });
-
-      };
-
-      //Owl carousel
-      //-----------------------------------------------
-      if ($('.owl-carousel', context).length > 0) {
-        $(".owl-carousel.carousel", context).owlCarousel({
-          items: 4,
-          pagination: false,
-          navigation: true,
-          navigationText: false
-        });
-        $(".owl-carousel.carousel-autoplay", context).owlCarousel({
-          items: 4,
-          autoPlay: 5000,
-          pagination: false,
-          navigation: true,
-          navigationText: false
-        });
-        $(".owl-carousel.clients", context).owlCarousel({
-          items: 6,
-          autoPlay: true,
-          pagination: false,
-          itemsDesktopSmall: [992, 4],
-          itemsTablet: [768, 4],
-          itemsMobile: [479, 3]
-        });
-        $(".owl-carousel.content-slider", context).owlCarousel({
-          singleItem: true,
-          autoPlay: 5000,
-          navigation: false,
-          navigationText: false,
-          pagination: false
-        });
-        $(".owl-carousel.content-slider-with-controls", context).owlCarousel({
-          singleItem: true,
-          autoPlay: false,
-          navigation: true,
-          pagination: true
-        });
-        $(".owl-carousel.content-slider-with-large-controls", context).owlCarousel({
-          singleItem: true,
-          autoPlay: false,
-          navigation: true,
-          pagination: true
-        });
-        $(".owl-carousel.content-slider-with-controls-autoplay", context).owlCarousel({
-          singleItem: true,
-          autoPlay: 5000,
-          navigation: true,
-          pagination: true
-        });
-        $(".owl-carousel.content-slider-with-large-controls-autoplay", context).owlCarousel({
-          singleItem: true,
-          autoPlay: 5000,
-          navigation: true,
-          pagination: true
-        });
-        $(".owl-carousel.content-slider-with-controls-autoplay-hover-stop", context).owlCarousel({
-          singleItem: true,
-          autoPlay: 5000,
-          navigation: true,
-          pagination: true,
-          stopOnHover: true
         });
       }
 

@@ -36,7 +36,7 @@ function project_include($theme, $path) {
 function _project_icon($name) {
   // Mimic the Icon API markup.
   $attributes = array(
-    'class' => array('glyphicon', 'glyphicon-' . $name),
+    'class' => array('glyphicon', 'glyphicon-' . $name, 'pr-5'),
     'aria-hidden' => 'true',
   );
   
