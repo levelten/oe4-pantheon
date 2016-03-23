@@ -2,3 +2,4 @@ name = Enterprise Blog (CBD)
 description = A multi-user full featured blog app. Has many of the features of WordPress.
 core = 7.x
 package = Open Enterprise
+apps[install_disable] = 1

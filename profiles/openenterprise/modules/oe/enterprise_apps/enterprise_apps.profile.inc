@@ -415,10 +415,13 @@ function enterprise_apps_install_demo(&$install_state) {
   $apps = array();
   foreach ($demo_info['required_apps'] as $name) {
     if (enterprise_apps_module_files_exist($name)) {
-      $apps[] = $name;
+      $apps[$name] = $name;
     }
     if (enterprise_apps_module_files_exist($name . '_config')) {
-      $apps[] = $name . '_config';
+      $apps[$name . '_config'] = $name . '_config';
+    }
+    if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
+      $apps[$name . '_content'] = $name . '_content';
     }
   }
 
@@ -426,25 +429,27 @@ function enterprise_apps_install_demo(&$install_state) {
   if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
     foreach ($profile_settings['apps'] AS $name) {
       if (enterprise_apps_module_files_exist($name)) {
-        $apps[] = $name;
+        $apps[$name] = $name;
       }
       if (enterprise_apps_module_files_exist($name . '_config')) {
-        $apps[] = $name . '_config';
+        $apps[$name . '_config'] = $name . '_config';
       }
-      if (!empty($profile_settings['demo']['demo_content'])) {
-        $apps[] = $name . '_content';
+      if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
+        $apps[$name . '_content'] = $name . '_content';
       }
     }
   }
 
   // add demo_config and content apps
-  $apps[] = $demo_app . '_config';
+  $apps[$demo_app . '_config'] = $demo_app . '_config';
 
-  $apps[] = !empty($profile_settings['demo']['demo_content']) ? 'enterprise_demo_content' : 'enterprise_demo_nocontent';
+  $a = !empty($profile_settings['demo']['demo_content']) ? 'enterprise_demo_content' : 'enterprise_demo_nocontent';
+  $apps[$a] = $a;
 
-  $apps[] = 'enterprise_permissions';
-  $apps[] = 'enterprise_permissions_content';
+  $apps['enterprise_permissions'] = 'enterprise_permissions';
+  $apps['enterprise_permissions_content'] = 'enterprise_permissions_content';
 
+  $profile_settings['demo']['enable_modules'] = $apps;
   $debug['apps'] = $apps;
 
   // verify app module exists and add to batch
@@ -480,6 +485,23 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
   // must rebuild field instances after all fields are installed.
   if (!empty($profile_settings['demo']['info']['features_revert'])) {
     features_revert($profile_settings['demo']['info']['features_revert']);
+  }
+
+  $modules = module_list();
+  $module_info_apps = array();
+  $disable = array();
+  foreach ($modules as $module) {
+    $file = drupal_get_path('module', $module) . "/$module.info";
+    $info = drupal_parse_info_file($file);
+    if (!empty($info['apps'])) {
+      $module_info_apps[$module] = $info['apps'];
+      if (!empty($info['apps']['disable'])) {
+        $disable[] = $module;
+      }
+    }
+  }
+  if (!empty($disable)) {
+    module_disable($disable);
   }
 
   // must rebuild field instances after all fields are installed.

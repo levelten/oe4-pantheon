@@ -1,6 +1,7 @@
 name = Enterprise Landing Pages Test Workflow
 core = 7.x
 package = Features
+apps[install_disable] = 1
 dependencies[] = bean_uuid
 dependencies[] = ctools
 dependencies[] = deploy

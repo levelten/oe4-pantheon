@@ -1,6 +1,7 @@
 name = Enterprise Conversion Content
 core = 7.x
 package = Open Enterprise Content
+apps[install_disable] = 1
 dependencies[] = bean_uuid
 dependencies[] = ctools
 dependencies[] = deploy

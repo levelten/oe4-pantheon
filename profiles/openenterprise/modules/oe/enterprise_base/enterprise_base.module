@@ -74,7 +74,7 @@ function enterprise_base_taxonomy_term_uri($term) {
   $url = array(
     'path' => 'taxonomy/term/' . $term->tid,
   );
-  
+
   // Allow other modules to set the path.
   drupal_alter('taxonomy_term_' . $term->vocabulary_machine_name . '_uri', $url, $term);
 
@@ -407,12 +407,14 @@ function enterprise_base_views_default_views_alter(&$views) {
  * Implements hook_preprocess_page().
  * TODO: hack to get breadcrumbs working, develop a better api for this
  */
-function enterprise_base_preprocess_page(&$variables) {
+function x_enterprise_base_preprocess_page(&$variables) {
+
   $trail = drupal_get_breadcrumb();
   if (!empty($trail) && (strip_tags($trail[0]) == t('Home'))) {
     $path_pattern = '';
     $replacements = array();
     // Replace the leading Home crumb.
+
     if (isset($variables['node'])) {
       $entity = $variables['node'];
       $path_pattern = pathauto_pattern_load_by_entity('node', $entity->type);
