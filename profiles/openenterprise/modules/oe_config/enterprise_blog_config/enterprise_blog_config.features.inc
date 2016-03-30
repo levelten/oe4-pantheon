@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.features.inc
+ * enterprise_blog_config.features.inc
  */
 
 /**

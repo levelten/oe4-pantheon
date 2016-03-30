@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_premiumoffer.field_group.inc
+ * enterprise_premiumoffer_config.field_group.inc
  */
 
 /**
@@ -105,8 +105,8 @@ function enterprise_premiumoffer_config_field_group_info() {
     'label' => 'Default CTAs',
     'weight' => '8',
     'children' => array(
-      0 => 'field_cta_footer',
-      1 => 'field_cta_sidebar',
+      0 => 'field_premiumoffer_cta_footer',
+      1 => 'field_premiumoffer_cta_sidebar',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
@@ -119,6 +119,42 @@ function enterprise_premiumoffer_config_field_group_info() {
     ),
   );
   $export['group_cta|node|enterprise_premiumoffer|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_rel|node|enterprise_premiumoffer|form';
+  $field_group->group_name = 'group_rel';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'enterprise_premiumoffer';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Relevancy',
+    'weight' => '9',
+    'children' => array(
+      0 => 'field_service_types',
+      1 => 'field_procedure_tags',
+      2 => 'group_patient_charateristics',
+    ),
+    'format_type' => 'div',
+    'format_settings' => array(
+      'label' => 'Relevancy',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'id' => '',
+        'classes' => 'group-rel field-group-div display_sidebar',
+        'description' => 'Select any categories that are relevant to the premium offer.
+<br /><br />',
+        'show_label' => '1',
+        'label_element' => 'h2',
+        'effect' => 'none',
+        'speed' => 'fast',
+      ),
+      'formatter' => 'open',
+    ),
+  );
+  $export['group_rel|node|enterprise_premiumoffer|form'] = $field_group;
 
   return $export;
 }

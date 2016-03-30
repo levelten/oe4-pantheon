@@ -1,16 +1,16 @@
 <?php
 /**
  * @file
- * enterprise_fields.features.field_base.inc
+ * enterprise_global_config.features.field_base.inc
  */
 
 /**
  * Implements hook_field_default_field_bases().
  */
-function enterprise_fields_field_default_field_bases() {
+function enterprise_global_config_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'body'
+  // Exported field_base: 'body'.
   $field_bases['body'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -31,7 +31,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'text_with_summary',
   );
 
-  // Exported field_base: 'field_body'
+  // Exported field_base: 'field_body'.
   $field_bases['field_body'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -50,7 +50,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'text_long',
   );
 
-  // Exported field_base: 'field_categories'
+  // Exported field_base: 'field_categories'.
   $field_bases['field_categories'] = array(
     'active' => 1,
     'cardinality' => -1,
@@ -76,7 +76,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'taxonomy_term_reference',
   );
 
-  // Exported field_base: 'field_description'
+  // Exported field_base: 'field_description'.
   $field_bases['field_description'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -95,7 +95,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'text_with_summary',
   );
 
-  // Exported field_base: 'field_energy_level'
+  // Exported field_base: 'field_energy_level'.
   $field_bases['field_energy_level'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -114,7 +114,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'radioactivity',
   );
 
-  // Exported field_base: 'field_file'
+  // Exported field_base: 'field_file'.
   $field_bases['field_file'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -137,7 +137,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'file',
   );
 
-  // Exported field_base: 'field_firstname'
+  // Exported field_base: 'field_firstname'.
   $field_bases['field_firstname'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -158,7 +158,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'text',
   );
 
-  // Exported field_base: 'field_icon'
+  // Exported field_base: 'field_icon'.
   $field_bases['field_icon'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -176,7 +176,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'icon_field',
   );
 
-  // Exported field_base: 'field_image'
+  // Exported field_base: 'field_image'.
   $field_bases['field_image'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -198,7 +198,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'image',
   );
 
-  // Exported field_base: 'field_lastname'
+  // Exported field_base: 'field_lastname'.
   $field_bases['field_lastname'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -219,7 +219,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'text',
   );
 
-  // Exported field_base: 'field_picture'
+  // Exported field_base: 'field_picture'.
   $field_bases['field_picture'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -241,7 +241,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'image',
   );
 
-  // Exported field_base: 'field_resource_link'
+  // Exported field_base: 'field_resource_link'.
   $field_bases['field_resource_link'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -270,7 +270,7 @@ function enterprise_fields_field_default_field_bases() {
     'type' => 'link_field',
   );
 
-  // Exported field_base: 'field_tags'
+  // Exported field_base: 'field_tags'.
   $field_bases['field_tags'] = array(
     'active' => 1,
     'cardinality' => -1,

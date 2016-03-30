@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_landingpage.features.field_instance.inc
+ * enterprise_landingpage_config.features.field_instance.inc
  */
 
 /**
@@ -10,13 +10,25 @@
 function enterprise_landingpage_config_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'node-enterprise_landingpage-body'
+  // Exported field_instance: 'node-enterprise_landingpage-body'.
   $field_instances['node-enterprise_landingpage-body'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 21,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 21,
+      ),
       'default' => array(
         'label' => 'hidden',
         'module' => 'text',
@@ -91,13 +103,26 @@ function enterprise_landingpage_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_landingpage-field_intel_event_col'
+  // Exported field_instance:
+  // 'node-enterprise_landingpage-field_intel_event_col'.
   $field_instances['node-enterprise_landingpage-field_intel_event_col'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 30,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 31,
+      ),
       'default' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -123,17 +148,172 @@ function enterprise_landingpage_config_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 41,
+      'weight' => 9,
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_landingpage-field_page_attribute_col'
+  // Exported field_instance:
+  // 'node-enterprise_landingpage-field_landingpage_cta_footer'.
+  $field_instances['node-enterprise_landingpage-field_landingpage_cta_footer'] = array(
+    'bundle' => 'enterprise_landingpage',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'hidden',
+        'module' => 'entityreference',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+          'links' => 0,
+          'view_mode' => 'default',
+        ),
+        'type' => 'entityreference_entity_view',
+        'weight' => 0,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 34,
+      ),
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 6,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'ds_extras_field_template' => '',
+    'enterprise_edit_form_display' => '',
+    'entity_type' => 'node',
+    'entityconnect_unload_add' => 0,
+    'entityconnect_unload_edit' => 0,
+    'field_name' => 'field_landingpage_cta_footer',
+    'label' => 'Default Footer CTA',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 14,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-enterprise_landingpage-field_landingpage_cta_sidebar'.
+  $field_instances['node-enterprise_landingpage-field_landingpage_cta_sidebar'] = array(
+    'bundle' => 'enterprise_landingpage',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 34,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'hidden',
+        'module' => 'entityreference',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => '',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+          'links' => 0,
+          'view_mode' => 'default',
+        ),
+        'type' => 'entityreference_entity_view',
+        'weight' => 0,
+      ),
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 5,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'ds_extras_field_template' => '',
+    'enterprise_edit_form_display' => '',
+    'entity_type' => 'node',
+    'entityconnect_unload_add' => 0,
+    'entityconnect_unload_edit' => 0,
+    'field_name' => 'field_landingpage_cta_sidebar',
+    'label' => 'Default Sidebar CTA',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 13,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-enterprise_landingpage-field_page_attribute_col'.
   $field_instances['node-enterprise_landingpage-field_page_attribute_col'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 28,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 29,
+      ),
       'default' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -159,17 +339,29 @@ function enterprise_landingpage_config_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 43,
+      'weight' => 10,
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_landingpage-field_redirect_url'
+  // Exported field_instance: 'node-enterprise_landingpage-field_redirect_url'.
   $field_instances['node-enterprise_landingpage-field_redirect_url'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 31,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 30,
+      ),
       'default' => array(
         'label' => 'above',
         'settings' => array(),
@@ -189,6 +381,7 @@ function enterprise_landingpage_config_field_default_field_instances() {
     'label' => 'Custom URL',
     'required' => 0,
     'settings' => array(
+      'absolute_url' => 1,
       'attributes' => array(
         'class' => '',
         'configurable_title' => 0,
@@ -202,6 +395,7 @@ function enterprise_landingpage_config_field_default_field_instances() {
       'enable_tokens' => 1,
       'rel_remove' => 'default',
       'title' => 'none',
+      'title_label_use_field_label' => FALSE,
       'title_maxlength' => 128,
       'title_value' => '',
       'url' => 0,
@@ -217,13 +411,25 @@ function enterprise_landingpage_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_landingpage-field_thankyou'
+  // Exported field_instance: 'node-enterprise_landingpage-field_thankyou'.
   $field_instances['node-enterprise_landingpage-field_thankyou'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 29,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 28,
+      ),
       'default' => array(
         'label' => 'above',
         'settings' => array(),
@@ -254,13 +460,26 @@ function enterprise_landingpage_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_landingpage-field_visitor_attribute_col'
+  // Exported field_instance:
+  // 'node-enterprise_landingpage-field_visitor_attribute_col'.
   $field_instances['node-enterprise_landingpage-field_visitor_attribute_col'] = array(
     'bundle' => 'enterprise_landingpage',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
+      'conversion_cta_footer' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 32,
+      ),
+      'conversion_cta_sidebar' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 32,
+      ),
       'default' => array(
         'label' => 'hidden',
         'settings' => array(),
@@ -286,17 +505,17 @@ function enterprise_landingpage_config_field_default_field_instances() {
       'module' => 'field_collection',
       'settings' => array(),
       'type' => 'field_collection_embed',
-      'weight' => 45,
+      'weight' => 11,
     ),
   );
 
   // Translatables
   // Included for use with string extractors like potx.
   t('Body');
-  t('CTA category');
   t('Custom URL');
+  t('Default Footer CTA');
+  t('Default Sidebar CTA');
   t('Intel events');
-  t('Landing page');
   t('Page attributes');
   t('Thank you page');
   t('Visitor attributes');

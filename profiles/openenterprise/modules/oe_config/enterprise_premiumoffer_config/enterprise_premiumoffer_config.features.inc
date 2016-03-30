@@ -1,13 +1,16 @@
 <?php
 /**
  * @file
- * enterprise_premiumoffer.features.inc
+ * enterprise_premiumoffer_config.features.inc
  */
 
 /**
  * Implements hook_ctools_plugin_api().
  */
 function enterprise_premiumoffer_config_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "ds" && $api == "ds") {
+    return array("version" => "1");
+  }
   if ($module == "field_group" && $api == "field_group") {
     return array("version" => "1");
   }
@@ -26,7 +29,7 @@ function enterprise_premiumoffer_config_views_api($module = NULL, $api = NULL) {
 /**
  * Implements hook_node_info().
  */
-function enterprise_premiumoffer_node_info() {
+function enterprise_premiumoffer_config_node_info() {
   $items = array(
     'enterprise_premiumoffer' => array(
       'name' => t('Premium Offer'),

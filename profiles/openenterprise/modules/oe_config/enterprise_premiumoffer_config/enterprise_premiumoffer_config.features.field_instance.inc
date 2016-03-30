@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_premiumoffer.features.field_instance.inc
+ * enterprise_premiumoffer_config.features.field_instance.inc
  */
 
 /**
@@ -112,8 +112,8 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_premiumoffer-field_cta_footer'.
-  $field_instances['node-enterprise_premiumoffer-field_cta_footer'] = array(
+  // Exported field_instance: 'node-enterprise_premiumoffer-field_premiumoffer_cta_footer'.
+  $field_instances['node-enterprise_premiumoffer-field_premiumoffer_cta_footer'] = array(
     'bundle' => 'enterprise_premiumoffer',
     'default_value' => NULL,
     'deleted' => 0,
@@ -191,7 +191,7 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
     'entity_type' => 'node',
     'entityconnect_unload_add' => 0,
     'entityconnect_unload_edit' => 0,
-    'field_name' => 'field_cta_footer',
+    'field_name' => 'field_premiumoffer_cta_footer',
     'label' => 'Default footer CTA',
     'required' => 0,
     'settings' => array(
@@ -206,8 +206,8 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_premiumoffer-field_cta_sidebar'.
-  $field_instances['node-enterprise_premiumoffer-field_cta_sidebar'] = array(
+  // Exported field_instance: 'node-enterprise_premiumoffer-field_premiumoffer_cta_sidebar'.
+  $field_instances['node-enterprise_premiumoffer-field_premiumoffer_cta_sidebar'] = array(
     'bundle' => 'enterprise_premiumoffer',
     'default_value' => NULL,
     'deleted' => 0,
@@ -285,7 +285,7 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
     'entity_type' => 'node',
     'entityconnect_unload_add' => 0,
     'entityconnect_unload_edit' => 0,
-    'field_name' => 'field_cta_sidebar',
+    'field_name' => 'field_premiumoffer_cta_sidebar',
     'label' => 'Default sidebar CTA',
     'required' => 0,
     'settings' => array(
@@ -300,51 +300,18 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_premiumoffer-field_files'.
-  $field_instances['node-enterprise_premiumoffer-field_files'] = array(
-    'bundle' => 'enterprise_premiumoffer',
+  // Exported field_instance: 'node-enterprise_landingpage-field_premiumoffer'.
+  $field_instances['node-enterprise_etsource-field_premiumoffer'] = array(
+    'bundle' => 'enterprise_etsource',
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
-      'conversion_cta_footer' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 31,
-      ),
-      'conversion_cta_sidebar' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 31,
-      ),
       'default' => array(
         'label' => 'above',
-        'module' => 'file',
-        'settings' => array(
-          'conditions' => array(),
-          'field_delimiter' => '',
-          'field_formatter_class' => '',
-          'linked_field' => array(
-            'advanced' => array(
-              'class' => '',
-              'rel' => '',
-              'target' => '',
-              'text' => '',
-              'title' => '',
-            ),
-            'destination' => '',
-            'linked' => 0,
-          ),
-        ),
-        'type' => 'file_default',
-        'weight' => 0,
-      ),
-      'mini' => array(
-        'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 4,
+        'weight' => 2,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -354,141 +321,22 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
       ),
     ),
     'ds_extras_field_template' => '',
-    'enterprise_edit_form_display' => '',
+    'enterprise_edit_form_display' => 'sidebar',
     'entity_type' => 'node',
-    'field_name' => 'field_files',
-    'label' => 'File assets',
+    'entityconnect_unload_add' => 0,
+    'entityconnect_unload_edit' => 0,
+    'field_name' => 'field_premiumoffer',
+    'label' => 'Premium offer',
     'required' => 0,
     'settings' => array(
-      'description_field' => 0,
-      'file_directory' => 'content/premiumoffer/files',
-      'file_extensions' => 'txt pdf doc docx',
-      'max_filesize' => '',
       'user_register_form' => FALSE,
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'media',
-      'settings' => array(
-        'allowed_schemes' => array(
-          'public' => 'public',
-        ),
-        'allowed_types' => array(
-          'audio' => 0,
-          'document' => 'document',
-          'image' => 0,
-          'video' => 0,
-        ),
-        'browser_plugins' => array(
-          'media_default--media_browser_1' => 0,
-          'media_default--media_browser_my_files' => 0,
-          'upload' => 0,
-        ),
-      ),
-      'type' => 'media_generic',
-      'weight' => 14,
-    ),
-  );
-
-  // Exported field_instance: 'node-enterprise_premiumoffer-field_images'.
-  $field_instances['node-enterprise_premiumoffer-field_images'] = array(
-    'bundle' => 'enterprise_premiumoffer',
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'conversion_cta_footer' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 32,
-      ),
-      'conversion_cta_sidebar' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 32,
-      ),
-      'default' => array(
-        'label' => 'above',
-        'module' => 'colorbox',
-        'settings' => array(
-          'colorbox_caption' => 'auto',
-          'colorbox_caption_custom' => '',
-          'colorbox_gallery' => 'post',
-          'colorbox_gallery_custom' => '',
-          'colorbox_image_style' => '',
-          'colorbox_multivalue_index' => NULL,
-          'colorbox_node_style' => '',
-          'colorbox_node_style_first' => '',
-          'conditions' => array(),
-          'field_delimiter' => '',
-          'field_formatter_class' => '',
-          'linked_field' => array(
-            'advanced' => array(
-              'class' => '',
-              'rel' => '',
-              'target' => '',
-              'text' => '',
-              'title' => '',
-            ),
-            'destination' => '',
-            'linked' => 0,
-          ),
-        ),
-        'type' => 'colorbox',
-        'weight' => 1,
-      ),
-      'mini' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 3,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'ds_extras_field_template' => '',
-    'enterprise_edit_form_display' => '',
-    'entity_type' => 'node',
-    'field_name' => 'field_images',
-    'label' => 'Image assets',
-    'required' => 0,
-    'settings' => array(
-      'alt_field' => 0,
-      'default_image' => 0,
-      'file_directory' => 'content/premiumoffer/images',
-      'file_extensions' => 'png gif jpg jpeg',
-      'max_filesize' => '',
-      'max_resolution' => '',
-      'min_resolution' => '',
-      'title_field' => 0,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'media',
-      'settings' => array(
-        'allowed_schemes' => array(
-          'public' => 'public',
-        ),
-        'allowed_types' => array(
-          'audio' => 0,
-          'document' => 0,
-          'image' => 'image',
-          'video' => 0,
-        ),
-        'browser_plugins' => array(
-          'media_default--media_browser_1' => 0,
-          'media_default--media_browser_my_files' => 0,
-          'upload' => 0,
-        ),
-      ),
-      'type' => 'media_generic',
-      'weight' => 13,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 2,
     ),
   );
 
@@ -497,8 +345,7 @@ function enterprise_premiumoffer_config_field_default_field_instances() {
   t('Body');
   t('Default footer CTA');
   t('Default sidebar CTA');
-  t('File assets');
-  t('Image assets');
+  t('Premium offer');
 
   return $field_instances;
 }

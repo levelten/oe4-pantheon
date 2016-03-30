@@ -1495,6 +1495,7 @@ LNAME|last_name
     'translate' => 0,
     'type' => 'enterprise_landingpage',
     'uid' => 1,
+    'universal' => 1,
     'url_alias' => array(
       0 => array(
         'alias' => 'offer/website-redesign',

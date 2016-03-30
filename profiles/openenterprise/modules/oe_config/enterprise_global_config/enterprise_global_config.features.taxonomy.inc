@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * enterprise_base.features.taxonomy.inc
+ * enterprise_global_config.features.taxonomy.inc
  */
 
 /**
  * Implements hook_taxonomy_default_vocabularies().
  */
-function enterprise_base_config_taxonomy_default_vocabularies() {
+function enterprise_global_config_taxonomy_default_vocabularies() {
   return array(
     'categories' => array(
       'name' => 'Categories',

@@ -30,6 +30,7 @@ function enterprise_conversion_config_enterprise_apps_config_settings() {
         ),
       ),
       'weight' => 0,
+      'class' => 'm-t-1 m-b-1',
     ),
     'cta:sel_cta_sidebar' => array(
       'path' => array(
@@ -48,6 +49,28 @@ function enterprise_conversion_config_enterprise_apps_config_settings() {
         'visibility' => 0,
       ),
       'weight' => 10,
+    ),
+    'views:enterprise_landingpage_blocks-rel_cta_sidebar' => array(
+      'title' => '<none>',
+      'cta' => array(
+        'list_visibility' => 1,
+        'selectors' => array(
+          0 => 'cta_sidebar',
+        ),
+        'categories' => array(),
+        'data' => array(),
+      ),
+    ),
+    'views:enterprise_landingpage_blocks-rel_cta_footer' => array(
+      'title' => '<none>',
+      'cta' => array(
+        'list_visibility' => 1,
+        'selectors' => array(
+          0 => 'cta_footer',
+        ),
+        'categories' => array(),
+        'data' => array(),
+      ),
     ),
   );
 

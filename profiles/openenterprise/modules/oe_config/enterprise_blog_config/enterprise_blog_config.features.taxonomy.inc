@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.features.taxonomy.inc
+ * enterprise_blog_config.features.taxonomy.inc
  */
 
 /**
@@ -13,15 +13,6 @@ function enterprise_blog_config_taxonomy_default_vocabularies() {
       'name' => 'Blog Categories',
       'machine_name' => 'blog_categories',
       'description' => 'Blog specific categories',
-      'hierarchy' => 0,
-      'module' => 'taxonomy',
-      'weight' => 0,
-      'entity_type' => 'taxonomy_vocabulary',
-    ),
-    'blog_tags' => array(
-      'name' => 'Blog Tags',
-      'machine_name' => 'blog_tags',
-      'description' => 'Blog specific tagging',
       'hierarchy' => 0,
       'module' => 'taxonomy',
       'weight' => 0,

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_premiumoffer.strongarm.inc
+ * enterprise_premiumoffer_config.strongarm.inc
  */
 
 /**

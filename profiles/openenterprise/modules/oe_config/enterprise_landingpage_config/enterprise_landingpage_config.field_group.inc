@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_landingpage.field_group.inc
+ * enterprise_landingpage_config.field_group.inc
  */
 
 /**
@@ -9,6 +9,34 @@
  */
 function enterprise_landingpage_config_field_group_info() {
   $export = array();
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_cta|node|enterprise_landingpage|form';
+  $field_group->group_name = 'group_cta';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'enterprise_landingpage';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Default CTAs',
+    'weight' => '2',
+    'children' => array(
+      0 => 'field_landingpage_cta_sidebar',
+      1 => 'field_landingpage_cta_footer',
+    ),
+    'format_type' => 'fieldset',
+    'format_settings' => array(
+      'formatter' => 'collapsible',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => 'group-cta field-group-fieldset',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_cta|node|enterprise_landingpage|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -21,10 +49,10 @@ function enterprise_landingpage_config_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Form redirect',
-    'weight' => '2',
+    'weight' => '4',
     'children' => array(
-      0 => 'field_thankyou',
-      1 => 'field_redirect_url',
+      0 => 'field_redirect_url',
+      1 => 'field_thankyou',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(

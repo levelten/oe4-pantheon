@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_landingpage.strongarm.inc
+ * enterprise_landingpage_config.strongarm.inc
  */
 
 /**
@@ -73,7 +73,56 @@ function enterprise_landingpage_config_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'field_bundle_settings_node__enterprise_landingpage';
   $strongarm->value = array(
-    'view_modes' => array(),
+    'view_modes' => array(
+      'teaser' => array(
+        'custom_settings' => TRUE,
+      ),
+      'conversion_cta_footer' => array(
+        'custom_settings' => TRUE,
+      ),
+      'conversion_cta_sidebar' => array(
+        'custom_settings' => TRUE,
+      ),
+      'full' => array(
+        'custom_settings' => FALSE,
+      ),
+      'rss' => array(
+        'custom_settings' => FALSE,
+      ),
+      'search_index' => array(
+        'custom_settings' => FALSE,
+      ),
+      'search_result' => array(
+        'custom_settings' => FALSE,
+      ),
+      'colorbox' => array(
+        'custom_settings' => FALSE,
+      ),
+      'conversion_cta_forms' => array(
+        'custom_settings' => FALSE,
+      ),
+      'token' => array(
+        'custom_settings' => FALSE,
+      ),
+      'featured' => array(
+        'custom_settings' => FALSE,
+      ),
+      'mini' => array(
+        'custom_settings' => FALSE,
+      ),
+      'image' => array(
+        'custom_settings' => FALSE,
+      ),
+      'text_teaser' => array(
+        'custom_settings' => FALSE,
+      ),
+      'teaser_stacked' => array(
+        'custom_settings' => FALSE,
+      ),
+      'revision' => array(
+        'custom_settings' => FALSE,
+      ),
+    ),
     'extra_fields' => array(
       'form' => array(
         'title' => array(
@@ -84,6 +133,12 @@ function enterprise_landingpage_config_strongarm() {
         ),
         'redirect' => array(
           'weight' => '5',
+        ),
+        'metatags' => array(
+          'weight' => '8',
+        ),
+        'xmlsitemap' => array(
+          'weight' => '7',
         ),
       ),
       'display' => array(),

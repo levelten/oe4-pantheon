@@ -731,13 +731,13 @@ function enterprise_rel_get_entity_from_path_value($path_value, $entity_type, $b
   if ($entity_type == 'taxonomy_term') {
     if (!is_numeric($path_value)) {
       //if (!empty($arg_options['transform_dash'])) {
-      $tid = strtr($path_value, '-', ' ');
+      $value = strtr($path_value, '-', ' ');
       //}
-      if ($bundle != 'term') {
-        $t = taxonomy_get_term_by_name($path_value, $bundle);
+      if ($bundle && $bundle != 'term') {
+        $t = taxonomy_get_term_by_name($value, $bundle);
       }
       else {
-        $t = taxonomy_get_term_by_name($path_value);
+        $t = taxonomy_get_term_by_name($value);
       }
       if (!empty($t)) {
         $entity = array_pop($t);
@@ -825,6 +825,17 @@ function enterprise_rel_view_path_by_params($params, &$options = array(), $rv_me
   return $path;
 }
 
+/**
+ * Analize views filter or argument settings to determine the proper format for
+ * a filt/arg value. Primary decision is whether values are names or numeric ids.
+ *
+ *
+ * @param $type
+ * @param $value
+ * @param $view
+ * @param $meta_element
+ * @return array
+ */
 function enterprise_rel_get_views_filtarg_value_type($type, $value, $view, $meta_element) {
   $v_type = '';
   $v = isset($value['path_value']) ? $value['path_value'] : '';
@@ -841,18 +852,25 @@ function enterprise_rel_get_views_filtarg_value_type($type, $value, $view, $meta
     $entity = current($value['entities']);
     if ($type == 'taxonomy_term') {
       $name_validate_options_types = array('name', 'convert');
-      if (
-        (!empty($meta_element[$filtarg]['validate_options']['type']) && (in_array($meta_element[$filtarg]['validate_options']['type'], $name_validate_options_types)))
-        || $meta_element[$filtarg]['table'] == 'taxonomy_term_data'
-      ) {
-        $v_type = 'name';
-        $v = $entity->name;
+      // if is argument
+      if ($filtarg == 'argument') {
+        if (!empty($meta_element[$filtarg]['validate_options']['type']) && (in_array($meta_element[$filtarg]['validate_options']['type'], $name_validate_options_types))) {
+          $v_type = 'name';
+        }
+        else if ($meta_element[$filtarg]['table'] == 'taxonomy_term_data') {
+          $v_type = 'name';
+        }
       }
+      // is filter
       else {
-        $v = $entity->tid;
+        // field set to autolookup
+        if ($meta_element[$filtarg]['type'] == 'textfield') {
+          $v_type = 'name';
+        }
       }
+      $v = ($v_type == 'name') ? $entity->name : $entity->tid;
     }
-    if ($type == 'user') {
+    else if ($type == 'user') {
       if (!empty($entity->realname)) {
         $v_type = 'name';
         $v = !empty($entity->realname) ? $entity->realname : $entity->name;
@@ -1250,6 +1268,9 @@ function enterprise_rel_get_rel_view_default_arguments() {
  * TODO: hack to get breadcrumbs working, develop a better api for this
  */
 function enterprise_rel_preprocess_page(&$variables) {
+
+  drupal_add_js(drupal_get_path('module', 'enterprise_rel') . '/js/enterprise_rel.views_ajax.js');
+
   $rv_meta = enterprise_rel_get_rel_view_meta();
   if (empty($rv_meta)) {
     return;
@@ -1798,7 +1819,7 @@ function enterprise_rel_form_node_type_form_submit(&$form, &$form_state) {
   variable_set('enterprise_rel_entity_settings_' . $entity_type . '__' . $bundle, $entity_settings);
 }
 
-function enterprise_rel_query_rel_terms_alter(&$query) {
+function enterprise_rel_query_rel_arguments_alter(&$query) {
   $tables =& $query->getTables();
   $where =& $query->getTables();
   $expressions =& $query->getExpressions();
@@ -1811,6 +1832,9 @@ function enterprise_rel_query_rel_terms_alter(&$query) {
   if (!empty($groupby['rel_score'])) {
     unset($groupby['rel_score']);
   }
+
+  //dsm(" " . $query);
+
 }
 
 function enterprise_rel_get_views_options($options = array()) {
@@ -1897,6 +1921,7 @@ function enterprise_rel_block_views_filter_view_block() {
 function enterprise_rel_block_views_filter_view_content($rv_meta) {
   $f_settings = $rv_meta['settings']['filter'];
 
+  //dsm($rv_meta);
   //if (!$rv_meta['view']->built) {
   //  $rv_meta['view']->build();
   //}
@@ -2405,5 +2430,14 @@ function enterprise_rel_field_attach_view_alter(&$output, $context) {
         }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_features_pipe_COMPONENT_alter().
+ */
+function enterprise_rel_features_pipe_node_alter(&$pipe, $data, $export) {
+  foreach ($data as $node_type) {
+    $pipe['variable'][] = "enterprise_rel_entity_settings_node_{$node_type}";
   }
 }

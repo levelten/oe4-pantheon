@@ -7,11 +7,11 @@
 /**
  * Implements hook_ds_view_modes_info().
  */
+// TODO: this is no longer needed here since conversion is not a feature
 function enterprise_conversion_ds_view_modes_info() {
   $view_modes = array();
 
   $selectors = cta_selectors();
-
   foreach ($selectors as $k => $v) {
     $key = 'conversion_' . $k;
     $ds_view_mode = new stdClass();
@@ -23,8 +23,6 @@ function enterprise_conversion_ds_view_modes_info() {
     );
     $view_modes[$key] = $ds_view_mode;
   }
-
-
 
   return $view_modes;
 }

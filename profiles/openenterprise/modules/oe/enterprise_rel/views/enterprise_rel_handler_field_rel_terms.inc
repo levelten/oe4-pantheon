@@ -8,7 +8,9 @@
 class enterprise_rel_handler_field_rel_terms extends views_handler_field {
 
   // needed to override unreferenced terms field in sql select
-  function query() {}
+  function query() {
+    enterprise_rel_views_query($this->view);
+  }
 
   function render($values) {
     $output = number_format($values->rel_score * 100, 1);

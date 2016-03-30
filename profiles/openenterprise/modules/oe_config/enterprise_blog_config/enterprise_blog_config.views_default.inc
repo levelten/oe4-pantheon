@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.views_default.inc
+ * enterprise_blog_config.views_default.inc
  */
 
 /**
@@ -24,6 +24,7 @@ function enterprise_blog_config_views_default_views() {
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Blog';
   $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['group_by'] = TRUE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
@@ -37,6 +38,22 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['style_options']['columns'] = '1';
   $handler->display->display_options['style_options']['alignment'] = 'vertical';
   $handler->display->display_options['row_plugin'] = 'node';
+  /* Relationship: Content: Taxonomy terms on node */
+  $handler->display->display_options['relationships']['term_node_tid']['id'] = 'term_node_tid';
+  $handler->display->display_options['relationships']['term_node_tid']['table'] = 'node';
+  $handler->display->display_options['relationships']['term_node_tid']['field'] = 'term_node_tid';
+  $handler->display->display_options['relationships']['term_node_tid']['label'] = 'Blog Categories';
+  $handler->display->display_options['relationships']['term_node_tid']['vocabularies'] = array(
+    'blog_categories' => 0,
+    'categories' => 0,
+    'cta_categories' => 0,
+    'keywords' => 0,
+    'tags' => 0,
+  );
+  /* Relationship: Content: Author */
+  $handler->display->display_options['relationships']['uid']['id'] = 'uid';
+  $handler->display->display_options['relationships']['uid']['table'] = 'node';
+  $handler->display->display_options['relationships']['uid']['field'] = 'uid';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
@@ -49,6 +66,45 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Contextual filter: Taxonomy term: Term ID */
+  $handler->display->display_options['arguments']['tid']['id'] = 'tid';
+  $handler->display->display_options['arguments']['tid']['table'] = 'taxonomy_term_data';
+  $handler->display->display_options['arguments']['tid']['field'] = 'tid';
+  $handler->display->display_options['arguments']['tid']['relationship'] = 'term_node_tid';
+  $handler->display->display_options['arguments']['tid']['exception']['value'] = '-';
+  $handler->display->display_options['arguments']['tid']['exception']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['tid']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['tid']['title'] = '%1 Blog Posts';
+  $handler->display->display_options['arguments']['tid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['tid']['default_argument_options']['argument'] = '-';
+  $handler->display->display_options['arguments']['tid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['tid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['tid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['tid']['specify_validation'] = TRUE;
+  $handler->display->display_options['arguments']['tid']['validate']['type'] = 'taxonomy_term';
+  $handler->display->display_options['arguments']['tid']['validate_options']['vocabularies'] = array(
+    'blog_categories' => 'blog_categories',
+  );
+  $handler->display->display_options['arguments']['tid']['validate_options']['type'] = 'convert';
+  $handler->display->display_options['arguments']['tid']['validate_options']['transform'] = TRUE;
+  /* Contextual filter: Realname: Real name */
+  $handler->display->display_options['arguments']['realname']['id'] = 'realname';
+  $handler->display->display_options['arguments']['realname']['table'] = 'realname';
+  $handler->display->display_options['arguments']['realname']['field'] = 'realname';
+  $handler->display->display_options['arguments']['realname']['relationship'] = 'uid';
+  $handler->display->display_options['arguments']['realname']['exception']['value'] = '-';
+  $handler->display->display_options['arguments']['realname']['exception']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['realname']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['realname']['title'] = '%1 Blog Posts by %2';
+  $handler->display->display_options['arguments']['realname']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['realname']['default_argument_options']['argument'] = '-';
+  $handler->display->display_options['arguments']['realname']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['realname']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['realname']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['realname']['limit'] = '0';
+  $handler->display->display_options['arguments']['realname']['case'] = 'ucwords';
+  $handler->display->display_options['arguments']['realname']['path_case'] = 'lower';
+  $handler->display->display_options['arguments']['realname']['transform_dash'] = TRUE;
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -63,6 +119,26 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['filters']['type']['value'] = array(
     'enterprise_blog' => 'enterprise_blog',
   );
+  /* Filter criterion: Content: Tags (field_tags) */
+  $handler->display->display_options['filters']['field_tags_tid']['id'] = 'field_tags_tid';
+  $handler->display->display_options['filters']['field_tags_tid']['table'] = 'field_data_field_tags';
+  $handler->display->display_options['filters']['field_tags_tid']['field'] = 'field_tags_tid';
+  $handler->display->display_options['filters']['field_tags_tid']['value'] = '';
+  $handler->display->display_options['filters']['field_tags_tid']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_tags_tid']['expose']['operator_id'] = 'field_tags_tid_op';
+  $handler->display->display_options['filters']['field_tags_tid']['expose']['label'] = 'Tags (field_tags)';
+  $handler->display->display_options['filters']['field_tags_tid']['expose']['operator'] = 'field_tags_tid_op';
+  $handler->display->display_options['filters']['field_tags_tid']['expose']['identifier'] = 'tags_tid';
+  $handler->display->display_options['filters']['field_tags_tid']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    4 => 0,
+    5 => 0,
+    6 => 0,
+    3 => 0,
+  );
+  $handler->display->display_options['filters']['field_tags_tid']['type'] = 'select';
+  $handler->display->display_options['filters']['field_tags_tid']['vocabulary'] = 'tags';
 
   /* Display: Main Page */
   $handler = $view->new_display('page', 'Main Page', 'page');
@@ -81,27 +157,6 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'node';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
-  $handler->display->display_options['defaults']['relationships'] = FALSE;
-  /* Relationship: Content: Author */
-  $handler->display->display_options['relationships']['uid']['id'] = 'uid';
-  $handler->display->display_options['relationships']['uid']['table'] = 'node';
-  $handler->display->display_options['relationships']['uid']['field'] = 'uid';
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
-  /* Contextual filter: Realname: Real name */
-  $handler->display->display_options['arguments']['realname']['id'] = 'realname';
-  $handler->display->display_options['arguments']['realname']['table'] = 'realname';
-  $handler->display->display_options['arguments']['realname']['field'] = 'realname';
-  $handler->display->display_options['arguments']['realname']['relationship'] = 'uid';
-  $handler->display->display_options['arguments']['realname']['title_enable'] = TRUE;
-  $handler->display->display_options['arguments']['realname']['title'] = '%1\'s Blogs';
-  $handler->display->display_options['arguments']['realname']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['realname']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['realname']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['realname']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['realname']['limit'] = '0';
-  $handler->display->display_options['arguments']['realname']['case'] = 'ucwords';
-  $handler->display->display_options['arguments']['realname']['path_case'] = 'ucwords';
-  $handler->display->display_options['arguments']['realname']['transform_dash'] = TRUE;
   $handler->display->display_options['path'] = 'blog';
   $handler->display->display_options['menu']['type'] = 'normal';
   $handler->display->display_options['menu']['title'] = 'Blog';
@@ -212,80 +267,6 @@ function enterprise_blog_config_views_default_views() {
     'page' => 'page',
     'tags' => 0,
   );
-
-  /* Display: Categories Page */
-  $handler = $view->new_display('page', 'Categories Page', 'categories');
-  $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
-  $handler->display->display_options['defaults']['relationships'] = FALSE;
-  /* Relationship: Content: Categories (field_blog_categories) */
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['id'] = 'field_blog_categories_tid';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['table'] = 'field_data_field_blog_categories';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['field'] = 'field_blog_categories_tid';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['label'] = 'Category';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['required'] = TRUE;
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
-  /* Contextual filter: Taxonomy term: Name */
-  $handler->display->display_options['arguments']['name']['id'] = 'name';
-  $handler->display->display_options['arguments']['name']['table'] = 'taxonomy_term_data';
-  $handler->display->display_options['arguments']['name']['field'] = 'name';
-  $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_categories_tid';
-  $handler->display->display_options['arguments']['name']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['name']['title_enable'] = TRUE;
-  $handler->display->display_options['arguments']['name']['title'] = 'Blog Posts in %1';
-  $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
-  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
-  $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['name']['specify_validation'] = TRUE;
-  $handler->display->display_options['arguments']['name']['validate']['type'] = 'taxonomy_term';
-  $handler->display->display_options['arguments']['name']['validate_options']['vocabularies'] = array(
-    'blog_categories' => 'blog_categories',
-  );
-  $handler->display->display_options['arguments']['name']['validate_options']['type'] = 'name';
-  $handler->display->display_options['arguments']['name']['validate_options']['transform'] = TRUE;
-  $handler->display->display_options['arguments']['name']['limit'] = '0';
-  $handler->display->display_options['arguments']['name']['case'] = 'ucfirst';
-  $handler->display->display_options['arguments']['name']['path_case'] = 'ucwords';
-  $handler->display->display_options['arguments']['name']['transform_dash'] = TRUE;
-  $handler->display->display_options['path'] = 'blog/category/%';
-
-  /* Display: Tags Page */
-  $handler = $view->new_display('page', 'Tags Page', 'tags');
-  $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
-  $handler->display->display_options['defaults']['relationships'] = FALSE;
-  /* Relationship: Content: Tags (field_blog_tags) */
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['id'] = 'field_blog_tags_tid';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['table'] = 'field_data_field_blog_tags';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['field'] = 'field_blog_tags_tid';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['label'] = 'Tag';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['required'] = TRUE;
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
-  /* Contextual filter: Taxonomy term: Name */
-  $handler->display->display_options['arguments']['name']['id'] = 'name';
-  $handler->display->display_options['arguments']['name']['table'] = 'taxonomy_term_data';
-  $handler->display->display_options['arguments']['name']['field'] = 'name';
-  $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_tags_tid';
-  $handler->display->display_options['arguments']['name']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['name']['title_enable'] = TRUE;
-  $handler->display->display_options['arguments']['name']['title'] = 'Blogs tagged with %1';
-  $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
-  $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
-  $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['name']['specify_validation'] = TRUE;
-  $handler->display->display_options['arguments']['name']['validate']['type'] = 'taxonomy_term';
-  $handler->display->display_options['arguments']['name']['validate_options']['vocabularies'] = array(
-    'blog_tags' => 'blog_tags',
-  );
-  $handler->display->display_options['arguments']['name']['validate_options']['type'] = 'name';
-  $handler->display->display_options['arguments']['name']['validate_options']['transform'] = TRUE;
-  $handler->display->display_options['arguments']['name']['limit'] = '0';
-  $handler->display->display_options['arguments']['name']['case'] = 'ucfirst';
-  $handler->display->display_options['arguments']['name']['path_case'] = 'lower';
-  $handler->display->display_options['arguments']['name']['transform_dash'] = TRUE;
-  $handler->display->display_options['path'] = 'blog/tag/%';
 
   /* Display: Archives Page */
   $handler = $view->new_display('page', 'Archives Page', 'archives');
@@ -626,12 +607,12 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['fields']['name']['relationship'] = 'uid';
   $handler->display->display_options['fields']['name']['label'] = 'Author';
   $handler->display->display_options['fields']['name']['hide_alter_empty'] = FALSE;
-  /* Field: : field_categories */
+  /* Field: Content: Categories */
   $handler->display->display_options['fields']['field_categories']['id'] = 'field_categories';
   $handler->display->display_options['fields']['field_categories']['table'] = 'field_data_field_categories';
   $handler->display->display_options['fields']['field_categories']['field'] = 'field_categories';
   $handler->display->display_options['fields']['field_categories']['hide_alter_empty'] = FALSE;
-  /* Field: : field_tags */
+  /* Field: Content: Tags */
   $handler->display->display_options['fields']['field_tags']['id'] = 'field_tags';
   $handler->display->display_options['fields']['field_tags']['table'] = 'field_data_field_tags';
   $handler->display->display_options['fields']['field_tags']['field'] = 'field_tags';
@@ -925,7 +906,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
   $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'blog/category';
+  $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'blog';
   $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['name']['limit'] = '0';
   $handler->display->display_options['arguments']['name']['path_case'] = 'lower';
@@ -938,23 +919,23 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['title'] = 'Tags';
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
-  /* Relationship: Content: Tags (field_blog_tags) */
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['id'] = 'field_blog_tags_tid';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['table'] = 'field_data_field_blog_tags';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['field'] = 'field_blog_tags_tid';
-  $handler->display->display_options['relationships']['field_blog_tags_tid']['label'] = 'Tag';
+  /* Relationship: Content: Tags (field_tags) */
+  $handler->display->display_options['relationships']['field_tags_tid']['id'] = 'field_tags_tid';
+  $handler->display->display_options['relationships']['field_tags_tid']['table'] = 'field_data_field_tags';
+  $handler->display->display_options['relationships']['field_tags_tid']['field'] = 'field_tags_tid';
+  $handler->display->display_options['relationships']['field_tags_tid']['label'] = 'Tag';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Taxonomy term: Name */
   $handler->display->display_options['arguments']['name']['id'] = 'name';
   $handler->display->display_options['arguments']['name']['table'] = 'taxonomy_term_data';
   $handler->display->display_options['arguments']['name']['field'] = 'name';
-  $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_tags_tid';
+  $handler->display->display_options['arguments']['name']['relationship'] = 'field_tags_tid';
   $handler->display->display_options['arguments']['name']['default_action'] = 'summary';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
   $handler->display->display_options['arguments']['name']['summary']['number_of_records'] = '1';
   $handler->display->display_options['arguments']['name']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'blog/tag';
+  $handler->display->display_options['arguments']['name']['summary_options']['base_path'] = 'rel-view/taxonomy/tags';
   $handler->display->display_options['arguments']['name']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['name']['limit'] = '0';
   $handler->display->display_options['arguments']['name']['path_case'] = 'lower';
@@ -1019,13 +1000,14 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '2';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '3';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
-  $handler->display->display_options['style_options']['columns'] = '2';
-  $handler->display->display_options['style_options']['column_classes'] = 'views-column equal-height-element col-md-6';
-  $handler->display->display_options['style_options']['row_classes'] = 'views-row equal-height-container row-fluid';
+  $handler->display->display_options['style_options']['columns'] = '1';
+  $handler->display->display_options['style_options']['alignment'] = 'vertical';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column equal-height-element';
+  $handler->display->display_options['style_options']['row_classes'] = 'views-row equal-height-container row-fluid well well-sm';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'ds';
@@ -1040,6 +1022,10 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['row_options']['advanced_fieldset']['advanced'] = TRUE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Relevant: By Terms */
+  $handler->display->display_options['sorts']['terms']['id'] = 'terms';
+  $handler->display->display_options['sorts']['terms']['table'] = 'enterprise_rel';
+  $handler->display->display_options['sorts']['terms']['field'] = 'terms';
   /* Sort criterion: Content: Sticky */
   $handler->display->display_options['sorts']['sticky']['id'] = 'sticky';
   $handler->display->display_options['sorts']['sticky']['table'] = 'node';
@@ -1051,6 +1037,33 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
+  /* Contextual filter: Relevant: By Terms */
+  $handler->display->display_options['arguments']['rel_tid']['id'] = 'rel_tid';
+  $handler->display->display_options['arguments']['rel_tid']['table'] = 'enterprise_rel';
+  $handler->display->display_options['arguments']['rel_tid']['field'] = 'rel_tid';
+  $handler->display->display_options['arguments']['rel_tid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['rel_tid']['default_argument_type'] = 'taxonomy_tid';
+  $handler->display->display_options['arguments']['rel_tid']['default_argument_options']['node'] = TRUE;
+  $handler->display->display_options['arguments']['rel_tid']['default_argument_options']['view'] = TRUE;
+  $handler->display->display_options['arguments']['rel_tid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['rel_tid']['validate']['fail'] = 'access denied';
+  /* Contextual filter: Relevant: By Text Index */
+  $handler->display->display_options['arguments']['rel_text_index']['id'] = 'rel_text_index';
+  $handler->display->display_options['arguments']['rel_text_index']['table'] = 'enterprise_rel';
+  $handler->display->display_options['arguments']['rel_text_index']['field'] = 'rel_text_index';
+  $handler->display->display_options['arguments']['rel_text_index']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['rel_text_index']['validate']['fail'] = 'access denied';
+  $handler->display->display_options['arguments']['rel_text_index']['title_relevance'] = '1.4';
+  $handler->display->display_options['arguments']['rel_text_index']['body_relevance'] = '0.8';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_alt_text'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_title_text'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_firstname'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_lastname'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_intel_event_value'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_page_attribute_value'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_track_submission_value'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_visitor_attribute_value'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_title'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */

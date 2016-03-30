@@ -122,7 +122,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '5f86e113-de5e-450f-836f-fca8a77fb3fc',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -139,7 +139,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => 'c3d75d66-df2d-4722-bc10-e7338f23e556',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -156,7 +156,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '8092d01d-ecac-4613-a91e-458d5316037f',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
     $entities['enterprise_blog_content'][] = (object) array(
@@ -173,7 +173,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => 'd386e6be-e2dc-4cf6-a173-b9f608d2d4ff',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -190,7 +190,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => 'e862c908-d04d-4889-854c-30d1f98fee60',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -207,7 +207,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '209d087a-3539-4c8b-93af-7f7dbe5d15d5',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -224,7 +224,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => 'fa5e22fa-c61c-4803-a777-b4b6cfa1c624',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -241,7 +241,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '5c83a36a-73ad-4ae0-89e4-d506b1eb7455',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   
@@ -259,7 +259,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '84c698d7-1eb7-4897-a2c8-1b2bb33e8405',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -276,7 +276,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '593823d5-1f86-4cb7-8035-f764cb0f9d82',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -293,7 +293,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '61e02ec8-f7b6-4e46-bc09-5467e5b727ca',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -310,7 +310,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '7b0611d9-fe51-4f6d-b061-533a408d9989',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -327,7 +327,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => 'c2560836-0a54-4631-9dcf-a495ced24d4a',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -344,7 +344,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '2d4f0dbe-f20c-42ca-bd14-fc2b8f6faf0d',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -361,7 +361,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => '',
     'url_alias' => array(),
     'uuid' => '2cda5d3c-f2bd-4ccf-88d4-0503e068c857',
-    'vocabulary_machine_name' => 'blog_tags',
+    'vocabulary_machine_name' => 'tags',
     'weight' => 0,
   );
   
@@ -450,7 +450,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '5f86e113-de5e-450f-836f-fca8a77fb3fc',
@@ -584,7 +584,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '8092d01d-ecac-4613-a91e-458d5316037f',
@@ -714,7 +714,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => 'd386e6be-e2dc-4cf6-a173-b9f608d2d4ff',
@@ -871,7 +871,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '209d087a-3539-4c8b-93af-7f7dbe5d15d5',
@@ -1016,7 +1016,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '84c698d7-1eb7-4897-a2c8-1b2bb33e8405',
@@ -1151,7 +1151,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '61e02ec8-f7b6-4e46-bc09-5467e5b727ca',
@@ -1293,7 +1293,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => 'e862c908-d04d-4889-854c-30d1f98fee60',
@@ -1424,7 +1424,7 @@ function enterprise_blog_content_uuid_default_entities() {
         ),
       ),
     ),
-    'field_blog_tags' => array(
+    'field_tags' => array(
       'und' => array(
         0 => array(
           'tid' => '2d4f0dbe-f20c-42ca-bd14-fc2b8f6faf0d',

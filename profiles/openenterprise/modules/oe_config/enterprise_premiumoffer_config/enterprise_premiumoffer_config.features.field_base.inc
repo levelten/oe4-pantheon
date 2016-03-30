@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_premiumoffer.features.field_base.inc
+ * enterprise_premiumoffer_config.features.field_base.inc
  */
 
 /**
@@ -10,13 +10,13 @@
 function enterprise_premiumoffer_config_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'field_cta_footer'.
-  $field_bases['field_cta_footer'] = array(
+  // Exported field_base: 'field_premiumoffer_cta_footer'.
+  $field_bases['field_premiumoffer_cta_footer'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_cta_footer',
+    'field_name' => 'field_premiumoffer_cta_footer',
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',
@@ -44,13 +44,13 @@ function enterprise_premiumoffer_config_field_default_field_bases() {
     'type' => 'entityreference',
   );
 
-  // Exported field_base: 'field_cta_sidebar'.
-  $field_bases['field_cta_sidebar'] = array(
+  // Exported field_base: 'field_premiumoffer_cta_sidebar'.
+  $field_bases['field_premiumoffer_cta_sidebar'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_cta_sidebar',
+    'field_name' => 'field_premiumoffer_cta_sidebar',
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',
@@ -78,49 +78,39 @@ function enterprise_premiumoffer_config_field_default_field_bases() {
     'type' => 'entityreference',
   );
 
-  // Exported field_base: 'field_files'.
-  $field_bases['field_files'] = array(
+  // Exported field_base: 'field_premiumoffer'.
+  $field_bases['field_premiumoffer'] = array(
     'active' => 1,
-    'cardinality' => -1,
+    'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_files',
+    'field_name' => 'field_premiumoffer',
     'indexes' => array(
-      'fid' => array(
-        0 => 'fid',
+      'target_id' => array(
+        0 => 'target_id',
       ),
     ),
     'locked' => 0,
-    'module' => 'file',
+    'module' => 'entityreference',
     'settings' => array(
-      'display_default' => 1,
-      'display_field' => 1,
-      'uri_scheme' => 'public',
-    ),
-    'translatable' => 0,
-    'type' => 'file',
-  );
-
-  // Exported field_base: 'field_images'.
-  $field_bases['field_images'] = array(
-    'active' => 1,
-    'cardinality' => -1,
-    'deleted' => 0,
-    'entity_types' => array(),
-    'field_name' => 'field_images',
-    'indexes' => array(
-      'fid' => array(
-        0 => 'fid',
+      'handler' => 'base',
+      'handler_settings' => array(
+        'behaviors' => array(
+          'views-select-list' => array(
+            'status' => 0,
+          ),
+        ),
+        'sort' => array(
+          'type' => 'none',
+        ),
+        'target_bundles' => array(
+          'enterprise_premiumoffer' => 'enterprise_premiumoffer',
+        ),
       ),
-    ),
-    'locked' => 0,
-    'module' => 'image',
-    'settings' => array(
-      'default_image' => 0,
-      'uri_scheme' => 'public',
+      'target_type' => 'node',
     ),
     'translatable' => 0,
-    'type' => 'image',
+    'type' => 'entityreference',
   );
 
   return $field_bases;

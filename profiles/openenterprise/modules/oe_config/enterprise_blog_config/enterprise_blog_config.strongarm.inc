@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.strongarm.inc
+ * enterprise_blog_config.strongarm.inc
  */
 
 /**
@@ -65,6 +65,51 @@ function enterprise_blog_config_strongarm() {
   $strongarm->name = 'ds_extras_field_template';
   $strongarm->value = 1;
   $export['ds_extras_field_template'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'enterprise_rel_entity_settings_node__enterprise_blog';
+  $strongarm->value = array(
+    'view_display' => 'enterprise_blog:page',
+    'filter' => array(
+      'block_title' => '',
+      'facets' => array(
+        'taxonomy_term:blog_categories' => array(
+          'display' => 'links',
+          'title' => '',
+          'item_limit' => '',
+        ),
+        'user:user' => array(
+          'display' => 'links',
+          'title' => 'Authors',
+          'item_limit' => '',
+        ),
+        'taxonomy_term:tags' => array(
+          'display' => 'links',
+          'title' => '',
+          'item_limit' => '',
+        ),
+      ),
+    ),
+    'breadcrumbs' => array(
+      'node' => array(
+        'model' => 'relview',
+        'filtargs' => array(
+          'taxonomy_term:blog_categories' => array(
+            'display' => '',
+          ),
+          'user:user' => array(
+            'display' => '',
+          ),
+        ),
+      ),
+    ),
+    'inherit' => array(
+      'ref_field' => '',
+    ),
+  );
+  $export['enterprise_rel_entity_settings_node__enterprise_blog'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
@@ -144,6 +189,12 @@ function enterprise_blog_config_strongarm() {
       'colorbox' => array(
         'custom_settings' => FALSE,
       ),
+      'image' => array(
+        'custom_settings' => FALSE,
+      ),
+      'teaser_stacked' => array(
+        'custom_settings' => FALSE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
@@ -156,6 +207,12 @@ function enterprise_blog_config_strongarm() {
         'redirect' => array(
           'weight' => '7',
         ),
+        'metatags' => array(
+          'weight' => '40',
+        ),
+        'xmlsitemap' => array(
+          'weight' => '30',
+        ),
       ),
       'display' => array(
         'disqus' => array(
@@ -164,6 +221,10 @@ function enterprise_blog_config_strongarm() {
             'visible' => FALSE,
           ),
           'teaser' => array(
+            'weight' => '1002',
+            'visible' => FALSE,
+          ),
+          'default' => array(
             'weight' => '1002',
             'visible' => FALSE,
           ),

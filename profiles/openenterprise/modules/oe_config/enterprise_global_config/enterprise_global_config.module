@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Global Config feature.
+ */
+
+include_once 'enterprise_global_config.features.inc';

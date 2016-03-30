@@ -103,24 +103,23 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
   $settings = variable_get('enterprise_apps_profile_settings', array());
 
   $required_apps = array(
+    'enterprise_global',
+    'enterprise_page',
+    'enterprise_block',
     'enterprise_intel', // contains base fields controls for Intelligence
     'enterprise_social',
-    'enterprise_social_content',
     'enterprise_seo',
-    'enterprise_seo_config',
     'enterprise_user',
-    'enterprise_user_content',
     'enterprise_comments',
     'enterprise_blog',
     'enterprise_dashboard',
     'enterprise_thankyoupage',
-    'enterprise_thankyoupage_content',
     'enterprise_webform',
-    'enterprise_webform_content',
   );
   if (!empty($settings['demo']['mode'])
     && (($settings['demo']['mode'] == 'attract_convert') || $settings['demo']['mode'] == 'standard')) {
     $required_apps[] = 'enterprise_landingpage';
+    //$required_apps[] = 'enterprise_premiumoffer';
     $required_apps[] = 'enterprise_conversion';
   }
 

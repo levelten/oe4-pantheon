@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.radioactivity_decay_profile.inc
+ * enterprise_blog_config.radioactivity_decay_profile.inc
  */
 
 /**

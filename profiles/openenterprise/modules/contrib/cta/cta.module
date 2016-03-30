@@ -762,7 +762,7 @@ function cta_block_view($delta = '') {
     $block['content'] = t('No CTA selected');
   }
   if (empty($block['content']) && user_access('select ctas')) {
-    $block['content'] = t('No block content was avaiable for CTA');
+    $block['content'] = t('No block content was available for CTA');
   }
    
   // convert content to array to add contextual links

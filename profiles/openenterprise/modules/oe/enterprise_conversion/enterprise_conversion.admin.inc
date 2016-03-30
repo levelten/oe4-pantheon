@@ -120,6 +120,7 @@ function enterprise_conversion_landingpage_cta_list_page($node) {
         $lo = $link_options;
         $lo['query']['selectors'] = $name;
         $add_links[] = l($text, 'block/add/cta', $lo);
+        $add_links[] = l('+View existing', 'admin/content/cta/' . $name, $lo);
       }
     }
   }
@@ -243,6 +244,7 @@ function enterprise_conversion_thankyou_landingpage_list_page($node) {
   }
 
   $add_links[] = l(t('+Add landing page'), 'node/add/enterprise-landingpage', $link_options);
+  $add_links[] = l(t('+View existing landing pages'), 'admin/content/node/enterprise_landingpage', $link_options);
 
   $empty_msg = t('There are no Landing pages linked to this thank you page. !add_link',
     array(

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Code for the Enterprise Premium Offers feature.
+ * Code for the Enterprise Premium Offers Config feature.
  */
 
 include_once 'enterprise_premiumoffer_config.features.inc';

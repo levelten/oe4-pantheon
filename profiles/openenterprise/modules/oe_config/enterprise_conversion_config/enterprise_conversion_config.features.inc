@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_conversion.features.inc
+ * enterprise_conversion_config.features.inc
  */
 
 /**
@@ -30,12 +30,14 @@ function enterprise_conversion_config_cta_selector_defaults() {
       'data' => array(
         'cta_description' => 'sidebar',
         'preset_vocabulary' => 'cta_categories',
-        'preview_prefix' => '<div class="row">' . PHP_EOL
-          .'<aside class="sidebar sidebar-second col-sm-5">' . PHP_EOL
-          .'<div class="region region-sidebar-second">' . PHP_EOL,
-        'preview_suffix' => '</div>' . PHP_EOL
-          .'</aside>' . PHP_EOL
-          .'</div>' . PHP_EOL,
+        'preview_prefix' => '<div class="row">
+<aside class="sidebar sidebar-second col-sm-5">
+<div class="region region-sidebar-second">
+',
+        'preview_suffix' => '</div>
+</aside>
+</div>
+',
       ),
     ),
   );

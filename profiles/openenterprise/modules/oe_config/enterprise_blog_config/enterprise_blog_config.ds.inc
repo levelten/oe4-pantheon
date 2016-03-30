@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * enterprise_blog.ds.inc
+ * enterprise_blog_config.ds.inc
  */
 
 /**
@@ -71,30 +71,6 @@ function enterprise_blog_config_ds_field_settings_info() {
         'conditions' => array(),
       ),
     ),
-    'about_author' => array(
-      'weight' => '8',
-      'label' => 'hidden',
-      'format' => 'default',
-      'formatter_settings' => array(
-        'ft' => array(
-          'func' => 'theme_ds_field_minimal',
-        ),
-        'field_delimiter' => '',
-        'field_formatter_class' => '',
-        'linked_field' => array(
-          'linked' => 0,
-          'destination' => '',
-          'advanced' => array(
-            'title' => '',
-            'target' => '',
-            'class' => '',
-            'rel' => '',
-            'text' => '',
-          ),
-        ),
-        'conditions' => array(),
-      ),
-    ),
     'prev_next_node' => array(
       'weight' => '2',
       'label' => 'hidden',
@@ -153,7 +129,6 @@ function enterprise_blog_config_ds_field_settings_info() {
     'field_blog_tags' => array(
       'formatter_settings' => array(
         'ft' => array(
-          'func' => 'theme_ds_field_minimal',
           'lb' => 'Tags',
         ),
       ),
@@ -516,8 +491,7 @@ function enterprise_blog_config_ds_layout_settings_info() {
       'footer' => array(
         6 => 'field_blog_tags',
         7 => 'field_energy_level',
-        8 => 'about_author',
-        9 => 'comments',
+        8 => 'comments',
       ),
     ),
     'fields' => array(
@@ -529,7 +503,6 @@ function enterprise_blog_config_ds_layout_settings_info() {
       'unpublished' => 'middle',
       'field_blog_tags' => 'footer',
       'field_energy_level' => 'footer',
-      'about_author' => 'footer',
       'comments' => 'footer',
     ),
     'classes' => array(

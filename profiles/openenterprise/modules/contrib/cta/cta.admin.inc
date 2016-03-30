@@ -297,7 +297,7 @@ function theme_cta_selector_list($variables) {
  * 
  */
 
-function cta_cta_list() {
+function cta_cta_list($selector = NULL) {
   $rows = array();
 
   // Build the sortable table header.
@@ -323,6 +323,8 @@ function cta_cta_list() {
   $filters['per_page'] = 50;
   $filters['types'] = array('cta');
 
+
+  /*
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'bean')
     ->tableSort($header)
@@ -331,10 +333,28 @@ function cta_cta_list() {
   if (!empty($filters['types'])) {
     $query->entityCondition('bundle', $filters['types'], 'IN');
   }
-
   $result = $query->execute();
+  */
+
+
+  $query = db_select('bean', 'b')
+    ->fields('b');
+
+  if (!empty($filters['types'])) {
+    $query->condition('type', $filters['types'], 'IN');
+  }
+
+  if (!empty($selector)) {
+    $s = $query->innerJoin('cta_bean_selector', 's', '%alias.delta = b.delta');
+    $query->condition("$s.selector", $selector);
+    //$query->condition();
+  }
+
+  $result = $query->execute()->fetchAllAssoc('bid');
+
   if (!empty($result)) {
-    $beans = bean_load_multiple(array_keys($result['bean']));
+    //$beans = bean_load_multiple(array_keys($result['bean']));
+    $beans = bean_load_multiple(array_keys($result));
   }
   else {
     $beans = array();

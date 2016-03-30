@@ -1417,6 +1417,24 @@ function enterprise_conversion_preprocess_block(&$vars) {
   }
 }
 
+/**
+ * Implements hoo_entity_info_alter();
+ *
+ * Adding view modes for each of the CTA selectors
+ *
+ * @param $entity_info
+ */
+function enterprise_conversion_entity_info_alter(&$entity_info) {
+
+  $selectors = cta_selectors();
+  foreach ($selectors as $k => $v) {
+    $key = 'conversion_' . $k;
+    $entity_info['node']['view modes'][$key] = array(
+      'label' => $v['description'],
+      'custom settings' => FALSE,
+    );
+  };
+}
 
 /**
  * replicates webform's block_view without rendering output so we can do alterations

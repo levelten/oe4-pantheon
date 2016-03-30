@@ -13,6 +13,7 @@ dependencies[] = options
 dependencies[] = strongarm
 dependencies[] = text
 features[ctools][] = strongarm:strongarm:1
+features[ds_layout_settings][] = node|enterprise_thankyou|default
 features[features_api][] = api:2
 features[field_instance][] = node-enterprise_thankyou-body
 features[field_instance][] = node-enterprise_thankyou-field_file

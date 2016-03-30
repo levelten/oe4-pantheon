@@ -7,7 +7,9 @@
       // check if side column exists
       if ($(".column-side").length == 1) {
         // Move taxonomy fields to right sidebar in rubik.
-        $(".display_sidebar").each(function() {
+        // The not selector excludes instances where a field with display_sidebar is placed inside a field group with
+        // .display_sidebar
+        $(".display_sidebar").not(".display_sidebar .display_sidebar").each(function() {
           $(this).detach();
           $('.column-side .column-wrapper').append($(this));
         });
