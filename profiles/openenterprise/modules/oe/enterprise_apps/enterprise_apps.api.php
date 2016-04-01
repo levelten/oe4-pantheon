@@ -175,13 +175,21 @@ function hook_enterprise_apps_config_settings() {
 
   // add cta footer block to blog content type
   $blocks['cta:sel_cta_footer'] = array(
+    // set title to none
+    'title' => '<none>',
+    // visibility by node_type
     'node_type' => array(
       'types' => array(
         'enterprise_blog',
       ),
     ),
     // add Bootstrap margin top and bottom classes to block
-    'class' => 'm-t-1 m-b-1',
+    'class' => 'm-y-1',
+    // block row settings
+    'block_row' => array(
+      'row' => 'row2',
+      'row_class' => 'stacked',
+    ),
   );
 
   // add blocks config data to settings array

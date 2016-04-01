@@ -324,18 +324,18 @@ function intel_admin_entity_edit_form_alter(&$form, &$form_state, $form_id = '')
             }
             $items[] = $item;
           }
+          $vars = array(
+            'title' => ($scope == 'page') ? t('Page attributes') : t('Visitor attributes'),
+            'items' => $items,
+            'type' => 'ul',
+          );
+          $form_add['intel_' . $scope . '_attrs_active'] = array(
+            '#type' => 'markup',
+            '#markup' => $msg . theme('item_list', $vars),
+          );
+          $field_count++;
         }
-        sort($items);
-        $vars = array(
-          'title' => ($scope == 'page') ? t('Page attributes') : t('Visitor attributes'),
-          'items' => $items,
-          'type' => 'ul',
-        );
-        $form_add['intel_' . $scope . '_attrs_active'] = array(
-          '#type' => 'markup',
-          '#markup' => $msg . theme('item_list', $vars),
-        );
-        $field_count++;
+
       }
     }
 

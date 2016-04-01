@@ -25,7 +25,7 @@ function enterprise_blog_config_views_data_alter(&$data) {
  */
 function enterprise_blog_config_preprocess_field(&$variables) {
 
-  if ($variables['element']['#field_name'] === 'field_blog_tags') {
+  if ($variables['element']['#field_name'] === 'field_tags') {
     $variables['label'] = '<i class="icon-tags"></i>';
     $variables['classes_array'][] = 'tags';
   }
@@ -62,7 +62,7 @@ function enterprise_blog_config_enterprise_apps_config_settings() {
     'section_path_node' => 'blog',
     'multi_author' => 1,  // FALSE or number for path slug order
     //'multi_class' => FALSE, // FALSE or number for path slug order
-    'taxonomy_categories' => 'blog_categories',
+    'taxonomy_categories' => 'categories',
     'taxonomy_tags' => 'tags',
   );
   */
@@ -95,8 +95,6 @@ function enterprise_blog_config_enterprise_apps_config_info() {
       'views' => array(
         'views' => array(
           'enterprise_blog:page',
-          'enterprise_blog:categories',
-          'enterprise_blog:tags',
           'enterprise_blog:archives',
         ),
       ),
@@ -273,18 +271,22 @@ function enterprise_blog_config_styler_style() {
  * 
  * @return array
  */
-function enterprise_blog_config_taxonomy_term_blog_categories_uri_alter(&$url, $term) {
+/*
+function enterprise_blog_config_taxonomy_term_categories_uri_alter(&$url, $term) {
   $url['path'] = 'rel-view/' . $url['path'];
   //$url['path'] = 'blog/category/' . enterprise_base_create_machine_name($term->name, '-');
 }
+*/
 
 /**
  * Implements hook_taxonomy_term_VOCABULARY_NAME_uri() which is provided by enterprise_base.
  * 
  * @return array
  */
-function enterprise_blog_config_taxonomy_term_blog_tags_uri_alter(&$url, $term) {
+/*
+function enterprise_blog_config_taxonomy_term_tags_uri_alter(&$url, $term) {
   $url['path'] = 'rel-view/' . $url['path'];
 }
+*/
 
 

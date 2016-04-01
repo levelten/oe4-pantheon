@@ -29,7 +29,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => 'user_experience',
     'url_alias' => array(),
     'uuid' => 'bbe30aac-25a0-4b79-bcdf-4ae28e798ecd',
-    'vocabulary_machine_name' => 'blog_categories',
+    'vocabulary_machine_name' => 'categories',
     'weight' => 0,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -46,7 +46,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => 'development',
     'url_alias' => array(),
     'uuid' => 'b9d25f5f-72f6-4224-980e-7798f8a61754',
-    'vocabulary_machine_name' => 'blog_categories',
+    'vocabulary_machine_name' => 'categories',
     'weight' => 1,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -63,7 +63,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => 'content',
     'url_alias' => array(),
     'uuid' => '27fd15ef-c256-4c59-87f1-311f1636233f',
-    'vocabulary_machine_name' => 'blog_categories',
+    'vocabulary_machine_name' => 'categories',
     'weight' => 2,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -80,7 +80,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => 'marketing',
     'url_alias' => array(),
     'uuid' => '40a8b548-e564-4149-ac97-34d7c97f5b04',
-    'vocabulary_machine_name' => 'blog_categories',
+    'vocabulary_machine_name' => 'categories',
     'weight' => 3,
   );
   $entities['enterprise_blog_content'][] = (object) array(
@@ -97,7 +97,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'slug' => 'analytics',
     'url_alias' => array(),
     'uuid' => '541c1363-2542-4879-a0b9-35fc917ede06',
-    'vocabulary_machine_name' => 'blog_categories',
+    'vocabulary_machine_name' => 'categories',
     'weight' => 4,
   );
 
@@ -443,7 +443,7 @@ function enterprise_blog_content_uuid_default_entities() {
     ),
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => '40a8b548-e564-4149-ac97-34d7c97f5b04',
@@ -577,7 +577,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'comment_count' => 0,
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => 'bbe30aac-25a0-4b79-bcdf-4ae28e798ecd',
@@ -707,7 +707,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'comment_count' => 0,
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => '40a8b548-e564-4149-ac97-34d7c97f5b04',
@@ -861,7 +861,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'comment_count' => 0,
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => 'bbe30aac-25a0-4b79-bcdf-4ae28e798ecd',
@@ -1006,7 +1006,7 @@ function enterprise_blog_content_uuid_default_entities() {
     ),
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => 'bbe30aac-25a0-4b79-bcdf-4ae28e798ecd',
@@ -1141,7 +1141,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'comment_count' => 0,
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => '541c1363-2542-4879-a0b9-35fc917ede06',
@@ -1283,7 +1283,7 @@ function enterprise_blog_content_uuid_default_entities() {
     ),
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => '27fd15ef-c256-4c59-87f1-311f1636233f',
@@ -1414,7 +1414,7 @@ function enterprise_blog_content_uuid_default_entities() {
     'comment_count' => 0,
     'ds_switch' => '',
     'entity_type' => 'node',
-    'field_blog_categories' => array(
+    'field_categories' => array(
       'und' => array(
         0 => array(
           'tid' => 'bbe30aac-25a0-4b79-bcdf-4ae28e798ecd',

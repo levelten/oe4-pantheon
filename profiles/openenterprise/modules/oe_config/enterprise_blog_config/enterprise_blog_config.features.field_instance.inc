@@ -1004,7 +1004,7 @@ function enterprise_blog_config_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
-          'picture_group' => 'medium-7x5',
+          'picture_group' => 'medium-16x9',
           'picture_mapping' => 'medium-0',
         ),
         'type' => 'picture',

@@ -129,12 +129,14 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
   //$required_apps[] = 'enterprise_APP;
 
   $features_revert = array();
-  $features_revert['enterprise_intel'] = array(
+  // needed to get intel fields on blog and other content types
+  $features_revert['enterprise_intel_config'] = array(
     'field_instances'
   );
 
   $info = array(
     'required_apps' => $required_apps,
+    'features_revert' => $features_revert,
   );
 
   return $info;

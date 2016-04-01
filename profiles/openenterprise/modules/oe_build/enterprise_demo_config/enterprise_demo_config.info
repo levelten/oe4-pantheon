@@ -26,5 +26,5 @@ features[variable][] = enterprise_intel_entity_settings_node__enterprise_thankyo
 features[variable][] = enterprise_intel_entity_settings_node__webform
 features[variable][] = error_level
 features[variable][] = intel_entity_settings_node__enterprise_blog
-features[variable][] = intel_entity_settings_taxonomy__blog_categories
-features[variable][] = intel_entity_settings_taxonomy__blog_tags
+features[variable][] = intel_entity_settings_taxonomy__categories
+features[variable][] = intel_entity_settings_taxonomy__tags

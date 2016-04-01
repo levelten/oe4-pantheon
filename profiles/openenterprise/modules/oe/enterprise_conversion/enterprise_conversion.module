@@ -1518,7 +1518,7 @@ function enterprise_conversion_webform_block_view($delta = '') {
  *
  * Tell styler module what styles this module provides.
  */
-function enterprise_conversion_styler_style() {
+function x_enterprise_conversion_styler_style() {
   $styles = array();
 
   $styles['ctas'] = array(

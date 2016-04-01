@@ -75,7 +75,7 @@ function enterprise_blog_config_strongarm() {
     'filter' => array(
       'block_title' => '',
       'facets' => array(
-        'taxonomy_term:blog_categories' => array(
+        'taxonomy_term:categories' => array(
           'display' => 'links',
           'title' => '',
           'item_limit' => '',
@@ -96,7 +96,7 @@ function enterprise_blog_config_strongarm() {
       'node' => array(
         'model' => 'relview',
         'filtargs' => array(
-          'taxonomy_term:blog_categories' => array(
+          'taxonomy_term:categories' => array(
             'display' => '',
           ),
           'user:user' => array(

@@ -17,7 +17,6 @@ function enterprise_apps_apps_list_page() {
     $row[] = l(t('config'), 'admin/structure/features/apps/' . $name . '/config');
     $rows[] = $row;
   }
-  dsm($apps_info);
   $vars = array(
     'header' => $header,
     'rows' => $rows,

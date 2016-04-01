@@ -5,3 +5,26 @@
  */
 
 include_once 'enterprise_global_config.features.inc';
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_NAME_uri() which is provided by enterprise_base.
+ *
+ * @return array
+ */
+function enterprise_global_config_taxonomy_term_categories_uri_alter(&$url, $term) {
+  if (module_exists('enterprise_rel')) {
+    $url['path'] = 'rel-view/' . $url['path'];
+  }
+}
+
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_NAME_uri() which is provided by enterprise_base.
+ *
+ * @return array
+ */
+function enterprise_global_config_taxonomy_term_tags_uri_alter(&$url, $term) {
+  if (module_exists('enterprise_rel')) {
+    $url['path'] = 'rel-view/' . $url['path'];
+  }
+}

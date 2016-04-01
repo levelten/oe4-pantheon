@@ -2,4 +2,4 @@ name = "SEMRush"
 description = "Integrates SEMRush keyword research into Drupal"
 package = Keyword Research
 core = 7.x
-configure = admin/config/search/semrush
+configure = admin/config/services/semrush

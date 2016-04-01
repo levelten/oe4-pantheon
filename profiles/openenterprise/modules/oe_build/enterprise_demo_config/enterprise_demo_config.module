@@ -5,3 +5,93 @@
  */
 
 include_once 'enterprise_demo_config.features.inc';
+
+function enterprise_demo_config_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_demo' => array(),
+  );
+
+  $weight = 0;
+
+  $blocks = array();
+  $blocks['search:form'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'title' => t('Search OE Pro'),
+    'weight' => 0,
+  );
+
+  $blocks['widgets:s_twitter-user-timeline-widget'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'weight' => 1,
+  );
+
+  $blocks['widgets:s_facebook-like-box'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'weight' => 2,
+  );
+
+  $blocks['widgets:s_enterprise_social-follow'] = array(
+    'title' => t('Follow us'),
+    'regions' => array(
+      'footer',
+    ),
+    'block_row' => array(
+      'row' => 'row2',
+      'row_class' => 'stacked',
+    ),
+    'weight' => 3,
+  );
+
+  $blocks['views:enterprise_blog_blocks-tags'] = array(
+    'weight' => 1,
+  );
+
+  $blocks['views:enterprise_blog_blocks-archives'] = array(
+    'weight' => 2,
+  );
+
+  $blocks['views:enterprise_blog_blocks-popular'] = array(
+    'weight' => 6,
+  );
+
+  $blocks['cta:sel_cta_sidebar'] = array(
+    'path' => array(
+      'pages' => array(
+        '<front>',
+        'admin/*',
+        'user',
+        'user/*',
+        'users/*',
+        'offer/*',
+        'thank-you/*',
+        'services',
+        'services/*',
+        'about',
+        'about/*',
+        'team',
+        'forum',
+        'forum/*',
+      ),
+    ),
+  );
+
+  // add cta footer to blog content type
+  $blocks['cta:sel_cta_footer'] = array(
+    'node_type' => array(
+      'types' => array(
+        'enterprise_blog',
+      ),
+    ),
+  );
+
+  $settings['enterprise_demo']['blocks'] = $blocks;
+
+  return $settings;
+}
+

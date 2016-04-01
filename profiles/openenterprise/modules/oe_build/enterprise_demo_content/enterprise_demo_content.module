@@ -124,104 +124,20 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
 
 
   $settings['enterprise_demo_content']['menus']['main-menu'] = $menu;
-  $weight = 0;
-  $settings['enterprise_demo_content']['blocks'] = array(
-    'search:form' => array(
-      'regions' => array(
-        'footer',
-      ),
-      'title' => t('Search OE Pro'),
-      'weight' => $weight++,
-    ),
-    'widgets:s_twitter-user-timeline-widget' => array(
-      'regions' => array(
-        'footer',
-      ),
-      'weight' => $weight++,
-    ),
-    'widgets:s_facebook-like-box' => array(
-      'regions' => array(
-        'footer',
-      ),
-      'weight' => $weight++,
-    ),
-    'widgets:s_enterprise_social-follow' => array(
-      'title' => t('Follow us'),
-      'regions' => array(
-        'footer',
-      ),
-      'block_row' => array(
-        'row' => 'row2',
-        'row_class' => 'stacked',
-      ),
-      'weight' => $weight++,
-    ),
-    'bean:custom-footer-contact-us' => array(
-      'regions' => array(
-        'footer',
-      ),
-      'block_row' => array(
-        'row' => 'row2',
-        'row_class' => 'stacked',
-      ),
-      'weight' => $weight++,
-    ),
 
-    'views:enterprise_blog_blocks-tags' => array(
-      'weight' => 2,
+  $blocks = array();
+  $blocks['bean:custom-footer-contact-us'] = array(
+    'regions' => array(
+      'footer',
     ),
-    'views:enterprise_blog_blocks-recent' => array(
-      'weight' => 4,
+    'block_row' => array(
+      'row' => 'row2',
+      'row_class' => 'stacked',
     ),
-    'views:enterprise_blog_blocks-popular' => array(
-      'weight' => 6,
-    ),
-    // disable blog archive block
-    'views:enterprise_blog_blocks-archives' => array(
-      'regions' => -1,
-    ),
-
-    // enterprise video blocks placement
-    'views:enterprise_video-tags_block' => array(
-      'weight' => 2,
-    ),
-    'views:enterprise_video-recent_block' => array(
-      'weight' => 4,
-    ),
-    'views:enterprise_video-popular_block' => array(
-      'weight' => 6,
-    ),
-
-    // add cta footer to blog content type
-    'cta:sel_cta_sidebar' => array(
-      'path' => array(
-        'pages' => array(
-          '<front>',
-          'admin/*',
-          'user',
-          'user/*',
-          'users/*',
-          'offer/*',
-          'thank-you/*',
-          'services',
-          'services/*',
-          'about',
-          'about/*',
-          'team',
-          'forum',
-          'forum/*',
-        ),
-      ),
-    ),
-    // add cta footer to blog content type
-    'cta:sel_cta_footer' => array(
-      'node_type' => array(
-        'types' => array(
-          'enterprise_blog',
-        ),
-      ),
-    ),
+    'weight' => 4,
   );
+
+  $settings['enterprise_demo_content']['blocks'] = $blocks;
 
   // Webform: Contact us
   $nodes['cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(

@@ -15,7 +15,7 @@ function enterprise_blog_config_views_default_views() {
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
-  $view->human_name = 'Enterprise Blog';
+  $view->human_name = 'Blog';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -42,10 +42,9 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['relationships']['term_node_tid']['id'] = 'term_node_tid';
   $handler->display->display_options['relationships']['term_node_tid']['table'] = 'node';
   $handler->display->display_options['relationships']['term_node_tid']['field'] = 'term_node_tid';
-  $handler->display->display_options['relationships']['term_node_tid']['label'] = 'Blog Categories';
+  $handler->display->display_options['relationships']['term_node_tid']['label'] = 'Categories';
   $handler->display->display_options['relationships']['term_node_tid']['vocabularies'] = array(
-    'blog_categories' => 0,
-    'categories' => 0,
+    'categories' => 1,
     'cta_categories' => 0,
     'keywords' => 0,
     'tags' => 0,
@@ -83,7 +82,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['arguments']['tid']['specify_validation'] = TRUE;
   $handler->display->display_options['arguments']['tid']['validate']['type'] = 'taxonomy_term';
   $handler->display->display_options['arguments']['tid']['validate_options']['vocabularies'] = array(
-    'blog_categories' => 'blog_categories',
+    'categories' => 'categories',
   );
   $handler->display->display_options['arguments']['tid']['validate_options']['type'] = 'convert';
   $handler->display->display_options['arguments']['tid']['validate_options']['transform'] = TRUE;
@@ -346,7 +345,7 @@ function enterprise_blog_config_views_default_views() {
   $view->description = 'Admin page for blog posts';
   $view->tag = 'default';
   $view->base_table = 'node';
-  $view->human_name = 'Enterprise Blog admin';
+  $view->human_name = 'Blog admin';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -738,7 +737,7 @@ function enterprise_blog_config_views_default_views() {
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
-  $view->human_name = 'Enterprise Blog Blocks';
+  $view->human_name = 'Blog Blocks';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -799,7 +798,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
   $handler->display->display_options['style_options']['wrapper_classes'] = 'row-fluid';
-  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-3 equal-height-element well';
+  $handler->display->display_options['style_options']['column_classes'] = 'views-column col-md-3 equal-height-element';
   $handler->display->display_options['style_options']['row_classes'] = 'views-row equal-height-container';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
@@ -816,7 +815,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '5';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '3';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
@@ -837,7 +836,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '5';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '3';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
@@ -889,18 +888,18 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['row_plugin'] = 'fields';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['relationships'] = FALSE;
-  /* Relationship: Content: Categories (field_blog_categories) */
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['id'] = 'field_blog_categories_tid';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['table'] = 'field_data_field_blog_categories';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['field'] = 'field_blog_categories_tid';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['label'] = 'Category';
-  $handler->display->display_options['relationships']['field_blog_categories_tid']['required'] = TRUE;
+  /* Relationship: Content: Categories (field_categories) */
+  $handler->display->display_options['relationships']['field_categories_tid']['id'] = 'field_categories_tid';
+  $handler->display->display_options['relationships']['field_categories_tid']['table'] = 'field_data_field_categories';
+  $handler->display->display_options['relationships']['field_categories_tid']['field'] = 'field_categories_tid';
+  $handler->display->display_options['relationships']['field_categories_tid']['label'] = 'Category';
+  $handler->display->display_options['relationships']['field_categories_tid']['required'] = TRUE;
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Taxonomy term: Name */
   $handler->display->display_options['arguments']['name']['id'] = 'name';
   $handler->display->display_options['arguments']['name']['table'] = 'taxonomy_term_data';
   $handler->display->display_options['arguments']['name']['field'] = 'name';
-  $handler->display->display_options['arguments']['name']['relationship'] = 'field_blog_categories_tid';
+  $handler->display->display_options['arguments']['name']['relationship'] = 'field_categories_tid';
   $handler->display->display_options['arguments']['name']['default_action'] = 'summary';
   $handler->display->display_options['arguments']['name']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['name']['summary']['sort_order'] = 'desc';
@@ -994,7 +993,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['block_description'] = 'Blog: Authors';
 
   /* Display: Related */
-  $handler = $view->new_display('block', 'Related', 'related');
+  $handler = $view->new_display('block', 'Related', 'rel');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['title'] = 'Related Posts';
   $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;

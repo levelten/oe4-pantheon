@@ -446,7 +446,7 @@ function enterprise_apps_install_demo(&$install_state) {
   $a = !empty($profile_settings['demo']['demo_content']) ? 'enterprise_demo_content' : 'enterprise_demo_nocontent';
   $apps[$a] = $a;
 
-  $apps['enterprise_permissions'] = 'enterprise_permissions';
+  $apps['enterprise_permissions_config'] = 'enterprise_permissions_config';
   $apps['enterprise_permissions_content'] = 'enterprise_permissions_content';
 
   $profile_settings['demo']['enable_modules'] = $apps;
@@ -482,9 +482,13 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
 
   $profile_settings = variable_get('enterprise_apps_profile_settings', array());
 
+  enterprise_apps_config_app('enterprise_demo');
+
   // must rebuild field instances after all fields are installed.
-  if (!empty($profile_settings['demo']['info']['features_revert'])) {
-    features_revert($profile_settings['demo']['info']['features_revert']);
+  $features_revert = !empty($profile_settings['demo']['info']['features_revert']) ? $profile_settings['demo']['info']['features_revert'] : array();
+
+  if (!empty($features_revert)) {
+    features_revert($features_revert);
   }
 
   $modules = module_list();

@@ -25,7 +25,7 @@ function enterprise_demo_config_strongarm() {
     'field_intel_event_col' => 'field_intel_event_col',
     'field_page_attribute_col' => 'field_page_attribute_col',
     'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_blog_categories' => 'field_blog_categories',
+    'field_categories' => 'field_categories',
   );
   $export['enterprise_intel_entity_settings_node__enterprise_blog'] = $strongarm;
 
@@ -37,7 +37,7 @@ function enterprise_demo_config_strongarm() {
     'field_intel_event_col' => 'field_intel_event_col',
     'field_page_attribute_col' => 'field_page_attribute_col',
     'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_blog_categories' => 0,
+    'field_categories' => 0,
   );
   $export['enterprise_intel_entity_settings_node__enterprise_landingpage'] = $strongarm;
 
@@ -49,7 +49,7 @@ function enterprise_demo_config_strongarm() {
     'field_intel_event_col' => 'field_intel_event_col',
     'field_page_attribute_col' => 'field_page_attribute_col',
     'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_blog_categories' => 0,
+    'field_categories' => 0,
   );
   $export['enterprise_intel_entity_settings_node__enterprise_thankyou'] = $strongarm;
 
@@ -61,7 +61,7 @@ function enterprise_demo_config_strongarm() {
     'field_intel_event_col' => 0,
     'field_page_attribute_col' => 0,
     'field_visitor_attribute_col' => 0,
-    'field_blog_categories' => 0,
+    'field_categories' => 0,
   );
   $export['enterprise_intel_entity_settings_node__webform'] = $strongarm;
 
@@ -95,7 +95,7 @@ function enterprise_demo_config_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
-  $strongarm->name = 'intel_entity_settings_taxonomy__blog_categories';
+  $strongarm->name = 'intel_entity_settings_taxonomy__categories';
   $strongarm->value = array(
     'page_intent' => 'i',
     'track_page_terms' => 1,
@@ -109,17 +109,17 @@ function enterprise_demo_config_strongarm() {
       'description' => 'Number of times a page subjects have been viewed',
     ),
   );
-  $export['intel_entity_settings_taxonomy__blog_categories'] = $strongarm;
+  $export['intel_entity_settings_taxonomy__categories'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
-  $strongarm->name = 'intel_entity_settings_taxonomy__blog_tags';
+  $strongarm->name = 'intel_entity_settings_taxonomy__tags';
   $strongarm->value = array(
     'page_intent' => 'i',
     'track_page_terms' => 1,
   );
-  $export['intel_entity_settings_taxonomy__blog_tags'] = $strongarm;
+  $export['intel_entity_settings_taxonomy__tags'] = $strongarm;
 
   return $export;
 }
