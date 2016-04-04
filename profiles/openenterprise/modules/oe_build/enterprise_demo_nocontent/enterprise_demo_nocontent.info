@@ -1,4 +1,4 @@
-name = Enterprise Demo No Content
+name = Enterprise Demo No Content (CBD)
 description = Provides welcome page and settings for no demo content installs.
 core = 7.x
 package = Open Enterprise Demo

@@ -1054,15 +1054,15 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['arguments']['rel_text_index']['validate']['fail'] = 'access denied';
   $handler->display->display_options['arguments']['rel_text_index']['title_relevance'] = '1.4';
   $handler->display->display_options['arguments']['rel_text_index']['body_relevance'] = '0.8';
-  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_alt_text'] = '0';
-  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_title_text'] = '0';
   $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_firstname'] = '0';
   $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_lastname'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_track_submission_value'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_title'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_alt_text'] = '0';
+  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_file_image_title_text'] = '0';
   $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_intel_event_value'] = '0';
   $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_page_attribute_value'] = '0';
-  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_track_submission_value'] = '0';
   $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_visitor_attribute_value'] = '0';
-  $handler->display->display_options['arguments']['rel_text_index']['included_fields:field_data_field_title'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Content: Published */

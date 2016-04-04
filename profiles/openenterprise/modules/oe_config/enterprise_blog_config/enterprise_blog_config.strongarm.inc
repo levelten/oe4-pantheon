@@ -117,16 +117,7 @@ function enterprise_blog_config_strongarm() {
   $strongarm->name = 'field_bundle_settings_node__enterprise_blog';
   $strongarm->value = array(
     'view_modes' => array(
-      'article_mini' => array(
-        'custom_settings' => TRUE,
-      ),
-      'article_quote' => array(
-        'custom_settings' => TRUE,
-      ),
-      'article_teaser' => array(
-        'custom_settings' => TRUE,
-      ),
-      'full' => array(
+       'full' => array(
         'custom_settings' => FALSE,
       ),
       'teaser' => array(
@@ -150,32 +141,17 @@ function enterprise_blog_config_strongarm() {
       'revision' => array(
         'custom_settings' => FALSE,
       ),
-      'article_featured' => array(
-        'custom_settings' => TRUE,
-      ),
-      'article_related' => array(
-        'custom_settings' => TRUE,
-      ),
       'content_hover' => array(
         'custom_settings' => FALSE,
       ),
       'featured' => array(
         'custom_settings' => TRUE,
       ),
-      'blog_full' => array(
-        'custom_settings' => FALSE,
-      ),
       'mini' => array(
         'custom_settings' => TRUE,
       ),
-      'blog_teaser' => array(
-        'custom_settings' => FALSE,
-      ),
       'diff_standard' => array(
         'custom_settings' => FALSE,
-      ),
-      'blog_related' => array(
-        'custom_settings' => TRUE,
       ),
       'list' => array(
         'custom_settings' => FALSE,

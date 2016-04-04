@@ -5,7 +5,6 @@ package = Open Enterprise Config
 dependencies[] = bean
 dependencies[] = ctools
 dependencies[] = ds
-dependencies[] = enterprise_fields
 dependencies[] = features
 dependencies[] = smart_trim
 dependencies[] = text

@@ -59,7 +59,6 @@ features_exclude[field][node-enterprise_thankyou-field_track_submission] = node-
 features_exclude[field][node-enterprise_thankyou-field_track_submission_value] = node-enterprise_thankyou-field_track_submission_value
 features_exclude[field][bean-cta-field_image] = bean-cta-field_image
 features_exclude[dependencies][enterprise_events] = enterprise_events
-features_exclude[dependencies][enterprise_fields] = enterprise_fields
 features_exclude[dependencies][enterprise_seo] = enterprise_seo
 features_exclude[dependencies][enterprise_conversion_config] = enterprise_conversion_config
 features_exclude[dependencies][enterprise_demo_config] = enterprise_demo_config

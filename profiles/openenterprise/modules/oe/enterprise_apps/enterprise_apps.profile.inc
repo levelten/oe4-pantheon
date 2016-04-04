@@ -38,9 +38,7 @@ function enterprise_apps_profile_install_tasks($install_state) {
   return $tasks;
 }
 
-function enterprise_apps_config_features_options_form($form, $form_state, &$install_state) {
-  drupal_set_title(t('Install applications'));
-
+function enterprise_apps_config_features_adhoc_apps() {
   $ext_apps = array(
     'enterprise_careers' => 0,
     'enterprise_events' => 0,
@@ -55,6 +53,13 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     'enterprise_video' => 0,
     'enterprise_work' => 0,
   );
+  return $ext_apps;
+}
+
+function enterprise_apps_config_features_options_form($form, $form_state, &$install_state) {
+  drupal_set_title(t('Install applications'));
+
+  $ext_apps = enterprise_apps_config_features_adhoc_apps();
 
   $msg = st('Major site components such blogs and landing pages are provided in modular features called Apps.');
   $msg .= ' ' . st('After installation, you can add Apps at anytime using the Features admin.');
@@ -351,6 +356,23 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
   }
 }
 
+function enterprise_apps_install_demo_info($demo_name = 'enterprise_demo') {
+  if (!enterprise_apps_module_files_exist($demo_name)) {
+    return;
+  }
+
+  require_once(drupal_get_path('module', $demo_name) . '/' . $demo_name . '.module');
+
+  $func = $demo_name . '_enterprise_apps_install_demo_info';
+
+  if (!function_exists($func)) {
+    return;
+  }
+
+  $demo_info = $func();
+  return $demo_info;
+}
+
 function enterprise_apps_install_demo(&$install_state) {
   $profile_settings = variable_get('enterprise_apps_profile_settings', array());
 //drupal_set_message(json_encode($profile_settings));
@@ -359,21 +381,8 @@ function enterprise_apps_install_demo(&$install_state) {
 
   if ($profile_settings['demo']['mode'] != 'min') {
     $demo_app = 'enterprise_demo';
+    $profile_settings['demo']['info'] = $demo_info = enterprise_apps_install_demo_info();
   }
-
-  if (!enterprise_apps_module_files_exist($demo_app)) {
-    return;
-  }
-
-  require_once(drupal_get_path('module', $demo_app) . '/' . $demo_app . '.module');
-
-  $func = $demo_app . '_enterprise_apps_install_demo_info';
-
-  if (!function_exists($func)) {
-    return;
-  }
-
-  $profile_settings['demo']['info'] = $demo_info = $func();
 
   $debug['demo_info'] = $demo_info;
 

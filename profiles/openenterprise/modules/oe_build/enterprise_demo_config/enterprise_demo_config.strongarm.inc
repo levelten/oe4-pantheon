@@ -20,54 +20,6 @@ function enterprise_demo_config_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
-  $strongarm->name = 'enterprise_intel_entity_settings_node__enterprise_blog';
-  $strongarm->value = array(
-    'field_intel_event_col' => 'field_intel_event_col',
-    'field_page_attribute_col' => 'field_page_attribute_col',
-    'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_categories' => 'field_categories',
-  );
-  $export['enterprise_intel_entity_settings_node__enterprise_blog'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'enterprise_intel_entity_settings_node__enterprise_landingpage';
-  $strongarm->value = array(
-    'field_intel_event_col' => 'field_intel_event_col',
-    'field_page_attribute_col' => 'field_page_attribute_col',
-    'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_categories' => 0,
-  );
-  $export['enterprise_intel_entity_settings_node__enterprise_landingpage'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'enterprise_intel_entity_settings_node__enterprise_thankyou';
-  $strongarm->value = array(
-    'field_intel_event_col' => 'field_intel_event_col',
-    'field_page_attribute_col' => 'field_page_attribute_col',
-    'field_visitor_attribute_col' => 'field_visitor_attribute_col',
-    'field_categories' => 0,
-  );
-  $export['enterprise_intel_entity_settings_node__enterprise_thankyou'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'enterprise_intel_entity_settings_node__webform';
-  $strongarm->value = array(
-    'field_intel_event_col' => 0,
-    'field_page_attribute_col' => 0,
-    'field_visitor_attribute_col' => 0,
-    'field_categories' => 0,
-  );
-  $export['enterprise_intel_entity_settings_node__webform'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
   $strongarm->name = 'enterprise_intel_vocab_field_map';
   $strongarm->value = array(
     'blog_categories' => 'field_blog_categories',

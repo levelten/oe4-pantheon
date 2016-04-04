@@ -44,6 +44,30 @@ function hook_enterprise_apps_config_settings() {
   );
 
   // ***************************
+  // Entity Info config
+  // Can be used to add/update field instances on entity types
+
+  $entity_info = array();
+  $entity_info['node:enterprise_blog'] = array(
+    'field_instance' => array(
+      // set to 1 to clone field from etmaster or etsource
+      'field_cta_categories' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      // array will use current field or clone from etmaster/etsource and merge
+      // settings in
+      'field_visitor_attribute_col' => array(
+        'widget' => array(
+          'weight' => 10,
+        )
+      ),
+    ),
+  );
+
+  $settings[$app_name]['entity_info'] = $entity_info;
+
+  // ***************************
   // Variables config
   // variables enables data to be merged into variable settings.
   // for example, the below code will merge in enterprise_blog into the
@@ -330,39 +354,6 @@ function hook_enterprise_apps_config_info() {
     /**/
   );
   return $config;
-}
-
-/**
- * Enables alteration of entity type definitions.
- */
-function hook_enterprise_apps_entity_config_settings() {
-  $settings = array();
-  $settings['node'] = array();
-  $settings['node']['enterprise_blog'] = array(
-    'field_instance' => array(
-      'field_intel_event_col' => array(
-        // insert - only adds field if does not already exist
-        // merge - merges in any values that do not already exist (destination values take priority)
-        // update - source values take priority
-        // delete - removes intance
-        'action' => 'insert|merge|update|delete',
-        'source' => 'enterprise_super',
-        'overrides' => array(),
-      ),
-      'field_page_attribute_col' => array(
-
-      ),
-      'field_visitor_attribute_col' => array(),
-    ),
-    'field_group' => array(
-
-    ),
-    'variable' => array(),
-    'property' => array(),
-  );
-
-
-  return $settings;
 }
 
 /**

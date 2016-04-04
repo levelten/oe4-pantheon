@@ -1,4 +1,4 @@
-name = Enterprise Intelligence Config
+name = Enterprise Intelligence Config (CBD)
 description = Intelligence configuration
 core = 7.x
 package = Open Enterprise Config

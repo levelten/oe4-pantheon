@@ -1,4 +1,4 @@
-name = Enterprise Demo Config
+name = Enterprise Demo Config (CBD)
 description = Builds standard Open Enterprise demo.
 core = 7.x
 package = Open Enterprise Demo
@@ -15,15 +15,8 @@ dependencies[] = dblog
 
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:2
-features[field_instance][] = node-enterprise_blog-field_cta_category
-features[field_instance][] = node-enterprise_blog-field_keywords
-features[field_instance][] = node-enterprise_landingpage-field_keywords
 features[user_permission][] = search content
 features[variable][] = disqus_developer
-features[variable][] = enterprise_intel_entity_settings_node__enterprise_blog
-features[variable][] = enterprise_intel_entity_settings_node__enterprise_landingpage
-features[variable][] = enterprise_intel_entity_settings_node__enterprise_thankyou
-features[variable][] = enterprise_intel_entity_settings_node__webform
 features[variable][] = error_level
 features[variable][] = intel_entity_settings_node__enterprise_blog
 features[variable][] = intel_entity_settings_taxonomy__categories

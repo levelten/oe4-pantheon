@@ -52,8 +52,8 @@ function enterprise_seo_config_field_default_field_instances() {
   );
 
   // Exported field_instance: 'node-superclass-field_keywords'
-  $field_instances['node-superclass-field_keywords'] = array(
-    'bundle' => 'superclass',
+  $field_instances['node-enterprise_etmaster-field_keywords'] = array(
+    'bundle' => 'enterprise_etmaster',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',

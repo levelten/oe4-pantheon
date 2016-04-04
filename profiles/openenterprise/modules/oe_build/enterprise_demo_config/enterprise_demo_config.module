@@ -11,6 +11,49 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     'enterprise_demo' => array(),
   );
 
+  $entity_info = array();
+  $entity_info['node:enterprise_blog'] = array(
+    'field_instance' => array(
+      'field_cta_category' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      'field_visitor_attribute_col' => 1,
+    ),
+  );
+
+  $entity_info['node:enterprise_landingpage'] = array(
+    'field_instance' => array(
+      //'field_cta_category' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      'field_visitor_attribute_col' => 1,
+    ),
+  );
+
+  $entity_info['node:enterprise_thankyou'] = array(
+    'field_instance' => array(
+      //'field_cta_category' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      'field_visitor_attribute_col' => 1,
+    ),
+  );
+
+  $entity_info['node:enterprise_webform'] = array(
+    'field_instance' => array(
+      //'field_cta_category' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      'field_visitor_attribute_col' => 1,
+    ),
+  );
+
+  $settings['enterprise_demo']['entity_info'] = $entity_info;
+
   $weight = 0;
 
   $blocks = array();
@@ -91,6 +134,8 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
   );
 
   $settings['enterprise_demo']['blocks'] = $blocks;
+
+
 
   return $settings;
 }

@@ -1,4 +1,4 @@
-name = Enterprise Demo Content
+name = Enterprise Demo Content (CBD)
 description = Builds standard Open Enterprise demo.
 core = 7.x
 package = Open Enterprise Demo

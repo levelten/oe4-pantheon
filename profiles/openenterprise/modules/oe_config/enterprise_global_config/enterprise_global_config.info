@@ -35,6 +35,7 @@ features[field_group][] = group_rel_global|node|enterprise_etmaster|form
 features[field_group][] = group_rel_label|node|enterprise_etmaster|form
 features[field_instance][] = node-enterprise_etmaster-body
 features[field_instance][] = node-enterprise_etmaster-field_categories
+features[field_instance][] = node-enterprise_etmaster-field_image
 features[field_instance][] = node-enterprise_etmaster-field_tags
 features[field_instance][] = node-enterprise_etsource-body
 features[node][] = enterprise_etmaster

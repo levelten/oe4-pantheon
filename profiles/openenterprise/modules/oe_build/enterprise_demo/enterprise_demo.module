@@ -136,7 +136,7 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
 
   $info = array(
     'required_apps' => $required_apps,
-    'features_revert' => $features_revert,
+    //'features_revert' => $features_revert,
   );
 
   return $info;

@@ -1,4 +1,4 @@
-name = Enterprise SEO Config
+name = Enterprise SEO Config (CBD)
 description = Configures SEO Tools suite
 core = 7.x
 package = Open Enterprise Config
@@ -12,7 +12,7 @@ features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:2
 features[field_base][] = field_keywords
 features[field_instance][] = node-page-field_keywords
-features[field_instance][] = node-superclass-field_keywords
+features[field_instance][] = node-enterprise_etmaster-field_keywords
 features[taxonomy][] = keywords
 features[variable][] = kwresearch_keyword_sync_vocabulary
 features[variable][] = kwresearch_keyword_tag_vocabulary
