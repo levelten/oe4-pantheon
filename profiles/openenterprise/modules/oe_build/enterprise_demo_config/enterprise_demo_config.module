@@ -42,7 +42,17 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     ),
   );
 
-  $entity_info['node:enterprise_webform'] = array(
+  $entity_info['node:page'] = array(
+    'field_instance' => array(
+      'field_cta_category' => 1,
+      'field_intel_event_col' => 1,
+      'field_keywords' => 1,
+      'field_page_attribute_col' => 1,
+      'field_visitor_attribute_col' => 1,
+    ),
+  );
+
+  $entity_info['node:webform'] = array(
     'field_instance' => array(
       //'field_cta_category' => 1,
       'field_intel_event_col' => 1,
