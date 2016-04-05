@@ -1,7 +1,7 @@
-name = Enterprise Demo No Content (CBD)
+name = Enterprise Demo No Content
 description = Provides welcome page and settings for no demo content installs.
 core = 7.x
-package = Open Enterprise Demo
+package = Open Enterprise Build
 dependencies[] = bean_uuid
 dependencies[] = ctools
 dependencies[] = deploy

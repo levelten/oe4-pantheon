@@ -423,11 +423,17 @@ function enterprise_apps_install_demo(&$install_state) {
   // create array of demo apps with optional apps from form
   $apps = array();
   foreach ($demo_info['required_apps'] as $name) {
+    if (enterprise_apps_module_files_exist($name . '_pre')) {
+      $apps[$name . '_pre'] = $name . '_pre';
+    }
     if (enterprise_apps_module_files_exist($name)) {
       $apps[$name] = $name;
     }
     if (enterprise_apps_module_files_exist($name . '_config')) {
       $apps[$name . '_config'] = $name . '_config';
+    }
+    if (enterprise_apps_module_files_exist($name . '_post')) {
+      $apps[$name . '_post'] = $name . '_post';
     }
     if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
       $apps[$name . '_content'] = $name . '_content';
@@ -437,11 +443,17 @@ function enterprise_apps_install_demo(&$install_state) {
   // add optional apps before demo content
   if (isset($profile_settings['apps']) && is_array($profile_settings['apps'])) {
     foreach ($profile_settings['apps'] AS $name) {
+      if (enterprise_apps_module_files_exist($name . '_pre')) {
+        $apps[$name . '_pre'] = $name . '_pre';
+      }
       if (enterprise_apps_module_files_exist($name)) {
         $apps[$name] = $name;
       }
       if (enterprise_apps_module_files_exist($name . '_config')) {
         $apps[$name . '_config'] = $name . '_config';
+      }
+      if (enterprise_apps_module_files_exist($name . '_post')) {
+        $apps[$name . '_post'] = $name . '_post';
       }
       if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
         $apps[$name . '_content'] = $name . '_content';

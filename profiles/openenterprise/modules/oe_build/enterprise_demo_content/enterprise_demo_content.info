@@ -1,7 +1,7 @@
-name = Enterprise Demo Content (CBD)
+name = Enterprise Demo Content
 description = Builds standard Open Enterprise demo.
 core = 7.x
-package = Open Enterprise Demo
+package = Open Enterprise Build
 dependencies[] = bean_uuid
 dependencies[] = ctools
 dependencies[] = deploy
