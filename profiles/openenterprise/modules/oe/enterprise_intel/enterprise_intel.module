@@ -58,20 +58,3 @@ function enterprise_intel_config_intel_controls($entity_type, $bundle, $settings
   }
 }
 
-/**
- * Implements hook_features_pipe_COMPONENT_alter().
- */
-function intel_features_pipe_node_alter(&$pipe, $data, $export) {
-  foreach ($data as $node_type) {
-    $pipe['variable'][] = "intel_entity_settings_node__{$node_type}";
-  }
-}
-
-/**
- * Implements hook_features_pipe_COMPONENT_alter().
- */
-function intel_features_pipe_taxonomy_alter(&$pipe, $data, $export) {
-  foreach ($data as $vocabulary) {
-    $pipe['variable'][] = "intel_entity_settings_taxonomy__{$vocabulary}";
-  }
-}

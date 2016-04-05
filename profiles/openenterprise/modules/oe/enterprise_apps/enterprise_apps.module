@@ -1391,6 +1391,73 @@ function enterprise_apps_get_apps_info() {
   return $info;
 }
 
+function enterprise_apps_form_alter(&$form, &$form_state, $form_id) {
+
+}
+
+function enterprise_apps_form_features_export_form_alter(&$form, &$form_state) {
+  if ($form['info']['package']['#default_value'] == 'Open Enterprise Config') {
+    if (isset($form['advanced']['generate_path']['#default_value']) && empty($form['advanced']['generate_path']['#default_value'])) {
+      $form['advanced']['generate_path']['#default_value'] = 'sites/all/modules/_config';
+    }
+
+    /*
+    $submit = array('enterprise_apps_form_features_export_form_migrate_submit');
+    $submit = array_merge($submit, $form['advanced']['generate']['#submit']);
+    $form['advanced']['apps_config_migrate'] = array(
+      '#type' => 'submit',
+      '#value' => t('Migrate config to site'),
+      '#submit' => $submit,
+    );
+    */
+    $form['advanced']['apps_config_migrate'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Migrate config from profile to site'),
+    );
+
+  }
+  //$form['advanced']['generate']['#validate'] = array();
+  //$form['advanced']['generate']['#validate'][] = 'enterprise_apps_form_features_export_form_validate';
+  $form['#validate'][] = 'enterprise_apps_form_features_export_form_validate';
+  dsm($form);
+}
+
+function enterprise_apps_form_features_export_form_migrate_submit(&$form, &$form_state) {
+  dsm($form);
+  dsm($form_state);
+  watchdog('oe_apps', print_r($form_state['values'], 1));
+  if (empty($form_state['values']['generate_path'])) {
+    $form_state['values']['generate_path'] = 'sites/all/modules/_config';
+  }
+
+  $form_state['values']['package'] = 'Site Config';
+
+  $form_state['op'] = $form_state['values']['generate']['#value'];
+}
+
+function enterprise_apps_form_features_export_form_validate(&$form, &$form_state) {
+  //dsm($form);
+  //dsm($form_state);
+  watchdog('oe_apps_v', print_r($form_state['values'], 1));
+  $values = &$form_state['values'];
+  if (!empty($values['apps_config_migrate'])) {
+    if (empty($values['generate_path'])) {
+      $values['generate_path'] = 'sites/all/modules/_config';
+    }
+    $values['package'] = 'Site Config';
+  }
+}
+
+/**
+ * Implements hook_features_pipe_COMPONENT_alter().
+ */
+function enterprise_apps_features_pipe_node_alter(&$pipe, $data, $export) {
+  foreach ($data as $node_type) {
+    $pipe['field_instance'][] = "comment-comment_node_{$node_type}-comment_body";
+    $pipe['variable'][] = "metatag_enable_node_{$node_type}";
+  }
+}
+
 
 /**********************************************************
  * Alter hooks to support apps info settings
