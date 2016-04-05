@@ -1,0 +1,199 @@
+diff --git a/field_tools.admin.inc b/field_tools.admin.inc
+index b3f4afb..e6093d7 100644
+--- a/field_tools.admin.inc
++++ b/field_tools.admin.inc
+@@ -365,7 +365,6 @@ function field_tools_bundle_fields_clone_from_form($form, &$form_state, $entity_
+   $bundle_name = field_extract_bundle($entity_type, $bundle_name);
+ 
+   $field_instances = field_info_instances($entity_type, $bundle_name);
+-  //dsm($field_instances);
+ 
+   $options_fields = array();
+   foreach ($field_instances as $field_name => $field) {
+@@ -379,6 +378,20 @@ function field_tools_bundle_fields_clone_from_form($form, &$form_state, $entity_
+     '#description' => t("Select fields to clone onto one or more bundles."),
+   );
+ 
++  if (module_exists('field_group')) {
++    $groups = field_group_info_groups($entity_type, $bundle_name, 'form');
++    $options_groups = array();
++    foreach ($groups as $group_name => $group) {
++      $options_groups[$group_name] = $group->label;
++    }
++    $form['groups'] = array(
++      '#title' => t('Groups to clone'),
++      '#type' => 'checkboxes',
++      '#options' => $options_groups,
++      '#description' => t("Select groups that you want to clone."),
++    );
++  }
++
+   $form['bundles'] = array(
+     '#title' => t('Bundle(s) to clone onto'),
+     '#type' => 'checkboxes',
+@@ -391,6 +404,12 @@ function field_tools_bundle_fields_clone_from_form($form, &$form_state, $entity_
+     '#disabled' => TRUE,
+   );
+ 
++  $form['update'] = array(
++    '#title' => t('Update existing instances'),
++    '#type' => 'checkbox',
++    '#description' => t("Check to update target bundle fields and field groups."),
++  );
++
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => t('Add field instances'),
+@@ -408,6 +427,12 @@ function field_tools_bundle_fields_clone_from_form_submit($form, &$form_state) {
+   // Get the bundle name if the bundle name is really a bundle object.
+   $source_bundle_name = field_extract_bundle($source_entity_type, $source_bundle_name);
+ 
++  $new_instances = array();
++  foreach (array_filter($form_state['values']['bundles']) as $option_key) {
++    list($entity_type, $bundle_type) = explode(':', $option_key);
++    $new_instances[$entity_type][] = $bundle_type;
++  }
++
+   // Get names of fields to clone.
+   $field_names = array_filter($form_state['values']['fields']);
+ 
+@@ -415,15 +440,66 @@ function field_tools_bundle_fields_clone_from_form_submit($form, &$form_state) {
+     $field = field_info_field($field_name);
+     $instance = field_info_instance($source_entity_type, $field_name, $source_bundle_name);
+ 
+-    $new_instances = array();
+-    foreach (array_filter($form_state['values']['bundles']) as $option_key) {
+-      list($entity_type, $bundle_type) = explode(':', $option_key);
+-      $new_instances[$entity_type][] = $bundle_type;
++    if ($form_state['values']['update'] == 1) {
++      _field_tools_update_instance_to_bundles($instance, $new_instances);
+     }
+-    if (!empty($new_instances)) {
++    elseif (!empty($new_instances)) {
+       _field_tools_add_instance_to_bundles($instance, $new_instances);
+     }
+   }
++
++  if (module_exists('field_group')) {
++    $export_groups = array_filter($form_state['values']['groups']);
++    $groups = field_group_info_groups($source_entity_type, $source_bundle_name, 'form');
++
++    $existing_groups = field_group_read_groups(array('name' => $entity_type, 'bundle' => $bundle_type));
++
++    foreach ($export_groups as $group_name) {
++      $group = $groups[$group_name];
++      if (isset($existing_groups[$entity_type][$bundle_type][$group->mode][$group_name])) {
++        $existing_group = $existing_groups[$entity_type][$bundle_type][$group->mode][$group_name];
++
++        if ($form_state['values']['update'] == 1) {
++          $existing_group->children = $group->children;
++          $existing_group->parent = $group->parent;
++          $existing_group->weight = $group->weight;
++          field_group_group_save($existing_group);
++          // ctools_export_crud_delete('field_group', $existing_group);
++          drupal_set_message(t('Group %group in bundle %bundle has been updated.', array(
++            '%group' => $group_name,
++            '%bundle' => $bundle_type,
++          )));
++        }
++        else {
++          drupal_set_message(t('Group %group has not been added to bundle %bundle because the bundle already contains this group.', array(
++            '%group' => $group_name,
++            '%bundle' => $bundle_type,
++          )), 'error');
++        }
++        continue;
++      }
++
++      $group->identifier = $group->group_name . '|' . $entity_type . '|' . $bundle_type . '|' . $group->mode;
++      $group->bundle = $bundle_type;
++      $group->entity_type = $entity_type;
++
++      if (isset($group->id)) {
++        unset($group->id);
++      }
++      if (isset($group->export_type)) {
++        unset($group->export_type);
++      }
++      // $group->disabled = FALSE;
++      ctools_export_crud_save('field_group', $group);
++      ctools_export_crud_enable('field_group', $group->identifier);
++      // dpm($group);
++
++      drupal_set_message(t('Group %group has been added to bundle %bundle.', array(
++        '%group' => $group_name,
++        '%bundle' => $bundle_type,
++      )));
++    }
++  }
+ }
+ 
+ /**
+@@ -1094,6 +1170,67 @@ function _field_tools_add_instance_to_bundles($instance, $new_instances) {
+   }
+ }
+ 
++
++/**
++ * Helper function to update a single field instance on multiple bundles.
++ *
++ * @param array $instance
++ *   The field instance to be updated to the bundles.
++ * @param array $target_instances
++ *   An array describing entity bundles on which to update field instances.
++ *   Each key is an entity type machine name, each value is an array of bundle
++ *   machine names of that entity.
++ */
++function _field_tools_update_instance_to_bundles($instance, $target_instances) {
++  $original_display = $instance['display'];
++  $field_info = field_info_field($instance['field_name']);
++  $entity_types = entity_get_info();
++  foreach ($target_instances as $entity_type => $bundles) {
++    $bundles = array_filter($bundles);
++    if (!empty($bundles)) {
++      if (!_field_tools_entity_can_attach_field($entity_type, $field_info)) {
++        drupal_set_message(t('Field %field_label cannot be attached to entity type %entity_type', array(
++          '%field_label' => $instance['label'],
++          '%entity_type' => $entity_types[$entity_type]['label'],
++        )));
++        continue;
++      }
++
++      $instance = array_diff_key($instance, array_flip(array('id', 'field_id', 'bundle', 'entity_type', 'deleted')));
++      // Only bring back displays that have matching "view mode" in this entity type.
++      $instance['display'] = array_intersect_key($original_display, $entity_types[$entity_type]['view modes']);
++      if (empty($instance['display'])) {
++        //@todo should there be logic to handle to no matching 'view modes'
++      }
++      $instance['entity_type'] = $entity_type;
++      foreach ($bundles as $bundle) {
++        if (_field_tools_field_already_attached($entity_type, $bundle, $field_info)) {
++          $target_instance = field_info_instance($entity_type, $instance['field_name'], $bundle);
++          $instance['id'] = $target_instance['id'];
++          $instance['field_id'] = $target_instance['field_id'];
++          $instance['bundle'] = $bundle;
++          field_update_instance($instance);
++
++          drupal_set_message(t('Field %field_label in %entity_type - %bundle has been updated.', array(
++            '%field_label' => $instance['label'],
++            '%entity_type' => $entity_types[$entity_type]['label'],
++            '%bundle' => $entity_types[$entity_type]['bundles'][$bundle]['label'],
++          )));
++          continue;
++        }
++        $instance['bundle'] = $bundle;
++        field_create_instance($instance);
++        drupal_set_message(t('Attached field %field_label to %entity_type - %bundle', array(
++          '%field_label' => $instance['label'],
++          '%entity_type' => $entity_types[$entity_type]['label'],
++          '%bundle' => $entity_types[$entity_type]['bundles'][$bundle]['label'],
++        )));
++      }
++    }
++  }
++}
++
++
+ /**
+  * Page callback to list all instances of a field with links to edit them.
+  */
