@@ -1410,34 +1410,34 @@ function enterprise_apps_form_features_export_form_alter(&$form, &$form_state) {
       '#submit' => $submit,
     );
     */
+    /*
     $form['advanced']['apps_config_migrate'] = array(
       '#type' => 'checkbox',
       '#title' => t('Migrate config from profile to site'),
+      '#weight' => -1,
     );
+    */
 
+    // insert checkbox below generate_path field. No weights are on fields,
+    // so have to use location in array
+    $n = array();
+    foreach ($form['advanced'] as $k => $v) {
+      $n[$k] = $v;
+      if ($k == 'generate_path') {
+        $n['apps_config_migrate'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Migrate config from profile to site'),
+        );
+      }
+    }
+    $form['advanced'] = $n;
   }
   //$form['advanced']['generate']['#validate'] = array();
   //$form['advanced']['generate']['#validate'][] = 'enterprise_apps_form_features_export_form_validate';
   $form['#validate'][] = 'enterprise_apps_form_features_export_form_validate';
 }
 
-function enterprise_apps_form_features_export_form_migrate_submit(&$form, &$form_state) {
-  dsm($form);
-  dsm($form_state);
-  watchdog('oe_apps', print_r($form_state['values'], 1));
-  if (empty($form_state['values']['generate_path'])) {
-    $form_state['values']['generate_path'] = 'sites/all/modules/_config';
-  }
-
-  $form_state['values']['package'] = 'Site Config';
-
-  $form_state['op'] = $form_state['values']['generate']['#value'];
-}
-
 function enterprise_apps_form_features_export_form_validate(&$form, &$form_state) {
-  //dsm($form);
-  //dsm($form_state);
-  watchdog('oe_apps_v', print_r($form_state['values'], 1));
   $values = &$form_state['values'];
   if (!empty($values['apps_config_migrate'])) {
     if (empty($values['generate_path'])) {

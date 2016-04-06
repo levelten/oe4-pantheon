@@ -1,4 +1,4 @@
-name = Enterprise SEO Config (CBD)
+name = Enterprise SEO Config
 description = Configures SEO Tools suite
 core = 7.x
 package = Open Enterprise Config

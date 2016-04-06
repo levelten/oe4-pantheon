@@ -25,6 +25,7 @@ dependencies[] = text
 apps[project] = enterprise_conversion
 apps[name] = Enterprise Conversion
 apps[description] = Creates conversion workflow incorporating Landing pages and CTAs
+features[bean_type][] = cta
 features[cta_selector][] = cta_footer
 features[cta_selector][] = cta_forms
 features[cta_selector][] = cta_sidebar

@@ -37,4 +37,3 @@ features[field_instance][] = field_collection_item-field_visitor_attribute_col-f
 features[field_instance][] = field_collection_item-field_visitor_attribute_col-field_visitor_attribute_value
 features[variable][] = googleanalytics_pages
 features[variable][] = intel_intel_scripts_enabled
-features_exclude[dependencies][options] = options

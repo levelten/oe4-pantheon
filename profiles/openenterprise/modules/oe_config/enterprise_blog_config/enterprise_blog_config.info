@@ -79,4 +79,3 @@ features[variable][] = scheduler_publish_enable_enterprise_blog
 features[views_view][] = enterprise_blog
 features[views_view][] = enterprise_blog_admin
 features[views_view][] = enterprise_blog_blocks
-features_exclude[dependencies][enterprise_conversion_config] = enterprise_conversion_config
