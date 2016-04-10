@@ -48,7 +48,8 @@ function enterprise_global_config_field_group_info() {
     'label' => 'Global',
     'weight' => '48',
     'children' => array(
-      0 => 'field_tags',
+      0 => 'field_categories',
+      1 => 'field_tags',
     ),
     'format_type' => 'htab',
     'format_settings' => array(

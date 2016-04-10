@@ -3,7 +3,7 @@
  */
 
 body.maintenance-page #logo {
-    background:transparent url(openenterprise_logo.png) no-repeat top left;
+    background:transparent url(images/openenterprise_logo_install.png) no-repeat top left;
     height:0;
     overflow:hidden;
     padding-top: 50px; /* height of logo  */

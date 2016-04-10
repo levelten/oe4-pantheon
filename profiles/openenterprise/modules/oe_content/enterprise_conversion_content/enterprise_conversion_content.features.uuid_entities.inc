@@ -1647,8 +1647,20 @@ LNAME|last_name
       'und' => array(
         0 => array(
           'format' => 'full_html',
-          'value' => '<p><img alt="Website Redesign Success e-book" class="media-image attr__typeof__foaf:Image img__fid__1155 img__view_mode__default attr__format__default attr__field_file_image_alt_text[und][0][value]__Website Redesign Success e-book attr__field_file_image_title_text[und][0][value]__" src="/sites/default/files/website_redesign_success_cta_sidebar.png" typeof="foaf:Image"></p>
-',
+          'value' => '<div class="cta cta-primary cta-gradient-180 cta-block">
+  <div class="cta-heading">
+    <h3 class="cta-title text-left">Build a Smarter Website</h3>
+  </div>
+
+  <div class="cta-body row">
+    <div class="col-lg-5 col-sm-12 col-xs-5 p-x-_5"><img alt="Website Redesign Success e-book" data-picture-mapping="medium-0" src="/sites/default/files/website_redesign_success_book_mockup.png" style="max-height:180px;" /></div>
+
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+    <button class="btn cta-accent btn-block">Free eBook</button>
+    </div>
+  </div>
+</div>',
         ),
       ),
     ),
@@ -1719,8 +1731,21 @@ LNAME|last_name
       'und' => array(
         0 => array(
           'format' => 'full_html',
-          'value' => '<p><img alt="Build a Smarter Website" class="media-image attr__typeof__foaf:Image img__fid__1159 img__view_mode__default attr__format__default attr__field_file_image_alt_text[und][0][value]__Build a Smarter Website attr__field_file_image_title_text[und][0][value]__" src="/sites/default/files/website_redesign_success_cta_footer.png" typeof="foaf:Image"></p>
-',
+          'value' => '<div class="cta cta-primary cta-gradient-180 cta-block">
+  <div class="row">
+    <div class="col-md-2 col-xs-3"><img alt="Website Redesign Success e-book" data-picture-mapping="medium-0" src="/sites/default/files/website_redesign_success_book_mockup.png" style="max-height: 150px;" /></div>
+
+    <div class="col-md-10 col-xs-9 text-left">
+      <h3 class="cta-title m-b-1">Build a Smarter Website</h3>
+
+      <p>Learn the 8 essential strategies forward thinking managers are using to become online market leaders. Step-by-step process to transform your website into a results generating machine.</p>
+      <button class="btn cta-accent btn-group center-block">
+        <span class="btn-group-body">Download Free eBook</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
+  </div>
+</div>',
         ),
       ),
     ),
@@ -1793,8 +1818,20 @@ LNAME|last_name
       'und' => array(
         0 => array(
           'format' => 'full_html',
-          'value' => '<p><img alt="Essential Guide to Internet Marketing" class="media-image attr__typeof__foaf:Image img__fid__1160 img__view_mode__default attr__format__default attr__field_file_image_alt_text[und][0][value]__Essential Guide to Internet Marketing attr__field_file_image_title_text[und][0][value]__" src="/sites/default/files/internet_marketing_essentials_cta_sidebar.png" typeof="foaf:Image"></p>
-',
+          'value' => '<div class="cta cta-primary cta-gradient-180 cta-block bg-gradient">
+  <div class="cta-heading">
+    <h3 class="cta-title text-left">Market Smarter Online</h3>
+  </div>
+
+  <div class="cta-body row">
+    <div class="col-lg-5 col-sm-12 col-xs-5 p-x-_5"><img alt="Essential Guide to Internet Marketing" data-picture-mapping="medium-0" src="/sites/default/files/internet_marketing_essentials_book_mockup.png" style="max-height:180px;" /></div>
+
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>Tired of gimmicks and hype? Learn how to do web marketing that builds real, lasting results.</p>
+      <button class="btn cta-accent btn-block">Free eBook</button>
+    </div>
+  </div>
+</div>',
         ),
       ),
     ),
@@ -1867,8 +1904,18 @@ LNAME|last_name
       'und' => array(
         0 => array(
           'format' => 'full_html',
-          'value' => '<p><img alt="Essential Guide to Internet Marketing" class="media-image attr__typeof__foaf:Image img__fid__1164 img__view_mode__default attr__format__default attr__field_file_image_alt_text[und][0][value]__Essential Guide to Internet Marketing attr__field_file_image_title_text[und][0][value]__" src="/sites/default/files/internet_marketing_essentials_cta_footer.png" typeof="foaf:Image"></p>
-',
+          'value' => '<div class="cta cta-primary cta-gradient-180 cta-block">
+  <div class="row">
+    <div class="col-md-2 col-xs-3"><img alt="Essential Guide to Internet Marketing" data-picture-mapping="medium-0" src="/sites/default/files/internet_marketing_essentials_book_mockup.png" style="max-height: 150px;" /></div>
+
+    <div class="col-md-10 col-xs-9 text-left">
+      <h3 class="cta-title m-b-1">Market Smarter Online</h3>
+
+      <p>Tired of gimmicks and hype? Learn how to do web marketing that builds real, lasting results.</p>
+      <button class="btn cta-accent btn-group center-block"><span class="btn-group-body">Download Free eBook</span> <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span></button>
+    </div>
+  </div>
+</div>',
         ),
       ),
     ),
@@ -1890,87 +1937,6 @@ LNAME|last_name
     'uid' => 1,
     'url_alias' => array(),
     'uuid' => '7ce22d21-6259-43df-8a89-19a95de80898',
-    'view_mode' => 'default',
-  );
-
-  $entities['add'][] = (object) array(
-    '__metadata' => array(
-      'type' => 'bean',
-      'uri' => 'bean/b887ce8b-bc10-4d4e-8505-cf072ad80cb4',
-      'cause' => FALSE,
-    ),
-    'cta' => array(
-      'list_visibility' => 1,
-      'selectors' => array(
-        0 => 'cta_sidebar',
-      ),
-      'categories' => array(),
-      'data' => array(
-        'ga_event' => array(
-          'track' => 1,
-          'track_display' => 1,
-          'track_click' => 1,
-          'track_conversion' => 1,
-          'click' => array(
-            'value' => 0,
-            'action' => '',
-            'selector' => '',
-            'event' => '',
-          ),
-          'conversion' => array(
-            'value' => 0,
-            'action' => '',
-          ),
-          'display' => array(
-            'action' => '',
-          ),
-        ),
-      ),
-      'custom_path' => '',
-      'custom_selector' => '',
-    ),
-    'data' => array(
-      'view_mode' => 'default',
-    ),
-    'default_revision' => 1,
-    'delta' => 'website-redesign-success-ebook-2',
-    'description' => NULL,
-    'entity_type' => 'bean',
-    'field_body' => array(
-      'und' => array(
-        0 => array(
-          'format' => 'full_html',
-          'value' => '<div class="cta cta-rectangle">
-<h4 style="font-size: 1.2em;"><strong>Build a Smarter Website</strong></h4>
-
-<div class="col-md-5 nopadding"><img alt="" src="/sites/default/files/website_redesign_success_book_mockup.png" /></div>
-
-<div class="col-md-7">
-<p class="small">Eight essential steps to transform your site into an inbound marketing machine.</p>
-<button class="btn btn-cta">Get it now! <i class="icon glyphicon glyphicon-download"></i></button></div>
-</div>
-',
-        ),
-      ),
-    ),
-    'field_landingpage' => array(
-      'und' => array(
-        0 => array(
-          'target_id' => '0185c1e1-fcd2-4f8b-8452-e906b8d7f5a2',
-        ),
-      ),
-    ),
-    'field_redirect_url' => array(),
-    'label' => 'Website Redesign Success ebook 2 (sidebar)',
-    'log' => '',
-    'revision' => 1,
-    'revisions' => array(),
-    'slug' => 'webform_website_redesign_success2',
-    'title' => '',
-    'type' => 'cta',
-    'uid' => 1,
-    'url_alias' => array(),
-    'uuid' => 'b887ce8b-bc10-4d4e-8505-cf072ad80cb4',
     'view_mode' => 'default',
   );
 

@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise landing pages feature.
+ */
+
+include_once 'enterprise_conversion_post.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_conversion_post_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_conversion');
+}

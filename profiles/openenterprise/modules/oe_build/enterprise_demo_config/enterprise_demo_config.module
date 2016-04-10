@@ -20,6 +20,11 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
       'field_page_attribute_col' => 1,
       'field_visitor_attribute_col' => 1,
     ),
+    'field_group' => array(
+      'group_rel_label' => 1,
+      'group_rel_container' => 1,
+      'group_rel_global' => 1,
+    ),
   );
 
   $entity_info['node:enterprise_landingpage'] = array(
@@ -63,8 +68,6 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
   );
 
   $settings['enterprise_demo']['entity_info'] = $entity_info;
-
-  $weight = 0;
 
   $blocks = array();
   $blocks['search:form'] = array(
@@ -143,10 +146,63 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     ),
   );
 
-  $settings['enterprise_demo']['blocks'] = $blocks;
+  $settings['enterprise_demo']['blocks'] = &$blocks;
 
 
+  $variables = array();
+
+  $settings['enterprise_demo']['variables'] = &$variables;
+
+  $variables['theme_bella_settings'] = variable_get('theme_bella_settings');
+  $variables['theme_bella_settings'] = array(
+    'default_logo' => 0,
+    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo.png',
+    'navbar_header_display' => 'none',
+    'navbar_class' => 'navbar-gray-lighter',
+    'less' => array(
+      'bella' => array(
+        '@brand-primary' => '#288CD5',
+        //'@brand-primary' => '#1A68AE',
+        //'@brand-primary' => '#2C90D9',
+        '@brand-secondary' => '#83B941',
+        '@brand-accent' => '#FFA126',
+        //'@brand-primary' => '#168FAE',
+        //'@brand-secondary' => '#A1C851',
+        //'@brand-accent' => '#F7941E',
+      )
+    )
+  );
+
+  $blocks['bean:brand_bar'] = array(
+    'regions' => array(
+      'brand_bar',
+    ),
+  );
 
   return $settings;
+}
+
+/**
+ * Implements hook_uuid_entities_features_import_entity_alter();
+ * @param $entity
+ * @param $entity_type
+ */
+function enterprise_demo_config_uuid_entities_features_import_entity_alter(&$entity, $entity_type) {
+
+  // replace webform block placeholder in brand_bar bean
+  if ($entity->entity_type == 'bean') {
+    // try to load contact us form to get id
+    if ($entity->delta == 'brand_bar' && function_exists('entity_get_id_by_uuid')) {
+      $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
+      $ids = entity_get_id_by_uuid('node', array($uuid));
+      if (!empty($ids)) {
+        $id = $ids[$uuid];
+        $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
+      }
+
+    }
+    watchdog('TEST edc', print_r($entity, 1));
+
+  }
 }
 

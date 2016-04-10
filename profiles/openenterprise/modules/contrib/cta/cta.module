@@ -777,8 +777,37 @@ function cta_block_view($delta = '') {
     //$block['content']['main']['#theme'] = 'markup';
     //unset($block['content']['#markup']);
   }
+  dsm($selection);
+  dsm($block);
 
-  $block = cta_block_process_ga_events($block, $selection);
+  // check if CTA bean is rendered inside a view
+  if ($selection['block_module'] == 'views' && !empty($block['content']['#markup'])) {
+    $matches = array();
+    $pattern = '/<div id="cta-bean-(.+?)">/s';
+    preg_match($pattern, $block['content']['#markup'], $matches);
+    if (!empty($matches[1])) {
+      $delta = $matches[1];
+      $viewed = cta_beans_viewed();
+      if (!empty($viewed[$delta]) && !empty($viewed[$delta]->cta)) {
+        $bs = $selection;
+        $bs['bean'] = $viewed[$delta];
+        unset($bs['block']);
+        $bs['block_module'] = '';
+        $bs['block_delta'] = '';
+        $bs['bean_delta'] = $delta;
+        $bs['meta'] = $viewed[$delta]->cta;
+        $block['set'] = 'bean';
+        $block = cta_block_process_ga_events($block, $bs);
+        dsm($bs);
+      }
+      else {
+        $block = cta_block_process_ga_events($block, $selection);
+      }
+    }
+  }
+  else {
+    $block = cta_block_process_ga_events($block, $selection);
+  }
   
   // add contextual link to select CTA
   $contextual_links = array(
@@ -808,6 +837,7 @@ function cta_block_view($delta = '') {
     );
     */
   }
+
 
   // allow other modules to alter data
   drupal_alter('cta_block_view', $block, $selector, $selection);
@@ -1490,6 +1520,17 @@ function cta_entity_delete($entity, $type) {
   } 
 }
 
+function cta_beans_viewed($action = 'get', $delta = '', $entity = FALSE) {
+  $beans = &drupal_static(__FUNCTION__, array());
+  if ($action == 'set') {
+    $beans[$delta] = $entity;
+  }
+  if (!$delta) {
+    return $beans;
+  }
+  return isset($beans[$delta]) ? $beans[$delta] : FALSE;
+}
+
 /**
  * implements hook_entity_query_alter
  * Done to remove CTA beans from block admin page
@@ -1528,6 +1569,9 @@ function cta_bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
       }
       $body = l($bean->content['field_body'][0]['#markup'], $link['url'], $link_options);
     }
+    $body = '<div id="cta-bean-' . $bean->delta . '">' . $body . '</div>';
+    // cache bean view data
+    cta_beans_viewed('set', $bean->delta, $bean);
 
     // if previewing on the the block/[delta] url,
     // check if there is any preview prefix or suffix markup set to be added

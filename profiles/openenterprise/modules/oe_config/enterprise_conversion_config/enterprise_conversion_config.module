@@ -63,6 +63,7 @@ function enterprise_conversion_config_enterprise_apps_config_settings() {
     ),
     'views:enterprise_landingpage_blocks-rel_cta_footer' => array(
       'title' => '<none>',
+      'class' => 'm-y-1',
       'cta' => array(
         'list_visibility' => 1,
         'selectors' => array(
@@ -313,7 +314,7 @@ Example 2:
   <h3 class="cta-heading text-left">Call to Action Heading</h3>
   <div class="row">
     <div class="col-lg-5 col-sm-12 col-xs-5">
-      <img src="http://placehold.it/120x150" />
+      <img src="http://placehold.it/120x150"  style="max-height: 180px;"/>
     </div>
     <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
       <p>...</p>
@@ -354,7 +355,7 @@ Example 2:
         </div>
         <div class="cta-body row">
           <div class="col-lg-5 col-sm-12 col-xs-5">
-            <img src="http://placehold.it/120x150" />
+            <img src="http://placehold.it/120x150" style="max-height: 180px;" />
           </div>
           <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
             <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>

@@ -93,44 +93,15 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
-  enterprise_apps_config_app('enterprise_conversion');
+  $var = variable_get('theme_enterprise_bootstrap_settings');
+  dsm($var);
 
-  return '';
-  $info = entity_get_info('node');
-  dsm($info);
-  return '';
-  $test = field_view_mode_settings($entity_type, $bundle);
-
-  $a = variable_get('enterprise_rel_enterprise_blog', array());
-
-  dsm($a);
-
-  $a = variable_get('enterprise_rel_entity_settings_node__enterprise_blog', array());
-
-  dsm($a);
+  $var = variable_get('theme_bella_settings');
+  dsm($var);
 
 
   return '';
 
-  $modules = module_list();
-  $module_info_apps = array();
-  $disable = array();
-  foreach ($modules as $module) {
-    $file = drupal_get_path('module', $module) . "/$module.info";
-    $info = drupal_parse_info_file($file);
-    if (!empty($info['apps'])) {
-      $module_info_apps[$module] = $info['apps'];
-      if (!empty($info['apps']['install_disable'])) {
-        $disable[] = $module;
-      }
-    }
-  }
-  dsm($disable);
-  if (!empty($disable)) {
-    module_disable($disable);
-  }
-
-  return '';
 }
 
 function enterprise_apps_config_app_page($app) {
@@ -1059,7 +1030,7 @@ function enterprise_apps_config_variables($config_settings, $config_info) {
   foreach ($config_settings['variables'] AS $name => $value) {
     // check if value exists, and if array merge values from setting
     $value0 = variable_get($name, null);
-    if (isset($value0) && is_scalar($value0)) {
+    if (isset($value0) && !is_scalar($value0)) {
       $value = drupal_array_merge_deep($value0, $value);
     }
     variable_set($name, $value);
@@ -1125,7 +1096,11 @@ function enterprise_apps_config_entity_info($config_settings, $config_info) {
       if ($component == 'field_instance') {
         enterprise_apps_config_entity_info_field_instance($entity_type, $bundle, $comp_settings);
       }
+      else if ($component == 'field_group') {
+        enterprise_apps_config_entity_info_field_group($entity_type, $bundle, $comp_settings);
+      }
     }
+
   }
 }
 
@@ -1174,6 +1149,64 @@ function enterprise_apps_config_entity_info_field_instance($entity_type, $bundle
     }
     else if ($action == 'update') {
       field_update_instance($instance1);
+    }
+    else if ($action == 'delete') {
+      field_delete_instance($instance1);
+    }
+  }
+}
+
+function enterprise_apps_config_entity_info_field_group($entity_type, $bundle, $comp_settings, $source_entity_type = NULL, $source_bundle = NULL) {
+  $group_mode = 'form';
+
+  // fetch groups from destination content type
+  $groups1 = field_group_info_groups($entity_type, $bundle, $group_mode);
+
+  // fetch groups from source content types
+  $groups0 = field_group_info_groups($entity_type, 'enterprise_etmaster', $group_mode);
+  $groups0 = array_merge($groups0, field_group_info_groups($entity_type, 'enterprise_etsource', $group_mode));
+
+  foreach ($comp_settings as $group_name => $settings) {
+    $instance0 = !empty($groups0[$group_name]) ? $groups0[$group_name] : array();
+    $instance1 = !empty($groups1[$group_name]) ? $groups1[$group_name] : array();
+    $action = 'update';
+    if (!empty($instance1) && !$settings) {
+      $action = 'delete';
+    }
+    else if (!empty($settings)) {
+      if (empty($instance1) && !empty($instance0)) {
+        $instance1 = $instance0;
+        $instance1->identifier = $group_name . '|' . $entity_type . '|' . $bundle . '|' . $group_mode;
+        $instance1->bundle = $bundle;
+        $instance1->entity_type = $entity_type;
+        if (isset($instance1->id)) {
+          unset($instance1->id);
+        }
+        if (isset($instance1->export_type)) {
+          unset($instance1->export_type);
+        }
+        $action = 'create';
+      }
+    }
+    else {
+      continue;
+    }
+
+    // ignore field group if instance not available
+    if (empty($instance1)) {
+      continue;
+    }
+
+    if (is_array($settings)) {
+      $instance1 = drupal_array_merge_deep($settings, $instance1);
+    }
+
+    if ($action == 'create') {
+      ctools_export_crud_save('field_group', $instance1);
+      ctools_export_crud_enable('field_group', $instance1->identifier);
+    }
+    else if ($action == 'update') {
+      field_group_group_save($instance1);
     }
     else if ($action == 'delete') {
       field_delete_instance($instance1);

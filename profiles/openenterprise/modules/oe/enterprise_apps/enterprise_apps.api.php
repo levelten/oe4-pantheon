@@ -63,6 +63,12 @@ function hook_enterprise_apps_config_settings() {
         )
       ),
     ),
+    // copy field groups from etmaster or etsource
+    'field_group' => array(
+      'group_rel_label' => 1,
+      'group_rel_container' => 1,
+      'group_rel_subject' => 1,
+    ),
   );
 
   $settings[$app_name]['entity_info'] = $entity_info;

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Intelligence feature.
+ */
+
+//include_once 'enterprise_intel_post.features.inc';

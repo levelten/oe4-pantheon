@@ -28,6 +28,19 @@
   &.cta-outline-none, .cta-outline-none  {
     border-style: none;
   }
+
+  &.cta-gradient {
+    #gradient.vertical(lighten(@background, 15%);darken(@background, 15%));
+  }
+  &.cta-gradient-90 {
+    #gradient.horizontal(lighten(@background, 15%);darken(@background, 15%));
+  }
+  &.cta-gradient-180 {
+    #gradient.vertical(darken(@background, 15%);lighten(@background, 15%));
+  }
+  &.cta-gradient-270 {
+    #gradient.horizontal(darken(@background, 15%);lighten(@background, 15%));
+  }
 }
 
 /* mixin to deal with all cta/btn elements changing on hover state, including when wrapped in a 'a' tag. */
@@ -44,6 +57,18 @@
     border-left-color: darken(@border, 12%);
   }
   text-decoration: none;
+  &.cta-gradient {
+    #gradient.vertical(lighten(@background, 5%);darken(@background, 25%));
+  }
+  &.cta-gradient-90 {
+    #gradient.horizontal(lighten(@background, 5%);darken(@background, 25%));
+  }
+  &.cta-gradient-180 {
+    #gradient.vertical(darken(@background, 25%);lighten(@background, 5%));
+  }
+  &.cta-gradient-270 {
+    #gradient.horizontal(darken(@background, 25%);lighten(@background, 5%));
+  }
 }
 
 /* cta styling */
