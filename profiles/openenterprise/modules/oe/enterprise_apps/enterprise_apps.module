@@ -486,6 +486,7 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
       $types = array();
       $views = array();
       $block_row = array();
+      $css_class = '';
 
       // add any existing block settings
       if (isset($block0->visibility)) {
@@ -496,6 +497,8 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
         $views = drupal_map_assoc(enterprise_apps_block_views($settings['module'], $settings['delta']));
         $blk = (object) $settings;
         $block_row = (array)block_row($blk);
+        $css_class = $block0->css_class;
+        //dsm($block0);
       }
   //dsm($types);
 
@@ -513,6 +516,9 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
       }
       if (isset($settings['block_row'])) {
         $block_row += $settings['block_row'];
+      }
+      if (isset($settings['css_class'])) {
+        $css_class = $settings['css_class'];
       }
 
       // process any preset settings
@@ -574,6 +580,7 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
         'pages' => implode(PHP_EOL, $pages),
         'custom' => $custom,
         'weight' => $weight,
+        'css_class' => $css_class,
       );
 
       if (module_exists('css_class')) {

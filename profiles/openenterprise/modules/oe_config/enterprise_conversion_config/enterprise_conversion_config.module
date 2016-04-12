@@ -48,7 +48,7 @@ function enterprise_conversion_config_enterprise_apps_config_settings() {
         'visibility' => 0,
       ),
       'weight' => 10,
-      'class' => 'm-y-1',
+      'css_class' => 'm-y-1',
     ),
     'views:enterprise_landingpage_blocks-rel_cta_sidebar' => array(
       'title' => '<none>',

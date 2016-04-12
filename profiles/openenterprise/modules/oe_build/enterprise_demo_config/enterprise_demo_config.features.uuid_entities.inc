@@ -48,7 +48,7 @@ function enterprise_demo_config_uuid_default_entities() {
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="contact-modal-label">Request a Consultation</h4>
       </div>
-      <div class="modal-body">
+      <div class="modal-body block-title-hide">
         (ADD WEBFORM BLOCK HERE)
       </div>
     </div>

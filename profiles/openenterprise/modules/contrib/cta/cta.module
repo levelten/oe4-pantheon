@@ -777,8 +777,6 @@ function cta_block_view($delta = '') {
     //$block['content']['main']['#theme'] = 'markup';
     //unset($block['content']['#markup']);
   }
-  dsm($selection);
-  dsm($block);
 
   // check if CTA bean is rendered inside a view
   if ($selection['block_module'] == 'views' && !empty($block['content']['#markup'])) {
@@ -798,7 +796,6 @@ function cta_block_view($delta = '') {
         $bs['meta'] = $viewed[$delta]->cta;
         $block['set'] = 'bean';
         $block = cta_block_process_ga_events($block, $bs);
-        dsm($bs);
       }
       else {
         $block = cta_block_process_ga_events($block, $selection);

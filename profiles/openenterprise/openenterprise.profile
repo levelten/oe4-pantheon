@@ -249,3 +249,11 @@ function openenterprise_api_property_load($options, &$message = '', &$status = 2
     return FALSE;
   }
 }
+
+function openenterprise_get_version() {
+  $version = 'pro';
+  if (isset($_GET['version']) && $_GET['version'] == 'free') {
+    $version = 'free';
+  }
+  return $version;
+}

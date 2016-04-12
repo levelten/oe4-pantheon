@@ -72,6 +72,26 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#collapsed' => FALSE,
   );
 
+  /*
+  $msg = "<br /><hr />" . '<h4>' . st('Version') . '</h4>';
+  $msg .= ' ' . st('');
+  $form['install']['version_msg'] = array(
+    '#type' => 'markup',
+    '#markup' => $msg,
+  );
+
+  $options = array(
+    '' => t('Auto detect'),
+    'free' => t('Free'),
+    'pro' => t('Pro'),
+  );
+  $form['install']['version'] = array(
+    '#type' => 'select',
+    '#title' => t('Version'),
+    '#options' => $options,
+  );
+  */
+
   $msg = "<br /><hr />" . '<h4>' . st('Essential Apps') . '</h4>';
   $msg .= ' ' . st('The selections below provide automated initial setup for popular combinations of Apps.');
   $form['install']['demo_mode_msg'] = array(
@@ -335,6 +355,8 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
     $profile_settings['apps_debug'] = array(
       'form_state_values' => $values,
     );
+
+    $profile_settings['version'] = !empty($values['version']) ? $values['version'] : '';
 
     $profile_settings['demo']['mode'] = $values['demo_mode'];
     if ($profile_settings['demo']['mode'] != 'min') {

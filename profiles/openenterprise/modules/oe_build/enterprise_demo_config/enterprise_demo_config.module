@@ -7,6 +7,8 @@
 include_once 'enterprise_demo_config.features.inc';
 
 function enterprise_demo_config_enterprise_apps_config_settings() {
+  $version = openenterprise_get_version();
+
   $settings = array(
     'enterprise_demo' => array(),
   );
@@ -146,6 +148,17 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     ),
   );
 
+
+  // remove block title on
+  if (function_exists('entity_get_id_by_uuid')) {
+    $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
+    $ids = entity_get_id_by_uuid('node', array($uuid));
+    if (!empty($ids)) {
+      $id = $ids[$uuid];
+      $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
+    }
+  }
+
   $settings['enterprise_demo']['blocks'] = &$blocks;
 
 
@@ -153,25 +166,35 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
 
   $settings['enterprise_demo']['variables'] = &$variables;
 
-  $variables['theme_bella_settings'] = variable_get('theme_bella_settings');
-  $variables['theme_bella_settings'] = array(
+  $colors = array(
+    '@brand-primary' =>   '#288CD5',
+    '@brand-secondary' => '#83B941',
+    '@brand-tertiary' =>  '#666666',
+    '@brand-accent' =>    '#FFA126',
+    '@brand-accent-2' =>  '#FFC826',
+    '@brand-accent-3' =>  '#FF6126',
+    //'@brand-primary' => '#1A68AE',
+    //'@brand-primary' => '#2C90D9',
+    //'@brand-primary' => '#168FAE',
+    //'@brand-secondary' => '#A1C851',
+    //'@brand-accent' => '#F7941E',
+  );
+
+  $theme_settings = array(
     'default_logo' => 0,
     'logo_path' => 'profiles/openenterprise/images/openenterprise_logo.png',
     'navbar_header_display' => 'none',
     'navbar_class' => 'navbar-gray-lighter',
     'less' => array(
-      'bella' => array(
-        '@brand-primary' => '#288CD5',
-        //'@brand-primary' => '#1A68AE',
-        //'@brand-primary' => '#2C90D9',
-        '@brand-secondary' => '#83B941',
-        '@brand-accent' => '#FFA126',
-        //'@brand-primary' => '#168FAE',
-        //'@brand-secondary' => '#A1C851',
-        //'@brand-accent' => '#F7941E',
-      )
+      'enterprise_bootstrap' => $colors
     )
   );
+  $variables['theme_enterprise_bootstrap_settings'] = $theme_settings;
+
+  if ($version == 'pro') {
+    $theme_settings['less']['bella'] = $colors;
+    $variables['theme_bella_settings'] = $theme_settings;
+  }
 
   $blocks['bean:brand_bar'] = array(
     'regions' => array(
@@ -199,10 +222,7 @@ function enterprise_demo_config_uuid_entities_features_import_entity_alter(&$ent
         $id = $ids[$uuid];
         $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
       }
-
     }
-    watchdog('TEST edc', print_r($entity, 1));
-
   }
 }
 
