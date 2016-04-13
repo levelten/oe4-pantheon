@@ -1,0 +1,4 @@
+name = Enterprise Guide - EXPERIMENTAL
+description = Guided tour of Open Enterprise
+core = 7.x
+package = Open Enterprise

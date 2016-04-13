@@ -23,7 +23,7 @@ function enterprise_global_config_field_group_info() {
     'label' => 'Relevance',
     'weight' => '48',
     'children' => array(
-      0 => 'group_rel_global',
+      0 => 'group_rel_subject',
     ),
     'format_type' => 'htabs',
     'format_settings' => array(
@@ -38,14 +38,14 @@ function enterprise_global_config_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
-  $field_group->identifier = 'group_rel_global|node|enterprise_etmaster|form';
-  $field_group->group_name = 'group_rel_global';
+  $field_group->identifier = 'group_rel_subject|node|enterprise_etmaster|form';
+  $field_group->group_name = 'group_rel_subject';
   $field_group->entity_type = 'node';
   $field_group->bundle = 'enterprise_etmaster';
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_rel_container';
   $field_group->data = array(
-    'label' => 'Global',
+    'label' => 'Subject',
     'weight' => '48',
     'children' => array(
       0 => 'field_categories',
@@ -56,13 +56,13 @@ function enterprise_global_config_field_group_info() {
       'formatter' => 'closed',
       'instance_settings' => array(
         'description' => '',
-        'classes' => 'group-rel-global field-group-htab',
+        'classes' => 'group-rel-subject field-group-htab',
         'required_fields' => 1,
         'id' => '',
       ),
     ),
   );
-  $export['group_rel_global|node|enterprise_etmaster|form'] = $field_group;
+  $export['group_rel_subject|node|enterprise_etmaster|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */

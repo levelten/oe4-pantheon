@@ -2580,6 +2580,94 @@ Open Enterprise integrates with the most popular CRM and Automated Marketing sys
     'uuid' => '414da7e6-ecd5-4f51-abb6-77a2b56c6a86',
   );
 
+$entities['enterprise_demo_content'][] = (object) array(
+    '__metadata' => array(
+      'type' => 'node',
+      'uri' => 'node/38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf',
+      'cause' => FALSE,
+    ),
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'format' => 'full_html',
+          'summary' => '',
+          'value' => '<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Clients. <span class="text-muted">Brands we\'ve helped.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Testimonails. <span class="text-muted">What our clients are saying.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+
+<div class="row featurette">
+<div class="image col-md-5" data-align="left"><img alt="" class="featurette-image img-responsive" src="http://placehold.it/500x500" /></div>
+
+<div class="message col-md-7">
+<h2 class="featurette-heading">Case Studies. <span class="text-muted">Storied Success.</span></h2>
+
+<p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+',
+        ),
+      ),
+    ),
+    'cid' => 0,
+    'comment' => 1,
+    'comment_count' => 0,
+    'cta' => array(
+      'selections' => array(),
+    ),
+    'ds_switch' => '',
+    'entity_type' => 'node',
+    'field_categories' => array(),
+    'field_cta_category' => array(),
+    'field_intel_event_col' => array(),
+    'field_keywords' => array(),
+    'field_page_attribute_col' => array(),
+    'field_tags' => array(),
+    'field_visitor_attribute_col' => array(),
+    'language' => 'und',
+    'last_comment_name' => NULL,
+    'last_comment_uid' => 1,
+    'log' => '',
+    'promote' => 0,
+    'rel_view_hide' => 0,
+    'status' => 1,
+    'sticky' => 0,
+    'title' => 'Results',
+    'tnid' => 0,
+    'translate' => 0,
+    'type' => 'page',
+    'uid' => 1,
+    'universal' => 0,
+    'url_alias' => array(
+      0 => array(
+        'alias' => 'results',
+        'language' => 'und',
+      ),
+    ),
+    'uuid' => '38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf',
+  );
+
   $entities['enterprise_demo_content'][] = (object) array(
     '__metadata' => array(
       'type' => 'bean',

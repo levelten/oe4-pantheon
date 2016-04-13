@@ -123,6 +123,16 @@ function enterprise_demo_enterprise_apps_install_demo_info() {
     $required_apps[] = 'enterprise_conversion';
   }
 
+  if (enterprise_apps_module_files_exist('enterprise_work_config')) {
+    $required_apps[] = 'enterprise_work';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_client_config')) {
+    $required_apps[] = 'enterprise_client';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_testimonial_config')) {
+    $required_apps[] = 'enterprise_testimonial';
+  }
+
   /*
    * Insert Apps for vertical demos here. Using
    */

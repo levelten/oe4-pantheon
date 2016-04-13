@@ -213,6 +213,12 @@ function hook_enterprise_apps_config_settings() {
         'enterprise_blog',
       ),
     ),
+    // visibility by views (view_name:display_id)
+    'views' => array(
+      'views' => array(
+        'enterprise_blog:page',
+        'enterprise_blog:archives',
+      ),
     // add Bootstrap margin top and bottom classes to block
     'class' => 'm-y-1',
     // block row settings

@@ -3,7 +3,7 @@
  * @file
  */
 
-include_once ('enterprise_rel.ds_api.inc');
+//include_once ('enterprise_rel.ds_api.inc');
 //include_once 'enterprise_rel.tokens.inc';
 
 function enterprise_rel_ajax_callback($js, $terms = '', $content = '') {

@@ -10,23 +10,54 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
   $version = openenterprise_get_version();
 
   $settings = array(
-    'enterprise_demo' => array(),
+    'enterprise_demo' => array(
+      'entity_info' => array(),
+      'blocks' => array(),
+      'variables' => array(),
+    ),
+  );
+  $entity_info = &$settings['enterprise_demo']['entity_info'];
+  $blocks = &$settings['enterprise_demo']['blocks'];
+  $variables = &$settings['enterprise_demo']['variables'];
+
+  $base_field_instance = array(
+    'field_cta_category' => 1,
+    'field_intel_event_col' => 1,
+    'field_keywords' => 1,
+    'field_page_attribute_col' => 1,
+    'field_visitor_attribute_col' => 1,
   );
 
-  $entity_info = array();
+  $base_field_group = array(
+    'group_rel_label' => 1,
+    'group_rel_container' => 1,
+    'group_rel_subject' => 1,
+  );
+
+  $work_field_instance = array();
+  $work_field_group = array();
+  if (module_exists('enterprise_work_config')) {
+    $work_field_instance = array(
+      'field_service_types' => 1,
+      'field_service_tags' => 1,
+      'field_challenge_types' => 1,
+      'field_service_areas' => 1,
+      'field_organization_types' => 1,
+      'field_organization_size' => 1,
+      'field_industry_types' => 1,
+      'field_personas' => 1,
+    );
+    $work_field_group = array(
+      'group_rel_service' => 1,
+      'group_rel_market' => 1,
+      'group_rel_persona' => 1,
+    );
+  }
+
+  //$entity_info = array();
   $entity_info['node:enterprise_blog'] = array(
-    'field_instance' => array(
-      'field_cta_category' => 1,
-      'field_intel_event_col' => 1,
-      'field_keywords' => 1,
-      'field_page_attribute_col' => 1,
-      'field_visitor_attribute_col' => 1,
-    ),
-    'field_group' => array(
-      'group_rel_label' => 1,
-      'group_rel_container' => 1,
-      'group_rel_global' => 1,
-    ),
+    'field_instance' => $base_field_instance + $work_field_instance,
+    'field_group' => $base_field_group + $work_field_group,
   );
 
   $entity_info['node:enterprise_landingpage'] = array(
@@ -69,9 +100,36 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     ),
   );
 
-  $settings['enterprise_demo']['entity_info'] = $entity_info;
+  if (module_exists('enterprise_work_config')) {
+    $entity_info['node:enterprise_work'] = array(
+      'field_instance' => $base_field_instance,
+      'field_group' => $base_field_group,
+    );
+    $blocks['enterprise_rel:views_facet_filter'] = array(
+      'title' => t('Filter by'),
+      'regions' => array(
+        'sidebar_second',
+      ),
+      'views' => array(
+        'views' => array(
+          'enterprise_work:page',
+        ),
+      ),
+      'weight' => 1,
+    );
+  }
+  /*
+  if (enterprise_apps_module_files_exist('enterprise_client_config')) {
+    //$required_apps[] = 'enterprise_client';
+  }
+  if (enterprise_apps_module_files_exist('enterprise_testimonial_config')) {
+    //$required_apps[] = 'enterprise_testimonial';
+  }
+  */
 
-  $blocks = array();
+  //$settings['enterprise_demo']['entity_info'] = $entity_info;
+
+  //$blocks = array();
   $blocks['search:form'] = array(
     'regions' => array(
       'footer',
@@ -159,12 +217,7 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
     }
   }
 
-  $settings['enterprise_demo']['blocks'] = &$blocks;
-
-
-  $variables = array();
-
-  $settings['enterprise_demo']['variables'] = &$variables;
+  //$settings['enterprise_demo']['blocks'] = &$blocks;
 
   $colors = array(
     '@brand-primary' =>   '#288CD5',

@@ -93,6 +93,42 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
+  $work_field_instance = array();
+  $work_field_group = array();
+  if (enterprise_apps_module_files_exist('enterprise_work_config')) {
+    $work_field_instance = array(
+      'field_service_types' => 1,
+      'field_service_tags' => 1,
+      'field_challenge_types' => 1,
+      'field_service_areas' => 1,
+      'field_organization_types' => 1,
+      'field_organization_size' => 1,
+      'field_industry_types' => 1,
+      'field_personas' => 1,
+    );
+    $work_field_group = array(
+      'group_rel_market' => 1,
+      'group_rel_persona' => 1,
+    );
+  }
+
+  $entity_info = array();
+  $entity_info['node:enterprise_blog'] = array(
+    'field_instance' => array(
+        'field_cta_category' => 1,
+        'field_intel_event_col' => 1,
+        'field_keywords' => 1,
+        'field_page_attribute_col' => 1,
+        'field_visitor_attribute_col' => 1,
+      ) + $work_field_instance,
+    'field_group' => array(
+        'group_rel_label' => 1,
+        'group_rel_container' => 1,
+        'group_rel_subject' => 1,
+      ) + $work_field_group,
+  );
+  dsm($entity_info['node:enterprise_blog']);
+
   $var = variable_get('theme_enterprise_bootstrap_settings');
   dsm($var);
 

@@ -51,6 +51,27 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
     'pl_ukey' => 'node:43a64850-4c5f-4c33-8625-f058b8165e51',
   );
 
+  $menu['node:38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf'] = array(
+    'link_title' => t('Results'),
+    'weight' => -6,
+    'expanded' => 1,
+  );
+
+  $i = 0;
+  $menu['app:enterprise_work'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf',
+  );
+
+  $menu['app:enterprise_client'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf',
+  );
+
+  $menu['app:enterprise_testimonial'] = array(
+    'weight' => $i++,
+    'pl_ukey' => 'node:38b9cda1-93d9-4f76-90bc-1c2f0d86d8bf',
+  );
 
 
   $menu['node:414da7e6-ecd5-4f51-abb6-77a2b56c6a86'] = array(
@@ -82,7 +103,7 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
 
   $menu['node:a2e44c8a-1f20-49cd-ada0-bd9bb2ce81c7'] = array(
     'link_title' => t('About us'),
-    'weight' => 6,
+    'weight' => 7,
     'expanded' => 1,
   );
 
@@ -119,7 +140,7 @@ function enterprise_demo_content_enterprise_apps_config_settings() {
 
   $menu['node:cf3a4aa8-a24a-4bac-af77-76b77020fa1d'] = array(
     'link_title' => t('Contact'),
-    'weight' => 7,
+    'weight' => 8,
   );
 
 
