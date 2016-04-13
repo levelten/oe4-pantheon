@@ -16,6 +16,65 @@ function enterprise_conversion_menu() {
     'access arguments' => array('admin intel'),
     'type' => MENU_CALLBACK,
   );
+
+
+
+  $items['node/%node/convwf'] = array(
+    'title' => 'Conversion WF',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+
+  /*
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  */
+
+  $items['node/%node/convwf/thankyou'] = array(
+    'title' => 'Thank you pages',
+    'page callback' => 'enterprise_conversion_premiumoffer_thankyou_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['node/%node/convwf/cta'] = array(
+    'title' => 'CTAs',
+    'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+
   $items['node/%node/cta'] = array(
     'title' => 'CTAs',
     'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
@@ -66,6 +125,17 @@ function enterprise_conversion_menu_alter(&$items) {
   //$items['node/%node/blocks']['weight'] = 1;
 }
 
+function enterprise_conversion_node_convwf_list_access($node) {
+  if (!node_access('create', $node)) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['premiumoffer'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
 /**
  * limite CTAs node tab to landingpages
  * @param $node
@@ -98,7 +168,7 @@ function enterprise_conversion_node_submission_list_access($node) {
     return FALSE;
   }
   $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
-  if ((!empty($et_settings['landingpage']) || !empty($et_settings['thankyou'])) && user_access('view intel visitor data')) {
+  if ((!empty($et_settings['landingpage']) || !empty($et_settings['thankyou']) || !empty($et_settings['premiumoffer'])) && user_access('view intel visitor data')) {
     return TRUE;
   }
   return FALSE;
@@ -112,6 +182,8 @@ function enterprise_conversion_admin_paths() {
     'node/*/cta' => 1,
     'node/*/landingpage' => 1,
     'node/*/submissions' => 1,
+    'node/*/convwf' => 1,
+    'node/*/convwf/*' => 1,
   );
   return $paths;
 }
@@ -248,13 +320,20 @@ function enterprise_conversion_tokens_alter(array &$replacements, array $context
   }
 }
 
-function enterprise_conversion_ctas_load_by_node($nid, $filters = array()) {
+function enterprise_conversion_ctas_load_by_node($node, $filters = array()) {
   $filters['types'] = (isset($filters['types'])) ? $filters['types'] : array('cta');
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'bean');
 
-  $query->fieldCondition('field_landingpage', 'target_id', $nid);
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['landingpage'])) {
+    $query->fieldCondition('field_landingpage', 'target_id', $node->nid);
+  }
+  else {
+    $query->fieldCondition('field_premiumoffer', 'target_id', $node->nid);
+  }
+
 
   if (!empty($filters['types'])) {
     $query->entityCondition('bundle', $filters['types'], 'IN');
@@ -353,6 +432,11 @@ function enterprise_conversion_form_bean_form_alter(&$form, $form_state) {
     $form['field_landingpage'][$lang]['#default_value'] = $_GET['target_id'];
     $lp_node = node_load($_GET['target_id']);
   }
+  if (!empty($_GET['po_target_id'])) {
+    $lang = $form['field_premiumoffer']['#language'];
+    $form['field_premiumoffer'][$lang]['#default_value'] = $_GET['po_target_id'];
+    $lp_node = node_load($_GET['po_target_id']);
+  }
 
   if (!empty($_GET['selectors'])) {
     $defs = explode(',', $_GET['selectors']);
@@ -391,6 +475,11 @@ function enterprise_conversion_form_node_form_alter(&$form, $form_state) {
   else if (isset($form['#node']) && ($form['#node']->type == 'webform')) {
     enterprise_conversion_webform_node_form_alter($form, $form_state);
 //dsm($form);
+  }
+
+  $lang = $form['language']['#value'];
+  if (!empty($_GET['po_target_id']) && !empty($form['field_premiumoffer'])) {
+    $form['field_premiumoffer'][$lang]['#default_value'] = array($_GET['po_target_id']);
   }
 }
 
@@ -670,6 +759,8 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
   //$form['#groups']['group_form_redirect']['#weight']
 
 
+
+
   $intel_level = intel_api_level();
   if ($intel_level != 'pro') {
     $msg = '<div class="messages warning">';
@@ -685,6 +776,7 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     $form['field_thankyou']['#disabled'] = TRUE;
     $form['field_redirect_url']['#disabled'] = TRUE;
   }
+
 }
 
 function enterprise_conversion_landingpage_node_form_validate(&$form, &$form_state) {
@@ -782,7 +874,8 @@ function enterprise_conversion_form_add_edit_button_submit(&$form, &$form_state)
   }
 
   $data = array(
-    'form'       => $form,    'form_state' => $form_state,
+    'form'       => $form,
+    'form_state' => $form_state,
     'dest'       => $_GET['q'],
     'field'      => $field,
     'field_info' => array(),
@@ -1562,7 +1655,7 @@ function enterprise_conversion_enterprise_apps_config_info() {
       'visibility_presets' => $visibility_presets,
     );
     $structures['enterprise_conversion']['blocks']['views:enterprise_blog_blocks-related'] = array(
-      'description' => $display_desc['blog:related'],
+      'description' => $display_desc['blog:rel'],
       'default' => array(
         'regions' => array('content'),
         'visibility_presets' => array('enterprise_thankyou_content_type'),
@@ -1587,122 +1680,194 @@ function enterprise_conversion_styler_style() {
     '#description' => t('Various templates for marking up CTAs.'),
   );
 
-  // Buttons
-  $styles['ctas']['button'] = array(
-    '#title' => t('Buttons'),
-    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+  $styles['ctas']['tags'] = array(
+    '#title' => t('CTA tags'),
+    '#description' => check_plain(t('Use the button classes on an <div>, <a>, <button>, or <input> element.')),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => 'Example 1:<br />
-<button class="cta-btn">Click Me Now</button>
-<br />
-<br />
-Example 2:<br />
-<button class="cta-btn cta-secondary">
-  <div class="icon-right">
-    <span>
-      <h3>Click Me Now</h3>
-      <small>Get started in seconds</small>
-    </span>
-    <i class="icon glyphicon glyphicon-chevron-right"></i>
+      '#value' => '<a class="cta cta-default" href="#" role="button">Link</a>
+<div class="cta cta-default" href="#" role="button">Div</div>
+<button class="cta cta-default" type="submit">Button</button>
+<input class="cta cta-default" type="button" value="Input">
+<input class="cta cta-default" type="submit" value="Submit">',
+    ),
+  );
+
+  $styles['ctas']['options'] = array(
+    '#title' => t('Options'),
+    '#description' => t('Use any of the available CTA classes to quickly create a styled CTA.'),
+  );
+  $styles['ctas']['options']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<a href="#" class="cta cta-default">Default</a>
+<a href="#" class="cta cta-primary">Primary</a>
+<a href="#" class="cta cta-secondary">Secondary</a>
+<a href="#" class="cta cta-accent">Accent</a>
+<a href="#" class="cta cta-link">Link</a>',
+  );
+
+
+  // Buttons
+  $styles['ctas']['button-group'] = array(
+    '#title' => t('Button Groups'),
+    '#description' => t('Extend buttons by adding text or icons before, after, or on both sides of any text-based button group body. Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value_replace_eol' => 1,
+      '#value' => '<a href="#" class="cta cta-default btn-group">
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  <span class="btn-group-body">Download Now</span>  
+</a>
+
+<a href="#" class="cta cta-primary btn-group">
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+</a>
+
+<a href="#" class="cta cta-accent btn-group">
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-star"></i></span>
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon cta-default"><i class="icon glyphicon glyphicon-download"></i></span>
+</a>
+',
+    ),
+  );
+
+  // Sidebar
+  $styles['ctas']['panel'] = array(
+    '#title' => t('Panels'),
+    '#description' => t('The cta-panel class makes cta-header, cta-body and cta-footer full width to allow content and background colors to go full width.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '
+<div class="row">
+  <div class="col-sm-6">
+    Example 1:<br />
+    <a href="#">
+      <div class="cta cta-panel cta-default cta-outline-none cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title">Call to Action Heading</h3>
+        </div>
+          <p class="m-t-1 m-b-1">
+          Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.
+          </p>
+
+          <div class="cta cta-accent btn-group btn-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+          </div>
+      </div>
+    </a>
   </div>
-</button>
-<br />
-<br />
-Example 3:<br />
-<button class="cta-btn cta-accent">
-  <div class="icon-bottom">
-    <span>
-      <h3>Click Me Now</h3>
-      <small>Get started in seconds</small>
-    </span>
-    <i class="icon glyphicon glyphicon-chevron-down"></i>
+  <div class="col-sm-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-panel cta-default cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body">
+          <img src="http://placehold.it/120x150" class="pull-left" />
+          <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>            
+        </div>
+        <div class="cta-footer">
+          <div class="cta cta-accent btn-group">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+          </div>
+        </div>
+      </div>
+    </a>
   </div>
-</button>',
+</div>',
       '#value_highlight' => 'Example 1:
-<button class="cta-btn">Click Me Now</button>
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+  <p>...</p>
+  <button class="btn btn-cta btn-group">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
+</div>
 
 Example 2:
-<button class="cta-btn cta-secondary">
-  <div class="icon-right">
-    <span>
-      <h3>Click Me Now</h3>
-      <small>Get started in seconds</small>
-    </span>
-    <i class="icon glyphicon glyphicon-chevron-right"></i>
+<div class="cta cta-primary">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-lg-5 col-sm-12 col-xs-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-block">Download Now</button>
+    </div>
   </div>
-</button>
-
-Example 3:
-<button class="cta-btn cta-accent">
-  <div class="icon-bottom">
-    <span>
-      <h3>Click Me Now</h3>
-      <small>Get started in seconds</small>
-    </span>
-    <i class="icon glyphicon glyphicon-chevron-down"></i>
-  </div>
-</button>',
+</div>',
     ),
   );
 
   // Sidebar
   $styles['ctas']['sidebar'] = array(
     '#title' => t('Sidebars'),
-    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    '#description' => t('To be displayed in narrow containers such as sidebars.'),
     'element' => array(
       '#tag' => 'markup',
-      '#value' => '<div class="row">
-  <div class="col-md-6">
+      '#value' => '
+<div class="row">
+  <div class="col-sm-6">
     Example 1:<br />
-    <div class="cta cta-rectangle">
-      <h3>Build a Smarter Website</h3>
-      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-      <button class="btn-cta btn-group pull-right" href="#">
-        <span class="btn-verb">Download Now</span>
-        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-      </button>
-    </div>
-  </div>
-  <div class="col-md-6">
-    Example 2:<br />
-    <div class="cta cta-rectangle cta-secondary">
-      <h3>Build a Smarter Website</h3>
-      <div class="col-md-5">
-        <img src="http://placehold.it/120x150" />
-      </div>
-      <div class="col-md-7">
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group" href="#">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <a href="#">
+      <div class="cta cta-default cta-block">
+        <h3 class="cta-title text-primary">Call to Action Heading</h3>
+        <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+        <button class="btn btn-cta btn-group">
+          <span class="btn-group-body">Download Now</span>
+          <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
         </button>
       </div>
-    </div>
+    </a>
+  </div>
+  <div class="col-sm-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-primary cta-block">
+        <div class="cta-heading">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body row">
+          <div class="col-lg-5 col-sm-12 col-xs-5">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn cta-accent btn-block">Download Now</button>
+          </div>
+        </div>
+      </div>
+    </a>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
-<div class="cta">
-  <h3>Build a Smarter Website</h3>
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
   <p>...</p>
-  <button class="btn-cta btn-group pull-right">
-    <span class="btn-verb">Download Now</span>
-    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+  <button class="btn btn-cta btn-group">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
 Example 2:
-<div class="cta cta-secondary">
-  <h3>Build a Smarter Website</h3>
-  <div class="col-md-5">
-    <img src="http://placehold.it/120x150" />
-  </div>
-  <div class="col-md-7">
-    <p>....</p>
-    <button class="btn-cta btn-group pull-right">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
+<div class="cta cta-primary">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-lg-5 col-sm-12 col-xs-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-block">Download Now</button>
+    </div>
   </div>
 </div>',
     ),
@@ -1711,18 +1876,18 @@ Example 2:
   // Footer
   $styles['ctas']['footer'] = array(
     '#title' => t('Footers'),
-    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    '#description' => t('To be displayed in wide format such as in content section.'),
     'element' => array(
       '#tag' => 'markup',
       '#value' => '<div class="row margin-bottom">
   <div class="col-md-12">
     Example 1:<br />
-    <div class="cta">
-      <h3>Build a Smarter Website</h3>
-      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-      <button class="btn-cta btn-group center-block">
-        <span class="btn-verb">Download Now</span>
-        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    <div class="cta cta-default cta-block">
+      <h3 class="cta-title text-primary">Call to Action Heading</h3>
+      <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+      <button class="btn btn-cta btn-group center-block">
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
       </button>
     </div>
   </div>
@@ -1730,113 +1895,52 @@ Example 2:
 <div class="row margin-bottom">
 <div class="col-md-12">
     Example 2:<br />
-    <div class="cta cta-secondary">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row margin-bottom">
-<div class="col-md-12">
-    Example 3:<br />
-    <div class="cta cta-bg">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row">
-<div class="col-md-12">
-    Example 4:<br />
-    <div class="cta cta-secondary cta-bg">
-      <div class="col-md-2">
-        <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-      </div>
-      <div class="col-md-10">
-        <h3>Build a Smarter Website</h3>
-        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
-        <button class="btn-cta btn-group">
-          <span class="btn-verb">Download Now</span>
-          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-        </button>
+    <div class="cta cta-primary cta-block">
+      <div class="row">
+        <div class="col-md-2 col-xs-4">
+          <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+        </div>
+        <div class="col-md-10 col-xs-8 text-left">
+          <h3 class="cta-title">Call to Action Heading</h3>
+          <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+          <button class="btn cta-accent btn-group center-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>',
       '#value_highlight' => 'Example 1:
-<div class="cta">
-  <h3>Build a Smarter Website</h3>
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
   <p>...</p>
-  <button class="btn-cta btn-group center-block">
-    <span class="btn-verb">Download Now</span>
-    <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+  <button class="btn btn-cta btn-group center-block">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
   </button>
 </div>
 
 Example 2:
-<div class="cta cta-secondary">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
-  </div>
-</div>
-
-Example 3:
-<div class="cta cta-bg">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
-  </div>
-</div>
-Example 4:
-<div class="cta cta-secondary cta-bg">
-  <div class="col-md-2">
-    <img src="http://placehold.it/120x150" style="max-height: 120px;" />
-  </div>
-  <div class="col-md-10">
-    <h3>Build a Smarter Website</h3>
-    <p>...</p>
-    <button class="btn-cta btn-group" href="#">
-      <span class="btn-verb">Download Now</span>
-      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
-    </button>
+<div class="cta cta-primary cta-block">
+  <div class="row">
+    <div class="col-md-2 col-xs-4">
+      <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+    </div>
+    <div class="col-md-10 col-xs-8 text-left">
+      <h3 class="cta-heading">Call to Action Heading</h3>
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-group center-block">
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
   </div>
 </div>',
     ),
   );
-
+/*
   $styles['ctas']['rectangle'] = array(
     '#title' => t('Rectangles'),
     '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
@@ -1899,6 +2003,7 @@ Example 2:
 </div>',
     ),
   );
+  */
 
   return $styles;
 }

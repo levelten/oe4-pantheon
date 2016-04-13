@@ -49,6 +49,22 @@ function enterprise_theme_theme($existing, $type, $theme, $path) {
       'variables' => array('colors' => NULL),
       'template' => 'templates/pictaculous-color-palette',
     ),
+    'header_branding' => array(
+      'variables' => array(
+        'logo' => NULL,
+        'site_name' => NULL,
+        'front_page' => NULL,
+      ),
+      'path' => drupal_get_path('theme', 'enterprise_bootstrap') . '/templates/includes',
+      'template' => 'header-branding',
+    ),
+    'navbar_toggle' => array(
+      'variables' => array(
+        'label' => NULL,
+      ),
+      'path' => drupal_get_path('theme', 'enterprise_bootstrap') . '/templates/includes',
+      'template' => 'navbar-toggle',
+    ),
   );
 }
 
@@ -139,4 +155,16 @@ function enterprise_theme_image_default_styles() {
   );
 
   return $styles;
+}
+
+function template_preprocess_header_branding(&$variables) {
+  global $base_url;
+
+  $variables['logo'] = theme_get_setting('logo');
+  $variables['front_page'] = $base_url;
+  $variables['site_name'] = theme_get_setting('site_name');
+}
+
+function template_preprocess_navbar_toggle(&$variables) {
+
 }

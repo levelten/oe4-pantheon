@@ -121,6 +121,49 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#description' => t('If your secondary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
   );
 
+	$form['enterprise_bootstrap_config']['column_right']['eb_light_accent'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Light Accent Color'),
+		'#default_value' => theme_get_setting('eb_accent_secondary'),
+		'#description' => t('If your accent color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+	);
+
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
+		'#type' => 'select',
+		'#title' => t('Block Striping'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
+		'#description' => t('Adds odd/even classes to blocks on the home page.'),
+		'#options' => array(
+			0 => t('No'),
+			1 => t('Yes'),
+		),
+	);
+ $form['enterprise_bootstrap_header_settings'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap',
+    '#title' => t('Header'),
+    '#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+  );
+  $form['enterprise_bootstrap_header_settings']['navbar_header'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap_header_settings',
+    '#title' => t('Navbar Header (menu left)'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $options = array(
+    'standard' => t('Standard template (logo/site name/slogan)'),
+    'none' => t('None'),
+    'region' => t('Region'),
+  );
+  $form['enterprise_bootstrap_header_settings']['navbar_header']['navbar_header_display'] = array(
+    '#type' => 'select',
+    '#title' => t('Display (default)'),
+    '#default_value' => theme_get_setting('navbar_header_display'),
+    '#description' => t('Choose to either place this above the content/sidebars, or inside the content area.'),
+    '#options' => $options,
+  );
+
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',
 		'#group' => 'enterprise_bootstrap',
@@ -140,6 +183,12 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
 	);
+  $form['enterprise_bootstrap_region_settings']['navigation']['navbar_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Navbar Class'),
+    '#default_value' => theme_get_setting('navbar_class'),
+    '#description' => t('Class that wraps the navbar region.')
+  );
 	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Navigation Region Class'),

@@ -37,10 +37,23 @@ function enterprise_rel_token_info() {
 
   $info['tokens']['node']['rel-view']['path'] = array(
     'name' => t('Path to relevant view'),
-    'description' => t("Formats relevant page uris. Does not includes base_path."),
+    'description' => t("Provides path to rel-view. Does not includes base_path. Example: blog/test/author"),
     'type' => 'rel-view',
   );
 
+  $info['tokens']['node']['rel-view']['path-args'] = array(
+    'name' => t('Contextual arguments'),
+    'description' => t("Provides the contextual argument path elements to filter for a specific node. E.g. same as path without the view base path element. Example: test/author"),
+    'type' => 'rel-view',
+  );
+
+  $info['tokens']['node']['rel-view']['dyn-path'] = array(
+    'name' => t('Path to relevant view'),
+    'description' => t("Provides the to translate rel-view url. E.g. rel-view/taxonomy/term/1"),
+    'type' => 'rel-view',
+  );
+
+  /*
   $info['tokens']['node']['rel-view']['path']['default-args'] = array(
     'name' => t('Path with all default args to relevant view'),
     'description' => t("Formats relevant page uris. Does not includes base_path."),
@@ -71,6 +84,7 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
 
   $ret_types = array(
     'path' => 'path',
+    'path-args' => 'path-args',
     'path-value' => 'path-value',
     'dyn-path' => 'dyn-path',
   );
@@ -103,10 +117,7 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
       $param_keys = array();
       $obj = null;
       $wrapper = entity_metadata_wrapper('node', $node);
-      if ($toks[0] == 'default-args') {
-
-      }
-      else if (count($toks) >= 2 && $toks[0] == 'field') {
+      if (count($toks) >= 2 && $toks[0] == 'field') {
         $param_keys[] = 'field';
         $param_keys[] = $fn = $toks[1];
         $param_value = array(
@@ -133,13 +144,6 @@ function enterprise_rel_tokens($type, $tokens, array $data = array(), array $opt
       }
       else {
         // TODO: non field types not finished
-        $param_keys[] = $toks[0];
-        $param_keys[] = $fn = $toks[1];
-        $param_value = array(
-          'entities' => array(),
-        );
-        $options = array();
-
       }
       //dsm($toks);
       //dsm($ret_type);

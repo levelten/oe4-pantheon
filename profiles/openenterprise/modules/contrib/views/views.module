@@ -494,16 +494,16 @@ function views_arg_load($value, $name, $display_id, $index) {
     $view->init_handlers();
 
     $ids = array_keys($view->argument);
-
+dsm($ids);
     $indexes = array();
     $path = explode('/', $view->get_path());
-
+dsm($path);
     foreach ($path as $id => $piece) {
       if ($piece == '%' && !empty($ids)) {
         $indexes[$id] = array_shift($ids);
       }
     }
-
+dsm($indexes);
     if (isset($indexes[$index])) {
       if (isset($view->argument[$indexes[$index]])) {
         $arg = $view->argument[$indexes[$index]]->validate_argument($value) ? $value : FALSE;

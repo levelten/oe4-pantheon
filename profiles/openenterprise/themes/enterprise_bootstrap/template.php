@@ -54,6 +54,9 @@ function enterprise_bootstrap_preprocess_html(&$variables) {
   if (theme_get_setting('eb_light_secondary')) {
     $variables['classes_array'][] = 'light-secondary';
   }
+  if (theme_get_setting('eb_light_accent')) {
+    $variables['classes_array'][] = 'light-accent';
+  }
 
   // Add page-header-above class
   $variables['classes_array'][] = (theme_get_setting('title_placement')) ? 'page-title-inside' : 'page-title-above';
@@ -109,6 +112,18 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   }
 
   /*
+   * Enterprise Header settings
+   */
+  $variables['navbar_header_display'] = theme_get_setting('navbar_header_display');
+  if (empty($variables['navbar_header_display'])) {
+    $variables['navbar_header_display'] = 'standard';
+  }
+  if ($variables['navbar_header_display'] == 'none') {
+    $variables['navbar_header_display'] = '';
+    $variables['navbar_classes_array'][] = 'navbar-no-header';
+  }
+
+  /*
    * Enterprise Megamenu settings
    */
   $enterprise_megamenu = theme_get_setting('enterprise_bootstrap_megamenu');
@@ -145,6 +160,13 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   } else {
     $variables['nav_wrapper'] = '';
     $variables['nav_inner'] = 'navbar-mega-menu';
+  }
+
+  // Navbar attributes
+  $s = theme_get_setting('navbar_class');
+  if (!empty($s)) {
+    $s = explode(' ', $s);
+    $variables['navbar_classes_array'] = array_merge($variables['navbar_classes_array'], $s);
   }
 
   // Navigation region settings.

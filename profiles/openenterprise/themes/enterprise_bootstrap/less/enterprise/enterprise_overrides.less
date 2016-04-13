@@ -39,23 +39,11 @@ img {
 }
 
 .btn-secondary {
-  background: @brand-secondary;
-  border-color: darken(@brand-secondary, 10%);
-  color: @brand-accent;
-  &:hover {
-    background: darken(@brand-secondary, 10%);
-    .transition;
-  }
+  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
 }
 
 .btn-accent {
-  background: @brand-accent;
-  border-color: darken(@brand-accent, 10%);
-  color: @brand-accent;
-  &:hover {
-    background: darken(@brand-accent, 10%);
-    .transition;
-  }
+  .button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
 }
 
 /* TODO: for some reason these styles are missing from enterprise_bootstrap */
@@ -174,7 +162,8 @@ fieldset.panel-default {
   position: relative;
 }
 
-.main-container-inner {
+div.main-container-inner {
   // Disable overflow auto for now
   //overflow: auto;
+  margin-top: 1em;
 }

@@ -131,12 +131,26 @@ function enterprise_base_menu_local_tasks_alter(&$data, $router_item, $root_path
     $active_type = $node->type;
   }
 
+
   
   if ($active_type) {
     $type = node_type_load($active_type);
     if (!isset($type->name)) {
       return;
     }
+
+    // check if the active type is a _list of another type
+    if (substr($active_type, -5) == '_list') {
+      $test_active_type = substr($active_type, 0, -5);
+      $test_type = node_type_load($test_active_type);
+      if (!empty($test_type->name)) {
+        $list_active_type = $active_type;
+        $list_type = $type;
+        $active_type = $test_active_type;
+        $type = $test_type;
+      }
+    }
+
     $content_name = strtolower($type->name);
     $item = menu_get_item('node/add/' . str_replace('_', '-', $active_type));
 
@@ -169,6 +183,52 @@ function enterprise_base_menu_local_tasks_alter(&$data, $router_item, $root_path
         '#link' => $item,
       );
     }
+
+    // look if _list/_view content type exists and add to contextual links if so
+    if (!isset($list_active_type)) {
+      $list_active_type = $active_type . '_list';
+      $list_type = node_type_load($list_active_type);
+    }
+
+    if (empty($list_type)) {
+      $list_active_type = $active_type . '_view';
+      $list_type = node_type_load($list_active_type);
+    }
+    if (!empty($list_type)) {
+      $content_name = strtolower($list_type->name);
+      $item = menu_get_item('node/add/' . str_replace('_', '-', $list_active_type));
+
+      if ($item['access']) {
+        $item['title'] = t('Add @type_name', array('@type_name' => strtolower($content_name)));
+        $item['localized_options'] = array(
+          'html' => TRUE,
+          'attributes' => array(
+            'class' => array('btn', 'btn-small'),
+          ),
+        );
+        $data['actions']['output'][] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
+      }
+      $href = 'admin/content/node/' . $list_active_type;
+      $item = menu_get_item($href);
+      if ($item['access']) {
+        $item['href'] = $href;
+        $item['title'] = t('Manage @type_name', array('@type_name' => $content_name . 's'));
+        $item['localized_options'] = array(
+          'html' => TRUE,
+          'attributes' => array(
+            'class' => array('btn', 'btn-small'),
+          ),
+        );
+        $data['actions']['output'][] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
+      }
+    }
+
   }
   
   if ($root_path == 'admin/content' || (strpos($root_path, 'admin/content/node') === 0)) {

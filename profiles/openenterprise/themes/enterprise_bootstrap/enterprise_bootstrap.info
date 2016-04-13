@@ -9,6 +9,7 @@ base theme = bootstrap
 ;;;;;;;;;;;;;;;;;;;;;
 
 regions[header_top]     = 'Header Top'
+regions[brand_bar]      = 'Brand Bar'
 regions[navigation]     = 'Navigation'
 regions[header_bottom]  = 'Header Bottom'
 regions[header]         = 'Top Bar'
@@ -19,6 +20,9 @@ regions[sidebar_first]  = 'Primary'
 regions[sidebar_second] = 'Secondary'
 regions[footer]         = 'Footer'
 regions[footer_bottom]  = 'Footer bottom'
+regions[footer_sticky]  = 'Sticky footer'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Stylesheets

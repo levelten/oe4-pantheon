@@ -179,45 +179,45 @@ function enterprise_style_preprocess_views_view_summary(&$vars) {
   $row_badge_classes_default = 'pull-right';
 
 
-  //$vars['boostrap_component_type'] = 'nav-stacked';
-  //$vars['boostrap_component_type'] = 'list-group';
-  //$vars['boostrap_component_type'] = 'tag-cloud';
-  //$vars['boostrap_component_type'] = 'list-inline';
-  //$vars['boostrap_component_type'] = 'tag-cloud';
-  $vars['boostrap_component_type'] = 'list-unstyled';
+  //$vars['bootstrap_component_type'] = 'nav-stacked';
+  //$vars['bootstrap_component_type'] = 'list-group';
+  //$vars['bootstrap_component_type'] = 'tag-cloud';
+  //$vars['bootstrap_component_type'] = 'list-inline';
+  //$vars['bootstrap_component_type'] = 'tag-cloud';
+  $vars['bootstrap_component_type'] = 'list-unstyled';
 
   if (isset($vars['view']->current_display)) {
     if ($vars['view']->current_display == 'tags') {
-      $vars['boostrap_component_type'] = 'tag-cloud';
+      $vars['bootstrap_component_type'] = 'tag-cloud';
     }
   }
 
-  if (isset($vars['boostrap_component_type'])) {
-    if ($vars['boostrap_component_type'] == 'list-group') {
+  if (isset($vars['bootstrap_component_type'])) {
+    if ($vars['bootstrap_component_type'] == 'list-group') {
       $vars['list_classes'] = 'list-group';
       $row_list_item_classes_default = 'list-group-item';
     }
-    else if ($vars['boostrap_component_type'] == 'nav-stacked') {
+    else if ($vars['bootstrap_component_type'] == 'nav-stacked') {
       $vars['list_classes'] = 'nav nav-stacked';
     }
-    else if ($vars['boostrap_component_type'] == 'nav-list') {
+    else if ($vars['bootstrap_component_type'] == 'nav-list') {
       $vars['list_classes'] = 'nav nav-list';
     }
-    else if ($vars['boostrap_component_type'] == 'list-unstyled') {
+    else if ($vars['bootstrap_component_type'] == 'list-unstyled') {
       $vars['list_classes'] = 'list-unstyled';
     }
-    else if ($vars['boostrap_component_type'] == 'list-inline') {
+    else if ($vars['bootstrap_component_type'] == 'list-inline') {
       $vars['list_classes'] = 'list-inline';
       //$row_classes_default = ' btn btn-default';
     }
-    else if ($vars['boostrap_component_type'] == 'tag-cloud') {
+    else if ($vars['bootstrap_component_type'] == 'tag-cloud') {
       $vars['options']['count'] = FALSE;
       $vars['list_classes'] = 'list-unstyled tags';
     }
   }
 
   foreach ($vars['rows'] as $id => $row) {
-    if ($vars['boostrap_component_type'] == 'tag-cloud') {
+    if ($vars['bootstrap_component_type'] == 'tag-cloud') {
       $vars['rows'][$id]->link = theme('icon', array('bundle' => 'bootstrap', 'icon' => 'glyphicon-tag')) . $vars['rows'][$id]->link;
     }
 

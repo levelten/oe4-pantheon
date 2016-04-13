@@ -139,6 +139,30 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['col-md-10'] = t('Col Md 10');
     $classes['col-md-11'] = t('Col Md 11');
     $classes['col-md-12'] = t('Col Md 12');
+    $classes['col-sm-1'] = t('Col Sm 1');
+    $classes['col-sm-2'] = t('Col Sm 2');
+    $classes['col-sm-3'] = t('Col Sm 3');
+    $classes['col-sm-4'] = t('Col Sm 4');
+    $classes['col-sm-5'] = t('Col Sm 5');
+    $classes['col-sm-6'] = t('Col Sm 6');
+    $classes['col-sm-7'] = t('Col Sm 7');
+    $classes['col-sm-8'] = t('Col Sm 8');
+    $classes['col-sm-9'] = t('Col Sm 9');
+    $classes['col-sm-10'] = t('Col Sm 10');
+    $classes['col-sm-11'] = t('Col Sm 11');
+    $classes['col-sm-12'] = t('Col Sm 12');
+    $classes['col-xs-1'] = t('Col XS 1');
+    $classes['col-xs-2'] = t('Col XS 2');
+    $classes['col-xs-3'] = t('Col XS 3');
+    $classes['col-xs-4'] = t('Col XS 4');
+    $classes['col-xs-5'] = t('Col XS 5');
+    $classes['col-xs-6'] = t('Col XS 6');
+    $classes['col-xs-7'] = t('Col XS 7');
+    $classes['col-xs-8'] = t('Col XS 8');
+    $classes['col-xs-9'] = t('Col XS 9');
+    $classes['col-xs-10'] = t('Col XS 10');
+    $classes['col-xs-11'] = t('Col XS 11');
+    $classes['col-xs-12'] = t('Col XS 12');
 
     $classes['row'] = t('Row');
     $classes['row-fluid'] = t('Row Fluid');
@@ -162,6 +186,10 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['margin-bottom'] = t('Margin: Bottom');
     $classes['margin-left'] = t('Margin: Left');
 
+    $classes['no-gutter'] = t('No Gutter');
+    $classes['no-gutter-right'] = t('No Gutter: Right');
+    $classes['no-gutter-left'] = t('No Gutter: Left');
+
     $classes['no-margin-top'] = t('No Margin: Top');
     $classes['no-margin-right'] = t('No Margin: Right');
     $classes['no-margin-bottom'] = t('No Margin: Bottom');
@@ -172,6 +200,7 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
 
     $classes['no-wrap'] = t('No Wrap (Overflow)');
 
+    $classes['field-collection-embed'] = t('Field Collection Embed');
   }
 }
 
@@ -292,7 +321,7 @@ function enterprise_style_ds_fields_info($entity_type) {
     'function' => 'enterprise_style_ds_field_date_stacked',
     'properties' => array(),
   );
-  for ($i = 1; $i <= 5; $i++) {
+  for ($i = 1; $i <= 9; $i++) {
     $fc_item['enterprise_custom_' . $i] = $bean['enterprise_custom_' . $i] = $node['enterprise_custom_' . $i] = array(
       'title' => t('Custom') . ' ' . $i,
       'field_type' => DS_FIELD_TYPE_FUNCTION,
