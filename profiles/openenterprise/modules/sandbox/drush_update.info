@@ -1,0 +1,9 @@
+name = Drush Update
+description = For those tired of manually typing in each module to update via Drush.
+core = 7.x
+project = drush_update
+package = Development
+
+dependencies[] = update
+
+configure = admin/config/development/drush_update

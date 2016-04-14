@@ -1,0 +1,127 @@
+<?php
+
+/**
+ * Implements hook_permission().
+ */
+function drush_update_permission() {
+  return array(
+    'administer drush_update settings' => array(
+      'title' => t('Administer Drush Update module'),
+      'description' => t('Perform administration tasks for the Drush Update module.'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function drush_update_menu() {
+  $items = array();
+
+  $items['admin/config/development/drush_update'] = array(
+    'title' => t('Drush Update'),
+    'description' => t('Get a list of modules to copy and paste into drush to update.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('drush_update_admin'),
+    'access arguments' => array('administer drush_update settings'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementing admin form.
+ */
+function drush_update_admin() {
+  $form = array();
+
+  if ($available = update_get_available(TRUE)) {
+    module_load_include('inc', 'update', 'update.compare');
+    $projects = update_calculate_project_data($available);
+    // return theme('update_report', array('data' => $data));
+  }
+  else {
+    $projects = _update_no_data();
+    // return theme('update_report', array('data' => _update_no_data()));
+  }
+
+  $options = array();
+  foreach ($projects as $project) {
+    if (empty($project['recommended']) || $project['recommended'] === $project['existing_version']) {
+      continue;
+    }
+
+    $opt = array(
+      'title' => $project['info']['name'] . " ({$project['name']})",
+      'type' => $project['project_type'],
+      'recommended' => $project['recommended'],
+      'existing_version' => $project['existing_version'],
+    );
+    $options[$project['name']] = $opt;
+  }
+
+  $header = array(
+    'title' => t('Project'),
+    'type' => t('Type'),
+    'recommended' => t('Recommended'),
+    'existing_version' => t('Existing Version'),
+  );
+
+  $drush_update_list = variable_get('drush_update_list', NULL);
+  $drush_update_cmd = variable_get('drush_update_cmd', 'pm-update');
+  if (!empty($drush_update_list)) {
+
+    $drush_update_copy = t('No projects selected.');
+
+    $drush_update_modules = array();
+    foreach ($drush_update_list as $key => $value) {
+      if ($key === $value) {
+        array_push($drush_update_modules, $key);
+      }
+    }
+
+    if (!empty($drush_update_modules)) {
+      $text = implode(' ', $drush_update_modules);
+      $drush_update_copy = 'drush ' . $drush_update_cmd . ' ' . $text;
+    }
+
+    $form['drush_update_fieldset'] = array(
+      '#title' => t('Copy & Paste'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $form['drush_update_fieldset']['drush_update_copy'] = array(
+      '#description' => t('Copy the code from here to paste into Drush.'),
+      '#type' => 'textarea',
+      '#disabled' => TRUE,
+      '#value' => $drush_update_copy,
+    );
+  }
+
+  $form['drush_update_cmd'] = array(
+    '#title' => t('Command'),
+    '#description' => t('Choose which command to use. default: pm-update'),
+    '#type' => 'select',
+    '#options' => array(
+      'pm-update' => t('Update'),
+      'pm-disable' => t('Disable'),
+      'pm-uninstall' => t('Uninstall'),
+    ),
+    '#default_value' => $drush_update_cmd,
+  );
+  $form['drush_update_list'] = array(
+    '#title' => t('Drush update list'),
+    '#description' => t('A list of projects that have available updates you can check.'),
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#empty' => t('No content available.'),
+    '#default_value' => $drush_update_list,
+  );
+
+  return system_settings_form($form);
+
+}
