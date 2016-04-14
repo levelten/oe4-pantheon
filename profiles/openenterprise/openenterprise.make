@@ -120,6 +120,8 @@ projects[module_filter][version] = 2.0-alpha2
 projects[menu_trail_by_path][version] = 2.0
 projects[realname][version] = 1.2
 projects[simplified_menu_admin][version] = 1.0-beta2
+projects[adminimal_admin_menu][version] = 1.7
+projects[adminimal_admin_menu][patch][] = https://www.drupal.org/files/issues/adminimal_admin_menu-js-error-2407007-3-no-whitespace-changes.patch
 
 ;;;;;
 ; SEO Modules
