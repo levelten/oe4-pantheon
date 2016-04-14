@@ -374,6 +374,10 @@
 
 (function($) {
 
+Drupal.admin = Drupal.admin || {};
+Drupal.admin.behaviors = Drupal.admin.behaviors || {};
+Drupal.admin.hashes = Drupal.admin.hashes || {};
+
 // Create the responsive menu using SlickNav.
 Drupal.admin.behaviors.responsivemenu = function (context, settings, $adminMenu) {
 
