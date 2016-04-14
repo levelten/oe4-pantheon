@@ -61,7 +61,7 @@ function enterprise_work_pre_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 51,
+      'weight' => 52,
     ),
   );
 
@@ -106,7 +106,7 @@ function enterprise_work_pre_field_default_field_instances() {
     'enterprise_edit_form_display' => 'sidebar',
     'entity_type' => 'node',
     'field_name' => 'field_industry_types',
-    'label' => 'Industries',
+    'label' => 'Industry',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -162,7 +162,7 @@ function enterprise_work_pre_field_default_field_instances() {
     'enterprise_edit_form_display' => 'sidebar',
     'entity_type' => 'node',
     'field_name' => 'field_organization_sizes',
-    'label' => 'Organization sizes',
+    'label' => 'Organization size',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -232,61 +232,6 @@ function enterprise_work_pre_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-enterprise_etmaster-field_personas'.
-  $field_instances['node-enterprise_etmaster-field_personas'] = array(
-    'bundle' => 'enterprise_etmaster',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'taxonomy',
-        'settings' => array(
-          'conditions' => array(),
-          'enterprise_rel_taxonomy_level' => '',
-          'field_delimiter' => '',
-          'field_formatter_class' => '',
-          'linked_field' => array(
-            'advanced' => array(
-              'class' => '',
-              'rel' => '',
-              'target' => '',
-              'text' => '',
-              'title' => '',
-            ),
-            'destination' => '',
-            'linked' => 0,
-          ),
-        ),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 10,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'ds_extras_field_template' => '',
-    'enterprise_edit_form_display' => 'sidebar',
-    'entity_type' => 'node',
-    'field_name' => 'field_personas',
-    'label' => 'Persona',
-    'required' => 0,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 56,
-    ),
-  );
-
   // Exported field_instance: 'node-enterprise_etmaster-field_service_areas'.
   $field_instances['node-enterprise_etmaster-field_service_areas'] = array(
     'bundle' => 'enterprise_etmaster',
@@ -337,13 +282,13 @@ function enterprise_work_pre_field_default_field_instances() {
       'active' => 1,
       'module' => 'options',
       'settings' => array(),
-      'type' => 'options_select',
+      'type' => 'options_buttons',
       'weight' => 55,
     ),
   );
 
   // Exported field_instance: 'node-enterprise_etmaster-field_tags'.
-  $field_instances['node-enterprise_etmaster-field_tags'] = array(
+  $field_instances['node-enterprise_etmaster-field_service_tags'] = array(
     'bundle' => 'enterprise_etmaster',
     'default_value' => NULL,
     'deleted' => 0,
@@ -370,7 +315,7 @@ function enterprise_work_pre_field_default_field_instances() {
           ),
         ),
         'type' => 'taxonomy_term_reference_link',
-        'weight' => 2,
+        'weight' => 5,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -382,8 +327,8 @@ function enterprise_work_pre_field_default_field_instances() {
     'ds_extras_field_template' => '',
     'enterprise_edit_form_display' => 'sidebar',
     'entity_type' => 'node',
-    'field_name' => 'field_tags',
-    'label' => 'Tags',
+    'field_name' => 'field_service_tags',
+    'label' => 'Service tags',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -396,7 +341,7 @@ function enterprise_work_pre_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 49,
+      'weight' => 51,
     ),
   );
 
@@ -450,7 +395,7 @@ function enterprise_work_pre_field_default_field_instances() {
       'active' => 1,
       'module' => 'options',
       'settings' => array(),
-      'type' => 'options_select',
+      'type' => 'options_buttons',
       'weight' => 50,
     ),
   );
@@ -458,11 +403,12 @@ function enterprise_work_pre_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Challenges');
-  t('Industries');
-  t('Organization sizes');
+  t('Industry');
+  t('Organization size');
   t('Organization type');
   t('Persona');
   t('Service areas');
+  t('Service tags');
   t('Service types');
 
   return $field_instances;

@@ -7,11 +7,12 @@
 include_once('enterprise_blog_config.features.inc');
 
 /**
- * Implements hook_enterprise_apps_on_enable()
+ * Implements hook_enterprise_apps_enable()
  */
 function enterprise_blog_config_enterprise_apps_app_enabled() {
   enterprise_apps_config_app('enterprise_blog');
 }
+
 /**
  * Implements hook_views_data_alter()
  */

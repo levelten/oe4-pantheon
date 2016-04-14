@@ -93,51 +93,10 @@ function enterprise_apps_menu() {
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
 
-  $work_field_instance = array();
-  $work_field_group = array();
-  if (enterprise_apps_module_files_exist('enterprise_work_config')) {
-    $work_field_instance = array(
-      'field_service_types' => 1,
-      'field_service_tags' => 1,
-      'field_challenge_types' => 1,
-      'field_service_areas' => 1,
-      'field_organization_types' => 1,
-      'field_organization_size' => 1,
-      'field_industry_types' => 1,
-      'field_personas' => 1,
-    );
-    $work_field_group = array(
-      'group_rel_market' => 1,
-      'group_rel_persona' => 1,
-    );
-  }
-
-  $entity_info = array();
-  $entity_info['node:enterprise_blog'] = array(
-    'field_instance' => array(
-        'field_cta_category' => 1,
-        'field_intel_event_col' => 1,
-        'field_keywords' => 1,
-        'field_page_attribute_col' => 1,
-        'field_visitor_attribute_col' => 1,
-      ) + $work_field_instance,
-    'field_group' => array(
-        'group_rel_label' => 1,
-        'group_rel_container' => 1,
-        'group_rel_subject' => 1,
-      ) + $work_field_group,
-  );
-  dsm($entity_info['node:enterprise_blog']);
-
-  $var = variable_get('theme_enterprise_bootstrap_settings');
-  dsm($var);
-
-  $var = variable_get('theme_bella_settings');
-  dsm($var);
-
-
+  $fc = enterprise_apps_get_base_feature_components('enterprise_client');
+  dsm($fc);
+  enterprise_apps_install_base_feature_components($fc);
   return '';
-
 }
 
 function enterprise_apps_config_app_page($app) {
@@ -1469,6 +1428,132 @@ function enterprise_apps_get_apps_info() {
 
 function enterprise_apps_form_alter(&$form, &$form_state, $form_id) {
 
+}
+
+// deploy_manager_add_to_plan()
+function enterprise_apps_get_entity_rel_info($entity_type = 'node', $bundle = 'enterprise_etmaster', $view_mode = 'form') {
+
+  $field_group_info = field_group_info_groups($entity_type, $bundle, $view_mode);
+  $field_instance_info = field_info_instances($entity_type, $bundle);
+
+  $info = array(
+    'field_group' => array(),
+    'field_instance' => array(),
+  );
+
+  foreach ($field_group_info as $k => $v) {
+    if (strpos($k, 'group_rel_') === 0) {
+      $info['field_group'][$k] = $v;
+      foreach ($v->children as $kk => $vv) {
+        if (strpos($vv, 'field_') === 0) {
+          $info['field_instance'][$vv] = $field_instance_info[$vv];
+        }
+      }
+    }
+  }
+
+  return $info;
+}
+
+/**
+ * Returns Features components from an app that may be needed as a dependency.
+ *
+ * @return string
+ */
+function enterprise_apps_get_base_feature_components($app_name) {
+
+  $info = array(
+    'node_info' => array(),
+    'taxonomy_default_vocabularies' => array(),
+    'field_default_field_bases' => array(),
+  );
+
+  $exts = array(
+    '_pre',
+    '',
+    '_config',
+    '_post',
+  );
+  foreach ($exts as $ext) {
+    $module_name = $app_name . $ext;
+    if (!enterprise_apps_module_files_exist($module_name)) {
+      continue;
+    }
+    $module_path = drupal_get_path('module', $module_name);
+
+    if (file_exists("$module_path/$module_name.features.inc")) {
+      include_once "$module_path/$module_name.features.inc";
+      $func = "{$module_name}_node_info";
+      if (function_exists($func)) {
+        $in = call_user_func($func);
+        $info['node_info'] = drupal_array_merge_deep($info['node_info'], $in);
+      }
+    }
+
+    if (file_exists("$module_path/$module_name.features.taxonomy.inc")) {
+      include_once "$module_path/$module_name.features.taxonomy.inc";
+      $func = "{$module_name}_taxonomy_default_vocabularies";
+      if (function_exists($func)) {
+        $in = call_user_func($func);
+        $info['taxonomy_default_vocabularies'] = drupal_array_merge_deep($info['taxonomy_default_vocabularies'], $in);
+      }
+    }
+
+    if (file_exists("$module_path/$module_name.features.field_base.inc")) {
+      include_once "$module_path/$module_name.features.field_base.inc";
+      $func = "{$module_name}_field_default_field_bases";
+      if (function_exists($func)) {
+        $in = call_user_func($func);
+        $info['field_default_field_bases'] = drupal_array_merge_deep($info['field_default_field_bases'], $in);
+      }
+    }
+  }
+
+  return $info;
+}
+
+function enterprise_apps_install_base_feature_components($info) {
+  // content types
+  if (isset($info['node_info']) && is_array($info['node_info'])) {
+    foreach ($info['node_info'] as $bundle => $type) {
+      $type0 = node_type_get_type($bundle);
+      if (!empty($type0)) {
+        $type = (object) drupal_array_merge_deep($type, $type0);
+      }
+      else {
+        $type['type'] = $bundle;
+        //$type = node_type_set_defaults($type);
+      }
+      node_type_save($type);
+    }
+  }
+
+  // taxonomy
+  if (isset($info['taxonomy_default_vocabularies']) && is_array($info['taxonomy_default_vocabularies'])) {
+    foreach ($info['taxonomy_default_vocabularies'] as $bundle => $type) {
+      $type0 = taxonomy_vocabulary_machine_name_load($bundle);
+      $type = (object) $type;
+      if (!empty($type0)) {
+        $type = (object) drupal_array_merge_deep($type, $type0);
+      }
+      taxonomy_vocabulary_save($type);
+    }
+  }
+
+  // field_base
+  if (isset($info['field_default_field_bases']) && is_array($info['field_default_field_bases'])) {
+    foreach ($info['field_default_field_bases'] as $name => $type) {
+      $type0 = field_info_field($name);
+
+      if (!empty($type0)) {
+        $type = drupal_array_merge_deep($type, $type0);
+        //field_update_field($type);
+      }
+      else {
+        field_create_field($type);
+      }
+    }
+  }
 }
 
 function enterprise_apps_form_features_export_form_alter(&$form, &$form_state) {

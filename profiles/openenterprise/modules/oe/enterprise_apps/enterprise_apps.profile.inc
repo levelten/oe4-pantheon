@@ -325,6 +325,9 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
+  // set install_profile in case install crashes.
+  variable_set('install_profile', 'openenterprise');
+
   watchdog('install-form', print_r($form_state['values'], 1));
 
 
@@ -444,6 +447,7 @@ function enterprise_apps_install_demo(&$install_state) {
 
   // create array of demo apps with optional apps from form
   $apps = array();
+  $content_apps = array();
   foreach ($demo_info['required_apps'] as $name) {
     if (enterprise_apps_module_files_exist($name . '_pre')) {
       $apps[$name . '_pre'] = $name . '_pre';
@@ -458,7 +462,7 @@ function enterprise_apps_install_demo(&$install_state) {
       $apps[$name . '_post'] = $name . '_post';
     }
     if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
-      $apps[$name . '_content'] = $name . '_content';
+      $content_apps[$name . '_content'] = $name . '_content';
     }
   }
 
@@ -478,13 +482,16 @@ function enterprise_apps_install_demo(&$install_state) {
         $apps[$name . '_post'] = $name . '_post';
       }
       if (!empty($profile_settings['demo']['demo_content']) && enterprise_apps_module_files_exist($name . '_content')) {
-        $apps[$name . '_content'] = $name . '_content';
+        $content_apps[$name . '_content'] = $name . '_content';
       }
     }
   }
 
   // add demo_config and content apps
   $apps[$demo_app . '_config'] = $demo_app . '_config';
+
+  // merge in app_content after apps are built
+  $apps = array_merge($apps, $content_apps);
 
   $a = !empty($profile_settings['demo']['demo_content']) ? 'enterprise_demo_content' : 'enterprise_demo_nocontent';
   $apps[$a] = $a;

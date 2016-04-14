@@ -37,3 +37,7 @@
   border: none;
   margin-bottom: 15px;
 }
+
+.column-side .horizontal-tabs .fieldset.titled > .fieldset-content {
+  padding: 10px 0 0 0;
+}

@@ -5,3 +5,11 @@
  */
 
 include_once 'enterprise_work_pre.features.inc';
+
+function enterprise_work_pre_enterprise_apps_app_enabled() {
+  $fc = enterprise_apps_get_base_feature_components('enterprise_client');
+  $fc = enterprise_apps_install_base_feature_components($fc);
+
+  $fc = enterprise_apps_get_base_feature_components('enterprise_testimonial');
+  $fc = enterprise_apps_install_base_feature_components($fc);
+}

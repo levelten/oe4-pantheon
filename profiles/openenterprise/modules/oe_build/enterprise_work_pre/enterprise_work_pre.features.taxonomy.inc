@@ -45,15 +45,6 @@ function enterprise_work_pre_taxonomy_default_vocabularies() {
       'weight' => 0,
       'entity_type' => 'taxonomy_vocabulary',
     ),
-    'personas' => array(
-      'name' => 'Personas',
-      'machine_name' => 'personas',
-      'description' => '',
-      'hierarchy' => 0,
-      'module' => 'taxonomy',
-      'weight' => 0,
-      'entity_type' => 'taxonomy_vocabulary',
-    ),
     'service_areas' => array(
       'name' => 'Service areas',
       'machine_name' => 'service_areas',

@@ -5,3 +5,39 @@
  */
 
 include_once 'enterprise_client_config.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_enable()
+ */
+function enterprise_client_config_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_client');
+}
+
+
+function enterprise_client_config_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_client' => array(
+      'entity_info' => array(),
+      'blocks' => array(),
+      'variables' => array(),
+    ),
+  );
+  $entity_info = &$settings['enterprise_client']['entity_info'];
+
+  $master_rel_info = enterprise_apps_get_entity_rel_info();
+  $rel_field_instance = array();
+  $rel_field_group = array();
+  foreach ($master_rel_info['field_instance'] as $k => $v) {
+    $rel_field_instance[$k] = 1;
+  }
+  foreach ($master_rel_info['field_group'] as $k => $v) {
+    $rel_field_group[$k] = 1;
+  }
+
+  $entity_info['node:enterprise_client'] = array(
+    'field_instance' => $rel_field_instance,
+    'field_group' => $rel_field_group,
+  );
+
+  return $settings;
+}

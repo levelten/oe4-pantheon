@@ -7,7 +7,7 @@
 include_once 'enterprise_demo_config.features.inc';
 
 function enterprise_demo_config_enterprise_apps_config_settings() {
-  $version = openenterprise_get_version();
+  $edition = openenterprise_get_edition();
 
   $settings = array(
     'enterprise_demo' => array(
@@ -45,12 +45,10 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
       'field_organization_types' => 1,
       'field_organization_size' => 1,
       'field_industry_types' => 1,
-      'field_personas' => 1,
     );
     $work_field_group = array(
       'group_rel_service' => 1,
       'group_rel_market' => 1,
-      'group_rel_persona' => 1,
     );
   }
 
@@ -244,7 +242,7 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
   );
   $variables['theme_enterprise_bootstrap_settings'] = $theme_settings;
 
-  if ($version == 'pro') {
+  if ($edition == 'pro') {
     $theme_settings['less']['bella'] = $colors;
     $variables['theme_bella_settings'] = $theme_settings;
   }

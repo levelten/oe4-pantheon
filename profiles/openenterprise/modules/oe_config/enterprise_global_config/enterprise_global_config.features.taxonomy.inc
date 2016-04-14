@@ -18,6 +18,15 @@ function enterprise_global_config_taxonomy_default_vocabularies() {
       'weight' => 0,
       'entity_type' => 'taxonomy_vocabulary',
     ),
+    'personas' => array(
+      'name' => 'Personas',
+      'machine_name' => 'personas',
+      'description' => 'Target audience representation',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'entity_type' => 'taxonomy_vocabulary',
+    ),
     'tags' => array(
       'name' => 'Tags',
       'machine_name' => 'tags',
