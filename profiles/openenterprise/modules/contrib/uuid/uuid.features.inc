@@ -134,14 +134,14 @@ function uuid_entities_features_export_render($module_name, $components, $export
 }
 
 /**
- * Implements [component]_features_export_rebuild().
+ * Implements [component]_features_rebuild().
  */
 function uuid_entities_features_rebuild($module_name) {
   uuid_entities_rebuild($module_name, 'rebuild');
 }
 
 /**
- * Implements [component]_features_export_revert().
+ * Implements [component]_features_revert().
  */
 function uuid_entities_features_revert($module_name) {
   uuid_entities_rebuild($module_name, 'revert');
@@ -158,8 +158,6 @@ function uuid_entities_rebuild($module_name = '', $op = 'rebuild') {
       // Let other modules do things before default entities are created.
       module_invoke_all("uuid_entities_pre_$op", $plan_name);
       foreach ($entities as $entity) {
-        // Let other modules alter entities before they are created
-        drupal_alter('uuid_entities_features_import_entity', $entity, $entity->__metadata['type']);
         entity_uuid_save($entity->__metadata['type'], $entity);
       }
       // Let other modules do things after default entities are created.
