@@ -9,6 +9,7 @@ function ckeditor_media_ckeditor_plugin() {
     'desc' => t('Media Browser for File Upload/Browsing'),
     // The full path to the CKEditor plugin directory, trailing slash included.
     'path' => drupal_get_path('module', 'ckeditor_media') . '/plugins/mediaBrowser/',
+    'default' => 'f',
   );
   return $plugins;
 }
