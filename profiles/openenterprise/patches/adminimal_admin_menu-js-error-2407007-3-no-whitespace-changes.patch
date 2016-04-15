@@ -1,0 +1,30 @@
+diff --git a/js/slicknav/jquery-no-conflict.slicknav.js b/js/slicknav/jquery-no-conflict.slicknav.js
+index ff7af8b..5850c2c 100644
+--- a/js/slicknav/jquery-no-conflict.slicknav.js
++++ b/js/slicknav/jquery-no-conflict.slicknav.js
+@@ -374,6 +374,10 @@
+ 
+ (function($) {
+ 
++Drupal.admin = Drupal.admin || {};
++Drupal.admin.behaviors = Drupal.admin.behaviors || {};
++Drupal.admin.hashes = Drupal.admin.hashes || {};
++
+ // Create the responsive menu using SlickNav.
+ Drupal.admin.behaviors.responsivemenu = function (context, settings, $adminMenu) {
+ 
+diff --git a/js/slicknav/jquery.slicknav.js b/js/slicknav/jquery.slicknav.js
+index d9a29e2..9fb5675 100644
+--- a/js/slicknav/jquery.slicknav.js
++++ b/js/slicknav/jquery.slicknav.js
+@@ -374,6 +374,10 @@
+ 
+ (function($) {
+ 
++Drupal.admin = Drupal.admin || {};
++Drupal.admin.behaviors = Drupal.admin.behaviors || {};
++Drupal.admin.hashes = Drupal.admin.hashes || {};
++
+ // Create the responsive menu using SlickNav.
+ Drupal.admin.behaviors.responsivemenu = function (context, settings, $adminMenu) {
+ 
