@@ -18,6 +18,53 @@ function deploy_auto_plan_permission() {
 }
 
 /**
+ * Helper function to set a session value
+ *
+ * @param string
+ *   The plan name.
+ */
+function deploy_auto_plan_set_session($value) {
+  // Because the Drupal 7 testing framework is not the greatest this world have
+  // seen we need to provide an alternative "session storage" in order to test
+  // this. The regular sessions are messed up for some reason.
+  // This is very hacky and will not work for all test cases, but it does the
+  // job for now.
+  $test_info = &$GLOBALS['drupal_test_info'];
+  if ($test_info) {
+    variable_set('deploy_auto_plan_user_plan__testing', $value);
+    return;
+  }
+  $_SESSION['deploy_auto_plan_user_plan'] = $value;
+}
+
+/**
+ * Helper function to get a session value
+ *
+ * @return string|FALSE
+ *   The plan name or FALSE when not exist in session
+ */
+function deploy_auto_plan_get_session() {
+  // Don't ask why, or see explanation in deploy_auto_plan_set_session() if you
+  // really want to know why (but you don't, trust me).
+  $test_info = &$GLOBALS['drupal_test_info'];
+  if ($test_info) {
+    return variable_get('deploy_auto_plan_user_plan__testing', FALSE);
+  }
+  if(isset($_SESSION['deploy_auto_plan_user_plan'])){
+    return $_SESSION['deploy_auto_plan_user_plan'];
+  }
+
+  return FALSE;
+}
+
+/**
+ * Helper function to destory a session value
+ */
+function deploy_auto_plan_del_session() {
+  unset($_SESSION['deploy_auto_plan_user_plan']);
+}
+
+/**
  * Implements hook_menu().
  */
 function deploy_auto_plan_menu() {
@@ -96,18 +143,38 @@ function deploy_auto_plan_settings($form, $form_state) {
  *   The type of entity being updated (i.e. node, user, comment).
  */
 function _deploy_auto_plan_entity_save($entity, $type) {
-  $plan_name = variable_get('deploy_auto_plan_name', NULL);
-  if (!$plan_name) {
-    return;
-  }
+  $plan_name = deploy_auto_plan_get_plan();
 
   $info = entity_get_info($type);
-  if (empty($info['entity keys']['uuid'])) {
+  if (!$plan_name || empty($info['entity keys']['uuid'])) {
     // we only care about entities with UUIDs.
     return;
   }
 
+  // Allow other modules to alter whether or not the entity should be added.
+  $status = TRUE;
+  drupal_alter('deploy_auto_plan_status', $status, $type, $entity);
+  if (!$status) {
+    // If status is FALSE then don't add the entity to the plan.
+    return;
+  }
+
   deploy_manager_add_to_plan($plan_name, $type, $entity);
+}
+
+/**
+ * Helper function to get a plan name
+ *
+ * @return string
+ *   The plan name.
+ */
+function deploy_auto_plan_get_plan() {
+  $user_plan_name = deploy_auto_plan_get_session();
+  if ($user_plan_name) {
+    return $user_plan_name;
+  }
+
+  return variable_get('deploy_auto_plan_name', NULL);
 }
 
  /**
