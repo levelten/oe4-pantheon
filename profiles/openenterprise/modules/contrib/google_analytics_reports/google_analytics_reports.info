@@ -5,6 +5,8 @@ core = 7.x
 dependencies[] = google_analytics_reports_api
 dependencies[] = views
 
+configure = admin/config/system/google-analytics-reports-api
+
 files[] = handlers/google_analytics_reports_handler_filter.inc
 files[] = handlers/google_analytics_reports_handler_filter_date.inc
 files[] = handlers/google_analytics_reports_handler_filter_string.inc
@@ -14,9 +16,9 @@ files[] = handlers/google_analytics_reports_handler_argument.inc
 files[] = plugins/google_analytics_reports_plugin_query_google_analytics.inc
 files[] = plugins/google_analytics_reports_plugin_argument_default_google_analytics_reports_path.inc
 
-; Information added by Drupal.org packaging script on 2015-07-31
-version = "7.x-3.0-beta2"
+; Information added by Drupal.org packaging script on 2016-03-28
+version = "7.x-3.0"
 core = "7.x"
 project = "google_analytics_reports"
-datestamp = "1438364344"
+datestamp = "1459185436"
 
