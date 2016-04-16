@@ -1,13 +1,5 @@
 <?php
 
-/**
- * @file
- * Provides mediaBrowser integration for CKEditor.
- */
-
-/**
- * Implements hook_ckeditor_plugin_alter().
- */
 function ckeditor_media_ckeditor_plugin() {
   $plugins = array();
   $plugins['mediaBrowser'] = array(
@@ -16,45 +8,8 @@ function ckeditor_media_ckeditor_plugin() {
     // Plugin description - it will be displayed in the plugins management section of the profile settings.
     'desc' => t('Media Browser for File Upload/Browsing'),
     // The full path to the CKEditor plugin directory, trailing slash included.
-    'path' => '%base_path%' . drupal_get_path('module', 'ckeditor_media') . '/plugins/mediaBrowser/',
-    'default' => 'f',
+    'path' => drupal_get_path('module', 'ckeditor_media') . '/plugins/mediaBrowser/',
+    'default' => 't',
   );
   return $plugins;
-}
-
-/**
- * Implements hook_element_info_alter().
- */
-function ckeditor_media_element_info_alter(&$types) {
-  $types['text_format']['#pre_render'][] = 'ckeditor_media_pre_render_text_format';
-}
-
-/**
- * Adds CKEditor-specific JavaScript.
- */
-function ckeditor_media_pre_render_text_format($element) {
-  // filter_process_format() copies properties to the expanded 'value' child
-  // element.
-  if (!isset($element['format'])) {
-    return $element;
-  }
-
-  $field = &$element['value'];
-  $settings = array(
-    'field' => $field['#id'],
-  );
-
-  if (!isset($field['#value'])) {
-    return $element;
-  }
-
-  // Add CKEditor-specific JS.
-  $element['#attached']['js'][] = array(
-    'data' => drupal_get_path('module', 'ckeditor_media') . '/plugins/mediaBrowser/library.js',
-    'type' => 'file',
-    'scope' => 'footer',
-    'weight' => -20,
-  );
-
-  return $element;
 }
