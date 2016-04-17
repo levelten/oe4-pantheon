@@ -1,0 +1,178 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Demo feature.
+ */
+
+include_once 'enterprise_demo_content_post.features.inc';
+
+/**
+ * Implements hook_enterprise_apps_enable()
+ */
+function enterprise_demo_content_post_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_demo_content_post');
+}
+
+function enterprise_demo_content_post_enterprise_apps_config_settings() {
+  $edition = openenterprise_get_edition();
+
+  $settings = array(
+    'enterprise_demo_content_post' => array(
+      'entity_info' => array(),
+      'blocks' => array(),
+      'variables' => array(),
+    ),
+  );
+  $entity_info = &$settings['enterprise_demo_content_post']['entity_info'];
+  $blocks = &$settings['enterprise_demo_content_post']['blocks'];
+  $variables = &$settings['enterprise_demo_content_post']['variables'];
+
+  $blocks['search:form'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'title' => t('Search OE Pro'),
+    'weight' => 0,
+  );
+
+  $blocks['widgets:s_twitter-user-timeline-widget'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'weight' => 1,
+  );
+
+  $blocks['widgets:s_facebook-like-box'] = array(
+    'regions' => array(
+      'footer',
+    ),
+    'weight' => 2,
+  );
+
+  $blocks['widgets:s_enterprise_social-follow'] = array(
+    'title' => t('Follow us'),
+    'regions' => array(
+      'footer',
+    ),
+    'block_row' => array(
+      'row' => 'row2',
+      'row_class' => 'stacked',
+    ),
+    'weight' => 3,
+  );
+
+  $blocks['views:enterprise_blog_blocks-tags'] = array(
+    'weight' => 1,
+  );
+
+  $blocks['views:enterprise_blog_blocks-archives'] = array(
+    'weight' => 2,
+  );
+
+  $blocks['views:enterprise_blog_blocks-popular'] = array(
+    'weight' => 6,
+  );
+
+  $blocks['cta:sel_cta_sidebar'] = array(
+    'path' => array(
+      'pages' => array(
+        '<front>',
+        'admin/*',
+        'user',
+        'user/*',
+        'users/*',
+        'offer/*',
+        'thank-you/*',
+        'services',
+        'services/*',
+        'about',
+        'about/*',
+        'team',
+        'forum',
+        'forum/*',
+      ),
+    ),
+  );
+
+  // add cta footer to blog content type
+  $blocks['cta:sel_cta_footer'] = array(
+    'node_type' => array(
+      'types' => array(
+        'enterprise_blog',
+      ),
+    ),
+  );
+
+
+  // remove block title on
+  if (function_exists('entity_get_id_by_uuid')) {
+    $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
+    $ids = entity_get_id_by_uuid('node', array($uuid));
+    if (!empty($ids)) {
+      $id = $ids[$uuid];
+      $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
+    }
+  }
+
+  //$settings['enterprise_demo']['blocks'] = &$blocks;
+
+  $colors = array(
+    '@brand-primary' =>   '#288CD5',
+    '@brand-secondary' => '#83B941',
+    '@brand-tertiary' =>  '#666666',
+    '@brand-accent' =>    '#FFA126',
+    '@brand-accent-2' =>  '#FFC826',
+    '@brand-accent-3' =>  '#FF6126',
+    //'@brand-primary' => '#1A68AE',
+    //'@brand-primary' => '#2C90D9',
+    //'@brand-primary' => '#168FAE',
+    //'@brand-secondary' => '#A1C851',
+    //'@brand-accent' => '#F7941E',
+  );
+
+  $theme_settings = array(
+    'default_logo' => 0,
+    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo.png',
+    'navbar_header_display' => 'none',
+    'navbar_class' => 'navbar-gray-lighter',
+    'less' => array(
+      'enterprise_bootstrap' => $colors
+    )
+  );
+  $variables['theme_enterprise_bootstrap_settings'] = $theme_settings;
+
+  if ($edition == 'pro') {
+    $theme_settings['less']['bella'] = $colors;
+    $variables['theme_bella_settings'] = $theme_settings;
+  }
+
+  $blocks['bean:brand_bar'] = array(
+    'regions' => array(
+      'brand_bar',
+    ),
+  );
+
+  return $settings;
+}
+
+/**
+ * Implements hook_uuid_entities_features_import_entity_alter();
+ * @param $entity
+ * @param $entity_type
+ */
+function enterprise_demo_content_post_uuid_entities_features_import_entity_alter(&$entity, $entity_type) {
+
+  // replace webform block placeholder in brand_bar bean
+  if ($entity->entity_type == 'bean') {
+    // try to load contact us form to get id
+    if ($entity->delta == 'brand_bar' && function_exists('entity_get_id_by_uuid')) {
+      $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
+      $ids = entity_get_id_by_uuid('node', array($uuid));
+      if (!empty($ids)) {
+        $id = $ids[$uuid];
+        $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
+      }
+    }
+  }
+}
+
