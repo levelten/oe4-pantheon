@@ -1,0 +1,88 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise FAQ feature.
+ */
+
+include_once('enterprise_faq_config.features.inc');
+
+/**
+ * Implements hook_enterprise_apps_on_enable()
+ */
+function enterprise_faq_config_enterprise_apps_app_enabled() {
+  enterprise_faq_app_theme_settings();
+  enterprise_apps_config_app('enterprise_faq');
+}
+
+/**
+ * Set the needed settings in the theme once app is installed
+ * Ex: Enable required Bootstrap Javascript files
+ */
+
+function enterprise_faq_config_app_theme_settings() {
+  global $theme_key;
+
+  $var_name = 'theme_' . $theme_key . '_settings';
+  $settings = variable_get($var_name);
+
+  if(isset($settings['enterprise_bootstrap_js_options'])) {
+
+    // Enable required Bootstrap Javascript files
+    $settings['enterprise_bootstrap_js_options']['transition'] = 'transition';
+    $settings['enterprise_bootstrap_js_options']['collapse'] = 'collapse';
+
+    variable_set($var_name, $settings);
+  }
+}
+
+/**
+ * Implements hook_enterprise_apps_config_info()
+ * @return array
+ */
+function enterprise_faq_config_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_faq'] = array(
+    'title' => t('FAQ'),
+  );
+  $visibility = array(
+    'enterprise_faq_view' => array(
+      'title' => t('Show on FAQ listing pages'),
+      'views' => array(
+        'views' => array('enterprise_faq:page'),
+      ),
+    ),
+    'enterprise_faq_content_type' => array(
+      'title' => t('Show on FAQ details pages'),
+      'node_type' => array(
+        'types' => array('enterprise_faq'),
+      )
+    ),
+  );
+
+  $view = views_get_view('enterprise_faq');
+  $display_desc = array();
+  foreach ($view->display AS $name => $display) {
+    $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+  }
+  $config['enterprise_faq']['blocks'] = array(
+    'views:enterprise_faq-categories_block' => array(
+      'description' => $display_desc['categories_block'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_faq_view'),
+        'weight' => 1,
+      ),
+      'visibility' => $visibility,
+    ),
+    'views:enterprise_faq-tags_block' => array(
+      'description' => $display_desc['tags_block'],
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_faq_view'),
+        'weight' => 2,
+      ),
+      'visibility' => $visibility,
+    ),
+  );
+  return $config;   
+}

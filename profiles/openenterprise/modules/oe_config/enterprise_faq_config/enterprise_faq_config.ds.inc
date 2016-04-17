@@ -7,7 +7,7 @@
 /**
  * Implements hook_ds_field_settings_info().
  */
-function enterprise_faq_ds_field_settings_info() {
+function enterprise_faq_config_ds_field_settings_info() {
   $export = array();
 
   $ds_fieldsetting = new stdClass();
@@ -72,7 +72,7 @@ function enterprise_faq_ds_field_settings_info() {
 /**
  * Implements hook_ds_layout_settings_info().
  */
-function enterprise_faq_ds_layout_settings_info() {
+function enterprise_faq_config_ds_layout_settings_info() {
   $export = array();
 
   $ds_layout = new stdClass();

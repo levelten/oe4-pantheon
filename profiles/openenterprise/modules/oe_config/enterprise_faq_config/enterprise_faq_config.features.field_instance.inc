@@ -7,7 +7,7 @@
 /**
  * Implements hook_field_default_field_instances().
  */
-function enterprise_faq_field_default_field_instances() {
+function enterprise_faq_config_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance: 'node-enterprise_faq-body'

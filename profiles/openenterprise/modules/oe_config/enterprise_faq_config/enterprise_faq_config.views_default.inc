@@ -7,7 +7,7 @@
 /**
  * Implements hook_views_default_views().
  */
-function enterprise_faq_views_default_views() {
+function enterprise_faq_config_views_default_views() {
   $export = array();
 
   $view = new view();
