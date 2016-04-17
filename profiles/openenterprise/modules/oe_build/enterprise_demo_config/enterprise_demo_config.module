@@ -6,19 +6,26 @@
 
 include_once 'enterprise_demo_config.features.inc';
 
+/**
+ * Implements hook_enterprise_apps_enable()
+ */
+function enterprise_demo_config_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_demo');
+}
+
+/*
+ * Implements hook_enterprise_apps_config_settings()
+ *
+ * Finish field_instances and other items on content types & entities before
+ * content is imported.
+ */
 function enterprise_demo_config_enterprise_apps_config_settings() {
   $edition = openenterprise_get_edition();
 
-  $settings = array(
-    'enterprise_demo' => array(
-      'entity_info' => array(),
-      'blocks' => array(),
-      'variables' => array(),
-    ),
-  );
-  $entity_info = &$settings['enterprise_demo']['entity_info'];
-  $blocks = &$settings['enterprise_demo']['blocks'];
-  $variables = &$settings['enterprise_demo']['variables'];
+
+  $entity_info = array();
+  $blocks = array();
+  $variables = array();
 
   $base_field_instance = array(
     'field_cta_category' => 1,
@@ -29,34 +36,32 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
   );
 
   $base_field_group = array(
-    'group_rel_label' => 1,
-    'group_rel_container' => 1,
-    'group_rel_subject' => 1,
   );
 
-  $work_field_instance = array();
-  $work_field_group = array();
-  if (module_exists('enterprise_work_config')) {
-    $work_field_instance = array(
-      'field_service_types' => 1,
-      'field_service_tags' => 1,
-      'field_challenge_types' => 1,
-      'field_service_areas' => 1,
-      'field_organization_types' => 1,
-      'field_organization_size' => 1,
-      'field_industry_types' => 1,
-    );
-    $work_field_group = array(
-      'group_rel_service' => 1,
-      'group_rel_market' => 1,
-    );
+  $rel_field_instance = array();
+  $rel_field_group = array();
+
+  $master_rel_info = enterprise_apps_get_entity_rel_info();
+  foreach ($master_rel_info['field_instance'] as $k => $v) {
+    $rel_field_instance[$k] = 1;
+  }
+  foreach ($master_rel_info['field_group'] as $k => $v) {
+    $rel_field_group[$k] = $v;
   }
 
   //$entity_info = array();
-  $entity_info['node:enterprise_blog'] = array(
-    'field_instance' => $base_field_instance + $work_field_instance,
-    'field_group' => $base_field_group + $work_field_group,
-  );
+  // array_merged is used becasue + operator was acting as pointer and changing
+  // settings in $rel_field_group
+  $entity_info['node:enterprise_blog'] = array();
+  $entity_info['node:enterprise_blog']['field_instance'] = $base_field_instance + $rel_field_instance;
+  $entity_info['node:enterprise_blog']['field_group'] = $base_field_group + $master_rel_info['field_group'];
+
+  // TODO: something totally weird. Changing the entity_info is changing data on $rel_field_group.
+  // Work on this later, wasting too much time.
+  // open rel subject fieldset on blog
+  //dsm($rel_field_group['group_rel_subject']->format_settings['formatter']);
+  //$entity_info['node:enterprise_blog']['field_group']['group_rel_subject']->format_settings['formatter'] = 'collapsible';
+  //dsm($rel_field_group['group_rel_subject']->format_settings['formatter']);
 
   $entity_info['node:enterprise_landingpage'] = array(
     'field_instance' => array(
@@ -65,7 +70,8 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
       'field_keywords' => 1,
       'field_page_attribute_col' => 1,
       'field_visitor_attribute_col' => 1,
-    ),
+    ) + $rel_field_instance,
+    'field_group' => $base_field_group + $master_rel_info['field_group'],
   );
 
   $entity_info['node:enterprise_thankyou'] = array(
@@ -75,17 +81,13 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
       'field_keywords' => 1,
       'field_page_attribute_col' => 1,
       'field_visitor_attribute_col' => 1,
-    ),
+    ) + $rel_field_instance,
+    'field_group' => $base_field_group + $master_rel_info['field_group'],
   );
 
   $entity_info['node:page'] = array(
-    'field_instance' => array(
-      'field_cta_category' => 1,
-      'field_intel_event_col' => 1,
-      'field_keywords' => 1,
-      'field_page_attribute_col' => 1,
-      'field_visitor_attribute_col' => 1,
-    ),
+    'field_instance' => $base_field_instance + $rel_field_instance,
+    'field_group' => $base_field_group + $master_rel_info['field_group'],
   );
 
   $entity_info['node:webform'] = array(
@@ -95,185 +97,61 @@ function enterprise_demo_config_enterprise_apps_config_settings() {
       'field_keywords' => 1,
       'field_page_attribute_col' => 1,
       'field_visitor_attribute_col' => 1,
-    ),
+    ) + $rel_field_instance,
+    'field_group' => $base_field_group + $master_rel_info['field_group'],
   );
 
   if (module_exists('enterprise_work_config')) {
-    $entity_info['node:enterprise_work'] = array(
-      'field_instance' => $base_field_instance,
-      'field_group' => $base_field_group,
-    );
+    $views_block_visibility = array();
+    $entity_info['node:enterprise_work'] = array();
+    $entity_info['node:enterprise_work']['field_instance'] = $base_field_instance + $rel_field_instance;
+    $entity_info['node:enterprise_work']['field_group'] = $base_field_group + $master_rel_info['field_group'];
+
+    // open rel services fieldset on work
+    //$entity_info['node:enterprise_work']['field_group']['group_rel_service']['format_settings']['formatter'] = 'collapsible';
+
+    $views_block_visibility[] = 'enterprise_work:page';
+
+    if (module_exists('enterprise_client_config')) {
+      $entity_info['node:enterprise_client'] = array(
+        'field_instance' => $base_field_instance,
+        'field_group' => $base_field_group + $master_rel_info['field_group'],
+      );
+      // open rel organization fieldset on client
+      //$entity_info['node:enterprise_client']['field_group']['group_rel_organization']['format_settings']['formatter'] = 'collapsible';
+
+      $views_block_visibility[] = 'enterprise_client:page';
+    }
+
+    if (module_exists('enterprise_testimonial_config')) {
+      $entity_info['node:enterprise_testimonial'] = array(
+        'field_instance' => $base_field_instance,
+        'field_group' => $base_field_group + $master_rel_info['field_group'],
+      );
+      $views_block_visibility[] = 'enterprise_client:page';
+    }
+
     $blocks['enterprise_rel:views_facet_filter'] = array(
       'title' => t('Filter by'),
       'regions' => array(
         'sidebar_second',
       ),
       'views' => array(
-        'views' => array(
-          'enterprise_work:page',
-        ),
+        'views' => $views_block_visibility,
       ),
       'weight' => 1,
     );
   }
-  /*
-  if (enterprise_apps_module_files_exist('enterprise_client_config')) {
-    //$required_apps[] = 'enterprise_client';
-  }
-  if (enterprise_apps_module_files_exist('enterprise_testimonial_config')) {
-    //$required_apps[] = 'enterprise_testimonial';
-  }
-  */
-
-  //$settings['enterprise_demo']['entity_info'] = $entity_info;
-
-  //$blocks = array();
-  $blocks['search:form'] = array(
-    'regions' => array(
-      'footer',
-    ),
-    'title' => t('Search OE Pro'),
-    'weight' => 0,
-  );
-
-  $blocks['widgets:s_twitter-user-timeline-widget'] = array(
-    'regions' => array(
-      'footer',
-    ),
-    'weight' => 1,
-  );
-
-  $blocks['widgets:s_facebook-like-box'] = array(
-    'regions' => array(
-      'footer',
-    ),
-    'weight' => 2,
-  );
-
-  $blocks['widgets:s_enterprise_social-follow'] = array(
-    'title' => t('Follow us'),
-    'regions' => array(
-      'footer',
-    ),
-    'block_row' => array(
-      'row' => 'row2',
-      'row_class' => 'stacked',
-    ),
-    'weight' => 3,
-  );
-
-  $blocks['views:enterprise_blog_blocks-tags'] = array(
-    'weight' => 1,
-  );
-
-  $blocks['views:enterprise_blog_blocks-archives'] = array(
-    'weight' => 2,
-  );
-
-  $blocks['views:enterprise_blog_blocks-popular'] = array(
-    'weight' => 6,
-  );
-
-  $blocks['cta:sel_cta_sidebar'] = array(
-    'path' => array(
-      'pages' => array(
-        '<front>',
-        'admin/*',
-        'user',
-        'user/*',
-        'users/*',
-        'offer/*',
-        'thank-you/*',
-        'services',
-        'services/*',
-        'about',
-        'about/*',
-        'team',
-        'forum',
-        'forum/*',
-      ),
-    ),
-  );
-
-  // add cta footer to blog content type
-  $blocks['cta:sel_cta_footer'] = array(
-    'node_type' => array(
-      'types' => array(
-        'enterprise_blog',
-      ),
-    ),
-  );
 
 
-  // remove block title on
-  if (function_exists('entity_get_id_by_uuid')) {
-    $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
-    $ids = entity_get_id_by_uuid('node', array($uuid));
-    if (!empty($ids)) {
-      $id = $ids[$uuid];
-      $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
-    }
-  }
-
-  //$settings['enterprise_demo']['blocks'] = &$blocks;
-
-  $colors = array(
-    '@brand-primary' =>   '#288CD5',
-    '@brand-secondary' => '#83B941',
-    '@brand-tertiary' =>  '#666666',
-    '@brand-accent' =>    '#FFA126',
-    '@brand-accent-2' =>  '#FFC826',
-    '@brand-accent-3' =>  '#FF6126',
-    //'@brand-primary' => '#1A68AE',
-    //'@brand-primary' => '#2C90D9',
-    //'@brand-primary' => '#168FAE',
-    //'@brand-secondary' => '#A1C851',
-    //'@brand-accent' => '#F7941E',
-  );
-
-  $theme_settings = array(
-    'default_logo' => 0,
-    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo.png',
-    'navbar_header_display' => 'none',
-    'navbar_class' => 'navbar-gray-lighter',
-    'less' => array(
-      'enterprise_bootstrap' => $colors
-    )
-  );
-  $variables['theme_enterprise_bootstrap_settings'] = $theme_settings;
-
-  if ($edition == 'pro') {
-    $theme_settings['less']['bella'] = $colors;
-    $variables['theme_bella_settings'] = $theme_settings;
-  }
-
-  $blocks['bean:brand_bar'] = array(
-    'regions' => array(
-      'brand_bar',
+  $settings = array(
+    'enterprise_demo' => array(
+      'entity_info' => $entity_info,
+      'blocks' => $blocks,
+      'variables' => $variables,
     ),
   );
 
   return $settings;
-}
-
-/**
- * Implements hook_uuid_entities_features_import_entity_alter();
- * @param $entity
- * @param $entity_type
- */
-function enterprise_demo_config_uuid_entities_features_import_entity_alter(&$entity, $entity_type) {
-
-  // replace webform block placeholder in brand_bar bean
-  if ($entity->entity_type == 'bean') {
-    // try to load contact us form to get id
-    if ($entity->delta == 'brand_bar' && function_exists('entity_get_id_by_uuid')) {
-      $uuid = 'cf3a4aa8-a24a-4bac-af77-76b77020fa1d';
-      $ids = entity_get_id_by_uuid('node', array($uuid));
-      if (!empty($ids)) {
-        $id = $ids[$uuid];
-        $entity->field_body[LANGUAGE_NONE][0]['value'] = str_replace('(ADD WEBFORM BLOCK HERE)', "[block:webform=client-block-$id]", $entity->field_body[LANGUAGE_NONE][0]['value']);
-      }
-    }
-  }
 }
 

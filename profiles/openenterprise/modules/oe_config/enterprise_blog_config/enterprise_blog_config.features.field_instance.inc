@@ -386,7 +386,7 @@ function enterprise_blog_config_field_default_field_instances() {
       'module' => 'radioactivity',
       'settings' => array(),
       'type' => 'radioactivity_basic_widget',
-      'weight' => 8,
+      'weight' => 50,
     ),
   );
 

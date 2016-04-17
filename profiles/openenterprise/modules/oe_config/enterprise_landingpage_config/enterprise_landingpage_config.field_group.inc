@@ -41,6 +41,34 @@ function enterprise_landingpage_config_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_form_container|node|enterprise_landingpage|form';
+  $field_group->group_name = 'group_form_container';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'enterprise_landingpage';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Form',
+    'weight' => '3',
+    'children' => array(
+      0 => 'group_form_redirect',
+    ),
+    'format_type' => 'fieldset',
+    'format_settings' => array(
+      'label' => 'Form',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => 'group-form-container field-group-fieldset display_sidebar',
+        'description' => '',
+      ),
+      'formatter' => 'open',
+    ),
+  );
+  $export['group_form_container|node|enterprise_landingpage|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_form_redirect|node|enterprise_landingpage|form';
   $field_group->group_name = 'group_form_redirect';
   $field_group->entity_type = 'node';
@@ -65,6 +93,7 @@ function enterprise_landingpage_config_field_group_info() {
       'formatter' => 'collapsible',
     ),
   );
+  $export['group_form_redirect|node|enterprise_landingpage|form'] = $field_group;
   $export['group_form_redirect|node|enterprise_landingpage|form'] = $field_group;
 
   return $export;

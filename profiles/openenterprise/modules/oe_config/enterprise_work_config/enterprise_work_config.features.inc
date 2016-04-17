@@ -29,7 +29,7 @@ function enterprise_work_config_views_api($module = NULL, $api = NULL) {
 function enterprise_work_config_node_info() {
   $items = array(
     'enterprise_work' => array(
-      'name' => t('Work'),
+      'name' => t('Case Study'),
       'base' => 'node_content',
       'description' => '',
       'has_title' => '1',

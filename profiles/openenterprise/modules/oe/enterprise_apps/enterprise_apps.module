@@ -92,6 +92,11 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
+  $master_rel_info = enterprise_apps_get_entity_rel_info();
+
+  dsm($master_rel_info);
+  return '';
+
 
   $fc = enterprise_apps_get_base_feature_components('enterprise_client');
   dsm($fc);
@@ -1169,8 +1174,24 @@ function enterprise_apps_config_entity_info_field_group($entity_type, $bundle, $
   $groups0 = array_merge($groups0, field_group_info_groups($entity_type, 'enterprise_etsource', $group_mode));
 
   foreach ($comp_settings as $group_name => $settings) {
-    $instance0 = !empty($groups0[$group_name]) ? $groups0[$group_name] : array();
-    $instance1 = !empty($groups1[$group_name]) ? $groups1[$group_name] : array();
+    $instance0 = !empty($groups0[$group_name]) ? $groups0[$group_name] : (object) array();
+    if (!is_scalar($settings)) {
+      $instance0 = (object) drupal_array_merge_deep($instance0, $settings);
+    }
+
+    if (!empty($instance0)) {
+      $instance0->identifier = $group_name . '|' . $entity_type . '|' . $bundle . '|' . $group_mode;
+      $instance0->bundle = $bundle;
+      $instance0->entity_type = $entity_type;
+      if (isset($instance0->id)) {
+        unset($instance0->id);
+      }
+      if (isset($instance0->export_type)) {
+        unset($instance0->export_type);
+      }
+    }
+
+    $instance1 = !empty($groups1[$group_name]) ? $groups1[$group_name] : (object)array();
     $action = 'update';
     if (!empty($instance1) && !$settings) {
       $action = 'delete';
@@ -1178,16 +1199,10 @@ function enterprise_apps_config_entity_info_field_group($entity_type, $bundle, $
     else if (!empty($settings)) {
       if (empty($instance1) && !empty($instance0)) {
         $instance1 = $instance0;
-        $instance1->identifier = $group_name . '|' . $entity_type . '|' . $bundle . '|' . $group_mode;
-        $instance1->bundle = $bundle;
-        $instance1->entity_type = $entity_type;
-        if (isset($instance1->id)) {
-          unset($instance1->id);
-        }
-        if (isset($instance1->export_type)) {
-          unset($instance1->export_type);
-        }
         $action = 'create';
+      }
+      else if (!empty($instance1) && !empty($instance0)) {
+        $instance1 = (object) drupal_array_merge_deep($instance1, $instance0);
       }
     }
     else {
@@ -1197,10 +1212,6 @@ function enterprise_apps_config_entity_info_field_group($entity_type, $bundle, $
     // ignore field group if instance not available
     if (empty($instance1)) {
       continue;
-    }
-
-    if (is_array($settings)) {
-      $instance1 = drupal_array_merge_deep($settings, $instance1);
     }
 
     if ($action == 'create') {

@@ -44,10 +44,7 @@ function enterprise_blog_config_views_default_views() {
   $handler->display->display_options['relationships']['term_node_tid']['field'] = 'term_node_tid';
   $handler->display->display_options['relationships']['term_node_tid']['label'] = 'Categories';
   $handler->display->display_options['relationships']['term_node_tid']['vocabularies'] = array(
-    'categories' => 1,
-    'cta_categories' => 0,
-    'keywords' => 0,
-    'tags' => 0,
+    'categories' => 'categories',
   );
   /* Relationship: Content: Author */
   $handler->display->display_options['relationships']['uid']['id'] = 'uid';

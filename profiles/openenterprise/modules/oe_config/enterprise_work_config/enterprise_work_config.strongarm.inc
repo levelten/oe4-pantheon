@@ -62,6 +62,38 @@ function enterprise_work_config_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'enterprise_rel_entity_settings_node__enterprise_work';
+  $strongarm->value = array(
+    'view_display' => 'enterprise_work:page',
+    'filter' => array(
+      'block_title' => '',
+      'facets' => array(
+        'taxonomy_term:service_types' => array(
+          'display' => 'links',
+          'title' => 'Services',
+          'item_limit' => '',
+        ),
+      ),
+    ),
+    'breadcrumbs' => array(
+      'node' => array(
+        'model' => 'relview',
+        'filtargs' => array(
+          'taxonomy_term:service_types' => array(
+            'display' => '',
+          ),
+        ),
+      ),
+    ),
+    'inherit' => array(
+      'ref_field' => '',
+    ),
+  );
+  $export['enterprise_rel_entity_settings_node__enterprise_work'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'field_bundle_settings_node__enterprise_work';
   $strongarm->value = array(
     'view_modes' => array(
@@ -114,25 +146,49 @@ function enterprise_work_config_strongarm() {
     'extra_fields' => array(
       'form' => array(
         'metatags' => array(
-          'weight' => '4',
+          'weight' => '9',
         ),
         'title' => array(
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '1',
+          'weight' => '6',
         ),
         'redirect' => array(
-          'weight' => '2',
+          'weight' => '7',
         ),
         'xmlsitemap' => array(
-          'weight' => '3',
+          'weight' => '8',
         ),
       ),
       'display' => array(),
     ),
   );
   $export['field_bundle_settings_node__enterprise_work'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'intel_entity_settings_node__enterprise_work';
+  $strongarm->value = array(
+    'page_intent' => 'i',
+    'track_page_uid' => 0,
+    'track_term_fields' => array(
+      'field_personas' => 0,
+      'field_categories' => 0,
+      'field_tags' => 0,
+      'field_industry_types' => 0,
+      'field_organization_sizes' => 0,
+      'field_organization_types' => 0,
+      'field_service_areas' => 0,
+      'field_service_types' => 0,
+      'field_service_tags' => 0,
+      'field_challenge_types' => 0,
+      'field_cta_category' => 0,
+      'field_keywords' => 0,
+    ),
+  );
+  $export['intel_entity_settings_node__enterprise_work'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */

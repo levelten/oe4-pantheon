@@ -499,6 +499,8 @@ function enterprise_apps_install_demo(&$install_state) {
   $apps['enterprise_permissions_config'] = 'enterprise_permissions_config';
   $apps['enterprise_permissions_content'] = 'enterprise_permissions_content';
 
+  $apps['enterprise_demo_content_post'] = 'enterprise_demo_content_post';
+
   $profile_settings['demo']['enable_modules'] = $apps;
   $debug['apps'] = $apps;
 
@@ -531,8 +533,6 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
   //features_revert(array('enterprise_editor' => array('ckeditor_profile', 'filter')));
 
   $profile_settings = variable_get('enterprise_apps_profile_settings', array());
-
-  enterprise_apps_config_app('enterprise_demo');
 
   // must rebuild field instances after all fields are installed.
   $features_revert = !empty($profile_settings['demo']['info']['features_revert']) ? $profile_settings['demo']['info']['features_revert'] : array();

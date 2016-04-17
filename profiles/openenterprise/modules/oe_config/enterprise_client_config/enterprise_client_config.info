@@ -4,7 +4,6 @@ package = Open Enterprise Config
 version = 7.x-3.5
 dependencies[] = ctools
 dependencies[] = ds
-dependencies[] = enterprise_fields
 dependencies[] = enterprise_global_config
 dependencies[] = entityreference
 dependencies[] = features

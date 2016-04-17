@@ -22,6 +22,7 @@ features[features_api][] = api:2
 features[field_base][] = field_landingpage_cta_footer
 features[field_base][] = field_landingpage_cta_sidebar
 features[field_group][] = group_cta|node|enterprise_landingpage|form
+features[field_group][] = group_form_container|node|enterprise_landingpage|form
 features[field_group][] = group_form_redirect|node|enterprise_landingpage|form
 features[field_instance][] = node-enterprise_landingpage-body
 features[field_instance][] = node-enterprise_landingpage-field_landingpage_cta_footer

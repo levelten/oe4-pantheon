@@ -2438,6 +2438,6 @@ function enterprise_rel_field_attach_view_alter(&$output, $context) {
  */
 function enterprise_rel_features_pipe_node_alter(&$pipe, $data, $export) {
   foreach ($data as $node_type) {
-    $pipe['variable'][] = "enterprise_rel_entity_settings_node_{$node_type}";
+    $pipe['variable'][] = "enterprise_rel_entity_settings_node__{$node_type}";
   }
 }

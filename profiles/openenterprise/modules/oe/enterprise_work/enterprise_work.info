@@ -1,5 +1,5 @@
-name = Enterprise Work (CBD)
-description = A brand you have done worked.
+name = Enterprise Work
+description = Case studies
 core = 7.x
 package = Open Enterprise
 apps[install_disable] = 1

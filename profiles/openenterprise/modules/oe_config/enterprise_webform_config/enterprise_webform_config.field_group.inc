@@ -21,7 +21,7 @@ function enterprise_webform_config_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Form redirect',
-    'weight' => '34',
+    'weight' => '2',
     'children' => array(
       0 => 'field_redirect_url',
       1 => 'field_thankyou',

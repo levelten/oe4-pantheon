@@ -60,7 +60,7 @@ function enterprise_conversion_post_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_select',
-      'weight' => 100,
+      'weight' => 20,
     ),
   );
 

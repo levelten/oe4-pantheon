@@ -38,6 +38,22 @@
   margin-bottom: 15px;
 }
 
-.column-side .horizontal-tabs .fieldset.titled > .fieldset-content {
-  padding: 10px 0 0 0;
+.column-side .display_sidebar > .fieldset-title {
+  background-color: #EEEEEE;
+}
+
+.column-side .display_sidebar .fieldset-content {
+  padding: 10px 6px 0 6px;
+}
+
+.column-side .display_sidebar .fieldset-content .fieldset-title {
+  background-color: #E8E8E8;
+}
+
+.column-side .display_sidebar .fieldset-content .fieldset-content {
+  background-color: #F8F8F8;
+}
+
+.column-side .display_sidebar .fieldset-content > .form-wrapper {
+  margin-bottom: 8px;
 }

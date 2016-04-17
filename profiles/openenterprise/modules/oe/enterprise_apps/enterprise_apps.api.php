@@ -64,6 +64,11 @@ function hook_enterprise_apps_config_settings() {
       ),
     ),
     // copy field groups from etmaster or etsource
+    // if a field group is set to 1, the group will be copied from etmaster/etsource
+    // if set to 0, field will be deleted
+    // if array/object is provided, that data will be used to create a new field_group
+    // or will be merged into an existing field group and updated
+    // and added/updated.
     'field_group' => array(
       'group_rel_label' => 1,
       'group_rel_container' => 1,

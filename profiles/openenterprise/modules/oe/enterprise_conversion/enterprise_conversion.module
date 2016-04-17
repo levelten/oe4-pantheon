@@ -492,6 +492,7 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     }
   }
 
+  $form_fieldset_exists = !empty($form['#fieldgroups']['group_form_container']);
 //dsm($form);
 //dsm($form_state);
 //dsm($_REQUEST);
@@ -603,6 +604,11 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     'enterprise_conversion_form_add_edit_button_submit',
   );
 
+  // if form fieldset exists, add fieldset
+  if ($form_fieldset_exists) {
+    $form['#group_children']['enterprise_conversion_cta_form'] = 'group_form_container';
+  }
+
   $form['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
 
   // If there are actions, $form[#validate] may not get called, so add it here, too
@@ -673,6 +679,11 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     '#default_value' => isset($lp_options['form_submit_class']) ? $lp_options['form_submit_class'] : '',
     '#description' => t('Enter any custom classes you would like add to the submit button.'),
   );
+
+  // if form fieldset exists, add fieldset
+  if ($form_fieldset_exists) {
+    $form['#group_children']['form_customization'] = 'group_form_container';
+  }
 
   // remove entity_data to prevent conflicts with entity_data_entity_save
   $form['page_customization'] = array(
@@ -971,7 +982,7 @@ function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
       '#markup' => $out,
       '#prefix' => '<div class="display_sidebar">',
       '#suffix' => '</div>',
-      '#weight' => 101,
+      '#weight' => 4,
     );
 
     // notifications
@@ -981,7 +992,7 @@ function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       '#description' => t('Notifications sent when form submitted.'),
-      '#weight' => 102,
+      '#weight' => 6,
       '#prefix' => '<div class="display_sidebar">',
       '#suffix' => '</div>',
     );
@@ -1048,7 +1059,7 @@ function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
         '#collapsible' => FALSE,
         '#collapsed' => FALSE,
         '#description' => t('The settings below enable you to quickly initialize your form using common configuration settings. You can further customize the form after saving.'),
-        '#weight' => 103,
+        '#weight' => 4,
         '#prefix' => '<div class="display_sidebar">',
         '#suffix' => '</div>',
       );
