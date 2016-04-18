@@ -22,9 +22,7 @@
       var dialogElement = dialog.getElement().getFirst();
       dialogElement.setStyle('z-index', 10001);
       // Invoke the media popup for file selection.
-      console.log(Drupal.media.popups);
       var mediaIframe = Drupal.media.popups.mediaBrowser(function(mediaFiles) {
-        console.log(mediaFiles);
         if (mediaFiles.length > 0) {
           // There is probably a better way of getting the url for the file
           // but media returns the object with an absolute url and the uri.
@@ -89,9 +87,6 @@
     for (var i = 0; i < definition.contents.length; ++i) {
       if ((element = definition.contents[ i ])) {
         attachMediaBrowser(evt.editor, evt.data.name, definition, element.elements);
-        if (element.hidden && element.filebrowser && element.type != 'fileButton') {
-          element.hidden = false;
-        }
       }
     }
   });
