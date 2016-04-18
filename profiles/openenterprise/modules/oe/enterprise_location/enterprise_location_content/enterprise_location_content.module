@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Enterprise Location Content feature.
- */
-
-include_once 'enterprise_location_content.features.inc';

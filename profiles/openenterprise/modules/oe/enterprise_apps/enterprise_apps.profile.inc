@@ -40,7 +40,6 @@ function enterprise_apps_profile_install_tasks($install_state) {
 
 function enterprise_apps_config_features_adhoc_apps() {
   $ext_apps = array(
-    'enterprise_careers' => 0,
     'enterprise_events' => 0,
     'enterprise_faq' => 1,
     'enterprise_forum' => 0,
@@ -49,10 +48,15 @@ function enterprise_apps_config_features_adhoc_apps() {
     'enterprise_location' => 0,
     'enterprise_news' => 0,
     'enterprise_press' => 1,
-    'enterprise_news' => 0,
     'enterprise_video' => 0,
-    'enterprise_work' => 0,
+    'enterprise_wiki' => 0,
   );
+  if (!empty($_GET['exp'])) {
+    $ext_apps[] = 'enterprise_work';
+    $ext_apps[] = 'enterprise_client';
+    $ext_apps[] = 'enterprise_testimonial';
+    $ext_apps[] = 'enterprise_careers';
+  }
   return $ext_apps;
 }
 

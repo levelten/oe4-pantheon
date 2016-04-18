@@ -10,7 +10,7 @@ include_once('enterprise_faq_config.features.inc');
  * Implements hook_enterprise_apps_on_enable()
  */
 function enterprise_faq_config_enterprise_apps_app_enabled() {
-  enterprise_faq_app_theme_settings();
+  enterprise_faq_config_app_theme_settings();
   enterprise_apps_config_app('enterprise_faq');
 }
 

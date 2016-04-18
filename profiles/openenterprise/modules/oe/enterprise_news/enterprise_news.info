@@ -1,5 +1,5 @@
 name = Enterprise News
-description = Feature for Company News
+description = Feature for company news
 core = 7.x
 package = Open Enterprise
 dependencies[] = ctools

@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Enterprise Images Content feature.
- */
-
-include_once 'enterprise_image_content.features.inc';
