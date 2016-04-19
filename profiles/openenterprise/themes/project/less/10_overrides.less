@@ -17,3 +17,16 @@ some cases may stretch layouts. So, we're just hiding it.
 .fb_iframe_widget, .fb_iframe_widget span, .fb_iframe_widget span iframe[style] {
     width: 100% !important;
 }
+
+// Format radio buttons in webforms so they align vertically with other form elements.
+.webform-client-form {
+  .form-radios {
+    input {
+      margin-left: 0;
+    }
+
+    label {
+      padding-left: 25px;
+    }
+  }
+}
