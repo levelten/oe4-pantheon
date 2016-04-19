@@ -33,6 +33,17 @@ class DeployAuthenticatorSession implements DeployAuthenticator {
    * {@inheritdoc}
    */
   public function deploy(Traversable $iterator) {
+
+    $verify_ssl = variable_get('deploy_verify_ssl', TRUE);
+    $context_options = array(
+      'ssl' => array(
+        'verify_peer' => $verify_ssl,
+        'verify_peer_name' => $verify_ssl,
+        'allow_self_signed' => !$verify_ssl,
+      ),
+    );
+    $context = stream_context_create($context_options);
+
     // Only authenticate if we've got a username and password. This allows for
     // deployment as an anonymous user. There are usecases for that.
     if (!empty($this->config['username'])) {
@@ -48,6 +59,7 @@ class DeployAuthenticatorSession implements DeployAuthenticator {
           'username' => $this->config['username'],
           'password' => $this->config['password'],
         )),
+        'context' => $context,
       );
 
       if ($this->config['debug']) {
@@ -71,34 +83,46 @@ class DeployAuthenticatorSession implements DeployAuthenticator {
         // We have to get a CSFR Token from the server and pass along with
         // each services call (introduced in Services 7.x-3.4
         // as per SA-CONTRIB-2013-051; https://drupal.org/node/2012982).
-        $user = NULL;
-        $parts = parse_url($this->service->config['url']);
-        $port = '';
+        $token = isset($response_data['token']) ? $response_data['token'] : NULL;
+        // To get the token directly from the login request requires Services
+        // 7.x-3.6 or newer, for older versions we need a separate request.
+        if (!$token) {
+          $user = NULL;
+          $parts = parse_url($this->service->config['url']);
+          $port = '';
 
-        if (isset($parts['port'])) {
-          $port = ':' . $parts['port'];
+          if (isset($parts['port'])) {
+            $port = ':' . $parts['port'];
+          }
+
+          if (isset($parts['user'])) {
+            $user = $parts['user'];
+          }
+
+          if (isset($parts['pass'])) {
+            $pass = $parts['pass'];
+          }
+
+          $token_url = $parts['scheme'] . '://' . ($user ? $user . ':' . $pass . '@' : '') . $parts['host'] . $port . '/services/session/token';
+
+          $options = array(
+            'method' => 'GET',
+            'headers' => $this->service->config['headers'],
+            'context' => $context,
+          );
+
+          $token_response = drupal_http_request($token_url, $options);
+          if (isset($token_response->error) || !in_array($token_response->code, array(200, 304))) {
+            throw new DeployAuthenticationException(t('Authentication error: @code @error', array('@code' => $token_response->code, '@error' => t('Failed to retrieve CSRF token.'))));
+          }
+
+          if ($this->config['debug']) {
+            watchdog('deploy', 'Session CSRF Token response: @response', array('@response' => print_r($token_response, TRUE)), WATCHDOG_DEBUG);
+          }
+
+          $token = trim($token_response->data);
         }
-
-        if (isset($parts['user'])) {
-          $user = $parts['user'];
-        }
-
-        if (isset($parts['pass'])) {
-          $pass = $parts['pass'];
-        }
-
-        $token_url = $parts['scheme'] . '://' . ($user ? $user . ':' . $pass . '@' : '') . $parts['host'] . $port . '/services/session/token';
-
-        $token_response = drupal_http_request($token_url, array('method' => 'GET', 'headers' => $this->service->config['headers']));
-        if (isset($token_response->error) || !in_array($token_response->code, array(200, 304))) {
-          throw new DeployAuthenticationException(t('Authentication error: @code @error', array('@code' => $token_response->code, '@error' => t('Failed to retrieve CSRF token.'))));
-        }
-
-        if ($this->config['debug']) {
-          watchdog('deploy', 'Session CSRF Token response: @response', array('@response' => print_r($token_response, TRUE)), WATCHDOG_DEBUG);
-        }
-
-        $this->service->config['headers']['X-CSRF-Token'] = trim($token_response->data);
+        $this->service->config['headers']['X-CSRF-Token'] = $token;
       }
       else {
         throw new DeployAuthenticationException(t("No session was returned from the authentication request."));
@@ -118,8 +142,9 @@ class DeployAuthenticatorSession implements DeployAuthenticator {
         'method' => 'POST',
         'headers' => array(
           'Cookie' => $response->headers['set-cookie'],
-          'X-CSRF-Token' => trim($token_response->data),
+          'X-CSRF-Token' => $token,
         ),
+        'context' => $context,
       );
       $response = drupal_http_request($logout_url, $options);
 

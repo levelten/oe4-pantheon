@@ -56,11 +56,6 @@ projects[entity][version] = 1.5
 projects[entitycache][version] = 1.2
 projects[exclude_node_title][version] = 1.7
 
-projects[features][version] = 2.5
-; How to fix Undefined property: stdClass::$status in features_export_form on PHP 5.4
-; http://drupal.org/node/2324973
-projects[features][patch][2324973] = https://www.drupal.org/files/issues/features-2324973-undefined_property_status-1_0.patch
-
 projects[icon][version] = 1.0-beta3
 projects[libraries][version] = 2.x-dev
 projects[menu_attributes][version] = 1.0-rc2
@@ -120,6 +115,8 @@ projects[module_filter][version] = 2.0-alpha2
 projects[menu_trail_by_path][version] = 2.0
 projects[realname][version] = 1.2
 projects[simplified_menu_admin][version] = 1.0-beta2
+projects[adminimal_admin_menu][version] = 1.7
+projects[adminimal_admin_menu][patch][] = https://www.drupal.org/files/issues/adminimal_admin_menu-js-error-2407007-3-no-whitespace-changes.patch
 
 ;;;;;
 ; SEO Modules

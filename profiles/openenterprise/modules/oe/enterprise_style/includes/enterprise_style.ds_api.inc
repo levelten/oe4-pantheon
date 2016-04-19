@@ -488,16 +488,22 @@ function enterprise_style_ds_field_prev_next_node($variables) {
     $entity = $variables['entity'];
     $next = prev_next_nid($entity->nid, 'next');
     $prev = prev_next_nid($entity->nid, 'prev');
+    $arrow_prev = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big'));
+    $arrow_next = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big'));
+    $attr_next = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next')));
+    $attr_prev = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev')));
+    $attr_prev_small = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev', 'small')));
+
     if (!empty($next) || !empty($prev)) {
       $output = '';
       if (!empty($next) && !empty($prev)) {
-        return l(t('Next') . theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big')) . '<span class="arrow"></span>', 'node/' . $next, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next')))) . l(theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big')), 'node/' . $prev, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev', 'small'))));
+        return l($arrow_next . t('Next') , 'node/' . $next, $attr_next) . l(t('Prev') . $arrow_prev, 'node/' . $prev, $attr_prev_small);
       }
       elseif (!empty($next)) {
-        return l(t('Next') . theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big')), 'node/' . $next, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next'))));
+        return l(t('Next') . $arrow_next, 'node/' . $next, $attr_next);
       }
       elseif (!empty($prev)) {
-        return l(theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big')) . t('Previous'), 'node/' . $prev, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev'))));
+        return l(t('Previous') . $arrow_prev, 'node/' . $prev, $attr_prev);
       }
     }
   }
