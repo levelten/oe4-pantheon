@@ -9,6 +9,7 @@ dependencies[] = devel
 dependencies[] = enterprise_apps
 dependencies[] = intel_twilio
 dependencies[] = menu_trail_by_path
+dependencies[] = search
 dependencies[] = strongarm
 dependencies[] = uuid
 dependencies[] = uuid_path

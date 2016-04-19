@@ -19,6 +19,7 @@ dependencies[] = taxonomy
 dependencies[] = field
 dependencies[] = field_ui
 dependencies[] = file
+dependencies[] = search
 
 ; Contrib
 

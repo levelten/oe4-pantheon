@@ -5,7 +5,7 @@
  */
 
 /**
- * Implementation hook_rules_data_info().
+ * Implements hook_rules_data_info().
  */
 function twilio_rules_data_info() {
   return array(
@@ -17,6 +17,13 @@ function twilio_rules_data_info() {
           'type' => 'text',
           'label' => t('Number'),
           'description' => t('The phone number of the incoming SMS.'),
+          'getter callback' => 'entity_property_verbatim_get',
+          'setter callback' => 'entity_property_verbatim_set',
+        ),
+        'number_twilio' => array(
+          'type' => 'text',
+          'label' => t('Twilio Number'),
+          'description' => t('The Twilio phone number that receieved the message.'),
           'getter callback' => 'entity_property_verbatim_get',
           'setter callback' => 'entity_property_verbatim_set',
         ),
@@ -140,6 +147,21 @@ function twilio_rules_action_info() {
       ),
     ),
   );
+  $actions['twilio_send_sms_to_all_users'] = $defaults + array(
+    'label' => t('Send an SMS to all users'),
+    'base' => 'twilio_rules_action_send_sms_to_all_users',
+    'parameter' => array(
+      'message' => array(
+        'type' => 'text',
+        'label' => t('Message'),
+      ),
+      'media' => array(
+        'type' => 'text',
+        'optional' => TRUE,
+        'label' => t('Media path'),
+      ),
+    ),
+  );
   $actions['twilio_send_sms_to_number'] = $defaults + array(
     'label' => t('Send an SMS to a number'),
     'base' => 'twilio_rules_action_send_sms_to_number',
@@ -173,6 +195,24 @@ function twilio_rules_action_info() {
 function twilio_rules_action_send_sms_to_user($account, $message, $media) {
   if (!empty($account->twilio_user['number']) && $account->twilio_user['status'] == 2) {
     twilio_send($account->twilio_user['number'], $message, $account->twilio_user['country'], $media);
+  }
+}
+
+/**
+ * Action: Send an SMS to all users.
+ */
+function twilio_rules_action_send_sms_to_all_users($message, $media) {
+  // Fetch all site users with confirmed numbers.
+  $results = db_select('twilio_user', 't')
+    ->fields('t')
+    ->condition('t.status', TWILIO_USER_CONFIRMED)
+    ->execute()
+    ->fetchAll();
+  // If we have results, iterate through and send the message.
+  if (!empty($results)) {
+    foreach ($results as $result) {
+      twilio_send($result->number, $message, $result->country, $media);
+    }
   }
 }
 
