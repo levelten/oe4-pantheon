@@ -116,14 +116,14 @@ dependencies[] = less
 dependencies[] = enterprise_apps
 dependencies[] = enterprise_base
 dependencies[] = enterprise_base_config
-//dependencies[] = enterprise_block
+; dependencies[] = enterprise_block
 dependencies[] = enterprise_editor
 dependencies[] = enterprise_editor_config
 ; dependencies[] = enterprise_menus
 ; dependencies[] = enterprise_webform
 ; dependencies[] = enterprise_intel
-//dependencies[] = enterprise_page
-//dependencies[] = enterprise_page_config
+; dependencies[] = enterprise_page
+; dependencies[] = enterprise_page_config
 dependencies[] = enterprise_style
 dependencies[] = enterprise_theme
 
