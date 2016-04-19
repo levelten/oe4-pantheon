@@ -1,4 +1,5 @@
 name = Enterprise News Content
+description = Demo content for Enterprise News
 core = 7.x
 package = Open Enterprise Content
 dependencies[] = ctools

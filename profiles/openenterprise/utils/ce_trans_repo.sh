@@ -3,8 +3,8 @@
 # run from Drupal root directory
 
 # Process
-# 1. Run with mode=1 to remove exclusive pro files
-# 2. Push to ce remote
+# 1. Run with mode=1 to remove PE files
+# 2. Push to CE remote
 # 3. Run with mode=2 to ignore any changes to files (to enable pushing back to pro remote)
 
 # for each module, theme, etc that should be removed rm -rf is run on the directory, then
@@ -16,12 +16,8 @@
 
 # useful commands
 # get a list of files set to assume-unchanged
-# git ls-files -v|grep '^h'
+#   git ls-files -v|grep '^h'
 
-
-# git ls-files -z profiles/openenterprise/modules/oe/enterprise_faq/ | xargs -0 git update-index --no-assume-unchanged
-# git ls-files -z profiles/openenterprise/modules/oe_config/enterprise_faq_config/ | xargs -0 git update-index --no-assume-unchanged
-# git ls-files -z profiles/openenterprise/modules/oe/enterprise_faq/ | xargs -0 git update-index --no-assume-unchanged
 
 # if pushing to ce repo, set to no-
 mode=1
@@ -40,16 +36,21 @@ do
 done
 
 #remove pro libraries
-#libs='enterprise_editor'
+libs='enterprise_editor'
 #for lib in $libs
-#do
-#  rm -rf profiles/openenterprise/libraries/$lib
-#  git ls-files -z profiles/openenterprise/libraries/$lib/ | xargs -0 git update-index --${assumeflag}assume-unchanged
-#done
+do
+  if [$mode -eq 1]
+  then
+    rm -rf profiles/openenterprise/libraries/$lib
+  elif [$mode -eq 2]
+  then
+    git ls-files -z profiles/openenterprise/libraries/$lib/ | xargs -0 git update-index --assume-unchanged
+  fi
+done
 
-#remote apps
+#remote Pro Apps
 apps="enterprise_premiumoffer"
-#apps+=" enterprise_client"
+apps+=" enterprise_client"
 #apps+=" enterprise_events"
 #apps+=" enterprise_faq"
 #apps+=" enterprise_image"
@@ -57,26 +58,21 @@ apps="enterprise_premiumoffer"
 #apps+=" enterprise_location"
 #apps+=" enterprise_news"
 #apps+=" enterprise_press"
-#apps+=" enterprise_testimonial"
+apps+=" enterprise_testimonial"
 #apps+=" enterprise_video"
-#apps+=" enterprise_work"
+apps+=" enterprise_work"
 for app in $apps
 do
-
   if [$mode -eq 1]
   then
     rm -rf profiles/openenterprise/modules/oe/$app
-    rm -rf profiles/openenterprise/modules/oe_config/${app}_config
-    rm -rf profiles/openenterprise/modules/oe_content/${app}_content
   elif [$mode -eq 2]
   then
-    git ls-files -z profiles/openenterprise/modules/oe/$app/ | xargs -0 git update-index --${assumeflag}assume-unchanged
-    git ls-files -z profiles/openenterprise/modules/oe_config/${app}_config/ | xargs -0 git update-index --${assumeflag}assume-unchanged
-    git ls-files -z profiles/openenterprise/modules/oe_content/${app}_content/ | xargs -0 git update-index --${assumeflag}assume-unchanged
+    git ls-files -z profiles/openenterprise/modules/oe/$app/ | xargs -0 git update-index --assume-unchanged
   fi
 done
 
-#remove pro apps
+#remove Pro directories
 modules='oe_ext'
 #modules+=' enterprise_work_pre'
 for module in $modules
@@ -86,6 +82,6 @@ do
     rm -rf profiles/openenterprise/modules/$module
   elif [$mode -eq 2]
   then
-    git ls-files -z profiles/openenterprise/modules/$module/ | xargs -0 git update-index --${assumeflag}assume-unchanged
+    git ls-files -z profiles/openenterprise/modules/$module/ | xargs -0 git update-index --assume-unchanged
   fi  
 done

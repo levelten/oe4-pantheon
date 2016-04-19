@@ -1,7 +1,7 @@
 name = Enterprise FAQ
 description = Answers to frequently asked questions
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 version = 7.x-3.5
 project = enterprise_faq
 dependencies[] = enterprise_faq_config

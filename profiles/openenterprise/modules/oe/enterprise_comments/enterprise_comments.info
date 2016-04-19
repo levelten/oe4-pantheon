@@ -1,3 +1,5 @@
 name = Enterprise Comments
 core = 7.x
 package = Open Enterprise
+dependencies[] = enterprise_comments_config
+features[features_api][] = api:2

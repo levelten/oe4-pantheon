@@ -225,7 +225,7 @@ function hook_enterprise_apps_config_settings() {
         'enterprise_blog:archives',
       ),
     // add Bootstrap margin top and bottom classes to block
-    'class' => 'm-y-1',
+    'css_class' => 'm-y-1',
     // block row settings
     'block_row' => array(
       'row' => 'row2',

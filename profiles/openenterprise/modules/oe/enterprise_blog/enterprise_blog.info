@@ -1,5 +1,7 @@
-name = Enterprise Blog (CBD)
+name = Enterprise Blog
 description = A multi-user full featured blog app. Has many of the features of WordPress.
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 apps[install_disable] = 1
+dependencies[] = enterprise_blog_config
+features[features_api][] = api:2

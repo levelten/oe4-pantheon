@@ -1,5 +1,7 @@
-name = Enterprise Testimonal (Experimental)
+name = Enterprise Testimonial (Experimental)
 description = Quotes clients have said about you
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 apps[install_disable] = 1
+dependencies[] = enterprise_testimonial_config
+features[features_api][] = api:2

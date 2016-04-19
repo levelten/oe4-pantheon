@@ -70,14 +70,14 @@ function openenterprise_theme($existing, $type, $theme, $path) {
  * Implements theme_openenterprise_logo().
  */
 function theme_openenterprise_logo() {
-  return '<img src="' . url('profiles/openenterprise/images/openenterprise-logo-small.png') .'" alt="" class="openenterprise" height="16" width="122" />';
+  return '<img src="' . url('profiles/openenterprise/images/openenterprise_logo_small.png') .'" alt="" class="openenterprise" height="16" width="122" />';
 }
 
 /**
  * Implements theme_levelten_logo().
  */
 function theme_levelten_logo() {
-  return '<img src="' . url('profiles/openenterprise/images/levelten-logo-small.png') .'" alt="" class="levelten" height="16" width="52" />';
+  return '<img src="' . url('profiles/openenterprise/images/levelten_logo_small.png') .'" alt="" class="levelten" height="16" width="52" />';
 }
 
 /**

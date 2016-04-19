@@ -2,3 +2,4 @@ name = Enterprise Intelligence
 description = Intelligence configuration
 core = 7.x
 package = Open Enterprise
+dependencies[] = enterprise_intel_config

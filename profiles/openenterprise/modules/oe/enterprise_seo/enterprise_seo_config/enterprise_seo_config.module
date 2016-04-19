@@ -1,0 +1,60 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise SEO feature.
+ */
+
+include_once 'enterprise_seo_config.features.inc';
+
+/*
+function enterprise_seo_config_features_export_alter(&$export, $module_name) {
+  if ($module_name == 'enterprise_seo_config') {
+    if (empty($_GET['profile']) && isset($export['features']['field_instance']) && isset($export['features']['field_instance']['node-enterprise_etmaster-field_keywords'])) {
+      //dsm($export);
+      //dsm($module_name);
+      unset($export['features']['field_instance']['node-enterprise_etmaster-field_keywords']);
+    }
+  }
+
+}
+
+function enterprise_seo_config_features_pipe_alter(&$pipe, $data, $export) {
+
+  if (1 || $export['component'] == 'field_instance') {
+
+    if ($export['module_name'] == 'enterprise_seo_config') {
+      //dsm($pipe);
+      if ($pipe['field_instance']) {
+        //dsm($pipe);
+        //dsm($data);
+        //dsm($export);
+      }
+
+      if (!empty($export['features']['field_instance']['node-enterprise_etmaster-field_keywords'])) {
+        //unset($export['features']['field_instance']['node-enterprise_etmaster-field_keywords']);
+      }
+      if (!empty($data['node-enterprise_etmaster-field_keywords'])) {
+        //unset($data['node-enterprise_etmaster-field_keywords']);
+      }
+      //dsm($export);
+    }
+  }
+}
+
+function enterprise_seo_config_system_info_alter(&$info, $file, $type) {
+  if ($type == 'module') {
+    if ($file->name == 'enterprise_seo_config') {
+      dsm($info);
+      dsm($file);
+      dsm($type);
+      unset($info['features']['field_instance'][0]);
+      unset($file->info['features']['field_instance'][0]);
+      dsm($file);
+      dsm($type);
+    }
+  }
+  //dsm($info);
+  //dsm($file);
+  //dsm($type);
+}
+*/

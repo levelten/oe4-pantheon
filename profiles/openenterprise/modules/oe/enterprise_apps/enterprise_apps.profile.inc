@@ -459,9 +459,9 @@ function enterprise_apps_install_demo(&$install_state) {
     if (enterprise_apps_module_files_exist($name)) {
       $apps[$name] = $name;
     }
-    if (enterprise_apps_module_files_exist($name . '_config')) {
-      $apps[$name . '_config'] = $name . '_config';
-    }
+    //if (enterprise_apps_module_files_exist($name . '_config')) {
+    //  $apps[$name . '_config'] = $name . '_config';
+    //}
     if (enterprise_apps_module_files_exist($name . '_post')) {
       $apps[$name . '_post'] = $name . '_post';
     }
@@ -479,9 +479,9 @@ function enterprise_apps_install_demo(&$install_state) {
       if (enterprise_apps_module_files_exist($name)) {
         $apps[$name] = $name;
       }
-      if (enterprise_apps_module_files_exist($name . '_config')) {
-        $apps[$name . '_config'] = $name . '_config';
-      }
+      //if (enterprise_apps_module_files_exist($name . '_config')) {
+      //  $apps[$name . '_config'] = $name . '_config';
+      //}
       if (enterprise_apps_module_files_exist($name . '_post')) {
         $apps[$name . '_post'] = $name . '_post';
       }

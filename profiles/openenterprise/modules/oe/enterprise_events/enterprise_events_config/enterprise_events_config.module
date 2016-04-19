@@ -1,0 +1,66 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Events feature.
+ */
+
+include_once 'enterprise_events_config.features.inc';
+
+/**
+ * Implements hook_ds_fields_info().
+ */
+function enterprise_events_config_ds_fields_info($entity_type) {
+  $fields = array();
+  
+  $fields['node']['ical_feed'] = array(
+    'title' => t('iCal Feed'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'ui_limit' => array('enterprise_event|*'),
+    'function' => 'enterprise_events_config_ical_feed',
+    'properties' => array(),
+  );
+  if (module_exists('microdata')) {
+    // Node title microdata.
+    $fields['node']['title_microdata'] = array(
+      'title' => t('Title Microdata'),
+      'field_type' => DS_FIELD_TYPE_FUNCTION,
+      'function' => 'enterprise_events_config_render_title_microdata',
+    );
+  }
+  
+  if (isset($fields[$entity_type])) {
+    return array($entity_type => $fields[$entity_type]);
+  }
+  return;
+  
+}
+
+/**
+ * Callback for enterprise events title microdata
+ */
+function enterprise_events_config_render_title_microdata($field) {
+  microdata_node_view($field['entity'], $field['view_mode'], LANGUAGE_NONE);
+  if (isset($field['entity']->content['title_microdata'])) {
+    return drupal_render($field['entity']->content['title_microdata']);
+  }
+  return;
+}
+
+/**
+ * Callback for enterprise events ical feed
+ */
+function enterprise_events_config_ical_feed($field) {
+  return theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-calendar')) . l('Add to my calendar', 'node/' . $field['entity']->nid . '/ical.ics');
+}
+
+/**
+ * Implements hook_ds_classes_alter().
+ * Provide the necessary classes for blog types.
+ */
+function enterprise_events_config_ds_classes_alter(&$classes, $name) {
+  if ('ds_classes_regions' === $name) {
+    $classes['style-event-full'] = t('Event: Full');
+    $classes['style-event-teaser'] = t('Event: Teaser');
+    $classes['style-event-upcoming'] = t('Event: Upcoming');
+  }
+}

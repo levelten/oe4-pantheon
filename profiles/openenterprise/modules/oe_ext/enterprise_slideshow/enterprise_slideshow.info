@@ -1,7 +1,7 @@
 name = Enterprise Slideshow
 description = Slideshow feature for Open Enterprise
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 version = 7.x-1.17
 project = enterprise_slideshow
 dependencies[] = bean

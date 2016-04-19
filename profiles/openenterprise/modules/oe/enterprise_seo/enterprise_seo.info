@@ -2,3 +2,4 @@ name = Enterprise SEO
 description = Configures SEO Tools suite
 core = 7.x
 package = Open Enterprise
+dependencies[] = enterprise_seo_config

@@ -1,7 +1,7 @@
 name = Enterprise Curated
 description = Provides curated content posting with categories and tags.
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 version = 7.x-3.x
 project = enterprise_curated
 dependencies[] = ctools

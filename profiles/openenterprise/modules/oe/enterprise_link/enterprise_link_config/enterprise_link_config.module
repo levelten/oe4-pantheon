@@ -1,0 +1,87 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Links feature.
+ */
+
+include_once('enterprise_link_config.features.inc');
+
+
+/**
+ * Implements hook_node_view()
+ */
+function enterprise_link_config_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'enterprise_link' && in_array($view_mode, array('full', 'teaser'))) {
+    drupal_add_css(drupal_get_path('module', 'enterprise_link') . '/css/enterprise_link_config.content.css');
+  }
+}
+
+/**
+ * Implements hook_enterprise_base_apps_structures()
+ */
+function enterprise_link_config_enterprise_base_apps_structures() {
+  $structures = array();
+  $structures['enterprise_link'] = array(
+    'title' => t('Links'),
+  );
+  $visibility = array(
+    'enterprise_link_view' => array(
+      'title' => t('Show on links listing pages'),
+      'views' => array(
+        'views' => array('enterprise_link:page'),
+      ),
+    ),
+    'enterprise_link_content_type' => array(
+      'title' => t('Show on link details pages'),
+      'node_type' => array(
+        'types' => array('enterprise_link'),
+      )
+    ),
+  );
+
+  $view = views_get_view('enterprise_link');
+  $desc_block = isset($view->display['block']->display_options['display_description']) ? $view->display['block']->display_options['display_description'] : '';
+  $desc_similar = isset($view->display['similar_block']->display_options['display_description']) ? $view->display['similar_block']->display_options['display_description'] : '';
+  $desc_categories = isset($view->display['categories_block']->display_options['display_description']) ? $view->display['categories_block']->display_options['display_description'] : '';
+  $desc_tags = isset($view->display['tags_block']->display_options['display_description']) ? $view->display['tags_block']->display_options['display_description'] : '';
+  $structures['enterprise_link']['blocks'] = array(
+    'views:enterprise_link-block' => array(
+      'description' => $desc_block,
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_link_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => 1,
+    ),
+    'views:enterprise_link-similar_block' => array(
+      'description' => $desc_similar,
+      'defaults' => array(
+        'regions' => array('sidebar_second'),
+        'visibility' => array('enterprise_link_content_type'),
+      ),
+      'visibility' => $visibility,
+      'weight' => 2,
+    ),
+    'views:enterprise_link-categories_block' => array(
+      'description' => $desc_categories,
+      'defaults' => array(
+        'regions' => array('sidebar_first'),
+        'visibility' => array('enterprise_link_view'),
+      ),
+      'visibility' => $visibility,
+      'weight' => 3,
+    ),
+    'views:enterprise_link-tags_block' => array(
+      'description' => $desc_tags,
+      'defaults' => array(
+        'regions' => array('sidebar_first'),
+        'visibility' => array('enterprise_link_view'),
+      ),
+      'visibility' => $visibility,
+      'weight' => 4,
+    ),
+    /**/
+  );
+  return $structures;   
+}

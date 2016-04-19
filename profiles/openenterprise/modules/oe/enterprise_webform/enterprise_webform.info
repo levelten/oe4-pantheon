@@ -1,4 +1,6 @@
 name = Enterprise Webform
 description = Enables webform creation and modification
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
+dependencies[] = enterprise_webform_config
+features[features_api][] = api:2

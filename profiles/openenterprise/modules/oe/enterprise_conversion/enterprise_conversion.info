@@ -1,10 +1,12 @@
 name = Enterprise Conversion
 description = Implements conversion workflows with CTAs, landing pages, webforms and thankyou pages
 core = 7.x
-package = Open Enterprise
+package = Open Enterprise Apps
 dependencies[] = cta
+dependencies[] = enterprise_conversion_config
 dependencies[] = enterprise_intel
 dependencies[] = enterprise_webform
 dependencies[] = entity_data
 dependencies[] = entityconnect
 dependencies[] = entityreference
+features[features_api][] = api:2

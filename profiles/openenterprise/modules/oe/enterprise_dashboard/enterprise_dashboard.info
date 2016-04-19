@@ -2,6 +2,5 @@ name = Enterprise Dashboard
 description = Provides blocks for admin dashboard
 core = 7.x
 package = Open Enterprise
-
 dependencies[] = dashboard
 dependencies[] = intel
