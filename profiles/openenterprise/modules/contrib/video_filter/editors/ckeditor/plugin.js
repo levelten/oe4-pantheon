@@ -1,10 +1,10 @@
 /**
  * @file Plugin for inserting video tags with video_filter
  */
-(function() {
+(function ($) {
   CKEDITOR.plugins.add('video_filter', {
 
-    requires: [],
+    requires : [],
 
     init: function(editor) {
       // Add Button
@@ -14,14 +14,11 @@
         icon: this.path + 'video_filter.png'
       });
 
-      if (typeof window.showModalDialog !== 'undefined') {
+      if(typeof window.showModalDialog !== 'undefined') {
         editor.addCommand('video_filter', {
-          exec: function() {
-            var path = (Drupal.settings.video_filter.url.wysiwyg_ckeditor) ? Drupal.settings.video_filter.url.wysiwyg_ckeditor : Drupal.settings.video_filter.url.ckeditor;
-            var media = window.showModalDialog(path, {
-              'opener': window,
-              'editorname': editor.name
-            }, "dialogWidth:580px; dialogHeight:480px; center:yes; resizable:yes; help:no;");
+          exec : function () {
+            var path = (Drupal.settings.video_filter.url.wysiwyg_ckeditor) ? Drupal.settings.video_filter.url.wysiwyg_ckeditor : Drupal.settings.video_filter.url.ckeditor
+            var media = window.showModalDialog(path, { 'opener' : window, 'editorname' : editor.name }, "dialogWidth:580px; dialogHeight:480px; center:yes; resizable:yes; help:no;");
           }
         });
 
@@ -34,47 +31,50 @@
     }
   });
 
-  CKEDITOR.dialog.add('video_filterDialog', function(editor) {
+  CKEDITOR.dialog.add('video_filterDialog', function( editor ) {
     var instructions_path = Drupal.settings.video_filter.instructions_url;
 
     return {
-      title: 'Add Video',
-      minWidth: 600,
-      minHeight: 180,
-      contents: [{
-        id: 'general',
-        label: 'Settings',
-        elements: [
+      title : 'Add Video',
+      minWidth : 600,
+      minHeight : 180,
+      contents : [{
+        id : 'general',
+        label : 'Settings',
+        elements : [
           {
-            type: 'text',
-            id: 'file_url',
-            label: 'URL',
-            validate: CKEDITOR.dialog.validate.notEmpty('The link must have a URL.'),
-            required: true,
-            commit: function(data) {
+            type : 'text',
+            id : 'file_url',
+            label : 'URL',
+            validate : CKEDITOR.dialog.validate.notEmpty( 'The link must have a URL.' ),
+            required : true,
+            commit : function( data )
+            {
               data.file_url = this.getValue();
             }
           },
           {
-            type: 'text',
-            id: 'width',
-            label: 'Width',
-            commit: function(data) {
+            type : 'text',
+            id : 'width',
+            label : 'Width',
+            commit : function( data )
+            {
               data.width = this.getValue();
             }
           },
           {
-            type: 'text',
-            id: 'height',
-            label: 'Height',
-            commit: function(data) {
+            type : 'text',
+            id : 'height',
+            label : 'Height',
+            commit : function( data )
+            {
               data.height = this.getValue();
             }
           },
           {
-            type: 'select',
-            id: 'align',
-            label: 'Align',
+            type : 'select',
+            id : 'align',
+            label : 'Align',
             'default': 'none',
             items: [
               ['None', ''],
@@ -82,30 +82,33 @@
               ['Right', 'right'],
               ['Center', 'center']
             ],
-            commit: function(data) {
+            commit : function( data )
+            {
               data.align = this.getValue();
             }
           },
           {
-            type: 'checkbox',
-            id: 'autoplay',
-            label: 'Autoplay',
+            type : 'checkbox',
+            id : 'autoplay',
+            label : 'Autoplay',
             'default': '',
-            commit: function(data) {
+            commit : function( data )
+            {
               data.autoplay = this.getValue() ? 1 : 0;
             }
           },
           {
-            type: 'html',
-            html: '<iframe src="' + instructions_path + '" style="width:100%; height: 200px;"></iframe>',
-          }
+              type: 'html',
+              html: '<iframe src="' + instructions_path + '" style="width:100%; height: 200px;"></iframe>',
+          },
         ]
       }],
-      onOk: function() {
+      onOk : function()
+      {
         var dialog = this,
           data = {},
-          link = editor.document.createElement('p');
-        this.commitContent(data);
+          link = editor.document.createElement( 'p' );
+        this.commitContent( data );
         var str = '[video:' + data.file_url;
         if (data.width) {
           str += ' width:' + data.width;
@@ -119,12 +122,9 @@
         if (data.autoplay) {
           str += ' autoplay:' + data.autoplay;
         }
-        else {
-          str += ' autoplay:0';
-        }
         str += ']';
-        link.setHtml(str);
-        editor.insertElement(link);
+        link.setHtml( str );
+        editor.insertElement( link );
       }
     };
   });
@@ -151,7 +151,7 @@
       str += ' autoplay:' + params.autoplay;
     }
     else {
-      str += ' autoplay:0';
+      str += ' autoplay:' + '0';
     }
     str += ']';
 
@@ -169,4 +169,4 @@
     editor.fire('saveSnapshot');
   }
 
-})();
+})(jQuery);
