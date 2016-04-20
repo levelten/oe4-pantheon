@@ -227,7 +227,7 @@ function openenterprise_themes_enable_list() {
   else if(isset($themes['enterprise_bootstrap_ce'])) {
     $themes_enable[] = 'enterprise_bootstrap_ce';
   }
-  if(isset($themes['bella']) && ($version != 'free')) {
+  if(isset($themes['bella']) && ($edition != 'ce')) {
     $themes_enable[] = 'bella';
   }
   if (empty($themes_enable)) {

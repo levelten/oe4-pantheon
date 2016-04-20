@@ -264,6 +264,25 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#description' => st('Input the property api key.'),
   );
 
+  $msg = st('LevelTen offers training to help you quickly get started with Open Enterprise.');
+  $msg .= ' ' . st('You can use the checkbox below to prep this instance for use in a training course.');
+  $msg .= ' ' . st('Note that selecting a training mode will likely override other options.');
+  $form['training'] = array(
+    '#type' => 'fieldset',
+    //'#tree' => TRUE,
+    '#title' => t('Training Mode'),
+    '#description' => $msg,
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $name = 'content_marketing_day';
+  $form['training']['training_' . $name] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Course: Build a Content Marketing Website in a Day'),
+    //'#description' => isset($info['description']) ?  $info['description'] : '',
+    '#default_value' => 0,
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => st('Continue'),
@@ -334,7 +353,6 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
 
   watchdog('install-form', print_r($form_state['values'], 1));
 
-
   if ($form_state['values']['op'] == t('Continue')) {
     if (!empty($form_state['values']['roles']) && is_array($form_state['values']['roles'])) {
       $w = 2;
@@ -381,6 +399,15 @@ function enterprise_apps_config_features_options_form_submit($form, &$form_state
     if (!empty($values['demo_content'])) {
       $profile_settings['demo']['demo_content'] = 1;
     }
+
+    if ($values['training_content_marketing_day']) {
+      $profile_settings['training'] = 'content_marketing_day';
+      // disable all ext apps
+      $profile_settings['apps'] = array();
+      $profile_settings['demo']['mode'] = 'attract_convert';
+      $profile_settings['demo']['demo_content'] = 0;
+    }
+
     variable_set('enterprise_apps_profile_settings', $profile_settings);
   }
 }

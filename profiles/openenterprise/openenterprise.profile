@@ -251,9 +251,9 @@ function openenterprise_api_property_load($options, &$message = '', &$status = 2
 }
 
 function openenterprise_get_edition() {
-  $edition = 'pro';
-  if (isset($_GET['edition']) && $_GET['edition'] == 'free') {
-    $edition = 'free';
+  $edition = 'pe';
+  if (isset($_GET['edition']) && $_GET['edition'] == 'ce') {
+    $edition = 'ce';
   }
   return $edition;
 }

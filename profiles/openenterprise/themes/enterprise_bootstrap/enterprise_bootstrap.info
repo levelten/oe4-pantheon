@@ -36,6 +36,7 @@ stylesheets[all][] = less/enterprise_bootstrap.less
 
 less[vars][@brand-primary]   = #553D7B
 less[vars][@brand-secondary] = #3F2766
+less[vars][@brand-tertiary]  = #3F2766
 less[vars][@brand-accent]    = #745F95
 less[vars][@brand-accent-2]  = #271149
 less[vars][@brand-accent-3]  = #9B8CB4

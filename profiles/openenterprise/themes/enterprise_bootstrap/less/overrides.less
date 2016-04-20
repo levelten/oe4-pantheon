@@ -93,11 +93,18 @@ body {
 .modal-backdrop {
   z-index: 1610;
 }
+
 .footer {
   margin-top: 45px;
-  padding-top: 35px;
-  padding-bottom: 36px;
   border-top: 1px solid #E5E5E5;
+  .footer-top {
+    padding: 20px 0;
+  }
+  .footer-bottom {
+    color: #fff;
+    background-color: @gray-dark;
+    padding: 20px 0;
+  }
 }
 
 // Element invisible fix
@@ -133,6 +140,9 @@ ul.secondary {
 
 // Blocks
 .block {
+  .block-title {
+    margin-top: 0;
+  }
   &:first-child h2.block-title {
 
   }
@@ -752,12 +762,6 @@ div.workbench-info-block {
       }
     }
   }
-}
-
-// Default footer color.
-.footer .footer-bottom {
-  background-color: @gray-dark;
-  padding: 20px 0;
 }
 
 // Carousel fix for widening images.

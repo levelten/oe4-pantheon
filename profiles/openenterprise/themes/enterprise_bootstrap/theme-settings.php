@@ -142,27 +142,41 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
     '#type' => 'fieldset',
     '#group' => 'enterprise_bootstrap',
     '#title' => t('Header'),
-    '#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+    '#description' => t('Settings for header layout.'),
   );
-  $form['enterprise_bootstrap_header_settings']['navbar_header'] = array(
+  $form['enterprise_bootstrap_header_settings']['navbar'] = array(
     '#type' => 'fieldset',
     '#group' => 'enterprise_bootstrap_header_settings',
-    '#title' => t('Navbar Header (menu left)'),
+    '#title' => t('Navbar'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+		'#description' => t('Settings for Bootstrap navbar'),
   );
   $options = array(
-    'standard' => t('Standard template (logo/site name/slogan)'),
-    'none' => t('None'),
-    'region' => t('Region'),
+    'standard' => t('Standard (display logo/site name/slogan)'),
+    'none' => t('None (remove logo, site name, & slogan)'),
+    'region' => t('Region (use Navbar Header region for custom markup)'),
   );
-  $form['enterprise_bootstrap_header_settings']['navbar_header']['navbar_header_display'] = array(
+  $form['enterprise_bootstrap_header_settings']['navbar']['navbar_header_display'] = array(
     '#type' => 'select',
-    '#title' => t('Display (default)'),
+    '#title' => t('Navbar Header (menu left)'),
     '#default_value' => theme_get_setting('navbar_header_display'),
-    '#description' => t('Choose to either place this above the content/sidebars, or inside the content area.'),
+    '#description' => t('The navbar header is displayed to the left of the nav menu, typically displaying the logo, site name and slogan.'),
     '#options' => $options,
   );
+	/*
+	$options = array(
+		'none' => t('None (remove logo, site name, & slogan)'),
+		'region' => t('Region (use Navbar  for custom markup)'),
+	);
+	$form['enterprise_bootstrap_header_settings']['navbar']['navbar_header_display'] = array(
+		'#type' => 'select',
+		'#title' => t('Navbar Header (menu left)'),
+		'#default_value' => theme_get_setting('navbar_header_display'),
+		'#description' => t('The navbar header is displayed to the left of the nav menu, typically displaying the logo, site name and slogan.'),
+		'#options' => $options,
+	);
+	*/
 
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',

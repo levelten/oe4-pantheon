@@ -37,7 +37,10 @@ stylesheets[all][] = fonts/bella/css/bella_font.css
 ;;;;;;;;;;;;;;;;;;;;;
 less[vars][@brand-primary]   = #EA9B3E
 less[vars][@brand-secondary] = #F5F5F5
+less[vars][@brand-tertiary]  = #F5F5F5
 less[vars][@brand-accent]    = #FFFFFF
+less[vars][@brand-accent-2]  = #FFFFFF
+less[vars][@brand-accent-3]  = #FFFFFF
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts

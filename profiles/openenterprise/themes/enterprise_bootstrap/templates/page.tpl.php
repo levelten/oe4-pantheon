@@ -86,6 +86,10 @@
       include 'includes/navigation_yamm.inc';
       break;
 
+    case 'minimal':
+      include 'includes/navigation_minimal.inc';
+      break;
+
     default:
       include 'includes/navigation_bootstrap.inc';
       break;

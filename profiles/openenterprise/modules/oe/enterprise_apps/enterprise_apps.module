@@ -92,6 +92,11 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
+
+  $settings = variable_get('enterprise_apps_profile_settings', array());
+  dsm($settings);
+  return '';
+
   $master_rel_info = enterprise_apps_get_entity_rel_info();
 
   dsm($master_rel_info);
