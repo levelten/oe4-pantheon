@@ -21,34 +21,26 @@
  * - $footer_classes: String of classes that can be used to style the "footer" region.
  */
 ?>
-<?php dsm($classes); ?>
-<article <?php if ($classes): ?>class="<?php print $classes ?> clearfix"<?php endif; ?>>
+<div class="media <?php if ($classes): ?><?php print $classes ?> clearfix"<?php endif; ?>>
   <?php if (isset($title_suffix['contextual_links'])): ?>
     <?php print render($title_suffix['contextual_links']); ?>
   <?php endif; ?>
 
-  <?php if ($header || $sticky): ?>
-    <header class="ds-header clearfix <?php print $header_classes; ?>">
-      <?php print $header; ?>
-      <?php if ($sticky): ?>
-        <div class="ds-sticky<?php print $sticky_classes; ?>">
-          <?php print $sticky; ?>
-        </div>
-      <?php endif; ?>
-    </header>
+  <?php if ($media_left): ?>
+      <div class="media-left <?php print $media_left_classes; ?>">
+        <?php print $media_left; ?>
+      </div>
   <?php endif; ?>
 
-  <?php if ($middle): ?>
-    <div class="content">
-      <section class="ds-middle clearfix <?php print $middle_classes; ?>">
-        <?php print $middle; ?>
-      </section>
-    </div>
+  <?php if ($media_body): ?>
+      <div class="media-body <?php print $media_body_classes; ?>">
+        <?php print $media_body; ?>
+      </div>
   <?php endif; ?>
 
-  <?php if ($footer): ?>
-    <footer class="ds-footer clearfix <?php print $footer_classes; ?>">
-      <?php print $footer; ?>
-    </footer>
+  <?php if ($media_right): ?>
+      <div class="media-right <?php print $media_right_classes; ?>">
+        <?php print $media_right; ?>
+      </div>
   <?php endif; ?>
-</article>
+</div>

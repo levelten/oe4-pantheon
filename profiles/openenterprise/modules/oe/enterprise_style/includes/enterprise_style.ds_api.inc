@@ -55,6 +55,26 @@ function enterprise_style_ds_view_modes_info() {
   );
   $view_modes['teaser_stacked'] = $ds_view_mode;
 
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'card';
+  $ds_view_mode->label = 'Card';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['card'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'media_object';
+  $ds_view_mode->label = 'Media object';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['media_object'] = $ds_view_mode;
+
   return $view_modes;
 }
 
@@ -108,6 +128,28 @@ function enterprise_style_ds_layout_info() {
         'footer' => t('Footer'),
       ),
       'image' => TRUE,
+    ),
+    'bootstrap_card' => array(
+      'label' => t('Bootstrap Card'),
+      'module' => 'bootstrap',
+      'path' => $layout_path . '/bootstrap_card',
+      'regions' => array(
+        'header' => t('Header'),
+        'middle' => t('Content'),
+        'footer' => t('Footer'),
+      ),
+      //'image' => TRUE,
+    ),
+    'bootstrap_media_object' => array(
+      'label' => t('Bootstrap Media Object'),
+      'module' => 'bootstrap',
+      'path' => $layout_path . '/bootstrap_media_object',
+      'regions' => array(
+        'media_left' => t('Media Left'),
+        'media_body' => t('Media Body'),
+        'media_right' => t('Media Right'),
+      ),
+      //'image' => TRUE,
     ),
   );
   return $layouts;
@@ -168,6 +210,8 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['row-fluid'] = t('Row Fluid');
     $classes['container'] = t('Container');
     $classes['container-fluid'] = t('Container Fluid');
+    $classes['card'] = t('Card');
+    $classes['card-block'] = t('Card Block');
 
     $classes['visible-xs'] = t('Phone: visible');
     $classes['visible-sm'] = t('Tablet: visible');

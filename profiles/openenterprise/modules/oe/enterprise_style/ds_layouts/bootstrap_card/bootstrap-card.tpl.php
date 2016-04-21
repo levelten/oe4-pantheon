@@ -21,34 +21,45 @@
  * - $footer_classes: String of classes that can be used to style the "footer" region.
  */
 ?>
-<?php dsm($classes); ?>
-<article <?php if ($classes): ?>class="<?php print $classes ?> clearfix"<?php endif; ?>>
+<div class="card <?php if ($classes): ?><?php print $classes ?> clearfix"<?php endif; ?>>
   <?php if (isset($title_suffix['contextual_links'])): ?>
     <?php print render($title_suffix['contextual_links']); ?>
   <?php endif; ?>
 
-  <?php if ($header || $sticky): ?>
-    <header class="ds-header clearfix <?php print $header_classes; ?>">
+  <?php if ($header): ?>
+    <?php if (!empty($header_classes)): ?>
+      <div class="card-header <?php print $header_classes; ?>">
+    <?php endif; ?>
+
       <?php print $header; ?>
-      <?php if ($sticky): ?>
-        <div class="ds-sticky<?php print $sticky_classes; ?>">
-          <?php print $sticky; ?>
-        </div>
-      <?php endif; ?>
-    </header>
+
+    <?php if (!empty($header_classes)): ?>
+      </div>
+    <?php endif; ?>
   <?php endif; ?>
 
   <?php if ($middle): ?>
-    <div class="content">
-      <section class="ds-middle clearfix <?php print $middle_classes; ?>">
-        <?php print $middle; ?>
-      </section>
-    </div>
+    <?php if (!empty($middle_classes)): ?>
+      <div class="<?php print $middle_classes; ?>">
+    <?php endif; ?>
+
+      <?php print $middle; ?>
+
+    <?php if (!empty($middle_classes)): ?>
+      </div>
+    <?php endif; ?>
   <?php endif; ?>
 
   <?php if ($footer): ?>
-    <footer class="ds-footer clearfix <?php print $footer_classes; ?>">
+    <?php if (!empty($footer_classes)): ?>
+      <div class="card-footer <?php print $footer_classes; ?>">
+    <?php endif; ?>
+
       <?php print $footer; ?>
-    </footer>
+
+    <?php if (!empty($footer_classes)): ?>
+      </div>
+    <?php endif; ?>
+
   <?php endif; ?>
-</article>
+</div>
