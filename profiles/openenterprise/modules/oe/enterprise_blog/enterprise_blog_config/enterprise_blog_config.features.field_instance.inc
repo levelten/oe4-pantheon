@@ -78,11 +78,17 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 0,
       ),
+      'micro' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 1,
+      ),
       'mini' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 4,
+        'weight' => 35,
       ),
       'rss' => array(
         'label' => 'hidden',
@@ -175,6 +181,12 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'smart_trim_format',
         'weight' => 2,
       ),
+      'title' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 4,
+      ),
     ),
     'entity_type' => 'node',
     'field_name' => 'body',
@@ -205,25 +217,8 @@ function enterprise_blog_config_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
-        'settings' => array(
-          'conditions' => array(),
-          'enterprise_rel_taxonomy_level' => '',
-          'field_delimiter' => '',
-          'field_formatter_class' => '',
-          'linked_field' => array(
-            'advanced' => array(
-              'class' => '',
-              'rel' => '',
-              'target' => '',
-              'text' => '',
-              'title' => '',
-            ),
-            'destination' => '',
-            'linked' => 0,
-          ),
-        ),
-        'type' => 'taxonomy_term_reference_link',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 8,
       ),
       'featured' => array(
@@ -232,11 +227,17 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 0,
       ),
+      'micro' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 36,
+      ),
       'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 25,
       ),
       'rss' => array(
         'label' => 'above',
@@ -255,6 +256,12 @@ function enterprise_blog_config_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 0,
+      ),
+      'title' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 8,
       ),
     ),
     'ds_extras_field_template' => '',
@@ -275,7 +282,7 @@ function enterprise_blog_config_field_default_field_instances() {
     ),
   );
 
-    // Exported field_instance: 'node-enterprise_blog-field_energy_level'.
+  // Exported field_instance: 'node-enterprise_blog-field_energy_level'.
   $field_instances['node-enterprise_blog-field_energy_level'] = array(
     'bundle' => 'enterprise_blog',
     'default_value' => array(
@@ -324,11 +331,17 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 0,
       ),
+      'micro' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 35,
+      ),
       'mini' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 17,
+        'weight' => 36,
       ),
       'rss' => array(
         'label' => 'hidden',
@@ -366,6 +379,12 @@ function enterprise_blog_config_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 16,
+      ),
+      'title' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 7,
       ),
     ),
     'enterprise_edit_form_display' => 'sidebar',
@@ -473,26 +492,15 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 0,
       ),
-      'mini' => array(
+      'micro' => array(
         'label' => 'hidden',
-        'module' => 'picture',
+        'module' => 'image',
         'settings' => array(
-          'colorbox' => 'full-0',
-          'colorbox_settings' => array(
-            'colorbox_caption' => 'auto',
-            'colorbox_caption_custom' => '',
-            'colorbox_gallery' => 'post',
-            'colorbox_gallery_custom' => '',
-            'colorbox_group' => '',
-            'colorbox_multivalue_index' => NULL,
-          ),
           'conditions' => array(),
-          'fallback_image_style' => '',
           'field_delimiter' => '',
-          'field_formatter_class' => 'image thumbnail',
+          'field_formatter_class' => 'image',
           'image_link' => 'content',
-          'lazyload' => '',
-          'lazyload_aspect_ratio' => '',
+          'image_style' => 'small-7x5-xs',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',
@@ -504,10 +512,32 @@ function enterprise_blog_config_field_default_field_instances() {
             'destination' => '',
             'linked' => 0,
           ),
-          'picture_group' => 'medium-16x9',
-          'picture_mapping' => 'medium-0',
         ),
-        'type' => 'picture',
+        'type' => 'image',
+        'weight' => 0,
+      ),
+      'mini' => array(
+        'label' => 'hidden',
+        'module' => 'image',
+        'settings' => array(
+          'conditions' => array(),
+          'field_delimiter' => '',
+          'field_formatter_class' => 'card-img-top',
+          'image_link' => 'content',
+          'image_style' => 'full-16x9-xs',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
+        'type' => 'image',
         'weight' => 0,
       ),
       'rss' => array(
@@ -559,6 +589,12 @@ function enterprise_blog_config_field_default_field_instances() {
         'weight' => 0,
       ),
       'text_teaser' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 3,
+      ),
+      'title' => array(
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
@@ -641,25 +677,8 @@ function enterprise_blog_config_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'inline',
-        'module' => 'taxonomy',
-        'settings' => array(
-          'conditions' => array(),
-          'enterprise_rel_taxonomy_level' => '',
-          'field_delimiter' => ', ',
-          'field_formatter_class' => 'm-t-1',
-          'linked_field' => array(
-            'advanced' => array(
-              'class' => '',
-              'rel' => '',
-              'target' => '',
-              'text' => '',
-              'title' => '',
-            ),
-            'destination' => '',
-            'linked' => 0,
-          ),
-        ),
-        'type' => 'taxonomy_term_reference_link',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 6,
       ),
       'drupal_exit();' => array(
@@ -674,11 +693,17 @@ function enterprise_blog_config_field_default_field_instances() {
         'type' => 'hidden',
         'weight' => 0,
       ),
+      'micro' => array(
+        'label' => 'inline',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 34,
+      ),
       'mini' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 19,
+        'weight' => 37,
       ),
       'rss' => array(
         'label' => 'above',
@@ -697,6 +722,12 @@ function enterprise_blog_config_field_default_field_instances() {
         'settings' => array(),
         'type' => 'hidden',
         'weight' => 18,
+      ),
+      'title' => array(
+        'label' => 'inline',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 6,
       ),
     ),
     'enterprise_edit_form_display' => 'sidebar',
@@ -722,6 +753,7 @@ function enterprise_blog_config_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Body');
+  t('Categories');
   t('Current energy level of the blog post.');
   t('Energy Level');
   t('Featured image');

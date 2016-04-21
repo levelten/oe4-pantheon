@@ -95,6 +95,12 @@ function enterprise_apps_util() {
 
   $settings = variable_get('enterprise_apps_profile_settings', array());
   dsm($settings);
+
+
+
+    $settings = variable_get('theme_enterprise_bootstrap_settings', array());
+  dsm($settings);
+
   return '';
 
   $master_rel_info = enterprise_apps_get_entity_rel_info();

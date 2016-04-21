@@ -133,6 +133,7 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
   $theme_settings = array(
     'default_logo' => 0,
     'logo_path' => 'profiles/openenterprise/images/openenterprise_logo_header.png',
+    'toggle_name' => 0,
     //'navbar_header_display' => 'none',
     //'navbar_class' => 'navbar-gray-lighter',
     'less' => array(

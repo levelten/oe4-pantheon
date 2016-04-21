@@ -87,6 +87,15 @@
     }
 }
 
+/* KT review */
+.teaser-title {
+    .card-title();
+}
+.teaser-subtitle {
+    margin-top: -.375rem;
+    margin-bottom: .75rem;
+}
+
 .style-default-full {
     .ds-middle {
         .field-name-field-image {
@@ -101,13 +110,19 @@
         }
     }
 }
+
 .style-default-teaser {
     .field-name-title {
         h3 {
-            margin-top: 0;
+            .card-title();
         }
     }
+    .field-name-submit-info {
+        .teaser-subtitle();
+        .text-muted();
+    }
 }
+
 
 .style-about-author {
     .field-name-field-description {

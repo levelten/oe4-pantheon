@@ -25,6 +25,26 @@ function enterprise_style_ds_view_modes_info() {
     'field_collection_item' => 'field_collection_item',
   );
   $view_modes['mini'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'micro';
+  $ds_view_mode->label = 'Micro';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['micro'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'title';
+  $ds_view_mode->label = 'Title';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+    'user' => 'user',
+  );
+  $view_modes['title'] = $ds_view_mode;
   
   $ds_view_mode = new stdClass();
   $ds_view_mode->api_version = 1;
@@ -55,25 +75,7 @@ function enterprise_style_ds_view_modes_info() {
   );
   $view_modes['teaser_stacked'] = $ds_view_mode;
 
-  $ds_view_mode = new stdClass();
-  $ds_view_mode->api_version = 1;
-  $ds_view_mode->view_mode = 'card';
-  $ds_view_mode->label = 'Card';
-  $ds_view_mode->entities = array(
-    'node' => 'node',
-    'user' => 'user',
-  );
-  $view_modes['card'] = $ds_view_mode;
 
-  $ds_view_mode = new stdClass();
-  $ds_view_mode->api_version = 1;
-  $ds_view_mode->view_mode = 'media_object';
-  $ds_view_mode->label = 'Media object';
-  $ds_view_mode->entities = array(
-    'node' => 'node',
-    'user' => 'user',
-  );
-  $view_modes['media_object'] = $ds_view_mode;
 
   return $view_modes;
 }
