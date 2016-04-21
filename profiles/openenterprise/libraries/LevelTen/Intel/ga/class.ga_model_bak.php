@@ -1060,7 +1060,6 @@ class GAModel {
         $d[$row[$pathField]][$row[$entityField]][$key] = $value;
       }
     }
-    dsm($d);
     return $d;
   }
 

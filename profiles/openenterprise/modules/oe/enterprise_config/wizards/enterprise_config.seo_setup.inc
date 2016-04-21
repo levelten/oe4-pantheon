@@ -30,7 +30,7 @@ function enterprise_config_config_wizard_analytics_setup_basic($form, $form_stat
 	$config = $form_state['config'];
 	$wizard = $config['wizard_info'];
 	$config_data = $config['wizard_data'];
-dsm($config_data);
+
 	if (empty($config_data['analytics']['level'])) {
 		$next = config_get_wizard_next_step_path($wizard, $config['step_n'], $config['substep_n'], TRUE);
 		drupal_goto($next);

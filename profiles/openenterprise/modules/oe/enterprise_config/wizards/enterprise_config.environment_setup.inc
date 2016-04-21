@@ -49,7 +49,7 @@ function enterprise_config_wizard_environment_setup_options($form, $form_state) 
 function enterprise_config_wizard_environment_setup_options_submit($form, $form_state) {
   $data = $form_state['config']['wizard_data'];
   $values = $form_state['values'];
-dsm($form_state);
+
   $name_e = explode(':', $data['name']);
 
   $modules = array();

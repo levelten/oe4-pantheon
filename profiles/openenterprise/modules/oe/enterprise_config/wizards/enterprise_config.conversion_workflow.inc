@@ -69,7 +69,7 @@ function enterprise_config_wizard_conversion_workflow_naming_submit($form, &$for
   );
   $node = config_node_construct('enterprise_thankyou', $vars);
   config_node_modify($node, $vars);
-dsm($node);
+
   node_save($node);
   config_wizard_data_set('thankyou_nid', $node->nid);
 }
@@ -78,8 +78,6 @@ function enterprise_config_wizard_conversion_workflow_thankyou_page($form, $form
   $data = $form_state['config']['wizard_data'];
   $node = node_load($data['thankyou_nid']);
 
-  dsm($data);
-  dsm($node);
   $lo = array(
     'target' => '_modal',
   );

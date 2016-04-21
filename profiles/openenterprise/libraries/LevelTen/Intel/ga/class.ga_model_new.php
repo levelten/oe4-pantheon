@@ -458,13 +458,12 @@ class GAModel {
 
   function addFeedData($feed, $type = '', $indexBy = '', $details = 0) {
     $args = func_get_args();
-    dsm($args);
+
     if (empty($feed->results) || !is_array($feed->results)) {
       return;
     }
     $settings = $this->requestSettings;
 
-    dsm($settings);
     $type = ($type) ? $type : $settings['type'];
     $subType = $settings['subType'];
     $indexBy = ($indexBy) ?  $indexBy : $settings['indexBy'];

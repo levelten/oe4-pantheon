@@ -142,7 +142,7 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
   );
   $variables['theme_enterprise_bootstrap_settings'] = $theme_settings;
 
-  if ($edition == 'pro') {
+  if ($edition != 'ce') {
     $theme_settings['less']['bella'] = $colors;
     $variables['theme_bella_settings'] = $theme_settings;
   }

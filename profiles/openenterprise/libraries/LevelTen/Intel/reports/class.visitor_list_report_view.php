@@ -119,8 +119,6 @@ class VisitorListReportView extends ListReportView {
 
     $value_str = '';
     $this->sortData('by_score_then_entrances', $indexBy);
-    dsm("indexBy = $indexBy");
-    dsm($this->data[$indexBy]);
     foreach($this->data[$indexBy] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
       if ($d['i']  == '023c23ba00000766a002') { continue; } // temp fix so error visitor id stats are not included

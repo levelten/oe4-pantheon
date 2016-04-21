@@ -21,7 +21,6 @@
  * - $footer_classes: String of classes that can be used to style the "footer" region.
  */
 ?>
-<?php dsm($classes); ?>
 <article <?php if ($classes): ?>class="<?php print $classes ?> clearfix"<?php endif; ?>>
   <?php if (isset($title_suffix['contextual_links'])): ?>
     <?php print render($title_suffix['contextual_links']); ?>
