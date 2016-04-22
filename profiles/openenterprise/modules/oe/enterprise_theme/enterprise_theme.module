@@ -132,6 +132,23 @@ function enterprise_theme_form_alter(&$form, &$form_state, $form_id) {
 function enterprise_theme_image_default_styles() {
   // Add logo image style.
   $styles = array();
+
+  $styles['enterprise_bootstrap_logo'] = array(
+    'name' => 'Enterprise Bootstrap Logo',
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array(
+          'height' => 75,
+          'upscale' => 0,
+        ),
+        'weight' => 0,
+      ),
+    ),
+    'label' => 'Enterprise Bootstrap Logo',
+  );
+
+  /*
   $styles['enterprise_bootstrap_logo'] = array(
     'name' => 'Enterprise Bootstrap Logo',
     'effects' => array(
@@ -153,6 +170,7 @@ function enterprise_theme_image_default_styles() {
     ),
     'label' => 'Enterprise Bootstrap Logo',
   );
+  */
 
   return $styles;
 }
@@ -161,6 +179,18 @@ function template_preprocess_header_branding(&$variables) {
   global $base_url;
 
   $variables['logo'] = theme_get_setting('logo');
+
+  $logo_path = theme_get_setting('logo_path');
+  $logo_image_style = theme_get_setting('logo_image_style');
+
+  // Change out logo with image style version.
+  if (isset($logo_image_style) && isset($logo_path) && !empty($logo_image_style)) {
+    if ($logo_image_style !== 'default') {
+      $variables['logo'] = image_style_url($logo_image_style, $logo_path);
+    }
+  }
+
+
   $variables['front_page'] = $base_url;
   $variables['site_name'] = theme_get_setting('site_name');
 }

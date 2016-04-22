@@ -348,9 +348,6 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
-  // set install_profile in case install crashes.
-  variable_set('install_profile', 'openenterprise');
-
   watchdog('install-form', print_r($form_state['values'], 1));
 
   if ($form_state['values']['op'] == t('Continue')) {
@@ -572,6 +569,7 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
     features_revert($features_revert);
   }
 
+  /*
   $modules = module_list();
   $module_info_apps = array();
   $disable = array();
@@ -588,6 +586,7 @@ function _enterprise_apps_install_demo_batch_finished($success, $results, $opera
   if (!empty($disable)) {
     module_disable($disable);
   }
+  */
 
   // must rebuild field instances after all fields are installed.
   //features_revert(array('enterprise_demo' => array('field_instance')));

@@ -123,6 +123,7 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
     '@brand-accent' =>    '#FFA126',
     '@brand-accent-2' =>  '#FFC826',
     '@brand-accent-3' =>  '#FF6126',
+    // alt
     //'@brand-primary' => '#1A68AE',
     //'@brand-primary' => '#2C90D9',
     //'@brand-primary' => '#168FAE',
@@ -130,12 +131,21 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
     //'@brand-accent' => '#F7941E',
   );
 
+  $colors = array(
+    '@brand-primary' =>   '#168FAE',
+    '@brand-secondary' => '#84BB41',
+    '@brand-tertiary' =>  '#666666',
+    '@brand-accent' =>    '#F46C22',
+    '@brand-accent-2' =>  '#FFFFFF',
+    '@brand-accent-3' =>  '#FFFFFF',
+  );
+
   $theme_settings = array(
     'default_logo' => 0,
-    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo_header.png',
+    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo_navbar.png',
+    //'logo_image_style' => 'enterprise_bootstrap_logo',
     'toggle_name' => 0,
-    //'navbar_header_display' => 'none',
-    //'navbar_class' => 'navbar-gray-lighter',
+    'navbar_header_display' => 'none',
     'less' => array(
       'enterprise_bootstrap' => $colors
     )
@@ -144,16 +154,15 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
 
   if ($edition != 'ce') {
     $theme_settings['less']['bella'] = $colors;
+    $theme_settings['navbar_class'] = 'navbar-gray-lighter';
     $variables['theme_bella_settings'] = $theme_settings;
   }
 
-  /*
   $blocks['bean:brand_bar'] = array(
     'regions' => array(
       'brand_bar',
     ),
   );
-  */
 
 
   return $settings;
