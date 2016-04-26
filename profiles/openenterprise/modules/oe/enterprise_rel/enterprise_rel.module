@@ -1433,18 +1433,68 @@ function enterprise_rel_form_node_form_alter(&$form, &$form_state) {
   );
 
   if (!empty($settings['inherit']['ref_field'])) {
-    $ref_field_weight = !empty($form[$settings['inherit']['ref_field']]['#weight']) ? $form[$settings['inherit']['ref_field']]['#weight'] : 0;
+    list($ref_entity_type, $ref_bundle, $ref_field_name) = explode(':', $settings['inherit']['ref_field']);
 
-    $form['rel_inherit'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Inherit relevancy settings from referenced %ref_type', array(
-        '%ref_type' => $form[$settings['inherit']['ref_field']][LANGUAGE_NONE]['#title'],
-      )),
-      '#default_value' => !empty($node->rel_inherit) ? $node->$node->rel_inherit : 1,
-      '#weight' => $ref_field_weight + 0.1,
-      '#prefix' => '<div class="display_sidebar">',
-      '#suffix' => '</div>',
-    );
+    $title = '';
+    if ($ref_bundle == $node->type) {
+      $ref_field_weight = !empty($form[$ref_field_name]['#weight']) ? $form[$ref_field_name]['#weight'] : 0;
+
+      $title = t('Inherit relevant settings from reference to %ref_type', array(
+        '%ref_type' => $form[$ref_field_name][LANGUAGE_NONE]['#title'],
+      ));
+    }
+    else {
+      $nid = 0;
+      $ec = !empty(arg(3)) ? arg(3) : '';
+      if ($ec && strpos($ec, 'entityconnect-form-') === 0) {
+        $ec = entityconnect_cache_get($ec);
+        if (!empty($ec->data['form']['#node']->nid)) {
+          $nid = $ec->data['form']['#node']->nid;
+          $ntitle = $ec->data['form']['#node']->title;
+          $form['rel_inherit_entity'] = array(
+            '#type' => 'value',
+            '#value' => array(
+              'entity_type' => 'node',
+              'entity_id' => $nid,
+            ),
+          );
+        }
+      }
+      else {
+        $query = db_select('field_data_' . $ref_field_name, 'f')
+          ->fields('f')
+          ->condition('f.entity_type', $ref_entity_type)
+          ->condition('f.bundle', $ref_bundle)
+          ->condition('f.' . $ref_field_name . '_target_id', $node->nid)
+        ;
+        $query->innerJoin('node', 'n', 'f.entity_id = n.nid');
+        $query->addField('n', 'title');
+        $ref = $query->execute()->fetchObject();
+        if (!empty($ref->entity_id)) {
+          $nid = $ref->entity_id;
+          $ntitle = $ref->title;
+        }
+      }
+
+      if ($nid) {
+        $title = t('Inherit relevant settings from !ref_type', array(
+          '!ref_type' => l(node_type_get_name($ref_bundle) . ': ' . $ntitle, 'node/' . $nid, array('attributes' => array('target' => '_blank'))),
+        ));
+      }
+    }
+    if ($title) {
+      $form['rel_inherit'] = array(
+        '#type' => 'checkbox',
+        '#title' => $title,
+        '#default_value' => !empty($node->rel_inherit) ? 1 : 0,
+        '#weight' => $ref_field_weight + 0.1,
+      );
+      if (1) {
+        $form['rel_inherit']['#prefix'] = '<div class="display_sidebar">';
+        $form['rel_inherit']['#suffix'] = '</div>';
+      }
+    }
+
   }
 }
 
@@ -1452,14 +1502,40 @@ function enterprise_rel_node_presave($node) {
   if (!empty($node->rel_inherit)) {
     $settings = variable_get('enterprise_rel_entity_settings_node__' . $node->type, array());
 
-    $ref_field = $settings['inherit']['ref_field'];
+    $ref_field_key = $settings['inherit']['ref_field'];
+    list($ref_entity_type, $ref_bundle, $ref_field_name) = explode(':', $ref_field_key);
     $lang = $node->language;
-    if (empty($node->{$ref_field}[$lang][0])) {
-      drupal_set_message('No relevancy settings were inherited as source reference was not set.', 'warning');
-      return;
+    if ($ref_bundle == $node->type) {
+      if (empty($node->{$ref_field_name}[$lang][0])) {
+        drupal_set_message('No relevancy settings were inherited as source reference was not set.', 'warning');
+        return;
+      }
+      $ref_nid = $node->{$ref_field_name}[$lang][0]['target_id'];
+      $ref_node = node_load($ref_nid);
     }
-    $ref_nid = $node->{$ref_field}[$lang][0]['target_id'];
-    $ref_node = node_load($ref_nid);
+    else {
+      if (!empty($node->rel_inherit_entity['entity_id'])) {
+        $ref_node = node_load($node->rel_inherit_entity['entity_id']);
+      }
+      else {
+        $query = db_select('field_data_' . $ref_field_name, 'f')
+          ->fields('f')
+          ->condition('f.entity_type', $ref_entity_type)
+          ->condition('f.bundle', $ref_bundle)
+          ->condition('f.' . $ref_field_name . '_target_id', $node->nid)
+        ;
+        $ref = $query->execute()->fetchObject();
+        if (!empty($ref->entity_id)) {
+          $ref_node = node_load($ref->entity_id);
+        }
+      }
+
+      if (empty($ref_node)) {
+        drupal_set_message('No relevancy settings were inherited as source is referencing this node.', 'warning');
+        return;
+      }
+    }
+
 
     foreach ($settings['inherit']['fields'] as $key => $v) {
       if ($v) {
@@ -1715,7 +1791,7 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
     $f = $field_info_fields[$name] = field_info_field($name);
     $entity_type = '';
     if ($f['type'] == 'entityreference') {
-      $options[$name] = $fi['label'];
+      $options['node:' . $node_type->type . ':' . $name] = t('Reference to ') . $fi['label'];
       $entity_type = $f['settings']['target_type'];
       reset($f['settings']['handler_settings']['target_bundles']);
       $bundle = key($f['settings']['handler_settings']['target_bundles']);
@@ -1733,7 +1809,28 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
     }
   }
 
-  $inherit_ref_field = !empty($settings['inherit']['ref_field']) ? $settings['inherit']['ref_field'] : '';
+  $field_info = field_info_fields();
+  foreach ($field_info as $field_name => $fi) {
+    if ($fi['type'] == 'entityreference') {
+      if (!empty($fi['settings']['handler_settings']['target_bundles'])) {
+        foreach ($fi['settings']['handler_settings']['target_bundles'] as $v) {
+          if ($v == $node_type->type) {
+            if (!empty($fi['bundles']['node'])) {
+              foreach ($fi['bundles']['node'] as $bundle) {
+                $options['node:' . $bundle . ':' . $field_name] = t('Reference from ') . node_type_get_name($bundle);
+                if (!isset($field_info_fields_by['node'])) {
+                  $field_info_fields_by['node'] = array();
+                }
+                $field_info_fields_by['node'][$bundle] = $name;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  $inherit_ref_key = !empty($settings['inherit']['ref_field']) ? $settings['inherit']['ref_field'] : '';
 
   $form['enterprise_rel']['inherit'] = array(
     '#type' => 'fieldset',
@@ -1745,18 +1842,24 @@ function enterprise_rel_form_node_type_form_alter(&$form, &$form_state) {
   $form['enterprise_rel']['inherit']['ref_field'] = array(
     '#type' => 'select',
     '#title' => t('Inherit relevancy settings from'),
-    '#default_value' => !empty($settings['inherit']['ref_field']) ? $settings['inherit']['ref_field'] : '',
+    '#default_value' => $inherit_ref_key,
     '#options' => $options,
     '#description' => t('Select an entity ref field to enable the "Inherit relevancy settings from ..." option.'),
   );
 
-  if (!empty($inherit_ref_field)) {
-    $ref_type_label = $options[$inherit_ref_field];
-    $fi = $field_info_fields[$inherit_ref_field];
-    $ref_entity_type = $fi['settings']['target_type'];
-    reset($fi['settings']['handler_settings']['target_bundles']);
-    $ref_bundle = key($fi['settings']['handler_settings']['target_bundles']);
-    $ref_fii = field_info_instances($ref_entity_type, $ref_bundle);
+  if (!empty($inherit_ref_key)) {
+    $ref_type_label = $options[$inherit_ref_key];
+    list($inherit_entity_type, $inherit_bundle, $inherit_field_name) = explode(':', $inherit_ref_key);
+    if ($inherit_bundle == $node_type->type) {
+      $fi = $field_info_fields[$inherit_field_name];
+      $ref_entity_type = $fi['settings']['target_type'];
+      reset($fi['settings']['handler_settings']['target_bundles']);
+      $ref_bundle = key($fi['settings']['handler_settings']['target_bundles']);
+      $ref_fii = field_info_instances($ref_entity_type, $ref_bundle);
+    }
+    else {
+      $ref_fii = field_info_instances($inherit_entity_type, $inherit_bundle);
+    }
 
     $options = array();
     foreach ($ref_fii as $name => $field) {

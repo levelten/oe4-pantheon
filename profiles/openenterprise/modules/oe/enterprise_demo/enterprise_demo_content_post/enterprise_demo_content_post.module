@@ -133,16 +133,16 @@ function enterprise_demo_content_post_enterprise_apps_config_settings() {
 
   $colors = array(
     '@brand-primary' =>   '#168FAE',
-    '@brand-secondary' => '#84BB41',
+    '@brand-secondary' => '#82B739',
     '@brand-tertiary' =>  '#666666',
-    '@brand-accent' =>    '#F46C22',
-    '@brand-accent-2' =>  '#FFFFFF',
-    '@brand-accent-3' =>  '#FFFFFF',
+    '@brand-accent' =>    '#FF8C1A',
+    '@brand-accent-2' =>  '#FFB91A',
+    '@brand-accent-3' =>  '#C32351',
   );
 
   $theme_settings = array(
     'default_logo' => 0,
-    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo_navbar.png',
+    'logo_path' => 'profiles/openenterprise/images/openenterprise_logo_brandbar.png',
     //'logo_image_style' => 'enterprise_bootstrap_logo',
     'toggle_name' => 0,
     'navbar_header_display' => 'none',

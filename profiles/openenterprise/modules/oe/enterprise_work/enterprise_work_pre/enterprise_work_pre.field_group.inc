@@ -24,13 +24,13 @@ function enterprise_work_pre_field_group_info() {
     'weight' => '10',
     'children' => array(
       0 => 'group_rel_subject',
-      1 => 'group_rel_subject',
+      1 => 'group_rel_solution',
       2 => 'group_rel_organization',
       3 => 'group_rel_person',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
-      'formatter' => 'collapsed',
+      'formatter' => 'collapsible',
       'instance_settings' => array(
         'required_fields' => 1,
         'classes' => 'display_sidebar rel-fieldset',
