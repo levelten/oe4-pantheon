@@ -99,11 +99,6 @@ projects[better_formats][version] = 1.0-beta1
 projects[ckeditor][version] = 1.x-dev
 projects[ckeditor_blocks][version] = 1.x-dev
 projects[ckeditor_bootstrap][version] = 1.x-dev
-projects[ckeditor_media][version] = 1.x-dev
-projects[video_filter][version] = 3.x-dev
-; video filter dialog with ckeditor standalone module is not working
-; http://drupal.org/node/1689440
-projects[video_filter][patch][1434158] = https://www.drupal.org/files/issues/update_the_readme_for-1434158-11.patch
 
 ;;;;;;
 ; UI Enhancements
