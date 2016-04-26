@@ -26,4 +26,11 @@
 
 	</div>
 	<?php if (!$is_front): ?></div><?php endif; ?>
+			
+	<!-- back to top arrow -->
+	<?php if ($back_to_top): ?>
+		<div class="scrollToTop">
+			<i class="icon glyphicon glyphicon-chevron-up"></i>
+		</div>
+	<?php endif; ?>
 </section>

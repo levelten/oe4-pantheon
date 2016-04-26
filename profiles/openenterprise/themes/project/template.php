@@ -403,6 +403,8 @@ function project_preprocess_page(&$vars) {
   // Add settings to Drupal.settings
   drupal_add_js(array('project' => $settings),array('type' => 'setting'));
 
+  // Add back to top arrow
+  $vars['back_to_top'] = theme_get_setting('back_to_top');
 }
 
 /**
