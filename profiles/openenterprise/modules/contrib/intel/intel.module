@@ -304,7 +304,7 @@ function intel_menu() {
   }
   */
 
-  if ($api_level == 'pro') {
+  if (1 || $api_level == 'pro') {
 
     $items['visitor/%intel_visitor'] = array(
       //'title callback' => 'intel_visitor_title',
@@ -456,7 +456,7 @@ function intel_menu() {
     );
   }
 
-  if ($api_level == 'pro') {
+  if (1 || $api_level == 'pro') {
     $items['admin/people/contacts'] = array(
       'title' => 'Contacts',
       'description' => 'Information about visitors.',

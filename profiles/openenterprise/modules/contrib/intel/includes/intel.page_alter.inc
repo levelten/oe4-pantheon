@@ -10,9 +10,19 @@ function intel_page_alter(&$page) {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   global $user;
 
+  /*
+   * TEMP
+   */
+  //drupal_include_
+  // END TEMP
+
+  $ldr = array();
+
   $api_level = intel_api_level();
 
   $parsed_url = intel_parse_cms_url();
+
+  $ld = array();
 
   $config = array(
     'debug' => intel_debug_mode(),
@@ -320,7 +330,7 @@ function intel_page_alter(&$page) {
 }
 
 function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $include_events = 0) {
-  global $user;
+  global $user, $base_path;
 
   $attr_cache = &drupal_static(__FUNCTION__, array());
   //$entity_info_cache = &drupal_static(__FUNCTION__);  // two cached vars, seem to not work
@@ -328,15 +338,19 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
 
   $visitor_attrs = array();
   $page_attrs = array();
+  $page_ld = array();
   $page_events = array();
 
   // if entity not found, return empty attributes
   if (!$entity || !$entity_type) {
     return array(
       'page' => $page_attrs,
+      'page_ld' => $page_ld,
       'visitor' => $visitor_attrs,
     );
   }
+
+  $page_ld['oei:attributes'] = array();
 
   if (!isset($attr_cache[$entity_type])) {
     $attr_cache[$entity_type] = array();
@@ -365,15 +379,15 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   $page_attr_info = intel_get_page_attribute_info();
 
   // resource type = entity_type
-  $page_attrs['rt'] = $entity_type;
+  $page_ld['site:entityType'] = $page_attrs['rt'] = $entity_type;
   // resource sub type = entity bundle
   if (isset($entity_info['entity keys']['bundle']) && isset($entity->{$entity_info['entity keys']['bundle']})) {
-    $page_attrs['rt2'] = $entity->{$entity_info['entity keys']['bundle']};
+    $page_ld['site:entityBundle'] = $page_attrs['rt2'] = $entity->{$entity_info['entity keys']['bundle']};
     $page_attrs['rt2'] = str_replace('enterprise_', '', $page_attrs['rt2']); // trim enterprise namespace in Open Enterprise
   }
   // resource id = entity_id
   if (isset($entity_info['entity keys']['id']) && isset($entity->{$entity_info['entity keys']['id']})) {
-    $page_attrs['rk'] = $entity->{$entity_info['entity keys']['id']};
+    $page_ld['site:entityId'] = $page_attrs['rk'] = $entity->{$entity_info['entity keys']['id']};
     $entity_attrs = intel_entity_attr_load_by_params($entity_type, $page_attrs['rk']);
 
     if (is_array($entity_attrs)) {
@@ -386,6 +400,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
           $value_str = intel_index_encode($ea->attr_key);
           if (!isset($page_attrs[$ea->attr_key])) {
             $page_attrs[$ea->attr_key] = array();
+            //$page_ld['oei:attributes'][$ea->attr_key] = array();
           }
           if (!empty($page_attr_info[$ea->attr_key]['encode']) && isset($ea->vsid)) {
             $index = intel_index_encode($ea->vsid);
@@ -395,15 +410,19 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
           }
           if ($page_attr_info[$ea->attr_key]['type'] == 'vector') {
             $page_attrs[$ea->attr_key][$index] = !empty($ea->value_num) ? $ea->value_num : 0;
+            //$page_ld['oei:attributes'][$ea->attr_key][$index] = !empty($ea->value_num) ? $ea->value_num : 0;
           }
           else {
             $page_attrs[$ea->attr_key][$index] = '';
+            //$page_ld['oei:attributes'][$ea->attr_key][$index] = '';
           }
         }
         else {
           $page_attrs[$ea->attr_key] = $ea->value;
+          //$page_ld['oei:attributes'][$ea->attr_key] = $ea->value;
           if (!empty($page_attr_info[$ea->attr_key]['encode']) && isset($ea->vsid)) {
             $page_attrs[$ea->attr_key] = intel_index_encode($ea->vsid);
+            //$page_ld['oei:attributes'][$ea->attr_key] = intel_index_encode($ea->vsid);
           }
         }
       }
@@ -418,15 +437,19 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
   // resource vid = entity vid
   if (isset($entity_info['entity keys']['revision']) && isset($entity->{$entity_info['entity keys']['revision']})) {
     //$page_attrs['rvi'] = $entity->{$entity_info['entity keys']['revision']};
+    $page_ld['version'] = $entity->{$entity_info['entity keys']['revision']};
   }
 
   // resource table = entity label
   if (isset($entity_info['entity keys']['label']) && isset($entity->{$entity_info['entity keys']['label']})) {
     //$page_attrs['rtl'] = $entity->{$entity_info['entity keys']['label']};
+    $page_ld['headline'] = $entity->{$entity_info['entity keys']['label']};
+    $page_ld['name'] = $entity->{$entity_info['entity keys']['label']};
   }
   // resource language
   if (isset($entity_info['entity keys']['language']) && isset($entity->{$entity_info['entity keys']['language']}) && ($entity->{$entity_info['entity keys']['language']} != LANGUAGE_NONE)) {
     $page_attrs['lang'] = $entity->{$entity_info['entity keys']['language']};
+    $page_ld['inLanguage'] = $entity->{$entity_info['entity keys']['language']};
   }
 
   // ? not sure if this is needed or enhances performance
@@ -434,6 +457,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $val = date('YmdHiw', $entity->created);
     if (empty($page_attrs['pd']) || ($page_attrs['pd'] != $val)) {
       $page_attrs['pd'] = $val;
+      $page_ld['datePublished'] = $val;
       /*
       if (isset($entity_attr)) {
         $entity_attr->attr_key = 'pd';
@@ -474,6 +498,8 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $uri = entity_uri($entity_type, $entity);
     if (!empty($uri['path'])) {
       $page_attrs['rl'] = $uri['path'];
+      $page_ld['@id'] = $base_path . $uri['path'];
+      $page_ld['site:route'] = $uri['path'];
       //$page_attrs['url'] = url($page_attrs['rl']);
     }
   }
@@ -511,6 +537,14 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
       $key = 'a';
     }
     $page_attrs[$key] = $entity->uid;
+    //$page_ld['author'] = $base_path . "user/" . $entity->uid;
+
+    $page_ld['author'] = array(
+      '@id' => $base_path . "user/" . $entity->uid,
+      'site:entityType' => 'user',
+      'site:entityId' => $entity->uid,
+      'site:route' => "user/" . $entity->uid,
+    );
   }
 
   // track page intent
@@ -526,6 +560,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
     $page_attrs['i'] = array(
       $intent => '',
     );
+    $page_ld['oei:pageIntent'] = $intent;
   }
 
   $vocab_entity_settings = intel_get_entity_settings_multi('taxonomy');
@@ -539,11 +574,18 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
       // check if tracking is enabled at the content type level or on globally on the vocabulary
       if (!empty($page_entity_settings['track_term_fields'][$key]) || !empty($vocab_entity_settings[$vocab_name]['track_page_terms'])) {
         $page_attr_key = !empty($vocab_entity_settings[$vocab_name]['page_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['page_attribute']['key'] : 't';
+        $page_ld_key = "site:$vocab_name";
         foreach ($entity->{$key}[$lang] AS $t) {
           if (!isset($page_attrs[$page_attr_key])) {
             $page_attrs[$page_attr_key] = array();
+            $page_ld[$page_ld_key] = array();
           }
           $page_attrs[$page_attr_key][$t['tid']] = '';
+          $page_ld[$page_ld_key][] = (object)array(
+            '@id' => $base_path . 'taxonomy/term/' . $t['tid'],
+            'site:route' => 'taxonomy/term/' . $t['tid'],
+            'site:entityId' => $t['tid'],
+          );
           if (!empty($vocab_entity_settings[$vocab_name]['track_page_terms_visitor'])) {
             $visitor_attr_key = !empty($vocab_entity_settings[$vocab_name]['visitor_attribute']['key']) ? $vocab_entity_settings[$vocab_name]['visitor_attribute']['key'] : $page_attr_key;
             if (!isset($visitor_attrs[$visitor_attr_key])) {
@@ -613,6 +655,7 @@ function intel_get_entity_intel_attributes($entity = '', $entity_type = '', $inc
 
   $attrs = array(
     'page' => $page_attrs,
+    'page_ld' => $page_ld,
     'visitor' => $visitor_attrs,
     'events' => $page_events,
   );

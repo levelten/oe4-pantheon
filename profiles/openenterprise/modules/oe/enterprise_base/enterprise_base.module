@@ -328,6 +328,7 @@ function enterprise_base_form_alter(&$form, &$form_state, $form_id) {
     || $form_id == 'user_profile_form' // taxonomy term edit form
     || $form_id == 'taxonomy_form_term' // taxonomy term edit form
     || $form_id == 'bean_form' // bean edit form
+    || $form_id == 'intel_visitor_edit_form'
   ) {
     // if admin theme is Rubik, enhance node admin
 		$theme = variable_get('admin_theme', 'bartik');

@@ -132,6 +132,7 @@ dsm($refs);
   );
 
   $form['actions'] = array(
+    '#type' => 'actions',
     '#weight' => 100,
   );
   $form['actions']['submit'] = array(

@@ -21,7 +21,7 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
   }
   $form['intel'] = array(
     '#type' => 'fieldset',
-    '#title' => t('LevelTen Intelligence'),
+    '#title' => t('Intelligence'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',      
@@ -158,6 +158,36 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
       '#description' => t('Description of the attribute. Leave blank to use vocabulary\'s description.'),
       '#rows' => 2,
     );
+
+    $form['intel']['cms'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('CMS integration'),
+      //'#description' => t(''),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($entity_settings['cms']['key']),
+    );
+
+    $empty = 1;
+    if (module_exists('intel_mailchimp')) {
+      $form['intel']['cms']['intel_cms_mailchimp_group_field'] = array(
+        '#type' => 'textfield',
+        '#title' => t('MailChimp Group Field'),
+        '#default_value' => !empty($entity_settings['cms']['mailchimp_group_field']) ? $entity_settings['cms']['mailchimp_group_field'] : '',
+        '#description' => t('Enter the the name of the MailChimp Group'),
+      );
+      $empty = 0;
+    }
+
+    if ($empty) {
+      $form['intel']['cms']['empty'] = array(
+        '#type' => 'markup',
+        '#markup' => t('No CMS integration modules have been enabled.'),
+      );
+    }
+
+
+
+
   }
 }
 // TODO: should this be converted to use a entity_type_insert hook?
@@ -224,6 +254,10 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
     if (!empty($values['intel_visitor_attribute_description'])) {
       $entity_settings['visitor_attribute']['description'] = $values['intel_visitor_attribute_description'];
     }
+  }
+
+  if (!empty($values['intel_cms_mailchimp_group_field'])) {
+    $entity_settings['cms']['mailchimp_group_field'] = $values['intel_cms_mailchimp_group_field'];
   }
 
   variable_set('intel_entity_settings_' . $entity_type . '__' . $bundle, $entity_settings);

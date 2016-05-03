@@ -60,6 +60,37 @@ function intel_webform_page_alter(&$page) {
 */
 
 /**
+ * Alter the list of select list options provided by Webform and other modules.
+ *
+ * @see hook_webform_select_options_info().
+ */
+function intel_webform_webform_select_options_info_alter(&$items) {
+  // Remove the days of the week options.
+  dsm($items);
+  //unset($items['days']);
+}
+
+function intel_webform_webform_references_term_list_alter(&$term_list, $vid) {
+  $vocab = taxonomy_vocabulary_load($vid);
+
+  // check if webform_option field exists on vocab
+  $fi = field_info_instance('taxonomy_term', 'webform_option', $vocab->machine_name);
+  if (empty($fi)) {
+    return;
+  }
+  $query = db_select('field_data_field_webform_option', 'f')
+    ->fields('f')
+    ->condition('entity_type', 'taxonomy_term')
+    ->condition('bundle', $vocab->machine_name);
+  $items = $query->execute()->fetchAllAssoc('entity_id');
+  foreach ($term_list as $k => $v) {
+    if (!empty($items[$k])) {
+      $term_list[$k] = $items[$k]->field_webform_option_value;
+    }
+  }
+}
+
+/**
  * Implements hook_intel_page_settings_js_alter()
  * @param $settings
  */

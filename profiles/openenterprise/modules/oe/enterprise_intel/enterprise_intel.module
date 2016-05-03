@@ -58,3 +58,45 @@ function enterprise_intel_config_intel_controls($entity_type, $bundle, $settings
   }
 }
 
+/**
+ * Implements hook_form_alter
+ *
+ * Disable bean revisioning
+ * @param $form
+ * @param $form_state
+ */
+// this is done in enterprise_base
+//function enterprise_intel_form_intel_visitor_edit_form_alter(&$form, &$form_state) {
+//  drupal_add_css(drupal_get_path('module', 'enterprise_base') . '/css/enterprise_base.edit_form.css');
+//
+//}
+
+/**
+ * Implementation of hook_theme().
+ *
+ * // add Rubik sidebar styling to visitor edit form
+ */
+function enterprise_intel_theme() {
+  $items = array();
+
+
+  // Add two column layout to bean edit form
+  $items['intel_visitor_edit_form'] = array(
+    'render element' => 'form',
+    'path' => drupal_get_path('theme', 'rubik') .'/templates',
+    'template' => 'form-default',
+    'preprocess functions' => array(
+      'enterprise_intel_preprocess_intel_visitor_edit_form',
+      'rubik_preprocess_form_buttons',
+    ),
+  );
+  //$items = array();
+  return $items;
+}
+
+function enterprise_intel_preprocess_intel_visitor_edit_form(&$vars) {
+  // for future use
+}
+
+
+

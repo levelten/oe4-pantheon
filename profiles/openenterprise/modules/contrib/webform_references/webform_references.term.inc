@@ -430,6 +430,7 @@ function _webform_references_get_term_list($vid, $sort_by = 'name', $order = 'AS
   foreach ($result as $term) {
     $term_list[$term->tid] = $term->name;
   }
+  drupal_alter('webform_references_term_list', $term_list, $vid);
   return $term_list;
 }
 
