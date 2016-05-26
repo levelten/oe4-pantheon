@@ -1172,21 +1172,9 @@ function intel_admin_paths() {
  * Testing function
  */
 function intel_util($ignore = '', $delete = 0) {
-  $node = node_load(11);
-  dsm($node);
-  return '';
-  $loc = 'http://dwyr-rbw.localhost/contact-us?fid=332';
-  $hrefs = array(
-    'node/99',
-    '/node/99',
-    '/contact-us',
-    '/contact-us?fid=332',
-  );
-  foreach ($hrefs as $href) {
-    dsm($href);
-    $urlc = intel_parse_url($href, $loc);
-    dsm($urlc);
-  }
+
+  jsonld_init();
+
 
   return '';
 }

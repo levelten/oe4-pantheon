@@ -53,6 +53,28 @@ function _intel_intel_visitor_property_info() {
       'title' => NULL,
     ),
   );
+
+  $prop['data.givenName'] = array(
+    'title' => t('Given name (first name)'),
+    'category' => 'identity',
+    'variables' => array(
+      '@value' => NULL,
+    ),
+    'field_type' => array(
+      'text',
+    ),
+    'webform_component_type' => array(
+      'text'
+    )
+  );
+  $prop['data.familyName'] = array(
+    'title' => t('Family name (last name)'),
+    'category' => 'identity',
+    'variables' => array(
+      '@value' => NULL,
+    ),
+  );
+
   $prop['data.name'] = array(
     'title' => t('Name'),
     'category' => 'identity',
@@ -259,7 +281,38 @@ function _intel_intel_visitor_property_info() {
       'url' => NULL,
     ),
   );
+
   $prop = intel_add_icons_to_visitor_properties($prop);
+
+  $attr_info = intel_get_attribute_info();
+  dsm($attr_info);
+
+  foreach ($attr_info as $k => $v) {
+    if (!empty($v['source_type']) && $v['source_type'] == 'taxonomy') {
+      $prop['data.analytics.' . $k] = array(
+        'title' => $v['title'],
+        'category' => t('attributes'),
+        'source_type' => !empty($v['source_type']) ? $v['source_type'] : '',
+        'variables' => array(
+          '_key' => NULL,
+        ),
+      );
+    }
+    /*
+    if (!empty($v['prop']) && $v['prop']) {
+      $prop['data.' . $v['prop']] = array(
+        'title' => $v['title'],
+        'category' => t('attributes'),
+        'source_type' => !empty($v['source_type']) ? $v['source_type'] : '',
+        'variables' => array(
+          '@value' => NULL,
+        ),
+      );
+    }
+    */
+  }
+
+
   return $prop;
 }
 
@@ -425,3 +478,4 @@ function intel_visitor_property_group($values) {
   }
   return $grouped;
 }
+

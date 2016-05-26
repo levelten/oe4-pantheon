@@ -14,6 +14,91 @@ function intel_visitor_admin_settings_form($form, $form_state) {
     '#description' => t('URL of picture to display for visitors with no custom picture. Leave blank for none.'),
   );
 
+  $form['intel_visitor_field_map'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Visitor attribute map'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
+
+  $fis = field_info_instances('intel_visitor', 'intel_visitor');
+  $fbs = field_info_fields();
+
+  $settings = variable_get('intel_visitor_field_map', array());
+
+  $info = intel_get_visitor_property_info_all();
+  $prop_options = array();
+  foreach ($info as $key => $def) {
+    if (isset($def['field_type'])) {
+      foreach ($def['field_type'] as $type) {
+        if (!isset($prop_options[$type])) {
+          $prop_options[$type] = array();
+        }
+        $prop_options[$type][$key] = $def;
+      }
+    }
+  }
+  dsm($prop_options);
+
+  $tax_options = array(
+    '' => '- ' . t('None (Do sync data)') . ' -',
+    '_set' => t('Sync field with visitor attributes'),
+  );
+  foreach ($fis as $field_name => $fi) {
+    $fb = $fbs[$field_name];
+    if ($fb['type'] == 'taxonomy_term_reference' && isset($fb['settings']['allowed_values'][0])) {
+      $vocab = $fb['settings']['allowed_values'][0]['vocabulary'];
+      $entity_settings = variable_get('intel_entity_settings_taxonomy__' . $fb['settings']['allowed_values'][0]['vocabulary'], array());
+      if (!empty($entity_settings['visitor_attribute']['key'])) {
+        $fields['tax'][$field_name] = array(
+          'type' => $fb['type'],
+          'label' => $fi['label'],
+          'vocab_name' => $vocab,
+          'options' => $tax_options,
+        );
+
+        $form['intel_visitor_field_map'][$field_name] = array(
+          '#type' => 'select',
+          '#title' => t('Field: %field (Taxonomy vocabulary %vocab)', array(
+              '%field' => $fi['label'],
+              '%vocab' => $vocab,
+            )
+          ),
+          '#description' => t('Select if you want to sync the Drupal entity field with the visitor attribute data.'),
+          '#options' => $tax_options,
+          '#default_value' => isset($settings[$field_name]) ? $settings[$field_name] : '',
+        );
+      }
+    }
+    else if ($fb['type'] == 'text') {
+      $options = array();
+      $options['email'] = t('Email');
+      $options['telephone'] = t('Telephone');
+      //$options['name:full'] = t('Full name');
+      $options['givenName'] = t('First name');
+      $options['name:last'] = t('Last name');
+      $options['facebook:url'] = t('Facebook (url)');
+      $options['twitter:username'] = t('Twitter (username)');
+      $options['twitter:url'] = t('Twitter (url)');
+      $options['linkedin:url'] = t('LinkedIn (url)');
+      $options['website:url'] = t('Website');
+      $form['intel_visitor_field_map'][$field_name] = array(
+        '#type' => 'select',
+        '#title' => t('Field: %field', array(
+            '%field' => $fi['label'],
+          )
+        ),
+        '#description' => t('Select if you want to sync the Drupal entity field with the visitor attribute data.'),
+        '#options' => $options,
+        '#default_value' => isset($settings[$field_name]) ? $settings[$field_name] : '',
+      );
+    }
+  }
+
+
+
+
   $form['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
@@ -101,6 +186,8 @@ dsm($refs);
     '#default_value' => $entity->phone,
   );
 
+  field_attach_form('intel_visitor', $entity, $form, $form_state);
+
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced'),
@@ -122,8 +209,6 @@ dsm($refs);
     );
   }
 
-
-  field_attach_form('intel_visitor', $entity, $form, $form_state);
   $form['advanced']['intel_sync_visitordata_fullcontact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Full Contact data'),
@@ -165,6 +250,7 @@ function intel_visitor_edit_form_validate($form, &$form_state) {
  */
 function intel_visitor_edit_form_submit($form, &$form_state) {
   $entity = $form_state['values']['entity'];
+  $values = $form_state['values'];
 
   $account = user_load_by_name($form_state['values']['user_name']);
   $email = '';
@@ -200,12 +286,126 @@ function intel_visitor_edit_form_submit($form, &$form_state) {
   }
 
   field_attach_submit('intel_visitor', $entity, $form, $form_state);
+dsm($entity);
+  dsm($form);
+  dsm($values);
+  $field_map = variable_get('intel_visitor_field_map', array());
+dsm($field_map);
+  $prop_options = array(
+    'source' => 'form',
+  );
+
+
+  $merge_data = array();
+  foreach ($field_map as $field_name => $v) {
+    if ($v == '_set') {
+      $fib = field_info_field($field_name);
+      if (empty($fib['settings']['allowed_values'][0]['vocabulary'])) {
+        continue;
+      }
+      $vocab_name = $fib['settings']['allowed_values'][0]['vocabulary'];
+      $entity_settings = variable_get('intel_entity_settings_taxonomy__' . $vocab_name, array());
+      if (!empty($entity_settings['visitor_attribute']['key'])) {
+        $key = 'attributes.' . $entity_settings['visitor_attribute']['key'];
+        $var = array();
+        foreach ($values[$field_name][LANGUAGE_NONE] as $i => $vv) {
+          if (!empty($vv['tid'])) {
+            $var[$vv['tid']] = '';
+          }
+        }
+        // TODO: keep this to just storage place
+        //$entity->setVar('visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+        $entity->setVar('api_visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+      }
+    }
+    else {
+      list($key, $elem) = explode(':', $v);
+
+      if (!isset($merge_data[$key])) {
+        $merge_data[$key] = array();
+      }
+
+      $value = '';
+      if (!empty($values[$field_name][LANGUAGE_NONE][0])) {
+        $value = trim($values[$field_name][LANGUAGE_NONE][0]['value']);
+      }
+
+      // don't add value if it is blank
+      if ($value) {
+        $merge_data[$key][$elem] = $value;
+      }
+    }
+  }
+dsm($merge_data);
+  foreach ($merge_data AS $prop_name => $values) {
+    $entity->setProp($prop_name, $values, $prop_options);
+  }
+
+
   if (!empty($form_state['values']['name'])) {
     $entity->setName($form_state['values']['name']);
   }
+
+  dsm($field_map);
+
   $entity = intel_visitor_save($entity);
   $form_state['redirect'] = $entity->uri();
 }
+
+function intel_visitor_set_data_from_fields(&$visitor, $prop_options = array()) {
+  $field_map = variable_get('intel_visitor_field_map', array());
+  foreach ($field_map as $field_name => $v) {
+    if ($v == '_set') {
+      $fib = field_info_field($field_name);
+      dsm($fib);
+      if (empty($fib['settings']['allowed_values'][0]['vocabulary'])) {
+        continue;
+      }
+      $vocab_name = $fib['settings']['allowed_values'][0]['vocabulary'];
+      $entity_settings = variable_get('intel_entity_settings_taxonomy__' . $vocab_name, array());
+      if (!empty($entity_settings['visitor_attribute']['key'])) {
+        $key = 'attributes.' . $entity_settings['visitor_attribute']['key'];
+        $var = array();
+        foreach ($visitor->{$field_name}[LANGUAGE_NONE] as $i => $vv) {
+          if (!empty($vv['tid'])) {
+            $var[$vv['tid']] = '';
+          }
+        }
+        // TODO: keep this to just storage place
+        //$entity->setVar('visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+        $visitor->setVar('api_visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+      }
+    }
+    else {
+      list($key, $elem) = explode(':', $v);
+
+      $value = '';
+      if (!empty($visitor->{$field_name}[LANGUAGE_NONE][0]['value'])) {
+        $value = trim($visitor->{$field_name}[LANGUAGE_NONE][0]['value']);
+      }
+
+      // don't add value if it is blank
+      if ($value) {
+        if (!isset($merge_data[$key])) {
+          $merge_data[$key] = array();
+        }
+        $merge_data[$key][$elem] = $value;
+      }
+    }
+  }
+
+  foreach ($merge_data AS $prop_name => $values) {
+    $visitor->setProp($prop_name, $values, $prop_options);
+  }
+
+  return $visitor;
+}
+
+function intel_visitor_set_fields_from_data($visitor) {
+
+}
+
+
 
 /**
  * Button submit function: handle the 'Delete' button on the node form.

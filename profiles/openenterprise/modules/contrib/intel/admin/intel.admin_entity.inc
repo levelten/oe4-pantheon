@@ -90,19 +90,35 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
       '#description' => t('Check to enable term in this vocabulary to be automatically tracked in analytics on all content types. In left unchecked, you can configure tracking settings on per content type via the content type edit form.'),
     );
 
+    $form['intel']['intel_sync_visitor_terms'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Sync term attributes in api visitor data with Drupal visitor entity.'),
+      '#default_value' => !empty($entity_settings['sync_visitor_terms']) ? $entity_settings['sync_visitor_terms'] : INTEL_SYNC_VISITOR_TERMS_DEFAULT,
+      '#description' => t('If enabled, any terms associated with the Visitor entity in Drupal will be synced with the api data. Terms can be set using custom fields.'),
+    );
+
     $form['intel']['page_attribute'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Custom page attribute'),
+      '#title' => t('Custom page/visitor attribute'),
       '#description' => t('By default vocabularies are tracked as standard Taxomony terms. Use the below fields create a custom page attribute to track this vocabulary.'),
       '#collapsible' => TRUE,
       '#collapsed' => empty($entity_settings['page_attribute']['key']),
     );
+
     $form['intel']['page_attribute']['intel_page_attribute_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Key'),
       '#default_value' => !empty($entity_settings['page_attribute']['key']) ? $entity_settings['page_attribute']['key'] : '',
       '#description' => t('A short unique identifier for the attribute. Keep this a short as possible.'),
       '#size' => 12,
+    );
+
+    $form['intel']['page_attribute']['intel_page_attribute_prop'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Property'),
+      '#default_value' => !empty($entity_settings['page_attribute']['prop']) ? $entity_settings['page_attribute']['prop'] : '',
+      '#description' => t('Identifier for this attribute.'),
+      '#size' => 32,
     );
 
     $form['intel']['page_attribute']['intel_page_attribute_title'] = array(
@@ -121,6 +137,9 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
       '#rows' => 2,
     );
 
+
+
+    /*
     $form['intel']['intel_track_page_terms_visitor'] = array(
       '#type' => 'checkbox',
       '#title' => t('Track selected terms in visitor attributes on all content types.'),
@@ -158,6 +177,7 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
       '#description' => t('Description of the attribute. Leave blank to use vocabulary\'s description.'),
       '#rows' => 2,
     );
+    */
 
     $form['intel']['cms'] = array(
       '#type' => 'fieldset',
@@ -184,10 +204,6 @@ function intel_admin_entity_type_form_alter(&$form, &$form_state, $form_id) {
         '#markup' => t('No CMS integration modules have been enabled.'),
       );
     }
-
-
-
-
   }
 }
 // TODO: should this be converted to use a entity_type_insert hook?
@@ -220,15 +236,14 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
     $entity_settings['track_page_terms'] = $values['intel_track_page_terms'];
   }
 
-  if (isset($values['intel_track_page_terms'])) {
-    $entity_settings['track_page_terms'] = $values['intel_track_page_terms'];
-  }
-
   if (!empty($values['intel_page_attribute_key'])) {
     if (!isset($entity_settings['page_attribute'])) {
       $entity_settings['page_attribute'] = array();
     }
     $entity_settings['page_attribute']['key'] = $values['intel_page_attribute_key'];
+    if (!empty($values['intel_page_attribute_prop'])) {
+      $entity_settings['page_attribute']['prop'] = $values['intel_page_attribute_prop'];
+    }
     if (!empty($values['intel_page_attribute_title'])) {
       $entity_settings['page_attribute']['title'] = $values['intel_page_attribute_title'];
     }
@@ -237,6 +252,16 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
     }
   }
 
+  if (isset($values['intel_sync_visitor_terms'])) {
+    $entity_settings['sync_visitor_terms'] = $values['intel_sync_visitor_terms'];
+    $entity_settings['visitor_attribute'] = array();
+    $entity_settings['visitor_attribute']['key'] = $values['intel_page_attribute_key'];
+    if (!empty($values['intel_page_attribute_prop'])) {
+      $entity_settings['visitor_attribute']['prop'] = $values['intel_page_attribute_prop'];
+    }
+  }
+
+  /*
   if (isset($values['intel_track_page_terms_visitor'])) {
     $entity_settings['track_page_terms_visitor'] = $values['intel_track_page_terms_visitor'];
   }
@@ -255,6 +280,7 @@ function intel_admin_entity_type_form_submit($form, &$form_state) {
       $entity_settings['visitor_attribute']['description'] = $values['intel_visitor_attribute_description'];
     }
   }
+  */
 
   if (!empty($values['intel_cms_mailchimp_group_field'])) {
     $entity_settings['cms']['mailchimp_group_field'] = $values['intel_cms_mailchimp_group_field'];

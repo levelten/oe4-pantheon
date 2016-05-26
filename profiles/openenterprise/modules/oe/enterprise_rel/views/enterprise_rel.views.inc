@@ -82,6 +82,7 @@ function enterprise_rel_views_data() {
       'handler' => 'enterprise_rel_handler_sort_rel_terms'
     ),
   );
+  /*
   $data['enterprise_rel']['terms_default'] = array(
     'title' => t('By Default Terms'),
     'help' => t('The rating given to the related content given as an argument.'),
@@ -93,6 +94,7 @@ function enterprise_rel_views_data() {
       'handler' => 'enterprise_rel_handler_sort_rel_terms_default'
     ),
   );
+  */
   $data['enterprise_rel']['rel_tid'] = array(
     'group' => t('Relevant'),
     'title' => t('By Terms'),
@@ -251,6 +253,8 @@ function enterprise_rel_views_query($view) {
   }
 
   $tax_weight = .5;
+  $tax_weight *= 2;
+
 
   if (!empty($args['tid']->tids)) {
     $weight = $tax_weight / count($args['tid']->tids);

@@ -681,9 +681,12 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
       if (empty($vocab_info->vid)) {
         continue;
       }
+
       // if mode == visitor,
       if (($mode == 'visitor') && (empty($v[$mode . '_attribute']['key']))) {
         $key = !empty($v['page_attribute']['key']) ? $v['page_attribute']['key'] : 't';
+        $prop = !empty($v['page_attribute']['prop']) ? $v['page_attribute']['prop'] : 'tag';
+
         if (!isset($v['visitor_attribute'])) {
           $v['visitor_attribute'] = array();
         }
@@ -691,6 +694,7 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
       }
       else {
         $key = $v[$mode . '_attribute']['key'];
+        $prop = $v[$mode . '_attribute']['prop'];
       }
 
       $attrs[$key] = $v[$mode . '_attribute'];
@@ -712,7 +716,21 @@ function intel_get_attribute_info($name = NULL, $mode = 'visitor') {
       $attrs[$key]['options info callback']  = 'intel_page_attribute_taxomony_term_option_info';
       $attrs[$key]['module']  = 'intel';
       $attrs[$key]['options'] = array();
-
+      if ($prop) {
+        $attrs[$key]['prop'] = $prop;
+      }
+      if (!isset($attrs[$key]['storage'])) {
+        $attrs[$key]['storage'] = array(
+          'analytics' => array(
+            'struc' => 'dimension',
+            'index' => 1,
+          )
+        );
+      }
+      $attrs[$key]['storage']['analytics'] = array(
+        'siteType' => 'taxonomy_term',
+        'siteBundle' => $vocab_info->machine_name,
+      );
     }
   }
 

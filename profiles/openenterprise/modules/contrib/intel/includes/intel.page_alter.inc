@@ -1585,6 +1585,22 @@ if (!empty($_GET['debug']) || !empty($debug)) {
     $track['submission_path'] = 'submission/' . $sid;
   }
 
+  // process any saved visitor attributes aquired from the form submission
+  $va1 = $visitor->getVar('visitor', 'attributes', '', array());
+  if (!empty($va1)) {
+    $visitor_attrs_info = intel_get_visitor_attribute_info();
+    foreach ($va1 AS $key => $value) {
+      if (is_array($value)) {
+        foreach ($value AS $key2 => $value2) {
+          intel_add_page_intel_push(array('set', "va.$key.$key2", $value2));
+        }
+      }
+      else {
+        intel_add_page_intel_push(array('set', "va.$key", $value));
+      }
+    }
+  }
+
   // save visitor
   if (!empty($visitor->vid)) {
     intel_visitor_save($visitor);

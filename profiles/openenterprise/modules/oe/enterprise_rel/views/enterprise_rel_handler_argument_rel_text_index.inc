@@ -55,6 +55,7 @@ class enterprise_rel_handler_argument_rel_text_index extends similar_handler_arg
    */
   public function similar_build_query($text, $modifier = '') {
     $text_weight = .5;
+    $text_weight /= 40;
     $query = array();
     if (!empty($modifier)) {
       $modifier = " $modifier";

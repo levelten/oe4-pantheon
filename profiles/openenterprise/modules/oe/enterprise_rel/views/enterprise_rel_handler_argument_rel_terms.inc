@@ -120,7 +120,6 @@ class enterprise_rel_handler_argument_rel_terms extends views_handler_argument_m
         }
       }
     }
-
     $this->view->tids = $this->tids;
 
     return TRUE;

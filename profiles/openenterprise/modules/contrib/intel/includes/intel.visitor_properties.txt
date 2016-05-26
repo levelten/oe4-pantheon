@@ -1,0 +1,114 @@
+Data Structure example for properties
+
+
+--- PAGE ---
+
+name: 'Page Title',
+url: '/blog/page-title',
+route: 'node/1',
+resourceType: 'node',
+resourceSubtype: 'enterprise_blog',
+pageIntent: 'oei:pageIntent:A001',
+wordCount: 501,
+titleWordCount: 6,
+titleCharCount: 63,
+taxonomyTerm: [
+  {
+    @id: 'taxonomy/term/4',
+    vocabulary: 'category',
+  }
+]
+segment: ?audienceSegment{
+    contentKeywords: [
+      'intelligence/content-keywords/AB04'
+    ],
+    contentConcepts: [
+      'oei:A001'
+    ]
+    category: [
+      'taxonomy/term/4',
+      'taxonomy/term/5',
+    ],
+    tag: [
+      'taxonomy/term/6'
+    ],
+    challenge: [
+      'taxonomy/term/7'
+    ],
+    industry: [],
+    organizationType: [],
+    organizationSize: [],
+    serviceType: [],
+    serviceTag: [],
+    jobRole: [],
+    gender: [],
+    tone: [],
+}
+
+get/set keys
+
+format 1. - assume arrays
+taxonomyTerm - returns all taxonomy terms (IRI replaced with object if available)
+taxonomyTerm.0 - returns 0th taxonomy term (IRI replaced with object if available)
+taxonomyTerm.vocabulary=categories - returns array of IRIs/objects where vocabulary
+taxonomyTerm.vocabulary=categories.[0] - returns object of 0th element of IRIs/objects where vocabulary
+taxonomyTerm.tid=123 - returns object where tid=123
+
+format 2. - assume primary element of array
+taxonomyTerm.vocabulary=categories - returns  of IRIs/objects where vocabulary
+taxonomyTerm.tid=123 - returns object where tid=123
+
+
+--- VISITOR ---
+
+name: 'Tommy Tester',
+givenName: 'Tommy',
+familyName: 'Tester',
+email: 'tommy@example.com',
+sameAs: [
+  'http://twitter.com/tommytester',
+],
+socialProfile: [
+  {
+    @id: 'http://facebook.com/tommytestetr',
+    platform: 'Facebook',
+    username: 'tommytester'
+  },
+  {
+    @id: 'linkedin:tommytester'
+  }
+],
+segment: {
+  category: [],
+  tag: [],
+  challenge: [],
+  industry: [],
+  jobRole: [],
+  gender: [],
+  tone: [],
+},
+browses: {
+  wordCount: 501 (average word count)
+  segment: {
+    category: [
+      {
+        @id: 'taxonomy/term/5',
+        value: 50,
+      },
+    ]
+  }
+},
+geo: {
+  _source: 'addthis',
+  latitude: 123.45,
+  longitude: 123.45
+}, visitor.socialSharing.platform=Facebook.preference
+socialSharing: [
+  {
+    platform: Facebook,
+    preference: 50,
+  }
+]
+addthis:user {
+
+}

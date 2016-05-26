@@ -1271,6 +1271,20 @@ function enterprise_rel_preprocess_page(&$variables) {
 
   drupal_add_js(drupal_get_path('module', 'enterprise_rel') . '/js/enterprise_rel.views_ajax.js');
 
+  $iv_attrs = intel_get_visitor_attribute_info();
+
+  $tax_attrs = array();
+  foreach ($iv_attrs as $k => $v) {
+    if (!empty($v['source_type']) && $v['source_type'] == 'taxonomy') {
+      $tax_attrs[] = $k;
+    }
+  }
+  drupal_add_js(array(
+    'enterprise_rel' => array(
+      'intel_tax_attrs' => $tax_attrs,
+    )
+  ), array('type' => 'setting'));
+
   $rv_meta = enterprise_rel_get_rel_view_meta();
   if (empty($rv_meta)) {
     return;

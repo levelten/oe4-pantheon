@@ -74,7 +74,7 @@ function intel_webform_webform_references_term_list_alter(&$term_list, $vid) {
   $vocab = taxonomy_vocabulary_load($vid);
 
   // check if webform_option field exists on vocab
-  $fi = field_info_instance('taxonomy_term', 'webform_option', $vocab->machine_name);
+  $fi = field_info_instance('taxonomy_term', 'field_webform_option', $vocab->machine_name);
   if (empty($fi)) {
     return;
   }
@@ -83,6 +83,7 @@ function intel_webform_webform_references_term_list_alter(&$term_list, $vid) {
     ->condition('entity_type', 'taxonomy_term')
     ->condition('bundle', $vocab->machine_name);
   $items = $query->execute()->fetchAllAssoc('entity_id');
+
   foreach ($term_list as $k => $v) {
     if (!empty($items[$k])) {
       $term_list[$k] = $items[$k]->field_webform_option_value;
@@ -254,6 +255,28 @@ function intel_webform_webform_submission_presave($node, &$submission) {
           $submission->data[$cid][0] ='http://' . $_SERVER['HTTP_HOST'] . $base_path . $visitor->uri();
         }
       }
+      if (!empty($component['extra']['intel_term_reference_action'])) {
+        $vocab = taxonomy_vocabulary_load($component['extra']['referenceable_types']);
+        $entity_settings = variable_get('intel_entity_settings_taxonomy__' . $vocab->machine_name, array());
+        if (!empty($entity_settings['visitor_attribute']['key'])) {
+          if ($component['extra']['intel_term_reference_action'] == 'set') {
+            $key = 'attributes.' . $entity_settings['visitor_attribute']['key'];
+            $var = array();
+            if ($component['extra']['intel_term_reference_action'] == 'merge') {
+              $var = $visitor->getVar('visitor', 'attributes', $entity_settings['visitor_attribute']['key'], array());
+            }
+            foreach ($submission->data[$cid] as $tid) {
+              if ($tid) {
+                $var[$tid] = '';
+              }
+            }
+            // TODO: keep this to just storage place
+            $visitor->setVar('visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+            //$visitor->setVar('api_visitor', 'attributes', $entity_settings['visitor_attribute']['key'], $var);
+          }
+        }
+
+      }
       if (!empty($component['extra']['intel_field_map'])) {
         list($key, $elem) = explode(':', $component['extra']['intel_field_map']);
 
@@ -302,6 +325,7 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   $prop_options = array(
     'source' => 'form',
   );
+
   foreach ($merge_data AS $prop_name => $values) {
     $visitor->setProp($prop_name, $values, $prop_options);
   }
@@ -311,7 +335,7 @@ function intel_webform_webform_submission_presave($node, &$submission) {
   if (isset($visitor->is_new) || count($merge_data)) {
     $visitor->updated = REQUEST_TIME;
   }
-
+dsm($visitor);
   $visitor->merge();
 }
 
@@ -538,6 +562,33 @@ function intel_webform_form_webform_component_edit_form_alter(&$form, $form_stat
     $options['twitter:url'] = t('Twitter (url)');
     $options['linkedin:url'] = t('LinkedIn (url)');
     $options['website:url'] = t('Website');
+  }
+  // if term reference, check if vocab is set on intel visitor
+  if ($type == 'term_reference') {
+    $tr_options = array(
+      '' => '- ' . t('None (Do not save)') . ' -',
+      //'set' => t('Set visitor attribute to match only the terms submitted.'),
+      'merge' => t('Add term to visitor attribute'),
+    );
+    $form['extra']['intel_term_reference_action'] = array(
+      '#type' => 'select',
+      '#title' => t('Save to Intel visitor property'),
+      '#description' => t('Select if you would like to save the submission value to visitor fields referencing the same vocabulary. If matching field does not exist on visitor, data will be ignored.'),
+      '#options' => $tr_options,
+      '#default_value' => isset($component['extra']['intel_term_reference_action']) ? $component['extra']['intel_term_reference_action'] : '',
+    );
+    // TODO
+    /*
+    $visitor_fi = field_info_instances('intel_visitor');
+    if (!empty($visitor_fi['intel_visitor'])) {
+      foreach ($visitor_fi['intel_visitor'] as $field_name => $field_instance) {
+        $fi = field_info_field($field_name);
+        dsm($fi);
+      }
+    }
+
+    dsm($visitor_fi);
+    */
   }
   if (count($options) > 1) {
     $form['extra']['intel_field_map'] = array(

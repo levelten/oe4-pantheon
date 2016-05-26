@@ -13,7 +13,7 @@ class enterprise_rel_handler_field_rel_terms extends views_handler_field {
   }
 
   function render($values) {
-    $output = number_format($values->rel_score * 100, 1);
+    $output = number_format($values->rel_score, 3);
     return $output;
   }
 
