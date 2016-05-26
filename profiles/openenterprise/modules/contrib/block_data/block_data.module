@@ -29,12 +29,13 @@ function block_data_permission() {
  */
 function block_data_preprocess_block(&$vars) {
   $block = $vars['block'];
-  $modules = _block_data_unserialize($block->data_attr);
-  // Add attributes to block;
-  if (!empty($modules) && is_array($modules)) {
+  $attributes = unserialize($block->data_attr);
+
+  // Add attributes to block.
+  if (!empty($attributes) && is_array($attributes)) {
     $data_attr = array();
-    foreach ($modules as $module) {
-      foreach ($module as $key => $value) {
+    foreach ($attributes as $attribute) {
+      foreach ($attribute as $key => $value) {
         // Account for style attribute, merge with existing value.
         if ($key === 'style') {
           $value = (!empty($vars['attributes_array']['style'])) ? $vars['attributes_array']['style'] . $value : $value;
@@ -60,12 +61,16 @@ function block_data_preprocess_panels_pane(&$vars) {
   // Load the block based on the block parts.
   $block = block_load($block_parts[0], $block_parts[1]);
   // Extract data attributes.
-  $modules = unserialize($block->data_attr);
+  $attributes = unserialize($block->data_attr);
   // Add attributes to block;
-  if (!empty($modules)) {
+  if (!empty($attributes) && is_array($attributes)) {
     $data_attr = array();
-    foreach ($modules as $module) {
-      foreach ($module as $key => $value) {
+    foreach ($attributes as $attribute) {
+      foreach ($attribute as $key => $value) {
+        // Account for style attribute, merge with existing value.
+        if ($key === 'style') {
+          $value = (!empty($vars['attributes_array']['style'])) ? $vars['attributes_array']['style'] . $value : $value;
+        }
         $data_attr[$key] = $value;
       }
     }
@@ -83,9 +88,12 @@ function block_data_form_alter(&$form, &$form_state, $form_id) {
     // Load statically cached block object used to display the form.
     $block = block_load($form['module']['#value'], $form['delta']['#value']);
 
-    // Add block data fields.
     // Retrieve block attributes data.
-    $data = (!empty($block->data_attr)) ? _block_data_unserialize($block->data_attr) : NULL;
+    $attributes = unserialize($block->data_attr);
+    if (unserialize($attributes) !== FALSE) {
+      $attributes = unserialize($attributes);
+    }
+    $data = (!empty($block->data_attr)) ? $attributes : NULL;
 
     // Account for CSS Class weight, put after them.
     $block_data_weight = NULL;
@@ -162,21 +170,6 @@ function block_data_form_submit($form, &$form_state) {
       if (module_exists('context')) {
         cache_clear_all('context', 'cache', TRUE);
       }
-    }
-  }
-}
-
-/**
- * Check if string needs to be unserialized.
- */
-function _block_data_unserialize($str) {
-  $data1 = unserialize($str);
-  if ($data1 !== FALSE || $str === 'b:0;') {
-    $data2 = unserialize($data1);
-    if ($data2 !== FALSE || $str === 'b:0;') {
-      return $data2;
-    } else {
-      return $data1;
     }
   }
 }

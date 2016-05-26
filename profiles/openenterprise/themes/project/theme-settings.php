@@ -455,6 +455,12 @@ function project_form_system_theme_settings_alter(&$form, &$form_state) {
     '#default_value' => theme_get_setting('colorize'),
     '#description' => t('Use colors defined to skin the theme.'),
   );
+  $form['project_visual']['column_right']['back_to_top'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add \'back to top\' arrow'),
+    '#default_value' => theme_get_setting('back_to_top'),
+    '#description' => t('Adds an \'up arrow\' fixed at the bottom of the screen that users can click on to smooth scroll back to the top of the page. Arrow only appears on scrolling down the page.'),
+  );
 
   
   /********************* Slideshow ***********************/

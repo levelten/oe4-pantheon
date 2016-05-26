@@ -99,13 +99,13 @@ http://getcm2.com
   <!-- HTML5 element support for IE6-8 -->
   <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-  <?php print $scripts; ?>
-</head>
-<body class="<?php print $classes; ?>" <?php print $attributes;?>>
-  <div id="skip-link">
-    <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
-  </div>
+    <![endif]-->
+    <?php print $scripts; ?>
+  </head>
+  <body class="<?php print $classes; ?>" <?php print $attributes;?>>
+    <div id="skip-link">
+      <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
+    </div>
     <div class="page-wrapper">
 
       <div class="header-container">
@@ -113,80 +113,65 @@ http://getcm2.com
 
 
         <!-- Header -->
-<header <?php if(!empty($header_attr)) {print drupal_attributes($header_attr);} ?> >
-  <div class="container">
-    <div class="row">
+        <header <?php if(!empty($header_attr)) {print drupal_attributes($header_attr);} ?> >
+          <div class="container">
+            <div class="row">
 
-        <div class="col-md-1">
-          <!-- header-left start -->
-          <div class="header-left clearfix">
-            <!-- logo -->
-            <?php if ($logo): ?>
-              <div id="logo" class="logo">
-                <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
-                  <img class="img-responsive" src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-                </a>
+              <div class="col-md-1">
+                <!-- header-left start -->
+                <div class="header-left clearfix">
+                  <!-- logo -->
+                  <?php if ($logo): ?>
+                    <div id="logo" class="logo">
+                      <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
+                        <img class="img-responsive" src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
+                      </a>
+                    </div>
+                  <?php endif; ?>
+                  <!-- name-and-slogan -->
+                  <?php if (!empty($site_name)): ?>
+                    <div class="site-name">
+                      <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a>
+                    </div>
+                  <?php endif; ?>
+                  <?php if (!empty($site_slogan)): ?>
+                    <div class="site-slogan">
+                      <?php print $site_slogan; ?>
+                    </div>
+                  <?php endif; ?>
+                </div> <!-- header-left start -->
               </div>
-            <?php endif; ?>
-            <!-- name-and-slogan -->
-            <?php if (!empty($site_name)): ?>
-              <div class="site-name">
-                <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a>
-              </div>
-            <?php endif; ?>
-            <?php if (!empty($site_slogan)): ?>
-              <div class="site-slogan">
-                <?php print $site_slogan; ?>
-              </div>
-            <?php endif; ?>
-          </div> <!-- header-left start -->
-        </div>
 
-        <div class="col-md-11">
-          <!-- header-right start -->
-          <div class="header-right clearfix">
-            <!-- main-navigation start -->
-            <div <?php if ($navbar_attr){ print drupal_attributes($navbar_attr); } ?>>
-              <nav class="navbar navbar-default" role="navigation">
-                <div class="container-fluid">
-                  <!-- Toggle get grouped for better mobile display -->
-                  <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-                      <span class="sr-only">Toggle navigation</span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                    </button>
-                  </div>
-                  <!-- Collect the nav links, forms, and other content for toggling -->
-                  <div class="collapse navbar-collapse" id="navbar-collapse-1">
-                    <?php if (!empty($main_menu)): ?>
-                      <?php print drupal_render($main_menu); ?>
-                    <?php endif; ?>
-                    <!-- header buttons -->
-                    <div class="header-dropdown-buttons hidden-xs">
-                      <?php if($toggle_search): ?>
-                        <div class="btn-group dropdown">
-                          <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <?php print $search_icon; ?>
+              <div class="col-md-11">
+                <!-- header-right start -->
+                <div class="header-right clearfix">
+                  <!-- main-navigation start -->
+                  <div <?php if ($navbar_attr){ print drupal_attributes($navbar_attr); } ?>>
+                    <nav class="navbar navbar-default" role="navigation">
+                      <div class="container-fluid">
+                        <!-- Toggle get grouped for better mobile display -->
+                        <div class="navbar-header">
+                          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
                           </button>
-                          <ul class="dropdown-menu dropdown-menu-right dropdown-animation">
-                            <li><?php print $search_box; ?></li>
-                          </ul>
                         </div>
-                      <?php endif; ?>
-                    </div> <!-- header buttons end-->
-                  </div> <!-- end-navbar -->
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                          <?php if (!empty($main_menu)): ?>
+                            <?php print drupal_render($main_menu); ?>
+                          <?php endif; ?>
+                        </div> <!-- end-navbar -->
+                      </div>
+                    </nav>
+                  </div>
                 </div>
-              </nav>
-            </div>
-          </div>
-        </div>
-    </div> <!-- /.row -->
-  </div> <!-- /.container -->
-</header>
-
-          
+              </div>
+            </div> <!-- /.row -->
+          </div> <!-- /.container -->
+        </header>
 
         <?php include 'includes/header_bottom.inc'; ?>
       </div>
@@ -224,7 +209,7 @@ http://getcm2.com
 
             <?php include 'includes/sidebar_first.inc'; ?>
             <?php include 'includes/sidebar_second.inc'; ?>
-        
+
           </div>
         </div>
       </section>
@@ -256,4 +241,4 @@ http://getcm2.com
       </footer>
     </div>
   </body>
-</html>
+  </html>

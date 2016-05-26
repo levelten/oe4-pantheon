@@ -403,13 +403,23 @@ function project_preprocess_page(&$vars) {
   // Add settings to Drupal.settings
   drupal_add_js(array('project' => $settings),array('type' => 'setting'));
 
+  // Add back to top arrow
+  $vars['back_to_top'] = theme_get_setting('back_to_top');
 }
 
 /**
  * Implements hook_preprocess_maintenance_page().
  */
 function project_preprocess_maintenance_page(&$vars) {
+  project_preprocess_html($vars);
   project_preprocess_page($vars);
+
+  // Inject regions.
+  $regions = system_region_list('project');
+  foreach ($regions as $key => $value) {
+    $blocks = block_get_blocks_by_region($key);
+    $vars['page'][$key] = $blocks;
+  }
 
   // Add main menu.
   $main_menu = menu_tree('main-menu');
@@ -417,11 +427,10 @@ function project_preprocess_maintenance_page(&$vars) {
   $vars['main_menu'] = $main_menu;
 
   // Add back Bootstrap.js
-  $bootstrap_path = drupal_get_path('theme', 'bootstrap');
-  drupal_add_js($bootstrap_path . '/dist/js/bootstrap.js');
+  $bootstrap_path = drupal_get_path('theme', 'enterprise_bootstrap');
+  drupal_add_js($bootstrap_path . '/bootstrap/dist/js/bootstrap.js');
 
 }
-
 
 /**
  * Implements hook_preprocess_block()
