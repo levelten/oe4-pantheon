@@ -87,7 +87,7 @@ segment: {
   gender: [],
   tone: [],
 },
-browses: {
+browses: ?browseBehavior {
   wordCount: 501 (average word count)
   segment: {
     category: [
@@ -102,7 +102,7 @@ geo: {
   _source: 'addthis',
   latitude: 123.45,
   longitude: 123.45
-}, visitor.socialSharing.platform=Facebook.preference
+},
 socialSharing: [
   {
     platform: Facebook,

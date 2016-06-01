@@ -27,15 +27,21 @@ function intel_visitor_admin_settings_form($form, $form_state) {
 
   $settings = variable_get('intel_visitor_field_map', array());
 
-  $info = intel_get_visitor_property_info_all();
+  $vp_info = intel_get_visitor_property_info_all();
+  dsm($vp_info);
   $prop_options = array();
-  foreach ($info as $key => $def) {
+  foreach ($vp_info as $key => $def) {
     if (isset($def['field_type'])) {
       foreach ($def['field_type'] as $type) {
         if (!isset($prop_options[$type])) {
           $prop_options[$type] = array();
         }
-        $prop_options[$type][$key] = $def;
+        foreach ($def['variables'] as $vkey => $vv) {
+          $prop_options[$type][$key . ':' . $vkey] = $def['title'];
+          if ($vkey != '@value') {
+            $prop_options[$type][$key . ':' . $vkey] .= ": " . $vkey;
+          }
+        }
       }
     }
   }
@@ -45,6 +51,7 @@ function intel_visitor_admin_settings_form($form, $form_state) {
     '' => '- ' . t('None (Do sync data)') . ' -',
     '_set' => t('Sync field with visitor attributes'),
   );
+
   foreach ($fis as $field_name => $fi) {
     $fb = $fbs[$field_name];
     if ($fb['type'] == 'taxonomy_term_reference' && isset($fb['settings']['allowed_values'][0])) {
@@ -76,13 +83,14 @@ function intel_visitor_admin_settings_form($form, $form_state) {
       $options['email'] = t('Email');
       $options['telephone'] = t('Telephone');
       //$options['name:full'] = t('Full name');
-      $options['givenName'] = t('First name');
+      $options['givenName:@value'] = t('First name');
       $options['name:last'] = t('Last name');
       $options['facebook:url'] = t('Facebook (url)');
       $options['twitter:username'] = t('Twitter (username)');
       $options['twitter:url'] = t('Twitter (url)');
       $options['linkedin:url'] = t('LinkedIn (url)');
       $options['website:url'] = t('Website');
+
       $form['intel_visitor_field_map'][$field_name] = array(
         '#type' => 'select',
         '#title' => t('Field: %field', array(
@@ -90,7 +98,8 @@ function intel_visitor_admin_settings_form($form, $form_state) {
           )
         ),
         '#description' => t('Select if you want to sync the Drupal entity field with the visitor attribute data.'),
-        '#options' => $options,
+        '#options' => $prop_options['text'],
+        //'#options' => $options,
         '#default_value' => isset($settings[$field_name]) ? $settings[$field_name] : '',
       );
     }

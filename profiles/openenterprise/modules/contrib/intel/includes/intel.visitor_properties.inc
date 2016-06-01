@@ -6,10 +6,313 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
+function intel_get_itemprop_context($prop_name) {
+  $ip_info = _intel_intel_itemprop_info();
 
+  $context = array();
+
+  // add namespaces
+  //$context['site'] = 'http://' . $_SERVER['HTTP_HOST'];
+  $context['io'] = 'http://' . $_SERVER['HTTP_HOST'] . $GLOBALS['base_path'] . 'intel/context/';
+  $context['xsd'] = 'http://www.w3.org/2001/XMLSchema#';
+
+  // add aliases
+  $context['type'] = '@type';
+  $context['url'] = '@id';
+
+  if (empty($ip_info[$prop_name])) {
+    return $context;
+  }
+
+  $classes = array();
+  $props = array();
+
+  $context = _intel_build_context($prop_name, $context, $ip_info);
+
+  // minimize context
+  foreach ($context as $pn => $pi) {
+    $a = array();
+    if (is_object($pi)) {
+      $a = get_object_vars($pi);
+    }
+    else if (is_array($pi)) {
+      $a = $pi;
+    }
+    if (!empty($a)) {
+      if (isset($a['@id']) && count($a) == 1) {
+        $context[$pn] = $a['@id'];
+      }
+    }
+  }
+
+  // convert arrays into objects recursivly for compatability with json-ld lib
+  $a = json_encode($context);
+  $context = json_decode($a);
+
+  return $context;
+
+}
+
+function _intel_build_context($prop_name, $context, $itemprop_info) {
+  if (empty($itemprop_info[$prop_name]['property'])) {
+    return $context;
+  }
+  if (!empty($itemprop_info[$prop_name]['context']) && is_array($itemprop_info[$prop_name]['context'])) {
+    $context = array_merge($context, $itemprop_info[$prop_name]['context']);
+  }
+  foreach ($itemprop_info[$prop_name]['property'] as $pn => $pi) {
+    if (!isset($context[$pn])) {
+      $context[$pn] = array();
+    }
+    if ($pi == '' && !empty($itemprop_info[$prop_name]['default_property_ns'])) {
+      $pi = $itemprop_info[$prop_name]['default_property_ns'] . ':' . $pn;
+    }
+    if (is_string($pi)) {
+      $pi = (object) array(
+        '@id' => $pi,
+      );
+    }
+    if (!is_scalar($pi)) {
+      $context[$pn] = drupal_array_merge_deep($context[$pn], $pi);
+    }
+  }
+  if (!empty($itemprop_info[$prop_name]['parent'])) {
+    $context = _intel_build_context($itemprop_info[$prop_name]['parent'], $context, $itemprop_info);
+  }
+  return $context;
+}
+
+function intel_get_itemprop_form_options($prop_name, $field_type = 'entity:text') {
+  $ip_info = _intel_intel_itemprop_info();
+
+  $form_options = array();
+
+  if (empty($ip_info[$prop_name])) {
+    return $form_options;
+  }
+
+  $options = array(
+    'field_type' => $field_type,
+  );
+
+  $form_options = _intel_build_form_options($prop_name, $form_options, $ip_info, $options);
+
+  return $form_options;
+
+}
+
+function _intel_build_form_options($prop_name, $form_options, $itemprop_info, $options) {
+  if (empty($itemprop_info[$prop_name]['property'])) {
+    return $form_options;
+  }
+
+  foreach ($itemprop_info[$prop_name]['property'] as $pn => $pi) {
+    if (empty($pi['field_type']) || !is_array($pi['field_type']) ||!in_array($options['field_type'], $pi['field_type'])) {
+      continue;
+    }
+    $key = 'data.property.' . $pn;
+    $label = $pn;
+    $form_options[$key] = $label;
+  }
+  if (!empty($itemprop_info[$prop_name]['parent'])) {
+    $form_options = _intel_build_form_options($itemprop_info[$prop_name]['parent'], $form_options, $itemprop_info, $options);
+  }
+  return $form_options;
+}
+
+/**
+ * If no expctedType, assume Text
+ */
+function _intel_intel_itemprop_info() {
+  $prop = array();
+
+  $text_field = array(
+    '#fieldType' => array(
+      'text'
+    ),
+    '#webformComponentType' => array(
+      'text'
+    ),
+  );
+
+  // Data types
+  $prop['Text'] = array(
+    'data_type' => 'String',
+  );
+
+  $prop['URL'] = array(
+    'data_type' => 'Url',
+  );
+
+  $prop['Date'] = array(
+    'data_type' => 'Date',
+  );
+
+  $prop['Thing'] = array(
+    '@id' => 'io:Thing',
+    'type' => 'object',
+    'description' => t('A thing.'),
+    'context' => array(
+      'schema' => 'http://schema.org/',
+    ),
+    'default_property_ns' => 'schema',
+    'property' => array(
+      'description' => '',
+      'image' => '',
+      'name' => '',
+      'url' => '',
+    ),
+  );
+
+  $prop['Person'] = array(
+    '@id' => 'io:Person',
+    'type' => 'object',
+    'description' => t('A person, know (contact) or unknown (visitor)'),
+    'parent' => 'Thing',
+    'context' => array(
+      'foaf' => 'http://xmlns.com/foaf/0.1/',
+      'schema' => 'http://schema.org/',
+      'vcard' => 'http://www.w3.org/2006/vcard/ns#',
+    ),
+    'default_property_ns' => 'schema',
+    'property' => array(
+      'address' => "vcard:address",
+      'birthday' => (object) array(
+        '@id' => 'http://schema.org/birthDate',
+        '@type' => 'xsd:date',
+      ),
+      'email' => '',
+      'familyName' => '',
+      'gender' => '',
+      'givenName' => '',
+      'honorificPrefix' => '',
+      'honorificSuffix' => '',
+      'jobTitle' => '',
+      'nickname' => 'foaf:nick',
+      'telephone' => '',
+      'facebook' => '',
+    ),
+  );
+
+  $prop['SocialProfile'] = array(
+    '@id' => 'io:SocialProfile',
+    'type' => 'object',
+    'parent' => 'Thing',
+    'description' => t('A person, know (contact) or unknown (visitor)'),
+    'default_property_ns' => 'schema',
+    'property' => array(
+      'username' => 'io:username',
+    ),
+  );
+
+  $prop['facebook'] = array(
+    '@id' => 'io:facebook',
+    'expected_type' => array(
+      'Url',
+      'SocialProfile'
+    ),
+  );
+
+  $prop['Visitor'] = array(
+    'context' => 'io:Visitor',
+    'label' => t('Visitor'),
+    'description' => t('A person, know (contact) or unknown (visitor)'),
+    'parent' => 'Person',
+    'default_property_ns' => 'io',
+    'property' => array(
+      'vtk' => '',
+    ),
+  );
+
+  $prop['name'] = array(
+    '@id' => 'schema:name',
+    '@type' => 'Text',
+    'description' => t('Name of the item'),
+    'field_type' => array(
+      'entity:text',
+      'webform:text',
+    ),
+  );
+
+  $prop['vtk'] = array(
+    'context' => (object) array(
+      '@id' => 'io:vtk',
+      '@type' => 'xsd:string'
+    ),
+    'description' => t('A hash token to identify site visitors'),
+  );
+
+  return $prop;
+
+  $prop['URL'] = array(
+
+  );
+
+  $prop['Thing'] = array();
+  $prop['Thing']['name'] = array(
+    '#description' => t('Name of the item'),
+  );
+  $prop['Thing']['description'] = array(
+    '#description' => t('A description of the item.'),
+  );
+  $prop['Thing']['image'] = array(
+    '#description' => t('An image of the item.'),
+    '#expectedType' => array(
+      'URL',
+      'ImageObject'
+    ),
+  );
+  $prop['Person'] = array(
+    '#inherits' => array(
+      'Thing'
+    ),
+  );
+
+  return $prop;
+}
 
 function _intel_intel_visitor_property_info() {
   $prop = array();
+
+  $text_type = array(
+    'field_type' => array(
+      'text',
+    ),
+    'webform_component_type' => array(
+      'text'
+    )
+  );
+
+  $prop['data.property.name'] = array(
+    'title' => t('Name'),
+    'category' => 'identity',
+    'variables' => array(
+      '@value' => NULL,
+    ),
+    'context' => 'http://schema.org/name',
+  ) + $text_type;
+
+  $prop['data.description'] = array(
+    'title' => t('Description'),
+    'category' => 'identity',
+    'variables' => array(
+      'summary' => NULL,
+      '@value' => NULL,
+    ),
+    'context' => 'http://schema.org/description',
+  ) + $text_type;
+
+  $prop['data.image'] = array(
+    'title' => t('Image'),
+    'category' => 'identity',
+    'variables' => array(
+      'url' => NULL,
+      'alt' => NULL,
+      'title' => NULL,
+    ),
+    'context' => 'http://schema.org/image',
+  ) + $text_type;
+
   // identity properties
   $prop['data.vtk'] = array(
     'title' => t('Visitor token'),
@@ -19,62 +322,57 @@ function _intel_intel_visitor_property_info() {
       'vtkid' => NULL,
       'vtkc' => NULL,
     ),    
-  );  
+  );
+
   $prop['data.age'] = array(
     'title' => t('Age'),
     'category' => 'identity',
     'variables' => array(
-      'age' => NULL,
+      '@value' => NULL,
       'rangeLow' => NULL,
       'rangeHigh' => NULL,
     ),
-  );
-  $prop['data.bio'] = array(
-    'title' => t('Bio'),
+  ) + $text_type;
+
+  $prop['data.birthDate'] = array(
+    'title' => t('Birth date'),
     'category' => 'identity',
     'variables' => array(
-      'summary' => NULL,
-      'full' => NULL,
+      '@value' => NULL,
     ),
-  );
+    'context' => (object) array(
+      "@id" => "http://schema.org/birthDate",
+      "@type" => "xsd:date",
+    )
+  ) + $text_type;
+
   $prop['data.gender'] = array(
     'title' => t('Gender'),
     'category' => 'identity',
     'variables' => array(
-      'gender' => NULL,
+      '@value' => NULL,
     ),
-  );
-  $prop['data.image'] = array(
-    'title' => t('Image'),
-    'category' => 'identity',
-    'variables' => array(
-      'url' => NULL,
-      'alt' => NULL,
-      'title' => NULL,
-    ),
-  );
+  ) + $text_type;
 
-  $prop['data.givenName'] = array(
-    'title' => t('Given name (first name)'),
+  $prop['data.property.givenName'] = array(
+    'title' => t('Given name'),
     'category' => 'identity',
     'variables' => array(
       '@value' => NULL,
     ),
-    'field_type' => array(
-      'text',
-    ),
-    'webform_component_type' => array(
-      'text'
-    )
-  );
-  $prop['data.familyName'] = array(
-    'title' => t('Family name (last name)'),
+    'context' => 'http://schema.org/givenName',
+  ) + $text_type;
+
+  $prop['data.property.familyName'] = array(
+    'title' => t('Family name'),
     'category' => 'identity',
     'variables' => array(
       '@value' => NULL,
     ),
-  );
+    'context' => 'http://schema.org/familyName',
+  ) + $text_type;
 
+/*
   $prop['data.name'] = array(
     'title' => t('Name'),
     'category' => 'identity',
@@ -90,21 +388,25 @@ function _intel_intel_visitor_property_info() {
       'credentials' => NULL,
     ),
   );
+*/
+
   // contact points
   $prop['data.email'] = array(
     'title' => t('Email'),
     'category' => 'contact',
     'variables' => array(
-      'email' => NULL,
+      '@value' => NULL,
     ),
-  );
-  $prop['data.phone'] = array(
-    'title' => t('Phone'),
+  ) + $text_type;
+
+  $prop['data.telephone'] = array(
+    'title' => t('Telephone'),
     'category' => 'contact',
     'variables' => array(
-      'phone' => NULL,
+      '@value' => NULL,
     ),
-  );
+  ) + $text_type;
+
   $prop['data.website'] = array(
     'title' => t('Website'),
     'category' => 'contact',
@@ -119,10 +421,17 @@ function _intel_intel_visitor_property_info() {
     'title' => t('Organization'),
     'category' => 'organization',
     'variables' => array(
-      'name' => NULL,
-      'title' => NULL,
+      '@value' => NULL,
     ),
-  );
+  ) + $text_type;
+
+  $prop['data.jobTitle'] = array(
+    'title' => t('Job Title'),
+    'category' => 'organization',
+    'variables' => array(
+      '@value' => NULL,
+    ),
+  ) + $text_type;
   
   // social properties
   $prop['data.aboutme'] = array(
