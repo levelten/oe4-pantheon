@@ -52,3 +52,4 @@ sites/*.localhost
 .idea
 
 /sites/default/local.settings.php
+config.codekit
