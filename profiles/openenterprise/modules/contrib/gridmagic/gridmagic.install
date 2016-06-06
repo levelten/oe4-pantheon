@@ -1,0 +1,13 @@
+<?php
+
+/*
+ * Implements hook_uninstall().
+ */
+function gridmagic_uninstall() {
+	$variables = array(
+		'gridmagic',
+	);
+	foreach($variables as $variable) {
+		variable_del($variable);
+	}
+}

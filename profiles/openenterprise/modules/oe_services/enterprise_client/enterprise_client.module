@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Client feature.
+ */
+
+include_once 'enterprise_client.features.inc';

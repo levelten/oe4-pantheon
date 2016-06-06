@@ -11,6 +11,7 @@
  */
 function intel_get_intel_event_info_default() {
   $event = array();
+  $scripts_enabled = variable_get('intel_intel_scripts_enabled', array());
 
   $event['landing_page_view'] = array(
     'title' => t('Landing page view'),
@@ -20,6 +21,22 @@ function intel_get_intel_event_info_default() {
   $event['landing_page_conversion'] = array(
     'title' => t('Landing page conversion'),
     'description' => t('Form submission from a landing page'),
+    'valued_event' => 1,
+    'value' => 0,
+  );
+  $event['cta_view'] = array(
+    'title' => t('CTA view'),
+    'description' => t('Call to action impression'),
+  );
+  $event['cta_click'] = array(
+    'title' => t('CTA click'),
+    'description' => t('Call to action is clicked'),
+    'valued_event' => 1,
+    'value' => 0,
+  );
+  $event['cta_conversion'] = array(
+    'title' => t('CTA conversion'),
+    'description' => t('Conversion after CTA is clicked'),
     'valued_event' => 1,
     'value' => 0,
   );
@@ -35,30 +52,60 @@ function intel_get_intel_event_info_default() {
     'valued_event' => 1,
     'value' => 25,
   );
-  $event['addthis_social_share'] = array(
-    'title' => t('AddThis social share'),
-    'category' => t('Social share'),
-    'description' => t('Click on social sharing widget'),
-    'valued_event' => 1,
-    'value' => 5,
-    'js_setting' => 1,
-  );
-  $event['addthis_social_share_clickback'] = array(
-    'title' => t('AddThis social share clickback'),
-    'category' => t('Social share clickback'),
-    'description' => t('Visitor referred from a social share'),
-    'valued_event' => 1,
-    'value' => 0,
-    'js_setting' => 1,
-  );
-  $event['disqus_comment'] = array(
-    'title' => t('Disqus comment'),
-    'category' => t('Comment'),
-    'description' => t('Click on social sharing widget'),
-    'valued_event' => 1,
-    'value' => 10,
-    'js_setting' => 1,
-  );
+
+  if (!empty($scripts_enabled['addthis'])) {
+    $event['addthis_social_share'] = array(
+      'title' => t('AddThis social share'),
+      'category' => t('Social share'),
+      'description' => t('Click on social sharing widget'),
+      'valued_event' => 1,
+      'value' => 4,
+      'js_setting' => 1,
+    );
+    $event['addthis_social_share_clickback'] = array(
+      'title' => t('AddThis social share clickback'),
+      'category' => t('Social share clickback'),
+      'description' => t('Visitor referred from a social share'),
+      'valued_event' => 1,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['addthis_social_follow'] = array(
+      'title' => t('AddThis social profile click'),
+      'category' => t('Social profile'),
+      'description' => t('Click on social profile follow button'),
+      'valued_event' => 1,
+      'value' => 2,
+      'js_setting' => 1,
+    );
+  }
+  if (!empty($scripts_enabled['youtube'])) {
+    $event['youtube_video_play'] = array(
+      'title' => t('YouTube video play'),
+      'category' => t('Video play'),
+      'description' => t('When a video is played'),
+      'valued_event' => 1,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['youtube_video_stop'] = array(
+      'title' => t('YouTube video stop'),
+      'category' => t('Video stop'),
+      'description' => t('When a video is paused or stopped'),
+      'valued_event' => 0,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+    $event['youtube_video_watch'] = array(
+      'title' => t('YouTube video watched'),
+      'category' => t('Video watched'),
+      'description' => t('When a video has been watched. Value is the % that was watched.'),
+      'valued_event' => 0,
+      'value' => 0,
+      'js_setting' => 1,
+    );
+  }
+
   return $event;
 }
 
@@ -151,8 +198,8 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
     $events[$k]['key']  = $k;
   }
 
-  foreach (module_implements('intel_intel_events') AS $module) {
-    $function = $module . '_intel_intel_events';
+  foreach (module_implements('intel_intel_event_info') AS $module) {
+    $function = $module . '_intel_intel_event_info';
     $a = $function();
     if (empty($a) || !is_array($a)) {
       continue;
@@ -164,7 +211,7 @@ function intel_get_intel_event_info($name = NULL, $options = array()) {
     }
   }
 
-  drupal_alter('intel_intel_events', $events);
+  drupal_alter('intel_intel_event_info', $events);
 
   uasort($events, '_intel_sort_by_category');
 
@@ -258,6 +305,64 @@ function intel_get_visitor_attribute_info_default() {
     'custom_options' => array(),
     'selectable' => 1,
   );
+  $attributes['e1l'] = array(
+    'title' => t('First entrance page'),
+    'title_plural' => t('First entrance pages'),
+    'description' => t('The first page hit on a visitors first visit to the site.'),
+    'type' => 'item',
+    'options_description' => t('Auto generated in javascript.'),
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 15,
+        'format' => 'single',
+      )
+    ),
+  );
+  $attributes['e1rl'] = array(
+    'title' => t('First referrer'),
+    'title_plural' => t('First referrers'),
+    'description' => t('The first referrer url for a visitors first visit to the site.'),
+    'type' => 'item',
+    'options_description' => t('Auto generated in javascript.'),
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 16,
+        'format' => 'single',
+      )
+    ),
+  );
+  $attributes['e1s'] = array(
+    'title' => t('First source'),
+    'title_plural' => t('First sources'),
+    'description' => t('The first referrer url for a visitors first visit to the site.'),
+    'type' => 'item',
+    'options_description' => t('Auto generated in javascript.'),
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 17,
+      )
+    ),
+  );
+  $attributes['e1m'] = array(
+    'title' => t('First medium'),
+    'title_plural' => t('First mediums'),
+    'description' => t('The first referrer url for a visitors first visit to the site.'),
+    'type' => 'item',
+    'options_description' => t('Auto generated in javascript.'),
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 17,
+      )
+    ),
+  );
   return $attributes;
 }
 
@@ -272,6 +377,116 @@ function intel_get_page_attribute_info_default() {
     'options_description' => t('Auto generated from entity uid.'),
     'options info callback' => 'intel_page_attribute_author_option_info',
   );
+  $attributes['rt'] = array(
+    'title' => t('Entity type'),
+    'title_plural' => t('Entity types'),
+    'description' => t('The entity type of the page. (node, user...)'),
+    'type' => 'value',
+    'options_description' => t('Auto generated from page entity.'),
+    'options info callback' => 'intel_page_attribute_entity_type_option_info',
+    'access callback' => 0,
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 6,
+      )
+    ),
+  );
+  $attributes['rt2'] = array(
+    'title' => t('Content type'),
+    'title_plural' => t('Content types'),
+    'description' => t('Node type or entity bundle type.'),
+    'type' => 'value',
+    'options_description' => t('Auto generated from entity type/bundle.'),
+    'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 6,
+      )
+    ),
+  );
+  $attributes['rk'] = array(
+    'title' => t('Entity id'),
+    'title_plural' => t('Entity ids'),
+    'description' => t('The standard id for the entity, e.g. node id.'),
+    'type' => 'item',
+    'options_description' => t('Auto generated from entity type/bundle.'),
+    'access callback' => 0,
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 6,
+      )
+    ),
+  );
+  $attributes['rvi'] = array(
+    'title' => t('Revision id'),
+    'title_plural' => t('Revision ids'),
+    'description' => t('The revision number of an entity.'),
+    'type' => 'item',
+    'encode' => FALSE,
+    'options_description' => t('Auto generated from entity data.'),
+    'access callback' => FALSE,
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 1,
+      )
+    ),
+  );
+  $attributes['rl'] = array(
+    'title' => t('Entity path'),
+    'title_plural' => t('Entity path'),
+    'description' => t('The Drupal system path for an entity.'),
+    'type' => 'value',
+    'options_description' => t('Auto generated from entity data.'),
+    'access callback' => FALSE,
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 6,
+      )
+    ),
+  );
+  /*
+  $attributes['url'] = array(
+    'title' => t('URL'),
+    'title_plural' => t('URLs'),
+    'description' => t('The default url for a node or entity, using the url function.'),
+    'type' => 'value',
+    'options_description' => t('Auto generated from entity type/bundle.'),
+    'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'access callback' => FALSE,
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 6,
+        'format' => 'single',
+      )
+    ),
+  );
+  /*
+  $attributes['lang'] = array(
+    'title' => t('Language'),
+    'title_plural' => t('Languages'),
+    'description' => t('The language of the page.'),
+    'type' => 'value',
+    'options_description' => t('Auto generated from entity data.'),
+    //'options info callback' => 'intel_page_attribute_content_type_option_info',
+    'access callback' => FALSE,
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 13,
+      )
+    ),
+  );
+  */
+  /*
   $attributes['ct'] = array(
     'title' => t('Content type'),
     'title_plural' => t('Content types'),
@@ -288,6 +503,7 @@ function intel_get_page_attribute_info_default() {
     'options_description' => t('Auto generated from page entity.'),
     'options info callback' => 'intel_page_attribute_entity_type_option_info',
   );
+  */
   $attributes['i'] = array(
     'title' => t('Page intent'),
     'description' => t('The role a page plays on the site.'),
@@ -296,12 +512,78 @@ function intel_get_page_attribute_info_default() {
     'custom_options' => array(),
     'selectable' => 1,
   );
-  $attributes['pt'] = array(
-    'title' => t('Publish time'),
+  $attributes['pd'] = array(
+    'title' => t('Published date'),
     'description' => t('The time (unix timestamp) a node was created.'),
     'options_description' => t('Auto generated from entity created date.'),
-    'type' => 'scalar',
+    'options info callback' => 'intel_page_attribute_published_date_option_info',
+    'type' => 'value',
+    'format' => 'datetimedow',
+    'access callback' => '_intel_user_access_extended',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 1,
+      )
+    ),
   );
+
+  $attributes['pda'] = array(
+    'title' => t('Published age'),
+    'description' => t('The time in seconds since the page was published (created).'),
+    'options_description' => t('Auto generated from entity created date.'),
+    'options info callback' => 'intel_page_attribute_published_age_option_info',
+    'type' => 'value',
+    'format' => 'timeago',
+    'access callback' => '_intel_user_access_extended',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 10,
+        'format' => 'timeago',
+      )
+    ),
+    'index_grouping' => array(
+      0,
+      86400,
+      86400*7,
+      86400*30,
+      86400*90,
+      86400*365,
+    ),
+  );
+  /*
+  $attributes['pdw'] = array(
+    'title' => t('Published DOW'),
+    'description' => t('The day of the week (integer 1-7) of the day of week a page was published.'),
+    'options_description' => t('Auto generated from entity created date.'),
+    'options info callback' => 'intel_page_attribute_published_dow_option_info',
+    'type' => 'scalar',
+//    'storage' => array(
+//      'analytics' => array(
+//        'struc' => 'metric',
+//        'index' => 5,
+//      )
+//    ),
+  );
+  $attributes['pdt'] = array(
+    'title' => t('Published TOD'),
+    'description' => t('The time in HH.MM format a page was published.'),
+    'options_description' => t('Auto generated from entity created date.'),
+    'options info callback' => 'intel_page_attribute_published_tod_option_info',
+    'type' => 'scalar',
+//    'storage' => array(
+//      'analytics' => array(
+//        'struc' => 'metric',
+//        'index' => 3,
+//      )
+//    ),
+    'index_grouping' => array(),
+  );
+  for ($i = 0; $i <= 2400; $i += 100) {
+    $attributes['pdt']['index_grouping'][] = $i;
+  }
+  */
   $attributes['s'] = array(
     'title' => t('Section'),
     'title_plural' => t('Sections'),
@@ -309,6 +591,7 @@ function intel_get_page_attribute_info_default() {
     'type' => 'item',
     'custom_options' => array(),
     'selectable' => 1,
+    'access callback' => FALSE,
   );
   $attributes['t'] = array(
     'title' => t('Tag'),
@@ -317,6 +600,12 @@ function intel_get_page_attribute_info_default() {
     'type' => 'list',
     'options_description' => t('Auto generated from terms in selected taxonomy fields.'),
     'options info callback' => 'intel_page_attribute_taxomony_term_option_info',
+    'storage' => array(
+      'analytics' => array(
+        'struc' => 'dimension',
+        'index' => 1,
+      )
+    ),
   );
   return $attributes;
 }
@@ -638,6 +927,130 @@ function intel_page_attribute_taxomony_term_option_info($option_id, $data_option
   return $data;
 }
 
+function intel_page_attribute_published_date_option_info($value, $data_options) {
+  $data = array();
+  $count_value = '';
+  $count_op = 'LIKE';
+  if (substr($value, 0 , 1) == 'w') {
+    $dow = array(
+      t('Sunday'),
+      t('Monday'),
+      t('Tuesday'),
+      t('Wednesday'),
+      t('Thursday'),
+      t('Friday'),
+      t('Saturday'),
+    );
+    $i = (int)substr($value, 1, 1);
+    $data['title'] = $dow[$i];
+    $count_value = '^[0-9]{12}' . $i . '$';
+    $count_op = 'REGEXP';
+  }
+  else if (substr($value, 0, 2) == 'Hi') {
+    $i = substr($value, 2, 4) .
+    $data['title'] = substr($value, 2, 2) . ':' . substr($value, 4, 2);
+    $count_value = '^[0-9]{8}' . $i . '[0-9]$';
+    $count_op = 'REGEXP';
+  }
+  else if (substr($value, 0, 1) == 'H') {
+    $i = substr($value, 1, 2);
+    $data['title'] = substr($value, 1, 2) .  ':00 ' . t('hours');
+    $count_value = '^[0-9]{8}' . $i . '[0-9]{3}$';
+    $count_op = 'REGEXP';
+  }
+  // YYYYMMDDHHMM
+  else if (strlen($value) == 8) {
+    $data['title'] = substr($value, 0, 4) . '-' . substr($value, 4, 2) . '-' . substr($value, 6, 2);
+    $count_value = substr($value, 0, 8) . '%';
+  }
+  // YYYYMM
+  else {
+    $data['title'] = substr($value, 0, 4) . '-' . substr($value, 4, 2);
+    $count_value = substr($value, 0, 6) . '%';
+  }
+
+  if (!empty($data_options['page_count']) && $count_value) {
+    $data['page_count'] = intel_entity_attr_entity_count('pd', $count_value, null, $count_op);
+  }
+  return $data;
+}
+
+function intel_page_attribute_published_age_option_info($option_id, $data_options) {
+  $group = explode('-', $option_id);
+  $titles = array(
+    '0' => t('Last 24 hours'),
+    '86400' => t('A day to a week'),
+    '604800' => t('A week to a month'),
+    '2592000' => t('A month to 3 months'),
+    '7776000' => t('3 months to a year'),
+  );
+
+  $data = array(
+    'title' => isset($titles[$group[0]]) ? $titles[$group[0]] : $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+    $data['page_count'] = intel_entity_attr_entity_count('pdw', (int)$option_id);
+  }
+  return $data;
+}
+
+function intel_page_attribute_published_dow_option_info($option_id, $data_options) {
+  $dow = array(
+    t('Sunday'),
+    t('Monday'),
+    t('Tuesday'),
+    t('Wednesday'),
+    t('Thursday'),
+    t('Friday'),
+    t('Saturday'),
+  );
+
+  $data = array(
+    'title' => isset($dow[$option_id]) ? $dow[$option_id] : $option_id,
+  );
+
+  if (!empty($data_options['page_count'])) {
+      $data['page_count'] = intel_entity_attr_entity_count('pdw', (int)$option_id);
+  }
+  return $data;
+}
+
+function intel_page_attribute_published_tod_option_info($option_id, $data_options) {
+  $group = explode('-', $option_id);
+
+  $h0 = (int)substr($group[0], 0, -2);
+  $m0 = substr($group[0], -2);
+  $pf0 = 'am';
+  if ($h0 > 12) {
+    $h0 = $h0 - 12;
+    $pf0 = 'pm';
+  }
+
+  if (isset($group[1])) {
+    $h1 = (int)substr($group[1], 0, -2);
+    $m1 = 59;
+    if ($h1 > 12) {
+      $h1 = $h1 - 12;
+    }
+    $d1 = " - $h1:$m1";
+  }
+
+  $data = array(
+    'title' => "$h0:$m0$d1 $pf0",
+  );
+
+  if (!empty($data_options['page_count'])) {
+    if (count($group) == 2) {
+      $data['page_count'] = intel_entity_attr_entity_count('pdt', (int)$group[0], (int)$group[1]);
+    }
+    else {
+      $data['page_count'] = intel_entity_attr_entity_count('pdt', (int)$group[0]);
+    }
+  }
+  return $data;
+}
+
 function intel_get_page_intents_default($filter = 'report') {
   $intents = array();
   if ($filter == 'report') {
@@ -803,6 +1216,19 @@ function intel_get_entity_settings_multi($entity_type, $bundle = '') {
     $data[$a[5]] = unserialize($row->value);
   }
   return $data;
+}
+
+function intel_index_encode($base10) {
+  // crockford base32 encoding
+  //return strtr( base_convert($base10, 10, 32), "abcdefghijklmnopqrstuv", "ABCDEFGHJKMNPQRSTVWXYZ");
+  return strtolower(strtr( base_convert($base10, 10, 32), "abcdefghijklmnopqrstuv", "ABCDEFGHJKMNPQRSTVWXYZ"));
+}
+
+function intel_index_decode($base32) {
+  // crockford base32 decoding
+  $base32 = strtr(strtoupper($base32), "ABCDEFGHJKMNPQRSTVWXYZILO", "abcdefghijklmnopqrstuv110");
+
+  return (int)base_convert($base32, 32, 10);
 }
 
 function _intel_sort_by_title($a, $b) {
@@ -1353,7 +1779,10 @@ function intel_score_item($data, $divideby = 1, &$score_components = array(), $m
 
     // the value of any valued events generated on any page in sessions started
     // on this page or segement
-    if (isset($entrance['events']['_all'])) {
+    if (isset($entrance['events']['_totals'])) {
+      $scores['entrance']['events'] += $entrance['events']['_totals']['value'];
+    }
+    else if (isset($entrance['events']['_all'])) {
       $scores['entrance']['events'] += $entrance['events']['_all']['value'];
     }
     // traffic scoring based on traffic generated by this page or segement
@@ -1381,12 +1810,16 @@ function intel_score_item($data, $divideby = 1, &$score_components = array(), $m
   }
 
   // the value of events triggered on this page/segment
-  if (isset($page['events']['_all'])) {
+  if (isset($page['events']['_totals'])) {
+    $scores['onpage']['events'] += $page['events']['_totals']['value'];
+  }
+  else if (isset($page['events']['_all'])) {
     $scores['onpage']['events'] += $page['events']['_all']['value'];
   }
+
   // traffic scoring based on hit on this page/segment
   $scores['onpage']['traffic'] += ($page['pageviews'] - $entrance['pageviews']) * $scoring['additional_pages'];
-
+//dsm($scores);
   // tally up scores from components
   if ($method == 'direct') {
 
@@ -1435,11 +1868,102 @@ function intel_score_item($data, $divideby = 1, &$score_components = array(), $m
   return $scores['_all']['_all'];
 }
 
+function _intel_get_report_dates_from_ops($ops = 'l30d', &$cache_options = array(), $return_hash = FALSE) {
+  $start = '';
+  $end = '';
+  if (!empty($_GET['timeops'])) {
+    $ops = $_GET['timeops'];
+  }
+
+  $a = explode(',', $ops);
+  if (count($a) == 2) {
+    $start = $a[0];
+    $end = $a[1];
+  }
+  elseif ($ops == 'today') {
+    $start = 'midnight';
+    $end = 'now';
+    $cache_options = array('refresh' => 1);
+  }
+  elseif (($ops == 'l24') || ($ops == 'l24fn') || ($ops == 'l24h') || ($ops == 'l24hfn')) {
+    $start = '-24 hours';
+    $end = 'now';
+    $cache_options = array('refresh' => 1);
+  }
+  elseif ($ops == 'yesterday') {
+    $start = '-1 day midnight';
+    $end = "midnight - 1 second";
+  }
+  elseif ($ops == 'l7dfn') {
+    $start = "-7 days";
+    $end = "now";
+    $cache_options = array('refresh' => 1);
+  }
+  elseif ($ops == 'l7d') {
+    $start = "-7 days midnight";
+    $end = "midnight - 1 second";
+    $cache_options = array('refresh' => 1);
+  }
+  elseif ($ops == 'l30dfn') {
+    $start = "-30 days";
+    $end = "now";
+    $cache_options = array('refresh' => 1);
+  }
+  elseif ($ops == 'thismonth') {
+    $start = "midnight first day of this month";
+    $end = "midnight first day of next month - 1 second";
+  }
+  elseif ($ops == 'lastmonth') {
+    $start = "midnight first day of last month";
+    $end = "midnight first day of this month - 1 second";
+  }
+  elseif ($ops == 'monthtodate') {
+    $start = "midnight first day of this month";
+    $end = "now";
+  }
+  else  {  // "l30d" last 30 days from yesterday
+    $start = "-30 days midnight";
+    $end = "midnight - 1 second";
+  }
+  return _intel_get_report_dates($start, $end);
+}
+
+function _intel_get_report_dates($start_default = "-31 days", $end_default = "-1 day", $return_hash = FALSE) {
+  if (!empty($_GET['dates'])) {
+    $a = explode(":", $_GET['dates']);
+    $_GET['start_date'] = $a[0];
+    $_GET['end_date'] = $a[1];
+  }
+  $start_date = (!empty($_GET['start_date'])) ? strtotime($_GET['start_date']) : strtotime($start_default);
+  $end_date = (!empty($_GET['end_date'])) ? strtotime($_GET['end_date']) : strtotime($end_default);
+  $number_of_days = round(($end_date - $start_date)/60/60/24);
+  if (!$return_hash) {
+    return array(
+      $start_date,
+      $end_date,
+      $number_of_days,
+    );
+  }
+  else {
+    return array(
+      'start_date' => $start_date,
+      'end_date' => $end_date,
+      'number_of_days' => $number_of_days,
+    );
+  }
+}
+
+function intel_ga_api_data($request = array(), $cache_options = array()) {
+  $feed = google_analytics_reports_api_report_data($request, $cache_options);
+  return $feed;
+}
+
+
 function intel_ga_feed_request_callback($request, $args) {
   $cache_options = $args['cache_options'];
   $request['sort_metric'] = $request['sort'];
   unset($request['sort']);
-  $feed = google_analytics_api_report_data($request, $cache_options);
+  $feed = intel_ga_api_data($request, $cache_options);
   return $feed;
 }
 
@@ -1476,26 +2000,30 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
     'refresh' => 1,
   );
 
-  $segment = 'dynamic::ga:customVarValue5==' . implode(',dynamic::ga:customVarValue5==', $vtkids);
+  //$segment = 'dynamic::ga:customVarValue5==' . implode(',dynamic::ga:customVarValue5==', $vtkids);
+  //$segment = 'users::condition::ga:customVarValue5==' . implode(',ga:customVarValue5==', $vtkids); // users has a limit of 90 days time frame
+  //$segment = 'sessions::condition::ga:customVarValue5==' . implode(',ga:customVarValue5==', $vtkids);
+  $segment = 'sessions::condition::ga:dimension5==' . implode(',ga:dimension5==', $vtkids);
 
   $request = array(
-    'dimensions' => array('ga:browser', 'ga:browserVersion', 'ga:operatingSystem', 'ga:operatingSystemVersion', 'ga:language', 'ga:screenResolution', 'ga:customVarValue4'),
+    'dimensions' => array('ga:browser', 'ga:browserVersion', 'ga:operatingSystem', 'ga:operatingSystemVersion', 'ga:language', 'ga:screenResolution', 'ga:dimension4'),
     'metrics' => array('ga:entrances'),
-    'sort_metric' => '-ga:customVarValue4',
+    'sort_metric' => '-ga:dimension4',
     'start_date' => $start_date,
     'end_date' => $end_date,
     'segment' => $segment,
     'max_results' => 1,
   );
 
-  $data = google_analytics_api_report_data($request, $cache);
+  $data = intel_ga_api_data($request, $cache);
   if (!empty($_GET['debug'])) {
     dpm('ga_request'); dpm($request);//
     dpm('ga_data'); dpm($data);//
   }
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       if ($ts > $visitor['lasthit']) {
         $visitor['lasthit'] = $ts;
       }
@@ -1509,14 +2037,15 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
     }
   }
 
-  $request['dimensions'] = array('ga:isMobile', 'ga:mobileDeviceBranding', 'ga:mobileDeviceModel', 'ga:mobileDeviceInfo', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:isMobile', 'ga:mobileDeviceBranding', 'ga:mobileDeviceModel', 'ga:mobileDeviceInfo', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances');
 
-  $data = google_analytics_api_report_data($request, $cache);
+  $data = intel_ga_api_data($request, $cache);
 
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $visitor['environment']['isMobile'] = $row['isMobile'];
       $visitor['environment']['mobileDeviceBranding'] = $row['mobileDeviceBranding'];
       $visitor['environment']['mobileDeviceModel'] = $row['mobileDeviceModel'];
@@ -1524,14 +2053,15 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
     }
   }
 
-  $request['dimensions'] = array('ga:country', 'ga:region', 'ga:city', 'ga:metro', 'ga:latitude', 'ga:longitude', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:country', 'ga:region', 'ga:city', 'ga:metro', 'ga:latitude', 'ga:longitude', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances');
 
-  $data = google_analytics_api_report_data($request, $cache);
+  $data = intel_ga_api_data($request, $cache);
 
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       if ($ts > $visitor['lasthit']) {
         $visitor['lasthit'] = $ts;
       }
@@ -1546,60 +2076,121 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
 
   $visitor['visits'] = array(
     '_all' => array(
+      'score' => 0,
       'entrance' => array(
         'entrances' => 0,
         'pageviews' => 0,
         'timeOnSite' => 0,
+        'score' => 0,
+      ),
+    ),
+    '_totals' => array(
+      'entrance' => array(
+        'entrances' => 0,
+        'pageviews' => 0,
+        'timeOnSite' => 0,
+        'sticks' => 0,
+        'goalValueAll' => 0,
+        'events' => array(),
+        'score' => 0,
       ),
     ),
   );
+
+  // get totals
+  $request['dimensions'] = array();
+  $request['metrics'] = array('ga:entrances', 'ga:pageviews', 'ga:bounces', 'ga:timeOnSite', 'ga:goalValueAll');
+  $request['sort_metric'] = '';
+  $request['max_results'] = 1000;
+
+  $data = intel_ga_api_data($request, $cache);
+  //dsm($request); dsm($data);
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $visitor['visits']['_totals']['entrance']['entrances'] += $row['entrances'];
+      $visitor['visits']['_totals']['entrance']['pageviews'] += $row['pageviews'];
+      $visitor['visits']['_totals']['entrance']['sticks'] += ($row['entrances'] - $row['bounces']);
+      $visitor['visits']['_totals']['entrance']['timeOnSite'] += $row['timeOnSite'];
+      $visitor['visits']['_totals']['entrance']['goalValueAll'] += $row['goalValueAll'];
+    }
+  }
+
+  $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
+  $request['filters'] = 'ga:eventCategory=~^*!$';
+  $data = intel_ga_api_data($request, $cache);
+  //dsm($request); dsm($data);
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $visitor['visits']['_totals']['entrance']['events'] = array(
+        '_totals' => array(
+          'value' => $row['eventValue'],
+          'totalValuedEvents' => $row['totalEvents'],
+          'uniqueValuedEvents' => $row['uniqueEvents'],
+        ),
+      );
+    }
+  }
+  $request['filters'] = '';
+  $request['dimensions'] = array('ga:dimension5', 'ga:visitCount', 'ga:medium', 'ga:source', 'ga:referralPath', 'ga:keyword', 'ga:dimension4');
+  $request['metrics'] = array('ga:entrances');
+  $request['sort_metric'] = '-ga:dimension4';  // note: cant sort by visitCount as it is treated as a string not an int
   $request['max_results'] = 10;
 
-
-  $request['dimensions'] = array('ga:visitCount', 'ga:medium', 'ga:source', 'ga:referralPath', 'ga:keyword', 'ga:socialNetwork', 'ga:customVarValue4');
-  $request['metrics'] = array('ga:entrances');
-  $request['sort_metric'] = '-ga:customVarValue4';  // note: cant sort by visitCount as it is treated as a string not an int
-
-  $data = google_analytics_api_report_data($request, $cache);
-
+  $data = intel_ga_api_data($request, $cache);
+//dsm($request); dsm($data);
   $visitCountMin = 0;
   $visitCountMax = 0;
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
+  $tsMin = REQUEST_TIME;
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      /*
       $visitCountMin = $i = (int)$row['visitCount'];
       if (!$visitCountMax) {
         $visitCountMax = $i;
       }
+      */
+      $i = $row['dimension5'] . '-' . $row['visitCount'];
       $visitor['visits'][$i] = array(
         'trafficsource' => array(),
       );
       $visitor['visits'][$i]['visitCount'] = $row['visitCount'];
-      $visitor['visits'][$i]['time'] = (int)$row['customVarValue4'];
+      $visitor['visits'][$i]['time'] = $vts =  (int)$row['dimension4'];
       $visitor['visits'][$i]['trafficsource']['medium'] = $row['medium'];
       $visitor['visits'][$i]['trafficsource']['source'] = $row['source'];
       $visitor['visits'][$i]['trafficsource']['referralPath'] = $row['referralPath'];
       $visitor['visits'][$i]['trafficsource']['keyword'] = $row['keyword'];
-      $visitor['visits'][$i]['trafficsource']['socialNetwork'] = $row['socialNetwork'];
+
+      //$visitor['visits'][$i]['trafficsource']['socialNetwork'] = $row['socialNetwork'];
       //$visitor['visits'][$ts]['trafficsource']['campaign'] = $row['campaign'];
+      if ($vts < $tsMin) {
+        $tsMin = $vts;
+      }
     }
   }
-  $request['dimensions'] = array('ga:visitCount', 'ga:campaign');
+  $request['dimensions'] = array('ga:dimension5', 'ga:visitCount', 'ga:socialNetwork', 'ga:campaign');
   $request['metrics'] = array('ga:pageviews', 'ga:bounces', 'ga:timeOnSite', 'ga:goalValueAll');
   $request['sort_metric'] = '';
-  $visitCountFilter = ($visitCountMin > 1) ? LevelTen\Intel\GAModel::formatGtRegexFilter('ga:visitCount', ($visitCountMin-1)) : '';
-  $request['filters'] = $visitCountFilter;
+  $request['filters'] = LevelTen\Intel\GAModel::formatGtRegexFilter('ga:dimension4', ($tsMin-1));
+  //$visitCountFilter = ($visitCountMin > 1) ? LevelTen\Intel\GAModel::formatGtRegexFilter('ga:visitCount', ($visitCountMin-1)) : '';
+  //$request['filters'] = $visitCountFilter;
 
-  $data = google_analytics_api_report_data($request, $cache);
+  $data = intel_ga_api_data($request, $cache);
 
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $i = (int)$row['visitCount'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      //$i = (int)$row['visitCount'];
+      $i = $row['dimension5'] . '-' . $row['visitCount'];
       $visitor['visits'][$i]['entrance'] = array();
       $visitor['visits'][$i]['entrance']['entrances'] = 1;
       $visitor['visits'][$i]['entrance']['pageviews'] = $row['pageviews'];
       $visitor['visits'][$i]['entrance']['sticks'] = (1 - $row['bounces']);
       $visitor['visits'][$i]['entrance']['timeOnSite'] = $row['timeOnSite'];
       $visitor['visits'][$i]['entrance']['goalValueAll'] = $row['goalValueAll'];
+      $visitor['visits'][$i]['trafficsource']['socialNetwork'] = $row['socialNetwork'];
       $visitor['visits'][$i]['trafficsource']['campaign'] = $row['campaign'];
 
       $visitor['visits']['_all']['entrance']['entrances'] ++;
@@ -1610,15 +2201,17 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
   $visitor['visits']['_all']['visitCount'] = $visitCountMax;
 
   // get valued events
-  $request['dimensions'] = array('ga:visitCount');
+  $request['dimensions'] = array('ga:dimension5', 'ga:visitCount');
   $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
-  $request['filters'] = 'ga:eventCategory=~^*!$' . (($visitCountFilter) ? ';' . $visitCountFilter : '');
+  $request['filters'] = 'ga:eventCategory=~^*!$' . ';' . LevelTen\Intel\GAModel::formatGtRegexFilter('ga:dimension4', ($tsMin-1));
 
-  $data = google_analytics_api_report_data($request, $cache);
-
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $i = (int)$row['visitCount'];
+  $data = intel_ga_api_data($request, $cache);
+  //dsm($request); dsm($data);
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      //$i = (int)$row['visitCount'];
+      $i = $row['dimension5'] . '-' . $row['visitCount'];
       $visitor['visits'][$i]['entrance']['events'] = array(
         '_all' => array(
           'value' => $row['eventValue'],
@@ -1628,18 +2221,17 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
       );
     }
   }
-
   $score_components = '';
   $score = 0;
   foreach ($visitor['visits'] AS $index => $visit) {
     if (substr($index, 0, 1) == '_') {
       continue;
     }
-    $visitor['visits'][$index]['score'] = intel_score_visit_aggregation($visitor['visits'][$index], 1, $score_components);
-    $score += $visitor['visits'][$index]['score'];
-    //$visitor['visits'][$index]['score_components'] = $score_components;  
+    //$visitor['visits'][$index]['score'] = intel_score_visit_aggregation($visitor['visits'][$index], 1, $score_components);
+    $visitor['visits'][$index]['score'] = intel_score_item($visitor['visits'][$index], 1, $score_components, '', 'entrance');
+    $visitor['visits']['_all']['score'] += $visitor['visits'][$index]['score'];
   }
-  $visitor['visits']['_all']['score'] = $score;
+  $visitor['visits']['_totals']['score'] = intel_score_item($visitor['visits']['_totals'], 1, $score_components, '', 'entrance');
 
   if ($visitor['lasthit']) {
     return $visitor;
@@ -1647,4 +2239,14 @@ function intel_fetch_analytics_visitor_meta_data($vtkids) {
   else {
     return FALSE;
   }
+}
+
+/**
+ * Selects data rows based on if feed is ver 2 or ver 3
+ * @param $feed
+ * @return array
+ */
+function intel_get_ga_feed_rows($feed) {
+  $rows = is_array($feed->results) ? $feed->results : $feed->results->rows;
+  return $rows;
 }

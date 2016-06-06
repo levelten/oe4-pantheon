@@ -8,6 +8,140 @@ define('GRIDMAGIC_LAYOUT_PRESET_DEFAULT', 'auto_1-4');
 define('GRIDMAGIC_ROW_PRESET_DEFAULT', 'auto_1-4');
 
 /**
+ * Implements hook_permission().
+ */
+function gridmagic_permission() {
+  return array(
+    'administer gridmagic settings' => array(
+      'title' => t('Administer gridmagic module'),
+      'description' => t('Change settings for the gridmagic module.'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function gridmagic_menu() {
+
+  $items = array();
+
+  $items['admin/config/user-interface/gridmagic'] = array(
+    'title' => 'Grid Magic',
+    'description' => 'Administrative interface for Grid Magic',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gridmagic_admin'),
+    'access arguments' => array('administer gridmagic settings'),
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback/form for admin interface.
+ */
+function gridmagic_admin() {
+  drupal_set_title('Grid Magic');
+
+  $form = array();
+
+  // Get regions from active theme.
+  $theme = variable_get('theme_default', FALSE);
+  $theme_regions = system_region_list($theme);
+
+  // Check if variable has been set.
+  $gridmagic = variable_get('gridmagic');
+  $gridmagic_setting = array();
+
+  // Get pre-defined settings.
+  if (!empty($gridmagic) && isset($gridmagic[$theme])) {
+    foreach ($gridmagic[$theme] as $key => $value) {
+      $gridmagic_setting['gridmagic-'.$key] = $value;
+    }
+  }
+
+  // Get Gridmagic presets
+  $presets = gridmagic_gridmagic_row_preset_info();
+  foreach ($presets as $key => $value) {
+    $presets[$key] = t($value['title']);
+  }
+  $presets['disabled'] = t('Disabled');
+
+  // Form template for regions.
+  $template = array(
+    '#type' => 'select',
+    '#options' => $presets,
+  );
+
+  if (!empty($theme_regions)) {
+    $form['current_theme'] = array(
+      '#type' => 'container',
+    );
+    $form['current_theme']['theme_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Current Theme'),
+      '#description' => t('The active theme being affected.'),
+      '#default_value' => $theme,
+      '#disabled' => TRUE,
+      '#attributes' => array(
+        'class' => array('ui-state-disabled'),
+      ),
+    );
+
+    $form['regions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Regions'),
+    );
+    
+    foreach ($theme_regions as $key => $value) {
+      $form['regions']['gridmagic-'.$key] = array(
+        '#title' => t($value),
+        '#default_value' => (isset($gridmagic_setting['gridmagic-'.$key])) ? $gridmagic_setting['gridmagic-'.$key] : 'disabled',
+      );
+      $form['regions']['gridmagic-'.$key] += $template;
+    }
+  }
+
+  $form['#submit'][] = 'gridmagic_form_submit';
+
+  return system_settings_form($form);
+}
+
+/*
+ * Form submit handler for Gridmagic.
+ */
+function gridmagic_form_submit($form, &$form_state) {
+  $input = $form_state['values'];
+
+  // Pull form values.
+  $theme_name = $input['theme_name'];
+  $regions = array();
+  foreach ($input as $key => $value) {
+    $region = explode('-', $key);
+    if ($region[0] == 'gridmagic') {
+      $regions[$region[1]] = $value;
+    }
+  }
+
+  // Get region values from gridmagic based on theme.
+  $gridmagic = array(
+      $theme_name => $regions,
+  );
+
+  // Assign to variable table.
+  variable_set('gridmagic', $gridmagic);
+
+}
+
+/*
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gridmagic_form_gridmagic_admin_alter(&$form, &$form_state, $form_id) {
+  unset($form['#submit'][1]);
+}
+
+/**
  *
  * See entity_get_info() for code pattern
  *
@@ -71,11 +205,23 @@ function gridmagic_gridmagic_row_preset_info() {
     ),
   );
 
+  $preset['50_50'] = array(
+    'title' => t('Two column 50/50'),
+    'limit' => 3,
+    'cols' => array(
+      '1e' => array(
+        'class' => array(
+          'col-sm-6',
+        ),
+      ),
+    ),
+  );
+
   $preset['33_33_33'] = array(
     'title' => t('Three column 33/33/33'),
     'limit' => 3,
     'cols' => array(
-      'c1' => array(
+      '1e' => array(
         'class' => array(
           'col-md-4',
           'col-sm-6',
@@ -88,7 +234,7 @@ function gridmagic_gridmagic_row_preset_info() {
     'title' => t('Four column 25/25/25/25'),
     'limit' => 4,
     'cols' => array(
-      'c1' => array(
+      '1e' => array(
         'class' => array(
           'col-md-3',
           'col-sm-6',
@@ -96,6 +242,19 @@ function gridmagic_gridmagic_row_preset_info() {
       ),
     ),
   );
+
+  $preset['disabled'] = array(
+    'title' => t('Disabled'),
+    'limit' => 0,
+    'cols' => array(
+      '1e' => array(
+        'class' => array(
+          'col-gridmagic',
+        ),
+      ),
+    ),
+  );
+
   return $preset;
 }
 
@@ -142,7 +301,7 @@ function gridmagic_get_layout_preset_info($preset_name = NULL) {
   return FALSE;
 }
 
-function gridmagic_gridmagic_layout_preset_info() {
+function gridmagic_layout_preset_info() {
   $preset = array();
   $preset['auto_1-4'] = array(
     'title' => t('Autospan default (1 to 4 equal columns)'),
@@ -155,22 +314,35 @@ function gridmagic_gridmagic_layout_preset_info() {
   return $preset;
 }
 
-function gridmagic_autospan_region_implements_all() {
-  $preset = array(
-    '_' => array(
-      'footer' => GRIDMAGIC_ROW_PRESET_DEFAULT,
-    ),
-  );
+/*function gridmagic_autospan_region_implements_all() {
+
+  $gridmagic = variable_get('gridmagic', NULL);
+  $theme = variable_get('theme_default', FALSE);
+
+  $preset = array();
+
+  if (!empty($gridmagic) && !empty($gridmagic[$theme])) {
+    // $preset['_'] => array(
+    //     'footer' => GRIDMAGIC_ROW_PRESET_DEFAULT,
+    // );
+    foreach ($gridmagic[$theme] as $key => $value) {
+      $preset['_'][$key] = $value;
+    }    
+  }
+  
   return $preset;
 }
 
 function gridmagic_autospan_region_implements($theme) {
   $implements = &drupal_static(__FUNCTION__, array());
+
   if (isset($implements[$theme])) {
     return $implements[$theme];
   }
-  $all= gridmagic_autospan_region_implements_all();
+  
+  $all = gridmagic_autospan_region_implements_all();
   $implements[$theme] = array();
+  
   if (isset($all[$theme])) {
     $implements[$theme] = $all[$theme];
   }
@@ -179,23 +351,41 @@ function gridmagic_autospan_region_implements($theme) {
   }
 
   return $implements[$theme];
-}
+}*/
 
 function gridmagic_page_alter(&$page) {
   global $theme;
+
+  // If page is not a render array, return.
   if (!is_array($page)) {
     return;
   }
-  $implements = gridmagic_autospan_region_implements($theme);
+
+  // $implements = gridmagic_autospan_region_implements($theme);
   $regions = element_children($page);
-//dsm($regions);
-  foreach ($regions AS $region_name) {
-    if (!empty($implements[$region_name])) {
+  $layout_preset = variable_get('gridmagic');
+
+  if (!empty($regions) && !empty($layout_preset[$theme])) {
+    $layout_preset = $layout_preset[$theme];
+    $presets = gridmagic_gridmagic_row_preset_info();
+
+    // Get all preset data.
+    foreach ($layout_preset as $key => $value) {
+      if ($presets[$value]) {
+        $layout_preset[$key] = $presets[$value];
+      }
+    }
+
+    foreach ($regions AS $region_name) {
+      // if (!empty($implements[$region_name])) {}
       $region = &$page[$region_name];
-      if (!is_array($region)) {
+      // If the preset for this region doesn't exist (didn't fill out the form)
+      // or if it's disabled, don't bother to waste processing time.
+      if (!is_array($region) || empty($layout_preset[$region_name]) || $layout_preset[$region_name] == 'disabled') {
         continue;
       }
-      $layout_preset = gridmagic_get_layout_preset_info($implements[$region_name]);
+      
+      // $layout_preset = gridmagic_get_layout_preset_info($region);
       $blocks = element_children($region);
 
       // calculate element counts
@@ -226,10 +416,9 @@ function gridmagic_page_alter(&$page) {
         $prev_block_name = $block_name;
       }
       $element = &$page[$region_name];
-      gridmagic_process_block_element($element, $region_name, $layout_preset, 0, $block_row_element_count);
+      gridmagic_process_block_element($element, $region_name, $layout_preset[$region_name], 0, $block_row_element_count);
     }
   }
-  //dsm($page);
 }
 
 function gridmagic_process_block_element(&$element, $name, $layout_preset, $index, $block_row_element_count) {
@@ -260,6 +449,7 @@ function gridmagic_add_block_attributes(&$block, $layout_preset, $index, $count)
   if (!empty($block->gridmagic['autospan_disable'])) {
     return;
   }
+
   $attributes = gridmagic_get_element_attributes($layout_preset, $index, $count);
 
   if (!isset($block->gridmagic)) {
@@ -283,7 +473,6 @@ function gridmagic_add_block_attributes(&$block, $layout_preset, $index, $count)
  */
 function gridmagic_get_element_attributes($preset, $index, $count, $row = 1) {
   $attributes = array();
-
   // check if preset is row or layout preset type
   if (isset($preset['cols'])) {
     $row_settings = $preset;

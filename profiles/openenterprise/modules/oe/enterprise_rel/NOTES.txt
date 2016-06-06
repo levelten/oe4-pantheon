@@ -1,0 +1,70 @@
+Rel urls
+
+  Context (Link To)
+    current page is default
+    via url
+      view
+      content type
+  Arg Source
+    current page is default
+    via url
+      view
+      content type
+
+$params
+  context_arg
+  args_arg
+  ops_arg
+
+urls:
+rel-[view|node]/[link-to-context]/[merge-op]/[args]
+
+link-to-context
+  view:[view_name]:[display_name]
+  content type: node:[content_type]
+  entity type: entity:[entity_type]:[bundle]
+
+If not provided, assume current context.
+
+args
+specific value:
+  taxonomy/term/[tid|name]
+  taxonomy/[vocab_name]/[tid|name]
+  node/[nid]
+  field/[field_name]/[value]
+
+signs to add multiple values
+
+literals
+  args/[args]
+
+if not provided, assume none
+
+ops
+
+  = single element
+  =+ add to current args
+  =- remove from current args
+
+==+
+
+if not provided, assume ‘=’
+
+
+Examples
+rel-view - goes to the rel-view of the existing context (no args)
+
+rel-view/=+ - goes to the rel-view of the existing context will all args from current page
+
+rel-view/taxonomy/term/1 - goes to the rel-view of the existing content with a single argument for tid 1
+
+rel-view/=+/taxonomy/term/1 - goest to the rel-view of the existing content with a all arguments for the existing page, replacing taxonomy term for vocab with tid 1
+
+? rel-view/==+/taxonomy/term/1 - goest to the rel-view of the existing content with a all arguments for the existing page, adding taxonomy term 1 to existing vocab ids
+
+
+rel-view/node:service - goes to rel-view for service content type (no args)
+
+rel-view/node:service/=+ - goes to rel-view for serviced content type with all args from current context
+
+rel-view/node:service/

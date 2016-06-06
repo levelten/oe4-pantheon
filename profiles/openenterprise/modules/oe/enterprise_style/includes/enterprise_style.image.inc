@@ -107,7 +107,7 @@ function enterprise_style_image_default_styles() {
             ),
           ),
         );
-        // if no ratio, i.e. no croping
+        // if no ratio, i.e. no cropping
         if (!$ratio) {
           $styles[$key]['label'] = ucfirst($size_name) . '-' . t('original ratio') . '-' . $resolution_name;
           $styles[$key]['effects'][0]['name'] = 'image_scale';
@@ -118,107 +118,6 @@ function enterprise_style_image_default_styles() {
   }
 
   return $styles;
-}
-
-/**
- * Implements hook_default_breakpoints().
- */
-function enterprise_style_default_breakpoints() {
-  $image_settings = enterprise_style_image_settings();
-
-  $weight = -10;
-
-  $export = array();
-
-  // Breakpoints.
-  $breakpoints = array();
-  foreach($image_settings['resolutions'] as $resolution_name => $resolution) {
-    $breakpoint = new stdClass();
-    $breakpoint->disabled = TRUE;
-    $breakpoint->api_version = 1;
-    $breakpoint->machine_name = 'custom.user.' . $resolution_name;
-    $breakpoint->name = $resolution_name;
-    $breakpoint->breakpoint = $resolution['breakpoint'];
-    $breakpoint->source = 'user';
-    $breakpoint->source_type = 'custom';
-    $breakpoint->status = 1;
-    $breakpoint->weight = $weight--;
-    $breakpoint->multipliers = array(
-      '1x' => '1x',
-    );
-    $export['custom.user.' . $resolution_name] = $breakpoint;
-  }
-  return $export;
-}
-
-/**
- * Implements hook_default_breakpoint_group().
- */
-function enterprise_style_default_breakpoint_group() {
-  $image_settings = enterprise_style_image_settings();
-
-  $export = array();
-
-  // Breakpoints.
-  $breakpoints = array();
-  foreach($image_settings['resolutions'] as $resolution_name => $resolution) {
-    $breakpoints[] = 'custom.user.' . $resolution_name;
-  }
-
-  //foreach($image_settings['ratios'] as $ratio_name => $ratio) {
-    //foreach($image_settings['sizes'] as $size_name => $size) {
-  foreach($image_settings['sizes'] as $size_name => $size) {
-    foreach($image_settings['ratios'] as $ratio_name => $ratio) {
-      $breakpoint_group = new stdClass();
-      $breakpoint_group->disabled = TRUE;
-      $breakpoint_group->api_version = 1;
-      $breakpoint_group->machine_name = $size_name . '-' . $ratio_name;
-      //$breakpoint_group->name = ucfirst($size_name) . '-' . str_replace('x', ':', $ratio_name);
-      if ($ratio_name != '0') {
-        //$breakpoint_group->name = ucfirst($size_name) . ': ' . $image_settings['ratios_label'][$ratio_name];
-        $breakpoint_group->name = ' - ' . ucfirst($size_name) . ': ' . str_replace('x', ':', $ratio_name) . ' (' . $image_settings['ratios_label'][$ratio_name] . ')';
-      }
-      else {
-        //$breakpoint_group->name = ucfirst($size_name);
-        $breakpoint_group->name = ucfirst($size_name);
-      }
-
-      $breakpoint_group->breakpoints = $breakpoints;
-      $breakpoint_group->type = 'custom';
-      $breakpoint_group->overridden = 0;
-      $export[$size_name . '-' . $ratio_name] = $breakpoint_group;
-    }
-  }
-
-  return $export;
-}
-
-/**
- * Implements hook_default_picture_mapping().
- */
-function enterprise_style_default_picture_mapping() {
-  $image_settings = enterprise_style_image_settings();
-
-  $export = array();
-
-  foreach($image_settings['sizes'] as $size_name => $size) {
-    foreach($image_settings['ratios'] as $ratio_name => $ratio) {
-      $mappings = array();
-      foreach($image_settings['resolutions'] as $resolution_name => $resolution) {
-        $mappings['custom.user.' . $resolution_name] = array(
-          '1x' => $size_name . '-' . $ratio_name . '-' . $resolution_name
-        );
-      }
-      $picture_mapping = new stdClass();
-      $picture_mapping->disabled = TRUE;
-      $picture_mapping->api_version = 1;
-      $picture_mapping->machine_name = $size_name . '-' . $ratio_name;
-      $picture_mapping->breakpoint_group = $size_name . '-' . $ratio_name;
-      $picture_mapping->mapping = $mappings;
-      $export[$size_name . '-' . $ratio_name] = $picture_mapping;
-    }
-  }
-  return $export;
 }
 
 /**

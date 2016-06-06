@@ -155,6 +155,22 @@ function intel_disqus_intel_intel_script() {
   return $scripts;
 }
 
+/**
+ * Implements hook_intel_intel_event_info()
+ */
+function intel_disqus_intel_intel_event_info() {
+  $events = array();
+  $events['disqus_comment'] = array(
+    'title' => t('Disqus comment'),
+    'category' => t('Comment'),
+    'description' => t('Comment submitted via Disqus'),
+    'valued_event' => 1,
+    'value' => 5,
+    'js_setting' => 1,
+  );
+  return $events;
+}
+
 function intel_disqus_comment_submit_js() {
   if (empty($_GET['vtk']) || empty($_GET['commentid'])) {
     $response = array(
@@ -168,7 +184,7 @@ function intel_disqus_comment_submit_js() {
   $commentid = $_GET['commentid'];
   
   $location = !empty($_GET['location']) ? $_GET['location'] : '';
-  $system_path = !empty($_GET['system_path']) ? $_GET['system_path'] : '';
+  $system_path = !empty($_GET['systemPath']) ? $_GET['systemPath'] : '';
   $submission = intel_submission_construct();
   $submission->type = 'disqus_comment';
   $submission->fid = '';
@@ -188,8 +204,8 @@ function intel_disqus_comment_submit_js() {
 
   $visitor = intel_visitor_load_or_create('user');
   $visitor->apiVisitorLoad();
-  $fsi = $visitor->getVar('api_session', 'comment_submit', '_updated');
-  $submit_context = $visitor->getVar('api_session', 'comment_submit', $fsi);
+  $fsi = $visitor->getVar('api_session', 'commentSubmit', '_updated');
+  $submit_context = $visitor->getVar('api_session', 'commentSubmit', $fsi);
 
   if (empty($submit_context)) {
     $response = array(
@@ -203,7 +219,7 @@ function intel_disqus_comment_submit_js() {
     $location = $submit_context['location'];
   }
   if (!$system_path) {
-    $system_path = $submit_context['system_path'];
+    $system_path = $submit_context['systemPath'];
   }
   $submission->submitted = $submit_context['submitted'];
   if ($submit_context['text']) {
@@ -251,6 +267,10 @@ function intel_disqus_comment_submit_js() {
 
   $response = array(
     'status' => 1,
+    'submit_context' => $submit_context,
+    'submission' => $submission,
+    'visitor' => $visitor,
+    'track' => $track,
   );
   intel_json_output($response);
 }

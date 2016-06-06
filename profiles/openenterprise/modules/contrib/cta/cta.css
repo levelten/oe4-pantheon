@@ -1,0 +1,9 @@
+.region .block.modal {
+    margin-bottom: 0px;
+    overflow: hidden;
+}
+
+/* move over views contextual links so not to overlap blocks */
+.block-cta .view-content div.contextual-links-wrapper {
+    right: 35px;
+}

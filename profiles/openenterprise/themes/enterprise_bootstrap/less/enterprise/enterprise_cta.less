@@ -1,0 +1,238 @@
+/* mixins */
+.cta-button-variant(@color; @background; @border) {
+  .button-variant(@color; @background; @border);
+  .btn-group .btn-group-addon:first-child,
+  &.btn-group .btn-group-addon:first-child {
+    border-right-color: @border;
+    &:focus,
+    &.focus {
+      border-right-color: darken(@border, 25%);
+    }
+    &:hover {
+      border-right-color: darken(@border, 12%);
+    }
+  }
+
+  .btn-group .btn-group-addon:last-child,
+  &.btn-group .btn-group-addon:last-child {
+    border-left-color: @border;
+    &:focus,
+    &.focus {
+      border-left-color: darken(@border, 25%);
+    }
+    &:hover {
+      border-left-color: darken(@border, 12%);
+    }
+  }
+  &.cta-outline-0, .cta-outline-0,
+  &.cta-outline-none, .cta-outline-none  {
+    border-style: none;
+  }
+}
+
+/* mixin to deal with all cta/btn elements changing on hover state, including when wrapped in a 'a' tag. */
+.hover-cta-button-variant(@color; @background; @border) {
+  color: @color;
+  background-color: darken(@background, 10%);
+  border-color: darken(@border, 12%);
+  &.btn-group .btn-group-addon:first-child,
+  .btn-group .btn-group-addon:first-child {
+    border-right-color: darken(@border, 12%);
+  }
+  &.btn-group .btn-group-addon:last-child,
+  .btn-group .btn-group-addon:last-child {
+    border-left-color: darken(@border, 12%);
+  }
+  text-decoration: none;
+}
+
+/* cta styling */
+.cta {
+  .btn();
+  white-space: normal;
+  &.cta-panel {
+    padding: 0;
+  }
+
+  &.cta-link, .cta-link {
+    .btn-link();
+  }
+
+  .btn-cta-default {
+    .cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+  .btn-cta-primary {
+    .cta-button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  }
+  .btn-cta-secondary {
+    .cta-button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+  }
+  .btn-cta-accent {
+    .cta-button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
+  }
+
+  &.text-primary, .text-primary {
+    .text-primary();
+  }
+  &.text-secondary, .text-secondary {
+    .text-secondary();
+  }
+  &.text-accent, .text-accent {
+    .text-accent();
+  }
+
+  .cta-heading,
+  .cta-body,
+  .cta-footer {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  &.cta-panel .cta-heading,
+  &.cta-panel .cta-body,
+  &.cta-panel .cta-footer {
+    padding-left: 15px;
+    padding-right: 15px;
+    .clearfix();
+  }
+  &.cta-panel .cta-heading {
+    .border-top-radius((@btn-border-radius-base - 1));
+    .border-bottom-radius(0);
+  }
+  &.cta-panel .cta-body {
+    .border-top-radius((@btn-border-radius-base - 1));
+    .border-bottom-radius((@btn-border-radius-base - 1));
+  }
+  &.cta-panel .cta-footer {
+    .border-bottom-radius((@btn-border-radius-base - 1));
+    .border-top-radius(0);
+  }
+}
+
+.cta-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  color: inherit;
+}
+
+/* hack to remove text underline on wrapper a:hover. Could not get text-decoration: none; to work */
+a:hover .cta, a:hover.cta {
+  display: inline-block;
+}
+
+
+
+.cta-default {
+  .cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  .btn-cta {
+    .cta-button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  }
+}
+
+.cta:hover .cta-default, .cta:hover.cta-default, a:hover .cta-default,
+.cta:hover .btn-cta-default, .cta:hover.btn-cta-default, a:hover .btn-cta-default{
+  .hover-cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  .btn-cta {
+    .hover-cta-button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  }
+}
+
+.cta-primary {
+  .cta-button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  .btn-cta {
+    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+.cta:hover .cta-primary, .cta:hover.cta-primary, a:hover .cta-primary,
+.cta:hover .btn-cta-primary, .cta:hover.btn-cta-primary, a:hover .btn-cta-primary {
+  .hover-cta-button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+  .btn-cta {
+    .hover-cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+
+.cta-secondary {
+  .cta-button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+  .btn-cta {
+    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+
+.cta:hover .cta-secondary, .cta:hover.cta-secondary, a:hover .cta-secondary,
+.cta:hover .btn-cta-secondary, .cta:hover.btn-cta-secondary, a:hover .btn-cta-secondary {
+  .hover-cta-button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+  .btn-cta {
+    .hover-cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+
+.cta-accent {
+  .cta-button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
+  .btn-cta {
+    .cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+.cta:hover .cta-accent, .cta:hover.cta-accent, a:hover .cta-accent,
+.cta:hover .btn-cta-accent, .cta:hover.btn-cta-accent, a:hover .btn-cta-accent {
+  .hover-cta-button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
+  .btn-cta {
+    .hover-cta-button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  }
+}
+
+
+.cta-block {
+  .btn-block();
+}
+
+// Display as table-cell
+// -------------------------
+.btn-group {
+  padding: 0;
+}
+
+.btn-group-addon {
+  &:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+}
+
+.btn-group-addon,
+.btn-group-body {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle; // Match the btns
+  padding: @padding-base-vertical (.8 * @padding-base-horizontal);
+}
+
+.btn-group-body {
+
+}
+
+// Reset rounded corners
+.btn-group .btn-group-addon:first-child {
+  border-right-style: solid;
+  border-right-width: 1px;
+  .border-right-radius(0);
+  .border-left-radius(@btn-border-radius-base);
+}
+.btn-group-addon:first-child {
+  border-right: 0;
+}
+.btn-group .btn-group-addon:last-child {
+  border-left-style: solid;
+  border-left-width: 1px;
+  .border-left-radius(0);
+  .border-right-radius(@btn-border-radius-base);
+}
+.btn-group-addon:last-child {
+  border-left: 0;
+}
+
+.btn-block {
+  .btn-group .btn-group-addon:first-child {
+    .pull-left();
+  }
+  .btn-group .btn-group-addon:last-child {
+    .pull-right();
+  }
+}

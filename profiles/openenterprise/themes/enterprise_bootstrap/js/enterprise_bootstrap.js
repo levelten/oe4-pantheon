@@ -17,7 +17,13 @@ var Drupal = Drupal || {};
       // Account for admin menu or existing margin.
       var $body = $("body", context),
       $header = $("#navbar", context),
-      $mainContainer = $(".page-wrapper", context);
+      $mainContainer = $(".page-wrapper", context),
+      hoverPushActivation = (settings.enterprise_bootstrap && settings.enterprise_bootstrap.mobilemenuhoverpushwidth) ? settings.enterprise_bootstrap.mobilemenuhoverpushwidth : 568,
+      mobileMenuActivationWidth = 568,
+      isMobile = function() {
+        // Check if we're in a mobile breakpoint.
+        return (window.outerWidth > mobileMenuActivationWidth) ? 0 : 1;
+      };
       // Only run for fixed navbar.
       if ($body.hasClass("navbar-is-fixed-top")) {
 
@@ -28,8 +34,10 @@ var Drupal = Drupal || {};
         }
 
         // Account for potential existing styles.
-        var style = ($mainContainer.attr("style") === undefined) ? "" : $mainContainer.attr("style");
-        $mainContainer.attr("style", style + "padding-top:"+mainContainerMargin+"px;");
+        if ($body.hasClass("navbar-is-static-top") && isMobile() || $body.hasClass("navbar-is-fixed-top") && $body.hasClass("logged-in") && !isMobile()) {
+          var style = ($mainContainer.attr("style") === undefined) ? "" : $mainContainer.attr("style");
+          $mainContainer.attr("style", style + "padding-top:"+mainContainerMargin+"px;");
+        }
       }
 
       /*
@@ -88,7 +96,7 @@ var Drupal = Drupal || {};
       /*
       * Sticky Menu
       */
-      if (settings.enterprise_bootstrap.sticky_menu) {
+      if (settings.enterprise_bootstrap && settings.enterprise_bootstrap.sticky_menu) {
         var $navbar = $("#navbar", context),
             $navbarWrapper = $("#navbar-wrapper", context);
         var navbarTop = $navbar.outerHeight(),
@@ -113,30 +121,22 @@ var Drupal = Drupal || {};
       /*
       * Mobile menu - hover vs push down
       */
-      var mobileMenuHoverPush = (settings.enterprise_bootstrap.mobilemenuhoverpush) ? settings.enterprise_bootstrap.mobilemenuhoverpush : false,
-      $navbar = $("#navbar", context),
-      $body = $("body", context),
-      navbarHeight = $navbar.outerHeight(),
-      mobileMenuActivationWidth = 568,
-      isMobileCheck = 0,
-      isMobile = function() {
-        // Check if we're in a mobile breakpoint.
-        return (window.outerWidth > mobileMenuActivationWidth) ? 0 : isMobileCheck++;
-      },
+      var mobileMenuHoverPush = (settings.enterprise_bootstrap && settings.enterprise_bootstrap.mobilemenuhoverpush) ? settings.enterprise_bootstrap.mobilemenuhoverpush : false,
+      navbarHeight = $header.outerHeight(),
       staticToFixed = function() {
         // Switch navbar-static-top to navbar-fixed-top
         if ($body.hasClass("navbar-is-static-top")) {
           $body.removeClass("navbar-is-static-top").addClass("navbar-is-fixed-top");
-          $body.css("padding-top", (navbarHeight-1)+"px");
-          $navbar.addClass("navbar-fixed-top").removeClass("navbar-static-top");
+          // $body.css("padding-top", (navbarHeight-1)+"px");
+          $header.addClass("navbar-fixed-top").removeClass("navbar-static-top");
         }
       },
       fixedToStatic = function() {
         // Switch navbar-fixed-top to navbar-static-top
         if ($body.hasClass("navbar-is-fixed-top")) {
           $body.removeClass("navbar-is-fixed-top").addClass("navbar-is-static-top");
-          $body.css("padding-top", "inherit");
-          $navbar.addClass("navbar-static-top").removeClass("navbar-fixed-top");
+          // $body.css("padding-top", "inherit");
+          $header.addClass("navbar-static-top").removeClass("navbar-fixed-top");
         }
       },
       mobileMenuPush = function() {
@@ -152,14 +152,14 @@ var Drupal = Drupal || {};
       };
 
       // Switch mobile navbar if Push is enabled, and navbar is set to Fixed Top.
-      if ($navbar.hasClass("navbar-fixed-top") && mobileMenuHoverPush && isMobile()) {
+      if ($header.hasClass("navbar-fixed-top") && mobileMenuHoverPush && isMobile()) {
         fixedToStatic();
         mobileMenuPush();
         // Run if page has been resized.
         window.onresize = function(){
           isMobile();
           // Only run mobileMenuPush once on change.
-          if (isMobileCheck === 1) {
+          if (isMobile() === 1) {
             mobileMenuPush();
           }
         };

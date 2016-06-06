@@ -5,7 +5,7 @@
  */
 Drupal.behaviors.intel_mailchimp = {
   attach: function (context) {
-	_l10iq.push(['_registerCallback', 'emailClick', this.emailClick, this]);
+	_l10iq.push(['addCallback', 'emailClick', this.emailClick, this]);
   },
 
   emailClick: function (vars) {
@@ -18,10 +18,10 @@ Drupal.behaviors.intel_mailchimp = {
       listid: vars.listid,
       campaignid: vars.campaignid,
       location: vars.location,
-      system_path: vars.system_path
+      systemPath: vars.systemPath
     };
     var url = ('https:' == document.location.protocol) ? 'https://' : 'http://';
-    url += Drupal.settings.intel.cms_hostpath + "intel_mailchimp/email_click_js";
+    url += Drupal.settings.intel.config.cmsHostpath + "intel_mailchimp/email_click_js";
     jQuery.ajax({
       dataType: 'json',
       url: url, 

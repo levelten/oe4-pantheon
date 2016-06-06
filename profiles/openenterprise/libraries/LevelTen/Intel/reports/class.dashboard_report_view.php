@@ -43,7 +43,7 @@ class DashboardReportView extends ReportView {
     );
     return $c;
   }
-  
+  /*
   function getConversionGoals() {
     $g = array(
       'n6' => 'ToFu conversion',
@@ -53,12 +53,13 @@ class DashboardReportView extends ReportView {
     );
     return $g;
   }
+  */
   
   function getEngagementEvents() {
     $e = array(
-      'Social share!' => 'social shares',
-      'Comment!' => 'comments',
-      //'CTA click!' => 'cta clicks',
+      'Social share' => 'social shares',
+      'Comment' => 'comments',
+      //'CTA click' => 'cta clicks',
     );
     return $e;
   }
@@ -80,7 +81,7 @@ class DashboardReportView extends ReportView {
     //$indexBy = $this->params['indexBy'];
     //$indexByLabel = $this->params['indexByLabel'];
     $daysLastMonth = $this->data['lastmonth']['daterange']['days'];
-    $data['lastmonth']['_all'] += array(
+    $data['lastmonth']['date']['_all'] += array(
       'entrance' => array(
         'entrances' => 0,
         'pageviews' => 0,
@@ -92,10 +93,10 @@ class DashboardReportView extends ReportView {
       'entrances_obj' => $targets['entrances_per_month'] / $daysInMonth,
       'leads_obj' => $targets['leads_per_month'] / $daysInMonth,
       'posts_obj' => $targets['posts_per_month'] / $daysInMonth,
-      'entrances_lm' => $data['lastmonth']['_all']['entrance']['entrances'] / $daysLastMonth,
-      'leads_lm' => $data['lastmonth']['_all']['leads'] / $daysLastMonth,
-      'posts_lm' => $data['lastmonth']['_all']['post']['published'] / $daysLastMonth,
-      'pageviews_lm' => $data['lastmonth']['_all']['entrance']['pageviews'] / $daysLastMonth,
+      'entrances_lm' => $data['lastmonth']['date']['_all']['entrance']['entrances'] / $daysLastMonth,
+      'leads_lm' => $data['lastmonth']['date']['_all']['leads'] / $daysLastMonth,
+      'posts_lm' => $data['lastmonth']['date']['_all']['post']['published'] / $daysLastMonth,
+      'pageviews_lm' => $data['lastmonth']['date']['_all']['entrance']['pageviews'] / $daysLastMonth,
     );
   
     $entrances_chart = new LineChart('objectives');
@@ -183,6 +184,7 @@ class DashboardReportView extends ReportView {
     $entrances = 0;
     $leads = 0; 
     $conversions = 0;
+    $max_posts_in_day = 0;
 
     for ($i = 1; $i <= ($daysInMonth); $i++) {
       $index = $index0 . (($i<10) ? '0' : '') . $i;
@@ -244,7 +246,6 @@ class DashboardReportView extends ReportView {
       $conversions_linechart->addRowItem($conversions);
       $conversions_linechart->addRowToSettings();
 
-      $max_posts_in_day = 0;
       $di = 1;
       if (isset($d['post']) && is_array($d['post'])) {
         foreach ($d['post'] AS $id => $post) {
@@ -254,8 +255,11 @@ class DashboardReportView extends ReportView {
           $post_timeline->addRowItem($di);
           $post_timeline->addRowItem($post['type']);
           $value = null;
-          if (isset($data['content'][$post['host'].$post['path']])) {
-            $value = $data['content'][$post['host'].$post['path']]['score'] / ((time() - $post['created']) / 24 / 60 / 60);
+          //if (isset($data['content'][$post['host'].$post['path']])) {
+          //  $value = $data['content'][$post['host'].$post['path']]['score'] / ((time() - $post['created']) / 24 / 60 / 60);
+          //}
+          if (isset($data['content'][$post['path']])) {
+            $value = $data['content'][$post['path']]['score'] / ((time() - $post['created']) / 24 / 60 / 60);
           }
           $post_timeline->addRowItem(round($value, 2));
           $post_timeline->addRowToSettings();
@@ -278,6 +282,7 @@ class DashboardReportView extends ReportView {
 
     }
     $post_timeline->setOption('vAxis.maxValue', $max_posts_in_day + 1);
+
     $output = '';
     
     $totals = $data['date']['_all'];
@@ -297,7 +302,7 @@ class DashboardReportView extends ReportView {
       $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['entrances'], $mark) . '</div>';
       $entrances_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
     }
-    $mark = $cur_days_per * $data['lastmonth']['_all']['entrance']['entrances'];
+    $mark = $cur_days_per * $data['lastmonth']['date']['_all']['entrance']['entrances'];
     $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['entrances'], $mark) . '</div>'; 
     $entrances_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
     $entrances_summary .= '</div>';
@@ -309,7 +314,7 @@ class DashboardReportView extends ReportView {
     $entrances_summary .= '<div class="key-metric-desc">pageviews in  ' . $mostr . '</div>'; 
     $entrances_summary .= '</div>';
     $entrances_summary .= '<div class="key-metric-change-box">';
-    $mark = $cur_days_per * $data['lastmonth']['_all']['entrance']['pageviews'];
+    $mark = $cur_days_per * $data['lastmonth']['date']['_all']['entrance']['pageviews'];
     $entrances_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['entrance']['pageviews'], $mark) . '</div>'; 
     $entrances_summary .= '<div class="key-metric-change-desc">vs. last month</div>';
     $entrances_summary .= '</div>';
@@ -327,7 +332,7 @@ class DashboardReportView extends ReportView {
       $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['lead']['leads'], $mark) . '</div>';
       $leads_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
     }
-    $mark = $cur_days_per * $data['lastmonth']['_all']['lead']['leads'];
+    $mark = $cur_days_per * $data['lastmonth']['date']['_all']['lead']['leads'];
     $leads_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['lead']['leads'], $mark) . '</div>'; 
     $leads_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
     $leads_summary .= '</div>';
@@ -337,7 +342,7 @@ class DashboardReportView extends ReportView {
     // because goalCompletionAll values did not exist when filter applied.
     // look deeper into why
     $goalCompletionsAll = isset($totals['entrance']['goals']['_all']['completions']) ? $totals['entrance']['goals']['_all']['completions'] : $totals['entrance']['goalCompletionsAll'];
-    $goalCompletionsAll_lm = isset($data['lastmonth']['_all']['entrance']['goals']['_all']['completions']) ? $data['lastmonth']['_all']['entrance']['goals']['_all']['completions'] : $data['lastmonth']['_all']['entrance']['goalCompletionsAll'];
+    $goalCompletionsAll_lm = !empty($data['lastmonth']['date']['_all']['entrance']['goals']['_all']['completions']) ? $data['lastmonth']['date']['_all']['entrance']['goals']['_all']['completions'] : $data['lastmonth']['date']['_all']['entrance']['goalCompletionsAll'];
     $leads_summary .= '<div class="summary-box">';
     $leads_summary .= '<div class="key-metric-box">';
     $leads_summary .= '<div class="key-metric-value">' . number_format($goalCompletionsAll) . '</div>';
@@ -364,17 +369,17 @@ class DashboardReportView extends ReportView {
       $posts_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['post']['published'], $mark) . '</div>';
       $posts_summary .= '<div class="key-metric-change-desc">vs. objective</div>';
     }
-    $mark = $cur_days_per * $data['lastmonth']['_all']['post']['published'];
+    $mark = $cur_days_per * $data['lastmonth']['date']['_all']['post']['published'];
     $posts_summary .= '<div class="key-metric-change-value">' . $this->formatDeltaValue($totals['post']['published'], $mark) . '</div>'; 
     $posts_summary .= '<div class="key-metric-change-desc">vs. last month</div>';  
     $posts_summary .= '</div>';
     $posts_summary .= '</div>';
-    
+
     $value = 0;
     $last_mo = 0;
     foreach ($engagementEvents AS $k => $v) {
       $value += !empty($totals['entrance']['events'][$k]) ? (int)$totals['entrance']['events'][$k]['totalValuedEvents'] : 0;
-      $last_mo += !empty($data['lastmonth']['_all']['entrance']['events'][$k]) ? (int)$data['lastmonth']['_all']['entrance']['events'][$k]['totalValuedEvents'] : 0;
+      $last_mo += !empty($data['lastmonth']['date']['_all']['entrance']['events'][$k]) ? (int)$data['lastmonth']['date']['_all']['entrance']['events'][$k]['totalValuedEvents'] : 0;
     }
     $posts_summary .= '<div class="summary-box">';
     $posts_summary .= '<div class="key-metric-box">';

@@ -1,49 +1,36 @@
 .node-enterprise-image {
-    .ds-left {
-        padding-right: 25px;
+  .ds-left {
+    padding-right: 25px;
+  }
+  .field-name-title h3 {
+    margin: 0;
+  }
+  .field-name-submit-info {
+    font-style: italic;
+    margin-bottom: 1em;
+  }
+  .field-name-body {
+    font-weight: 300;
+    .more-link {
+      padding-left: 3px;
     }
-    .field-name-title h3 {
-        margin: 0;
-    }
-    .field-name-submit-info {
-        font-style: italic;
-        margin-bottom: 1em;
-    }
-    .field-name-body {
-        font-weight: 300;
-        .more-link {
-            padding-left: 3px;
-        }
-    }
+  }
 
-    &.view-mode-mini {
-      h2, h3 {
-        .font-size(1.8);
-        font-weight: 700;
-        line-height: 1.5em;
-        margin-top: 0;
-        padding-bottom: 0.5em;
-        .heading-underline(40px);
-      }
+  &.view-mode-mini {
+    h2, h3 {
+      .font-size(1.8);
+      font-weight: 700;
+      line-height: 1.5em;
+      margin-top: 0;
+      padding-bottom: 0.5em;
+      .heading-underline(40px);
     }
+  }
 }
 
 .view-enterprise-image {
-	.views-row {
-      margin-bottom: 14px;
-      padding: 14px 0;
-      //border-bottom:1px solid @gray-lighter;
-	}
 	.views-row-odd {
-		background-color: @brand-secondary;
-	}
-	&.view-display-id-page {
-		.views-row {
-			margin-bottom: 1em;
-			&.views-row-last {
-				margin-bottom: 0;
-			}
-		}
+		background-color: @gray-lighter;
 	}
 	&.view-display-id-block {
 		.views-row {

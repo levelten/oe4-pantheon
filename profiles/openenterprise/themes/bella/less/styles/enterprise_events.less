@@ -1,75 +1,68 @@
 .node-enterprise-event {
-    &.style-event-full {
-      .field-name-field-event-datetime {
-        &:extend(h4);
-        .date-display-single {
-          .label;
-          .label-warning;
-        }
+  &.style-event-full {
+    .field {
+      margin:10px 0px;
+    }
+    .field-name-field-event-datetime {
+      &:extend(h3);
+      .date-display-single a {
+        .btn;
+        .btn-warning;
+        color:@brand-accent;
+      }
+    }
+  }
+
+  &.style-default-teaser, &.style-default-featured,
+  &.style-event-teaser {
+    .ds-left {
+      padding-right: 25px;
+    }
+    .field-name-title h3 {
+      margin: 0 0 10px 0;
+    }
+    .field-name-submit-info {
+      font-style: italic;
+      margin-bottom: 1em;
+    }
+    .field-name-body {
+      font-weight: 300;
+      .more-link {
+        padding-left: 3px;
       }
     }
 
-	&.style-default-teaser, &.style-default-featured,
-	&.style-event-teaser {
-		.ds-left {
-			padding-right: 25px;
-		}
-		.field-name-title h3 {
-          margin: 0 0 10px 0;
-		}
-		.field-name-submit-info {
-			font-style: italic;
-			margin-bottom: 1em;
-		}
-		.field-name-body {
-			font-weight: 300;
-			.more-link {
-				padding-left: 3px;
-			}
-		}
-
-        .well {
-          margin-bottom:0;
-          margin:10px 0;
-        }
-	}
+    .well {
+      margin-bottom:0;
+      margin:10px 0;
+    }
+  }
 }
 
 .view-enterprise-events {
-	.views-row {
-		margin-bottom: 14px;
-		padding: 14px 0;
-        border-bottom:1px solid @gray-lighter;
-
-      &.last {
-        border-bottom: none;
+  .views-row {
+    border-bottom:1px solid @gray-lighter;
+    &.last {
+      border-bottom: none;
+    }
+  }
+  .views-row-odd {
+    background-color: @gray-lighter;
+  }
+  &.view-display-id-block_upcoming {
+    .views-row {
+      margin-bottom: 1em;
+      &.views-row-last {
+        margin-bottom: 0;
       }
-	}
-	.views-row-odd {
-		background-color: @brand-secondary;
-	}
-	&.view-display-id-page {
-		.views-row {
-			margin-bottom: 45px;
-			&.views-row-last {
-				margin-bottom: 0;
-			}
-		}
-	}
-	&.view-display-id-block_upcoming {
-		.views-row {
-			margin-bottom: 1em;
-			&.views-row-last {
-				margin-bottom: 0;
-			}
-		}
-		h2, h3 {
-			.font-size(1.8);
-			font-weight: 700;
-			line-height: 1.5em;
-			margin-top: 0;
-			padding-bottom: 0.5em;
-			//.heading-underline(40px);
-		}
-	}
+    }
+    h2, h3 {
+      .font-size(1.8);
+      font-weight: 700;
+      line-height: 1.5em;
+      margin-top: 0;
+      padding-bottom: 0.5em;
+      //.heading-underline(40px);
+    }
+  }
 }

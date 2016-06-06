@@ -1,0 +1,7 @@
+name        = Slick CKEditor
+description = ACTIVE DEVELOPMENT | DO NOT USE. Add Slick widget to CKEditor.
+core        = 7.x
+package     = Slick
+
+dependencies[] = slick
+dependencies[] = ckeditor

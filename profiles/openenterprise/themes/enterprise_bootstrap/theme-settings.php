@@ -4,13 +4,15 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['general']['#weight'] = -8;
 
 	$default_settings = array();
+	$theme_path = drupal_get_path('theme', 'enterprise_bootstrap');
 
-	$filename = DRUPAL_ROOT . '/' . drupal_get_path('theme', 'enterprise_bootstrap') . '/enterprise_bootstrap.info';
+	$filename = DRUPAL_ROOT . '/' . $theme_path . '/enterprise_bootstrap.info';
 	$info = drupal_parse_info_file($filename);
 	if (isset($info['settings'])) {
 		$default_settings = $info['settings'];
 	}
 
+  // Logo
 	$logo_options = array('default' => "Default") + image_style_options(false);
 	$form['logo']['settings']['logo_image_style'] = array(
 		'#type' => 'select',
@@ -19,6 +21,11 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#default_value' => theme_get_setting('logo_image_style'),
 		'#options' => $logo_options,
 	);
+  $form['logo']['settings']['logo_suggestion'] = array(
+    '#markup' => '<div class="description"><p>When using an Enterprise Bootstrap theme, the ideal logo dimensions is 200x75 available in the "Enterprise Bootstrap Logo" image style.</p></div>',
+    '#attributes' => array('class' => array('description')),
+    '#weight' => 10,
+  );
 
 	$form['enterprise_bootstrap'] = array(
 		'#type' => 'vertical_tabs',
@@ -82,7 +89,6 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Wide'),
 		),
 	);
-	
 	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
 		'#title' => t('Block Striping'),
@@ -93,16 +99,70 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Yes'),
 		),
 	);
-	$form['enterprise_bootstrap_config']['column_left']['enterprise_bootstrap_blokkfont'] = array(
+	
+  $form['enterprise_bootstrap_config']['column_right']['eb_dark_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Dark Theme'),
+    '#default_value' => theme_get_setting('eb_dark_theme'),
+    '#description' => t('Adds a "theme-dark" class to the body, only affects subthemes that use it.'),
+  );
+
+  $form['enterprise_bootstrap_config']['column_right']['eb_light_primary'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Light Primary Color'),
+    '#default_value' => theme_get_setting('eb_light_primary'),
+    '#description' => t('If your primary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+  );
+
+  $form['enterprise_bootstrap_config']['column_right']['eb_light_secondary'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Light Secondary Color'),
+    '#default_value' => theme_get_setting('eb_light_secondary'),
+    '#description' => t('If your secondary color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+  );
+
+	$form['enterprise_bootstrap_config']['column_right']['eb_light_accent'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Light Accent Color'),
+		'#default_value' => theme_get_setting('eb_accent_secondary'),
+		'#description' => t('If your accent color is lighter in nature and works better with darker colors, the theme will attempt to adjust for this.'),
+	);
+
+	$form['enterprise_bootstrap_config']['column_right']['enterprise_bootstrap_block_striping'] = array(
 		'#type' => 'select',
-		'#title' => t('Blokk Font'),
-		'#default_value' => theme_get_setting('enterprise_bootstrap_blokkfont'),
-		'#description' => t('Enables Blokk Neue as the default font. Great for testing designs.'),
+		'#title' => t('Block Striping'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_block_striping'),
+		'#description' => t('Adds odd/even classes to blocks on the home page.'),
 		'#options' => array(
 			0 => t('No'),
 			1 => t('Yes'),
 		),
 	);
+ $form['enterprise_bootstrap_header_settings'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap',
+    '#title' => t('Header'),
+    '#description' => t('Settings regarding the container status of each region (excluding the front page). These settings affect where they\'re placement and padding.'),
+  );
+  $form['enterprise_bootstrap_header_settings']['navbar_header'] = array(
+    '#type' => 'fieldset',
+    '#group' => 'enterprise_bootstrap_header_settings',
+    '#title' => t('Navbar Header (menu left)'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $options = array(
+    'standard' => t('Standard template (logo/site name/slogan)'),
+    'none' => t('None'),
+    'region' => t('Region'),
+  );
+  $form['enterprise_bootstrap_header_settings']['navbar_header']['navbar_header_display'] = array(
+    '#type' => 'select',
+    '#title' => t('Display (default)'),
+    '#default_value' => theme_get_setting('navbar_header_display'),
+    '#description' => t('Choose to either place this above the content/sidebars, or inside the content area.'),
+    '#options' => $options,
+  );
 
 	$form['enterprise_bootstrap_region_settings'] = array(
 		'#type' => 'fieldset',
@@ -123,6 +183,12 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		'#collapsible' => TRUE,
     '#collapsed' => TRUE,
 	);
+  $form['enterprise_bootstrap_region_settings']['navigation']['navbar_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Navbar Class'),
+    '#default_value' => theme_get_setting('navbar_class'),
+    '#description' => t('Class that wraps the navbar region.')
+  );
 	$form['enterprise_bootstrap_region_settings']['navigation']['navbar_region_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Navigation Region Class'),
@@ -245,7 +311,7 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 	$form['enterprise_bootstrap_region_settings']['footer']['footer_class'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Footer Class'),
-		'#default_value' => theme_get_setting('header_class'),
+		'#default_value' => theme_get_setting('footer_class'),
 		'#description' => t('Add classes for the footer region, separated by space.')
 	);
 
@@ -469,6 +535,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
+	$form['enterprise_bootstrap_megamenu_config']['section_top']['enterprise_bootstrap_hide_caret'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Hide Caret'),
+		'#default_value' => theme_get_setting('enterprise_bootstrap_hide_caret'),
+		'#description' => t('Hide caret in dropdown links in the navbar.'),
+	);
+
 	$form['enterprise_bootstrap_megamenu_config']['section_right']['enterprise_bootstrap_mega_columns'] = array(
 		'#type' => 'select',
 		'#title' => t('Mega Menu Columns'),
@@ -499,7 +572,13 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			1 => t('Toggle'),
 		),
 	);
-	$form['enterprise_bootstrap_megamenu_config']['section_left']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push'] = array(
+		'#type' => 'fieldset', 
+		'#title' => t('Mobile Menu - Hover Push'), 
+		'#collapsible' => FALSE, 
+		'#collapsed' => FALSE,
+	);
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push']['enterprise_bootstrap_mobile_menu_hover_push'] = array(
 		'#type' => 'select',
 		'#title' => t('Mobile Menu: Hover or Push'),
 		'#default_value' => theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push'),
@@ -508,6 +587,24 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 			0 => t('Hover over content'),
 			1 => t('Push down content'),
 		),
+	);
+
+	$default_mobile_menu_width = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width');
+	$form['enterprise_bootstrap_megamenu_config']['section_left']['mobile_menu_hover_push']['enterprise_bootstrap_mobile_menu_hover_push_width'] = array(
+		'#type' => 'select',
+		'#title' => t('Activation Width'),
+		'#description' => t('The mobile width this will activate.'),
+		'#default_value' => (!empty($default_mobile_menu_width)) ? $default_mobile_menu_width : 568,
+		'#options' => array(
+			480 => t('480px (iPhone 4)'),
+			568 => t('568px (iPhone 5)'),
+			667 => t('667px (iPhone 6)'),
+		),
+		'#states' => array(
+      'visible' => array(
+        ':input[name=enterprise_bootstrap_mobile_menu_hover_push]' => array('value' => '1'),
+      ),
+    ),
 	);
 
 	//  We don't use this anymore, but we can keep this in as a reminder.
@@ -576,4 +673,239 @@ function enterprise_bootstrap_form_system_theme_settings_alter(&$form, &$form_st
 		),
 	);
 
-} // end settings_alter
+	// Colourlovers settings
+	if (module_exists('colourlovers')) {
+		$form['enterprise_bootstrap_color']['colourlovers'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('COLOURLovers Palettes'),
+			'#weight' => -2,
+			'#description' => t('Enter the URL below to request your palettes. You can use the !playground to get your API URL. This works with !palettes only.', array('!playground' => l('Colourlovers Playground', 'admin/appearance/colourlovers'), '!palettes' => '<strong>PALETTES</strong>')),
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
+		);
+		
+		$form['enterprise_bootstrap_color']['colourlovers']['cl_palette_mode'] = array(
+			'#type' => 'select',
+			'#title' => t('Palette Mode'),
+			'#default_value' => theme_get_setting('cl_palette_mode'),
+			'#description' => t('Choose from Top or New palettes. Random only returns one. You will need to save once to view the palettes.'),
+			'#options' => array(
+				'top' => t('Top'),
+				'new' => t('New'),
+				'random' => t('Random'),
+				'custom_user' => t('Custom: Username'),
+				'custom_keywords' => t('Custom: Keywords'),
+			),
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+		);
+
+		$form['enterprise_bootstrap_color']['colourlovers']['cl_palette_param'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Parameters'),
+			'#default_value' => theme_get_setting('cl_palette_param'),
+			'#description' => t('If using a username, enter it here. If using keywords, you must separate each term using a comma.'),
+			'#prefix' => '<div class="inline-field">',
+			'#suffix' => '</div>',
+			'#states' => array(
+	      'visible' => array(
+	        array(
+	        	array(':input[name=cl_palette_mode]' => array('value' => 'custom_keywords')),
+	        	'or',
+	        	array(':input[name=cl_palette_mode]' => array('value' => 'custom_user')),
+	        ),
+	      ),
+	    ),
+		);
+
+		$form['enterprise_bootstrap_color']['colourlovers']['colourlovers_container'] = array(
+			'#type' => 'fieldset',
+		);
+		$form['enterprise_bootstrap_color']['colourlovers']['colourlovers_container']['cl_palette_options'] = array(
+			'#type' => 'markup',
+	  	'#markup' => variable_get('cl_palette_options', 'No palettes generated.'),
+	  );
+	}
+
+	// Pictaculous settings
+	if (module_exists('pictaculous')) {
+		$form['enterprise_bootstrap_color']['pictaculous'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Pictaculous Palettes'),
+			'#description' => t('You must upload an image using the !pictaculous interface, we will pull the settings from there.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))),
+			'#weight' => -1,
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
+		);
+
+		$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'] = array(
+			'#type' => 'value',
+			'#title' => t('Pictaculous Object'),
+			'#value' => theme_get_setting('pictaculous_object'),
+		);
+		
+    // Don't wait on save to provide palettes.
+    $pictaculous_object = theme_get_setting('pictaculous_object');
+    if (empty($pictaculous_object)) {
+    	$pictaculous_object = variable_get('pictaculous_object', NULL);
+    }
+
+		if (!empty($pictaculous_object)) {
+			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container'] = array(
+				'#type' => 'fieldset',
+			);
+
+			$form['enterprise_bootstrap_color']['pictaculous']['pictaculous_container']['pictaculous_options'] = array(
+		    '#type' => 'markup',
+				'#markup' => _enterprise_bootstrap_pictaculous($pictaculous_object),
+		  );
+		} else {
+			drupal_set_message(t('You must upload an image to the !pictaculous admin form to generate palettes.', array('!pictaculous' => l('Pictaculous', 'admin/config/media/pictaculous'))), 'status', FALSE);
+		}
+	}
+
+	// Add related CSS/JS
+	$form['#attached']['css'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.css';
+	$form['#attached']['js'][] = $theme_path . '/js/jquery-minicolors/jquery.minicolors.min.js';
+	$form['#attached']['js'][] = $theme_path . '/js/enterprise_bootstrap_admin.js';
+
+	// Add form submit handler.
+	$form['#submit'][] = 'enterprise_bootstrap_theme_settings_submit';
+
+	// Specify theme-settings.php as dependency. We won't use the active theme since it's usually a subtheme.
+	// http://ghosty.co.uk/2014/03/managed-file-upload-in-drupal-theme-settings
+	$form_state['build_info']['files'][] = $theme_path . '/theme-settings.php';
+
+}
+
+/*
+ * Validate handler for Enterprise Bootstrap.
+ */
+function enterprise_bootstrap_theme_settings_submit(&$form, &$form_state) {
+	$input = $form_state['values'];
+
+	// Check for Colourlovers
+  if (module_exists('colourlovers')) {
+  	require_once(drupal_get_path('module', 'colourlovers') . '/colourlovers.admin.inc');
+		if (!empty($input['cl_palette_mode'])) {
+  		variable_set('cl_palette_options', _enterprise_bootstrap_colourlovers($input['cl_palette_mode'], $input['cl_palette_param']));
+  	}  	
+  }
+
+  // Check for Pictaculous
+  if (module_exists('pictaculous')) {
+  	// Get value from Pictaculous.
+  	$pictaculous_object = variable_get('pictaculous_object', NULL);
+
+		$pictaculous_theme = $form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'];
+		// If FID's don't match, grab newest info.
+		if (isset($pictaculous_theme['fid'])) {
+			if ($pictaculous_theme['fid'] != $pictaculous_object['fid']) {
+				form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+			}
+		} else {
+			form_set_value($form['enterprise_bootstrap_color']['pictaculous']['pictaculous_object'], $pictaculous_object, $form_state);
+		}
+  }
+}
+
+/**
+ * Generate palettes from COLOURLovers.
+ */
+function _enterprise_bootstrap_colourlovers($mode = 'top', $param = NULL) {
+	// Set up API call and palettes.
+	$params = array();
+	if ($mode == 'custom_user') {
+		if (empty($param)) {
+			form_set_error('cl_palette_param', t('You must enter a username when using Custom: Username.'));
+		}
+		$params['lover'] = $param;
+	} elseif ($mode == 'custom_keywords') {
+		if (empty($param)) {
+			form_set_error('cl_palette_param', t('You must enter some keywords when using Custom: Keywords.'));
+		}
+		$params['keywords'] = _colourlovers_format_keyword($param);
+	}
+
+	$palettes = _colourlovers_method('palettes', $mode, 20, $params);
+	$badge = array();
+
+	if (!empty($palettes)) {
+		foreach ($palettes as $key => $value) {
+			// If using palettes, set up Color module palette.
+			if (count($value->colors) < 5) {
+				continue;
+			}
+			$theme_palette[$value->id] = array(
+				'title' => t($value->title),
+				'colors' => $value->colors,
+			);
+			// Set up badge images.
+			$image_vars = array(
+				'path' => $value->badgeUrl,
+				'alt' => $value->url,
+				'title' => t($value->title),
+				'attributes' => array(
+					'style' => '',
+				),
+			);
+
+			$wrapper_attributes = array(
+				'class' => array('colourlovers-image'),
+				'data-colors' => array(implode(',', $value->colors)),
+			);
+
+			$badge[] = '<div '. drupal_attributes($wrapper_attributes).'>'.theme_image($image_vars).'</div>';
+		}
+		$badges = '<div class="colourlovers-images">'.implode('', $badge).'</div>';
+		return $badges;
+	}
+}
+
+/**
+ * Generate palettes from Pictaculous.
+ */
+function _enterprise_bootstrap_pictaculous($object) {
+	$output = '';
+
+	if (is_array($object) && !empty($object)) {
+		foreach ($object as $key => $value) {
+			if (is_array($value) || is_object($value)) {
+
+				switch ($key) {
+
+					case 'info':
+						$value->fid = $object['fid'];
+						$value->title = $object['title'];
+						$element = array(
+							'#title' => t('Pictaculous: Image'),
+							'#description' => t('The palette returned based on the image supplied.'),
+							'#children' => theme('pictaculous_info', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+						break;
+
+					case 'kuler_themes':
+						$element = array(
+							'#title' => t('Pictaculous: Adobe Kuler'),
+							'#description' => t('Suggestions supplied by Adober Kuler.'),
+							'#children' => theme('pictaculous_kuler', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+					break;
+
+					case 'cl_themes':
+						$element = array(
+							'#title' => t('Pictaculous: COLOURLovers'),
+							'#description' => t('Suggestions supplied by COLOURLovers.'),
+							'#children' => theme('pictaculous_colour', array('object' => $value)),
+						);
+						$output .= theme('fieldset', array('element' => $element));
+					break;
+					
+				}
+			}
+		}
+	}
+	return $output;
+}

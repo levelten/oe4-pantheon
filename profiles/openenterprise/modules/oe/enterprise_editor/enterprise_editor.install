@@ -13,3 +13,33 @@ function enterprise_editor_uninstall() {
     variable_del($variable);
   }
 }
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function enterprise_editor_update_dependencies() {
+  $dependencies ['enterprise_editor'][7200] = array(
+    'picture' => 7203,
+  );
+  return $dependencies;
+}
+
+/**
+ * Revert Enterprise Editor feature.
+ */
+function enterprise_editor_update_7200() {
+  features_revert_module('enterprise_editor');
+}
+
+/**
+ * Disable CKEditor LESS (no longer needed)
+ */
+function enterprise_editor_update_7201() {
+  $less = system_get_info('module', 'less');
+  if (module_exists('ckeditor_less') && $less['version'] == '7.x-4.0') {
+    module_disable(array('ckeditor_less'));
+    return t('CKEditor LESS was successfully disabled.');
+  } else {
+    throw new DrupalUpdateException("CKEditor LESS was not disabled.");
+  }
+}

@@ -5,7 +5,6 @@ function L10iCharts() {
   this.init = function init() {
 	  this.resizeCharts();
 	  this.addCustomFormatters();
-console.log(_chart);
       for (var id in _chart) {
     	this.drawChart(id);
       }
@@ -20,7 +19,6 @@ console.log(_chart);
       google.visualization.NumberDateFormat.options = options;
 
       this.format = function (dt, columnIndex) {
-console.log(dt);
     	var options = google.visualization.NumberDateFormat.options;
         for (var i=0; i < dt.getNumberOfRows(); i++) {
           var date = new Date (dt.getValue(i, columnIndex));
@@ -52,7 +50,6 @@ console.log(dt);
   
   this.drawChart = function drawChart(id) {
 	var i, chart, data, charttype, e, formatter, method, method_name, cols, rows, dateCols;
-console.log(id);
 	charttype = id.split('-');
 	charttype = charttype[0];	
 	dateCols = [];
@@ -61,7 +58,6 @@ console.log(id);
 	if ((_chart[id][2]['cols'] != undefined) && (_chart[id][2]['cols'].length > 0)) {   
       data = new google.visualization.DataTable();
       cols = _chart[id][2]['cols'];
-console.log(cols);
       for (var i = 0; i < cols.length; i++) {
     	data.addColumn(cols[i]);
     	if (cols[i].type == 'date') {
@@ -70,7 +66,6 @@ console.log(cols);
       }
       
       rows = _chart[id][2]['rows'];
-console.log(rows);
       if (rows != undefined) {
     	  for (var i = 0; i < rows.length; i++) {
     		  for (var j in dateCols) {

@@ -29,7 +29,7 @@
  * @return array|bool
  */
 function intel_parse_url($url, $location = '') {
-  $comps = intel_parse_href($url, $location = '');
+  $comps = intel_parse_href($url, $location);
   $c = parse_url($comps['location']);
   if (!empty($c) && is_array($c)) {
     $comps = $c + $comps;
@@ -73,7 +73,7 @@ function intel_parse_href($href, $location = '') {
   if (!empty($locc['host'])) {
     $loc_domain = $locc['host'] . ((!empty($locc['port'])) ? ':' . $locc['port'] : '');
     if (!empty($locc['scheme'])) {
-      $loc_root = $locc['scheme'] . '//' . $loc_domain;
+      $loc_root = $locc['scheme'] . '://' . $loc_domain;
     }    
   }  
   

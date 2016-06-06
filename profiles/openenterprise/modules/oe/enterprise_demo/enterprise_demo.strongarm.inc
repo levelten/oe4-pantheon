@@ -78,6 +78,13 @@ function enterprise_demo_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'error_level';
+  $strongarm->value = 0;
+  $export['error_level'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'intel_entity_settings_node__enterprise_blog';
   $strongarm->value = array(
     'page_intent' => 't',

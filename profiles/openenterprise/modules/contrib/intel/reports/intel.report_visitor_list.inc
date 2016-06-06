@@ -6,93 +6,85 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-function intel_visitor_list_report_page($report_params = '-', $report_subtype = '-', $entity_type = '-', $entity = '-') {
+function intel_visitor_list_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
   require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
   require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
   $output = '';
 
-  $vars = intel_init_reports_vars('visitor_list', 'visitor', $report_params, $report_subtype, $entity_type, $entity);
+  $vars = array();
+  if (!empty($entity_type) && $entity_type != '-') {
+    $vars['entity_type'] = $entity_type;
+    $vars['entity'] = $entity;
+  }
+  $vars = intel_init_reports_vars('visitor_list', 'visitor', $report_params, $report_subtype, $report_subfilter, $vars);
 
   $output = intel_build_report($vars);
   return $output;
 }
 
-//function intel_visitor_list_report($filters = array(), $context = 'site', $sub_index = '-') {
+//function intel_visitor_list_report($vars['filters'] = array(), $vars['context'] = 'site', $sub_index = '-') {
 function intel_visitor_list_report($vars) {
   intel_include_library_file('ga/class.ga_model.php'); 
 
-  $filters = $vars['filters'];
-  $sub_index = $vars['report_subtype'];
-  $context = $vars['context'];
-  $context_mode = $vars['context_mode'];
+  $output = '';
 
-  $reports = intel_reports();
-  $report_mode = $vars['report_info']['key'];
-  $report_modes = explode('.', $report_mode);
-  $indexBy = $report_modes[0];
-  $indexByLabel = $vars['report_info']['title'];
-  
-  $cache_options = array();
-  $row_count = 100;
-  $feed_rows = 2 * $row_count;
-  
-  $output = '';    
+  $vars['indexBy'] = $vars['report_modes'][0];
 
-  /*
-  if (!empty($filters['page'])) {
-    $a = explode(":", $filters['page']);
-    $path = $a[1];
-  }
-  */
-  
   $timeops = 'l30d';
-  if ($report_modes[1] == 'recent') {
-    $timeops = 'l30dfn';
-    $cache_options = array('refresh' => 1);
+  if ($vars['report_modes'][1] == 'recent') {
+    $vars['timeops'] = 'l30dfn';
+    $vars['cache_options'] = array('refresh' => 1);
+    list($vars['start_date'], $vars['end_date'], $vars['number_of_days']) = _intel_get_report_dates_from_ops($vars['timeops'], $vars['cache_options']);
   }
-  //$timeops = 'yesterday';
-  list($start_date, $end_date, $number_of_days) = _intel_get_report_dates_from_ops($timeops, $cache_options);
 
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->setContext($vars['context']);
   $ga_data->setContextMode($vars['context_mode']);
   $ga_data->setAttributeInfoAll($vars['attribute_info']);
-  $ga_data->buildFilters($filters, $vars['subsite']);
-  $ga_data->setReportModes($report_modes);
-  $ga_data->buildFilters($filters, $context);
-
-  $ga_data->setDateRange($start_date, $end_date);
-  $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
-  $ga_data->setRequestSetting('indexBy', $indexBy);
+  $ga_data->buildFilters($vars['filters'], $vars['subsite']);
+  $ga_data->setReportModes($vars['report_modes']);
+  $ga_data->buildFilters($vars['filters'], $vars['context']);
+//$ga_data->setDebug(1);
+  $ga_data->setDateRange($vars['start_date'], $vars['end_date']);
+  $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $vars['cache_options']));
+  $ga_data->setRequestSetting('indexBy', $vars['indexBy']);
   $ga_data->setRequestSetting('details', 0);
 
-  if ($report_modes[1] != 'entrance') {
-    $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
-    $ga_data->loadFeedData('pageviews'); 
+  //$vars['feed_rows'] = 20;
+  $ga_data->setRequestDefaultParam('max_results', 1 * $vars['feed_rows']);
+
+  /*
+  if ($vars['report_modes'][1] != 'entrance') {
+    $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
+    $ga_data->loadFeedData('pageviews');
   }
 
-  $ga_data->setRequestDefaultParam('max_results', 1 * $feed_rows);
+  $ga_data->setRequestDefaultParam('max_results', 1 * $vars['feed_rows']);
   $ga_data->loadFeedData('entrances');
 
-  $ga_data->loadFeedData('pageviews_valuedevents');
-  $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
+  $ga_data->loadFeedData('pageviews_events_valued');
+  $ga_data->setRequestDefaultParam('max_results', 2 * $vars['feed_rows']);
+  */
+  $ga_data->loadFeedData('entrances');
+  $ga_data->loadFeedData('entrances_events_valued');
   $ga_data->loadFeedData('visit_info');
   
   $d = $ga_data->data;
 
   $vtkids = array();
   $i = 0;
-  foreach ($d[$indexBy] AS $index => $de) {
-    $score_components = array();
-    if ($report_modes[1] == 'recent') {
-      $d[$indexBy][$index]['entrance']['pageviews'] = $d[$indexBy][$index]['pageview']['pageviews'];
-    }
-    //$d[$indexBy][$index]['score'] = intel_score_visit_aggregation($d[$indexBy][$index], 1, $score_components);
-    $d[$indexBy][$index]['score'] = intel_score_item($d[$indexBy][$index], 1, $score_components, '', 'visitor');
 
-    $d[$indexBy][$index]['score_components'] = $score_components;  
+  foreach ($d[$vars['indexBy']] AS $index => $de) {
+    $score_components = array();
+    if ($vars['report_modes'][1] == 'recent') {
+      $d[$vars['indexBy']][$index]['entrance']['pageviews'] = $d[$vars['indexBy']][$index]['pageview']['pageviews'];
+    }
+
+    $d[$vars['indexBy']][$index]['score'] = intel_score_item($de, 1, $score_components, '', 'trafficsource');
+    $d[$vars['indexBy']][$index]['score_components'] = $score_components;
+
     if (!empty($de['i'])) {
-      if ($report_modes[0] == 'visit') {
+      if ($vars['report_modes'][0] == 'visit') {
         $a = explode('-', $de['i']);
         $vtkid = $a[0];
       }
@@ -101,58 +93,72 @@ function intel_visitor_list_report($vars) {
       }
       $vtkids[] = $vtkid;
       // we only need to load enough for the report
-      if ($i++ >= $row_count) {
-        break;
+      if ($i++ >= $vars['row_count']) {
+        //break;
       }
     }
     if (isset($vtkid)) {
-      $d[$indexBy][$index]['vtkid'] = $vtkid;
-      $d[$indexBy][$index]['links'] = array();
+      $d[$vars['indexBy']][$index]['vtkid'] = $vtkid;
+      $d[$vars['indexBy']][$index]['links'] = array();
+      $filter = 'vtk:' . $vtkid;
+
+      $link_keys = array();
+      $link_keys[] = array(
+        'type' => 'scorecard',
+      );
+      $link_keys[] = array(
+        'type' => 'sources',
+      );
+      $link_keys[] = array(
+        'type' => 'content',
+      );
+      $d[$vars['indexBy']][$index]['links'] = intel_build_report_links($link_keys, $filter, $vars['report_params']);
+      $d[$vars['indexBy']][$index]['links'][] = l(t('clickstream'), intel_build_report_path('visitor', array(), 'clickstream', $filter));
+
+/*
       $params = $vars['report_params'];
-      $params['ft'] = 'visitor';
-      $params['f'] = 'vtk:' . urlencode($vtkid);
-      $d[$indexBy][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
-      $d[$indexBy][$index]['links'][] = l(t('content'), intel_build_report_path('content', $params));
-      $d[$indexBy][$index]['links'][] = l(t('sources'), intel_build_report_path('tarfficsource', $params));
-    } 
+      $params['_filter_add'] = $filter;
+      $d[$vars['indexBy']][$index]['links'][] = l(t('+'), intel_build_report_path('scorecard', $params));
+
+      $params = $vars['report_params'];
+      $params['_filter_only'] = $filter;
+      $d[$vars['indexBy']][$index]['links'][] = l(t('scorecard'), intel_build_report_path('scorecard', $params));
+      $d[$vars['indexBy']][$index]['links'][] = l(t('content'), intel_build_report_path('content', $params));
+      $d[$vars['indexBy']][$index]['links'][] = l(t('sources'), intel_build_report_path('trafficsource', $params));
+      $d[$vars['indexBy']][$index]['links'][] = l(t('clickstream'), intel_build_report_path('visitor', array(), 'clickstream', $filter));
+*/
+    }
   }
 
-  $visitors = intel_visitor_load_multiple($vtkids, array(), FALSE, 'vtkid');
-  foreach ($d[$indexBy] AS $index => $de) {
-    if (isset($de['vtkid']) && !empty($visitors[$de['vtkid']]) && !empty($visitors[$de['vtkid']]->name)) {
-      $d[$indexBy][$index]['visitor'] = $visitors[$de['vtkid']];    
+  //$visitors = intel_visitor_load_multiple($vtkids, array(), FALSE, 'vtkid');
+  //dsm($visitors);
+  foreach ($d[$vars['indexBy']] AS $index => $de) {
+    $visitor = intel_visitor_load($index, TRUE, 'vtkid');
+    if (!empty($visitor->name)) {
+      $d[$vars['indexBy']][$index]['info'] = array(
+        'title' => $visitor->name,
+        'uri' => '/visitor/' . $index,
+      );
+    }
+    else {
+      $d[$vars['indexBy']][$index]['info'] = array(
+        'title' => t('anon') . ' (' . substr($index, 0, 10) . ')',
+        'uri' => '/visitor/' . $index . '/clickstream',
+      );
     }
   }
 
 //dsm($d);
-  
-  $vars = array(
-    'data' => $d,
-    'row_count' => $row_count,
-    'number_of_days' => $number_of_days,
-    'start_date' => $start_date,
-    'end_date' => $end_date,
-    'context' => $context,
-    'context_mode' => $context_mode,
-    'indexBy' => $indexBy,
-    'indexByLabel' => $indexByLabel,
-    'report_modes' => $report_modes,    
-  );
-  $output .= theme_intel_visitor_list_report($vars);
+  $vars['data'] = $d;
+  $output .= theme_intel_report($vars);
 
-  $output .= t("Timeframe: %start_date - %end_date %refresh", array(
-    '%start_date' => date("Y-m-d H:i", $start_date),
-    '%end_date' => date("Y-m-d H:i", $end_date),
-    '%refresh' => (!empty($cache_options['refresh'])) ? '(refresh)' : '',
-  ));  
-  
   return $output;  
 }
 
 /*
-function intel_scorecard_apply_filters_to_request($request, $filterstr, $segmentstr) {
-  if ($filterstr) {
-    $request['filters'] .= (($request['filters']) ? ';' : '') . $filterstr;
+function intel_scorecard_apply_filters_to_request($request, $vars['filters']tr, $segmentstr) {
+  if ($vars['filters']tr) {
+    $request['filters'] .= (($request['filters']) ? ';' : '') . $vars['filters']tr;
   }
   if ($segmentstr) {
     $request['segment'] .= (($request['segment']) ? ';' : '') . $segmentstr;

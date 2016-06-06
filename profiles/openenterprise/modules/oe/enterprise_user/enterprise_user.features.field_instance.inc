@@ -398,7 +398,7 @@ function enterprise_user_field_default_field_instances() {
           'field_delimiter' => '',
           'field_formatter_class' => 'img-thumbnail',
           'image_link' => '',
-          'image_style' => 'full-2x1-md',
+          'image_style' => 'full-1x1-lg',
           'linked_field' => array(
             'advanced' => array(
               'class' => '',

@@ -9,7 +9,6 @@
  * Implements hook_widgets_element_info().
  */
 function socialmedia_widgets_element_info() {
-  //$addthis_js = '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?addthis_username:[socialmedia:addthis:username]]"></script>';
   $elements = array(
     'socialmedia_twitter-tweet-no-count' => array(
       'label' => t('Twitter tweet button (no count)'),
@@ -461,7 +460,7 @@ function socialmedia_widgets_element_form_alter(&$form, $set, $element) {
 
 function socialmedia_widgets_element_addthis_js() {
   //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=[?username=[socialmedia:sm-addthis_username]?]"></script>';
-  return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
+  return '<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#pubid=[?pubid=[socialmedia:sm-addthis_pubid]?]"></script>';
   //return '<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username="></script>';
 }
 
@@ -745,13 +744,17 @@ function _socialmedia_widgets_get_facebook_locales() {
   $cache = cache_get('socialmedia_facebook_locales');
   if (empty($cache->data)) {
     $result = drupal_http_request("https://www.facebook.com/translations/FacebookLocales.xml");
-    $xml = simplexml_load_string($result->data);
-    foreach ($xml->locale as $line) {
-      $representation = (array) $line->codes->code->standard->representation;
-      $name = (array) $line->englishName;
-      $key = $representation[0];
-      $value = $name[0];
-      $fb_locale[$key] = $value;
+    if (isset($result->data)) {
+      $xml = simplexml_load_string($result->data);
+      if (!empty($xml->locale) && is_array($xml->locale)) {
+        foreach ($xml->locale as $line) {
+          $representation = (array) $line->codes->code->standard->representation;
+          $name = (array) $line->englishName;
+          $key = $representation[0];
+          $value = $name[0];
+          $fb_locale[$key] = $value;
+        }
+      }
     }
     cache_set('socialmedia_facebook_locales', serialize($fb_locale), 'cache');
   }

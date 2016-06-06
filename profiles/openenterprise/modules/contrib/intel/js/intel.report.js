@@ -11,7 +11,7 @@ Drupal.behaviors.intelReport = {
         return_type: 'json'
       };
       var url = ('https:' == document.location.protocol) ? 'https://' : 'http://'; 
-	  url += Drupal.settings.intel.cms_hostpath + $('#intel-report-container').attr("data-q"); //?callback=?";
+	  url += Drupal.settings.intel.config.cmsHostpath + $('#intel-report-container').attr("data-q"); //?callback=?";
       if ($('#intel-report-container').attr("data-refresh")) {
         data.refresh = 1;
       }

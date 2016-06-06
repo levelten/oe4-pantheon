@@ -64,3 +64,9 @@ PATCH: drupal-Casting-null-array-1711256-7.patch
 CORE FILE: includes/common.inc
 NOTES: Fixes the following Drupal core PHP warning:
 - Warning: Invalid argument supplied for foreach() in element_children() (line 6590 of includes/common.inc).
+
+----* Patch is current: 7/28/15 *----
+PATCH: 2364343-20.robots.txt.patch
+CORE FILE: robots.txt
+REF: https://www.drupal.org/node/2476547
+NOTES: Enables bots to access CSS and JS files to properly render pages.

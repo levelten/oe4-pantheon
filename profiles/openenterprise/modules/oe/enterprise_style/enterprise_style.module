@@ -3,39 +3,43 @@
  * @file
  */
 
+include_once 'enterprise_style.features.inc';
+
 require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterprise_style.ds_api.inc";
 require_once drupal_get_path('module', 'enterprise_style') . "/includes/enterprise_style.image.inc";
 
 /**
- * Implements hook_ctools_plugin_api().
- */
-function enterprise_style_ctools_plugin_api($module = NULL, $api = NULL) {
-  if ($module == "ds" && $api == "ds") {
-    return array("version" => "1");
-  }
-  if ($module == "breakpoints" && $api == "default_breakpoint_group") {
-    return array("version" => "1");
-  }
-  if ($module == "breakpoints" && $api == "default_breakpoints") {
-    return array("version" => "1");
-  }
-  if ($module == "picture" && $api == "default_picture_mapping") {
-    return array("version" => "1");
-  }
-}
-
-/**
- * Adding js and css for core features
- * TODO is there a better way of doing this? Can a libraries file called from
- * .info?
+* Implements hook_init().
 */
 function enterprise_style_init() {
-  // add js library for auto sizing of videos
-  drupal_add_js(libraries_get_path('jquery.fitvids') . '/jquery.fitvids.js');
-  // js for custom OE JS features
-  drupal_add_js(drupal_get_path('module', 'enterprise_extras') . '/js/enterprise_extras.js');
-  // core styling for custom features (should be overriden in theme)
-  drupal_add_css(drupal_get_path('module', 'enterprise_extras') . '/css/enterprise_extras.css');
+  $image_settings = enterprise_style_image_settings();
+  $size_count = 0;
+  global $theme_key;
+
+  $var_name = 'picture_ckeditor_mappings';
+  $settings = variable_get($var_name);
+
+  if (!isset($settings['picture_enterprise_style'])) {
+    foreach($image_settings['sizes'] as $size_name => $size) {
+      $size_count++;
+      foreach($image_settings['ratios'] as $ratio_name => $ratio) {
+        $picture_name = $size_name . '-' . $ratio_name;
+
+        // Check Pictue CKEditor settings if size exists.
+        if (!isset($settings[$picture_name])) {
+          // Add Picture CKEditor settings.
+          $settings[$picture_name] = array(
+            'enabled' => 1,
+            'weight' => $size_count,
+            'fallback' => $picture_name.'-lg',
+          );
+        }
+      }
+    }
+  }
+  // So we don't have to run this every time.
+  $settings['picture_enterprise_style'] = 1;
+  variable_set($var_name, $settings);
 }
 
 /**
@@ -94,6 +98,11 @@ function enterprise_style_theme() {
       'entity' => NULL,
       'time' => NULL,
     ),
+  );
+
+  $themes['comparison_table'] = array(
+    'template' => 'templates/comparison-table',
+    'variables' => array(),
   );
 
 /*
@@ -170,48 +179,51 @@ function enterprise_style_preprocess_views_view_summary(&$vars) {
   $row_badge_classes_default = 'pull-right';
 
 
-  //$vars['boostrap_component_type'] = 'nav-stacked';
-  //$vars['boostrap_component_type'] = 'list-group';
-  //$vars['boostrap_component_type'] = 'tag-cloud';
-  //$vars['boostrap_component_type'] = 'list-inline';
-  //$vars['boostrap_component_type'] = 'tag-cloud';
-  $vars['boostrap_component_type'] = 'list-unstyled';
+  //$vars['bootstrap_component_type'] = 'nav-stacked';
+  //$vars['bootstrap_component_type'] = 'list-group';
+  //$vars['bootstrap_component_type'] = 'tag-cloud';
+  //$vars['bootstrap_component_type'] = 'list-inline';
+  //$vars['bootstrap_component_type'] = 'tag-cloud';
+  $vars['bootstrap_component_type'] = 'list-unstyled';
 
   if (isset($vars['view']->current_display)) {
     if ($vars['view']->current_display == 'tags') {
-      $vars['boostrap_component_type'] = 'tag-cloud';
+      $vars['bootstrap_component_type'] = 'tag-cloud';
     }
   }
 
-  if (isset($vars['boostrap_component_type'])) {
-    if ($vars['boostrap_component_type'] == 'list-group') {
+  if (isset($vars['bootstrap_component_type'])) {
+    if ($vars['bootstrap_component_type'] == 'list-group') {
       $vars['list_classes'] = 'list-group';
       $row_list_item_classes_default = 'list-group-item';
     }
-    else if ($vars['boostrap_component_type'] == 'nav-stacked') {
+    else if ($vars['bootstrap_component_type'] == 'nav-stacked') {
       $vars['list_classes'] = 'nav nav-stacked';
     }
-    else if ($vars['boostrap_component_type'] == 'nav-list') {
+    else if ($vars['bootstrap_component_type'] == 'nav-list') {
       $vars['list_classes'] = 'nav nav-list';
     }
-    else if ($vars['boostrap_component_type'] == 'list-unstyled') {
+    else if ($vars['bootstrap_component_type'] == 'list-unstyled') {
       $vars['list_classes'] = 'list-unstyled';
     }
-    else if ($vars['boostrap_component_type'] == 'list-inline') {
+    else if ($vars['bootstrap_component_type'] == 'list-inline') {
       $vars['list_classes'] = 'list-inline';
       //$row_classes_default = ' btn btn-default';
     }
-    else if ($vars['boostrap_component_type'] == 'tag-cloud') {
+    else if ($vars['bootstrap_component_type'] == 'tag-cloud') {
       $vars['options']['count'] = FALSE;
       $vars['list_classes'] = 'list-unstyled tags';
     }
   }
 
   foreach ($vars['rows'] as $id => $row) {
-    if ($vars['boostrap_component_type'] == 'tag-cloud') {
+    if ($vars['bootstrap_component_type'] == 'tag-cloud') {
       $vars['rows'][$id]->link = theme('icon', array('bundle' => 'bootstrap', 'icon' => 'glyphicon-tag')) . $vars['rows'][$id]->link;
     }
 
+    if (!isset($vars['row_classes'][$id])) {
+      $vars['row_classes'][$id] = '';
+    }
     $vars['row_classes'][$id] .= $row_classes_default;
     $vars['row_list_item_classes'][$id] = $row_list_item_classes_default;
     $vars['row_badge_classes'][$id] = $row_badge_classes_default;
@@ -411,6 +423,21 @@ function enterprise_style_styler_style() {
     ),
   );
 
+  // Featured content (placeholder for other hooks to implement)
+  $styles['other_components'] = array(
+      '#title' => t('Other components'),
+      '#description' => t('Components  used for other purposes.'),
+  );
+
+  $styles['other_components']['comparison_table'] = array(
+      '#title' => t('Comparison Table'),
+      'element' => array(
+          '#tag' => 'markup',
+          '#value' => theme('comparison_table'),
+          '#value_highlightx' => theme('comparison_table'),
+      ),
+  );
+
   return $styles;
 }
 
@@ -535,4 +562,67 @@ function enterprise_style_construct_demo_node($vars) {
   $ewrapper->body->summary->set($my_body_content);
 
   return $entity;
+}
+
+/**
+ * Cleaning up highlight markup for styler view modes.
+ */
+function enterprise_style_format_styler_highlight_cleanup($html, $options = array()) {
+  $html = utf8_decode($html);
+
+  $dom = new DOMDocument();
+  $dom->preserveWhiteSpace = false;
+  $dom->formatOutput = true;
+  // Suppress warnings for HTML5 elements.
+  libxml_use_internal_errors(true);
+  $dom->loadHTML($html);
+  libxml_clear_errors();
+
+  //$dom = $dom->createDocumentFragment();
+  //$newItem = new DOMDocument();
+  foreach($dom->getElementsByTagName('picture') as $elem) {
+    $new = $dom->createElement('img');
+    $new->setAttribute('src', 'http://placehold.it/640x360');
+    $new->setAttribute('alt', '...');
+    //$new->formatOutput = true;
+
+    //$new->loadXML('<img src="http://placehold.it/640x360" alt="" title="" />');
+    $elem->parentNode->replaceChild($new, $elem);
+  }
+  foreach($dom->getElementsByTagName('a') as $elem) {
+    $innerHTML = DOMinnerHTML($elem);
+    $new = $dom->createElement('a');
+    $new->setAttribute('href', '#');
+    DOMappendHTML($elem, $innerHTML);
+    //$innerElem = $dom->loadHTML($innerHTML);
+    //$new->appendChild($innerElem);
+    $elem->parentNode->replaceChild($new, $elem);
+  }
+  $html = $dom->saveHTML();
+  $html = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $html));
+  $html = str_replace(PHP_EOL, '', $html);
+  $html = trim($html);
+
+  return $html;
+}
+
+function DOMappendHTML(DOMNode $parent, $source) {
+  $tmpDoc = new DOMDocument();
+  $tmpDoc->loadHTML($source);
+  foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
+    $node = $parent->ownerDocument->importNode($node);
+    $parent->appendChild($node);
+  }
+}
+
+function DOMinnerHTML(DOMNode $element) {
+  $innerHTML = "";
+  $children  = $element->childNodes;
+
+  foreach ($children as $child)
+  {
+    $innerHTML .= $element->ownerDocument->saveHTML($child);
+  }
+
+  return $innerHTML;
 }

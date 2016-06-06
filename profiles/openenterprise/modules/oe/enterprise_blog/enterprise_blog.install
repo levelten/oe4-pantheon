@@ -9,7 +9,7 @@
  * // hook_init should usually be in the module file but since it is here it gets
  * // called less often which is good.
  */
-function enterprise_base_init() {
+function enterprise_blog_init() {
   if (!variable_get('enterprise_blog_installed', FALSE) && taxonomy_vocabulary_machine_name_load('blog_categories')) {
     // Add in Uncategorized taxonomy term.
     $vocab = taxonomy_vocabulary_machine_name_load('blog_categories');

@@ -99,13 +99,18 @@ var kwresearch = kwresearch || {};
 		kwresearch_get_buttons: function(keyword) {
 		    str = '<div class="kwresearch_actions">';
 		    title = Drupal.t('Keyword report');
-		    str += '<a href="#" onclick="kwresearch.kwresearch_launch_report(\'' + keyword + '\'); return false;" title="' + title + '" class="kwresearch-tool-button">';
-		    str += '<img src="' + Drupal.settings.kwresearch.module_path + '/icons/report.png" title="' + title + '" />';
-		    str += '</a>';
-
-		    str += $$.kwresearch_get_toggle_button(keyword, 'sitekw');
-		    str += $$.kwresearch_get_toggle_button(keyword, 'siteops');
-		    str += $$.kwresearch_get_toggle_button(keyword, 'pagekw');
+            if (Drupal.settings.kwresearch.permissions.query_keyword_stats) {
+                str += '<a href="#" onclick="kwresearch.kwresearch_launch_report(\'' + keyword + '\'); return false;" title="' + title + '" class="kwresearch-tool-button">';
+                str += '<img src="' + Drupal.settings.kwresearch.module_path + '/icons/report.png" title="' + title + '" />';
+                str += '</a>';
+            }
+            if (Drupal.settings.kwresearch.permissions.admin_site_keywords) {
+                str += $$.kwresearch_get_toggle_button(keyword, 'sitekw');
+                str += $$.kwresearch_get_toggle_button(keyword, 'siteops');
+            }
+            if (Drupal.settings.kwresearch.permissions.admin_page_keywords) {
+                str += $$.kwresearch_get_toggle_button(keyword, 'pagekw');
+            }
 		    str += $$.kwresearch_get_toggle_button(keyword, 'vocab');
 		    str += $$.kwresearch_get_toggle_button(keyword, 'mlt');
 		    str += $$.kwresearch_get_toggle_button(keyword, 'meta_keywords');
@@ -297,7 +302,7 @@ var kwresearch = kwresearch || {};
 		    $('.kwresearch_actions').hide();
 		  }
 		  else if (add == 1) {
-		    data.priority = 0;  
+		    data.priority = 50;
 		  }  
 
 		  $.ajax({
@@ -402,6 +407,14 @@ var kwresearch = kwresearch || {};
 		    nv = $$.kwresearch_remove_phrase_from_list(keyword, v);
 		  }
 		  $('#edit-' + Drupal.settings.kwresearch.sync_vocab_field).val(nv);
+
+          // check seo keyword field. If empty, add keyword to field
+          if ($('#edit-seo-keyword').length) {
+            v = $('#edit-seo-keyword').val();
+            if (!v) {
+              $('#edit-seo-keyword').val(keyword);
+            }
+          }
 		  
 		  // do ajax call to store in database
 		  var data = { 

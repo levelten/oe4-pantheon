@@ -6,49 +6,86 @@
  * @author Tom McCracken <tomm@getlevelten.com>
  */
 
-require_once './' . drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
+function intel_visitor_clickstream_report_page($report_params = '-', $report_subtype = '-', $report_subfilter = '-', $entity_type = '-', $entity = '-') {
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.reports.inc";
+  require_once drupal_get_path('module', 'intel') . "/includes/intel.ga.inc";
+  $output = '';
 
-function intel_visitor_clickstream($visitor) {
-  //intel_add_report_headers();
-  $visitorid = substr($visitor->vtk, 0 , 20);
+  $vars = array();
+  if (!empty($entity_type) && $entity_type != '-') {
+    $vars['entity_type'] = $entity_type;
+    $vars['entity'] = $entity;
+  }
+  $vars = intel_init_reports_vars('visitor_clickstream', 'visitor', $report_params, $report_subtype, $report_subfilter, $vars);
+  // TODO: hack until init of timeline fixed on ajax loading
+  $_GET['return_type'] = 'nonajax';
+
+  $output = intel_build_report($vars);
+
+  return $output;
+}
+
+//function intel_visitor_clickstream_report($vars) {
+
+function intel_visitor_clickstream_report($vars) {
+//dsm($vars);
+  $visitor = $vars['entity'];
+  if (!empty($visitor->vtk)) {
+    $vtkid = substr($visitor->vtk, 0 , 20);
+  }
+
+  $vtkids = array();
+  if (!empty($visitor->identifiers['vtk']) && is_array($visitor->identifiers['vtk'])) {
+    foreach ($visitor->identifiers['vtk'] AS $vtk) {
+      $vtkids[] = substr($vtk, 0, 20);
+    }
+  }
+
   $steps = array(
     '_visits' => array(),
     '_pages' => array(),
   );
   
   list($start_date, $end_date, $number_of_days) = _intel_get_report_dates("-90 days", "Now");
+  $vtk_segment = 'sessions::condition::ga:dimension5==' . implode(',ga:dimension5==', $vtkids);
+  //$vtk_filter = 'ga:dimension5==' . implode(',ga:dimension5==', $vtkids);
   $request = array(
-    'dimensions' => array('ga:hostname', 'ga:pagePath', 'ga:pageTitle', 'ga:visitLength', 'ga:visitCount', 'ga:customVarValue4'),
+    'dimensions' => array('ga:hostname', 'ga:pagePath', 'ga:pageTitle', 'ga:visitLength', 'ga:dimension5', 'ga:visitCount', 'ga:dimension4'),
     'metrics' => array('ga:entrances', 'ga:pageviews', 'ga:bounces', 'ga:timeOnSite', 'ga:timeOnPage', 'ga:goalValueAll'),
-    'sort_metric' => 'ga:customVarValue4',
+    'sort_metric' => 'ga:dimension4',
     'start_date' => $start_date,
     'end_date' => $end_date,
-    'segment' => 'dynamic::ga:customVarValue5==' . $visitorid,
+    //'filters' => $vtk_filter,
+    'segment' => $vtk_segment,
+    //'segment' => 'dynamic::ga:customVarValue5==' . $vtkid,
     //'segment' => 'dynamic::ga:customVarValue5==1337759660',
   );
 
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($request);  dsm($data);
 
   $visits = array();
   $visitindex = 0;
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       if (!isset($steps[$ts])) { 
         $steps[$ts] = array(); 
-      }      
-      if (!isset($steps['_visits'][$row['visitCount']])) {
+      }
+      $visitid = $row['dimension5'] . '-' . $row['visitCount'];
+      if (!isset($steps['_visits'][$visitid])) {
         $steps[$ts]['visitindex'] = $visitindex;
         $steps[$ts]['visit'] = array('events' => _intel_init_events_array());
         $steps[$ts]['visit']['timestamp'] = $ts;
+        $steps[$ts]['visit']['vtk'] = $row['dimension5'];
         $steps[$ts]['visit']['visitCount'] = $row['visitCount'];
         $steps[$ts]['visit']['visitLength'] = $row['visitLength'];
         $steps[$ts]['visit']['timeOnSite'] = $row['timeOnSite'];         
         $steps[$ts]['visit']['sticks'] = 1 - $row['bounces']; 
         $steps[$ts]['visit']['pageviews'] = 0;
         $steps[$ts]['visit']['goalValueAll'] = $row['goalValueAll'];
-        $steps['_visits'][$row['visitCount']] = $ts;  
+        $steps['_visits'][$visitid] = $ts;
         $visitindex = $ts;
       }
       $steps[$ts]['visitindex'] = $visitindex;
@@ -68,20 +105,21 @@ function intel_visitor_clickstream($visitor) {
     }
   }
   else {
-    $msg = t('Sorry, no data was returned for visitor id %vid. Report cannot be generated.', array('%vid' => $visitorid));
+    $msg = t('Sorry, no data was returned for visitor id %vid. Report cannot be generated.', array('%vid' => $vtkid));
     drupal_set_message($msg, 'error');
     return '';
   }
 //dsm($steps);
   
-  //$request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:eventLabel', 'ga:hostname', 'ga:pagePath', 'ga:customVarValue4');
-  $request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:hostname', 'ga:pagePath', 'ga:customVarValue4');
+  //$request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:eventLabel', 'ga:hostname', 'ga:pagePath', 'ga:dimension4');
+  $request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:hostname', 'ga:pagePath', 'ga:dimension4');
   $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];  
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $pageindex = _intel_get_page_step_index($steps, $ts, $row['hostname'], $row['pagePath']);
       $visitindex = _intel_get_visit_step_index($steps, $ts);     
       if (!isset($steps[$ts]['visitindex'])) {
@@ -118,13 +156,14 @@ function intel_visitor_clickstream($visitor) {
   }
   
   // this is rediculous! GA won't return events without a label if you use eventLabel as a dimention
-  $request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:eventLabel', 'ga:hostname', 'ga:pagePath', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:eventCategory', 'ga:eventAction', 'ga:eventLabel', 'ga:hostname', 'ga:pagePath', 'ga:dimension4');
   $request['metrics'] = array('ga:totalEvents', 'ga:uniqueEvents', 'ga:eventValue');
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];       
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $pageindex = _intel_get_page_step_index($steps, $ts, $row['hostname'], $row['pagePath']);
       $visitindex = _intel_get_visit_step_index($steps, $ts);
       foreach ($steps[$ts]['events'] AS $i => $event) {
@@ -146,13 +185,14 @@ function intel_visitor_clickstream($visitor) {
   }  
   
 
-  $request['dimensions'] = array('ga:source', 'ga:referralPath', 'ga:medium', 'ga:keyword', 'ga:socialNetwork', 'ga:campaign', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:source', 'ga:referralPath', 'ga:medium', 'ga:keyword', 'ga:socialNetwork', 'ga:campaign', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances'); 
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4']; 
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $referrer = array(
         'source' => $row['source'],
         'referralPath' => $row['referralPath'],
@@ -165,13 +205,14 @@ function intel_visitor_clickstream($visitor) {
     }
   }
   
-  $request['dimensions'] = array('ga:browser', 'ga:browserVersion', 'ga:operatingSystem', 'ga:operatingSystemVersion', 'ga:language', 'ga:screenResolution', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:browser', 'ga:browserVersion', 'ga:operatingSystem', 'ga:operatingSystemVersion', 'ga:language', 'ga:screenResolution', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances'); 
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $steps[$ts]['environment'] = array();
       $steps[$ts]['environment']['browser'] = $row['browser'];
       $steps[$ts]['environment']['browserVersion'] = $row['browserVersion'];
@@ -182,13 +223,14 @@ function intel_visitor_clickstream($visitor) {
     }
   }
   
-  $request['dimensions'] = array('ga:isMobile', 'ga:mobileDeviceBranding', 'ga:mobileDeviceModel', 'ga:mobileDeviceInfo', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:isMobile', 'ga:mobileDeviceBranding', 'ga:mobileDeviceModel', 'ga:mobileDeviceInfo', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances'); 
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $steps[$ts]['environment']['isMobile'] = $row['isMobile'];
       $steps[$ts]['environment']['mobileDeviceBranding'] = $row['mobileDeviceBranding'];
       $steps[$ts]['environment']['mobileDeviceModel'] = $row['mobileDeviceModel'];
@@ -197,13 +239,14 @@ function intel_visitor_clickstream($visitor) {
   }
   
   
-  $request['dimensions'] = array('ga:country', 'ga:region', 'ga:city', 'ga:metro', 'ga:latitude', 'ga:longitude', 'ga:customVarValue4');
+  $request['dimensions'] = array('ga:country', 'ga:region', 'ga:city', 'ga:metro', 'ga:latitude', 'ga:longitude', 'ga:dimension4');
   $request['metrics'] = array('ga:entrances'); 
-  $data = google_analytics_api_report_data($request);
+  $data = intel_ga_api_data($request);
 //dsm($data);
-  if (!empty($data->results) && is_array($data->results)) {
-    foreach ($data->results AS $row) {
-      $ts = (int)$row['customVarValue4'];
+  $rows = intel_get_ga_feed_rows($data);
+  if (!empty($rows) && is_array($rows)) {
+    foreach ($rows AS $row) {
+      $ts = (int)$row['dimension4'];
       $steps[$ts]['location'] = array();
       $steps[$ts]['location']['country'] = $row['country'];
       $steps[$ts]['location']['region'] = $row['region'];
@@ -220,7 +263,9 @@ function intel_visitor_clickstream($visitor) {
   
   $vars = array(
     'steps' => $steps,
-    'visitorid' => $visitorid,
+    'visitorid' => $vtkid,
+    'visitor' => $visitor,
+    'vtkids' => $vtkids,
   );
 
   $output .= theme_intel_visitor_clickstream($vars);
@@ -231,9 +276,10 @@ function intel_visitor_clickstream($visitor) {
 }
 
 function theme_intel_visitor_clickstream($variables) {
-//dsm($variables);
+
   $steps = $variables['steps'];
-  $visitorid = $variables['visitorid'];
+  $vtkid = $variables['visitorid'];
+  $vtkids = $variables['vtkids'];
 //dsm($steps);
   
   drupal_add_css(drupal_get_path('module', 'intel') . '/css/intel.report.css');
@@ -330,7 +376,11 @@ EOD;
       $vi ++;
       $tldata['visits'][$ts] = _intel_init_tl_visit($step, $ts, $vi);
       $vout .= '<div class="visit">' . "\n";
-      $vout .= '  <h3>' . t('Visit') . " " . $step['visit']['visitCount'] . ': ' . date("D F j, Y, g:i a", $ts) . "</h3>\n";
+      $vout .= '  <h3>' . t('Visit') . " " . $step['visit']['visitCount'];
+      if (count($vtkids) > 1) {
+        $vout .= ' (' . substr($step['visit']['vtk'], 0, 10) . ')';
+      }
+      $vout .= ': ' . date("D F j, Y, g:i a", $ts) . "</h3>\n";
       $col1 = '  <div class="summary">' . "\n";
 
       $col1 .= '    <div class="referrer report-box">' . "\n";
@@ -503,8 +553,9 @@ EOD;
   //  }
   //  $tldata['dates'][] = $tldate;
   //}  
-  
-$visitor = intel_visitor_load($visitorid);
+
+$visitor = $variables['visitor'];
+
 $data = array();
 $start = date("m/d/Y", strtotime("$startday -1 day"));
 $end = date("m/d/Y", strtotime("$endday +1 day"));

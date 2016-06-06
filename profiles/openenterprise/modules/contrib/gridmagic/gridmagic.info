@@ -1,2 +1,4 @@
 name = Grid Magic
+description = Grid Magic aims to automatically assign Bootstrap 3 classes to regions with multiple blocks as a way to evenly divide the blocks across the region.
 core = 7.x
+configure = admin/config/user-interface/gridmagic

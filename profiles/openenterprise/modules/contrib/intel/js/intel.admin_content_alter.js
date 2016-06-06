@@ -2,107 +2,85 @@
 
   Drupal.behaviors.intel_admin_content_alter = {
     attach: function (context, settings) {
+    // if standard admin form
+    if (jQuery("#node-admin-content").length > 0) {
+      var colIndex = 0;
+      var colCount = 0;
+      jQuery('#node-admin-content thead tr:nth-child(1) th').each(function () {
 
-      // Set up vars
-      var colIndex = 0,
-          colCount = 0,
-          hrefs = [],
-          data = {'hrefs': hrefs},
-          cms_hostpath = Drupal.settings.intel.cms_hostpath,
-          module_path = Drupal.settings.intel.module_path,
-          protocol = ('https:' == document.location.protocol) ? 'https://' : 'http://',
-          imgsrc = protocol + cms_hostpath + module_path + "/images/ajax_loader_row.gif",
-          url = protocol + cms_hostpath + "intel/admin_content_alter_js", //?callback=?";
-          query = getUrlVars();
-
-      // If standard admin form
-      if (jQuery("#node-admin-content", context).length > 0) {
-        
-        jQuery("#node-admin-content thead tr:nth-child(1) th", context).each(function () {
-          if ($(this).text() == "Title") {
-            colIndex = colCount+1;
-          }
-          if ($(this).attr('colspan')) {
-            colCount += +$(this).attr('colspan');
-          } else {
-            colCount++;
-          }
-        });
-        //alert("ci=" + colIndex + ", cc=" + colCount);
-      }
-
-      // If no columns, return.
-      if (colIndex === 0) {
-        return;
-      }
-
-      // Add table headers for Intel data.
-      $("#node-admin-content thead th:eq(" + (colIndex-1) + ")", context).after('<th>Score</th><th>Entrs</th><th>Views</th>');
-      
-      // Map URL parameters to data array.
-      for (var i in query) {
-        if (i == 'render') {
-          continue;
+        if ($(this).text() == "Title") {
+          colIndex = colCount+1;
         }
-        data[i] = query[i];
+        if ($(this).attr('colspan')) {
+        colCount += +$(this).attr('colspan');
+      } else {
+        colCount++;
       }
+      });
+      //console.log("ci=" + colIndex + ", cc=" + colCount);
+    
+    }
+    if (colIndex == 0) {
+      return;
+    }
+    $("#node-admin-content thead th:eq(" + (colIndex-1) + ")").after('<th>Score</th><th>Entrs</th><th>Views</th>');
+    var hrefs = [];
+	var imgsrc = ('https:' == document.location.protocol) ? 'https://' : 'http://';
+    imgsrc += Drupal.settings.intel.config.cmsHostpath + Drupal.settings.intel.config.modulePath + "/images/ajax_loader_row.gif";
+    $("#node-admin-content tr").each ( function( index ) {
+      var href = $(this).find("td:eq(" + (colIndex-1) + ") a").attr("href");
+      if (typeof href != 'undefined') {
+        hrefs.push(href);
+        $(this).find("td:eq(" + (colIndex-1) + ")").after('<td data-path="' + href + '" colspan="3" style="text-align:center;"><img src="' + imgsrc + '"></td>');        
+      }
+    }
+        
+    );
+    var query = getUrlVars();
+  
+    var data = {
+      'hrefs': hrefs
+    };
+    for (var i in query) {
+    if (i == 'render') {
+      continue;
+    }
+      data[i] = query[i];
+    }
 
-      // Return Intel JSON from admin_content_alter_js
-      jQuery.getJSON(url, data)
-      .always(function() {
-        intelStatusCode = true;
-        // By default, add loading gif.
-        $("#node-admin-content tr", context).each ( function( index ) {
+	  var url = ('https:' == document.location.protocol) ? 'https://' : 'http://';
+      url += Drupal.settings.intel.config.cmsHostpath + "intel/admin_content_alter_js"; //?callback=?";
+      jQuery.getJSON(url, data).success(function(data) { 
+        $("#node-admin-content tr").each ( function( index ) {
           var href = $(this).find("td:eq(1) a").attr("href");
-          if (typeof href != 'undefined') {
-            hrefs.push(href);
-            $(this).find("td:eq(" + (colIndex-1) + ")").after('<td data-path="' + href + '" colspan="3" style="text-align:center;"><img src="' + imgsrc + '"></td>');
-          }
-        });
-      })
-      .fail(function(jqxhr, textStatus, error) {
-        // Remove gif if fails.
-        window.console.log("Status code: " + jqxhr.status + " " + error);
-        $("#node-admin-content tr", context).each ( function( index ) {
+        if (typeof href != 'undefined') {
+        if (typeof data.rows[href] != 'undefined') {
+          $(this).find("td:eq(" + colIndex + ")").replaceWith(data.rows[href]);
+        }
+        else {
           $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
-        });
-      })
-      .success(function(data) {
-        // Fill in Intel data if succeeds
-        if (data) {
-          $("#node-admin-content tr", context).each ( function( index ) {
-            var href = $(this).find("td:eq(1) a").attr("href");
-            if (typeof href != 'undefined') {
-              if (typeof data.rows[href] != 'undefined') {
-                $(this).find("td:eq(" + colIndex + ")").replaceWith(data.rows[href]);
-              } else {
-                $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
-              }
-            }
-          });
-        } else {
-          $("#node-admin-content tr", context).each ( function( index ) {
-            $(this).find("td:eq(" + colIndex + ")").replaceWith('<td colspan="3" style="text-align:center;">NA</td>');
-          });
+        }
         }
       });
-
+      });  
     }
   };
   
   function getUrlVars() {
-    var vars = {}, hash;
-    if (window.location.href.indexOf('?') == -1) {
+      var vars = {}, hash;
+      if (window.location.href.indexOf('?') == -1) {
+        return vars;
+      }
+      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+      for(var i = 0; i < hashes.length; i++)
+      {
+          hash = hashes[i].split('=');
+          //vars.push(hash[0]);
+          vars[hash[0]] = hash[1];
+      }
       return vars;
-    }
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-
-    for (var i = 0; i < hashes.length; i++){
-      hash = hashes[i].split('=');
-      //vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
-    }
-    return vars;
   }
 
 })(jQuery);
+
+// jQuery('#node-admin-content thead tr:nth-child(1) th').css("border","5px solid red");

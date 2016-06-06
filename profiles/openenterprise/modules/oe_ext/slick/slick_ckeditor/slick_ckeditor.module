@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Implements hook_ckeditor_plugin()
+ * 
+ * @return type
+ */
+function slick_ckeditor_ckeditor_plugin() {
+  $plugins = array();
+  $plugins['slick_carousel'] = array(
+    'name' => 'slick_carousel',
+    'desc' => t('Slick Carousel Plugin'),
+    'path' => drupal_get_path('module', 'slick_ckeditor') . '/plugins/slick_carousel/',
+    'buttons' => array(
+      'Slick Carousel' => array('label' => 'Slick Carousel', 'icon' => 'icons/carousel.png'),
+    )
+  );
+  return $plugins;
+}

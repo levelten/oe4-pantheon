@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Coupon feature.
+ */
+
+include_once 'enterprise_coupon.features.inc';

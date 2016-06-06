@@ -1,18 +1,9 @@
+// Override Media query variables.
+// Ahmad: The @mobile media query has to be consistent with the navbar collapse breakpoint otherwise the Main Menu gonna appear messed up on tablet portrait.
+@mobile:  ~"screen and (max-width: @{grid-float-breakpoint-max})";
+
 body.admin-menu.navbar-is-fixed-top {
 	margin-top: 0 !important;
-}
-
-.btn-default, .btn-info {
-	background-color: transparent;
-	border-color: @brand-primary;
-	color: @brand-primary;
-	font-weight: 300;
-	text-transform: uppercase;
-	&:hover {
-		background-color: @brand-primary;
-		border-color: @brand-primary;
-		color: white;
-	}
 }
 
 .trifold {
@@ -90,12 +81,23 @@ body.admin-menu.navbar-is-fixed-top {
 ul.tags {
 	a {
 		background-color: @brand-primary;
-		color: @brand-accent;
+		color: @white;
 		.rounded(3px);
 		&:hover {
 			background-color: darken(@brand-primary, 10%);
 			text-decoration: none;
 		}
+	}
+	.light & {
+		color: @black;
+	}
+}
+
+.badge {
+	background-color: @brand-primary;
+	color: @white;
+	.light & {
+		color: @black;
 	}
 }
 
@@ -128,58 +130,62 @@ ul.tags {
 	}
 }
 .field-name-body {
-  ul, ol {
-    padding-left: 20px;
-  }
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
-    }
-  }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+	ul, ol {
+		padding-left: 20px;
+	}
+	ul {
+		&.list-colored {
+			li {
+				list-style-type: none;
+				&:before {
+					color: @brand-primary;
+					content: "\25AA";
+					padding-right: 10px;
+					position: absolute;
+					left: 20px;
+				}
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
 }
 iframe {
-  ul, ol {
-    padding-left: 20px;
-  }
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
-    }
-  }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+	ul, ol {
+		padding-left: 20px;
+	}
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
 }
 
 blockquote {
@@ -200,26 +206,105 @@ blockquote {
 
 
 .ckeditor-processed {
-  ul {
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        content: "\25AA";
-        padding-right: 10px;
-      }
-    }
-  }
-  ol {
-    counter-reset: numItem;
-    li {
-      list-style-type: none;
-      &:before {
-        color: @brand-primary;
-        counter-increment: numItem;
-        content: counter(numItem) ".";
-        padding-right: 10px;
-      }
-    }
-  }
+	ul {
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				content: "\25AA";
+				padding-right: 10px;
+			}
+		}
+	}
+	ol {
+		counter-reset: numItem;
+		li {
+			list-style-type: none;
+			&:before {
+				color: @brand-primary;
+				counter-increment: numItem;
+				content: counter(numItem) ".";
+				padding-right: 10px;
+			}
+		}
+	}
+}
+
+// Button/Background Color overrides
+.btn { font-family: @font-family-base; }
+
+// Override for other buttons/backgrounds
+.btn-link {
+	background: transparent;
+	border: 0;
+	color: @brand-link;
+	&:hover, &:focus {
+		background-color: transparent;
+		color: @brand-link;
+	}
+}
+.btn-secondary, .bg-secondary {
+	color: @brand-accent;
+}
+.btn-accent, .bg-accent {
+	color: @brand-primary;
+}
+
+// Cool LESS loop stuff
+@colors : @brand-primary, @brand-secondary, @brand-accent, @brand-success, @brand-info, @brand-warning, @brand-danger;
+@names  : primary, secondary, accent, success, info, warning, danger;
+@length : length(@colors);
+
+.brand-variation(@names; @colors; @index) when (@index > 0) {
+	.brand-variation(@names; @colors; (@index - 1)); // decrement.
+
+	@name  : extract(@names, @index);
+	@color : extract(@colors, @index);
+
+	.bella-buttons .btn-@{name} {
+		background-color: transparent;
+		border-color: @color;
+		color: @color;
+		font-weight: 300;
+		text-transform: uppercase;
+		&:hover {
+			background-color: @color;
+			border-color: @color;
+			color: white;
+		}
+	}
+}
+
+// Compile brand buttons.
+.brand-variation(@names; @colors; @length);
+.bella-buttons {
+	.btn-default {
+		background-color: transparent;
+		border-color: @gray;
+		color: @gray;
+		font-weight: 300;
+		text-transform: uppercase;
+		&:hover {
+			background-color: @gray;
+			border-color: @gray;
+			color: white;
+		}
+	}
+	.btn-link {
+		background: transparent;
+		border: 0;
+		color: @brand-link;
+		font-family: @font-family-base;
+		&:hover, &:focus {
+			background-color: transparent;
+			color: @brand-link;
+		}
+	}
+}
+
+// Fix Carousel transition for Safari
+.carousel-inner > .item.next.left,
+.carousel-inner > .item.prev.right,
+.carousel-inner > .item.active {
+	.transition(transform 0.6s ease-in-out);
 }

@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function drush_update_uninstall() {
+	$variables = array(
+		'drush_update_list',
+		'drush_update_copy',
+		'drush_update_cmd',
+	);
+
+	foreach ($variables as $variable) {
+		variable_del($variable);
+	}
+}

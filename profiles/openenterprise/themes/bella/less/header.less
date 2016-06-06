@@ -1,340 +1,363 @@
 // Insert your styling here.
 header {
-	// Disabling overflow auto for now
-	//overflow: auto;
+  // Disabling overflow auto for now
+  //overflow: auto;
 }
 
 // Navbar colors
 .navbar-default {
-	background-color: rgba(255, 255, 255, 0.95);
-	border-bottom: 1px solid @gray-light;
-	height: auto;
-	overflow: visible;
-	z-index: 99;
-	color: @gray;
-	.navbar-nav {
-		> li {
-			> a {
-				color: @gray;
-				&:hover, &:focus {
-					background-color: white;
-					color: @brand-primary;
-				}
-			}
-			&.active-trail, &:hover {
-				> a {
-					background-color: transparent;
-					color: @brand-primary;
-				}
-			}
+  background-color: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid @gray-light;
+  height: auto;
+  overflow: visible;
+  z-index: 99;
+  color: @gray;
+  .navbar-nav {
+	> li {
+	  > a {
+		color: @gray;
+		&:hover, &:focus {
+		  background-color: white;
+		  color: @brand-primary;
 		}
-		> .active {
-			> a {
-				background-color: transparent;
-				color: @brand-primary;
-				&:hover, &:focus {
-					background-color: white;
-					color: @brand-primary;
-				}
-			}
+	  }
+	  &.active-trail, &:hover {
+		> a {
+		  background-color: transparent;
+		  color: @brand-primary;
 		}
+	  }
 	}
+	> .active {
+	  > a {
+		background-color: transparent;
+		color: @brand-primary;
+		&:hover, &:focus {
+		  background-color: white;
+		  color: @brand-primary;
+		}
+	  }
+	}
+  }
 }
 .navbar-inverse {
-	background-color: @brand-primary;
-	color: @brand-accent;
-	border-bottom: darken(@brand-primary, 15%);
-	.navbar-nav {
-		> li {
-			border-left: 1px solid darken(@brand-primary, 15%);
-			&.active-trail, &:hover {
-				> a {
-					background-color: darken(@brand-primary, 10%);
-					color: @brand-accent;
-				}
-			}
-			&:last-child {
-				border-right: 1px solid darken(@brand-primary, 15%);
-			}
-			> a {
-				color: @brand-accent;
-				&:hover {
-					background-color: darken(@brand-primary, 10%);
-					color: @brand-accent;
-				}
-			}
+  background-color: @brand-primary;
+  color: @brand-accent;
+  border-bottom: darken(@brand-primary, 15%);
+  .navbar-nav {
+	> li {
+	  border-left: 1px solid darken(@brand-primary, 15%);
+	  &.active-trail, &:hover {
+		> a {
+		  background-color: darken(@brand-primary, 10%);
+		  color: @brand-accent;
 		}
-		> .active {
-			> a {
-				background-color: darken(@brand-primary, 10%);
-				color: @brand-accent;
-				&:hover, &:focus {
-					background-color: darken(@brand-primary, 10%);
-					color: @brand-accent;
-				}
-			}
+	  }
+	  &:last-child {
+		border-right: 1px solid darken(@brand-primary, 15%);
+	  }
+	  > a {
+		color: @brand-accent;
+		&:hover {
+		  background-color: darken(@brand-primary, 10%);
+		  color: @brand-accent;
 		}
+	  }
 	}
+	> .active {
+	  > a {
+		background-color: darken(@brand-primary, 10%);
+		color: @brand-accent;
+		&:hover, &:focus {
+		  background-color: darken(@brand-primary, 10%);
+		  color: @brand-accent;
+		}
+	  }
+	}
+  }
 }
 
 // Specific navbar fixes
 .navbar-fixed-top {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 .header-container {
-	float: left;
-	overflow: auto;
-	width: 20%;
+  float: left;
+  overflow: auto;
+  width: 20%;
 }
 .navbar-container {
-	float: left;
-	width: 80%;
+  float: left;
+  width: 80%;
 }
 .navbar > .container .navbar-brand {
-	margin-left: 0;
-	overflow: hidden;
+  margin-left: 0;
+  overflow: hidden;
 }
 
 // Header - logo, name, etc
 .navbar-header {
-	overflow: auto;
-	@media @normal, @wide {
-		float: left;
-		width: 18%;
+  overflow: auto;
+  @media @normal, @wide {
+	float: left;
+	width: 18%;
+  }
+  @media @mobile {
+	text-align: center;
+	padding: 1em;
+  }
+  .name {
+	color: @brand-primary;
+	.font-size(3.6);
+	font-weight: 700;
+	line-height: 1em;
+	letter-spacing: 3px;
+	margin: 0 !important;
+	padding: 5px 0 0;
+	text-transform: uppercase;
+	word-break: break-all;
+	&:hover {
+	  color: @brand-primary;
+	}
+	.navbar-inverse & {
+	  &, &:hover {
+		color: @brand-accent;
+	  }
 	}
 	@media @mobile {
-		text-align: center;
-		padding: 1em;
+	  display: block;
+	  overflow: auto;
 	}
-	.name {
-		color: @brand-primary;
-		.font-size(3.6);
-		font-weight: 700;
-		line-height: 1em;
-		letter-spacing: 3px;
-		margin: 0 !important;
-		padding: 5px 0 0;
-		text-transform: uppercase;
-		word-break: break-all;
-		&:hover {
-			color: @brand-primary;
-		}
-		.navbar-inverse & {
-			&, &:hover {
-				color: @brand-accent;
-			}
-		}
-		@media @mobile {
-			display: block;
-			overflow: auto;
-		}
+  }
+  .logo {
+	.box-sizing();
+	display: inline-block;
+	margin: 0;
+	padding: 14px;
+
+	img {
+	  max-width:100%;
+	  max-height:100%;
+	  width: 100%
 	}
-	.logo {
-		.box-sizing();
-		display: inline-block;
-		margin: 0;
-		padding: 10px;
-		
-		img {
-			max-width:100%;
-			max-height:100%;
-		}
-		@media @mobile {
-			display: block;
-			margin: 0;
-			overflow: auto;
-			text-align: left;
-			max-width: 80%;
-		}
+	@media @mobile {
+	  display: block;
+	  margin: 0;
+	  overflow: auto;
+	  text-align: left;
+	  max-width: 80%;
 	}
-	.navbar-toggle {
-		.icon-bar {
-			background-color: @gray-light;
-			.navbar-inverse & {
-				background-color: @brand-primary;
-			}
-		}
+  }
+  .navbar-toggle {
+	.icon-bar {
+	  background-color: @gray-light;
+	  .navbar-inverse & {
+		background-color: @brand-primary;
+	  }
 	}
+  }
 }
 .navbar-header {
-	@media @tablet {
-		float: left;
-		width: 25%;
-	}
-	@media @normal, @wide {
-		float: left;
-		width: 18%;
-	}
+  @media @tablet {
+	float: left;
+	width: 25%;
+  }
+
+  @media @normal, @wide {
+	float: left;
+	width: 18%;
+  }
 }
 .navbar-collapse {
-	overflow: auto;
-	@media @tablet {
-		float: left;
-		width: 75%;
-	}
-	@media @normal, @wide {
-		float: left;
-		width: 82%;
-	}
-	.navbar-menu {
-		position: relative;
-		.region-navigation {
+  overflow: auto;
+  @media @tablet {
+	float: left;
+	width: 75%;
+  }
+  @media @normal, @wide {
+	float: left;
+	width: 82%;
+  }
 
-		}
+  @media @mobile {
+	padding-right: 0px;
+	padding-left: 0px;
+  }
+  .navbar-menu {
+	position: relative;
+	.region-navigation {
+
 	}
+  }
 }
 
 // Navar
 .navbar-default, .navbar-inverse {
-	.navbar-nav {
-		float: right;
-		text-align: center;
-		@media @mobile {
-			display: block;
-			float: none;
-			margin: 0;
-		}
-		.caret {
-			display: none;
-		}
-		> .active {
-			a {
-				&:focus, &:hover {
-					background-color: transparent;
-				}
-			}
-		}
-		> li {
-			> a {
-				font-weight: 300;
-				padding: 15px 10px;
-				text-transform: uppercase;
-				&:hover {
-				}
-			}
-			// Mobile navbar-nav > li
-			@media @mobile {
-				.box-sizing();
-				border: 0;
-				border-top: 1px solid @gray-light;
-				display: block;
-				float: left;
-				overflow: auto;
-				width: 50% !important;
-			}
-			&.expanded {
-				@media @tablet {
-					> .dropdown-menu {
-						li {
-							border-bottom: 1px solid lighten(@gray, 45%);
-							.box-sizing();
-							padding: 0 5px !important;
-							&:last-child {
-								border: 0;
-							}
-							&:hover {
-								color: @text-color;
-								background-color: @gray-lighter;
-							}
-						}
-						padding: 0;
-						a {
-							font-weight: 300;
-							padding: 5px 20px;
-							&:hover {
-								color: @text-color;
-								background-color: transparent;
-							}
-						}
-					}
-					&:hover {
-						.navbar-is-fixed-top & {
-							> .dropdown-menu {
-								border-top: 0;
-								display: block;
-								left: auto;
-							}
-						}
-					}
-				}
-			}
-		}
-		// Mobile dropdowns
-		> .open {
-			a {
-				color: @text-color;
-				&:hover, &:focus {
-					background-color: @gray-lighter;
-				}
-			}
-			> a {
-				&, &:hover, &:focus {
-					background-color: transparent;
-					color: @brand-primary;
-				}
-			}
-			.dropdown-menu {
-				> .active > a {
-					background-color: transparent;
-					color: @brand-primary;
-				}
-			}
-		}
+  .navbar-nav {
+	float: right;
+	text-align: center;
+	@media @mobile {
+	  display: block;
+	  float: none;
+	  margin: 0;
 	}
+	.caret {
+	  display: none;
+	}
+	> .active {
+	  a {
+		&:focus, &:hover {
+		  background-color: transparent;
+		}
+	  }
+	}
+	> li {
+	  > a {
+		font-weight: 300;
+		padding: 15px 10px;
+		text-transform: uppercase;
+		&:hover {
+		}
+	  }
+	  // Mobile navbar-nav > li
+	  @media @mobile {
+		.box-sizing();
+		border: 0;
+		border-top: 1px solid @gray-light;
+		display: block;
+		float: left;
+		overflow: hidden;
+		width: 100%;
+		background-color: @gray-lighter;
+
+		> .dropdown-menu, > .dropdown-menu li {
+		  background-color: #fff !important;
+
+		  a:hover , a.active {
+			background-color: #fff !important;
+			color: @brand-primary !important;
+		  }
+		}
+
+	  }
+	  &.expanded {
+		@media @mobile, @tablet {
+		  > .dropdown-menu {
+			width: auto;
+			padding: 0;
+			white-space: normal;
+			li {
+			  border-bottom: 1px solid lighten(@gray, 45%);
+			  .box-sizing();
+			  padding: 0 5px !important;
+			  &:last-child {
+				border: 0;
+			  }
+			  &:hover {
+				color: @text-color;
+				background-color: @gray-lighter;
+			  }
+			}
+			a {
+			  display: block;
+			  font-weight: 300;
+			  padding: 5px 10px;
+			  color: @text-color !important;
+			  &:hover {
+				color: @text-color;
+				background-color: transparent;
+				text-decoration: none;
+			  }
+			}
+		  }
+		  &:hover {
+			.navbar-is-fixed-top & {
+			  > .dropdown-menu {
+				border-top: 0;
+				display: block;
+				left: auto;
+			  }
+			}
+		  }
+		}
+	  }
+	}
+	// Mobile dropdowns
+	> .open {
+	  a {
+		color: @text-color;
+		&:hover, &:focus {
+		  background-color: @gray-lighter;
+		}
+	  }
+	  > a {
+		&, &:hover, &:focus {
+		  background-color: transparent;
+		  color: @brand-primary;
+		}
+	  }
+	  .dropdown-menu {
+		> .active > a {
+		  background-color: transparent;
+		  color: @brand-primary;
+		}
+	  }
+	}
+  }
 }
 
 .dropdown-menu {
-	> li {
-		> a {
-			white-space: pre-line;
-		}
+  > li {
+	> a {
+	  white-space: pre-line;
 	}
-	> .active {
-		background-color: @gray-lighter;
-		> a {
-			&, &:hover, &:focus {
-				color: @text-color;
-				background-color: transparent;
-			}
-		}
+  }
+  > .active {
+	background-color: @gray-lighter;
+	> a {
+	  &, &:hover, &:focus {
+		color: @text-color;
+		background-color: transparent;
+	  }
 	}
+  }
 }
 
 .navbar-collapse {
-	.block-search {
-		.contextual-links-wrapper {
-			left: 10px;
-		}
-		.block-title {
-			display: none;
-		}
-		.form-search {
-			@media @mobile {
-				margin-bottom: 1em;
-			}
-			@media @tablet {
-				input, button {
-					.font-size(1);
-					height: 30px;
-				}
-				.input-group {
-					input {
-						float: right;
-						width: 150px;
-					}
-				}
-			}
-		}
+  .block-search {
+	.contextual-links-wrapper {
+	  left: 10px;
 	}
+	.block-title {
+	  display: none;
+	}
+	.form-search {
+	  @media @mobile {
+		margin-bottom: 1em;
+	  }
+	  @media @tablet {
+		input, button {
+		  .font-size(1);
+		  height: 30px;
+		}
+		.input-group {
+		  input {
+			float: right;
+			width: 150px;
+		  }
+		}
+	  }
+	}
+  }
 }
 
 .nav, .collapse, .dropup, .dropdown {
   position: static;
-}  
+}
 
 .dropdown-menu {
   left: auto;
-  width: auto;
+  min-width: 100%;
 }
 /* This enables hover dropdowns */
 .dropdown:hover .dropdown-menu {
@@ -343,10 +366,23 @@ header {
   white-space: nowrap;
 }
 .dropdown:hover .dropdown-menu > li > a {
-  width: auto;
-  white-space: nowrap;
+  min-width: 100%;
 }
 .nav.navbar-right .dropdown-menu {
   left: auto;
   right: 0;
+}
+
+// Autospacing on nav items
+#navbar-menu .default-bootstrap {
+  .navbar-nav {
+	@media @normal {
+	  display: table;
+	  width: 100%;
+	  > li {
+		display: table-cell;
+		float: none;
+	  }
+	}
+  }
 }

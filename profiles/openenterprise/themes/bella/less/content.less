@@ -1,13 +1,12 @@
 // Insert your styling here.
 
 .page-title {
-	background-color: @gray;
+	background-color: @gray-light;
 	&, h1, h2, .page-header {
 		color: white;
 	}
 	.page-header {
 		border: none;
-		font-weight: 500;
 		letter-spacing: 1px;
 		margin: 0;
 		padding: 0.5em 0;
@@ -19,6 +18,19 @@
 		}
 	}
 }
+
+.page-title-above {
+	.navbar {
+		margin-bottom: 0;
+	}
+}
+.page-title-inside {
+	.page-header {
+		margin-top: 0;
+		padding-top: 0;
+	}
+}
+
 #page-header {
 	background-color: @brand-secondary;
 	padding: 2em 0;
@@ -31,8 +43,13 @@
 .highlighted {
 	margin-top: 1em;
 }
-.information {
-	padding-top: 1em;
+
+.featurette {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	.featurette-heading {
+		margin-top: 0;
+	}
 }
 
 .main-container-inner {
@@ -42,9 +59,12 @@
 
 .region-sidebar-first, .region-sidebar-second {
 	.block {
-		margin-bottom: 24px;
+		margin-bottom: 20px;
 		.block-title {
 			margin-top: 0;
+		}
+		&:last-child {
+			margin-bottom: 0;
 		}
 	}
 	.block-menu-block {
@@ -55,9 +75,18 @@
 }
 
 .btn-social-share {
-	.addthis_counter.addthis_bubble_style a.addthis_button_expanded {
-		color: @brand-primary;
-		font-size: @font-size-base;
+	.addthis_counter.addthis_bubble_style {
+		a.addthis_button_expanded {
+			color: @brand-primary;
+			font-size: @font-size-base;
+		}
+	}
+	.addthis_button {
+		&:hover, &:active, &:focus {
+			a.addthis_button_expanded {
+				color: #FFF;
+			}
+		}
 	}
 }
 
@@ -70,6 +99,7 @@
 			text-align: left;
 			width: 25%;
 			top: 10%;
+
 			h3 {
 				color: @brand-primary;
 				font-weight: 300;
@@ -77,6 +107,12 @@
 				margin-bottom: 0.75em;
 				text-transform: uppercase;
 				text-shadow: none;
+
+			  	@media @tablet, @mobile {
+				  text-align: left;
+				  margin-top:0.5em;
+				  margin-bottom:0.5em;
+				}
 			}
 			p {
 				color: @gray;
@@ -89,8 +125,12 @@
 				font-weight: 500;
 				margin-top: 1em;
 				padding: 10px 15px;
+
+			  	@media @tablet, @mobile {
+				  margin-top: 0;
+				}
 			}
-			@media @mobile, @tablet-max {
+			@media @tablet-max {
 				left: 0;
 				top: 0;
 				padding: 0 15px;
@@ -108,6 +148,12 @@
 					padding: 6px 10px;
 				}
 			}
+			@media @mobile {
+				display: none;
+				.cke_editable & {
+					display: block;
+				}
+			}
 		}
 	}
 	.carousel-indicators {
@@ -116,8 +162,13 @@
 		}
 		li {
 			border-color: @brand-primary;
+
+		  	&:before {content: '';} // Ahmad: Disables ol numbers that appear on slider
 			&.active {
 				background-color: @brand-primary;
+			}
+			&::before {
+				display: none;
 			}
 		}
 	}

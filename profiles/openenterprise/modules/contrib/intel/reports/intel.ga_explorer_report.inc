@@ -125,13 +125,13 @@ function intel_ga_explorer_report() {
         '#markup' => '<br><h3>Request</h3>' . implode("<br>\n", $items),
       );
       $options = array('refresh' => TRUE);
-      $data = google_analytics_api_report_data($req, $options);
+      $data = google_analytics_reports_api_report_data($req, $options);
       dsm($data);//
 
       $header = array();
       $rows = array();
-      if (!empty($data->results) && is_array($data->results)) {
-        foreach ($data->results AS $r) {
+      if (!empty($data->results->rows) && is_array($data->results->rows)) {
+        foreach ($data->results->rows AS $r) {
           $row = array();
           if (!count($header)) {
             foreach ($r AS $k => $e) {

@@ -145,14 +145,14 @@ class GAModel {
     if (!empty($filters['visitor'])) {
       $a = explode(":", $filters['visitor']);
       $vtk = $a[1];
-      //$gasegments['visitor'] = "ga:customVarValue5==" . $vtk;
-      $gafilters['visitor'] = "ga:customVarValue5==" . $vtk;
+      //$gasegments['visitor'] = "ga:dimension5==" . $vtk;
+      $gafilters['visitor'] = "ga:dimension5==" . $vtk;
     }
 
     if (!empty($filters['visitor-attr'])) {
       $a = str_replace(':', '=', $filters['visitor-attr']);
       $query = l10insight_build_ga_filter_from_serialized_customvar($a);
-      //$ga_segments['visitor-attr'] = "dynamic::ga:customVarValue3=" . $query;
+      //$ga_segments['visitor-attr'] = "dynamic::ga:dimension3=" . $query;
     }
     $this->gaFilters = array(
       'filters' => $gafilters,
@@ -308,7 +308,7 @@ class GAModel {
       $request['metrics'] = array('ga:entrances', 'ga:goalValueAll');
       if ($reportModes[0] == 'visit') {  // visit.recent report
         $request['dimensions'][] = 'ga:visitCount';
-        $request['dimensions'][] = 'ga:customVarValue4';
+        $request['dimensions'][] = 'ga:dimension4';
       }
       $request['sort'] = '-ga:goalValueAll,-ga:entrances';
       if ($this->gaFilters['paths']['pagePath']) {
@@ -349,14 +349,14 @@ class GAModel {
       //$request['max_results'] = 4 * $items;  
     }
     else if ($indexBy == 'visitor') {
-      $request['dimensions'][] = 'ga:customVarValue5';
+      $request['dimensions'][] = 'ga:dimension5';
     }
     else if ($indexBy == 'visit') {
-      $request['dimensions'][] = 'ga:customVarValue5';
+      $request['dimensions'][] = 'ga:dimension5';
       $request['dimensions'][] = 'ga:visitCount';
       if ($reportModes[1] == 'recent') {
-        $request['dimensions'][] = 'ga:customVarValue4';
-        $request['sort'] = '-ga:customVarValue4';
+        $request['dimensions'][] = 'ga:dimension4';
+        $request['sort'] = '-ga:dimension4';
         if ($type == 'entrances') {
           $filter[] = 'ga:entrances>0';
         }
@@ -392,15 +392,15 @@ class GAModel {
     else if ($indexBy == 'landingpage') {
       $filters[] = "ga:eventCategory=~^Landing page";
     } else if ($indexBy == 'author') {
-      $request['dimensions'][] = 'ga:customVarValue1';
-      $filters[] = 'ga:customVarValue1=@&a=';
+      $request['dimensions'][] = 'ga:dimension1';
+      $filters[] = 'ga:dimension1=@&a=';
       $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
     } else if (strpos($indexBy, 'pageAttribute:') === 0) {
       $indexBys = explode(':', $indexBy);
-      $request['dimensions'][] = 'ga:customVarValue1';
+      $request['dimensions'][] = 'ga:dimension1';
       // TODO add other attribute types
       if ($this->pageAttributeInfo['type'] == 'list') {
-        $filters[] = 'ga:customVarValue1=@&' . $indexBys[1] . '.';
+        $filters[] = 'ga:dimension1=@&' . $indexBys[1] . '.';
       }
       $filters[] = 'ga:pagePath=@/';  // this entry forces the goal value up to previous pages
     }
@@ -648,8 +648,8 @@ class GAModel {
     $data['sticks'] += ($row['entrances'] - $row['bounces']);
     $data['goalValueAll'] += !empty($row['goalValueAll']) ? $row['goalValueAll'] : 0;
     $data['goalCompletionsAll'] += !empty($row['goalCompletionsAll']) ? $row['goalCompletionsAll'] : 0;
-    if (!empty($row['customVarValue4'])) {
-      $data['timestamp'] = $row['customVarValue4'];
+    if (!empty($row['dimension4'])) {
+      $data['timestamp'] = $row['dimension4'];
     }
     return $data;
   }
@@ -740,7 +740,7 @@ class GAModel {
     $keyOps = array(
       'entrances' => 0,
       'goalValueAll' => 0,
-      'customVarValue5' => 0,
+      'dimension5' => 0,
     );
     foreach($feed->results AS $row) {
       $index = $this->initFeedIndex($row, $indexBy);
@@ -865,10 +865,10 @@ class GAModel {
       $index = (count($a) == 2) ? $a[1] : $a[0];
     }
     else if ($indexBy == 'visitor') {
-      $index = $row['customVarValue5'];
+      $index = $row['dimension5'];
     }
     else if ($indexBy == 'visit') {
-      $index = $row['customVarValue5'] . '-' . $row['visitCount'];
+      $index = $row['dimension5'] . '-' . $row['visitCount'];
     }
     else if ($indexBy == 'location') {
       if (isset($row['city']) && isset($row['region'])) {
@@ -880,14 +880,14 @@ class GAModel {
     }
     else if ($indexBy == 'author') {
       $decoded = '';
-      $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
-      $row['customVarValue1'] = $decoded;
+      $data = $this->unserializeCustomVar($row['dimension1'], $decoded);
+      $row['dimension1'] = $decoded;
       $index = $data['a'];
     }
     else if (strpos($indexBy, 'pageAttribute:') === 0) {
       $decoded = '';
-      $data = $this->unserializeCustomVar($row['customVarValue1'], $decoded);
-      $row['customVarValue1'] = $decoded;
+      $data = $this->unserializeCustomVar($row['dimension1'], $decoded);
+      $row['dimension1'] = $decoded;
       $indexBys = explode(':', $indexBy);
 
       if ($this->pageAttributeInfo['type'] == 'list') {

@@ -1,8 +1,10 @@
 <?php
 /**
  * @file
+ * Code for the Enterprise Editor feature.
  */
 
+include_once 'enterprise_editor.features.inc';
 
 /**
  * Implements hook_permission().
@@ -77,14 +79,6 @@ function enterprise_editor_admin() {
 }
 
 /**
- * Implements hook_ctools_plugin_api().
- */
-function enterprise_editor_ctools_plugin_api($module = NULL, $api = NULL) {
-  if ($module == "strongarm" && $api == "strongarm") {
-    return array("version" => "1");
-  }
-}
-/**
  * Implements hook_ckeditor_settings_alter().
  */
 function enterprise_editor_ckeditor_settings_alter(&$settings) {
@@ -137,7 +131,21 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
     $settings['contentsCss'][] = $base_path.drupal_get_path('theme', 'enterprise_bootstrap').'/css/style.css?'.$query;
   }
 
-  // filter out unavailable plugins
+  // Load theme related .less file.
+  $theme_default = variable_get('theme_default', NULL);
+  $theme_info = system_get_info('theme', $theme_default);
+
+  if (!empty($theme_info['stylesheets'])) {
+    foreach ($theme_info['stylesheets'] as $media) {
+      if (!empty($media)) {
+        foreach ($media as $sheet) {
+          $settings['contentsCss'][] = $base_path.$sheet;
+        }
+      }
+    }
+  }
+
+  // Filter out unavailable plugins
   foreach ($plugins AS $name => $flag) {
     if (!$flag && isset($settings['loadPlugins'][$name])) {
       unset($settings['loadPlugins'][$name]);
@@ -150,6 +158,9 @@ function enterprise_editor_ckeditor_settings_alter(&$settings) {
   if (variable_get('enterprise_editor_ckeditor_css', 1)) {
     $settings['contentsCss'][] = $base_path . $module_path . '/ckeditor/ckeditor.css?' . $query;
   }
+
+  // Clean up CSS imports
+  array_unique($settings['contentsCss']);
 
   if (!empty($settings['stylesCombo_stylesSet'])) {
     unset($settings['stylesCombo_stylesSet']);

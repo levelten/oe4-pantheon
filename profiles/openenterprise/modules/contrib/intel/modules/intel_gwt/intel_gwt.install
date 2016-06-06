@@ -1,0 +1,83 @@
+<?php
+/**
+ * @file
+ * Installation file for LevelTen Intelligence
+ * 
+ * @author Tom McCracken <tomm@getlevelten.com>
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function intel_gwt_uninstall() {
+  $query = db_delete('variable')
+    ->condition('name', 'intel_gwt%', 'LIKE');
+  $query->execute();
+}
+
+/**
+ *  Implementation of hook_schema
+ */
+function intel_gwt_schema() {
+  $schema['intel_gwt_search'] = array(
+    'description' => 'Stores search analytics data from Google Webmaster Tools',
+    'fields' => array(
+      'keyword' => array(
+        'description' => 'Keyword phrase (query)',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'day' => array(
+        'description' => 'day data is for in YYYY-MM-DD format',
+        'type' => 'char',
+        'length' => 10,
+      ),
+      'timeframe' => array(
+        'description' => 'time frame for the data',
+        'type' => 'varchar',
+        'length' => 32,
+      ),
+      'nid' => array(
+        'description' => 'node id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+      'path' => array(
+        'description' => 'system path of page',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'alias' => array(
+        'description' => 'path alias of page',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'impressions' => array(
+        'description' => 'number of impressions',
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+      'clicks' => array(
+        'description' => 'number of clicks',
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+      'position' => array(
+        'description' => 'average position of keyword',
+        'type' => 'float',
+      ),
+    ),
+    'indexes' => array(
+      'keyword' => array(array('keyword', 32)),
+      'day' => array('day'),
+      'timeframe' => array('timeframe'),
+      'nid' => array('nid'),
+      'path' => array(array('path', 16)),
+      'alias' => array(array('keyword', 32)),
+    ),
+  );
+
+  return $schema;
+}

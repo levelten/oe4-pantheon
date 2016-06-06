@@ -34,7 +34,7 @@
       if (typeof sid !== 'undefined') {
         sids[sid] = sid;
         var imgsrc = ('https:' == document.location.protocol) ? 'https://' : 'http://'; 
-		imgsrc += Drupal.settings.intel.cms_hostpath + Drupal.settings.intel.module_path + "/images/ajax_loader_row.gif";
+		imgsrc += Drupal.settings.intel.config.cmsHostpath + Drupal.settings.intel.config.modulePath + "/images/ajax_loader_row.gif";
         $(this).find("td:eq(" + (colIndex) + ")").after('<td data-sid="' + sid + '" colspan="2"><img src="' + imgsrc + '"></td>');  
       }
     });
@@ -43,7 +43,7 @@
         'path': window.location.pathname
     };
       var url = ('https:' == document.location.protocol) ? 'https://' : 'http://'; 
-	  url += Drupal.settings.intel.cms_hostpath + "intel_webform/admin_submission_results_alter_js"; //?callback=?";
+	  url += Drupal.settings.intel.config.cmsHostpath + "intel_webform/admin_submission_results_alter_js"; //?callback=?";
       jQuery.ajax({
       dataType: 'json',
       url: url, 

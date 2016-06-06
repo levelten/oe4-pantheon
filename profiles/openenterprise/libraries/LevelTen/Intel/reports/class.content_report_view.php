@@ -168,6 +168,7 @@ class ContentReportView extends ReportView {
 
     $value_str = '';
     $this->sortData('by_score_then_entrances', 'content');
+
     foreach($this->data['content'] AS $n => $d) {
       if (empty($d['i']) || (substr($d['i'], 0 , 1) == '_')) { continue; } 
       //list($host, $path) = explode('/', $d['i'], 2);
@@ -246,9 +247,7 @@ class ContentReportView extends ReportView {
       }
       
       $table->newWorkingRow();
-      // check if uri is absolute or relative. Add schema if absolute.
-      $uri = ((substr($d['i'], 0, 1) != '/') ? 'http://' : '') . $d['i'];
-      $l = render::link($pathstr, $uri, array('attributes' => array('target' => '_blank')));
+      $l = render::link($pathstr, 'http://' . $d['i'], array('attributes' => array('target' => '_blank')));
       $table->addRowItem($l);
       
       $table->addRowItem($entrances);

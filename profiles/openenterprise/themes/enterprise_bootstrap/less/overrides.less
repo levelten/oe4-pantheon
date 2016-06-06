@@ -1,11 +1,3 @@
-// Media query variables.
-@mobile:  ~"screen and (max-width: @{screen-sm-min})";
-@tablet:  ~"screen and (min-width: @{screen-sm-min})";
-@tablet-max: ~"(max-width: @{screen-md-min})";
-@normal:  ~"screen and (min-width: @{screen-md-min})";
-@normal-max: ~"(max-width: @{screen-lg-min})";
-@wide:    ~"screen and (min-width: @{screen-lg-min})";
-
 // Drop shadows.
 .box-shadow(@shadow) {
   -webkit-box-shadow: @shadow;
@@ -651,7 +643,7 @@ img {
 
 // Krumo fix
 .krumo-root {
-  color: black;
+  color: @gray-dark;
 }
 
 // Blocker
@@ -716,5 +708,61 @@ img {
 // Workbench block
 div.workbench-info-block {
   .alert();
-  background-color: #FFEC5E; // pale yellow
+  background-color: @brand-warning;
+}
+
+.navbar-nav > li > .dropdown-menu {
+  width:auto;
+  padding: 0;
+  white-space: normal;
+  li {
+    border-bottom: 1px solid lighten(@gray, 45%);
+    .box-sizing();
+    padding: 0 5px !important;
+    &:last-child {
+      border: 0;
+    }
+    &:hover {
+      color: @text-color;
+      background-color: @gray-lighter;
+    }
+  }
+  a {
+    display: block;
+    font-weight: 300;
+    padding: 5px 20px;
+    color: @text-color !important;
+    &:hover {
+      color: @text-color;
+      background-color: transparent;
+      text-decoration: none;
+    }
+
+    @media @mobile {
+      color:@gray-lighter !important;
+      &:hover {
+        color: @text-color !important;;
+      }
+    }
+  }
+}
+
+// Default footer color.
+.footer .footer-bottom {
+  background-color: @gray-dark;
+  padding: 20px 0;
+}
+
+// Carousel fix for widening images.
+.carousel {
+  &.wide {
+    .item img {
+      width: 100%;
+    }
+  }
+  &.short {
+    .carousel-inner {
+      max-height: 400px;
+    }
+  }
 }

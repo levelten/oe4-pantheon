@@ -1,111 +1,143 @@
 var _l10iq = _l10iq || [];
-var _l10iq = _l10iq || [];
 
-function l10iAddthisTracker() {
-  this.waits = 0;
-  
-  this.init = function init() {
-	var waits, i;
-	_l10iq.push(['_log', "l10iAddthisTracker.init()"]);
-    if ((typeof addthis != 'object') || (typeof addthis.addEventListener != 'function')) {
-      if (this.waits < 5) {
-    	this.waits++;
-    	var delay = (this.waits >= 2) ? 2500 : 1000;
-        with (this) { setTimeout( function() { init(); }, delay);}
-      }
-      return;
-    }
-    else {
-      addthis.addEventListener('addthis.menu.share', this.eventHandler);
-      addthis.addEventListener('addthis.user.clickback', this.eventHandler);
+function L10iAddthis(_ioq, config) {
+    var ioq = _ioq;
+    var io = _ioq.io;
+    this.waits = 0;
 
-      // verify addthis returned proper user object
-      if (addthis.user == undefined || (typeof addthis.user.ready != 'function')) {
-          return;
-      }
-      addthis.user.ready(function (data){
-        var services = {};
-        // verify we have proper user.services object
-        if (typeof addthis.user.services == 'function') {
-           var s = addthis.user.services();
-           if (typeof s.toMap == 'function') {
-                services = s.toMap();
-           }
+    this.init = function init() {
+        var waits, i;
+
+        io('log', 'L10iAddthis.init()');
+        if ((typeof addthis != 'object') || (typeof addthis.addEventListener != 'function')) {
+
+            if (this.waits < 5) {
+                this.waits++;
+                var delay = (this.waits >= 2) ? 2500 : 1000;
+                with (this) {
+                    setTimeout(function () {
+                        init();
+                    }, delay);
+                }
+            }
+            return;
         }
-        var action = [];
-        var count = 0;
-        for (i in services) {  
-          action = [
-            '_setVar',
-            'visitor',
-            'addthis',
-            "services." + services[i]['name'],
-            Number(services[i]['score'])            
-          ];
-          _l10iq.push(action);
-          count++;
+        else {
+            //addthis.addEventListener('addthis.ready', this.onReady);
+            addthis.addEventListener('addthis.menu.share', this.onSocialShare);
+            addthis.addEventListener('addthis.menu.follow', this.onSocialFollow);
+            addthis.addEventListener('addthis.user.clickback', this.onSocialShareClickback);
+            io('addCallback', 'domReady', this.onReady, this);
+            //this.onReady({});
         }
-        var geo = addthis.user.location();
-        if (geo['country'] !== 'undefined') {
-          var e = ['country', 'dma', 'lat', 'lon', 'msa', 'region', 'zip'];  
-          for(i = 0; i < e.length; i++) {
-        	if (geo[e[i]] == undefined) {
-        	  continue;
-        	}
-            action = [
-              '_setVar',
-              'visitor',
-              'addthis',
-              "geo." + e[i],
-              geo[e[i]]                
-            ];
-            _l10iq.push(action);  
-            count++;
-          }
-        }        
-        var last_set = _l10iq.push(['_getFlag', 'session', 'addthis']);
-        var timestamp = _l10iq.push(['_getTime']);
-        if ((count > 0) && ((last_set == undefined) || ((timestamp - last_set) > (60*60*24)))) {
-          _l10iq.push(['_saveVar', 'visitor', 'addthis']);
-          _l10iq.push(['_setFlag', 'session', 'addthis', timestamp, true]);
+    };
+
+    this.getUser = function () {
+        if (addthis.user == undefined || (typeof addthis.user.ready != 'function')) {
+            return null;
         }
-      });
-    }
-  };
-  
-  this.eventHandler = function(evt) { 
-    var share_event = {
-      'category': "Social share!",
-      'action': "[unknown]",
-      'label': "!system_alias",
-      'value': (typeof _l10iq.settings.scorings.addthis_social_share !== 'undefined') ? Number(_l10iq.settings.scorings.addthis_social_share) : 0,
-      'noninteraction': false      
+        return addthis.user;
     };
-    var clickback_event = {
-      'category': "Social share clickback!",
-      'action': "[unknown]",
-      'label': "!system_alias",
-      'value': (typeof _l10iq.settings.scorings.addthis_social_share_clickback !== 'undefined') ? Number(_l10iq.settings.addthis_social_share_clickback) : 0,
-      'noninteraction': true      
+
+    this.onReady = function (evt) {
+        // verify addthis returned proper user object
+        if (addthis.user == undefined || (typeof addthis.user.ready != 'function')) {
+            return;
+        }
+
+        addthis.user.ready(function (data) {
+            var i, services = {}, count, val;
+            // verify we have proper user.services object
+            if (typeof addthis.user.services == 'function') {
+                var s = addthis.user.services();
+                if (ioq.isArray(s) && ioq.isFunction(s.toMap)) {
+                    services = s.toMap();
+                }
+            }
+            count = 0;
+            val = {};
+            for (i in services) {
+                if (services.hasOwnProperty(i)) {
+                    val[services[i]['name']] = Number(services[i]['score']);
+                    count++;
+                }
+            }
+            if (count) {
+                io('set', 'v:addthis.services', val);
+            }
+
+            var geo = addthis.user.location();
+            val = {};
+            if (ioq.isObject(geo) && geo['country'] !== 'undefined') {
+                var e = ['country', 'dma', 'lat', 'lon', 'msa', 'region', 'zip'];
+                for (i = 0; i < e.length; i++) {
+                    if (geo[e[i]] == undefined) {
+                        continue;
+                    }
+                    val[e[i]] = geo[e[i]];
+                }
+                if (val.lat && val.lon) {
+                    val.lat = parseFloat(val.lat);
+                    val.lon = parseFloat(val.lon);
+                    io('set', 'v:addthis.geo', val);
+                    if (ioq.isFunction(ioq.hasSchema) && ioq.hasSchema('GeoCoord')) {
+                        var gs = ioq.new('GeoCoord', val);
+                        ioq.set('s:geo', gs, {_source: 'addthis'});
+                    }
+                }
+            }
+            var last_set = io('getFlag', 'session', 'addthis');
+            var timestamp = io('getTime');
+            if ((count > 0) && ((last_set == undefined) || ((timestamp - last_set) > (60 * 60 * 24)))) {
+                io('setFlag', 'session', 'addthis', timestamp, true);
+            }
+        });
     };
-    var ignore = {
-      'more': 1
+
+    this.onSocialShare = function (evt) {
+        var ignore = {
+            'more': 1
+        };
+
+        if (ignore[evt.data.service]) {
+            return;
+        }
+        var ga_event = {
+            'eventCategory': "Social share!",
+            'eventAction': (typeof addthis.util.getServiceName(evt.data.service) != 'undefined') ? addthis.util.getServiceName(evt.data.service) : evt.data.service,
+            'eventLabel': "[[systemAlias]]",
+            'eventValue': io('get', 'config.scorings.addthis_social_share', 0),
+            'nonInteraction': false,
+            'eid': 'socialShare'
+        };
+        io('event', ga_event);
     };
-    if (evt.type == "addthis.menu.share") {
-      if (ignore[evt.data.service]) {
-        return;
-      }
-      share_event.action = (typeof addthis.util.getServiceName(evt.data.service) != 'undefined') ? addthis.util.getServiceName(evt.data.service) : evt.data.service;
-      _l10iq.push(['_trackIntelEvent', jQuery(this), share_event, '']);
-    }
-    if (evt.type == "addthis.user.clickback") {
-      clickback_event.action = (typeof addthis.util.getServiceName(evt.data.service) != 'undefined') ? addthis.util.getServiceName(evt.data.service) : evt.data.service;
-      _l10iq.push(['_trackIntelEvent', jQuery(this), clickback_event, '']);
-    }
-  };
+
+    this.onSocialShareClickback = function (evt) {
+        var ga_event = {
+            'eventCategory': "Social share clickback!",
+            'eventAction': (typeof addthis.util.getServiceName(evt.data.service) != 'undefined') ? addthis.util.getServiceName(evt.data.service) : evt.data.service,
+            'eventLabel': "[[systemAlias]]",
+            'eventValue': io('get', 'config.scorings.addthis_social_share_clickback', 0),
+            'nonInteraction': false,
+            'eid': 'socialShareClickback'
+        };
+        io('event', ga_event);
+    };
+
+    this.onSocialFollow = function (evt) {
+        var ga_event = {
+            'eventCategory': "Social profile click!",
+            'eventAction': (typeof addthis.util.getServiceName(evt.data.service) != 'undefined') ? addthis.util.getServiceName(evt.data.service) : evt.data.service,
+            'eventLabel': (evt.data.url) ? evt.data.url : "(not set)",
+            'eventValue': io('get', 'config.scorings.addthis_social_follow', 0),
+            'nonInteraction': false,
+            'eid': 'socialProfileClick'
+        };
+        io('event', ga_event);
+    };
+
+    this.init();
 }
 
-var l10iAddthis = new l10iAddthisTracker();
-jQuery(document).ready(function() {
-	_l10iq.push(['_onReady', l10iAddthis.init, l10iAddthis]);
-});
+_l10iq.push(['providePlugin', 'addthis', L10iAddthis, {}]);

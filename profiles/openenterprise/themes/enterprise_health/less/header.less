@@ -1,51 +1,72 @@
 header {
-	&.navbar-default {
-		background-color: @brand-primary;
-		border: 0;
-		border-top: 5px solid darken(@brand-primary, 10%);
-	}
-	.navbar-header {
-		overflow: auto;
-		@media @normal, @wide {
-			float: left;
-			width: 18%;
-		}
-	}
-	.navbar-collapse {
-		overflow: auto;
-		@media @normal, @wide {
-			float: left;
-			width: 82%;
-		}
-		.navbar-nav {
-			display: table;
-			text-align: center;
-			width: 100%;
-			counter-reset: navitem;
-			.caret {
-				display: none;
-			}
-			> li {
-				display: table-cell;
-				float: none;
-				> a {
-					text-transform: uppercase;
-					&:before {
-						color: @gray-light;
-						counter-increment: navitem;
-						content: "0" counter(navitem);
-						padding-right: 10px;
-					}
-				}
-				&.active-trail {
-					> a {
-						background: @brand-primary;
-						&:before {
-							color: @brand-secondary;
-						}
-					}
-				}
-			}
-		}
-	}
+  &.navbar-default {
+    background-color: #fff;
+    border: 0;
+  }
+  .navbar-header {
+    overflow: auto;
+    @media @normal, @wide {
+      float: left;
+    }
+    .navbar-brand.logo {
+      margin: 0;
+    }
+    .navbar-toggle {
+      background-color: @brand-secondary;
+      margin-top: 12px;
+
+      &:hover {
+        background-color: lighten(@brand-secondary, 20%);
+      }
+    }
+  }
+  .navbar-collapse {
+    overflow: auto;
+    @media @normal, @wide {
+      float: right;
+      margin-top: 36px;
+    }
+    .navbar-nav {
+      display: table;
+      text-align: center;
+      width: 100%;
+      counter-reset: navitem;
+      > li {
+        display: table-cell;
+        float: none;
+        > a {
+          text-transform: uppercase;
+          color: @brand-primary;
+          font-weight: bold;
+          &:before {
+            color: @gray-light;
+            counter-increment: navitem;
+            // content: "0" counter(navitem);
+            padding-right: 10px;
+          }
+          &:hover {
+            color: lighten(@brand-primary, 30%);
+            background-color: #fff;
+          }
+          &:focus {
+            color: @brand-primary;
+            background-color: transparent;
+          }
+        }
+        &.active-trail {
+          > a {
+            background: #fff;
+            color: lighten(@brand-primary, 20%);
+            &:before {
+              color: @brand-secondary;
+            }
+            &:hover {
+              background-color: #fff;
+              color: lighten(@brand-primary, 30%);
+            }
+          }
+        }
+      }
+    }
+  }
 }

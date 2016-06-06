@@ -5,6 +5,8 @@
  * Field formatter conditions.
  */
 
+require_once "ffc.ffc_conditions_info.inc";
+
 /**
  * Implements hook_field_formatter_info_alter().
  */

@@ -19,7 +19,7 @@ function insight_menu() {
     'description' => 'Insight configuration configuration settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('insight_admin_settings_form'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,    
     'file' => 'insight.admin.inc',
     'file path' => drupal_get_path('module', 'insight'),
@@ -29,7 +29,7 @@ function insight_menu() {
     'description' => 'Insight configuration configuration settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('insight_admin_settings_form'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'insight.admin.inc',
   );
@@ -38,7 +38,7 @@ function insight_menu() {
     'description' => 'Insight configuration configuration settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('insight_admin_api_settings'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
     'file' => 'insight.admin.inc',
   );

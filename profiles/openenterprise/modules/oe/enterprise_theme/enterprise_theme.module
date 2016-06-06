@@ -5,3 +5,166 @@
  */
 
 include_once 'enterprise_theme.features.inc';
+
+/**
+ * Implements hook_page_alter().
+ */
+function enterprise_theme_page_alter(&$page) {
+  // Only run on admin pages.
+  $module_path = drupal_get_path('module', 'enterprise_theme');
+  if (path_is_admin(current_path())) {
+    // Add admin theme enhancements.
+    drupal_add_css($module_path . '/enterprise_theme.admin.css');
+
+    // Make default theme name available as variable.
+    $themes = list_themes();
+    $settings = array();
+    foreach ($themes as $theme) {
+      if ($theme->status == 1) {
+        $settings['themes'][] = $theme->name;
+      }
+    }
+    drupal_add_js(array('enterprise_theme' => $settings),array('type' => 'setting'));
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function enterprise_theme_theme($existing, $type, $theme, $path) {
+  return array(
+    'pictaculous_info' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-info',
+    ),
+    'pictaculous_kuler' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-kuler',
+    ),
+    'pictaculous_colour' => array(
+      'variables' => array('object' => NULL),
+      'template' => 'templates/pictaculous-colour',
+    ),
+    'pictaculous_color_palette' => array(
+      'variables' => array('colors' => NULL),
+      'template' => 'templates/pictaculous-color-palette',
+    ),
+    'header_branding' => array(
+      'variables' => array(
+        'logo' => NULL,
+        'site_name' => NULL,
+        'front_page' => NULL,
+      ),
+      'path' => drupal_get_path('theme', 'enterprise_bootstrap') . '/templates/includes',
+      'template' => 'header-branding',
+    ),
+    'navbar_toggle' => array(
+      'variables' => array(
+        'label' => NULL,
+      ),
+      'path' => drupal_get_path('theme', 'enterprise_bootstrap') . '/templates/includes',
+      'template' => 'navbar-toggle',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_module_implements_alter().
+ */
+function enterprise_theme_module_implements_alter(&$implementations, $hook) {
+  // Run enterprise_theme_form_alter last so we can alter the LESS variable fields.
+  if ($hook == 'form_alter' && isset($implementations['enterprise_theme'])) {
+    $group = $implementations['enterprise_theme'];
+    unset($implementations['enterprise_theme']);
+    $implementations['enterprise_theme'] = $group;
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function enterprise_theme_form_alter(&$form, &$form_state, $form_id) {
+  
+  // Add jQuery.minicolors to color fields.
+  if ($form_id === 'system_theme_settings') {
+    // Get themes from LESS.
+    $themes = element_children($form['less']);
+
+    // Apply settings regardless if theme is active or not.
+    foreach ($themes as $k => $v) {
+      $theme_name = $v;
+      if (!empty($form['less'][$theme_name])) {
+        foreach ($form['less'][$theme_name] as $key => $value) {
+          // Add minicolors to brand colors.
+          if (strpos($key, '@brand-') !== FALSE) {
+            $form['less'][$theme_name][$key]['#attributes']['class'][] = 'minicolor';
+            $form['less'][$theme_name][$key]['#prefix'] = '<div class="inline-field">';
+            $form['less'][$theme_name][$key]['#suffix'] = '</div>';
+            if (empty($form['less'][$theme_name][$key]['#default_value'])) {
+              $form['less'][$theme_name][$key]['#default_value'] = $form['less'][$theme_name][$key]['#attributes']['placeholder'];
+            }
+          }
+        }
+        
+        $form['less'][$theme_name]['actions'] = array(
+          '#type' => 'actions',
+        );
+        // Add reset button for default settings.
+        $form['less'][$theme_name]['actions']['reset'] = array(
+          '#type' => 'button',
+          '#value' => t('Reset'),
+        );
+        // Add shuffle button to switch colors.
+        $form['less'][$theme_name]['actions']['shuffle'] = array(
+          '#type' => 'button',
+          '#value' => t('Shuffle'),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_image_default_styles()
+ *
+ * @return array
+ */
+function enterprise_theme_image_default_styles() {
+  // Add logo image style.
+  $styles = array();
+  $styles['enterprise_bootstrap_logo'] = array(
+    'name' => 'Enterprise Bootstrap Logo',
+    'effects' => array(
+      2 => array(
+        'label' => 'Scale and crop',
+        'help' => 'Scale and crop will maintain the aspect-ratio of the original image, then crop the larger dimension. This is most useful for creating perfectly square thumbnails without stretching the image.',
+        'effect callback' => 'image_scale_and_crop_effect',
+        'dimensions callback' => 'image_resize_dimensions',
+        'form callback' => 'image_resize_form',
+        'summary theme' => 'image_resize_summary',
+        'module' => 'image',
+        'name' => 'image_scale_and_crop',
+        'data' => array(
+          'width' => 200,
+          'height' => 75,
+        ),
+        'weight' => 1,
+      ),
+    ),
+    'label' => 'Enterprise Bootstrap Logo',
+  );
+
+  return $styles;
+}
+
+function template_preprocess_header_branding(&$variables) {
+  global $base_url;
+
+  $variables['logo'] = theme_get_setting('logo');
+  $variables['front_page'] = $base_url;
+  $variables['site_name'] = theme_get_setting('site_name');
+}
+
+function template_preprocess_navbar_toggle(&$variables) {
+
+}

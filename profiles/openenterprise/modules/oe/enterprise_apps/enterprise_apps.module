@@ -57,42 +57,8 @@ function enterprise_apps_menu() {
 
 // deploy_manager_add_to_plan()
 function enterprise_apps_util() {
-
-  $s = variable_get('theme_enterprise_bootstrap_settings', array());
-  print_r($s);
-  return '';
-
-  $desc = array();
-  $obj = enterprise_apps_obj_load_by_ukey('menu_link:forum', $desc);
-
-  dsm($obj);
-  dsm($desc);
-
-  return 'OK';
-
-  $profile = drupal_get_profile();
-  dsm($profile);
-
-  $options = array(
-    'pkey' => '168596',
-    'apikey' => 'e67e82b2bd029a000f9302d32674118b',
-    'apiUrl' => 'getcm2.localhost:8082/api/v1',
-  );
-  $message = '';
-  try {
-    $property = openenterprise_api_property_load($options, $message);
-  }
-  catch (Exception $e) {
-    dsm($e);
-    return;
-  }
-  dsm($property);
-
-  return '';
-
-  $p = enterprise_editor_available_plugins();
-  dsm($p);
-
+  require_once(drupal_get_path('module', 'enterprise_dashboard') . '/enterprise_dashboard.install');
+  enterprise_dashboard_enable();
   return '';
 }
 
@@ -363,6 +329,7 @@ function enterprise_apps_config_app($app_name, $config_settings = null) {
   enterprise_apps_config_nodes($config_settings, $config_info);
   enterprise_apps_config_menus($config_settings, $config_info);
   enterprise_apps_config_variables($config_settings, $config_info);
+  enterprise_apps_config_permissions($config_settings, $config_info);
   enterprise_apps_config_cta_selectors($config_settings, $config_info);
 
   // clear all caches just in case
@@ -622,16 +589,15 @@ function enterprise_apps_config_form_submit($form, &$form_state) {
         'region' => array($block['region']),
         'visibility_presets' => array(),
       );
-      foreach ($block['visibility_presets'] AS $k => $v) {
-        if ($v) {
-          $config_settings['blocks'][$ci_name]['visibility_presets'][] = $k;
+      if (!empty($block['visibility_presets'])) {
+        foreach ($block['visibility_presets'] AS $k => $v) {
+          if ($v) {
+            $config_settings['blocks'][$ci_name]['visibility_presets'][] = $k;
+          }
         }
       }
     }
   }
-
-  //dsm($config_settings);
-  //dsm($config_info);
 
   enterprise_apps_config_blocks($config_settings, $config_info);
 
@@ -640,6 +606,7 @@ function enterprise_apps_config_form_submit($form, &$form_state) {
 function enterprise_apps_config_blocks($config_settings, $config_info) {
 //dsm($config_settings);
 //dsm($config_info);
+  global $theme_key;
   if (!isset($config_settings['blocks'])) {
     return;
   }
@@ -648,6 +615,7 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
 
   // build array of enabled themes and their regions
   $themes = array();
+
   //$theme_list = list_themes(TRUE);
   // for some reason list_themes does not show themes enabled during install,
   // so using custom query
@@ -664,10 +632,46 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
     }
   }
 
+  if (!$admin_theme = variable_get('admin_theme')) {
+    drupal_theme_initialize();
+    $admin_theme = $theme_key;
+  }
+  $admin_theme_index = -1;
+  if ($admin_theme) {
+    $query = db_select('system', 's')
+      ->fields('s')
+      ->condition('type', 'theme')
+      ->condition('name', $admin_theme);
+    $theme_list = $query->execute()->fetchAllAssoc('name');
+
+    foreach ($theme_list AS $name => $theme) {
+      if ($theme->name) {
+        $regions = system_region_list($name);
+        $themes[$name] = $regions;
+        break;
+      }
+    }
+  }
+
   foreach ($config_settings['blocks'] AS $name => $settings) {
     $ci_block = isset($config_info['blocks'][$name]) ? $config_info['blocks'][$name] : array();
 
     foreach ($themes AS $theme => $block_regions) {
+
+      // only add blocks to admin theme if it is specified as a theme in
+      // $settings['themes'] or the admin_theme prop is set
+      if (!empty($settings['themes']) && is_array($settings['themes']) && !in_array($theme, $settings['themes'])) {
+        //dsm("continue 1 $theme");
+        continue;
+      }
+      else if (!empty($settings['admin_theme']) && ($theme != $admin_theme)) {
+        //dsm("continue 2 $theme");
+        continue;
+      }
+      else if (empty($settings['admin_theme']) && ($theme == $admin_theme)) {
+        //dsm("continue 3 $theme");
+        continue;
+      }
       // get current block if it exists
       //$block0 = block_load($settings['module'], $settings['delta']);
       $query = db_select('block', 'b')
@@ -800,7 +804,8 @@ function enterprise_apps_config_blocks($config_settings, $config_info) {
       $query = db_merge('block')
         ->key($key)
         ->fields($fields);
-  //dsm(" " . $query);
+//dsm($key);
+//dsm($fields);
       $query->execute();
 
       db_delete('block_node_type')
@@ -1239,6 +1244,34 @@ function enterprise_apps_config_variables($config_settings, $config_info) {
   }
 }
 
+function enterprise_apps_config_permissions($config_settings, $config_info) {
+  //dsm($config_settings);
+  //dsm($config_info);
+  if (!isset($config_settings['permissions'])) {
+    return;
+  }
+
+  $existing = &drupal_static(__FUNCTION__);
+  if (!isset($existing)) {
+    $existing = module_invoke_all('permission');
+  }
+
+  $roles = user_roles();
+  foreach ($config_settings['permissions'] AS $name => $perms) {
+    $role = user_role_load_by_name($name);
+    if (!empty($role) && !empty($role->rid)) {
+      // check if the permission exists (e.g. module is enabled), if not remove
+      // permission
+      foreach ($perms as $perm_name => $v) {
+        if (!isset($existing[$perm_name])) {
+          unset($perms[$perm_name]);
+        }
+      }
+      user_role_change_permissions($role->rid, $perms);
+    }
+  }
+}
+
 function enterprise_apps_config_cta_selectors($config_settings, $config_info) {
 //dsm($config_settings);
 //dsm($config_info);
@@ -1349,7 +1382,21 @@ function enterprise_apps_uuid_entities_features_import_entity_alter(&$entity, $e
       }
     }
   }
-//dsm($entity);
+  // adjust user roles to match correct ids
+  if ($entity->entity_type == 'user') {
+    if (!empty($entity->roles)) {
+      $new = array();
+      foreach ($entity->roles as $name) {
+        $role = user_role_load_by_name($name);
+        if (!empty($role) && !empty($role->rid)) {
+          $new[$role->rid] = $name;
+        }
+      }
+      $entity->roles = $new;
+    }
+
+  }
+  //dsm($entity);
 }
 
 /**

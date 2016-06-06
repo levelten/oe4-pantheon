@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Enterprise Landing Pages Test Workflow feature.
- */
-
-include_once 'enterprise_landingpages_test.features.inc';

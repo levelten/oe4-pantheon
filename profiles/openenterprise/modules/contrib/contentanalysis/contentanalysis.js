@@ -26,7 +26,9 @@ var contentanalysis = contentanalysis || {};
 		},
 
 		contentanalysis_back: function() {
-			$$.contentanalysis_show_analyzer_tab(contentanalysisPrevAnalyzerTab);
+          if ($$.contentanalysisPrevAnalyzerTab) {
+            $$.contentanalysis_show_analyzer_tab($$.contentanalysisPrevAnalyzerTab);
+          }
 		  //contentanalysis_show_report_tab(contentanalysisPrevReportTab);
 		},
 
@@ -139,6 +141,7 @@ var contentanalysis = contentanalysis || {};
 		  if(analyzer_override) {
 		    data.action = 'refresh';
 		  }
+
 		  if ($('#contentanalysis-page-analyzer-form').html()) {
 		    data.source = 'admin-form';
 		    data.body = $('[name=input]').val()
@@ -162,7 +165,8 @@ var contentanalysis = contentanalysis || {};
 		    // Turn off CKEditor if any.
 		    var ckeditor = false;
 		    if ($('#cke_edit-body-und-0-value').html()) {
-		      $('#wysiwyg-toggle-edit-body-und-0-value').click();
+		      //$('#wysiwyg-toggle-edit-body-und-0-value').click();
+              $('#switch_edit-body-und-0-value').click();
 		      ckeditor = true;
 		    }
 		
@@ -201,7 +205,8 @@ var contentanalysis = contentanalysis || {};
 		    }	
 		    // Turn back on CKEditor if needed.
 		    if (ckeditor) {
-		      $('#wysiwyg-toggle-edit-body-und-0-value').click();
+		      //$('#wysiwyg-toggle-edit-body-und-0-value').click();
+              $('#switch_edit-body-und-0-value').click();
 		    }
 		
 		  } else {

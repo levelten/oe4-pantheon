@@ -1,5 +1,7 @@
 <?php
 
+define('BLOCKER_UI_URL', 'admin/config/user-interface/blocker');
+
 /**
 * Implements hook_permission().
 */
@@ -165,12 +167,17 @@ function blocker_ui_blocks_page($entity, $entity_type) {
       );
       $markup = '';
       if (isset($block->brid)) {
+        // Assign descriptive image.
+        if (!empty($block->title) && $block->title !== '<none>') {
+          $blocker_block->subject = $block->title;
+        } else {
+          $blocker_block->subject = $block_info[$block->module][$block->delta]['info'];
+        }
         $blocker_block->css_class = $block->css_class;
         $blocker_block->row = $block->row;
         $blocker_block->row_class = $block->row_class;
-        $blocker_block->subject = ($block->title?$block->title:$block_info[$block->module][$block->delta]['info']);
         $blocker_block_vars['elements']['#block'] = $blocker_block;
-        $blocker_block_vars['elements']['#children'] = '<div>' . l(t('Edit'), 'admin/config/user-interface/blocker/edit/' . $block->brid, array('query' => drupal_get_destination())) . ' ' . l(t('Remove'), 'admin/config/user-interface/blocker/delete/' . $block->brid, array('query' => drupal_get_destination())) . '</div>';
+        $blocker_block_vars['elements']['#children'] = _blocker_ui_button($block);
         $markup = theme('block', $blocker_block_vars);
       }
       else {
@@ -232,3 +239,22 @@ function blocker_ui_page_build(&$page) {
   }
 }
 
+function _blocker_ui_button($block) {
+  $output = '';
+  $edit_options = array(
+    'query' => drupal_get_destination(),
+    'attributes' => array('class' => 'button edit'),
+  );
+  $remove_options = array(
+    'query' => drupal_get_destination(),
+    'attributes' => array('class' => 'button remove'),
+  );
+
+  $output .= '<div class="blocker-ui-actions">';
+  $output .= l(t('Edit'), BLOCKER_UI_URL . '/edit/' . $block->brid, $edit_options);
+  $output .= ' ';
+  $output .= l(t('Remove'), BLOCKER_UI_URL . '/delete/' . $block->brid, $remove_options);
+  $output .= '</div>';
+
+  return $output;
+}

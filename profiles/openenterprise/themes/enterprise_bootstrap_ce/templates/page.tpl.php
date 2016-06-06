@@ -113,7 +113,7 @@
   </div>
 </header>
 
-<?php if ($is_front && $front_full_width): ?>
+<?php if (!empty($is_front) && !empty($front_full_width)): ?>
   <div class="main-container">
 <?php else: ?>
   <div class="main-container container">
@@ -145,7 +145,7 @@
       <?php if (!empty($title)): ?>
         <h1 class="page-header"><?php print $title; ?></h1>
       <?php endif; ?>
-      <?php if ($is_front && $front_full_width): ?>
+      <?php if ($is_front && !empty($front_full_width)): ?>
         <div class="information">
       <?php else: ?>
         <div class="information container">

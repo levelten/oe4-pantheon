@@ -1,11 +1,10 @@
 name = OpenEnterprise
 description = OpenEnterprise Distribution by LevelTen Interactive
 distribution_name = OpenEnterprise
-version = "7.x-3.x"
+version = 7.x-3.8
 
 ; Core
 dependencies[] = block
-dependencies[] = comment
 dependencies[] = contextual
 dependencies[] = comment
 dependencies[] = dblog
@@ -112,7 +111,6 @@ dependencies[] = views_responsive_grid
 
 ;; Themeing
 dependencies[] = less
-dependencies[] = ckeditor_less
 
 ;; Enterprise Modules
 dependencies[] = enterprise_apps

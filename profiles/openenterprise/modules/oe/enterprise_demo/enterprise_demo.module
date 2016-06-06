@@ -69,11 +69,13 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
     'enterprise_intel',
     'enterprise_social',
     'enterprise_social_content',
+    'enterprise_seo',
     'enterprise_user',
     'enterprise_user_content',
     'enterprise_comments',
     'enterprise_blog',
     'enterprise_blog_content',
+    'enterprise_dashboard',
     'enterprise_thankyoupage',
     'enterprise_thankyoupage_content',
     //'enterprise_webform_content', //? why is this before enterprise_webform
@@ -82,8 +84,9 @@ function enterprise_demo_enterprise_apps_app_enabled_batch() {
   );
   if (!empty($settings['demo']['mode'])
     && (($settings['demo']['mode'] == 'attract_convert') || $settings['demo']['mode'] == 'standard')) {
-    $required_apps[] = 'enterprise_landingpages';
-    $required_apps[] = 'enterprise_landingpages_content';
+    $required_apps[] = 'enterprise_landingpage';
+    $required_apps[] = 'enterprise_conversion';
+    $required_apps[] = 'enterprise_conversion_content';
   }
   /*
   if (!empty($settings['demo']['mode']) && ($settings['demo']['mode'] == 'standard')) {

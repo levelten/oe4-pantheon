@@ -83,11 +83,39 @@
 }
 
 #kwresearch-site-keywords .page_count {
-  text-align: center;   
+  text-align: right;
+  padding-right: 2em;
 }
 
 #kwresearch-site-keywords .daily_volume {
   text-align: center;	
+}
+
+#kwresearch-site-keywords .gwt-impressions {
+    text-align: right;
+    padding-right: 1em;
+}
+
+#kwresearch-site-keywords .gwt-impressions.active {
+    padding-right: 2em;
+}
+
+#kwresearch-site-keywords .gwt-clicks {
+    text-align: right;
+    padding-right: 1em;
+}
+
+#kwresearch-site-keywords .gwt-clicks.active {
+    padding-right: 2em;
+}
+
+#kwresearch-site-keywords .gwt-position {
+    text-align: right;
+    padding-right: 1em;
+}
+
+#kwresearch-site-keywords .gwt-position.active {
+    padding-right: 2em;
 }
 
 .stats-indicator {
@@ -120,4 +148,10 @@
     background-color:#FFE6B6;
     padding: 0 0 0 0;
     height: 15px;
+}
+
+/* clean up styling on Rubik */
+body.tao #kwresearch-stats-report-form input.form-submit {
+    margin-left: 10px;
+    margin-top: 1.5em;
 }

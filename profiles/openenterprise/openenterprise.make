@@ -56,11 +56,6 @@ projects[entity][version] = 1.5
 projects[entitycache][version] = 1.2
 projects[exclude_node_title][version] = 1.7
 
-projects[features][version] = 2.5
-; How to fix Undefined property: stdClass::$status in features_export_form on PHP 5.4
-; http://drupal.org/node/2324973
-projects[features][patch][2324973] = https://www.drupal.org/files/issues/features-2324973-undefined_property_status-1_0.patch
-
 projects[icon][version] = 1.0-beta3
 projects[libraries][version] = 2.x-dev
 projects[menu_attributes][version] = 1.0-rc2
@@ -104,17 +99,6 @@ projects[better_formats][version] = 1.0-beta1
 projects[ckeditor][version] = 1.x-dev
 projects[ckeditor_blocks][version] = 1.x-dev
 projects[ckeditor_bootstrap][version] = 1.x-dev
-projects[ckeditor_media][version] = 1.x-dev
-projects[video_filter][version] = 3.x-dev
-; video filter dialog with ckeditor standalone module is not working
-; http://drupal.org/node/1689440
-projects[video_filter][patch][1434158] = https://www.drupal.org/files/issues/update_the_readme_for-1434158-11.patch
-
-projects[ckeditor_less][type] = module
-projects[ckeditor_less][download][type] = git
-projects[ckeditor_less][download][directory_name] = ckeditor_less
-projects[ckeditor_less][download][branch] = 7.x-1.x
-projects[ckeditor_less][download][url] = http://git.drupal.org/sandbox/KyleTaylored/2306291.git
 
 ;;;;;;
 ; UI Enhancements
@@ -126,6 +110,8 @@ projects[module_filter][version] = 2.0-alpha2
 projects[menu_trail_by_path][version] = 2.0
 projects[realname][version] = 1.2
 projects[simplified_menu_admin][version] = 1.0-beta2
+projects[adminimal_admin_menu][version] = 1.7
+projects[adminimal_admin_menu][patch][] = https://www.drupal.org/files/issues/adminimal_admin_menu-js-error-2407007-3-no-whitespace-changes.patch
 
 ;;;;;
 ; SEO Modules

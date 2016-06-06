@@ -1,0 +1,2009 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise landing pages feature.
+ */
+
+include_once 'enterprise_conversion.features.inc';
+include_once 'includes/enterprise_conversion.ds_api.inc';
+
+function enterprise_conversion_menu() {
+  $items = array();
+  $items['conversion/util'] = array(
+    'title' => 'Enterprise Conversion Util',
+    'page callback' => 'enterprise_conversion_util',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+  $items['node/%node/convwf'] = array(
+    'title' => 'Conversion WF',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+
+  /*
+  $items['node/%node/convwf/landingpage'] = array(
+    'title' => 'Landing pages',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  */
+
+  $items['node/%node/convwf/thankyou'] = array(
+    'title' => 'Thank you pages',
+    'page callback' => 'enterprise_conversion_premiumoffer_thankyou_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['node/%node/convwf/cta'] = array(
+    'title' => 'CTAs',
+    'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_convwf_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+
+  $items['node/%node/cta'] = array(
+    'title' => 'CTAs',
+    'page callback' => 'enterprise_conversion_landingpage_cta_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_cta_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  $items['node/%node/landingpage'] = array(
+    'title' => 'Landing pages',
+    'page callback' => 'enterprise_conversion_thankyou_landingpage_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_landingpage_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  $items['node/%node/cta/add'] = array(
+    'title' => 'Add CTA',
+    'description' => 'Add a CTA for this landing page.',
+    'page callback' => 'enterprise_conversion_goto_add_cta',
+    'page arguments' => array(1),
+    'access callback' => 'bean_access',
+    'access arguments' => array('create'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+  $items['node/%node/submissions'] = array(
+    'title' => 'Submissions',
+    'page callback' => 'enterprise_conversion_landingpage_submission_list_page',
+    'page arguments' => array(1),
+    'access callback' => 'enterprise_conversion_node_submission_list_access',
+    'access arguments' => array(1),
+    'file' => 'enterprise_conversion.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    //'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  return $items;
+}
+
+function enterprise_conversion_menu_alter(&$items) {
+  $items['node/%node/analytics']['weight'] = 1;
+  //$items['node/%node/blocks']['weight'] = 1;
+}
+
+function enterprise_conversion_node_convwf_list_access($node) {
+  if (!node_access('create', $node)) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['premiumoffer'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * limite CTAs node tab to landingpages
+ * @param $node
+ * @return bool
+ */
+function enterprise_conversion_node_cta_list_access($node) {
+  if (!node_access('create', $node)) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['landingpage'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function enterprise_conversion_node_landingpage_list_access($node) {
+  if (!node_access('create', $node)) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['thankyou'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function enterprise_conversion_node_submission_list_access($node) {
+  if (!module_exists('intel')) {
+    return FALSE;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if ((!empty($et_settings['landingpage']) || !empty($et_settings['thankyou']) || !empty($et_settings['premiumoffer'])) && user_access('view intel visitor data')) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_admin_paths()
+ */
+function enterprise_conversion_admin_paths() {
+  $paths = array(
+    'node/*/cta' => 1,
+    'node/*/landingpage' => 1,
+    'node/*/submissions' => 1,
+    'node/*/convwf' => 1,
+    'node/*/convwf/*' => 1,
+  );
+  return $paths;
+}
+
+function enterprise_conversion_goto_add_cta($node = null, $selector = '') {
+  $options = array(
+    'query' => array(),
+  );
+  if ($node) {
+    $options['query']['target_id'] = $node->nid;
+    $options['query']['destination'] = 'node/' . $node->nid . '/cta';
+  }
+  drupal_goto('block/add/cta', $options);
+}
+
+function enterprise_conversion_util() {
+
+  enterprise_conversion_enterprise_apps_app_enabled();
+  return '';
+}
+
+/**
+ * Implements hook_enterprise_apps_app_enabled()
+ */
+function enterprise_conversion_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_conversion');
+}
+
+function enterprise_conversion_permission() {
+  return array(
+    'bypass thankyou form submission validation' => array(
+      'title' => t('Bypass thank you page form submission validation'),
+      'description' => t('Thank you pages can be set to do a check to see if they were reached using a valid form submission. This permission enables roles to bypass that check and view the node at any time.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_page_alter();
+ * @param $page
+ */
+function enterprise_conversion_page_alter(&$page) {
+  $entity = menu_get_object();
+  $arg2 = arg(2);
+  if (!empty($entity->type)) {
+    $et_settings = variable_get('enterprise_conversion_settings_node__' . $entity->type, array());
+  }
+  if (!empty($entity) && !empty($et_settings['landingpage']) && (empty($arg2) || $arg2 == 'draft')) {
+    if (!empty($entity->entity_data['landingpages']['page_remove_blocks'])) {
+      // add visible blocks to node
+      $save_entity_data = FALSE;
+      if (!isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'])) {
+        $entity->entity_data['landingpages']['page_remove_blocks_ignore'] = array();
+        $save_entity_data = TRUE;
+      }
+
+      $ignore = enterprise_conversion_block_remove_ignore($entity);
+
+      // iterate through page regions
+      // to_delete tracks blocks that are no longer present on page
+      $to_delete = $entity->entity_data['landingpages']['page_remove_blocks_ignore'];
+      foreach(element_children($page) AS $region) {
+        // iterate through blocks in each region
+        foreach (element_children($page[$region]) AS $block_name) {
+          // if block does not exist in ignore list, add setting value to -1
+          // if value set to 1, don't remove block
+          if (!isset($entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name])) {
+            $entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name] = '';
+            $save_entity_data = TRUE;
+          }
+          else if ($entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name]) {
+            unset($to_delete[$block_name]);
+            continue;
+          }
+          else {
+            unset($to_delete[$block_name]);
+          }
+
+          if (!in_array($block_name, $ignore)) {
+            unset($page[$region][$block_name]);
+          }
+
+        }
+      }
+
+      // delete any blocks that are not longer valid
+      if (count($to_delete)) {
+        foreach ($to_delete AS $block_name) {
+          unset($entity->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name]);
+        }
+        $save_entity_data = TRUE;
+      }
+      if ($save_entity_data) {
+        entity_data_set('node', $entity->nid, 'landingpages', $entity->entity_data['landingpages']);
+      }
+    }
+  }
+}
+
+function enterprise_conversion_block_remove_ignore($node) {
+  $ignore = module_invoke_all('enterprise_conversion_block_remove_ignore');
+  if (empty($ignore) || !is_array($ignore)) {
+    $ignore = array();
+  }
+  // add pre defined ignores
+  $defaults = array(
+    'system_main',
+    'admin_menu',
+    'cta_sel_cta_forms',
+  );
+  $ignore = array_merge($ignore, $defaults);
+  drupal_alter('enterprise_conversion_block_remove_ignore', $ignore);
+  return $ignore;
+}
+
+
+/**
+ * Implements hook_tokens_alter
+ * Change [node:field-offer-level] to return key rather than human readable value. Used for pathauto pattern.
+ * @param $replacements
+ * @param $context
+ */
+function enterprise_conversion_tokens_alter(array &$replacements, array $context) {
+  if (isset($replacements['[node:field-track-submission]']) && (!empty($context['data']['node']))) {
+     $node = $context['data']['node'];
+     $track = $node->field_track_submission[$node->language][0]['value'];
+     $replace = '';
+     if (substr($track, 0, 5) == 'goal_') {
+       $a = explode('_', $track);
+       //$replace = strtolower($a[1]);
+       $replace = strtolower(substr($a[1], 0, 1));
+     }
+     $replacements['[node:field-track-submission]'] = $replace;
+  }
+}
+
+function enterprise_conversion_ctas_load_by_node($node, $filters = array()) {
+  $filters['types'] = (isset($filters['types'])) ? $filters['types'] : array('cta');
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'bean');
+
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['landingpage'])) {
+    $query->fieldCondition('field_landingpage', 'target_id', $node->nid);
+  }
+  else {
+    $query->fieldCondition('field_premiumoffer', 'target_id', $node->nid);
+  }
+
+
+  if (!empty($filters['types'])) {
+    $query->entityCondition('bundle', $filters['types'], 'IN');
+  }
+
+  if (isset($filters['pager_limit'])) {
+    $query->tableSort($header)
+      ->pager($filters['pager_limit']);
+  }
+
+  $result = $query->execute();
+  if (!empty($result)) {
+    $entities = bean_load_multiple(array_keys($result['bean']));
+  }
+  else {
+    $entities = array();
+  }
+
+  return $entities;
+}
+
+function enterprise_conversion_node_view($node, $view_mode, $langcode) {
+//dsm($_SESSION);
+//dsm($_GET);
+
+  // check if full view mode 
+  if ($view_mode != 'full') {
+    return;
+  }
+  $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+  if (!empty($et_settings['landingpage'])) {
+//dsm($node);
+  }
+  // do thankyou page processing
+  if (!empty($et_settings['thankyou'])) {
+//dsm($node);
+    // check user permission to bypass
+    $form_type = enterprise_conversion_quick_validate_form_submission();
+    if ($form_type == 'webform') {
+      require_once drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc";
+      $submission = webform_get_submissions(array('sid' => $_GET['sid']));
+      // check if submission exists and if it is recent
+      if (!isset($submission->submitted) || ($submission->submitted + 86400 < time())) {
+        $form_type = '';
+      }      
+    } 
+    if (!$form_type && !user_access('bypass thankyou form submission validation')) {
+      // validation failed. Get redirect from fields.
+      $url = '';      
+      if (isset($node->field_landingpage[$node->language][0]['target_id'])) {
+        $url = 'node/' . $node->field_landingpage[$node->language][0]['target_id'];
+      }
+      else if (isset($node->field_redirect_url[$node->language][0]['url'])) {
+        $url = $node->field_redirect_url[$node->language][0]['url'];
+      }
+//dsm($url);
+return;
+      if (trim($url)) {
+        drupal_set_message(t('Your access to %title has timedout. Resubmit the form for access.', array('%title' => $node->title, '%url' => $url)), 'warning');
+        drupal_goto($url);
+        exit;
+      }
+    }
+  }
+}
+
+/**
+ * does a quick check if form was submitted
+ */
+function enterprise_conversion_quick_validate_form_submission() {
+  // check webform submission
+  if (isset($_GET['sid']) && is_numeric($_GET['sid'])) {
+    return 'webform';
+  }
+  // check HubSpot form id
+  else if (isset($_GET['submissionGuid'])) {
+    $a = explode('-', $_GET['submissionGuid']);
+    if ((count($a) == 5) && (strlen($a[1]) == 4)) {
+      return 'hubspot';
+    }
+  }  
+  return FALSE;
+}
+
+function enterprise_conversion_form_bean_form_alter(&$form, $form_state) {
+  if (isset($form['cta'])) {
+    $form['cta'] += array(
+      '#weight' => 102,
+      '#prefix' => '<div class="display_sidebar">',
+      '#suffix' => '</div>',
+    );
+  }
+  // check if referenced from a landingpage
+  if (!empty($_GET['target_id'])) {
+    $lang = $form['field_landingpage']['#language'];
+    $form['field_landingpage'][$lang]['#default_value'] = $_GET['target_id'];
+    $lp_node = node_load($_GET['target_id']);
+  }
+  if (!empty($_GET['po_target_id'])) {
+    $lang = $form['field_premiumoffer']['#language'];
+    $form['field_premiumoffer'][$lang]['#default_value'] = $_GET['po_target_id'];
+    $lp_node = node_load($_GET['po_target_id']);
+  }
+
+  if (!empty($_GET['selectors'])) {
+    $defs = explode(',', $_GET['selectors']);
+    $form['cta']['selectors']['#default_value'] += $defs;
+    if (!empty($lp_node) && (count($defs) == 1)) {
+      $selectors = cta_selectors();
+      if (!empty($selectors[$defs[0]]['data'])) {
+        if (is_string($selectors[$defs[0]]['data'])) {
+          $data = unserialize($selectors[$defs[0]]['data']);
+        }
+        else {
+          $data = $selectors[$defs[0]]['data'];
+        }
+        if (!empty($data['cta_description'])) {
+          $form['label']['#default_value'] = $lp_node->title . ' (' . $data['cta_description'] . ')';
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORMID_alter()
+ * @param $form
+ * @param $form_state
+ */
+
+function enterprise_conversion_form_node_form_alter(&$form, $form_state) {
+  if (!empty($form['#node']->type)) {
+    $et_settings = variable_get('enterprise_conversion_settings_node__' . $form['#node']->type, array());
+  }
+  if (!empty($et_settings['landingpage'])) {
+    enterprise_conversion_landingpage_node_form_alter($form, $form_state);
+//dsm($form);
+  }
+  else if (isset($form['#node']) && ($form['#node']->type == 'webform')) {
+    enterprise_conversion_webform_node_form_alter($form, $form_state);
+//dsm($form);
+  }
+
+  $lang = $form['language']['#value'];
+  if (!empty($_GET['po_target_id']) && !empty($form['field_premiumoffer'])) {
+    $form['field_premiumoffer'][$lang]['#default_value'] = array($_GET['po_target_id']);
+  }
+}
+
+function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state) {
+  // if node add form, exit
+  $options = array(
+    '' => t(' - None - '),
+  );
+  $default_value = '';
+  if (isset($form['#node']->nid)) {
+    $selection = cta_selection_load('node/' . $form['#node']->nid, 'cta_forms');
+    $default_value = $selection['block_module'];
+    if (!empty($selection['block_module'])) {
+      $default_value = $selection['block_module'] . ':' . $selection['block_delta'];
+    }
+    else if (!empty($selection['bean_delta'])) {
+      $default_value = 'bean:' . $selection['bean_delta'];
+    }
+  }
+
+//dsm($form);
+//dsm($form_state);
+//dsm($_REQUEST);
+
+  // check if form entityconnect cache is set
+  if (isset($_REQUEST['build_cache_id']) && ($cid = $_REQUEST['build_cache_id'])) {
+    $cache = cache_get($cid);
+//dsm($cache);
+    if (isset($cache->data['field'])  && ($cache->data['field'] == 'cta_selections_cta_forms')) {
+      // disable entityconnect normal processing
+      $form_state['#entityconnect_processed'] = TRUE;
+      unset($_REQUEST['return']);
+
+      // check if entity connect returning from webform add
+      if ($cache->data['add_child'] && ($cache->data['target_entity_type'] == 'node')) {
+        $default_value = 'webform:client-block-' . $cache->data['target_id'];
+      }
+      if ($form_state['rebuild']) {
+        unset($_REQUEST['build_cache_id']);
+      }
+    }
+  }
+
+  $blocks = cta_blocks_by_selector('cta_forms');
+  if (is_array($blocks)) {
+    foreach ($blocks AS $bi => $block) {
+      $func = $block['module'] . '_block_info';
+      $infos = $func();
+      // check to make sure block info exists for block (i.e. it has not been
+      // deleted). If deleted remove from list
+      // TODO: this is a hack. The CTA module should delete meta data when a block
+      // is delted
+      if (!isset($infos[$block['delta']])) {
+        cta_block_meta_delete($block['module'], $block['delta']);
+        continue;
+      }
+      $info = $infos[$block['delta']];
+      $name = $block['module'] . ':' . $block['delta'];
+      $options[$name] = $info['info'];
+    }
+  }
+  $blocks = cta_beans_by_selector('cta_forms');
+  if (is_array($blocks)) {
+    foreach ($blocks AS $block) {
+      $bean = bean_load($block['delta']);
+      if (empty($bean)) {
+        cta_bean_meta_delete($block['module'], $block['delta']);
+        continue;
+      }
+      $options["bean:" . $block['delta']] = $bean->label;
+    }
+  }
+
+  asort($options);
+
+  $field_suffix = '<br />';
+  if (module_exists('enterprise_config')) {
+    $path = CONFIG_WIZARD_PAGE_ROOT . 'wizard/webform';
+  }
+  else {
+    $path = 'node/add/webform';
+  }
+  $link_options = array(
+    'attributes' => array(
+      'target' => 'add_webform',
+    ),
+  );
+  $icon = '+';
+  if (module_exists('icon')) {
+    //$icon = theme('icon', array('bundle' => 'bootstrap', 'icon' => 'glyphicon-plus'));
+    $icon = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-plus'));
+    $link_options['html'] = TRUE;
+  }
+  $field_suffix .= l($icon . t('Add webform'), $path, $link_options);
+
+  /*
+  $form['cta'] = array(
+    '#tree' => TRUE,
+    'selections' => array(),
+  );
+  */
+
+  $widget_element = $form['field_thankyou'][LANGUAGE_NONE];
+  $widget_element['#bundle'] = 'webform';
+  //$form['cta']['selections']['cta_forms'] = array(
+  $form['enterprise_conversion_cta_form'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('display_sidebar')
+    ),
+  );
+  $form['enterprise_conversion_cta_form']['cta_form'] = array(
+    '#type' => 'select',
+    '#title' => t('Submission form'),
+    '#description' => t('Select the submit form to be used on the landing page.'),
+    '#options' => $options,
+    '#default_value' => $default_value,
+  );
+
+  entityconnect_add_form_element_new($form['enterprise_conversion_cta_form'], 'selections', 'cta_selections_cta_forms', '', 'all', 'select single-value', $form['enterprise_conversion_cta_form']['cta_form'] , 'node', array('webform' => 'webform'));
+  entityconnect_add_form_element_edit($form['enterprise_conversion_cta_form'], 'selections', 'cta_selections_cta_forms', '', 'all', 'select single-value', $form['enterprise_conversion_cta_form']['cta_form'] , 'node');
+
+  $form['enterprise_conversion_cta_form']['add_entityconnect__cta_selections_cta_forms_all_']['#submit'] = array(
+    'entityconnect_include_form',
+    'enterprise_conversion_form_add_edit_button_submit',
+  );
+  $form['enterprise_conversion_cta_form']['edit_entityconnect__cta_selections_cta_forms_all_']['#submit'] = array(
+    'entityconnect_include_form',
+    'enterprise_conversion_form_add_edit_button_submit',
+  );
+
+  $form['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
+
+  // If there are actions, $form[#validate] may not get called, so add it here, too
+  if (isset($form['actions']['submit'])) {
+    $form['actions']['submit']['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
+  }
+
+  $data = isset($selection['data']) ? $selection['data'] : array();
+  if (is_string($data)) {
+    $data = unserialize($data);
+  }
+
+
+  $lp_options = array();
+  if (isset($form['#node']->nid)) {
+    $lp_options = entity_data_get('node', $form['#node']->nid, 'landingpages', array(), $form['#node']->vid);
+  }
+
+  $form['form_customization'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Form display customization'),
+    '#collapsible' => TRUE,
+    '#collapsed' => (empty($lp_options['form_title']) && empty($lp_options['form_content_prefix']) && empty($lp_options['form_submit_text'])),
+    '#description' => t('Customize form display settings for this landing page.'),
+    '#weight' => 1,
+    '#prefix' => '<div class="display_sidebar">',
+    '#suffix' => '</div>',
+  );
+
+  $form['form_customization']['form_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($lp_options['form_title']) ? $lp_options['form_title'] : '',
+    '#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
+  );
+
+  $form['form_customization']['form_content_prefix'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Form lead-in'),
+    '#default_value' => isset($lp_options['form_content_prefix']) ? $lp_options['form_content_prefix'] : '',
+    '#rows' => 3,
+    '#description' => t('Enter any text you would like placed before the form.'),
+  );
+
+  $form['form_customization']['form_submit_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Submit button text'),
+    '#default_value' => isset($lp_options['form_submit_text']) ? $lp_options['form_submit_text'] : '',
+    '#description' => t('Enter custom submit button text. Leave blank to keep form default.'),
+  );
+
+  $form['form_customization']['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced customization'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['form_customization']['advanced']['form_wrapper_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form wrapper class'),
+    '#default_value' => isset($lp_options['form_wrapper_class']) ? $lp_options['form_wrapper_class'] : '',
+    '#description' => t('Enter any custom classes you would like add to the form wrapper button.'),
+  );
+  $form['form_customization']['advanced']['form_submit_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Submit button class'),
+    '#default_value' => isset($lp_options['form_submit_class']) ? $lp_options['form_submit_class'] : '',
+    '#description' => t('Enter any custom classes you would like add to the submit button.'),
+  );
+
+  // remove entity_data to prevent conflicts with entity_data_entity_save
+  $form['page_customization'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Page display options'),
+    '#collapsible' => TRUE,
+    '#collapsed' => (empty($data['block_title']) && empty($data['cta_form_content_prefix']) && empty($data['cta_form_submit_text'])),
+    //'#description' => t('Customize form display settings for this landing page.'),
+    '#weight' => 0,
+    '#prefix' => '<div class="display_sidebar">',
+    '#suffix' => '</div>',
+  );
+
+  $form['page_customization']['page_remove_blocks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Remove blocks'),
+    '#default_value' => isset($lp_options['page_remove_blocks']) ? $lp_options['page_remove_blocks'] : 0,
+    //'#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
+  );
+
+
+  $form['page_customization']['page_remove_blocks_advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Remove blocks customization'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  if (isset($lp_options['page_remove_blocks_ignore'])) {
+    $desc = t('Check any block you would like to not be removed from the page view when the remove blocks option is enabled.');
+    $desc .= ' ' . t('Note: disabled checkboxes are set to automatically be excluded in the code.');
+    $form['page_customization']['page_remove_blocks_advanced']['page_remove_blocks_ignore'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Don\'t remove'),
+      '#options' => array(),
+      '#default_value' => isset($lp_options['page_remove_blocks_ignore']) ? $lp_options['page_remove_blocks_ignore'] : array(),
+      '#description' => $desc,
+    );
+    $ignore = enterprise_conversion_block_remove_ignore($form['#node']);
+    $form_state['page_remove_blocks_ignore_defaults'] = $ignore;
+
+    $element = &$form['page_customization']['page_remove_blocks_advanced']['page_remove_blocks_ignore'];
+    foreach ($lp_options['page_remove_blocks_ignore'] AS $block_name => $value) {
+      $element['#options'][$block_name] = $block_name;
+      if (in_array($block_name, $ignore)) {
+        $element[$block_name]['#disabled'] = TRUE;
+        $element['#default_value'][$block_name] = $block_name;
+      }
+    }
+  }
+
+  /*$lp_options = entity_data_get('node', $form['#node']->nid, 'landingpages', array());
+  $form['page_customization']['page_remove_dwyr_blocks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Remove DWYR blocks'),
+    '#default_value' => isset($lp_options['page_remove_dwyr_blocks']) ? $lp_options['page_remove_dwyr_blocks'] : 0,
+    //'#description' => t('Enter a custom form block title. Enter <none> to remove the title or leave blank to keep form default.'),
+  );*/
+  //dsm($selection);
+  //dsm($form);
+
+  enterprise_conversion_node_form_alter_form_redirect_group($form, $form_state);
+
+  // remove entity_data to prevent conflicts with entity_data_entity_save
+  $form['intel_tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Conversion tracking'),
+    '#collapsible' => TRUE,
+    '#collapsed' => (empty($data['block_title']) && empty($data['cta_form_content_prefix']) && empty($data['cta_form_submit_text'])),
+    //'#description' => t('Customize form display settings for this landing page.'),
+    '#weight' => 6,
+    '#prefix' => '<div class="display_sidebar">',
+    '#suffix' => '</div>',
+  );
+
+  //$form['#groups']['group_form_redirect']['#weight']
+
+
+
+
+  $intel_level = intel_api_level();
+  if ($intel_level != 'pro') {
+    $msg = '<div class="messages warning">';
+    $msg .= t('The Pro version of Intel is required to enable form redirects by landing pages.');
+    $msg .= ' ' . l(t('Learn more about API versions'), INTEL_HELP_APIVERS, array('attributes' => array('target' => '_blank'))) . '.';
+    $msg .= '</div>';
+    $form['form_redirect_msg'] = array(
+      '#type' => 'markup',
+      '#markup' => $msg,
+    );
+    //$form['#groups']['group_form_redirect']->children[] = 'form_redirect_msg';
+    $form['#group_children']['form_redirect_msg'] = 'group_form_redirect';
+    $form['field_thankyou']['#disabled'] = TRUE;
+    $form['field_redirect_url']['#disabled'] = TRUE;
+  }
+
+}
+
+function enterprise_conversion_landingpage_node_form_validate(&$form, &$form_state) {
+
+  if (!isset($form['#node']->cta)) {
+    $form['#node']->cta = array();
+  }
+  if (!isset($form['#node']->cta['selections'])) {
+    $form['#node']->cta['selections'] = array();
+  }
+
+//dsm($form_state);
+  $e = explode(':', $form_state['values']['cta_form']);
+  if (count($e) == 2) {
+
+    if (!isset($form['#node']->cta['selections']['cta_forms'])) {
+      $form['#node']->cta['selections']['cta_forms'] = array();
+    }
+    $selection = &$form['#node']->cta['selections']['cta_forms'];
+
+    if (!isset($selection['data']) || !is_array($selection['data'])) {
+      $selection['data'] = array();
+    }
+    $module = $e[0];
+    $delta = $e[1];
+    if ($module == 'bean') {
+      $selection['bean_delta'] = $delta;
+      $selection['block_module'] = '';
+      $selection['block_delta'] = '';
+    }
+    else {
+      $selection['bean_delta'] = '';
+      $selection['block_module'] = $module;
+      $selection['block_delta'] = $delta;
+    }
+    // save this to the node in the form_state
+    $form_state['node']->cta['selections']['cta_forms'] = $selection;
+  }
+
+
+
+  if (!isset($form_state['node']->entity_data)) {
+    $form_state['node']->entity_data = array();
+  }
+  if (!isset($form_state['node']->entity_data['landingpages'])) {
+    $form_state['node']->entity_data['landingpages'] = array();
+  }
+  $form_state['node']->entity_data['landingpages']['form_title'] = $form_state['values']['form_title'];
+  $form_state['node']->entity_data['landingpages']['form_content_prefix'] = $form_state['values']['form_content_prefix'];
+  $form_state['node']->entity_data['landingpages']['form_submit_text'] = $form_state['values']['form_submit_text'];
+  $form_state['node']->entity_data['landingpages']['form_submit_class'] = $form_state['values']['form_submit_class'];
+  $form_state['node']->entity_data['landingpages']['form_wrapper_class'] = $form_state['values']['form_wrapper_class'];
+
+  $form_state['node']->entity_data['landingpages']['page_remove_blocks'] = $form_state['values']['page_remove_blocks'];
+  // loop through page_remove_blocks_ignore to attach to entity_data.
+  if (isset($form_state['values']['page_remove_blocks_ignore'])) {
+    $form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore'] = array();
+    $ignore = (isset($form_state['page_remove_blocks_ignore_defaults']) ? $form_state['page_remove_blocks_ignore_defaults'] : array());
+    foreach ($form_state['values']['page_remove_blocks_ignore'] AS $block_name => $value) {
+        // don't set value for blocks provided by ignore function
+      $form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore'][$block_name] = (!in_array($block_name, $ignore)) ? $value : '';
+    }
+    // set flush flag to refresh blocks list on page_alter
+    //$form_state['node']->entity_data['landingpages']['page_remove_blocks_ignore_flush'] = 1;
+  }
+
+  //$form['#node']->cta['selections']['cta_forms'] = $form_state['values']['cta_form'];
+}
+
+/**
+ * Call when a new entity is to be added or edited.
+ *
+ * We cache the current state and form
+ * and redirect to the add or edit page with an append build_cached_id.
+ */
+function enterprise_conversion_form_add_edit_button_submit(&$form, &$form_state) {
+  $cache_id = "entityconnect-" . $form['#build_id'];
+  $field = $form_state['clicked_button']['#field'];
+  $key   = $form_state['clicked_button']['#key'];
+
+  $target_entity_type = 'node';
+  $target_id = '_none';
+  $acceptable_types = array('webform' => 'webform');
+
+  $cta = $form_state['input']['cta_form'];
+  $e = explode(':', $cta);
+  if ($e[0] == 'webform') {
+    $target_entity_type = 'node';
+    $e2 = explode('-', $e[1]);
+    $target_id = $e2[2];
+  }
+
+  if (!$target_entity_type) {
+    return;
+  }
+
+  $data = array(
+    'form'       => $form,
+    'form_state' => $form_state,
+    'dest'       => $_GET['q'],
+    'field'      => $field,
+    'field_info' => array(),
+    'key'        => $key,
+    'add_child'  => $form_state['clicked_button']['#add_child'],
+    'target_id'  => $target_id,
+    'target_entity_type' => $target_entity_type,
+    'acceptable_types' => $acceptable_types,
+  );
+
+  entityconnect_cache_set($cache_id, $data);
+
+  unset($_GET['destination']);
+  if ($data['add_child']) {
+    $form_state['redirect'] = "admin/entityconnect/add/$cache_id";
+  }
+  else {
+    if ($data['target_id']) {
+      $form_state['redirect'] = "admin/entityconnect/edit/$cache_id";
+    }
+  }
+}
+
+
+function enterprise_conversion_webform_node_form_alter(&$form, $form_state) {
+  drupal_add_css(drupal_get_path('module', 'enterprise_conversion') . '/enterprise_conversion.webform_edit.css');
+  $node = $form['#node'];
+  $webform = $node->webform;
+
+  // get cta block settings for webform
+  if (!empty($webform['nid'])) {
+    $delta = 'client-block-' . $webform['nid'];
+    $meta = cta_block_meta_load('webform',  $delta);
+  }
+
+  $options = array(
+    '' => t('Page only'),
+    'block' => t('Page & block (can be used in sidebars)'),
+    'cta_forms' => t('Page, block and CTA form selector (used on landing pages)'),
+  );
+  $default_value = 'cta_forms';
+  if (isset($_GET['landingpages_form_block'])) {
+    $default_value = $_GET['landingpages_form_block'];
+  }
+  if (isset($node->landingpages_webform_block)) {
+    $default_value = $node->landingpages_webform_block;
+  }
+
+  $form['landingpages_webform_block'] = array(
+    '#type' => 'radios',
+    '#title' => t('Form usage'),
+    '#description' => t('Check this box to make this form available for selection on landing pages.'),
+    '#options' => $options,
+    //'#default_value' => entity_data_get('node', $node->nid, 'landingpages_webform_block', $default_value),
+    '#default_value' => $default_value,
+    '#prefix' => '<div class="display_sidebar">',
+    '#suffix' => '</div>',
+    '#weight' => -10,
+  );
+
+  enterprise_conversion_node_form_alter_form_redirect_group($form, $form_state);
+
+  $vars = array(
+    'path' => drupal_get_path('module', 'entityconnect') . '/theme/images/pencil.png'
+  );
+  $edit_text = theme('image', $vars);
+  $link_options = array(
+    'html' => TRUE,
+  );
+  // check entityconnect query data
+  if (!empty($_GET['build_cache_id'])) {
+    $link_options['query'] = array(
+      'build_cache_id' => $_GET['build_cache_id']
+    );
+  }
+  $edit = '';
+  if (isset($webform['nid'])) {
+    $wf_link_options = array(
+      'query' => drupal_get_destination()
+    );
+    // webform fields
+    $items = array();
+    foreach ($webform['components'] AS $comp) {
+      if ($comp['type'] == 'markup') {
+        continue;
+      }
+      //$items[] = $comp['name'];// . ' (' . $comp['type'] . ')';
+      $items[] = l($comp['name'], 'node/' . $webform['nid'] . '/webform/components/' . $comp['cid'], $wf_link_options);
+    }
+    if (count($items)) {
+      $out = implode(', ', $items);
+    }
+    else {
+      $out = t('No fields have been added yet.');
+    }
+
+    $edit = l($edit_text, 'node/' . $form['#node']->nid . '/webform', $link_options);
+    $form['enterprise_conversion_fields'] = array(
+      '#type' => 'item',
+      '#title' => t('Form fields') .  ' ' . $edit,
+      '#markup' => $out,
+      '#prefix' => '<div class="display_sidebar">',
+      '#suffix' => '</div>',
+      '#weight' => 101,
+    );
+
+    // notifications
+    $form['enterprise_conversion_notifications'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Notifications'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#description' => t('Notifications sent when form submitted.'),
+      '#weight' => 102,
+      '#prefix' => '<div class="display_sidebar">',
+      '#suffix' => '</div>',
+    );
+
+    $items = array();
+    foreach ($webform['emails'] AS $email) {
+      // check if response is back to submitter (email is the component id)
+      if (is_numeric($email['email'])) {
+        $items[] = l(t('Auto responder'), 'node/' . $webform['nid'] . '/webform/emails/' . $email['eid'], $wf_link_options);
+      }
+      else {
+        $items[] = l($email['email'], 'node/' . $webform['nid'] . '/webform/emails/' . $email['eid'], $wf_link_options);
+      }
+    }
+    if (count($items)) {
+      $out = implode(', ', $items);
+    }
+    else {
+      $out = t('No email recipients have been added yet.');
+    }
+
+    $edit = l($edit_text, 'node/' . $form['#node']->nid . '/webform/emails', $link_options);
+    $form['enterprise_conversion_notifications']['enterprise_conversion_emails'] = array(
+      '#type' => 'item',
+      '#title' => t('Emails') .  ' ' . $edit,
+      '#markup' => $out,
+      //'#prefix' => '<div class="display_sidebar">',
+      //'#suffix' => '</div>',
+      //'#weight' => 102,
+    );
+
+    // SMS texts
+    $items = array();
+    if (isset($webform['intel']['send_sms']) && is_array($webform['intel']['send_sms'])) {
+      foreach ($webform['intel']['send_sms'] AS $num => $sms) {
+        $items[] = $num;
+      }
+    }
+    if (count($items)) {
+      $out = implode(', ', $items);
+    }
+    else {
+      $out = t('No SMS text recipients have been added.');
+    }
+
+    $edit = l($edit_text, 'node/' . $form['#node']->nid . '/webform/phone', $link_options);
+    $form['enterprise_conversion_notifications']['enterprise_conversion_sms'] = array(
+      '#type' => 'item',
+      '#title' => t('SMS texts') .  ' ' . $edit,
+      '#markup' => $out,
+      //'#prefix' => '<div class="display_sidebar">',
+      //'#suffix' => '</div>',
+     // '#weight' => 102,
+    );
+  }
+  // if node/add
+  else {
+    if (function_exists('intel_webform_present_components')) {
+
+
+      $form['enterprise_conversion_setup'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Quick setup'),
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+        '#description' => t('The settings below enable you to quickly initialize your form using common configuration settings. You can further customize the form after saving.'),
+        '#weight' => 103,
+        '#prefix' => '<div class="display_sidebar">',
+        '#suffix' => '</div>',
+      );
+
+      $comps = intel_webform_present_components();
+      $options = array();
+      foreach ($comps AS $name => $comp) {
+        $options[$name] = $comp['name'];
+      }
+      $form['enterprise_conversion_setup']['landingpages_webform_fields'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Form fields'),
+        '#description' => t('Select any fields you would like to add to the form.'),
+        '#options' => $options,
+        '#default_value' => array('email', 'first_name', 'last_name'),
+      );
+
+      $comps = intel_webform_existing_components(TRUE, array(), array('markup'));
+      //dsm($comps);
+
+      $form['enterprise_conversion_setup']['landingpages_webform_emails'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Email notifications'),
+        '#description' => t('Enter any email addresses you would like emailed when the form is submitted. Use commas to seperate multiple values.'),
+      );
+
+      $form['enterprise_conversion_setup']['landingpages_webform_sms'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SMS text notifications'),
+        '#description' => t('Enter any phone numbers you would like texted when the form is submitted. Use commas to seperate multiple values.'),
+      );
+
+
+    }
+  }
+}
+
+function enterprise_conversion_node_form_alter_form_redirect_group(&$form, $form_state) {
+  if (isset($form['field_thankyou'])) {
+    if (empty($form['field_thankyou'][LANGUAGE_NONE]['#default_value'])
+      && empty($form['field_redirect_url'][LANGUAGE_NONE]['#default_value'])
+    ) {
+      $form['#fieldgroups']['group_form_redirect']->format_settings['formatter'] = 'collapsed';
+    }
+    else {
+      $form['#fieldgroups']['group_form_redirect']->format_settings['formatter'] = 'collapsible';
+    }
+  }
+}
+
+function enterprise_conversion_node_form_alter_landingpage_redirect_group(&$form, $form_state) {
+  if (isset($form['field_landingpage'])) {
+    if (empty($form['field_landingpage'][LANGUAGE_NONE]['#default_value'])
+      && empty($form['field_redirect_url'][LANGUAGE_NONE]['#default_value'])
+    ) {
+      $form['#fieldgroups']['group_landingpage_redirect']->format_settings['formatter'] = 'collapsed';
+    }
+    else {
+      $form['#fieldgroups']['group_landingpage_redirect']->format_settings['formatter'] = 'collapsible';
+    }
+  }
+}
+
+function enterprise_conversion_node_view_alter(&$build) {
+  //dsm($build);
+}
+
+function enterprise_conversion_node_load($nodes, $types) {
+  $et_settings = array();
+  foreach ($nodes AS $nid => $node) {
+    if (!isset($et_settings[$node->type])) {
+      $et_settings[$node->type] = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+    }
+    if (!empty($et_settings[$node->type]['landingpage'])) {
+      enterprise_conversion_landingpage_node_load($nodes[$nid]);
+    }
+    else if ($node->type == 'webform') {
+      enterprise_conversion_webform_node_load($nodes[$nid]);
+    }
+  }
+}
+
+function enterprise_conversion_landingpage_node_load(&$node) {
+
+}
+
+function enterprise_conversion_webform_node_load(&$node) {
+  $webform = $node->webform;
+
+  // determine webform_block setting
+  $delta = 'client-block-' . $webform['nid'];
+  $meta = cta_block_meta_load('webform',  $delta);
+
+  $node->landingpages_webform_block = '';
+  if (!empty($webform['block'])) {
+    $node->landingpages_webform_block = 'block';
+  }
+  if (!empty($meta['selectors']) && in_array('cta_forms', $meta['selectors'])) {
+    $node->landingpages_webform_block = 'cta_forms';
+  }
+
+}
+
+/**
+ * Implements hook_node_insert()
+ *
+ */
+function enterprise_conversion_node_insert($node) {
+  enterprise_conversion_node_save($node);
+}
+
+/**
+ * Implements hook_node_update()
+ *
+ */
+function enterprise_conversion_node_update($node) {
+  enterprise_conversion_node_save($node);
+}
+
+/**
+ * Implements hook_node_save()
+ *
+ * Used to set data on node before saving
+ *
+ */
+function enterprise_conversion_node_presave($node) {
+  if ($node->type == 'webform') {
+    // detect if settings are from form settings or node edit
+    $nid = 0;
+    $form_settings = (strpos($_GET['q'], '/webform/configure')) ? 1 : 0;
+    if ($form_settings) {
+      $sys_path = drupal_get_normal_path($node->webform['redirect_url']);
+      $e = explode('/', $sys_path);
+      if ((count($e) == 2) && $e[0] == 'node' && is_numeric($e[1])) {
+        $nid = $e[1];
+      }
+      if (isset($node->field_thankyou)) {
+        $node->field_thankyou = array($node->language => array());
+        if ($nid) {
+          $node->field_thankyou[$node->language][] = array('target_id' => $nid);
+        }
+      }
+      if (isset($node->field_redirect_url)) {
+        $node->field_redirect_url = array($node->language => array());
+        if (!$nid) {
+          $node->field_redirect_url[$node->language][] = array('url' => $node->webform['redirect_url']);
+        }
+      }
+    }
+    else {
+      if (!empty($node->field_thankyou[$node->language][0]['target_id'])) {
+        $node->webform['redirect_url'] = 'node/' . $node->field_thankyou[$node->language][0]['target_id'];
+      }
+      else if (!empty($node->field_redirect_url[$node->language][0]['url'])) {
+        $node->webform['redirect_url'] = $node->field_redirect_url[$node->language][0]['url'];
+      }
+    }
+  }
+
+  // save landingpage_webform_block setting before node is saved
+  // (do other settings after nid is created)
+  if (isset($node->landingpages_webform_block)) {
+    $block_enabled = ($node->landingpages_webform_block) ? 1 : 0;
+    if ($node->webform['block'] != $block_enabled) {
+      $node->webform['block'] = $block_enabled;
+    }
+  }
+
+  if (isset($node->landingpages_webform_fields)) {
+    $comps = intel_webform_present_components();
+    $cid = 1;
+    foreach ($node->landingpages_webform_fields AS $name => $value) {
+      if ($value) {
+        $comp = $comps[$name];
+        $comp['cid'] = $cid;
+        $node->webform['components'][$cid] = $comp;
+        $cid++;
+      }
+    }
+    // initial intel and mailchimp fields
+    intel_webform_setup_webform_config($node);
+  }
+
+  if (isset($node->landingpages_webform_emails) && isset($node->webform)) {
+    $emails = explode(',', $node->landingpages_webform_emails);
+    foreach ($emails AS $email) {
+      $email = trim($email);
+      $node->webform['emails'][] = array(
+        'email' => $email,
+        'subject' => 'default',
+        'from_name' => 'default',
+        'from_address' => 'default',
+        'template' => 'default',
+        'excluded_components' => array(),
+        'html' => 0,
+        'attachments' => 0,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_node_[insert|update]()
+ * Used for node insert and update to save any cta elements attached to nodes
+ *
+ */
+function enterprise_conversion_node_save($node) {
+  if ($node->type == 'webform') {
+    if (isset($node->landingpages_webform_block)) {
+      //entity_data_set('node', $node->nid, 'landingpages_webform_block', $node->landingpages_webform_block);
+      $delta = 'client-block-' . $node->nid;
+      // get existing cta block meta settings
+      $meta = cta_block_meta_load('webform',  $delta);
+      if ($node->landingpages_webform_block == 'cta_forms') {
+        // check if block meta already exists
+        if (!isset($meta['selectors'])) {
+          $meta = array(
+            'list_visibility' => 1,
+            'selectors' => array(),
+            'data' => array(
+              'ga_event' => array(
+                'track' => 0,
+              )
+            ),
+          );
+        }
+        if (!in_array('cta_forms', $meta['selectors'])) {
+          $meta['selectors'][] = 'cta_forms';
+          cta_block_meta_save($meta, 'webform', $delta);
+        }
+      }
+      // landingpage form enable not set
+      else {
+        // only do something if meta exists
+        if (isset($meta['selectors'])) {
+          // if cta_forms selector is set, unset
+          $i = array_search('cta_forms', $meta['selectors']);
+          if ($i !== FALSE) {
+            unset($meta['selectors'][$i]);
+            cta_block_meta_save($meta, 'webform', $delta);
+          }
+        }
+      }
+    }
+    if (isset($node->landingpages_webform_sms)) {
+      $intel_settings = variable_get('intel_webform_settings_node_' . $node->nid, array());
+      $smss = explode(',', $node->landingpages_webform_sms);
+      foreach ($smss AS $sms) {
+        $sms = trim($sms);
+        if (!isset($intel_settings['send_sms'])) {
+          $intel_settings['send_sms'] = array();
+        }
+        $intel_settings['send_sms'][$sms] = $sms;
+      }
+      variable_set('intel_webform_settings_node_' . $node->nid, $intel_settings);
+    }
+  }
+}
+
+/*
+function enterprise_conversion_form_alter(&$form, &$form_state) {
+  //dsm($form);
+  //dsm($form_state);
+
+  //$time = REQUEST_TIME;
+  //$params = session_get_cookie_params();
+  //setcookie('referer_q', $_GET['q'], 0, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+}
+
+
+function enterprise_conversion_webform_submission_presave($node, &$submission) {
+  if (isset($_COOKIE['l10i_l']) && module_exists('intel')) {
+    $loc_comps = intel_parse_href($_COOKIE['l10i_l']);
+    if (empty($loc_comps['system_path'])) {
+      return;
+    }
+    $a = explode('/', $loc_comps['system_path']);
+    if (($a[0] == 'node') && is_numeric($a[1])) {
+      $ref_node = node_load($a[1]);
+      dsm($ref_node);
+      if (($ref_node->type == 'enterprise_landingpage')) {
+        if (isset($ref_node->field_thankyou[$ref_node->language][0]['target_id'])) {
+          $ref_nid = $ref_node->field_thankyou[$ref_node->language][0]['target_id'];
+        }
+        if (!empty($ref_nid)) {
+          $node->webform['redirect_url'] = 'node/' . $ref_nid;
+        }
+        else if (isset($ref_node->field_redirect_url[$ref_node->language][0]['url'])) {
+          $ref_url = $ref_node->field_redirect_url[$ref_node->language][0]['url'];
+          if ($ref_url) {
+            $node->webform['redirect_url'] = $ref_url;
+          }
+        }
+      }
+    }
+  }
+}
+*/
+
+function enterprise_conversion_cta_block_view_alter(&$block, $selector, $selection) {
+
+  if ($selector == 'cta_forms') {
+    $node = menu_get_object();
+    if (!empty($node->type)) {
+      $et_settings = variable_get('enterprise_conversion_settings_node__' . $node->type, array());
+    }
+    if (!empty($node)
+      && !empty($et_settings['landingpage'])
+      && !empty($node->entity_data)
+      && !empty($node->entity_data['landingpages']) )
+    {
+      $lp_options = $node->entity_data['landingpages'];
+      if (!empty($lp_options['form_title'])) {
+        $block['subject'] = ($lp_options['form_title'] != '<none>') ? filter_xss($lp_options['form_title']) : '';
+      }
+
+      if (!empty($lp_options['form_submit_text'])) {
+        if ($selection['block_module'] == 'webform') {
+          $webform_block = enterprise_conversion_webform_block_view($selection['block_delta']);
+          //dsm($webform_block);
+        }
+
+        if (isset($webform_block['content']['#form'])) {
+          $form = &$webform_block['content']['#form'];
+          $form['actions']['submit']['#value'] = $lp_options['form_submit_text'];
+          if (!empty($lp_options['form_submit_class'])) {
+            if (!isset($form['actions']['submit']['#attributes']['class'])) {
+              $form['actions']['submit']['#attributes']['class'] = array();
+            }
+            $form['actions']['submit']['#attributes']['class'][] = $lp_options['form_submit_class'];
+          }
+          if (!empty($lp_options['form_wrapper_class'])) {
+            //if (!isset($block['classes_array'])) {
+             // $block['classes_array'] = array();
+            //}
+            $block['form_wrapper_class'] = $lp_options['form_wrapper_class'];
+          }
+        }
+      }
+
+      // if webform_block, render before returning and return
+      if (isset($webform_block['content']['#form'])) {
+        //$block['content']['#contextual_links'] += $webform_block['content']['#contextual_links'];
+        //$block['content']['#markup'] = isset($selection['data']['block_content_prefix']) ? filter_xss($selection['data']['block_content_prefix']) : '';
+        $block['content']['#markup'] = drupal_render($webform_block['content']);
+      }
+
+      if (!empty($lp_options['form_content_prefix'])) {
+        if (isset($block['content']['#markup'])) {
+          $block['content']['#markup'] = filter_xss($lp_options['form_content_prefix']) . $block['content']['#markup'];
+        }
+      }
+      //dsm($block);
+      //dsm($selector);
+      //dsm($selection);
+    }
+
+  }
+}
+
+
+function enterprise_conversion_preprocess_block(&$vars) {
+  $block = $vars['block'];
+  if (isset($block->form_wrapper_class)) {
+    $vars['classes_array'] = array_merge($vars['classes_array'], explode(' ', $block->form_wrapper_class));
+  }
+}
+
+
+/**
+ * replicates webform's block_view without rendering output so we can do alterations
+ * @param string $delta
+ * @return array
+ */
+function enterprise_conversion_webform_block_view($delta = '') {
+  global $user;
+
+  // Load the block-specific configuration settings.
+  $webform_blocks = variable_get('webform_blocks', array());
+  $settings = isset($webform_blocks[$delta]) ? $webform_blocks[$delta] : array();
+  $settings += array(
+    'display' => 'form',
+    'pages_block' => 0,
+  );
+
+  // Get the node ID from delta.
+  $nid = drupal_substr($delta, strrpos($delta, '-') + 1);
+
+  // Load node in current language.
+  if (module_exists('translation')) {
+    global $language;
+    if (($translations = translation_node_get_translations($nid)) && (isset($translations[$language->language]))) {
+      $nid = $translations[$language->language]->nid;
+    }
+  }
+
+  // The webform node to display in the block.
+  $node = node_load($nid);
+
+  // Return if user has no access to the webform node.
+  if (!node_access('view', $node)) {
+    return;
+  }
+
+  // This is a webform node block.
+  $node->webform_block = TRUE;
+
+  // Use the node title for the block title.
+  $subject = $node->title;
+
+  // If not displaying pages in the block, set the #action property on the form.
+  if ($settings['pages_block']) {
+    $node->webform['action'] = FALSE;
+  }
+  else {
+    $query = array_diff_key($_GET, array('q' => ''));
+    $node->webform['action'] = url('node/' . $node->nid, array('query' => $query));
+  }
+
+  // Generate the content of the block based on display settings.
+  if ($settings['display'] == 'form') {
+    webform_node_view($node, 'full');
+    $content = $node->content['webform'];
+  }
+  else {
+    $teaser = ($settings['display'] == 'teaser') ? 'teaser' : 'full';
+    $content = node_view($node, $teaser);
+  }
+
+  // Add contextual links for the webform node if they aren't already there.
+  if (!isset($content['#contextual_links']['node'])) {
+    $content['#contextual_links']['node'] = array('node', array($node->nid));
+  }
+
+  // Create the block.
+  // Note that we render the content immediately here rather than passing back
+  // a renderable so that if the block is empty it is hidden.
+  $block = array(
+    'subject' => $subject,
+    'content' => $content,
+  );
+  return $block;
+}
+
+function enterprise_conversion_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_conversion' => array(),
+  );
+
+  $settings['enterprise_conversion']['blocks'] = array(
+    // add forms selector to landing page
+    'cta:sel_cta_forms' => array(
+      'regions' => array(
+        'sidebar_second',
+      ),
+      'node_type' => array(
+        'types' => array(
+          'enterprise_landingpage',
+        ),
+      ),
+      'weight' => 0,
+    ),
+    'cta:sel_cta_sidebar' => array(
+      'path' => array(
+        'pages' => array(
+          'admin/*',
+        ),
+        'visibility' => 0,
+      ),
+      'weight' => 0,
+    ),
+    'cta:sel_cta_footer' => array(
+      'path' => array(
+        'pages' => array(
+          'admin/*',
+        ),
+        'visibility' => 0,
+      ),
+      'weight' => 10,
+    ),
+  );
+
+  return $settings;
+}
+
+/**
+ * Implements hook_enterprise_config_apps_structures()
+ *
+ * Provides blocks config data
+ * @return array
+ */
+function enterprise_conversion_enterprise_apps_config_info() {
+  $structures = array();
+  $structures['enterprise_conversion'] = array(
+    'title' => t('Landing pages'),
+  );
+
+  $visibility_presets = array(
+    'enterprise_landingpage_content_type' => array(
+      'title' => t('Show on landing pages'),
+      'node_type' => array(
+        'types' => array(
+          'enterprise_landingpage',
+        ),
+      )
+    ),
+    'enterprise_thankyou_content_type' => array(
+      'title' => t('Show on thank you pages'),
+      'node_type' => array(
+        'types' => array(
+          'enterprise_thankyou',
+        ),
+      )
+    ),
+    'exclude_front' => array(
+      'title' => t('Exclude from front page'),
+      'path' => array(
+        'pages' => array(
+          '<front>',
+        ),
+        'visibility' => 0,
+      )
+    ),
+    'exclude_landingpage' => array(
+      'title' => t('Exclude from landing pages'),
+      'path' => array(
+        'pages' => array(
+          'offer/*',
+        ),
+        'visibility' => 0,
+      )
+    ),
+    'exclude_thankyou' => array(
+      'title' => t('Exclude from thank you pages'),
+      'path' => array(
+        'pages' => array(
+          'thank-you/*',
+        ),
+        'visibility' => 0,
+      )
+    ),
+  );
+
+  $structures['enterprise_conversion']['blocks'] = array();
+
+  $structures['enterprise_conversion']['blocks']['cta:sel_cta_sidebar'] = array(
+    'description' => t('Selector for sidebar CTAs'),
+    'default' => array(
+      'regions' => array('sidebar_second'),
+      'visibility_presets' => array(
+        'exclude_front',
+        'exclude_landingpage',
+        'exclude_thankyou',
+      ),
+      'weight' => 0,
+    ),
+    'visibility_presets' => $visibility_presets,
+  );
+  $structures['enterprise_conversion']['blocks']['cta:sel_cta_footer'] = array(
+    'description' => t('Selector for footer CTAs'),
+    'default' => array(
+      'regions' => array('content'),
+      'visibility_presets' => array(
+        'exclude_front',
+        'exclude_landingpage',
+        'exclude_thankyou',
+      ),
+      'weight' => 0,
+    ),
+    'visibility_presets' => $visibility_presets,
+  );
+
+
+  $display_desc = array();
+  if (module_exists('enterprise_blog')) {
+    $view = views_get_view('enterprise_blog_blocks');
+    if (!empty($view)) {
+      foreach ($view->display AS $name => $display) {
+        $display_desc['blog:' . $name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+      }
+    }
+    $structures['enterprise_conversion']['blocks']['views:enterprise_blog_blocks-recent'] = array(
+      'description' => $display_desc['blog:recent'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_thankyou_content_type'),
+      ),
+      'visibility_presets' => $visibility_presets,
+    );
+    $structures['enterprise_conversion']['blocks']['views:enterprise_blog_blocks-popular'] = array(
+      'description' => $display_desc['blog:popular'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array(),
+      ),
+      'visibility_presets' => $visibility_presets,
+    );
+    $structures['enterprise_conversion']['blocks']['views:enterprise_blog_blocks-related'] = array(
+      'description' => $display_desc['blog:rel'],
+      'default' => array(
+        'regions' => array('content'),
+        'visibility_presets' => array('enterprise_thankyou_content_type'),
+      ),
+      'visibility_presets' => $visibility_presets,
+    );
+  }
+
+  return $structures;
+}
+
+/**
+ * Implements hook_styler().
+ *
+ * Tell styler module what styles this module provides.
+ */
+function enterprise_conversion_styler_style() {
+  $styles = array();
+
+  $styles['ctas'] = array(
+    '#title' => t('Calls to Action'),
+    '#description' => t('Various templates for marking up CTAs.'),
+  );
+
+  $styles['ctas']['tags'] = array(
+    '#title' => t('CTA tags'),
+    '#description' => check_plain(t('Use the button classes on an <div>, <a>, <button>, or <input> element.')),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<a class="cta cta-default" href="#" role="button">Link</a>
+<div class="cta cta-default" href="#" role="button">Div</div>
+<button class="cta cta-default" type="submit">Button</button>
+<input class="cta cta-default" type="button" value="Input">
+<input class="cta cta-default" type="submit" value="Submit">',
+    ),
+  );
+
+  $styles['ctas']['options'] = array(
+    '#title' => t('Options'),
+    '#description' => t('Use any of the available CTA classes to quickly create a styled CTA.'),
+  );
+  $styles['ctas']['options']['default'] = array(
+    '#tag' => 'markup',
+    '#value' => '<a href="#" class="cta cta-default">Default</a>
+<a href="#" class="cta cta-primary">Primary</a>
+<a href="#" class="cta cta-secondary">Secondary</a>
+<a href="#" class="cta cta-accent">Accent</a>
+<a href="#" class="cta cta-link">Link</a>',
+  );
+
+
+  // Buttons
+  $styles['ctas']['button-group'] = array(
+    '#title' => t('Button Groups'),
+    '#description' => t('Extend buttons by adding text or icons before, after, or on both sides of any text-based button group body. Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value_replace_eol' => 1,
+      '#value' => '<a href="#" class="cta cta-default btn-group">
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  <span class="btn-group-body">Download Now</span>  
+</a>
+
+<a href="#" class="cta cta-primary btn-group">
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+</a>
+
+<a href="#" class="cta cta-accent btn-group">
+  <span class="btn-group-addon"><i class="icon glyphicon glyphicon-star"></i></span>
+  <span class="btn-group-body">Download Now</span>
+  <span class="btn-group-addon cta-default"><i class="icon glyphicon glyphicon-download"></i></span>
+</a>
+',
+    ),
+  );
+
+  // Sidebar
+  $styles['ctas']['panel'] = array(
+    '#title' => t('Panels'),
+    '#description' => t('The cta-panel class makes cta-header, cta-body and cta-footer full width to allow content and background colors to go full width.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '
+<div class="row">
+  <div class="col-sm-6">
+    Example 1:<br />
+    <a href="#">
+      <div class="cta cta-panel cta-default cta-outline-none cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title">Call to Action Heading</h3>
+        </div>
+          <p class="m-t-1 m-b-1">
+          Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.
+          </p>
+
+          <div class="cta cta-accent btn-group btn-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+          </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-panel cta-default cta-block">
+        <div class="cta-heading cta-primary">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body">
+          <img src="http://placehold.it/120x150" class="pull-left" />
+          <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>            
+        </div>
+        <div class="cta-footer">
+          <div class="cta cta-accent btn-group">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-ok-sign"></i></span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+  <p>...</p>
+  <button class="btn btn-cta btn-group">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
+</div>
+
+Example 2:
+<div class="cta cta-primary">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-lg-5 col-sm-12 col-xs-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-block">Download Now</button>
+    </div>
+  </div>
+</div>',
+    ),
+  );
+
+  // Sidebar
+  $styles['ctas']['sidebar'] = array(
+    '#title' => t('Sidebars'),
+    '#description' => t('To be displayed in narrow containers such as sidebars.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '
+<div class="row">
+  <div class="col-sm-6">
+    Example 1:<br />
+    <a href="#">
+      <div class="cta cta-default cta-block">
+        <h3 class="cta-title text-primary">Call to Action Heading</h3>
+        <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+        <button class="btn btn-cta btn-group">
+          <span class="btn-group-body">Download Now</span>
+          <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6">
+    Example 2:<br />
+    <a href="#">
+      <div class="cta cta-primary cta-block">
+        <div class="cta-heading">
+          <h3 class="cta-title text-left">Call to Action Heading</h3>
+        </div>
+        <div class="cta-body row">
+          <div class="col-lg-5 col-sm-12 col-xs-5">
+            <img src="http://placehold.it/120x150" />
+          </div>
+          <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+            <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+            <button class="btn cta-accent btn-block">Download Now</button>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+  <p>...</p>
+  <button class="btn btn-cta btn-group">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
+</div>
+
+Example 2:
+<div class="cta cta-primary">
+  <h3 class="cta-heading text-left">Call to Action Heading</h3>
+  <div class="row">
+    <div class="col-lg-5 col-sm-12 col-xs-5">
+      <img src="http://placehold.it/120x150" />
+    </div>
+    <div class="col-lg-7 col-sm-12 col-xs-7 text-left">
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-block">Download Now</button>
+    </div>
+  </div>
+</div>',
+    ),
+  );
+
+  // Footer
+  $styles['ctas']['footer'] = array(
+    '#title' => t('Footers'),
+    '#description' => t('To be displayed in wide format such as in content section.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<div class="row margin-bottom">
+  <div class="col-md-12">
+    Example 1:<br />
+    <div class="cta cta-default cta-block">
+      <h3 class="cta-title text-primary">Call to Action Heading</h3>
+      <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+      <button class="btn btn-cta btn-group center-block">
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
+  </div>
+  </div>
+<div class="row margin-bottom">
+<div class="col-md-12">
+    Example 2:<br />
+    <div class="cta cta-primary cta-block">
+      <div class="row">
+        <div class="col-md-2 col-xs-4">
+          <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+        </div>
+        <div class="col-md-10 col-xs-8 text-left">
+          <h3 class="cta-title">Call to Action Heading</h3>
+          <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+          <button class="btn cta-accent btn-group center-block">
+            <span class="btn-group-body">Download Now</span>
+            <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-default cta-block">
+  <h3 class="cta-heading text-primary">Call to Action Heading</h3>
+  <p>...</p>
+  <button class="btn btn-cta btn-group center-block">
+    <span class="btn-group-body">Download Now</span>
+    <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+  </button>
+</div>
+
+Example 2:
+<div class="cta cta-primary cta-block">
+  <div class="row">
+    <div class="col-md-2 col-xs-4">
+      <img src="http://placehold.it/120x150" style="max-height: 120px;" />
+    </div>
+    <div class="col-md-10 col-xs-8 text-left">
+      <h3 class="cta-heading">Call to Action Heading</h3>
+      <p>...</p>
+      <button class="btn btn-cta-accent btn-group center-block">
+        <span class="btn-group-body">Download Now</span>
+        <span class="btn-group-addon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
+  </div>
+</div>',
+    ),
+  );
+/*
+  $styles['ctas']['rectangle'] = array(
+    '#title' => t('Rectangles'),
+    '#description' => t('Icons can be generated using the <code>&lt;i&gt;</code> tag and using the class attribute to specify the icon.'),
+    'element' => array(
+      '#tag' => 'markup',
+      '#value' => '<div class="row">
+  <div class="col-md-6">
+    <a href="#">
+    <div class="cta cta-rectangle">
+      <h3>Build a Smarter Website</h3>
+      <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+      <button class="btn-cta btn-group pull-right">
+        <span class="btn-verb">Get it now!</span>
+        <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+      </button>
+    </div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a href="#">
+    <div class="cta cta-rectangle cta-secondary">
+      <h3>Build a Smarter Website</h3>
+      <div class="col-md-5">
+        <img src="http://placehold.it/120x150" />
+      </div>
+      <div class="col-md-7">
+        <p>Eight essential steps to transform your site into an inbound marketing machine.</p>
+        <button class="btn-cta btn-group">
+          <span class="btn-verb">Get it now!</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+      </div>
+    </div>
+    </a>
+  </div>
+</div>',
+      '#value_highlight' => 'Example 1:
+<div class="cta cta-rectangle">
+  <h3>Build a Smarter Website</h3>
+  <p>...</p>
+  <button class="btn-cta btn-group pull-right">
+          <span class="btn-verb">Get it now!</span>
+          <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+        </button>
+</div>
+
+Example 2:
+<div class="cta cta-rectangle cta-secondary">
+  <h3>Build a Smarter Website</h3>
+  <div class="col-md-5">
+    <img src="..." />
+  </div>
+  <div class="col-md-7">
+    <p>....</p>
+    <button class="btn-cta btn-group">
+      <span class="btn-verb">Get it now!</span>
+      <span class="btn-icon"><i class="icon glyphicon glyphicon-download"></i></span>
+    </button>
+  </div>
+</div>',
+    ),
+  );
+  */
+
+  return $styles;
+}

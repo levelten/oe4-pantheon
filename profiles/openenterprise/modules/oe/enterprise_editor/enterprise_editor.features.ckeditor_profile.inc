@@ -228,7 +228,7 @@ function enterprise_editor_ckeditor_profile_defaults() {
             'name' => 'picture_ckeditor',
             'desc' => 'Support responsive images with the Picture module.',
             'buttons' => FALSE,
-            'path' => '%base_path%' . drupal_get_path('module', 'picture') . '/plugins/',
+            'path' => '%base_path%' . drupal_get_path('module', 'picture') . '/ckeditor/plugins/',
             'default' => 't',
           ),
           'trifold' => array(
@@ -244,16 +244,14 @@ function enterprise_editor_ckeditor_profile_defaults() {
           ),
           'video_filter' => array(
             'name' => 'video_filter',
-            'desc' => 'Plugin for inserting video tags with video_filter.',
+            'desc' => 'Plugin to directly embed videos with the video filter module.',
             'path' => '%base_path%' . drupal_get_path('module', 'video_filter') . '/editors/ckeditor/',
             'buttons' => array(
               'video_filter' => array(
-                'icon' => 'video_filter.png',
                 'label' => 'Video filter',
+                'icon' => 'video_filter.png',
               ),
             ),
-            'url' => 'http://drupal.org/project/video_filter',
-            'load' => TRUE,
           ),
         ),
       ),

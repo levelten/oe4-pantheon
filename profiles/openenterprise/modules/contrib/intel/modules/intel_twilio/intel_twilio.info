@@ -1,8 +1,9 @@
 name = Twilio Intelligence
 core = "7.x"
-description = "Integrates Twilio with LevelTen Intel EXPERIMENTAL"
+description = "Integrates Twilio for phone call tracking and SMS notifications"
 package = Intelligence
 
 dependencies[] = intel
 dependencies[] = twilio
+dependencies[] = twilio_twiml
 

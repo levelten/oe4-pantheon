@@ -1,0 +1,184 @@
+<?php
+/**
+ * @file
+ * Code for the Enterprise Work feature.
+ */
+
+include_once('enterprise_work.features.inc');
+
+
+/**
+ * Implements hook_enterprise_apps_on_enable()
+ */
+function enterprise_work_enterprise_apps_app_enabled() {
+  enterprise_apps_config_app('enterprise_work');
+}
+
+function enterprise_work_enterprise_apps_config_settings() {
+  $settings = array(
+    'enterprise_work' => array(),
+  );
+  $settings['enterprise_work']['options'] = array(
+    'section_path' => 'work',
+    'section_path_node' => 'work',
+    //'multi_author' => 1,  // FALSE or number for path slug order
+    //'multi_class' => FALSE, // FALSE or number for path slug order
+    //'taxonomy_categories' => 'blog_categories',
+    'taxonomy_tags' => 'tags',
+  );
+
+  $variables = array();
+  $settings['enterprise_work']['variables'] = $variables;
+
+  return $settings;
+}
+
+
+/**
+ * Implements hook_enterprise_apps_config_info()
+ * @return array
+ */
+function enterprise_work_enterprise_apps_config_info() {
+  $config = array();
+  $config['enterprise_work'] = array(
+    'title' => t('Work'),
+  );
+
+  // blocks config
+  $visibility = array(
+    'enterprise_work_view' => array(
+      'title' => t('Show on work listing pages'),
+      'views' => array(
+        'views' => array(
+          'enterprise_work:page',
+          //'enterprise_work:categories',
+          //'enterprise_work:tags',
+          //'enterprise_work:archives',
+        ),
+      ),
+    ),
+    'enterprise_work_content_type' => array(
+      'title' => t('Show on work pages'),
+      'node_type' => array(
+        'types' => array('enterprise_work'),
+      )
+    ),
+  );
+  $view = views_get_view('enterprise_work_blocks');
+  $display_desc = array();
+  if (!empty($view)) {
+    foreach ($view->display AS $name => $display) {
+      $display_desc[$name] = isset($display->display_options['display_description']) ? $display->display_options['display_description'] : '';
+    }
+  }
+
+  $config['enterprise_work']['blocks'] = array(
+    // Blog categories block
+    'views:enterprise_work_blocks-service_types' => array(
+      'description' => $display_desc['service_types'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view'),
+        'weight' => -6,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_work_blocks-service_areas' => array(
+      'description' => $display_desc['service_areas'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view'),
+        'weight' => -5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_work_blocks-tags' => array(
+      'description' => $display_desc['tags'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view'),
+        'weight' => -4,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    /*
+    'views:enterprise_work_blocks-archives' => array(
+      'description' => $display_desc['archives'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view'),
+        'weight' => -3,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_work_blocks-recent' => array(
+      'description' => $display_desc['recent'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view', 'enterprise_work_content_type'),
+        'weight' => 5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_work_blocks-popular' => array(
+      'description' => $display_desc['popular'],
+      'default' => array(
+        'regions' => array('sidebar_second'),
+        'visibility_presets' => array('enterprise_work_view', 'enterprise_work_content_type'),
+        'weight' => 6,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    'views:enterprise_work_blocks-related' => array(
+      'description' => $display_desc['related'],
+      'default' => array(
+        'regions' => array('content'),
+        'visibility_presets' => array('enterprise_work_content_type'),
+        'weight' => 5,
+      ),
+      'visibility_presets' => $visibility,
+    ),
+    */
+    /**/
+  );
+  return $config;
+}
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
+ *
+ */
+function enterprise_work_taxonomy_term_service_types_uri_alter(&$url, $term) {
+  //return;
+  $app_settings = enterprise_apps_config_settings('enterprise_work');
+  $url['path'] = 'rel-view/' . $url['path'];
+  return;
+  $url = array(
+    //'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
+  );
+}
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
+ *
+ */
+function enterprise_work_taxonomy_term_service_tags_uri_alter(&$url, $term) {
+  //return;
+  $app_settings = enterprise_apps_config_settings('enterprise_work');
+  $url['path'] = 'rel-view/' . $url['path'];
+  return;
+  $url = array(
+    //'path' => $app_settings['options']['section_path'] . '/' . drupal_clean_css_identifier(strtolower($term->name)),
+  );
+}
+
+/**
+ * Implements hook_taxonomy_term_VOCABULARY_MACHINE_NAME_uri_alter()
+ *
+ */
+function enterprise_work_taxonomy_term_service_areas_uri_alter(&$url, $term) {
+  $app_settings = enterprise_apps_config_settings('enterprise_work');
+  $url = array(
+    'path' => $app_settings['options']['section_path'] . '/-/' . drupal_clean_css_identifier(strtolower($term->name)),
+  );
+}

@@ -1,81 +1,141 @@
 .hatch-block-title {
-	position: relative;
-	z-index: 1;
-	line-height: 1em;
-	text-align: center;
-	margin-bottom: 1em;
-	&:before, &:after {
-		position: absolute;
-		top: 38%;
-		overflow: hidden;
-		width: 35%;
-		height: 10px;
-		content: '\a0';
-		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAh0lEQVQYV2P89fDQfzZ5O0YGIPj19OR/RmZ2BlYJAzD/x80N/yESQEUMLOwMbNLmYP7vFxf+//34gIFDPYARrpPhz08GmEkgncz8CmCTGEHGwnSCTPr34x1YJ8wkRpBxyHYycQjBTQK7Cd1OdDfBXQuzE+YbEA2ymhHkIGQ7//8FOhbqG5CbAIqFXH5FfSSpAAAAAElFTkSuQmCC);
-		background-repeat: repeat;
-	}
-	&:before {
-		margin-left: -37%;
-	}
-	&:after {
-		margin-left: 2%;
-	}
+  position: relative;
+  z-index: 1;
+  line-height: 1em;
+  text-align: center;
+  margin-bottom: 1em;
+  &:before, &:after {
+    position: absolute;
+    top: 38%;
+    overflow: hidden;
+    width: 35%;
+    height: 10px;
+    content: '\a0';
+    // background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAh0lEQVQYV2P89fDQfzZ5O0YGIPj19OR/RmZ2BlYJAzD/x80N/yESQEUMLOwMbNLmYP7vFxf+//34gIFDPYARrpPhz08GmEkgncz8CmCTGEHGwnSCTPr34x1YJ8wkRpBxyHYycQjBTQK7Cd1OdDfBXQuzE+YbEA2ymhHkIGQ7//8FOhbqG5CbAIqFXH5FfSSpAAAAAElFTkSuQmCC);
+    background-repeat: repeat;
+  }
+  &:before {
+    margin-left: -37%;
+  }
+  &:after {
+    margin-left: 2%;
+  }
 }
 
 .front {
-	.block-row-odd {
-		background-color: @brand-accent;
-		color: white;
-		padding: 1em 0;
-		h2, h3 {
-			color: white;
-		}
-		.block-title {
-			&:extend(.hatch-block-title all);
-			&:before, &:after {
-				background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAATUlEQVQYV2NkYGAwBuKzQAwCIPYzIH4O4zMiSYCYMIWSQLYUiI9LAdwkkAJ0K1BMAikAGQe3E2ol3E0wK+B2orsJ2Q0oroeZhO4GDJMARQ4Tu6WLU1YAAAAASUVORK5CYII=);
-			}
-		}
-	}
-	.block-row-even {
-		padding: 1em 0;
-		&:first-child {
-			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAP0lEQVQYV2P89evXfzY2NkYGPACkBqwAn2KYHNwkbIqRxVCsRJZA14jhNpACkHPQ3U2eQqKsJsozRAUPsQEOAKSXR+UvUfAkAAAAAElFTkSuQmCC) repeat;
-		}
-		.block-title {
-			&:extend(.hatch-block-title all);
-		}
-	}
+  .carousel {
+    border-bottom: 7px solid @brand-secondary;
+  }
+
+  .main-container {
+    .block-title {
+      color: @brand-secondary;
+      text-align: center;
+      overflow: hidden;
+      width: 100%;
+      padding-bottom: 1.3em;
+
+      // horizontal line on either side of block titles
+      &:before,
+      &:after {
+        background-color: @brand-secondary;
+        content: "";
+        display: inline-block;
+        height: 1px;
+        position: relative;
+        vertical-align: middle;
+        width: 20%;
+      }
+      &:before {
+        right: 0.5em;
+        margin-left: -50%;
+      }
+      &:after {
+        left: 0.5em;
+        margin-right: -50%;
+      }
+    }
+
+    .home-hero {
+      background: url('../images/operation.jpg') no-repeat center center;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      border-bottom: 7px solid @brand-secondary;
+      border-top: 0 none !important;
+
+      h2 {
+        color: @brand-secondary;
+      }
+
+      p {
+        color: darken(@brand-primary, 20%);
+        font-size: 1.1em;
+      }
+    }
+
+    .block-row-even {
+      background-color: @brand-accent-2;
+      border-top: 25px solid lighten(@brand-accent-2, 5%);
+      color: @brand-primary;
+
+      .block-title {
+        color: @brand-primary;
+
+        // horizontal line on either side of block titles
+        &:before,
+        &:after {
+          background-color: @brand-primary;
+        }
+      }
+      .btn {
+        background-color: transparent;
+      }
+    }
+    .block-block {
+      padding: 2.5em 0;
+    }
+
+    .team {
+      a {
+        display: block;
+        padding: 10px 0;
+        margin-top: 10px;
+
+        h3 {
+          margin: 0;
+        }
+
+        h4 {
+          padding-top: 3px;
+          color: @brand-secondary;
+        }
+
+        &:hover {
+          background-color: @brand-secondary;
+          text-decoration: none;
+
+          h3, h4 {
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
 }
 
 #search-block-form {
-	.input-group-btn {
-		padding-left: 10px;
-		button {
-			background-color: @brand-accent;
-			border-color: @brand-accent;
-			color: white;
-			&:hover {
-				background-color: darken(@brand-accent, 10%);
-				border-color: darken(@brand-accent, 10%);
-			}
-		}
-	}
+  .input-group-btn {
+    padding-left: 10px;
+    button {
+      background-color: @brand-accent;
+      border-color: @brand-accent;
+      color: white;
+      &:hover {
+        background-color: darken(@brand-accent, 10%);
+        border-color: darken(@brand-accent, 10%);
+      }
+    }
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

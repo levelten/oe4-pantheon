@@ -20,7 +20,7 @@ function kwresearch_menu() {
     'description' => 'Research keywords and prioritize site keywords.',
     'page callback' => 'kwresearch_keywords_list_page',
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/site_report.inc',
   );
@@ -28,7 +28,7 @@ function kwresearch_menu() {
     'title' => 'Keyword lists',
     'page callback' => 'kwresearch_keywords_list_page',
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'file' => 'includes/site_report.inc',
     'weight' => -8,
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -38,7 +38,7 @@ function kwresearch_menu() {
     'page callback' => 'kwresearch_keywords_list_page',
     'page arguments' => array(4),
     'access callback' => 'user_access',
-    'access arguments' => array('kwresearch admin site keywords'),
+    'access arguments' => array('kwresearch access site keywords'),
     'file' => 'includes/site_report.inc',
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -68,7 +68,7 @@ function kwresearch_menu() {
     'title' => 'Keyword stats',
     'page callback' => 'kwresearch_keyword_stats_report_page',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('kwresearch query keyword stats'),
     'type' => MENU_LOCAL_TASK,
     'weight' => -6,
     'file' => 'includes/stats_report.inc',
@@ -199,22 +199,30 @@ function kwresearch_admin_paths() {
 /**
  * Testing function
  */
-function kwresearch_util($pid) {
-  return " ";
+function kwresearch_util() {
+  return '';
 }
-    
+
 /**
  * Implements hook_permission()
 ().
  */
 function kwresearch_permission() {
   return array(
+    'kwresearch access site keywords' => array(
+      'title' => t('Access site keywords'),
+      'description' => t('Enables viewing of the site keywords.'),
+    ),
+    'kwresearch query keyword stats' => array(
+      'title' => t('Query keyword stats'),
+      'description' => t('Enables access to keyword research form.'),
+    ),
     'kwresearch admin site keywords' => array(
-      'title' => t('kwresearch admin site keywords'),
+      'title' => t('Administer site keywords'),
       'description' => t('Enables site (global) level keyword management such as adding and prioritizing keywords.'),
     ),
     'kwresearch admin page keywords' => array(
-      'title' => t('kwresearch admin page keywords'),
+      'title' => t('Administer page keywords'),
       'description' => t('Enables page level keyword management.'),
     ),
   );
@@ -409,13 +417,17 @@ function kwresearch_load_filtered_keyword_result($filter = array(), $options = a
   $query = db_select('kwresearch_keyword', 'k')
      ->extend('PagerDefault')
      ->limit($limit);
-  $u = $query->leftJoin('users', 'u', '%alias.uid = k.uid');
+  //$u = $query->leftJoin('users', 'u', '%alias.uid = k.uid');
   $query->fields('k');
-  $query->addField($u, 'name', 'username'); 
+  //$query->addField($u, 'name', 'username');
 
   if (module_exists('linkintel')) {
     $r = $query->leftJoin('linkintel_request', 'r', '%alias.kid = k.kid');
     $query->addField($r, 'path', 'link_request_path');
+  }
+
+  if (module_exists('intel_gwt')) {
+    kwresearch_add_intel_gwt_query_settings($query);
   }
 
   if (!empty($header)) {
@@ -434,10 +446,35 @@ function kwresearch_load_filtered_keyword_result($filter = array(), $options = a
     //$sql .= " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') . $filter['where'];
     //$count_sql .=  " WHERE " . (($options['mode'] == 'site') ? 'k.priority >= 0 AND ' : '') .  $filter['where'];
   }
-  
+
+  //dsm(" " . $query);
+
   $result = $query->execute();
 
   return $result;
+}
+
+function kwresearch_add_intel_gwt_query_settings(&$query) {
+  $g = $query->leftJoin('intel_gwt_search', 'g', '%alias.keyword = k.keyword AND (%alias.timeframe = :timeframe1 OR %alias.keyword IS NULL)',
+    array(
+      ':timeframe1' => 'l28',
+    ));
+  $query->addField($g, 'impressions', 'gwt_impressions');
+  $query->addField($g, 'clicks', 'gwt_clicks');
+  $query->addField($g, 'position', 'gwt_position');
+
+  $h = $query->leftJoin('intel_gwt_search', 'h', '%alias.keyword = k.keyword AND (%alias.timeframe = :timeframe0 OR %alias.keyword IS NULL)',
+    array(
+      ':timeframe0' => 'm28',
+    ));
+  $query->addField($h, 'impressions', 'gwt_impressions0');
+  $query->addField($h, 'clicks', 'gwt_clicks0');
+  $query->addField($h, 'position', 'gwt_position0');
+  $query->addExpression('CAST(' . $g . '.impressions AS SIGNED) - CAST(' . $h . '.impressions AS SIGNED)', 'gwt_impressions_chg');
+  $query->addExpression('CAST(' . $g . '.clicks AS SIGNED) - CAST(' . $h . '.clicks AS SIGNED)', 'gwt_clicks_chg');
+  $query->addExpression($g . '.position - ' . $h . '.position', 'gwt_position_chg');
+  $query->groupBy('k.keyword');
+  return $query;
 }
 
 /**
@@ -1163,12 +1200,25 @@ function kwresearch_nodeapi_OLD(&$node, $op, $a3 = NULL, $a4 = NULL) { }
  * Add Content Optimizer field set to node edit forms.
  * Add Content Analysis enabled field to content type admin form
  */
-function kwresearch_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['type']['#value']) && ($form['type']['#value'] . '_node_form' == $form_id)) {
+//function kwresearch_form_alter(&$form, $form_state, $form_id) {
+function kwresearch_form_node_form_alter(&$form, $form_state, $form_id) {
+  //if (isset($form['type']['#value']) && ($form['type']['#value'] . '_node_form' == $form_id)) {
+  if (1) {
 
     $node = $form['#node'];
     
     require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'kwresearch') . "/includes/tax_report.inc";
+
+    if (!empty($_GET['kwresearch_page_kid'])) {
+      $kid0 = $_GET['kwresearch_page_kid'];
+      $kw0 = kwresearch_get_keyword($kid0);
+      if (isset($form['contentanalysis'])
+        && isset($form['contentanalysis']['seo'])
+        && isset($form['contentanalysis']['seo']['keyword'])
+        && !$form['contentanalysis']['seo']['keyword']['#default_value']) {
+        $form['contentanalysis']['seo']['keyword']['#default_value'] = $kw0;
+      }
+    }
 
     drupal_add_css(drupal_get_path('module', 'kwresearch') . '/kwresearch.css');
     drupal_add_js(drupal_get_path('module', 'kwresearch') . '/kwresearch.js');
@@ -1204,7 +1254,10 @@ function kwresearch_form_alter(&$form, $form_state, $form_id) {
             if (empty($terms[$keyword_obj->keyword])) {
               $form[$id][$node->language]['#default_value'] .= (($form[$id][$node->language]['#default_value']) ? ', ' : '') . $keyword_obj->keyword;
             }
-          }          
+          }
+          if (empty($form[$id][$node->language]['#default_value']) && !empty($kw0)) {
+            $form[$id][$node->language]['#default_value'] = $kw0;
+          }
           $keywords = $form[$id][$node->language]['#default_value'];
           // move field to additional settings group 
           $form['kwresearch'] = array(

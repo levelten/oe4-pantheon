@@ -28,54 +28,14 @@ function bella_process_page(&$variables) {
   }
 }
 
-/*
-* Create custom LESS variables
-*/
-function bella_less_variables() {
-  // Grab the color palette saved by the color module.
-  $color_pallete = variable_get('color_bella_palette', FALSE);
-  // If the color palette hasn't been saved yet, use the default.
-  if (empty($color_pallete)) {
-    $color_pallete = array(
-      'brandprimary' => '#EA9B3E',
-      'brandsecondary' => '#F5F5F5',
-      'brandaccent' => '#FFF',
-      'brandaccent2' => '#EA9B3E',
-      'brandaccent3' => '#EA9B3E',
-    );
-  }
-  // Generate variables with color values.
-  foreach ($color_pallete as $key => $value) {
-    $color_pallete['@'.$key] = $color_pallete[$key];
-    unset($color_pallete[$key]);
-  }
-  return $color_pallete;
-}
-
-/*
- * Alter LESS variables
- *
- * Use variables_alter because for some reason, hook_less_variables doesn't work anymore.
+/**
+ * Implements hook_preprocess_html()
  */
-function bella_less_variables_alter(array &$less_variables, $system_name) {
-  // Grab the color palette saved by the color module.
-  $color_pallete = variable_get('color_bella_palette', FALSE);
-  // If the color palette hasn't been saved yet, use the default.
-  if (empty($color_pallete)) {
-    $color_pallete = array(
-      'brandprimary' => '#EA9B3E',
-      'brandsecondary' => '#F5F5F5',
-      'brandaccent' => '#FFF',
-      'brandaccent2' => '#EA9B3E',
-      'brandaccent3' => '#EA9B3E',
-    );
+function bella_preprocess_html(&$vars) {
+
+  // Add Bella button class.
+  if (theme_get_setting('bella_buttons')) {
+    $vars['classes_array'][] = 'bella-buttons';
   }
 
-  if ($system_name === 'bella') {
-    // Generate variables with color values.
-    foreach ($color_pallete as $key => $value) {
-      $less_variables[$key] = $color_pallete[$key];
-      unset($color_pallete[$key]);
-    }
-  }
 }

@@ -139,9 +139,12 @@ function intel_hubspot_util_fetch_contact($hsutk) {
  * @param $settings
  */
 function intel_hubspot_intel_page_settings_js_alter(&$settings) {
-  if (is_array($settings['intel']['track_forms'])) {
-    $settings['intel']['track_forms'][] = 'form.hs-form';
+  if (is_array($settings['intel']['config']['trackForms'])) {
+    $settings['intel']['config']['trackForms'][] = 'body->form.hs-form';
   }
+  //if (is_array($settings['intel']['track_forms'])) {
+  //  $settings['intel']['track_forms'][] = 'form.hs-form';
+  //}
 }
 
 /**

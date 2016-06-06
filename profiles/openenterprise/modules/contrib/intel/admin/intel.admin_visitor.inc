@@ -307,7 +307,7 @@ function intel_visitor_tab_clickstream($visitor) {
   drupal_set_title(t('Clickstream: @title', array('@title' => $visitor->label())), PASS_THROUGH);
  
   $output = '';
-  $output .= intel_visitor_clickstream($visitor);
+  $output .= intel_visitor_clickstream_report_page('-', '-', '-', $visitor);
   
   return $output;
 }

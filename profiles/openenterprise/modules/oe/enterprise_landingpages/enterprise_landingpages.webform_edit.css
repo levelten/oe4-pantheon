@@ -1,8 +1,0 @@
-#edit-enterprise-landingpages-setup .form-item {
-  clear: left;
-}
-#edit-enterprise-landingpages-setup #edit-landingpages-webform-fields .form-item {
-  clear: none;
-  width: 50%;
-  float: left;
-}

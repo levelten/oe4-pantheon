@@ -619,7 +619,7 @@ function kwresearch_keyword_pages_page($kid) {
   drupal_set_title('Keyword pages');
 
   $keyword_obj = kwresearch_load_site_keyword($kid);
-  $output = t('Keyword: @keyword', 
+  $output = '<label>' . t('Keyword:') . '</label>' . t(' @keyword',
     array(
     '@keyword' => $keyword_obj->keyword,
   )      
@@ -691,17 +691,33 @@ function kwresearch_keyword_pages_page($kid) {
   }
 
   if (!$rows) {
+    $msg = t('No pages are associated with this keyword.');
+
     $rows[] = array(array(
-        'data' => t('No pages are associated with this keyword.'),
+        'data' => $msg,
         'colspan' => count($header),
       ));
   }
+
   $vars = array(
     'header' => $header, 
     'rows' => $rows, 
     'attributes' => array('id' => 'kwresearch-site-keywords'),
   );
   $output .= theme('table', $vars);
+
+  $types = node_type_get_types();
+  $output .= t('!add', array(
+    '!add' => l('+Add content', 'node/add'),
+  ));
+
+  if (!empty($types['enterprise_blog'])) {
+    $output .= ' ' . t('!add', array(
+        '!add' => l('+Add blog post', 'node/add/enterprise-blog', array('query' => array(
+          'kwresearch_page_kid' => $kid
+        ))),
+      ));
+  }
   //$output .= theme('pager', array('tags' => NULL, 'element' => 0));
 
   return $output;

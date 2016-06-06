@@ -1,0 +1,64 @@
+name = Project
+description = A Bootstrap Sub-theme for Open Enterprise.
+core = 7.x
+base theme = enterprise_bootstrap
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Regions
+;;;;;;;;;;;;;;;;;;;;;
+
+regions[header_top]     = 'Header Top'
+regions[header_bottom]  = 'Header Bottom'
+regions[header]         = 'Top Bar'
+regions[banner]         = 'Banner'
+regions[help]           = 'Help'
+regions[content]        = 'Content'
+regions[sidebar_first]  = 'Primary'
+regions[sidebar_second] = 'Secondary'
+regions[footer]         = 'Footer'
+regions[footer_bottom]  = 'Footer bottom'
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Stylesheets
+;;;;;;;;;;;;;;;;;;;;;
+
+stylesheets[all][] = less/project.less
+
+;;;;;;;;;;;;;;;;;;;;;
+;; LESS
+;;;;;;;;;;;;;;;;;;;;;
+
+less[vars][@brand-color]   = #2A90CC
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Scripts
+;;;;;;;;;;;;;;;;;;;;;
+
+scripts[] = 'js/modernizr.js'
+scripts[] = 'js/project.js'
+
+; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
+settings[bootstrap_cdn] = ''
+settings[bootstrap_navbar_position] = 'static-top'
+settings[toggle_name] = 0
+
+; Enterprise Bootstrap
+; ---------------
+settings[fittext] = 0
+settings[enterprise_bootstrap_front_container] = 1
+settings[enterprise_bootstrap_sidebar_column] = 0
+settings[enterprise_bootstrap_block_striping] = 1
+settings[enterprise_bootstrap_dropdown] = 1
+settings[enterprise_bootstrap_js_options][affix] = 1
+settings[enterprise_bootstrap_js_options][alert] = 1
+settings[enterprise_bootstrap_js_options][carousel] = 1
+settings[enterprise_bootstrap_js_options][collapse] = 1
+settings[enterprise_bootstrap_js_options][dropdown] = 1
+settings[enterprise_bootstrap_js_options][transition] = 1
+settings[enterprise_bootstrap_js_options][modal] = 1
+
+; Project
+; ---------------
+settings[project_plugins][bootstrap_notify] = 1
+settings[project_plugins][jquery_update_jquery_version] = 1.9

@@ -9,6 +9,8 @@
  */
 function enterprise_permissions_user_default_roles() {
   $roles = array();
+  // roles implementation moved to install profile
+  return $roles;
 
   // Exported role: administrator.
   $roles['administrator'] = array(
@@ -42,3 +44,4 @@ function enterprise_permissions_user_default_roles() {
 
   return $roles;
 }
+

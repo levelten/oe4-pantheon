@@ -57,10 +57,15 @@ function kwresearch_get_keyword_stats_data($keywords, &$msgs, $params = array())
       $bd = 0;
       $source_cmptn_entries = 0;
       $source_bd_entries = 0;
+      $source_count = 0;
       foreach ($sources as $aid => $s) {
         if (isset($v[$aid . '_searches'])) {
           $srch += $s['searches_ratio'] * $v[$aid . '_searches'];
         }
+        else {
+          continue;
+        }
+        $source_count ++;
         if (isset($v[$aid . '_competition'])) {
           $source_cmptn_entries++;
           if ($v[$aid . '_competition'] < 0) {

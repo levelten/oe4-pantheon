@@ -1,5 +1,5 @@
 name = Enterprise Bootstrap
-description = Extended Bootstrap base theme for Open Enterprise.
+description = Extended Bootstrap base theme for Open Enterprise Pro.
 core = 7.x
 base theme = bootstrap
 
@@ -9,6 +9,7 @@ base theme = bootstrap
 ;;;;;;;;;;;;;;;;;;;;;
 
 regions[header_top]     = 'Header Top'
+regions[brand_bar]      = 'Brand Bar'
 regions[navigation]     = 'Navigation'
 regions[header_bottom]  = 'Header Bottom'
 regions[header]         = 'Top Bar'
@@ -19,12 +20,25 @@ regions[sidebar_first]  = 'Primary'
 regions[sidebar_second] = 'Secondary'
 regions[footer]         = 'Footer'
 regions[footer_bottom]  = 'Footer bottom'
+regions[footer_sticky]  = 'Sticky footer'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Stylesheets
 ;;;;;;;;;;;;;;;;;;;;;
 
-stylesheets[all][] = css/style.css
+stylesheets[all][] = less/enterprise_bootstrap.less
+
+;;;;;;;;;;;;;;;;;;;;;
+;; LESS
+;;;;;;;;;;;;;;;;;;;;;
+
+less[vars][@brand-primary]   = #553D7B
+less[vars][@brand-secondary] = #3F2766
+less[vars][@brand-accent]    = #745F95
+less[vars][@brand-accent-2]  = #271149
+less[vars][@brand-accent-3]  = #9B8CB4
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
@@ -50,6 +64,7 @@ settings[fittext] = 0
 settings[enterprise_bootstrap_front_container] = 1
 settings[enterprise_bootstrap_sidebar_column] = 0
 settings[enterprise_bootstrap_block_striping] = 1
+settings[enterprise_bootstrap_dropdown] = 1
 settings[title_placement] = 1
 settings[title_container] = 1
 settings[highlighted_placement] = 1

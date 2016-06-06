@@ -53,6 +53,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     'enterprise_press' => 1,
     'enterprise_news' => 0,
     'enterprise_video' => 0,
+    'enterprise_work' => 0,
   );
 
   $msg = st('Major site components such blogs and landing pages are provided in modular features called Apps.');
@@ -90,7 +91,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
   $form['install']['demo_mode']['attract_convert']['#description'] = st('Adds landing pages, calls-to-action and A/B testing to facilitate robust conversion workflows.');
   //$form['install']['demo_mode']['standard']['#description'] = st('Installs the apps for the standard Open Enterprise demo. Includes all essential apps plus; Press releases, FAQ.');
 
-  if (!enterprise_apps_module_files_exist('enterprise_landingpages')) {
+  if (!enterprise_apps_module_files_exist('enterprise_conversion')) {
     $form['install']['demo_mode']['attract_convert']['#disabled'] = TRUE;
     $form['install']['demo_mode']['standard']['#disabled'] = TRUE;
     $form['install']['demo_mode']['#default_value'] = 'attract';
@@ -178,6 +179,26 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#default_value' => TRUE,
   );
 
+  $form['rolesfs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Roles'),
+    '#description' => t('User roles added during the installation.'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $options = array(
+    'writer' => t('Writer'),
+    'editor' => t('Editor'),
+    'manager' => t('Manager'),
+    'demo' => t('Demo (admin)'),
+  );
+  $form['rolesfs']['roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Roles',
+    '#options' => $options,
+    '#default_value' => array('writer', 'editor', 'manager'),
+  );
 
   $link_options = array(
     'attributes' => array(
@@ -213,7 +234,6 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
     '#default_value' => '',
     '#description' => st('Input the property api key.'),
   );
-
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -280,7 +300,27 @@ function enterprise_apps_config_features_options_form_validate($form, &$form_sta
 function enterprise_apps_config_features_options_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
+  watchdog('install-form', print_r($form_state['values'], 1));
+
+
   if ($form_state['values']['op'] == t('Continue')) {
+    if (!empty($form_state['values']['roles']) && is_array($form_state['values']['roles'])) {
+      $w = 2;
+      foreach ($form_state['values']['roles'] as $name => $v) {
+        if ($v) {
+          $role = new stdClass();
+          $role->name = $name;
+          $role->weight = $w++;
+          user_role_save($role);
+        }
+      }
+      // sort admin role to end of list
+      $r = user_role_load_by_name('administrator');
+      $r->weight = $w;
+      user_role_save($r);
+    }
+
+
     $profile_settings = array();
     if (isset($form_state['api_profile_settings'])) {
       $profile_settings = $form_state['api_profile_settings'];

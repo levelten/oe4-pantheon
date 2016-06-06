@@ -64,7 +64,7 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   
   $ga_data = new LevelTen\Intel\GAModel();
   $ga_data->buildFilters($filters, $context);
-  $ga_data->addGAFilter('ga:customVarValue1!@&a=1&');
+  $ga_data->addGAFilter('ga:dimension1!@&a=1&');
 
   $ga_data->setDateRange($start_date, $end_date);
   $ga_data->setRequestCallback('intel_ga_feed_request_callback', array('cache_options' => $cache_options));
@@ -82,9 +82,9 @@ function intel_author_list_report($filters = array(), $context = 'site', $sub_in
   $ga_data->loadFeedData('entrances');
   
   $ga_data->setRequestDefaultParam('max_results', 2 * $feed_rows);
-  $ga_data->loadFeedData('pageviews_valuedevents');
+  $ga_data->loadFeedData('pageviews_events_valued');
 
-  $ga_data->loadFeedData('entrances_valuedevents');
+  $ga_data->loadFeedData('entrances_events_valued');
   
   $d = $ga_data->data;
  

@@ -1,29 +1,18 @@
+<?php include 'header_top.inc'; ?>
+<?php include 'brand_bar.inc'; ?>
 <!-- Navigation Enterprise region -->
 <div id="navbar-wrapper" class="<?php print $nav_wrapper; ?>">
   <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
-    <?php include 'header_top.inc'; ?>
     <div class="<?php print $nav_inner; ?>">
       <div class="navbar-region <?php print $navbar_region_class; ?>">
-        <!-- Navbar Logo Region -->
-        <div id="navbar-logo" <?php print drupal_attributes($nav_logo_class); ?>>
-          <?php if ($logo): ?>
-          <a class="logo navbar-btn pull-left navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>">
-            <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-          </a>
-          <?php endif; ?>
+        <!-- Navbar Header (Logo) Region -->
+        <?php if (!empty($navbar_header_display)): ?>
+          <div id="navbar-logo" <?php print drupal_attributes($nav_logo_class); ?>>
+            <?php include 'header-branding.tpl.php'; ?>
 
-          <?php if (!empty($site_name)): ?>
-          <a class="name navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a>
-          <?php endif; ?>
-
-          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
+            <?php include 'navbar-toggle.tpl.php'; ?>
+          </div>
+        <?php endif; ?>
         <!-- Navbar Menu Region -->
         <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
           <div id="navbar-menu" <?php print drupal_attributes($nav_menu_class); ?>>
@@ -44,6 +33,6 @@
         <?php endif; ?>
       </div>
     </div>
-    <?php include 'header_bottom.inc'; ?>
   </header>
 </div>
+<?php include 'header_bottom.inc'; ?>

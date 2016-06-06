@@ -1,3 +1,4 @@
+<!-- Header Top -->
 <?php if (!empty($page['header_top'])): ?>
 	<div class="header-top">
 		<div class="container">

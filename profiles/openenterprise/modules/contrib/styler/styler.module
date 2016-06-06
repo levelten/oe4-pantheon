@@ -89,11 +89,27 @@ function styler_styles() {
 }
 
 function styler_style_view() {
+
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler_bootstrap.css');
   drupal_add_css(drupal_get_path('module', 'styler') . '/styler.css');
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler_bootstrap.js');
   drupal_add_js(drupal_get_path('module', 'styler') . '/styler.js');
 
+  // Add default bootstrap javascript plugins
+  $bootstrap_js = array('scrollspy' => 'scrollspy' , 'affix' => 'affix', 'tooltip' => 'tooltip' , 'popover' => 'popover');
+  $theme_name = 'enterprise_bootstrap';
+  $themes = list_themes();
+
+  if(isset($themes[$theme_name])) {
+    $js_path = drupal_get_path('theme', $theme_name).'/bootstrap/js/';
+    $options = array(
+        'group' => JS_THEME,
+        'preprocess' => TRUE,
+    );
+    foreach ($bootstrap_js as $key => $value) {
+      drupal_add_js($js_path.$key.'.js', $options);
+    }
+  }
 
   $prettify_path = libraries_get_path('prettify');
   if ($prettify_path ) {
@@ -104,7 +120,7 @@ function styler_style_view() {
   $build = array(
     'styles' => array(
       'pre' => array(
-        '#markup' => '<div class="col-md-9">',
+        '#markup' => '<div class="col-md-9 style-guide-sections">',
       ),
     ),
     'nav' => array(
@@ -162,13 +178,13 @@ function styler_style_view() {
   }
   $build['styles']['post']['#markup'] = '</div>';
 
-  $build['nav']['nav']['#markup'] = theme_bootstrap_nav_docs($nav_items);
+  $build['nav']['nav']['#markup'] = '<div id="style-guide-index"><nav>' . theme_bootstrap_nav_docs($nav_items) . '</nav></div>';
   $build['nav']['post']['#markup'] = '</div>';
   return $build;
 }
 
 function theme_bootstrap_nav_docs($nav_items, $level = 0) {
-  $output = '<ul class="nav' . (($level == 0) ? ' bs-docs-sidebar' : '') . '">';
+  $output = '<ul data-spy="affix" class="nav' . (($level == 0) ? ' bs-docs-sidebar' : '') . '">';
   foreach ($nav_items AS $key => $value) {
     $text = '';
     $url = '';
@@ -225,15 +241,15 @@ function theme_styler_element($vars) {
             </div>
           </div>
         ';
-    // process highlight code
+
+    // Process highlight code.
     $highlight = '';
-    if (isset($vars['#value_highlight'])) {
-      if ($vars['#value_highlight']) {
-        $highlight = $vars['#value_highlight'];
-      }
+
+    if (!empty($vars['#value_highlight'])) {
+      $highlight = (string) $vars['#value_highlight'];
     }
     else {
-      $highlight = $code;
+      $highlight = (string) $code;
     }
 
     if ($highlight) {
@@ -336,6 +352,31 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
     '#value' => 'The following snippet of text is <em>rendered as italicized text</em>.',
   );
 
+  // Blockquotes
+  $styles['type']['blockquotes'] = array(
+    '#title' => t('Blockquotes'),
+    '#description' => t('For quoting blocks of content from another source within your document.'),
+  );
+  $styles['type']['blockquotes']['default'] = array(
+    '#title' => t('Default blockquote'),
+    //'#description' => t('For de-emphasizing inline or blocks of text, use the <code>&lt;small&gt;</code> tag to set text at 85% the size of the parent. Heading elements receive their own <code>font-size</code> for nested <code>&lt;small&gt;</code> elements.'),
+    '#tag' => 'markup',
+    '#value' => '<blockquote>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+  <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>
+</blockquote>',
+  );
+
+  $styles['type']['blockquotes']['reverse'] = array(
+    '#title' => t('Alternate blockquote'),
+    //'#description' => t('For de-emphasizing inline or blocks of text, use the <code>&lt;small&gt;</code> tag to set text at 85% the size of the parent. Heading elements receive their own <code>font-size</code> for nested <code>&lt;small&gt;</code> elements.'),
+    '#tag' => 'markup',
+    '#value' => '<blockquote class="blockquote-reverse">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+  <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>
+</blockquote>',
+  );
+
   // Contextual colors
   $styles['type']['colors'] = array(
     '#title' => t('Contextual colors'),
@@ -398,6 +439,8 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
     '#value' => '
     <button type="button" class="btn btn-default">Default</button>
     <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-secondary">Secondary</button>
+    <button type="button" class="btn btn-accent">Accent</button>
     <button type="button" class="btn btn-success">Success</button>
     <button type="button" class="btn btn-info">Info</button>
     <button type="button" class="btn btn-warning">Warning</button>
@@ -409,6 +452,12 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 
 <!-- Provides extra visual weight and identifies the primary action in a set of buttons -->
 <button type="button" class="btn btn-primary">Primary</button>
+
+<!-- Styled to match brand secondary color -->
+<button type="button" class="btn btn-secondary">Secondary</button>
+
+<!-- Styled to match brand accent color -->
+<button type="button" class="btn btn-accent">Accent</button>
 
 <!-- Indicates a successful or positive action -->
 <button type="button" class="btn btn-success">Success</button>
@@ -469,9 +518,6 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 </p>
 ',
   );
-
-
-
 
   // Images
   $desc = t('Add classes to an <img> element to easily style images in any project.');
@@ -587,9 +633,6 @@ Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus
 '
     ),
   );
-
-
-
 
   return $styles;
 }

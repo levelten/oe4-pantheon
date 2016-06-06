@@ -40,6 +40,29 @@ function enterprise_bootstrap_transform_main_menu(&$menu_array) {
 }
 
 /**
+ * Implements hook_preprocess_html()
+ */
+function enterprise_bootstrap_preprocess_html(&$variables) {
+  // Add dark class to theme if enabled.
+  if (theme_get_setting('eb_dark_theme')) {
+    $variables['classes_array'][] = 'dark';
+  }
+  // Add light class to theme if enabled.
+  if (theme_get_setting('eb_light_primary')) {
+    $variables['classes_array'][] = 'light';
+  }
+  if (theme_get_setting('eb_light_secondary')) {
+    $variables['classes_array'][] = 'light-secondary';
+  }
+  if (theme_get_setting('eb_light_accent')) {
+    $variables['classes_array'][] = 'light-accent';
+  }
+
+  // Add page-header-above class
+  $variables['classes_array'][] = (theme_get_setting('title_placement')) ? 'page-title-inside' : 'page-title-above';
+}
+
+/**
  * Implements hook_preprocess_page()
  */
 function enterprise_bootstrap_preprocess_page(&$variables) {
@@ -77,6 +100,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $sidebar_column_width = FALSE;
   }
 
+  // Set sidebar columns.
   if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
     $variables['content_column_class'] = ($sidebar_column_width) ? ' class="col-sm-6"' : ' class="col-sm-4"';
   }
@@ -85,6 +109,18 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   }
   else {
     $variables['content_column_class'] = ' class = "col-sm-12"';
+  }
+
+  /*
+   * Enterprise Header settings
+   */
+  $variables['navbar_header_display'] = theme_get_setting('navbar_header_display');
+  if (empty($variables['navbar_header_display'])) {
+    $variables['navbar_header_display'] = 'standard';
+  }
+  if ($variables['navbar_header_display'] == 'none') {
+    $variables['navbar_header_display'] = '';
+    $variables['navbar_classes_array'][] = 'navbar-no-header';
   }
 
   /*
@@ -126,9 +162,21 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $variables['nav_inner'] = 'navbar-mega-menu';
   }
 
+  // Navbar attributes
+  $s = theme_get_setting('navbar_class');
+  if (!empty($s)) {
+    $s = explode(' ', $s);
+    $variables['navbar_classes_array'] = array_merge($variables['navbar_classes_array'], $s);
+  }
+
   // Navigation region settings.
   $variables['navbar_region_class'] .= theme_get_setting('navbar_region_class');
-  
+
+  // Hide caret.
+  if (theme_get_setting('enterprise_bootstrap_hide_caret')) {
+    $variables['navbar_region_class'] .= ' hide-caret';
+  }
+
   // Add nav_logo classes from theme settings.
   $variables['nav_logo_class']['class'][] = 'navbar-header';
   $nav_logo_class = explode(' ', trim(theme_get_setting('nav_logo_class')));
@@ -219,27 +267,16 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     }
   }
 
-  // Option to use Blokk font.
-  if(theme_get_setting('enterprise_bootstrap_blokkfont')) {
-    $blokk_path = $theme_path .'/fonts/blokkneue/blokkneue.css';
-    $options = array(
-      'group' => CSS_THEME,
-      'every_page' => TRUE,
-      'weight' => -1,
-      'preprocess' => TRUE,
-      );
-    drupal_add_css($blokk_path, $options);
-  }
-
   // Add Javscript files and settings from Enterprise Bootstrap settings
   // Mega Menu and mobile menu settings.
   $settings = array();
   $settings['megamenu'] = theme_get_setting('enterprise_bootstrap_megamenu');
   $settings['mobilemenu'] = theme_get_setting('enterprise_bootstrap_mobile_dropdown');
   $settings['mobilemenuhoverpush'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push');
+  $settings['mobilemenuhoverpushwidth'] = theme_get_setting('enterprise_bootstrap_mobile_menu_hover_push_width');
   $settings['fittext'] = theme_get_setting('fittext_selector');
   $settings['sticky_menu'] = theme_get_setting('sticky_menu');
-  
+
   // Process FitText selectors
   $selectors = array();
   if (!empty($settings['fittext'])) {
@@ -250,14 +287,8 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
     $settings['fittext'] = $selectors;
   }
 
-  drupal_add_js(
-    array(
-      'enterprise_bootstrap' => $settings,
-      ),
-    array(
-      'type' => 'setting',
-      )
-    );
+  // Add settings to Drupal.settings
+  drupal_add_js(array('enterprise_bootstrap' => $settings),array('type' => 'setting'));
 
   // fitText.js
   $fittext = theme_get_setting('fittext');
@@ -327,7 +358,7 @@ function enterprise_bootstrap_preprocess_page(&$variables) {
   // $equalize = theme_get_setting('equalize');
   // if (!empty($equalize)) {
   //   if ($equalize == 1) {
-  //     drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');        
+  //     drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/equalize.js/1.0.1/equalize.min.js', 'external');
   //   }
   // }
 
@@ -403,7 +434,7 @@ function enterprise_bootstrap_task_list($variables) {
     $output .= $item;
     $output .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
     $output .= '</li>';
-  } 
+  }
   $output .= '</ol>';
   return $output;
 }
@@ -505,7 +536,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
     'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
     'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
   );
-  
+
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
@@ -523,7 +554,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
       $menu_data['mega_item_class'] = $menu_data['mega_columns'];
       $menu_data['mega_wrapper_class'] = 'row';
       break;
-    
+
     case 'col-table':
       // Use display:table-cell hack
       $menu_data['mega_item_class'] = 'mega-table-cell';
@@ -543,7 +574,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
       $menu_data['mega_wrapper_class'] = '';
       break;
   }
-  
+
   // Last chance to turn into a mega menu via Enterprise Extras option.
   // But only do that if it's the main menu.
   if (!empty($element['#original_link']['options']['enterprise_mega']) && $element['#original_link']['options']['enterprise_mega']) {
@@ -601,7 +632,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
           $output[] = '<div class="'.$menu_data['mega_wrapper_class'].'">';
         }
       }
-      
+
       // Add conditions for Mega Block.
       if (!empty($menu_data['mega_block'])) {
         $mega_block_pieces = explode('|', $menu_data['mega_block']);
@@ -629,7 +660,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
         $output[] = drupal_render($element['#below']);
       }
       $output[] = '</ul></div>';
-      
+
       if (in_array('last', $element['#attributes']['class'])) {
         if ($menu_data['enterprise_mega'] == 'yamm') {
           $output[] = '</li>';
@@ -703,7 +734,7 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
         // Add our own wrapper.
         unset($element['#below']['#theme_wrappers']);
         $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
-        
+
         // Generate as standard dropdown.
         $element['#attributes']['class'][] = 'dropdown';
         $element['#localized_options']['html'] = TRUE;
@@ -737,71 +768,8 @@ function enterprise_bootstrap_menu_link__main_menu($variables) {
  * Implements theme_menu_link__main_block().
  */
 function enterprise_bootstrap_menu_link__menu_block(array $variables) {
-// Default Bootstrap menu
-  $element = $variables['element'];
-  $sub_menu = '';
-
-  // We'll store a lot of info about this menu link in here.
-  $menu_data = array(
-    'mlid' => $element['#original_link']['mlid'],
-    'theme_hook' => $variables['theme_hook_original'],
-    'depth' => (!empty($element['#original_link']['depth'])) ? intval($element['#original_link']['depth']) : NULL,
-    'expanded' => (!empty($element['#original_link']['expanded'])) ? $element['#original_link']['expanded'] : 0,
-    'dropdown' => theme_get_setting('enterprise_bootstrap_dropdown'),
-    'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
-    'disable_icon_menu_block' => (!empty($element['#localized_options']['disable_icon_menu_block']) && $element['#localized_options']['disable_icon_menu_block']) ? TRUE : FALSE,
-  );
-  
-  // Remove Icon on Menu Blocks when requested.
-  if ($menu_data['disable_icon_menu_block']) {
-    unset($element['#localized_options']['icon']);
-  }
-  // Add class for when Icon Menu is being used.
-  if (!empty($element['#localized_options']['icon']['icon'])) {
-    $element['#attributes']['class'][] = 'has-icon';
-  }
-  // Add Menu link ID for specific styling cases.
-  $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
-
-  
-  // Handle all other menus.
-  if ($element['#below'] && $menu_data['expanded']) {
-    // Prevent dropdown functions from being added to management menu so it
-    // does not affect the navbar module.
-    if (($element['#original_link']['menu_name'] == 'management') && (module_exists('navbar'))) {
-      $sub_menu = drupal_render($element['#below']);
-    }
-    elseif ((!empty($element['#original_link']['depth'])) && ($element['#original_link']['depth'] == 1)) {
-      // Add our own wrapper.
-      unset($element['#below']['#theme_wrappers']);
-      $sub_menu = '<ul class="dropdown-menu">' . drupal_render($element['#below']) . '</ul>';
-
-      // Generate as standard dropdown.
-      $element['#attributes']['class'][] = 'dropdown';
-      $element['#localized_options']['html'] = TRUE;
-
-      // Set dropdown trigger element to # to prevent inadvertant page loading
-      // when a submenu link is clicked.
-      if ($menu_data['dropdown']) {
-        $element['#attributes']['class'][] = 'hover';
-          $element['#localized_options']['attributes']['data-target'] = '#';
-          $element['#localized_options']['attributes']['class'][] = 'dropdown-hover';
-          $element['#localized_options']['attributes']['data-hover'] = 'dropdown';
-        } else {
-          $element['#title'] .= ' <span class="caret"></span>';
-          $element['#localized_options']['attributes']['data-target'] = '#';
-          $element['#localized_options']['attributes']['class'][] = 'dropdown-toggle';
-          $element['#localized_options']['attributes']['data-toggle'] = 'dropdown';
-        }
-    }
-  }
-  // On primary navigation menu, class 'active' is not set on active menu item.
-  // @see https://drupal.org/node/1896674
-  if (($element['#href'] == $_GET['q'] || ($element['#href'] == '<front>' && drupal_is_front_page())) && (empty($element['#localized_options']['language']))) {
-    $element['#attributes']['class'][] = 'active';
-  }
-  $output = l($element['#title'], $element['#href'], $element['#localized_options']);
-  return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
+  // Stick to default theming.
+  return theme_menu_link($variables);
 }
 
 /**
@@ -823,7 +791,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
     'mobile_dropdown' => theme_get_setting('enterprise_bootstrap_mobile_dropdown'),
     'hover_dropdown' => theme_get_setting('bootstrap_hover_dropdown'),
   );
-  
+
   // Add class for when Icon Menu is being used.
   if (!empty($element['#localized_options']['icon']['icon'])) {
     $element['#attributes']['class'][] = 'has-icon';
@@ -831,7 +799,7 @@ function enterprise_bootstrap_menu_link(array $variables) {
   // Add Menu link ID for specific styling cases.
   $element['#attributes']['class'][] = 'mlid-'.$element['#original_link']['mlid'];
 
-  
+
   // Handle all other menus.
   if ($element['#below'] && $menu_data['expanded']) {
     // Prevent dropdown functions from being added to management menu so it
@@ -881,14 +849,14 @@ function _enterprise_bootstrap_menu_wrapper($variables) {
   // 'bootstrap' => t('Bootstrap Default'),
   // 'enterprise' => t('Enterprise Mega Menu'),
   // 'yamm' => t('YAMM'),
-  
+
   // Extract additional data.
   if (!empty($variables['#tree'])) {
     foreach ($variables['#tree'] as $element) {
       if (is_array($element)) {
         // Check if link is part of menu block.
         if ((!empty($element['#theme']) && is_array($element['#theme'])) && (in_array('menu_link__menu_block', $element['#theme']) || in_array('menu_link', $element['#theme']))) {
-          $enterprise_mega = 'default';
+          return '<ul class="menu nav">' . $variables['tree'] . '</ul>';
         }
       }
     }
@@ -898,11 +866,11 @@ function _enterprise_bootstrap_menu_wrapper($variables) {
         break;
 
       case 'enterprise':
-        return '<div class="mega-content">' . $variables['tree'] . '</div>';
+        return '<div class="mega-content"><ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul></div>';
         break;
 
       case 'yamm':
-        return '<ul class="menu nav navbar-nav">' . $variables['tree'] . '</ul>';
+        return '<ul class="menu nav navbar-nav yamm">' . $variables['tree'] . '</ul>';
         break;
 
       case 'bootstrap':

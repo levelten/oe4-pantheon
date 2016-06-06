@@ -1,8 +1,5 @@
 <?php
 
-// Need to convert this module to bootstrap 3
-
-
 /**
  * Implements hook_ds_view_modes_info().
  */
@@ -25,9 +22,10 @@ function enterprise_style_ds_view_modes_info() {
   $ds_view_mode->entities = array(
     'node' => 'node',
     'user' => 'user',
+    'field_collection_item' => 'field_collection_item',
   );
   $view_modes['mini'] = $ds_view_mode;
-
+  
   $ds_view_mode = new stdClass();
   $ds_view_mode->api_version = 1;
   $ds_view_mode->view_mode = 'image';
@@ -52,8 +50,8 @@ function enterprise_style_ds_view_modes_info() {
   $ds_view_mode->view_mode = 'teaser_stacked';
   $ds_view_mode->label = 'Teaser Stacked';
   $ds_view_mode->entities = array(
-      'node' => 'node',
-      'user' => 'user',
+    'node' => 'node',
+    'user' => 'user',
   );
   $view_modes['teaser_stacked'] = $ds_view_mode;
 
@@ -141,6 +139,30 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['col-md-10'] = t('Col Md 10');
     $classes['col-md-11'] = t('Col Md 11');
     $classes['col-md-12'] = t('Col Md 12');
+    $classes['col-sm-1'] = t('Col Sm 1');
+    $classes['col-sm-2'] = t('Col Sm 2');
+    $classes['col-sm-3'] = t('Col Sm 3');
+    $classes['col-sm-4'] = t('Col Sm 4');
+    $classes['col-sm-5'] = t('Col Sm 5');
+    $classes['col-sm-6'] = t('Col Sm 6');
+    $classes['col-sm-7'] = t('Col Sm 7');
+    $classes['col-sm-8'] = t('Col Sm 8');
+    $classes['col-sm-9'] = t('Col Sm 9');
+    $classes['col-sm-10'] = t('Col Sm 10');
+    $classes['col-sm-11'] = t('Col Sm 11');
+    $classes['col-sm-12'] = t('Col Sm 12');
+    $classes['col-xs-1'] = t('Col XS 1');
+    $classes['col-xs-2'] = t('Col XS 2');
+    $classes['col-xs-3'] = t('Col XS 3');
+    $classes['col-xs-4'] = t('Col XS 4');
+    $classes['col-xs-5'] = t('Col XS 5');
+    $classes['col-xs-6'] = t('Col XS 6');
+    $classes['col-xs-7'] = t('Col XS 7');
+    $classes['col-xs-8'] = t('Col XS 8');
+    $classes['col-xs-9'] = t('Col XS 9');
+    $classes['col-xs-10'] = t('Col XS 10');
+    $classes['col-xs-11'] = t('Col XS 11');
+    $classes['col-xs-12'] = t('Col XS 12');
 
     $classes['row'] = t('Row');
     $classes['row-fluid'] = t('Row Fluid');
@@ -164,6 +186,10 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
     $classes['margin-bottom'] = t('Margin: Bottom');
     $classes['margin-left'] = t('Margin: Left');
 
+    $classes['no-gutter'] = t('No Gutter');
+    $classes['no-gutter-right'] = t('No Gutter: Right');
+    $classes['no-gutter-left'] = t('No Gutter: Left');
+
     $classes['no-margin-top'] = t('No Margin: Top');
     $classes['no-margin-right'] = t('No Margin: Right');
     $classes['no-margin-bottom'] = t('No Margin: Bottom');
@@ -174,6 +200,7 @@ function enterprise_style_ds_classes_alter(&$classes, $name) {
 
     $classes['no-wrap'] = t('No Wrap (Overflow)');
 
+    $classes['field-collection-embed'] = t('Field Collection Embed');
   }
 }
 
@@ -229,6 +256,8 @@ function enterprise_style_ds_span_column_replace(&$classes, $columns = 1) {
 function enterprise_style_ds_fields_info($entity_type) {
   $node = array();
   $user = array();
+  $fc_item = array();
+  $bean = array();
   $user['user_thumbnail'] = array(
     'title' => t('User Thumbnail'),
     'field_type' => DS_FIELD_TYPE_FUNCTION,
@@ -292,7 +321,30 @@ function enterprise_style_ds_fields_info($entity_type) {
     'function' => 'enterprise_style_ds_field_date_stacked',
     'properties' => array(),
   );
-  return array('node' => $node, 'user' => $user);
+  for ($i = 1; $i <= 9; $i++) {
+    $fc_item['enterprise_custom_' . $i] = $bean['enterprise_custom_' . $i] = $node['enterprise_custom_' . $i] = array(
+      'title' => t('Custom') . ' ' . $i,
+      'field_type' => DS_FIELD_TYPE_FUNCTION,
+      'ui_limit' => array('*|*'),
+      'function' => 'enterprise_style_ds_field_custom',
+      'properties' => array(
+        'settings' => array(
+          'custom_markup' => array(
+            'title' => t('Custom markup'),
+            'type' => 'textfield',
+            'description' => t('Input custom markup to display in this field.'),
+          ),
+        ),
+        'default' => array(
+          'custom_markup' => '',
+        ),
+      ),
+
+    );
+  }
+
+
+  return array('node' => $node, 'user' => $user, 'bean' => $bean, 'field_collection_item' => $fc_item);
 
   /*
   $node['bootstrap_jumbotron'] = array(
@@ -306,14 +358,73 @@ function enterprise_style_ds_fields_info($entity_type) {
   */
 }
 
+function enterprise_style_ds_fields_info_alter(&$fields, $entity_type) {
+  $link_fields = array();
+  /*
+  $link_fields['properties']['settings']['link_attr_title'] = array(
+    'type' => 'checkbox',
+    'title' => t('Title attribute'),
+    'description' => t('Include title="[entity:title]" in anchor tag.'),
+  );
+  $link_fields['properties']['default']['link_attr_title'] = 1;
+  */
 
+  // Adding absolute URL option to node link
+  $link_fields['properties']['settings']['link_href_absolute'] = array(
+    'type' => 'checkbox',
+    'title' => t('Absolute URL'),
+    'description' => t('Convert this link into an absolute URL. Handy for RSS feeds.'),
+  );
+  $link_fields['properties']['default']['link_href_absolute'] = 0;
+  if (!empty($fields['node_link'])) {
+    $fields['node_link'] = drupal_array_merge_deep($fields['node_link'], $link_fields);
+    $fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+  /*
+  if (!empty($fields['title'])) {
+    $fields['title'] = drupal_array_merge_deep($fields['title'], $link_fields);
+    $fields['title']['function'] = 'enterprise_style_ds_field_node_link';
+    //$fields['node_link']['function'] = 'enterprise_style_ds_field_node_link';
+  }
+  */
+}
+
+function enterprise_style_ds_field_node_link($field) {
+  $settings = isset($field['formatter_settings']) ? $field['formatter_settings'] : array();
+  $settings += $field['properties']['default'];
+
+  // Link.
+  if (!empty($settings['link'])) {
+    if (!empty($settings['link_href_absolute'])) {
+      if (!isset($field['entity']->uri)) {
+        $field['entity']->uri = entity_uri($field['entity_type'], $field['entity']);
+      }
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      $field['entity']->uri['options']['absolute'] = 1;
+    }
+    /*
+    if (!empty($settings['link_attr_title'])) {
+      if (!isset($field['entity']->uri['options'])) {
+        $field['entity']->uri['options'] = array();
+      }
+      if (!isset($field['entity']->uri['options']['attributes'])) {
+        $field['entity']->uri['options']['attributes'] = array();
+      }
+      $field['entity']->uri['options']['attributes'] = $field['entity']->title;
+    }
+    */
+  }
+  return ds_render_field($field);
+}
 
 function enterprise_style_ds_field_user_thumbnail($variables) {
   $entity = $variables['entity'];
   $account = user_load($entity->uid);
   $picture_field = 'field_picture_thumbnail';
-  if (isset($user->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
-    if (!isset($user->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
+  if (isset($account->field_picture_thumbnail['und'][0]['is_default']) && $account->field_picture_thumbnail['und'][0]['is_default']) {
+    if (!isset($account->field_enterprise_style_picture['und'][0]['is_default']) || !$account->field_enterprise_style_picture['und'][0]['is_default']) {
       $picture_field = 'field_enterprise_style_picture';
     }
   }
@@ -377,16 +488,22 @@ function enterprise_style_ds_field_prev_next_node($variables) {
     $entity = $variables['entity'];
     $next = prev_next_nid($entity->nid, 'next');
     $prev = prev_next_nid($entity->nid, 'prev');
+    $arrow_prev = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big'));
+    $arrow_next = theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big'));
+    $attr_next = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next')));
+    $attr_prev = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev')));
+    $attr_prev_small = array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev', 'small')));
+
     if (!empty($next) || !empty($prev)) {
       $output = '';
       if (!empty($next) && !empty($prev)) {
-        return l(t('Next') . theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big')) . '<span class="arrow"></span>', 'node/' . $next, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next')))) . l(theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big')), 'node/' . $prev, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev', 'small'))));
+        return l($arrow_next . t('Next') , 'node/' . $next, $attr_next) . l(t('Prev') . $arrow_prev, 'node/' . $prev, $attr_prev_small);
       }
       elseif (!empty($next)) {
-        return l(t('Next') . theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-right-open-big')), 'node/' . $next, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'next'))));
+        return l(t('Next') . $arrow_next, 'node/' . $next, $attr_next);
       }
       elseif (!empty($prev)) {
-        return l(theme('icon', array('bundle' => 'enterprise_style', 'icon' => 'oeicon-left-open-big')) . t('Previous'), 'node/' . $prev, array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-primary', 'prev'))));
+        return l(t('Previous') . $arrow_prev, 'node/' . $prev, $attr_prev);
       }
     }
   }
@@ -407,6 +524,37 @@ function enterprise_style_ds_field_comment_count($variables) {
     return theme('item_list', array('items' => $items, 'attributes' => array('class' => array('meta-info'))));
   }
 }
+
+/**
+ * Implements hook_ds_field_settings_form().
+ */
+function enterprise_style_ds_field_settings_form($field) {
+  return ds_ds_field_settings_form($field);
+}
+
+/**
+ * Implements hook_ds_field_format_summary().
+ */
+function enterprise_style_ds_field_format_summary($field) {
+  $summary = ds_ds_field_format_summary($field);
+  $summary = ($summary != '') ? $summary : t('None');
+  return $summary;
+}
+
+/**
+ * Field callback for meta_info
+ *
+ * @param type $variables
+ * @return type
+ */
+function enterprise_style_ds_field_custom($variables) {
+  $output = '';
+  if (!empty($variables['formatter_settings']['custom_markup'])) {
+    $output = $variables['formatter_settings']['custom_markup'];
+  }
+  return $output;
+}
+
 
 /**
  * Field callback for date_stacked

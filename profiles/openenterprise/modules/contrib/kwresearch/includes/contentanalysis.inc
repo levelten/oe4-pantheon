@@ -93,6 +93,11 @@ function kwresearch_analyzer_form_elements($form_state, $analysis = '', $node = 
       'page_keywords_data' => $page_kw,
       'site_priority_options' => $site_priority_options,
       'page_priority_options' => $page_priority_options,
+      'permissions' => array(
+        'query_keyword_stats' => user_access('kwresearch query keyword stats'),
+        'admin_site_keywords' => user_access('kwresearch admin site keywords'),
+        'admin_page_keywords' => user_access('kwresearch admin page keywords'),
+      ),
       'post_token' => drupal_get_token('kwresearch'),
     )), array('type' => 'setting', 'scope' => JS_DEFAULT));
   //return $form;

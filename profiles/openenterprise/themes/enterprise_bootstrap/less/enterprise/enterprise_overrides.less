@@ -39,23 +39,11 @@ img {
 }
 
 .btn-secondary {
-  background: @brand-secondary;
-  border-color: darken(@brand-secondary, 10%);
-  color: white;
-  &:hover {
-    background: darken(@brand-secondary, 10%);
-    .transition;
-  }
+  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
 }
 
 .btn-accent {
-  background: @brand-accent;
-  border-color: darken(@brand-accent, 10%);
-  color: white;
-  &:hover {
-    background: darken(@brand-accent, 10%);
-    .transition;
-  }
+  .button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
 }
 
 /* TODO: for some reason these styles are missing from enterprise_bootstrap */
@@ -161,132 +149,6 @@ fieldset.panel-default {
     padding-top: 1em;
 }
 
-.cta {
-  padding: 10px 10px;
-  color: white;
-  background: @brand-primary;
-  border: 0;
-  overflow: hidden;
-  .transition;
-  &:hover {
-    background: darken(@brand-primary, 10%);
-    .transition;
-  }
-  &:last-child {
-    margin-right: 0;
-  }
-  .icon {
-    color: white;
-  }
-  h3, h4, h5, h6 {
-    color: white;
-    margin: 0 0 10px 0;
-    &:hover {
-      text-decoration: none;
-    }
-  }
-  .btn-cta {
-    background: @brand-accent;
-    color: white;
-  }
-}
-
-.cta-secondary {
-  background: @brand-secondary;
-  .transition;
-  &:hover {
-    background: darken(@brand-secondary, 10%);
-    .transition;
-  }
-  .btn-cta {
-    background: @brand-accent;
-    color: white;
-  }
-}
-
-.cta-accent {
-  background: @brand-accent;
-  .transition;
-  &:hover {
-    background: darken(@brand-accent, 10%);
-    .transition;
-  }
-  .btn-cta {
-    background: @brand-primary;
-    color: white;
-  }
-}
-
-.cta-rectangle {
-  max-width: 300px;
-  .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
-  .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
-  .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
-  .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
-  .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
-  .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
-  .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
-  .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
-  .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
-  .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
-  .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
-  .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-}
-
-.cta-btn {
-  h3, h4, h5, h6 {
-    color: white;
-    margin: 0 0 0 0;
-    &:hover {
-      text-decoration: none;
-    }
-  }
-  .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
-  .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
-  .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
-  .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
-  .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
-  .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
-  .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
-  .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
-  .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
-  .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
-  .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
-  .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12  {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-  .icon-right {
-    span {
-      display:inline-block;
-      vertical-align:middle;
-      width:80%;
-    }
-    i {
-      display:inline-block;
-      vertical-align:middle;
-      padding-left:5px;
-      width:20%;
-    }
-  }
-  .icon-bottom {
-    span {
-      display:block;
-      width:100%;
-    }
-    i {
-      display:block;
-      text-align: center;
-      width:100%;
-      margin-top: 5px;
-    }
-  }
-
-}
-
 // Bootstrap fixes
 .carousel {
   &.slide {
@@ -296,7 +158,12 @@ fieldset.panel-default {
   }
 }
 
-.main-container-inner {
+#style-guide-index .bs-docs-sidebar li .affix {
+  position: relative;
+}
+
+div.main-container-inner {
   // Disable overflow auto for now
   //overflow: auto;
+  margin-top: 1em;
 }
