@@ -29,11 +29,13 @@ function enterprise_bootstrap_process_page(&$variables) {
  */
 function enterprise_bootstrap_transform_main_menu(&$menu_array) {
   foreach(element_children($menu_array) as $level1) {
-    foreach(element_children($menu_array[$level1]['#below']) as $level2) {
-      if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
-        $menu_array[$level1]['#below'][$level2]['#mega'] = TRUE;
-      } else {
-        $menu_array[$level1]['#below'][$level2]['#mega'] = FALSE;
+    if (!empty($menu_array[$level1]['#below'])) {
+      foreach(element_children($menu_array[$level1]['#below']) as $level2) {
+        if (count($menu_array[$level1]['#below'][$level2]['#below'])) {
+          $menu_array[$level1]['#below'][$level2]['#mega'] = TRUE;
+        } else {
+          $menu_array[$level1]['#below'][$level2]['#mega'] = FALSE;
+        }
       }
     }
   }
