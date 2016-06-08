@@ -6,7 +6,10 @@
 
   Drupal.behaviors.enterpriseRel = {
     attach: function (context) {
-      io('addCallback', 'domReady', this.init);
+      if (window.io != undefined) {
+        io('addCallback', 'domReady', this.init);
+      }
+
     },
     init: function () {
       // only execute once
