@@ -1,7 +1,7 @@
 name = Enterprise Location
 description = Provides a location content type and geo coding
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 version = 7.x-3.5
 project = enterprise_location
 dependencies[] = enterprise_location_config

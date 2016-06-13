@@ -19,4 +19,5 @@ dependencies[] = libraries
 dependencies[] = picture
 dependencies[] = styler
 dependencies[] = views_bootstrap
+features[features_api][] = api:2
 files[] = plugins/list/enterprise_style_plugin_style_list.inc

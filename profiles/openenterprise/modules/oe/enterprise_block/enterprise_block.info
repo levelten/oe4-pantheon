@@ -3,3 +3,4 @@ description = Creates basic block entity (Bean)
 core = 7.x
 package = Open Enterprise
 dependencies[] = enterprise_block_config
+features[features_api][] = api:2

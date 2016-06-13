@@ -5,3 +5,4 @@ package = Open Enterprise
 version = 7.x-3.5
 project = enterprise_editor
 dependencies[] = enterprise_editor_config
+features[features_api][] = api:2

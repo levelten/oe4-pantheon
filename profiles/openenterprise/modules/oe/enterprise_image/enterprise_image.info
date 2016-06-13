@@ -1,7 +1,7 @@
 name = Enterprise Images
 description = Enables image uploading and image gallery display
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 version = 7.x-3.5
 project = enterprise_image
 dependencies[] = enterprise_image_config

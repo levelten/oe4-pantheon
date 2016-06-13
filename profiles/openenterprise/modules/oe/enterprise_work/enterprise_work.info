@@ -1,7 +1,7 @@
 name = Enterprise Work (Experimental)
 description = Case studies
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 apps[install_disable] = 1
 dependencies[] = enterprise_work_config
 dependencies[] = enterprise_work_pre

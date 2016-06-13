@@ -1,7 +1,7 @@
 name = Enterprise Events
 description = Create and manage events
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 version = 7.x-3.5
 project = enterprise_events
 dependencies[] = enterprise_events_config

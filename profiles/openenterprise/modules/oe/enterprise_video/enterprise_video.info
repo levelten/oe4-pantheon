@@ -1,7 +1,7 @@
 name = Enterprise Video
 description = Embed videos to create a vblog
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 version = 7.x-3.1
 project = enterprise_video
 dependencies[] = enterprise_video_config

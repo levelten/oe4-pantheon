@@ -1,7 +1,7 @@
 name = Enterprise Forum
 description = Community discussion boards.
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 dependencies[] = advanced_forum
 dependencies[] = advanced_forum_bootstrap
 dependencies[] = ctools

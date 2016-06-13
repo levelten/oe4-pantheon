@@ -1,5 +1,5 @@
 name = Enterprise Thank You Page
 description = Provides redirect pages for form submissions
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 dependencies[] = enterprise_thankyoupage_config

@@ -1,7 +1,7 @@
 name = Enterprise News
 description = Feature for company news
 core = 7.x
-package = Open Enterprise Apps
+package = Open Enterprise
 dependencies[] = enterprise_news_config
 features[features_api][] = api:2
 

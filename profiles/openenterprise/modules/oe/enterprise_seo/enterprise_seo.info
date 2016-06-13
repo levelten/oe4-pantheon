@@ -3,3 +3,4 @@ description = Configures SEO Tools suite
 core = 7.x
 package = Open Enterprise
 dependencies[] = enterprise_seo_config
+features[features_api][] = api:2
