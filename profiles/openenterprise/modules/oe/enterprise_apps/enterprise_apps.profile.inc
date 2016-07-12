@@ -40,6 +40,7 @@ function enterprise_apps_profile_install_tasks($install_state) {
 
 function enterprise_apps_config_features_adhoc_apps() {
   $ext_apps = array(
+    'enterprise_careers' => 0,
     'enterprise_events' => 0,
     'enterprise_faq' => 1,
     'enterprise_forum' => 0,
