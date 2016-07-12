@@ -42,6 +42,7 @@ function enterprise_apps_config_features_options_form($form, $form_state, &$inst
   drupal_set_title(t('Install applications'));
 
   $ext_apps = array(
+    'enterprise_careers' => 0,
     'enterprise_events' => 0,
     'enterprise_faq' => 1,
     'enterprise_forum' => 0,
