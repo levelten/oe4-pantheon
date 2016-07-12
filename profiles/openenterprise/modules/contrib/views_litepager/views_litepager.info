@@ -4,9 +4,9 @@ dependencies[] = views
 core = 7.x
 package = Views
 files[] = views_litepager_plugin_pager_lite.inc
-; Information added by drupal.org packaging script on 2012-04-28
-version = "7.x-3.0"
+; Information added by drupal.org packaging script on 2013-10-19
+version = "7.x-3.0+2-dev"
 core = "7.x"
 project = "views_litepager"
-datestamp = "1335573365"
+datestamp = "1382164913"
 
