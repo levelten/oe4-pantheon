@@ -281,34 +281,41 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
 
   switch ($display['type']) {
     case 'file_rendered':
-      $view_mode = $settings['file_view_mode'];
-
-      // Prevent 'empty' fields from causing a WSOD.
-      $items = array_filter($items);
-
-      // Load and build the fully displayed nodes.
-      $files_display = array();
       foreach ($items as $delta => $item) {
-        $files_display[$item['fid']] = file_load($item['fid']);
-        if (!empty($item['description'])) {
-          $files_display[$item['fid']]->description = $item['description'];
-        }
-        // @todo: Verify if referencing_entity properties are really needed.
-        // They -may- be referenced in the picture and the
-        // file_entity_link modules
-        $files_display[$item['fid']]->referencing_entity = $entity;
-        $files_display[$item['fid']]->referencing_entity_type = $entity_type;
-        $files_display[$item['fid']]->referencing_field = $field['field_name'];
-      }
-      $output = file_view_multiple($files_display, $view_mode);
-      // Remove the first level from the output array.
-      $files_built = reset($output);
+        // Protect ourselves from recursive rendering.
+        static $recursive_render_depth = array();
+        $recursive_render_id = $entity_type . $field['field_name'] . $item['fid'];
 
-      // Assemble the render array.
-      foreach ($items as $delta => $item) {
-        if (isset($files_built[$item['fid']])) {
-          $element[$delta] = $files_built[$item['fid']];
+        if (isset($recursive_render_depth[$recursive_render_id])) {
+          $recursive_render_depth[$recursive_render_id]++;
         }
+        else {
+          $recursive_render_depth[$recursive_render_id] = 1;
+        }
+
+        if ($recursive_render_depth[$recursive_render_id] > 20) {
+          watchdog(
+            'file_entity',
+            'Recursive rendering detected when rendering entity %entity_type: %entity_id, using the %field_name field. Aborting rendering.',
+            array(
+              '%entity_type' => 'file',
+              '%entity_id' => $item['fid'],
+              '%field_name' => $field['field_name'],
+            ),
+            WATCHDOG_ERROR
+          );
+          return $element;
+        }
+
+        $file = (object) $item;
+
+        // Add some references to the referencing entity.
+        // @see https://www.drupal.org/node/2333107
+        $file->referencing_entity = $entity;
+        $file->referencing_entity_type = $entity_type;
+        $file->referencing_field = $field['field_name'];
+
+        $element[$delta] = file_view($file, $settings['file_view_mode'], $langcode);
       }
       break;
 
