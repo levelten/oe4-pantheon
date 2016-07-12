@@ -16,9 +16,9 @@ files[] = handlers/google_analytics_reports_handler_argument.inc
 files[] = plugins/google_analytics_reports_plugin_query_google_analytics.inc
 files[] = plugins/google_analytics_reports_plugin_argument_default_google_analytics_reports_path.inc
 
-; Information added by Drupal.org packaging script on 2016-03-28
-version = "7.x-3.0"
+; Information added by Drupal.org packaging script on 2016-07-10
+version = "7.x-3.1"
 core = "7.x"
 project = "google_analytics_reports"
-datestamp = "1459185436"
+datestamp = "1468152170"
 
