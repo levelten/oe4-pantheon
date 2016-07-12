@@ -363,5 +363,8 @@ function icon_bundle_list($bundle) {
   // Allow other modules and themes to alter a bundle's listing.
   $bundle_context = $bundle;
   drupal_alter('icon_bundle_list', $build, $bundle_context);
-  return $build;
+
+  $table = theme('icon_table', array('bundle' => $bundle, 'build' => $build));
+
+  return $table;
 }

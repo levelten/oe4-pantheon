@@ -4,17 +4,11 @@ core = 7.x
 ;;;;;;
 ; Fields
 ;;;;;;
-projects[addressfield][version] = 1.0-beta5
-; Address component Views support
-; http://drupal.org/node/991834
-projects[addressfield][patch][991834] = https://drupal.org/files/addressfield-views_components-991834-90.patch
+projects[addressfield][version] = 1.1
 projects[date][version] = 2.8
 projects[entityreference][version] = 1.1
 projects[ffc][version] = 1.0-beta2
-projects[field_delimiter][version] = 1.0
-; Undefined index: field_delimiter & Undefined index: cardinality
-; http://drupal.org/node/1961498
-projects[field_delimiter][patch][1961498] = http://drupal.org/files/1961498-field_delimiter-undefined_indexes-1.patch
+projects[field_delimiter][version] = 1.1
 projects[field_formatter_class][version] = 1.1
 projects[field_formatter_settings][version] = 1.1
 projects[field_group][version] = 1.4
@@ -32,10 +26,7 @@ projects[options_element][version] = 1.12
 ;;;;;;
 projects[globalredirect][version] = 1.5
 projects[pathauto][version] = 1.2
-projects[redirect][version] = 1.0-rc1
-; How to fix and/or prevent circular redirects
-; http://drupal.org/node/1796596
-projects[redirect][patch][1796596] = https://drupal.org/files/redirect_loop_detection-1796596-68-reroll.patch
+projects[redirect][version] = 1.0-rc3
 projects[transliteration][version] = 3.2
 
 ;;;;;;
@@ -71,11 +62,8 @@ projects[views][version] = 3.8
 projects[views][patch][1493210] = https://drupal.org/files/views_contextual_links_on_page_element-1493210-20.patch
 projects[views_bulk_operations][version] = 3.2
 projects[views_responsive_grid][version] = 1.3
-projects[views_litepager][version] = 3.0
-; multiple hook_requirements bugs cause fatal errors on install
-; http://drupal.org/node/1874586
-projects[views_litepager][patch][1874586] = https://drupal.org/files/views_litepager-n1874586-3.patch
-projects[webform][version] = 3.21
+projects[views_litepager][version] = 3.0-dev
+projects[webform][version] = 4.12
 
 ;;;;;;
 ; Dev Ops
@@ -90,6 +78,8 @@ projects[strongarm][version] = 2.0
 ; https://drupal.org/node/2076543
 projects[strongarm][patch][2076543] = https://drupal.org/files/strongarm-2076543-import-export-value-alter-hooks.patch
 projects[uuid][version] = 1.0-alpha6
+; Error when trying to create empty file or destination directory not set
+; https://drupal.org/node/2121031
 projects[uuid][patch][] = "https://www.drupal.org/files/issues/uuid-empty_file-2121031-1.patch"
 
 ;;;;;;
@@ -111,6 +101,8 @@ projects[menu_trail_by_path][version] = 2.0
 projects[realname][version] = 1.2
 projects[simplified_menu_admin][version] = 1.0-beta2
 projects[adminimal_admin_menu][version] = 1.7
+; Uncaught TypeError when using with Media
+; https://drupal.org/node/2407007
 projects[adminimal_admin_menu][patch][] = https://www.drupal.org/files/issues/adminimal_admin_menu-js-error-2407007-3-no-whitespace-changes.patch
 
 ;;;;;

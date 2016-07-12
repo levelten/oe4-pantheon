@@ -40,7 +40,6 @@ function enterprise_config_wizard_install_config0_submit($form, $form_state) {
 function enterprise_config_content_features_list() {
   $features = array(
     'enterprise_blog' => 1,
-    'enterprise_careers' => 0,
     'enterprise_case_studies' => 0,
     'enterprise_clients' => 0,
     'enterprise_curated' => 0,

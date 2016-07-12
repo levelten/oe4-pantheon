@@ -37,13 +37,12 @@ function theme_pager_lite($variables) {
   // current is the page we are currently paged to
   $pager_current = $pager_page_array[$element] + 1;
 
-
-  $li_previous = theme('pager_previous', array('text' => (isset($tags[1]) ? $tags[1] : t('‹‹')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
+  $li_previous = theme('pager_previous', array('text' => (isset($tags['previous']) ? $tags['previous'] : t('‹‹')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
   if (empty($li_previous)) {
     $li_previous = "&nbsp;";
   }
 
-  $li_next = theme('pager_lite_next', array('text' => (isset($tags[3]) ? $tags[3] : t('››')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
+  $li_next = theme('pager_lite_next', array('text' => (isset($tags['next']) ? $tags['next'] : t('››')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
   if (empty($li_next)) {
     $li_next = "&nbsp;";
   }

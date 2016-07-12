@@ -24,6 +24,14 @@ function icon_theme($existing, $type, $theme, $path) {
       'bundle' => NULL,
     ),
   );
+  $hooks['icon_table'] = array(
+    'file' => 'theme.inc',
+    'path' => $include_path,
+    'variables' => array(
+      'bundle' => NULL,
+      'build' => NULL,
+    ),
+  );
   // Add theming hooks for render hooks so they can control their own output.
   // Due to a nasty bug in template suggestions and preprocessing, we can't do
   // something like icon_RENDER_HOOK__BUNDLE and have it be completely dynamic
@@ -91,4 +99,86 @@ function theme_icon($variables) {
     return theme('icon_' . $bundle['render'], $variables);
   }
   return '';
+}
+
+/**
+ * Return icons as table.
+ */
+function theme_icon_table($variables) {
+  $bundle = $variables['bundle'];
+  $build = $variables['build'];
+
+  // Get config file and other specialized info.
+  switch ($bundle['provider']) {
+    case 'fontello':
+      $url = file_create_url($bundle['path'] . '/config.json');
+      $config = l('config.json', $url, array('attributes' => array('target' => '_blank')));
+      $css_prefix = $bundle['settings']['css_prefix_text'];
+      break;
+
+    case 'fontawesome':
+      $config = t('No config available.');
+      $css_prefix = 'fa';
+      break;
+
+    case 'icomoon':
+      $url = file_create_url($bundle['path'] . '/selection.json');
+      $config = l('selection.json', $url, array('attributes' => array('target' => '_blank')));
+      $css_prefix = $bundle['settings']['prefix'];
+      break;
+
+    default:
+      $config = t('No config available');
+      $css_prefix = '';
+      break;
+  }
+
+  // Set up table for information about the bundle.
+  $admin = array(
+    'header' => array(
+      'name' => t('Name'),
+      'provider' => t('Provider'),
+      'icons' => t('Icons'),
+      'tag' => t('Tag'),
+      'prefix' => t('Prefix'),
+      'config' => t('Config'),
+    ),
+    'rows' => array(
+      0 => array(
+        $bundle['name'],
+        $bundle['provider'],
+        count($bundle['icons']),
+        $bundle['settings']['tag'],
+        $css_prefix,
+        $config,
+      ),
+    ),
+  );
+
+  $admin_table = theme('table', $admin);
+
+  // Set up icon table.
+  $icon_header = array(
+    'icon' => t('Icon'),
+    'name' => t('Name'),
+    'markup' => t('Markup'),
+    'token' => t('Token'),
+  );
+
+  $icon_rows = array();
+  foreach ($build as $key => $value) {
+    $icon = theme('icon', $value);
+    $icon_rows[] = array(
+      $icon,
+      $bundle['icons'][$value['#icon']],
+      check_plain($icon),
+      '[icon:'.$value['#bundle'] . ':' . $bundle['icons'][$value['#icon']] . ']',
+    );
+  }
+
+  $icon_table = theme('table', array('header' => $icon_header, 'rows' => $icon_rows));
+
+  $build = $admin_table . $icon_table;
+
+  return $build;
 }
