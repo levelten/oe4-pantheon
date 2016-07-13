@@ -1,0 +1,27 @@
+.text-secondary {
+  color: @brand-secondary;
+  &:hover {
+    color: darken(@brand-primary, 10%);
+  }
+}
+
+.text-accent {
+  color: @brand-accent;
+  &:hover {
+    color: darken(@brand-accent, 10%);
+  }
+}
+
+.btn {
+  &:focus {
+    outline: none;
+  }
+}
+
+.btn-secondary {
+  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+}
+
+.btn-accent {
+  .button-variant(@btn-accent-color; @btn-accent-bg; @btn-accent-border);
+}

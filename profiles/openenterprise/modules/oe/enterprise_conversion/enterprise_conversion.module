@@ -612,8 +612,9 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
   $form['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
 
   // If there are actions, $form[#validate] may not get called, so add it here, too
+  // Not sure why I did this. It causes a problem with save_draft #validate hook not running, so I am commenting it out.
   if (isset($form['actions']['submit'])) {
-    $form['actions']['submit']['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
+    //$form['actions']['submit']['#validate'][] = 'enterprise_conversion_landingpage_node_form_validate';
   }
 
   $data = isset($selection['data']) ? $selection['data'] : array();
@@ -758,11 +759,6 @@ function enterprise_conversion_landingpage_node_form_alter(&$form, &$form_state)
     '#prefix' => '<div class="display_sidebar">',
     '#suffix' => '</div>',
   );
-
-  //$form['#groups']['group_form_redirect']['#weight']
-
-
-
 
   $intel_level = intel_api_level();
   if ($intel_level != 'pro') {

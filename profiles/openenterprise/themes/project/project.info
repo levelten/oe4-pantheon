@@ -29,7 +29,12 @@ stylesheets[all][] = less/project.less
 ;; LESS
 ;;;;;;;;;;;;;;;;;;;;;
 
-less[vars][@brand-color]   = #2A90CC
+less[vars][@brand-color]     = #2A90CC
+less[vars][@brand-secondary] = #3F2766
+less[vars][@brand-tertiary]  = #3F2766
+less[vars][@brand-accent]    = #745F95
+less[vars][@brand-accent-2]  = #271149
+less[vars][@brand-accent-3]  = #9B8CB4
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Scripts
